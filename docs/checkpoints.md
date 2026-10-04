@@ -67,10 +67,15 @@ redrafted from corrected briefs.
 - The cross-book regression run is green in all five jobs after three rounds of matching each
   book's own setup (dev requirements, the RISC-V-bound checks deselected, the query-engine book's
   npm packages and path).
-- The site is live at <https://snowch.github.io/digital-design/>, deployed from the session
-  branch: the repository's default branch is that branch, so the `github-pages` environment
-  rejects deploys from `main` until the default branch is changed to `main` or `main` is added to
-  the environment's deployment branches, both in the repository's settings.
+- The site is live at <https://snowch.github.io/digital-design/>, and every push to `main`
+  deploys it. The default branch is `main`. The `github-pages` environment that Pages created
+  kept a branch rule naming the session branch, which was the default at the time, and refused
+  every deploy from `main` even after the default changed; the deploy job no longer declares
+  that environment, so no rule binds it, and the first push after the change deployed.
+- The author found the drawings soft on a tablet. Ports now sit on whole pixels, and wires,
+  signal levels, lane bases and axis lines are drawn without anti-aliasing (`crispEdges`), so a
+  line is a hard edge at any zoom; gate outlines, wires and levels are two pixels wide, and part
+  and port names are set in the full text colour.
 - The review's findings were upheld by a sceptic's pass (16 whole, 9 in part, none rejected); it
   found three more facts, each fixed: the flip-flop shown as text no longer prints a line for an
   unused Qb; `~(a | b)` elaborates to one NOR gate, so an assign with one operator is one gate as
