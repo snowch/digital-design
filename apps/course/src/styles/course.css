@@ -1,0 +1,585 @@
+/* Lessons, challenges and the circuit views. Phone first. Every colour is a token. */
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.button {
+  display: inline-block;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-raised);
+  color: var(--fg);
+  cursor: pointer;
+  min-height: 44px;
+  transition: background var(--motion);
+}
+.button:hover {
+  background: var(--bg-sunken);
+}
+.button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.button.primary {
+  background: var(--accent);
+  color: var(--accent-fg);
+  border-color: var(--accent);
+}
+.button.danger {
+  border-color: var(--bad);
+  color: var(--bad);
+}
+
+.badge {
+  display: inline-block;
+  font-size: var(--text-sm);
+  padding: 0 var(--space-2);
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  color: var(--fg-muted);
+  margin-right: var(--space-2);
+  vertical-align: middle;
+}
+.badge.ok {
+  color: var(--ok);
+  border-color: var(--ok);
+  background: var(--ok-bg);
+  margin-left: var(--space-2);
+}
+
+.theme-picker {
+  margin-left: auto;
+  font-size: var(--text-sm);
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+.theme-picker select {
+  font: inherit;
+  min-height: 32px;
+}
+
+/* Lesson */
+.lesson-header {
+  margin-bottom: var(--space-6);
+}
+.lesson-model-note {
+  background: var(--note-bg);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+}
+.lesson-model-note h2,
+.lesson-model-vs-reality h2 {
+  font-size: var(--text-lg);
+  margin-top: 0;
+}
+.lesson-model-vs-reality {
+  margin-top: var(--space-7);
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-4);
+}
+.lesson-section {
+  margin-bottom: var(--space-6);
+}
+.section-kind {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--fg-muted);
+}
+.prose > *:last-child {
+  margin-bottom: 0;
+}
+.prose table {
+  border-collapse: collapse;
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
+}
+.prose th,
+.prose td {
+  border: 1px solid var(--border);
+  padding: var(--space-1) var(--space-2);
+}
+
+figure.interactive {
+  margin: var(--space-5) 0;
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-raised);
+}
+figure.interactive > figcaption {
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-3);
+}
+.interactive-problem,
+.interactive-missing {
+  color: var(--warn);
+  background: var(--warn-bg);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+}
+
+/* Challenge */
+.challenge-title {
+  margin-top: 0;
+}
+.challenge-actions,
+.try-it-actions,
+.explorer-actions,
+.fault-actions,
+.internals-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  margin: var(--space-3) 0;
+}
+.challenge-status {
+  font-weight: 600;
+}
+.verdict.failures {
+  list-style: none;
+  padding: 0;
+}
+.verdict-failure {
+  border-left: 4px solid var(--bad);
+  background: var(--bad-bg);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  margin-bottom: var(--space-3);
+}
+.verdict-failure h4 {
+  margin: 0 0 var(--space-2);
+}
+.verdict-values {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--space-1) var(--space-3);
+  margin: 0 0 var(--space-2);
+}
+.verdict-values dt {
+  color: var(--fg-muted);
+}
+.verdict-values dd {
+  margin: 0;
+}
+.values .value {
+  margin-right: var(--space-2);
+}
+.verdict.blocked {
+  border-left: 4px solid var(--warn);
+  background: var(--warn-bg);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+}
+.verdict-blocked {
+  white-space: pre-wrap;
+  background: transparent;
+  padding: 0;
+}
+.hints {
+  margin-top: var(--space-4);
+}
+.hints-list {
+  padding-left: var(--space-5);
+}
+.hints-rung {
+  display: block;
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+}
+
+/* Editors */
+.draw-editor details,
+.write-editor details {
+  margin-top: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-3);
+}
+.draw-editor summary,
+.write-editor summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.hdl-text,
+.editor-import textarea {
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  padding: var(--space-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg-sunken);
+  color: var(--fg);
+  resize: vertical;
+}
+.hdl-label,
+.editor-import label > span {
+  display: block;
+  font-weight: 600;
+  margin: var(--space-2) 0;
+}
+.hdl-errors {
+  color: var(--bad);
+}
+.hdl-warnings {
+  color: var(--warn);
+}
+.hdl-ok {
+  color: var(--ok);
+}
+.hdl-generated {
+  font-size: var(--text-sm);
+}
+
+/* Circuit drawing */
+.circuit {
+  display: block;
+  background: var(--bg-sunken);
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.circuit text {
+  fill: var(--fg);
+}
+.circuit .wire path {
+  stroke: var(--wire);
+  stroke-width: 2;
+}
+.circuit .wire circle {
+  fill: var(--wire);
+}
+.circuit .wire-high path {
+  stroke: var(--wire-high);
+  stroke-width: 3;
+}
+.circuit .wire-high circle {
+  fill: var(--wire-high);
+}
+.circuit .wire-low path {
+  stroke: var(--wire-low);
+}
+.circuit .wire-low circle {
+  fill: var(--wire-low);
+}
+.circuit .wire-unknown path {
+  stroke: var(--wire-unknown);
+  stroke-dasharray: 5 4;
+}
+.circuit .wire-unknown circle {
+  fill: var(--wire-unknown);
+}
+.circuit .wire-hit {
+  stroke: transparent !important;
+  stroke-width: 14 !important;
+}
+.circuit .wire-selected path:not(.wire-hit) {
+  stroke: var(--focus);
+  stroke-width: 4;
+}
+.circuit .pin rect {
+  fill: var(--bg-raised);
+  stroke: var(--border-strong);
+  stroke-width: 1.5;
+}
+.circuit .pin-high rect {
+  stroke: var(--sig-high);
+  stroke-width: 3;
+}
+.circuit .pin-low rect {
+  stroke: var(--sig-low);
+}
+.circuit .pin-unknown rect {
+  stroke: var(--sig-unknown);
+  stroke-dasharray: 4 3;
+}
+.circuit .pin-button {
+  cursor: pointer;
+}
+.circuit .pin-name {
+  font-weight: 700;
+}
+.circuit .part .box {
+  fill: var(--gate-fill);
+  stroke: var(--gate-stroke);
+  stroke-width: 2;
+}
+.circuit .part-label {
+  font-weight: 700;
+}
+.circuit .part-name,
+.circuit .port-label {
+  fill: var(--fg-muted);
+  font-size: 10px;
+}
+.circuit .value-label {
+  font-weight: 700;
+}
+.circuit .value-high {
+  fill: var(--sig-high);
+}
+.circuit .value-low {
+  fill: var(--sig-low);
+}
+.circuit .value-unknown {
+  fill: var(--sig-unknown);
+}
+.circuit .mark {
+  fill: none;
+  stroke: var(--bad);
+  stroke-width: 2;
+  stroke-dasharray: 6 3;
+}
+.circuit .part-composite {
+  cursor: pointer;
+}
+.circuit g:focus-visible {
+  outline: none;
+}
+.circuit g:focus-visible > rect,
+.circuit g:focus-visible > path,
+.circuit g:focus-visible > g > path,
+.circuit .selected > rect,
+.circuit .selected > g > path {
+  stroke: var(--focus);
+  stroke-width: 3;
+}
+.circuit .port-hit {
+  fill: transparent;
+}
+.circuit .port-dot {
+  fill: var(--bg-raised);
+  stroke: var(--gate-stroke);
+  stroke-width: 1.5;
+}
+.circuit .port:hover .port-dot,
+.circuit .port:focus-visible .port-dot {
+  fill: var(--focus);
+  stroke: var(--focus);
+}
+.circuit .port-pending .port-dot {
+  fill: var(--accent);
+  stroke: var(--accent);
+}
+.circuit-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
+  font-size: var(--text-sm);
+}
+.crumb {
+  border: none;
+  background: none;
+  color: var(--accent);
+  text-decoration: underline;
+  cursor: pointer;
+  padding: var(--space-1);
+  min-height: 32px;
+}
+.crumb:disabled {
+  color: var(--fg);
+  text-decoration: none;
+  cursor: default;
+}
+
+.builder-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+.toolbar-gap {
+  flex: 1 1 auto;
+}
+.builder-canvas {
+  min-height: 220px;
+}
+.builder-help {
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  margin: var(--space-2) 0;
+}
+.builder-status {
+  min-height: 1.5em;
+  font-weight: 600;
+  margin: 0 0 var(--space-2);
+}
+.builder-warnings {
+  font-size: var(--text-sm);
+}
+
+/* Tables */
+.signal-table,
+.truth-table {
+  border-collapse: collapse;
+  margin: var(--space-3) 0;
+  font-variant-numeric: tabular-nums;
+}
+.signal-table caption,
+.truth-table caption {
+  text-align: left;
+  font-weight: 600;
+  margin-bottom: var(--space-1);
+}
+.signal-table th,
+.signal-table td,
+.truth-table th,
+.truth-table td {
+  border: 1px solid var(--border);
+  padding: var(--space-1) var(--space-3);
+  text-align: left;
+}
+.truth-table .row-current {
+  background: var(--note-bg);
+  font-weight: 700;
+}
+.truth-table-wrap {
+  overflow-x: auto;
+}
+.value-high {
+  color: var(--sig-high);
+}
+.value-low {
+  color: var(--sig-low);
+}
+.value-unknown {
+  color: var(--sig-unknown);
+}
+
+/* Timing diagram */
+.timing-diagram {
+  display: block;
+  background: var(--bg-sunken);
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.timing-diagram text {
+  fill: var(--fg);
+}
+.timing-diagram .axis line {
+  stroke: var(--border-strong);
+}
+.timing-diagram .lane-base {
+  stroke: var(--border);
+}
+.timing-diagram .level {
+  stroke: var(--fg);
+  stroke-width: 2;
+}
+.timing-diagram .hatch {
+  stroke: var(--sig-unknown);
+  stroke-width: 2;
+}
+.timing-diagram .overlay-band {
+  stroke: var(--sig-cursor);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 3;
+}
+.timing-diagram .bus-segment rect {
+  fill: var(--bg-raised);
+  stroke: var(--fg);
+}
+.timing-diagram .shade-setup rect {
+  fill: var(--sig-shade-setup);
+}
+.timing-diagram .shade-hold rect {
+  fill: var(--sig-shade-hold);
+}
+.timing-diagram .shade-note rect {
+  fill: var(--note-bg);
+}
+.timing-diagram .shade-label {
+  fill: var(--fg-muted);
+  font-size: 10px;
+}
+.timing-diagram .cursor line {
+  stroke: var(--sig-cursor);
+  stroke-width: 2;
+}
+.timing-diagram .level-label {
+  font-size: 10px;
+}
+.timing-cursor,
+.setup-hold-offset,
+.explorer-steps label {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  margin: var(--space-2) 0;
+}
+.timing-cursor input,
+.setup-hold-offset input,
+.explorer-steps input {
+  flex: 1 1 200px;
+  min-height: 44px;
+}
+
+/* Interactives */
+.prediction-options,
+.fault-choices {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-3);
+  margin: var(--space-3) 0;
+}
+.prediction-option,
+.fault-choice {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-height: 44px;
+}
+.prediction-match {
+  color: var(--ok);
+  font-weight: 600;
+}
+.prediction-nomatch {
+  color: var(--bad);
+  font-weight: 600;
+}
+.fault-explanation,
+.try-it-note,
+.setup-hold-result {
+  font-weight: 600;
+}
+.internals-phase {
+  background: var(--note-bg);
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-3);
+  margin: var(--space-3) 0;
+}
+.setup-hold-overlay {
+  border-left: 4px solid var(--warn);
+  background: var(--warn-bg);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  margin: var(--space-3) 0;
+}
+
+@media (max-width: 40rem) {
+  .verdict-values {
+    grid-template-columns: 1fr;
+  }
+  .theme-picker {
+    margin-left: 0;
+  }
+}
