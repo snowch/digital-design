@@ -38,8 +38,16 @@ export function gradeAnswers(
   const named = (values: Readonly<Record<string, string>>) =>
     Object.fromEntries(Object.entries(values).map(([k, v]) => [term(k), v]));
   const failures: VerdictFailure[] = [];
+  const results = cases.map((c) => grader(answers, c.given, c.expect));
+  // Every field missing anywhere is named at once, in the order the challenge asks for them.
+  const gone = new Set(results.flatMap((r) => ("missing" in r ? r.missing : [])));
+  if (gone.size) {
+    const fields = challenge.fields.filter((f) => gone.has(f.id)).map((f) => f.label);
+    const blocked = format(strings.answers.unanswered, { fields: fields.join(", ") });
+    return { passed: false, total: cases.length, failures: [], blocked };
+  }
   for (const [index, c] of cases.entries()) {
-    const r = grader(answers, c.given, c.expect);
+    const r = results[index]!;
     if (isProblem(r)) {
       const blocked =
         "missing" in r

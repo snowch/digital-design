@@ -123,14 +123,14 @@ test.describe("the signals lesson's challenges", () => {
     await expect(failure.locator(".verdict-values")).toContainText("=-250");
   });
 
-  test("an empty answer blocks the run with a sentence naming the field", async ({ page }) => {
+  test("empty answers block the run with a sentence naming every empty field", async ({ page }) => {
     await openLesson(page, LESSON.id);
     const section = challenge(page, "freezer-word");
     await runTests(section);
     await expect(status(section)).toHaveText(S.challenge.blocked);
-    await expect(section.locator(".verdict-blocked")).toContainText(
-      data("freezer-word").fields[1]!.label,
-    );
+    // Both empty fields are named at once, not one per run.
+    for (const f of data("freezer-word").fields.slice(1))
+      await expect(section.locator(".verdict-blocked")).toContainText(f.label);
   });
 
   test("saved work is graded again on load; a saved mark alone earns nothing", async ({ page }) => {

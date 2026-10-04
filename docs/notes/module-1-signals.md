@@ -118,3 +118,46 @@ Read from the clock (`date -u`), not estimated.
   sample reaches some 1 sample. A dropped nothing else; B dropped "Use the figure above to
   find one" (restored by the managing model, replacing a sentence that repeated the task
   below it, which is a cut, not a rewrite).
+- 23:13 to 23:17 Placed the drafts with a script (`place.py` in the scratchpad: the prose and
+  labels files written from the drafts, the views' strings patched by key so Prettier's line
+  breaks do not matter, and the managing model's edits applied from a list that fails if an
+  edit no longer applies). Edits by the managing model, all of them: "Each such measurement is
+  a sample: one measurement of the voltage" cut to "Each such measurement is a **sample**" (a
+  repeat the redraft introduced, and the term set in bold); the challenge's lead had its
+  sentence repeating the task replaced by the dropped "Use the figure above to find one"; the
+  failure figure's lead split into two paragraphs at "Move the noise up" (no words changed).
+- 23:17 Whole-lesson read on the built page, start to finish. Found: the title E had drafted,
+  "How can a reading travel down a noisy wire?", still used "reading" for the temperature
+  (sent back; now "How does the till know the temperature?"); the model note's "a reading
+  taken with the wrong rule" (sent back; now "a word read with the wrong rule"). The read did
+  not find "Bits taken together as one value" (B), a third sense of "value"; left for the
+  reviewer.
+- 23:18 to 23:20 The check script failed (exit 1, 6 of 100 Playwright tests): the plot's sample
+  numbers at 11 pixels measured 10.9 in the aesthetics rule (set to 12, with every other sample
+  numbered on narrow columns); and two of the first lesson's tests read "the first lesson in
+  the list" as `remember`, which is no longer true (they now find its row by title). The
+  screenshot baseline for the new figure was made and looked at. Second run: exit 0, 193 Vitest
+  tests, the build, 100 Playwright tests.
+- 23:20 Committed in two commits (platform, then lesson) and pushed `module-1-signals`. The
+  platform commit alone does not typecheck: the first lesson's spec still counted tests its old
+  way until the lesson commit. Noted rather than rewritten, as the branch is already pushed.
+- 23:21 to 23:24 The mechanical half of the review, a Playwright walk at 1280 and 375 pixels in
+  the light and dark themes: every slider to both ends (no NaN, undefined or Infinity), every
+  radio, every bit, both predictions, both challenges with the stub, wrong attempts (0, 3.3,
+  1.40, 2.40 and -1 volts; all-zero bits with answers) and the reference threshold, every hint.
+  No console error, no horizontal page scroll, no control without a name, in all four. Found:
+  - **the blocked sentence named only the first empty field** ("Fill in Unsigned"), because the
+    grader stopped at the first case that lacked an answer. Fixed in `gradeAnswers`: every
+    field missing in any case is named at once, in the challenge's order; the educational test
+    now checks both names.
+  - **"You chose The 2.40 V threshold reads fewer samples wrong.. The model gives..."**: the
+    prediction's option labels are full sentences with a capital and a full stop, slotted into
+    the runtime's "You chose {choice}." The circuit lessons' options are phrases ("Q is 0110").
+    Sent to the drafting subagent for phrase-shaped options.
+  - the walk's own fault, not the page's: it pressed every bit inside every figure, including
+    the challenge's bits, so its "reference" attempt at the word challenge started from all 1s
+    and failed. The educational test, which starts from a fresh page, passes the reference.
+  - a number box with `type="number"` cannot hold a comma decimal ("1,70") in an English
+    browser: the box is then empty and the run says to fill it in. Not changed; noted.
+  - Added `dd-model/src/bits.test.ts`: the readings, the recordings' determinism and scaling,
+    the "at or above reads 1" rule and the band, and the graders' parsing and blocking.
