@@ -38,8 +38,13 @@ const LANE_GAP = 10;
 const LABEL_W = 64;
 const AXIS_H = 28;
 
+/** A net by its port name (an input or output of the circuit) or by its own name. */
 function resolveNet(circuit: Circuit, name: string): number | undefined {
-  return circuit.nets.find((n) => n.name === name)?.id;
+  return (
+    circuit.outputs.find((p) => p.name === name)?.net ??
+    circuit.inputs.find((p) => p.name === name)?.net ??
+    circuit.nets.find((n) => n.name === name)?.id
+  );
 }
 
 export function TimingDiagram({
@@ -69,7 +74,8 @@ export function TimingDiagram({
     )
     .filter((l): l is { name: string; net: number } => l.net !== undefined);
   const span = Math.max(1, end - from);
-  const unit = Math.max(6, Math.min(48, 640 / span));
+  // Readable at one pixel per unit at the least; a long run scrolls sideways in its wrapper.
+  const unit = Math.max(2, Math.min(48, 700 / span));
   const width = LABEL_W + span * unit + 16;
   const height = AXIS_H + lanes.length * (LANE_H + LANE_GAP) + 8;
   const x = (t: number) => LABEL_W + (t - from) * unit;
@@ -90,12 +96,13 @@ export function TimingDiagram({
 
   return (
     <div className="timing">
+      <div className="timing-scroll">
       <svg
         className="timing-diagram"
         viewBox={`0 0 ${width} ${height}`}
         role="img"
         aria-labelledby={`${id}-title`}
-        style={{ width: "100%", height: "auto", maxWidth: `${width * 1.4}px` }}
+        style={{ width: "100%", height: "auto", minWidth: `${Math.min(width, 1400)}px`, maxWidth: `${width * 1.4}px` }}
       >
         <title id={`${id}-title`}>{title}</title>
         <defs>
@@ -225,6 +232,7 @@ export function TimingDiagram({
           <line x1={x(at)} y1={AXIS_H - 4} x2={x(at)} y2={height - 4} />
         </g>
       </svg>
+      </div>
       {onCursor && (
         <label className="timing-cursor">
           <span>{format(strings.timing.cursor, { time: at })}</span>

@@ -464,6 +464,10 @@ figure.interactive > figcaption {
 }
 
 /* Timing diagram */
+.timing-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
 .timing-diagram {
   display: block;
   background: var(--bg-sunken);

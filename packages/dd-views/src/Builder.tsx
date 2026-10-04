@@ -294,11 +294,11 @@ export function Builder({ drawing, onChange, palette, highlight = [], title }: B
       <svg
         ref={svgRef}
         className="circuit builder-canvas"
-        viewBox={`0 0 ${Math.max(scene.width, 440)} ${Math.max(scene.height, 220)}`}
+        viewBox={`0 0 ${Math.max(scene.width, 720)} ${Math.max(scene.height, 300)}`}
         role="application"
         aria-labelledby={`${id}-title`}
         aria-describedby={`${id}-help`}
-        style={{ width: "100%", height: "auto", touchAction: "none" }}
+        style={{ width: "100%", height: "auto", maxWidth: "1100px", touchAction: "none" }}
         onPointerMove={onMove}
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
