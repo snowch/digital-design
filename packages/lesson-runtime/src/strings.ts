@@ -87,7 +87,7 @@ export const DEFAULT_STRINGS: Strings = {
     coneHint: "Places to look",
     oscillated:
       "The circuit never settled during this test, so signals that kept changing are shown as X",
-    reset: "Reset",
+    reset: "Clear work",
     resetConfirm: "Discard work",
     resetCancel: "Cancel",
     resetDone: "Work cleared",

@@ -189,3 +189,36 @@ went right.
   - A failed test on a half-built drawing now reads "The D flip-flop dff1 drives that signal",
     as intended. It also lists "open_dff1_CLK" under "Places to look", an internal name for an
     unconnected input; the first lesson's page does the same. Not changed; noted for the author.
+- 23:30 to 00:20 The reading half of the review. A reviewer subagent with a written brief
+  (appendix) read the lesson as a learner who had done only the previous lesson, from the page's
+  text and screenshots of every figure, and checked facts against the data and the facts test.
+  It could not write its report file, so the managing model saved its report to the agreed path
+  unchanged in substance. A second, sceptical subagent attacked each finding. 24 findings; the
+  sceptic upheld 13, upheld 11 in part and rejected none. What was done with each:
+
+  | # | finding (short) | sceptic | action |
+  | --- | --- | --- | --- |
+  | F1 | "Nothing else in the text changes" for a wider word is false | upheld, and worse: an 8-bit copy keeping `4'b0000` elaborated silently and crashed the simulator | **code**: the elaborator now refuses a value of the wrong width inside `always_ff`/`always_comb` with its plain message (test); prose re-briefed |
+  | F2 | the generalisation figure showed the third challenge's whole answer | upheld | **structure**: the figure now shows the register with a load enable only; the challenge asks for the reset as well, with its priority |
+  | F3 | `<=` drawn as one "≤" glyph by the mono face's ligatures | upheld (also on the first lesson's page) | **code**: no ligatures in code, text boxes or drawings |
+  | F4 | prediction prose said the figures show flip-flops; they show none | upheld | re-briefed |
+  | F5 | "bit 3 first" before bits have numbers; the figure drew bit 0 at the top | upheld | **layout**: ff3 now at the top; re-briefed to number the bits where a word is first written |
+  | F6 | EN means at-an-edge here and while-1 in the latch | upheld | re-briefed: one sentence where EN first appears |
+  | F7 | the challenge's "Reset" button vs the lesson's reset | upheld (platform string) | **platform string** re-drafted by the drafting subagent |
+  | F8 | table header Q(NEXT) vs a net named NEXT | in part (only the net) | **content**: net renamed CHOICE, gate orChoice |
+  | F9 | the fault figure did not draw the forced value | upheld | **code**: a fault's part (a fixed value, an inserted inverter) is drawn where it acts, placed clear of hand-placed parts; tests |
+  | F10 | "Press the CLK pin" had no purpose in the fault lab | in part | moved to the gated-clock figure |
+  | F11 | GCLK, LOAD, KEEP, CHOICE named in prose but not in the drawing | upheld, wider | re-briefed: say that pressing a wire shows its name |
+  | F12 | the stepped figure among clocked ones, unexplained | in part | one sentence of reason |
+  | F13 | the clock rule argued four times | in part (the explanation's repeat; the construction's early statement is a design choice) | explanation repeat cut; construction kept, because the challenge's tests fail the shortcut and the learner meets the construction first |
+  | F14 | "takes D at every edge" set up twice | in part | the investigation's after-text shortened |
+  | F15 | explanation paragraph answers two questions | upheld | split |
+  | F16 | nothing says what raises RST at power-on | in part | one sentence: outside this lesson |
+  | F17 | "keep path" used without being introduced | in part | named in the fault lab |
+  | F18 | "written by leaving Q out" ambiguous | in part | re-briefed with the new figure |
+  | F19 | `begin ... end` and `4'b0000` unexplained | upheld | explained, `4'b0000` in the challenge's task |
+  | F20 | module name and port order differ, figure vs challenge | upheld | the challenge's header now matches the figure's text |
+  | F21 | objective says "Build a register" | in part (the learner builds a shift register and writes one) | not changed |
+  | F22 | misquotes the previous lesson's question | upheld | quoted exactly |
+  | F23 | long sentences, lists as prose | in part (term-last is the house rule) | long sentences split, fault-lab parts and steps as lists |
+  | F24 | small wording | in part ("wins", "held" rejected) | "stay put" replaced, the shift task's "the results" made specific, the two unknown options given one shape |

@@ -182,19 +182,21 @@ export function fourFlipFlopsCircuit(): Circuit {
     const { q } = dFlipFlop(b, d, clk, { name: `ff${i}` });
     b.output(`Q${i}`, q);
   });
+  // Bit 3 at the top, so the drawing reads top to bottom in the order a word is written.
   const at: Record<string, [number, number]> = { "in:CLK": [0, 21] };
   for (let i = 0; i < 4; i++) {
-    at[`in:D${i}`] = [0, 1 + i * 5];
-    at[`ff${i}`] = [6, 1 + i * 5];
-    at[`out:Q${i}`] = [12, 1 + i * 5];
+    const row = 1 + (3 - i) * 5;
+    at[`in:D${i}`] = [0, row];
+    at[`ff${i}`] = [6, row];
+    at[`out:Q${i}`] = [12, row];
   }
   return placed(b.build(), at);
 }
 
 /**
  * One bit that keeps its value at an edge where EN is 0, built from gates in front of a flip-flop:
- * NEXT = (D AND EN) OR (Q AND NOT EN). The gates sit at the top level so the view shows them; the
- * flip-flop is the course's own, to be opened. With `clear`, a RST input forces NEXT to 0 through
+ * CHOICE = (D AND EN) OR (Q AND NOT EN). The gates sit at the top level so the view shows them; the
+ * flip-flop is the course's own, to be opened. With `clear`, a RST input forces CHOICE to 0 through
  * one more AND gate, so a reset wins over EN and D.
  */
 export function keepBitCircuit(options: { clear?: boolean } = {}): Circuit {
@@ -207,7 +209,7 @@ export function keepBitCircuit(options: { clear?: boolean } = {}): Circuit {
   const notEn = b.not(en, { name: "notEn" });
   const load = b.and([d, en], { name: "andLoad", output: b.net("LOAD") });
   const keep = b.and([q, notEn], { name: "andKeep", output: b.net("KEEP") });
-  let next = b.or([load, keep], { name: "orNext", output: b.net("NEXT") });
+  let next = b.or([load, keep], { name: "orChoice", output: b.net("CHOICE") });
   if (rst !== undefined) {
     const notRst = b.not(rst, { name: "notRst" });
     next = b.and([next, notRst], { name: "andClear", output: b.net("CLEARED") });
@@ -226,7 +228,7 @@ export function keepBitCircuit(options: { clear?: boolean } = {}): Circuit {
     notEn: [5, 5],
     andLoad: [10, 1],
     andKeep: [10, 5],
-    orNext: [15, 3],
+    orChoice: [15, 3],
     notRst: [10, 9],
     andClear: [20, 5],
     ff: [ffX, ffY],
@@ -299,7 +301,14 @@ export const LIBRARY: Readonly<Record<string, () => Circuit>> = {
   "dff-reset-enable": () => dFlipFlopCircuit({ reset: true, enable: true }),
   "register-4": () => registerCircuit(4, { reset: true }),
   "register-4-plain": () => registerCircuit(4),
-  "register-4-enable": () => registerCircuit(4, { enable: true }),
+  "register-4-enable": () =>
+    placed(registerCircuit(4, { enable: true }), {
+      "in:D": [0, 0],
+      "in:CLK": [0, 3],
+      "in:EN": [0, 6],
+      reg: [6, 1],
+      "out:Q": [12, 1],
+    }),
   "register-4-reset-enable": () =>
     placed(registerCircuit(4, { reset: true, enable: true }), {
       "in:D": [0, 0],

@@ -246,18 +246,20 @@ export function CircuitView({
                       {box.label}
                     </text>
                   )}
-                  {!nameRepeatsKind(part.id, part.kind) && (
+                  {!nameRepeatsKind(part.id, part.kind) && !part.id.startsWith("fault/") && (
                     <text x={box.w / 2} y={box.h + 12} textAnchor="middle" className="part-name">
                       {part.id}
                     </text>
                   )}
                   {!isShaped(part.kind) &&
+                    part.kind !== "const" &&
                     box.inputs.map((p) => (
                       <text key={p.port} x={6} y={p.at.y - box.y + 3} className="port-label">
                         {p.port}
                       </text>
                     ))}
                   {!isShaped(part.kind) &&
+                    part.kind !== "const" &&
                     box.outputs.map((p) => (
                       <text
                         key={p.port}

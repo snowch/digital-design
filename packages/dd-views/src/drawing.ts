@@ -335,14 +335,17 @@ export function circuitToDrawing(circuit: Circuit): Drawing {
     driverPort.set(input.net, { part: id, port: "y" });
   }
   for (const c of circuit.components) {
-    if (c.path.includes("/")) continue;
+    // A part a fault added (a fixed value, an inverter in a wire) is drawn where it acts, so the
+    // figure shows what the fault did; it is named by its path, which no drawn part shares.
+    const fault = c.path.startsWith("fault/");
+    if (c.path.includes("/") && !fault) continue;
     // An open is an unconnected input: in a drawing that is simply no wire.
     if (c.kind === "open") continue;
+    const id = fault ? c.path : c.name;
     const fanIn = Object.keys(c.inputs).length;
-    push({ id: c.name, kind: c.kind, ...(fanIn > 2 ? { fanIn } : {}) }, layoutOf(c.meta));
-    for (const [port, net] of Object.entries(c.outputs))
-      driverPort.set(net, { part: c.name, port });
-    for (const [port, net] of Object.entries(c.inputs)) addReader(net, { part: c.name, port });
+    push({ id, kind: c.kind, ...(fanIn > 2 ? { fanIn } : {}) }, layoutOf(c.meta));
+    for (const [port, net] of Object.entries(c.outputs)) driverPort.set(net, { part: id, port });
+    for (const [port, net] of Object.entries(c.inputs)) addReader(net, { part: id, port });
   }
   for (const c of topComposites) {
     // A block carries the ports it was built with: a flip-flop or a register with a reset and

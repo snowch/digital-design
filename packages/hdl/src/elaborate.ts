@@ -240,7 +240,12 @@ class Elaborator {
         return;
       case "assignment": {
         const target = this.target(s.target.name, s.target.at, s.target.select !== undefined);
-        env.set(s.target.name, this.expression(s.value, target.width));
+        const value = this.expression(s.value, target.width);
+        // Inside always_ff or always_comb, as in an assign: a value of the wrong width is the
+        // learner's mistake to be told about, not a fault for the simulator to stumble on.
+        if (this.b.widthOf(value) !== target.width)
+          this.widthMismatch(s.value.at, this.b.widthOf(value), target.width);
+        env.set(s.target.name, value);
         return;
       }
       case "if": {

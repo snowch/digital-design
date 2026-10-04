@@ -49,7 +49,7 @@ export const LABELS = {
     p1New: "Q is 1111",
     p2Zero: "Q is 0000",
     p2D: "Q is 0110",
-    unknown: "The simulator cannot know Q, written XXXX",
+    unknown: "The simulator cannot know Q (XXXX)",
     p3Zero: "Q2 is 0",
     p3One: "Q2 is 1",
     p3X: "The simulator cannot know Q2 (X)",

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { libraryCircuit, registerCircuit } from "@dd/dd-model";
+import { applyFaults, libraryCircuit, registerCircuit, stuckAt } from "@dd/dd-model";
 import { elaborate } from "@dd/hdl";
 import { Simulator, bit0, bit1, runSuite } from "@dd/sim";
 
@@ -175,5 +175,20 @@ describe("a block opened in a drawing with placed pins", () => {
     const d = drawing.parts.find((p) => p.id === pinId("input", "D"));
     // At the top level CLK is placed 21 rows down; inside ff0 it is laid out beside D.
     expect(Math.abs((clk?.y ?? 0) - (d?.y ?? 0))).toBeLessThan(6);
+  });
+});
+
+describe("a fault drawn in a hand-placed circuit", () => {
+  it("shows the fixed value as a part, placed clear of the others", () => {
+    const broken = applyFaults(libraryCircuit("keep-bit"), [stuckAt("KEEP", 0)]);
+    const drawing = circuitToDrawing(broken);
+    const fixed = drawing.parts.find((p) => p.kind === "const");
+    expect(fixed).toBeDefined();
+    const others = drawing.parts.filter((p) => p !== fixed);
+    expect(others.some((p) => p.x === fixed?.x && p.y === fixed?.y)).toBe(false);
+    expect(Math.max(...others.map((p) => p.y))).toBeLessThan(fixed?.y ?? 0);
+    expect(drawing.wires.some((w) => w.from.part === fixed?.id && w.to.part === "orChoice")).toBe(
+      true,
+    );
   });
 });

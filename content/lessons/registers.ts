@@ -18,12 +18,12 @@ const KEEP_BIT_TEXT = `module keep_bit(input logic D, input logic EN, input logi
   logic NEN;
   logic LOAD;
   logic KEEP;
-  logic NEXT;
+  logic CHOICE;
   assign NEN = ~EN;
   assign LOAD = D & EN;
   assign KEEP = Q & NEN;
-  assign NEXT = LOAD | KEEP;
-  always_ff @(posedge CLK) Q <= NEXT;
+  assign CHOICE = LOAD | KEEP;
+  always_ff @(posedge CLK) Q <= CHOICE;
 endmodule
 `;
 
@@ -35,8 +35,9 @@ const SHIFT_TEXT = `module shift_four(input logic IN, input logic CLK, output lo
 endmodule
 `;
 
+// The same module name and port order as the generalisation figure's generated text.
 const REGISTER_HEADER =
-  "module register4(input logic [3:0] D, input logic EN, input logic RST, input logic CLK, output logic [3:0] Q);";
+  "module register_4(input logic [3:0] D, input logic CLK, input logic RST, input logic EN, output logic [3:0] Q);";
 
 const REGISTER_TEXT = `${REGISTER_HEADER}
   always_ff @(posedge CLK) begin
@@ -157,7 +158,7 @@ export const registers: LessonInput = {
             faults: [
               { kind: "stuck-at", net: "KEEP", value: 0, label: LABELS.faults.keepCut },
               { kind: "stuck-at", net: "EN", value: 1, label: LABELS.faults.enHigh },
-              { kind: "wrong-gate", path: "orNext", gate: "and", label: LABELS.faults.orToAnd },
+              { kind: "wrong-gate", path: "orChoice", gate: "and", label: LABELS.faults.orToAnd },
             ],
             run: [
               { label: "load 1", set: { D: 1, EN: 1, CLK: 0 }, clock: "CLK" },
@@ -205,7 +206,7 @@ export const registers: LessonInput = {
           caption: LABELS.captions.registerAsText,
           lead: PROSE.registerAsTextLead,
           after: PROSE.registerAsTextAfter,
-          props: { libraryId: "register-4-reset-enable" },
+          props: { libraryId: "register-4-enable" },
         },
       ],
     },

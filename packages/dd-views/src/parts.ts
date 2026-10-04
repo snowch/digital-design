@@ -31,6 +31,7 @@ const GATE_LABELS: Readonly<Record<string, string>> = {
   xor: "XOR",
   xnor: "XNOR",
   mux2: "MUX",
+  const: "CONST",
 };
 
 const COMPOSITE_LABELS: Readonly<Record<string, string>> = {
@@ -68,6 +69,7 @@ const GATE_INPUTS: Readonly<Record<string, readonly string[]>> = {
   not: ["a"],
   buf: ["a"],
   mux2: ["sel", "a", "b"],
+  const: [],
 };
 
 /** The spec of a part by id, or undefined if the id names nothing placeable. */

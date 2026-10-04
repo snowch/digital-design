@@ -76,9 +76,14 @@ export function autoLayout(drawing: Drawing, only?: ReadonlySet<string>): Drawin
     columns.set(c, list);
   }
   const placed = new Map<string, { x: number; y: number }>();
+  // Parts that keep their places (a hand-placed drawing with one part added, such as a fault's
+  // fixed value) are left alone, and the new parts go in rows below them, so nothing lands on top.
+  const kept = only ? parts.filter((p) => !only.has(p.id)) : [];
+  const below = kept.length ? Math.max(...kept.map((p) => p.y)) + ROW_STEP : 0;
   for (const [c, list] of columns) {
-    list.sort((p, q) => p.id.localeCompare(q.id));
-    list.forEach((p, i) => placed.set(p.id, { x: c * COLUMN_STEP, y: 1 + i * ROW_STEP }));
+    const moving = only ? list.filter((p) => only.has(p.id)) : list;
+    moving.sort((p, q) => p.id.localeCompare(q.id));
+    moving.forEach((p, i) => placed.set(p.id, { x: c * COLUMN_STEP, y: below + 1 + i * ROW_STEP }));
   }
   return {
     ...drawing,
