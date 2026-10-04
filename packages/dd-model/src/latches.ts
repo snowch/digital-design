@@ -13,6 +13,8 @@ export interface LatchOptions {
   name?: string;
   /** Gate delay in the delay model, for every gate inside. */
   delay?: number;
+  /** An existing net to drive as Q, so a caller (the HDL elaborator) can name it first. */
+  q?: NetId;
 }
 
 export interface LatchPorts {
@@ -22,6 +24,11 @@ export interface LatchPorts {
 
 function gateOptions(name: string, options: LatchOptions) {
   return options.delay !== undefined ? { name, delay: options.delay } : { name };
+}
+
+function without<T extends LatchOptions>(options: T, name: string): T {
+  const { q: _q, ...rest } = options;
+  return { ...rest, name } as T;
 }
 
 /**
@@ -38,7 +45,7 @@ export function srLatch(
     options.name ?? "sr",
     "sr-latch",
     (bb) => {
-      const q = bb.net("Q");
+      const q = options.q ?? bb.net("Q");
       const qb = bb.net("Qb");
       bb.nor([r, qb], { output: q, ...gateOptions("norQ", options) });
       bb.nor([s, q], { output: qb, ...gateOptions("norQb", options) });
@@ -62,7 +69,10 @@ export function gatedSrLatch(
     (bb) => {
       const sGated = bb.and([s, en], gateOptions("andS", options));
       const rGated = bb.and([r, en], gateOptions("andR", options));
-      return srLatch(bb, sGated, rGated, { ...options, name: "sr" });
+      return srLatch(bb, sGated, rGated, {
+        ...without(options, "sr"),
+        ...(options.q !== undefined ? { q: options.q } : {}),
+      });
     },
     (ports) => ({ inputs: { S: s, R: r, EN: en }, outputs: { Q: ports.q, Qb: ports.qb } }),
   );
@@ -85,7 +95,10 @@ export function dLatch(
       const nd = bb.not(d, gateOptions("notD", options));
       const s = bb.and([d, en], gateOptions("andS", options));
       const r = bb.and([nd, en], gateOptions("andR", options));
-      return srLatch(bb, s, r, { ...options, name: "sr" });
+      return srLatch(bb, s, r, {
+        ...without(options, "sr"),
+        ...(options.q !== undefined ? { q: options.q } : {}),
+      });
     },
     (ports) => ({ inputs: { D: d, EN: en }, outputs: { Q: ports.q, Qb: ports.qb } }),
   );

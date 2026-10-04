@@ -63,7 +63,11 @@ export function dFlipFlop(
       }
       const notClk = bb.not(clk, g("notClk"));
       const master = dLatch(bb, dIn, notClk, { name: "master", ...inner });
-      const slave = dLatch(bb, master.q, clk, { name: "slave", ...inner });
+      const slave = dLatch(bb, master.q, clk, {
+        name: "slave",
+        ...inner,
+        ...(options.q !== undefined ? { q: options.q } : {}),
+      });
       if (hold !== undefined)
         bb.gate("buf", [slave.q], { output: hold, name: "holdBuf", ...inner });
       return { q: slave.q, qb: slave.qb };

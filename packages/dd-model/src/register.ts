@@ -31,11 +31,11 @@ export function register(
       for (let i = 0; i < width; i++) {
         const dBit = bb.net(`d${i}`);
         bb.component("bit", { a: d }, { y: dBit }, { name: `bit${i}`, params: { index: i } });
-        const { name: _ignored, ...rest } = options;
+        const { name: _ignored, q: _q, width: _w, ...rest } = options;
         const ff = dFlipFlop(bb, dBit, clk, { ...rest, name: `ff${i}` });
         bits.push(ff.q);
       }
-      const q = bb.net("Q", width);
+      const q = options.q ?? bb.net("Q", width);
       const ports: Record<string, NetId> = {};
       bits.forEach((bit, i) => {
         ports[String.fromCharCode(97 + i)] = bit;

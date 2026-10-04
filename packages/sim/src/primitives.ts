@@ -99,6 +99,17 @@ export const PRIMITIVES: Readonly<Record<string, Primitive>> = {
       return { y: slice(inputs["a"] as Word, index, index) };
     },
   },
+  slice: {
+    kind: "slice",
+    inputs: ["a"],
+    outputs: ["y"],
+    describe: "A run of bits of a wider word, from bit hi down to bit lo.",
+    evaluate: (inputs, params) => {
+      const hi = Number(params?.["hi"] ?? 0);
+      const lo = Number(params?.["lo"] ?? 0);
+      return { y: slice(inputs["a"] as Word, hi, lo) };
+    },
+  },
   join: {
     kind: "join",
     inputs: "variadic",
