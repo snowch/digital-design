@@ -9,7 +9,7 @@ the subagent that drafted every learner-facing string from a brief of facts.
 Read from the clock (`date -u`), not estimated.
 
 - Started: 2026-10-04 22:47 UTC (first command in the session).
-- Finished: 2026-10-04 23:50 UTC (the last commit, with the note complete). About 63 minutes in all.
+- Finished: 2026-10-04 23:52 UTC (the last commit, with the note complete). About 65 minutes in all.
 
 ## Log
 
@@ -238,6 +238,8 @@ Read from the clock (`date -u`), not estimated.
     than that, so the stored phone baseline still showed the old, colliding row, while the page
     was fixed. Found by comparing a fresh screenshot with the stored one; rewritten with
     `--update-snapshots=all` and looked at.
+- 23:52 `main` had moved again (a comparison note, documents only); merged it, and the check passed
+  again on the merged head (exit 0, 199 Vitest tests, 100 Playwright tests).
 - 23:48 `./scripts/check.sh`: exit 0; 199 Vitest tests, the build, 100 Playwright tests at
   desktop and phone widths. Committed and pushed.
 
