@@ -411,9 +411,19 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
 }
 .circuit .wire path {
   stroke: var(--wire);
-  stroke-width: 2.25;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  stroke-width: 2;
+  stroke-linecap: butt;
+  stroke-linejoin: miter;
+}
+/* Wires and signal levels are horizontal and vertical lines on whole pixels: drawn without
+   anti-aliasing they stay sharp at any zoom, where a smoothed line blurs across two pixels. */
+.circuit .wire path:not(.wire-hit):not(.wire-halo),
+.timing-diagram .level,
+.timing-diagram .lane-base,
+.timing-diagram .axis line,
+.timing-diagram .cursor line,
+.timing-lanes .lane-edge {
+  shape-rendering: crispEdges;
 }
 .circuit .wire circle {
   fill: var(--wire);
@@ -510,8 +520,11 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
 }
 .circuit .part-name,
 .circuit .port-label {
-  fill: var(--fg-muted);
+  fill: var(--fg);
   font-size: 12px;
+}
+.circuit .part-name {
+  font-weight: 500;
 }
 .circuit .value-label {
   font-weight: 700;
@@ -741,9 +754,9 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
 }
 .timing-diagram .level {
   stroke: var(--fg);
-  stroke-width: 2.25;
-  stroke-linejoin: round;
-  stroke-linecap: round;
+  stroke-width: 2;
+  stroke-linejoin: miter;
+  stroke-linecap: butt;
 }
 .timing-diagram .hatch {
   stroke: var(--sig-unknown);

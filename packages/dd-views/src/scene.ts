@@ -57,7 +57,8 @@ export function partBox(part: Part): PartBox {
   const h = isPin ? PIN_H : partHeight(part.kind, Math.max(inputs.length, outputs.length));
   const x = part.x * CELL;
   const y = part.y * CELL;
-  const spread = (n: number, i: number) => y + (h * (i + 1)) / (n + 1);
+  // Ports sit on whole pixels, so a wire runs along a pixel row and draws sharp.
+  const spread = (n: number, i: number) => Math.round(y + (h * (i + 1)) / (n + 1));
   return {
     part,
     x,

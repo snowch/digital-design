@@ -180,7 +180,7 @@ export function CircuitView({
                         }
                       : { role: "img", "aria-label": label })}
                   >
-                    <rect width={box.w} height={box.h} rx={6} />
+                    <rect width={box.w} height={box.h} rx={4} />
                     <text x={box.w / 2} y={box.h / 2 + 4} textAnchor="middle" className="pin-name">
                       {part.name ?? part.id}
                     </text>

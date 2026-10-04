@@ -380,7 +380,7 @@ export function Builder({ drawing, onChange, palette, highlight = [], title }: B
                       />
                     )}
                     {isPin ? (
-                      <rect width={box.w} height={box.h} rx={6} />
+                      <rect width={box.w} height={box.h} rx={4} />
                     ) : isShaped(part.kind) ? (
                       <GateSymbol kind={part.kind} />
                     ) : (
