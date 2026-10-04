@@ -67,6 +67,7 @@ export function dFlipFlop(
         name: "slave",
         ...inner,
         ...(options.q !== undefined ? { q: options.q } : {}),
+        ...(options.qb !== undefined ? { qb: options.qb } : {}),
       });
       if (hold !== undefined)
         bb.gate("buf", [slave.q], { output: hold, name: "holdBuf", ...inner });

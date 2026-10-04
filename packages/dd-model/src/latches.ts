@@ -15,6 +15,8 @@ export interface LatchOptions {
   delay?: number;
   /** An existing net to drive as Q, so a caller (the HDL elaborator) can name it first. */
   q?: NetId;
+  /** An existing net to drive as Qb, so a caller (the circuit builder's editor) can wire it first. */
+  qb?: NetId;
 }
 
 export interface LatchPorts {
@@ -27,8 +29,16 @@ function gateOptions(name: string, options: LatchOptions) {
 }
 
 function without<T extends LatchOptions>(options: T, name: string): T {
-  const { q: _q, ...rest } = options;
+  const { q: _q, qb: _qb, ...rest } = options;
   return { ...rest, name } as T;
+}
+
+/** The output nets a caller asked for, to pass down to the latch that drives them. */
+function outputs(options: LatchOptions): Pick<LatchOptions, "q" | "qb"> {
+  return {
+    ...(options.q !== undefined ? { q: options.q } : {}),
+    ...(options.qb !== undefined ? { qb: options.qb } : {}),
+  };
 }
 
 /**
@@ -46,7 +56,7 @@ export function srLatch(
     "sr-latch",
     (bb) => {
       const q = options.q ?? bb.net("Q");
-      const qb = bb.net("Qb");
+      const qb = options.qb ?? bb.net("Qb");
       bb.nor([r, qb], { output: q, ...gateOptions("norQ", options) });
       bb.nor([s, q], { output: qb, ...gateOptions("norQb", options) });
       return { q, qb };
@@ -69,10 +79,7 @@ export function gatedSrLatch(
     (bb) => {
       const sGated = bb.and([s, en], gateOptions("andS", options));
       const rGated = bb.and([r, en], gateOptions("andR", options));
-      return srLatch(bb, sGated, rGated, {
-        ...without(options, "sr"),
-        ...(options.q !== undefined ? { q: options.q } : {}),
-      });
+      return srLatch(bb, sGated, rGated, { ...without(options, "sr"), ...outputs(options) });
     },
     (ports) => ({ inputs: { S: s, R: r, EN: en }, outputs: { Q: ports.q, Qb: ports.qb } }),
   );
@@ -95,10 +102,7 @@ export function dLatch(
       const nd = bb.not(d, gateOptions("notD", options));
       const s = bb.and([d, en], gateOptions("andS", options));
       const r = bb.and([nd, en], gateOptions("andR", options));
-      return srLatch(bb, s, r, {
-        ...without(options, "sr"),
-        ...(options.q !== undefined ? { q: options.q } : {}),
-      });
+      return srLatch(bb, s, r, { ...without(options, "sr"), ...outputs(options) });
     },
     (ports) => ({ inputs: { D: d, EN: en }, outputs: { Q: ports.q, Qb: ports.qb } }),
   );

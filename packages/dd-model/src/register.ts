@@ -31,7 +31,7 @@ export function register(
       for (let i = 0; i < width; i++) {
         const dBit = bb.net(`d${i}`);
         bb.component("bit", { a: d }, { y: dBit }, { name: `bit${i}`, params: { index: i } });
-        const { name: _ignored, q: _q, width: _w, ...rest } = options;
+        const { name: _ignored, q: _q, qb: _qb, width: _w, ...rest } = options;
         const ff = dFlipFlop(bb, dBit, clk, { ...rest, name: `ff${i}` });
         bits.push(ff.q);
       }

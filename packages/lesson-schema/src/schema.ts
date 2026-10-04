@@ -62,39 +62,48 @@ export type TestSuite = z.infer<typeof TestSuite>;
 /** A circuit as plain data: the engine's netlist, which is already JSON. */
 export const CircuitData = z.object({
   name: z.string(),
-  nets: z.array(
-    z.object({
-      id: z.number().int().nonnegative(),
-      name: z.string(),
-      width: z.number().int().min(1),
-      meta: z.record(z.string(), z.unknown()).optional(),
-    }),
-  ),
-  components: z.array(
-    z.object({
-      id: z.number().int().nonnegative(),
-      kind: z.string(),
-      name: z.string(),
-      path: z.string(),
-      inputs: z.record(z.string(), z.number().int().nonnegative()),
-      outputs: z.record(z.string(), z.number().int().nonnegative()),
-      delay: z.number().nonnegative().optional(),
-      params: z.record(z.string(), z.union([z.number(), z.string(), z.boolean()])).optional(),
-      meta: z.record(z.string(), z.unknown()).optional(),
-    }),
-  ),
-  inputs: z.array(z.object({ name: z.string(), net: z.number().int().nonnegative() })),
-  outputs: z.array(z.object({ name: z.string(), net: z.number().int().nonnegative() })),
-  composites: z.array(
-    z.object({
-      path: z.string(),
-      kind: z.string(),
-      name: z.string(),
-      inputs: z.record(z.string(), z.number().int().nonnegative()),
-      outputs: z.record(z.string(), z.number().int().nonnegative()),
-      meta: z.record(z.string(), z.unknown()).optional(),
-    }),
-  ),
+  nets: z
+    .array(
+      z.object({
+        id: z.number().int().nonnegative(),
+        name: z.string(),
+        width: z.number().int().min(1),
+        meta: z.record(z.string(), z.unknown()).readonly().optional(),
+      }),
+    )
+    .readonly(),
+  components: z
+    .array(
+      z.object({
+        id: z.number().int().nonnegative(),
+        kind: z.string(),
+        name: z.string(),
+        path: z.string(),
+        inputs: z.record(z.string(), z.number().int().nonnegative()).readonly(),
+        outputs: z.record(z.string(), z.number().int().nonnegative()).readonly(),
+        delay: z.number().nonnegative().optional(),
+        params: z
+          .record(z.string(), z.union([z.number(), z.string(), z.boolean()]))
+          .readonly()
+          .optional(),
+        meta: z.record(z.string(), z.unknown()).readonly().optional(),
+      }),
+    )
+    .readonly(),
+  inputs: z.array(z.object({ name: z.string(), net: z.number().int().nonnegative() })).readonly(),
+  outputs: z.array(z.object({ name: z.string(), net: z.number().int().nonnegative() })).readonly(),
+  composites: z
+    .array(
+      z.object({
+        path: z.string(),
+        kind: z.string(),
+        name: z.string(),
+        inputs: z.record(z.string(), z.number().int().nonnegative()).readonly(),
+        outputs: z.record(z.string(), z.number().int().nonnegative()).readonly(),
+        meta: z.record(z.string(), z.unknown()).readonly().optional(),
+      }),
+    )
+    .readonly(),
 });
 export type CircuitData = z.infer<typeof CircuitData>;
 
@@ -157,6 +166,8 @@ export const Challenge = z.object({
   tests: TestSuite,
   /** HDL constructs this challenge's text may use. */
   allowedConstructs: z.array(z.string()).default([]),
+  /** What the editor offers to build a drawn solution with, by id. The book interprets the ids. */
+  palette: z.array(z.string()).default([]),
   hints: Hints,
   /** The reference solution: what the educational tests complete the challenge with, and what rung five offers. */
   reference: Artifact,
