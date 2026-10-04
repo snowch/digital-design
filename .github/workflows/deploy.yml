@@ -49,9 +49,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    # No `environment:` key on purpose. The github-pages environment that Pages created carries
+    # a branch rule naming the branch that was the default at the time, and that rule refused
+    # every deploy from main after the default branch changed. Without the key the job is bound
+    # by no environment rule, and the Pages service still records the deployment.
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
