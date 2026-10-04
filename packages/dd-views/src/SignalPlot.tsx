@@ -13,7 +13,7 @@ import { volts } from "@dd/dd-model";
 import { format, useViewStrings } from "./strings";
 import { useWidth } from "./useWidth";
 
-const LEFT = 58;
+const LEFT = 86;
 const RIGHT = 10;
 const TOP = 12;
 const PLOT = 180;
