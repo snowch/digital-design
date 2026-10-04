@@ -16,7 +16,7 @@ async function textCollisions(page: Page): Promise<Collision[]> {
   return page.evaluate(() => {
     const out: { figure: string; problem: string }[] = [];
     const svgs = document.querySelectorAll<SVGSVGElement>(
-      "svg.timing-diagram, svg.timing-lanes, svg.circuit",
+      "svg.timing-diagram, svg.timing-lanes, svg.circuit, svg.signal-plot",
     );
     for (const svg of svgs) {
       const figure = svg.closest("figure")?.id ?? svg.className.baseVal;
@@ -102,6 +102,31 @@ test.describe("the diagrams", () => {
     expect(await textCollisions(page)).toEqual([]);
     await four.getByRole("button", { name: /ff2\. / }).click();
     expect(await textCollisions(page)).toEqual([]);
+  });
+
+  test("the signals lesson: no label overlaps another or leaves its drawing, before and after use", async ({
+    page,
+  }) => {
+    await openLesson(page, "signals");
+    expect(await textCollisions(page)).toEqual([]);
+
+    // Commit the threshold prediction (two plots appear), move every slider to both ends, and
+    // switch the investigation figure to the compressor recording.
+    const predict = page.locator("#ix-predict-threshold");
+    await predict.getByRole("radio").nth(1).check();
+    await predict.getByRole("button", { name: V.prediction.commit }).click();
+    await expect(predict.locator("svg.signal-plot")).toHaveCount(2);
+    const explore = page.locator("#ix-explore-signal");
+    await explore.getByRole("radio").nth(1).check();
+    for (const id of ["ix-explore-signal", "ix-break-signal"]) {
+      for (const slider of await page.locator(`#${id}`).getByRole("slider").all()) {
+        for (const end of ["min", "max"] as const) {
+          const v = await slider.getAttribute(end);
+          await slider.fill(v ?? "0");
+          expect(await textCollisions(page), `${id} at ${end}`).toEqual([]);
+        }
+      }
+    }
   });
 
   test("every lesson's diagrams are clear as first drawn", async ({ page }) => {

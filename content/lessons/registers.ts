@@ -53,7 +53,7 @@ export const registers: LessonInput = {
   module: 5,
   order: 1,
   objectives: [...LABELS.objectives],
-  introduces: ["word", "register", "shift register"],
+  introduces: ["register", "shift register"],
   sections: [
     { kind: "question", title: LABELS.titles.question, prose: PROSE.question },
     { kind: "motivation", title: LABELS.titles.motivation, prose: PROSE.motivation },

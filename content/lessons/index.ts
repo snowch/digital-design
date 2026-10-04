@@ -6,8 +6,9 @@ import { parseLesson, type Lesson, type LessonInput } from "@dd/lesson-schema";
 
 import { registers } from "./registers";
 import { remember } from "./remember";
+import { signals } from "./signals";
 
-const INPUTS: readonly LessonInput[] = [remember, registers];
+const INPUTS: readonly LessonInput[] = [signals, remember, registers];
 
 export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(
   (a, b) => a.module - b.module || a.order - b.order,

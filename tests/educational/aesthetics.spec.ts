@@ -102,4 +102,14 @@ test.describe("the look of the page", () => {
       animations: "disabled",
     });
   });
+
+  test("the signals lesson's noisy-signal figure looks as designed", async ({ page }) => {
+    await openLesson(page, "signals");
+    const figure = page.locator("#ix-break-signal");
+    await figure.scrollIntoViewIfNeeded();
+    await expect(figure).toHaveScreenshot("ix-break-signal.png", {
+      maxDiffPixelRatio: 0.02,
+      animations: "disabled",
+    });
+  });
 });

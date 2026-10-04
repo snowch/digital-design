@@ -1,0 +1,71 @@
+// The words of the lesson on signals and bits.
+//
+// Drafted by the course's prose process from briefs of checked facts (see CLAUDE.md and
+// docs/notes/module-1-signals.md) and checked against the model, then placed here by the
+// lesson's structure in signals.ts. Edit a fact here only after checking it; the lesson's
+// facts test (signals.facts.test.ts) holds the numbers.
+
+export const PROSE = {
+  question:
+    "A temperature sensor in a shop's cold room sends the temperature to the till along a cable 30 metres long. The cable runs past the fridge's compressor motor. The sensor sends the temperature as 16 steps, one after another. In each step it drives the cable to 0 V for a 0, or to 3.30 V for a 1.\n\nThe receiver in the till measures the cable's voltage once in each step. Each such measurement is a **sample**. So one temperature arrives as 16 samples, one for each step. But the samples never come back as exactly 0 V or 3.30 V. Noise from the cable and the motor moves each sample away from what the sensor sent.\n\nThe till must turn these wobbling voltages into clean 0s and 1s. Then it must read those 16 values as a temperature. How does it do both?",
+  motivation:
+    "The sensor drives the cable to only two voltages: 0 V and 3.30 V, far apart. The receiver does not need the exact voltage. It only needs to tell which one the sensor meant.\n\nA small wobble does no harm. It does harm only when it carries a sample far enough that it looks like the other voltage.\n\nOnce the receiver has decided each sample is a 0 or a 1, the noise is gone. The till keeps a clean 0 or 1, not the wobbly voltage. Getting 16 values right is not the whole job, though. The till must also turn them into a temperature, and that needs a rule the sensor and the till agree on.",
+  prediction:
+    'The receiver decides each sample by comparing it with one voltage. A sample at or above that voltage reads as 1; below it reads as 0. That voltage is the **threshold**.\n\nThe figure below asks which of two thresholds reads more samples wrong. Choose an answer, then press "Check my prediction". The plots that appear show what the model read.',
+  p1Question:
+    "The compressor is running. One receiver uses a threshold of 2.40 V, close to 3.30 V. Another uses 1.40 V, nearer the middle. Which threshold reads fewer samples wrong?",
+  p1Explain:
+    "At 2.40 V, 3 samples are read wrong: samples 5, 6 and 13. All three were sent as 1, but the noise pulled each below 2.40 V. At 1.40 V, none is read wrong. A threshold close to 3.30 V leaves little room on that side. The noise needs to move a sample only a little to carry it across.",
+  exploreSignalLead:
+    "The figure shows 16 samples from the cable's voltage. Each sample is a dot on the graph. A horizontal line marks the threshold, with dashed lines at 0 V and 3.30 V where the sensor drives the cable. Below the plot are rows for each sample's number, the value sent, and the value read. A filled dot means the receiver read a 1; a hollow dot means 0. A sample read incorrectly has a ring round it.\n\nEach value the receiver reads is either 0 or 1. One such value is a **bit**.\n\nThe figure starts at 2.40 V with the compressor off. Every sample reads as sent. Choose the recording with the compressor running: the noise from the motor moves samples, and the same threshold now reads 3 samples incorrectly.\n\nMove the threshold slider down. Watch the lines under the plot: they show the highest sample sent as 0 and the lowest sent as 1, and how far each is from the threshold.",
+  exploreSignalAfter:
+    "A threshold reads every sample correctly when it sits between the highest sample sent as 0 and the lowest sent as 1. The gap between the threshold and the nearest sample on each side is how much more noise that sample could take before it read incorrectly. That gap is the **noise margin**.\n\nWith the compressor running and the threshold at 1.40 V, every sample reads correctly, but the highest 0 sample, sample 16, is only 0.29 V below the threshold. A little more noise on that sample would flip it to 1.\n\nAt 1.70 V the gaps are 0.59 V below (sample 16) and 0.55 V above (sample 5). Moving the threshold widens one gap and narrows the other. Near the middle of the two voltages, both gaps are reasonably wide.",
+  construction:
+    "The receiver needs one threshold that works for both recordings: with the compressor off and with it running, with wide noise margins on both sides. First you choose the threshold. Then you turn the 16 bits it reads into a number.",
+  setThresholdLead: "Type a threshold in volts for the receiver. Use the figure above to find one.",
+  c1Task:
+    "Choose one threshold in volts for the receiver. The tests read both recordings with it.\n\nFor each recording, every sample must be read as it was sent. The noise margin must be at least 0.30 V on both sides: the highest sample sent as 0 at least 0.30 V below the threshold, and the lowest sent as 1 at least 0.30 V above it.\n\nThere are 4 tests: two recordings, each checked for wrong samples and for the noise margin.",
+  buildNumberLead:
+    "The receiver has 16 bits, each either 0 or 1. To get a number, each bit's place needs a worth.\n\nThe figure shows 16 bits, all at 0. Press a bit to change it between 0 and 1. Above is its number, bit 0 on the right to bit 15 on the left. Below is what it is worth.\n\nEach bit is worth twice the one to its right: 1, 2, 4, 8, and so on to 32768 for bit 15. The number is the sum of the worths of the bits that are 1. Writing a number this way, with only 0s and 1s, is **binary**.\n\nExample: set bits 4 and 1. The number is 16 + 2 = 18.\n\nBits taken together as one value, here 16 of them, are a **word**. Reading a word by adding the worths of its 1 bits, every one counted as positive, is the **unsigned** reading. The figure shows it below the bits.",
+  buildNumberAfter:
+    "Set the bits the till received from the cold room: `1111 1111 0100 1000`. Read unsigned, the word is 65352.\n\n16 bits make 65536 different patterns. Read unsigned, they are the numbers 0 to 65535.\n\nThe sensor sent -184. The till got 65352. Something has gone wrong, yet every bit arrived as the sensor sent it. The problem is not the threshold.",
+  breakSignalLead:
+    "The figure shows the compressor recording with two new tools. A second slider multiplies the noise from 1.0 to 3.0 times the recorded wobbles. As you turn it up, the shapes stay the same but grow. The shaded band in the plot, behind the dots, shows every threshold that reads all 16 samples right. The threshold starts at 1.70 V. At 1.0 times, the band runs from 1.12 V to 2.25 V. A line under the plot shows the 16 bits sent and the 16 bits read, each read unsigned, as numbers in each case.\n\nMove the noise up one step at a time and watch what happens to the band. At 1.5 times it shrinks to 1.67 V to 1.72 V. At 1.6 times the band vanishes: no choice of threshold reads every sample right.",
+  breakSignalAfter:
+    "At 1.6 times the noise, with the threshold at 1.70 V, samples 5 and 16 are read wrong. The word reads 63305 instead of 65352. One wrong bit changes the number by that bit's worth. If bit 15 were wrong, it would shift by 32768. Which sample the noise hits decides how far the number shifts. When the noise grows this large, no threshold helps. The answer lies outside the receiver: less noise on the cable, kept away from the motor, or two voltages further apart so the gap between them is wider than the noise.",
+  explanation:
+    "Back to the 65352. Every bit arrived as the sensor sent it. The threshold did its job. The till read the word unsigned, so every bit's worth counted as positive. 65352 tenths of a degree is 6535.2 degrees. But the sensor did not use that rule. It wrote the number with a different rule for the top bit, and the result was -184. Nothing in the 16 bits says which rule was meant. The till had to be told.",
+  signedWordLead:
+    "The till's word `1111 1111 0100 1000` can be read two ways. The figure shows both. Instead of counting the top bit as worth 32768, count it as worth -32768. The figure labels bit 15 with this worth. Count every other bit as it was. This is the **signed** reading. Read this way, the word is -184: take -32768 and add the worths of the other bits that are 1. The sensor sent -184: its temperature in tenths of a degree, -18.4 degrees. Press any bit to flip it between 0 and 1, and both readings update.",
+  signedWordAfter:
+    "When the top bit is 0, both readings give the same number. When the top bit is 1, the unsigned reading is always the signed reading plus 65536. Here, 65352 = -184 + 65536. Read as signed, 16 bits are the numbers -32768 to 32767. Read as unsigned, 0 to 65535. Both rules make use of all 65536 different patterns. Neither reading is wrong. The bits are the same in both. The till's fault was that it used a different rule from the sensor.",
+  manyReadingsLead:
+    "Writing out 16 bits is long and easy to copy wrongly. Take the bits in groups of four from the right, and write each group as one digit, 0 to 9 then A for ten up to F for fifteen. That is **hexadecimal**. `1111 1111 0100 1000` becomes `FF48`. Hexadecimal is a shorter way to write the same bits, not a different number.\n\nThe figure shows one word at a time, read one way at a time. Choose a word and how to read it. The bits do not change when the reading does. Only the rule changes.\n\nYou can also read the same 16 bits another way: send them to a row of 16 lamps, lighting the ones whose bit is 1. That pattern is not a number at all.",
+  manyReadingsAfter:
+    "The word for 1.8 degrees is `0000 0000 0001 0010`. Read unsigned, it is 18. Read signed, it is also 18, because the top bit is 0. When all sixteen bits are 1, you get `1111 1111 1111 1111`, which reads 65535 unsigned and -1 signed. In hexadecimal, that is `FFFF`.\n\nThe course builds a computer that works on 16-bit words. A word inside it, like the one the till received, carries nothing that says which reading is meant. The part that uses the word decides.",
+  predictTopLead: "Here is one more prediction. Use the rule for the signed reading.",
+  p2Question: "The word is `1000 0000 0000 0000`. Only bit 15 is 1. What does it read as signed?",
+  p2Explain:
+    "Read signed, bit 15 is worth -32768 and no other bit is 1, so the word is -32768. Read unsigned, the same bits are 32768. It is the most negative number a 16-bit word can be when read signed.",
+  freezerWordLead: "The same sensor is moved into a freezer.",
+  c2Task:
+    "The freezer is at -25.0 degrees. The sensor counts in tenths of a degree, so the word it sends reads as -250 when read signed. Set the 16 bits the sensor sends by pressing each bit to change it. Then type what a till that reads the word unsigned would get, and the word in hexadecimal. There are 3 tests: your bits must read signed as -250, your unsigned answer must be the unsigned reading of your bits, and your hexadecimal answer must match your bits. The figures on this page do not show your bits; work them out.",
+  reflection:
+    "A receiver turns a wobbling voltage into bits using a threshold. The noise margin on each side is how much more noise can happen before the receiver reads the bit wrong. When the noise carries some 0 sample up to or above some 1 sample, there is no gap left between them. No threshold can read every sample right.\n\nA word is a pattern of bits. The bits themselves mean nothing. Unsigned, signed, hexadecimal and lamps are four different rules for reading the same bits. The pattern does not change when the reading does; only the rule changes. The bits carry no record of which rule to use. If the receiver and sensor agree, how could the till add two temperatures, or keep the last one while the next arrives?",
+  modelVsReality:
+    "The recordings on this page are made by the course's model from a fixed starting number. They are the same on every visit. Real noise is different every time. The numbers you see are a teaching choice, not a measurement from a real cable.\n\nOn a real cable, the voltage does not jump from one level to the other. It changes over a short time, the way a container fills through a narrow pipe, and passes through the middle on the way. The model takes one sample in the middle of each step, after the voltage has settled. It draws no changes between steps.\n\nMany real receivers use two thresholds: a higher one for a 1 and a lower one for a 0. They promise nothing for a voltage between them. The model uses one threshold.\n\nReal sensors and tills agree their rules in a written description of what is sent. The cold room's fault in this lesson is invented. But a word read with the wrong rule is a real kind of fault.",
+  c1Hints: [
+    "A threshold reads every sample right when it is above the highest sample sent as 0 and at or below the lowest sent as 1. The noise margin is the gap to each.",
+    "A threshold can read every sample right but still fail the test if it sits close to one side. For example, 1.40 V reads every sample right in the compressor recording, but the highest 0 sample is only 0.29 V below it, failing the noise margin test.",
+    "With the compressor off, every sample is within 0.18 V of 0 V or 3.30 V, so almost any threshold between them works. The compressor recording is what limits you.",
+    "With the compressor running, sample 16 is the highest 0 sample and sample 5 is the lowest 1 sample. The threshold must be at least 0.30 V above sample 16 and at least 0.30 V below sample 5.",
+    "Any threshold from 1.45 V to 1.95 V works. Try 1.70 V: it gives gaps of 0.59 V and 0.55 V with the compressor running.",
+  ],
+  c2Hints: [
+    "Read signed, the word is -32768 plus the worths of the other 1 bits. A negative number needs bit 15 set to 1.",
+    "Setting the bits for 250 is a common mistake. There is no minus sign in the bits. Bit 15's worth of -32768 is what makes the number negative.",
+    "-184 is `1111 1111 0100 1000`, and its unsigned reading is -184 + 65536 = 65352.",
+    "The unsigned reading of the freezer's word is -250 + 65536 = 65286. Find the bits whose worths add up to 65286.",
+    "The answer is `1111 1111 0000 0110`. Unsigned it is 65286; in hexadecimal, `FF06`.",
+  ],
+} as const;

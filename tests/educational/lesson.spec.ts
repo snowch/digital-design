@@ -5,6 +5,8 @@
 
 import { expect, test, type Page } from "@playwright/test";
 
+import { testCount } from "@dd/lesson-schema";
+
 import {
   LESSON,
   LESSONS,
@@ -54,7 +56,7 @@ test.describe("the lesson pages", () => {
   test("the lesson list shows progress recomputed from stored work", async ({ page }) => {
     await page.goto("#/");
     await expect(page.getByRole("link", { name: LESSON.title })).toBeVisible();
-    await expect(page.locator(".lesson-list .meta").first()).toContainText(
+    await expect(page.getByRole("link", { name: LESSON.title }).locator(".meta")).toContainText(
       `0 of ${LESSON.challenges.length}`,
     );
   });
@@ -73,10 +75,7 @@ test.describe("challenges", () => {
       if (c.gradedDirection === "write") await writeText(section, text);
       else await importText(section, text);
       await runTests(section);
-      const total =
-        c.tests.kind === "sequence"
-          ? c.tests.steps.filter((s) => s.expect).length
-          : c.tests.vectors.length;
+      const total = testCount(c);
       await expect(status(section)).toHaveText(format(S.challenge.passing, { total }));
       await expect(section.locator(".challenge-complete")).toHaveText(S.challenge.complete);
     });
@@ -158,7 +157,7 @@ endmodule`,
     );
     await expect(page.getByRole("link", { name: "Lessons" })).toBeVisible();
     await page.goto("#/");
-    await expect(page.locator(".lesson-list .meta").first()).toContainText(
+    await expect(page.getByRole("link", { name: LESSON.title }).locator(".meta")).toContainText(
       `0 of ${LESSON.challenges.length}`,
     );
   });
