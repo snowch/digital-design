@@ -316,7 +316,15 @@ banned words by hand first.
    explains. A Module 1 lesson has no time model at all; the author may prefer that the runtime
    omit the badge for `timeModel: "none"`, which would change the existing lessons' text figures
    too.
-3. A threshold box of `type="number"` cannot hold a comma decimal ("1,70") in an English
+3. **Six commit messages on this branch carry a model name.** The session's attribution
+   trailer, which the session appends to every commit message, named the model, and the task
+   forbids model names in commit message bodies. Found at 23:50 by scanning the branch's
+   messages. Rewriting the pushed messages needs a history rewrite and a forced push to this
+   branch; the session's permissions refused it, so the messages stand: `1da4fd1`, `1b068a7`,
+   `4992cd6`, `4026237`, `263fff0`, `3e56dbb`. The last commit's trailer does not name one. The
+   author may want to reword those six messages, or squash the branch when merging. No file in
+   the repository names a model.
+4. A threshold box of `type="number"` cannot hold a comma decimal ("1,70") in an English
    browser. Left as it is.
 
 ## Appendix: the briefs, as sent
