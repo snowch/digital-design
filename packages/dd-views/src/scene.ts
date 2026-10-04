@@ -151,9 +151,16 @@ export function subCircuit(circuit: Circuit, scope: string): Circuit {
   if (!composite) return circuit;
   const prefix = `${scope}/`;
   const strip = (path: string) => path.slice(prefix.length);
+  // Pin positions belong to the drawing they were placed in: a block's ports are the outer
+  // circuit's nets, and the outer pins' places mean nothing inside the block.
+  const unplaced = circuit.nets.map((n) => {
+    if (!n.meta || !("pin" in n.meta || "outputPins" in n.meta)) return n;
+    const { pin: _pin, outputPins: _outputPins, ...meta } = n.meta;
+    return { ...n, meta };
+  });
   return {
     name: composite.name,
-    nets: circuit.nets,
+    nets: unplaced,
     components: circuit.components
       .filter((c) => c.path.startsWith(prefix))
       .map((c) => ({ ...c, path: strip(c.path) })),

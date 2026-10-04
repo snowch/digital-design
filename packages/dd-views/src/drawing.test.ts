@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { registerCircuit } from "@dd/dd-model";
+import { libraryCircuit, registerCircuit } from "@dd/dd-model";
 import { elaborate } from "@dd/hdl";
 import { Simulator, bit0, bit1, runSuite } from "@dd/sim";
 
@@ -13,6 +13,7 @@ import {
   undrivenOutputs,
   type Drawing,
 } from "./drawing";
+import { drawingAt } from "./scene";
 
 const SR = { inputs: [{ name: "S" }, { name: "R" }], outputs: [{ name: "Q" }] };
 
@@ -164,5 +165,15 @@ describe("a register block in a drawing", () => {
     const block = drawing.parts.find((p) => p.kind === "register");
     expect(block?.ports).toEqual({ inputs: ["D", "CLK", "RST", "EN"], outputs: ["Q"] });
     expect(drawing.wires).toHaveLength(5);
+  });
+});
+
+describe("a block opened in a drawing with placed pins", () => {
+  it("lays out its own pins, not the outer drawing's", () => {
+    const { drawing } = drawingAt(libraryCircuit("four-flip-flops"), "ff0");
+    const clk = drawing.parts.find((p) => p.id === pinId("input", "CLK"));
+    const d = drawing.parts.find((p) => p.id === pinId("input", "D"));
+    // At the top level CLK is placed 21 rows down; inside ff0 it is laid out beside D.
+    expect(Math.abs((clk?.y ?? 0) - (d?.y ?? 0))).toBeLessThan(6);
   });
 });

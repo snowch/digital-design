@@ -109,3 +109,83 @@ went right.
   diagram check extended to this lesson before and after use and to every lesson as first
   drawn, the look rules run over every lesson, and a screenshot of the reset figure. All 15 new
   tests passed at desktop width on the first run, with placeholder words.
+- 22:35 to 23:10 The prose. One shared fact sheet and five briefs (A to E) went out to five
+  drafting subagents in parallel, each with `docs/style.md` attached; they are reproduced as
+  sent in the appendix. Every fact in them had been checked against the facts test or the
+  simulator first. Results, draft by draft (the "profile" CLAUDE.md predicts is a dropped fact,
+  a wrong fact and a drift per few drafts):
+  - **A (question, motivation, prediction).** One filler sentence, "The task is simple."
+    (rule 22, an evaluation with no grounds, and rule 17, a label for what follows): sent
+    back. The unknown option began in lower case, unlike its siblings: sent back. **A race I
+    did not anticipate:** I read A.md at 21:07, while the subagent was still running; it
+    rewrote the file at 21:08, so the motivation I fact-checked was not the one placed. Found
+    only at the whole-lesson read, where the page's motivation did not match my notes. The final
+    version was re-checked: it drops "the simulator cannot know" (the learner knows X from the
+    previous lesson, so accepted) and turns "at the edges where Save is pressed" into "when Save
+    is pressed" (a small drift, accepted, left for the reviewer). Lesson for next time: read a
+    draft only after its subagent has reported back.
+  - **B (investigation, construction).** One vocabulary slip, "keep a word" written as "hold a
+    word" although the fact sheet reserved "hold" for hold time; terms not set in bold where
+    introduced; the construction paragraph carried three ideas (rule 2). All sent back; the
+    redraft fixed all three and changed nothing else.
+  - **C (failure experiment, explanation).** One **wrong fact**: the fault lab was described as
+    "your bit", but the figure is the lesson's own circuit, not the learner's drawing. Two
+    **dropped facts**: the gates' and wires' names (so LOAD, KEEP and NEXT appeared undefined)
+    and each step's inputs. One number written as a word that the page prints as a digit ("Two
+    of 4" where the page says "2 of 4"). All sent back and fixed. A dropped framing phrase in
+    `gatedClockAfter` ("the rule this course keeps from here") and a dropped gate name in
+    `keepClearBitLead` (notRst) were restored by adding words, not by rewriting.
+    At the whole-lesson read, `keepClearBitLead` opened with "One more AND gate, andClear, takes
+    NEXT and NOT RST" straight after a paragraph that had never mentioned RST: a broken join, sent
+    back with a note; the redraft added one opening sentence.
+  - **D (generalisation, challenge, reflection, model note).** A term the learner has not met,
+    "hardware description language"; "hold" in the keep sense three times (one found only by a
+    scripted scan of the placed lesson). Sent back twice. The model note dropped "(its hold
+    time)", which ties the shift register's working to the previous lesson's figure; restored by
+    adding the three words.
+  - **E (labels).** "holding" in a title; "gated clock" and "Gated-clock bit", a term on the
+    do-not-use list; "keep bit" as a name the lesson never defines; a section title that named
+    one of its two challenges; an unknown option in a different shape from its sibling. Sent
+    back; all fixed.
+  - **My own error, not the drafts'.** Brief C named the three fault options "Keep path stuck at
+    0", "EN held at 1" and "OR changed to AND", while brief E asked for the page's fault labels
+    and got "KEEP wire forced to 0", "EN forced to 1" and "OR gate changed to AND". The prose
+    quoted labels the page did not show. I corrected the three quoted names to the page's labels
+    (a fact fix: the page is the authority), and the fault lab's own prose no longer says "held".
+    Two briefs describing one control must take its label from one place.
+  - Formatting, not wording: prediction options are shown as plain text, so the backticks the
+    drafts put round `0110` printed literally; the placement script strips them.
+  - The "register" block's label was drafted "Register"; placed as "register" so the failure
+    sentence reads "The register Q_reg drives that signal" and matches "4-bit register".
+  Totals: about 95 strings in five drafts; sent back: 12 notes over 8 redrafts; wrong facts: 1;
+  dropped facts: 4 (2 sent back, 2 restored by added words); vocabulary or term slips: 7; one
+  broken join; no sentence rewritten by the managing model.
+- 23:10 Whole-lesson read on the built page found, besides the drafting items above:
+  - "X" meaning two things on one page: the explorer's reference table wrote X for "either
+    value" while the lesson uses X for "unknown". The table figure already wrote "0 or 1"; the
+    explorer's table now does too.
+  - On a phone the reset figure's table scrolled sideways and hid its last column, "What it
+    does", seen only in the new screenshot baseline. Tighter cell padding under 480 pixels fixed
+    it, and the look test now fails any reference table wider than its wrapper on a phone (it
+    passes for both lessons).
+  - The loop wire under the flip-flop crossed the block's name "ff" (no check measures a wire
+    against a label). The CLK pin moved one row down, so the loop's channel runs under the name.
+- 23:15 `./scripts/check.sh` passed: 177 Vitest tests, the build, 68 Playwright tests.
+  Committed the lesson and pushed the branch.
+- 23:20 The mechanical half of the review, by a Playwright walk of the built page at 1280 and
+  375 pixels, in the light and the dark theme: every figure's buttons and pins pressed, every
+  slider to both ends, the predictions committed, the fault options chosen and checked, the
+  challenges' part buttons pressed and their tests run on the half-built result. Found:
+  - no console errors, no horizontal page scroll, no control without an accessible name, in all
+    four configurations;
+  - **one bug**: opening a flip-flop inside the four-flip-flop figure drew the block's CLK pin
+    21 rows down, because the hand-placed position of the outer CLK pin is stored on the CLK net,
+    and a block's ports are the outer circuit's nets. A drawing made in the editor would show the
+    same fault inside any block it contains. Fixed in `subCircuit`: an opened block drops the
+    outer drawing's pin positions. Test in `drawing.test.ts`.
+  - On a phone each drawing scrolls sideways inside its card, as the first lesson's do (the
+    platform's documented behaviour); the learner sees the inputs first and scrolls to the
+    output.
+  - A failed test on a half-built drawing now reads "The D flip-flop dff1 drives that signal",
+    as intended. It also lists "open_dff1_CLK" under "Places to look", an internal name for an
+    unconnected input; the first lesson's page does the same. Not changed; noted for the author.
