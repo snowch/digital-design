@@ -325,22 +325,25 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
   },
   signal: {
     plotTitle: "Samples and threshold",
-    plotSummary: "{n} samples from {low} to {high}, threshold at {threshold}, {wrong} read wrong.",
+    plotSummary:
+      "{n} samples from {low} to {high}, threshold at {threshold}, {wrong} come out wrong.",
     recording: "Recording",
     threshold: "Threshold: {value}",
     noise: "Noise: ×{scale}",
     sample: "Sample",
     sent: "Sent",
-    read: "Read",
-    allRight: "Every sample reads correctly.",
-    someWrong: "{n} of {total} read wrong: {list}.",
+    read: "Received",
+    allRight: "Every sample comes out as sent.",
+    someWrong: "{n} of {total} come out wrong: {list}.",
     nearest0: "Highest sample sent as 0: sample {index}, {gap} below threshold.",
     nearest1: "Lowest sample sent as 1: sample {index}, {gap} above threshold.",
-    nearest0Wrong: "PLACEHOLDER sample {index} {gap} wrong side 0",
-    nearest1Wrong: "PLACEHOLDER sample {index} {gap} wrong side 1",
-    band: "Thresholds that read every sample right: {from} to {to}.",
-    noBand: "No threshold reads every sample correctly at this noise.",
-    words: "Sent unsigned: {sent}; read unsigned: {read}.",
+    nearest0Wrong:
+      "Highest sample sent as 0: sample {index}, {gap} above threshold, on the wrong side.",
+    nearest1Wrong:
+      "Lowest sample sent as 1: sample {index}, {gap} below threshold, on the wrong side.",
+    band: "Thresholds where every sample comes out as sent: {from} to {to}.",
+    noBand: "At this noise, no threshold makes every sample come out as sent.",
+    words: "Sent unsigned: {sent}; received unsigned: {read}.",
   },
   bits: {
     row: "Bits",
@@ -364,7 +367,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       hex: "Each group of four bits is one hexadecimal digit, 0 to 9 then A to F.",
       lamps: "A 1 lights its lamp; a 0 leaves it dark.",
     },
-    readAs: "Read as",
+    readAs: "Show as",
     word: "Word",
     lampOn: "on",
     lampOff: "off",
@@ -372,15 +375,15 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     value: "Reading",
   },
   readingPrediction: {
-    modelGave: "The model gives: {value}.",
+    modelGave: "The model's answer is {value}.",
     same: "the same",
-    atThreshold: "At {threshold}: {n} wrong.",
+    atThreshold: "At {threshold}: {n} come out wrong.",
   },
   answers: {
     terms: {
       threshold: "Threshold",
-      wrong: "Samples wrong",
-      wrongSamples: "Wrong samples",
+      wrong: "Samples come out wrong",
+      wrongSamples: "Which samples come out wrong",
       marginBelow: "Margin below",
       marginAbove: "Margin above",
       bits: "Bits",
@@ -390,7 +393,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     },
     unanswered: "Fill in {fields} to run the tests.",
     invalid: "{field} must be a valid entry.",
-    ofYourBits: "PLACEHOLDER the reading of your bits",
+    ofYourBits: "What your bits read as",
   },
 };
 
