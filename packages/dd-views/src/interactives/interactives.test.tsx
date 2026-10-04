@@ -152,14 +152,14 @@ describe("the setup and hold experiment", () => {
       format(S.setupHold.late, { time: 1045, value: "1" }),
     );
     await user.click(screen.getByRole("button", { name: S.setupHold.draw }));
-    expect(screen.getByRole("status")).toHaveTextContent(/Draw 1:/);
+    expect(screen.getByRole("status")).toHaveTextContent(/Roll 1:/);
     const stored = JSON.parse(storage.get("dd:v1:remember") ?? "{}");
     expect(stored.slots.sh.draws).toHaveLength(1);
     expect(stored.slots.sh.draws[0]).toMatchObject({ seed: 1, offset: -15, from: 1020 });
     fireEvent.change(slider, { target: { value: "0" } });
     expect(screen.getByRole("status")).toHaveTextContent(S.setupHold.ignored);
     await user.click(screen.getByRole("button", { name: format(S.setupHold.replay, { seed: 1 }) }));
-    expect(screen.getByRole("status")).toHaveTextContent(/Draw 1:/);
+    expect(screen.getByRole("status")).toHaveTextContent(/Roll 1:/);
   });
 });
 
@@ -221,6 +221,6 @@ describe("the circuit explorer", () => {
     expect(screen.getByRole("row", { current: true })).toHaveTextContent("Set");
     const table = screen.getByRole("table", { name: S.circuit.signals });
     expect(table).toHaveTextContent("Q");
-    expect(screen.getByRole("status")).toHaveTextContent(/Settled after \d+ steps/);
+    expect(screen.getByRole("status")).toHaveTextContent(format(S.explorer.settled, { n: 2 }));
   });
 });

@@ -3,11 +3,21 @@
 // and a netlist (one the learner saved, or one elaborated from text) becomes a drawing again,
 // laid out automatically where it carries no positions.
 
-import { dFlipFlop, dLatch, gatedSrLatch, srLatch } from "@dd/dd-model";
+import { dFlipFlop, dLatch, gatedSrLatch, srLatch, type LatchOptions } from "@dd/dd-model";
 import { CircuitBuilder, type Circuit, type NetId } from "@dd/sim";
 
 import { autoLayout } from "./layout";
 import { partSpec, type PartSpec } from "./parts";
+
+/** The two-button memory as a block: an SR latch whose only output is the light. */
+function twoButtons(b: CircuitBuilder, a: NetId, bPress: NetId, options: LatchOptions): void {
+  b.scope(
+    options.name ?? "two-buttons",
+    "two-buttons",
+    (bb) => srLatch(bb, a, bPress, { ...options, name: "latch" }),
+    (ports) => ({ inputs: { A: a, B: bPress }, outputs: { LIGHT: ports.q } }),
+  );
+}
 
 export interface Part {
   readonly id: string;
@@ -188,13 +198,16 @@ export function compileDrawing(drawing: Drawing, name = "drawing"): Compiled {
     }
     // A composite from the library, wired through its ports.
     const ins = Object.fromEntries(spec.inputs.map((port) => [port, inputNet(part, port)]));
-    const q = outputNet.get(`${part.id}.Q`);
+    const q = outputNet.get(`${part.id}.Q`) ?? outputNet.get(`${part.id}.LIGHT`);
     const qb = outputNet.get(`${part.id}.Qb`);
     const outs = { ...(q !== undefined ? { q } : {}), ...(qb !== undefined ? { qb } : {}) };
     const opts = { name: part.id, ...outs };
     switch (part.kind) {
       case "sr-latch":
         srLatch(b, ins["S"] as NetId, ins["R"] as NetId, opts);
+        break;
+      case "two-buttons":
+        twoButtons(b, ins["A"] as NetId, ins["B"] as NetId, opts);
         break;
       case "gated-sr-latch":
         gatedSrLatch(b, ins["S"] as NetId, ins["R"] as NetId, ins["EN"] as NetId, opts);

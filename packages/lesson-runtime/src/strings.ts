@@ -13,6 +13,7 @@ export interface Strings {
     readonly modelVsReality: string;
     readonly timeModel: Readonly<Record<string, string>>;
     readonly unknownInteractive: string;
+    readonly brokenInteractive: string;
   };
   readonly challenge: {
     readonly run: string;
@@ -67,6 +68,7 @@ export const DEFAULT_STRINGS: Strings = {
       none: "No simulation",
     },
     unknownInteractive: "Unknown interactive type: {kind}",
+    brokenInteractive: "The {kind} figure could not be shown: {message}",
   },
   challenge: {
     run: "Run tests",

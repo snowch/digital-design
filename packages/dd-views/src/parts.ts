@@ -34,6 +34,7 @@ const GATE_LABELS: Readonly<Record<string, string>> = {
 };
 
 const COMPOSITE_LABELS: Readonly<Record<string, string>> = {
+  "two-buttons": "Two buttons",
   "sr-latch": "SR latch",
   "gated-sr-latch": "Gated SR latch",
   "d-latch": "D latch",
@@ -44,6 +45,7 @@ const COMPOSITE_LABELS: Readonly<Record<string, string>> = {
 };
 
 const COMPOSITE_DESCRIPTIONS: Readonly<Record<string, string>> = {
+  "two-buttons": "It remembers which of two buttons was pressed last; A lights it, B puts it out.",
   "sr-latch":
     "Two cross-coupled NOR gates. S=1 sets Q to 1, R=1 resets it to 0, both 0 holds, both 1 is not allowed.",
   "gated-sr-latch": "An SR latch whose S and R reach it only while EN is 1.",

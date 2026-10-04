@@ -23,15 +23,17 @@ import { useSettleSim } from "../useSim";
 import { withProps } from "./props";
 import { Step, outputsPerStep } from "./script";
 
+const label = { label: z.string().optional() };
 const FaultSpec = z.discriminatedUnion("kind", [
-  z.object({ kind: z.literal("broken-wire"), net: z.string() }),
-  z.object({ kind: z.literal("inverted"), net: z.string() }),
+  z.object({ kind: z.literal("broken-wire"), net: z.string(), ...label }),
+  z.object({ kind: z.literal("inverted"), net: z.string(), ...label }),
   z.object({
     kind: z.literal("stuck-at"),
     net: z.string(),
     value: z.union([z.literal(0), z.literal(1)]),
+    ...label,
   }),
-  z.object({ kind: z.literal("wrong-gate"), path: z.string(), gate: z.string() }),
+  z.object({ kind: z.literal("wrong-gate"), path: z.string(), gate: z.string(), ...label }),
 ]);
 
 const Props = z.object({
@@ -42,6 +44,11 @@ const Props = z.object({
 });
 
 export function toFault(spec: z.infer<typeof FaultSpec>): Fault {
+  const fault = baseFault(spec);
+  return spec.label ? { ...fault, label: spec.label } : fault;
+}
+
+function baseFault(spec: z.infer<typeof FaultSpec>): Fault {
   switch (spec.kind) {
     case "broken-wire":
       return brokenWire(spec.net);
@@ -125,6 +132,9 @@ export const FaultLab = withProps(
           onScope={setScope}
         />
         <div className="fault-actions">
+          <button type="button" className="button secondary" onClick={() => sim.releaseAll()}>
+            {strings.explorer.releaseAll}
+          </button>
           <button type="button" className="button primary" onClick={runChecks}>
             {strings.fault.run}
           </button>

@@ -21,8 +21,8 @@ export interface Shade {
 export interface TimingDiagramProps {
   readonly circuit: Circuit;
   readonly trace: Trace;
-  /** Net names to show, in order. Default: the circuit's inputs then outputs. */
-  readonly signals?: readonly string[];
+  /** Nets to show, in order, by name or with a label to show instead. Default: inputs then outputs. */
+  readonly signals?: readonly (string | { readonly net: string; readonly label: string })[];
   readonly from?: number;
   readonly to?: number;
   readonly cursor?: number;
@@ -57,12 +57,16 @@ export function TimingDiagram({
   const strings = useViewStrings();
   const id = useId();
   const end = to ?? Math.max(traceEnd(trace), from + 1);
-  const names = signals ?? [
+  const wanted = signals ?? [
     ...circuit.inputs.map((p) => p.name),
     ...circuit.outputs.map((p) => p.name),
   ];
-  const lanes = names
-    .map((name) => ({ name, net: resolveNet(circuit, name) }))
+  const lanes = wanted
+    .map((w) =>
+      typeof w === "string"
+        ? { name: w, net: resolveNet(circuit, w) }
+        : { name: w.label, net: resolveNet(circuit, w.net) },
+    )
     .filter((l): l is { name: string; net: number } => l.net !== undefined);
   const span = Math.max(1, end - from);
   const unit = Math.max(6, Math.min(48, 640 / span));

@@ -19,10 +19,24 @@ export function learnerText(lesson: Lesson): string[] {
   const out: string[] = [lesson.title, ...lesson.objectives, lesson.modelVsReality];
   for (const s of lesson.sections) {
     out.push(s.title, s.prose);
-    for (const x of s.interactives) out.push(x.caption);
+    for (const x of s.interactives) {
+      out.push(x.caption);
+      if (x.lead) out.push(x.lead);
+      if (x.after) out.push(x.after);
+      // Words inside an interactive's props that a learner reads: questions, options, phases.
+      out.push(...stringsIn(x.props));
+    }
   }
   for (const c of lesson.challenges) out.push(c.title, c.task, ...c.hints);
   return out;
+}
+
+/** Every string nested anywhere in a props object, for the scan. */
+function stringsIn(value: unknown): string[] {
+  if (typeof value === "string") return [value];
+  if (Array.isArray(value)) return value.flatMap(stringsIn);
+  if (value && typeof value === "object") return Object.values(value).flatMap(stringsIn);
+  return [];
 }
 
 /** A word's forms: the stem followed by letters, so "latch" also catches "latches" and "latched". */

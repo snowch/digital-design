@@ -39,7 +39,7 @@ export function brokenWire(netName: string): Fault {
   return {
     id: `broken-wire:${netName}`,
     label: `Break the wire ${netName}`,
-    explanation: "A cut wire carries nothing. Every gate that read it now sees an unknown value.",
+    explanation: "A cut wire carries nothing, so every gate that reads it now sees X.",
     apply(circuit) {
       const net = netId(circuit, netName);
       const { components, nets } = detach(circuit, net);
@@ -63,7 +63,7 @@ export function invertedSignal(netName: string): Fault {
     id: `inverted:${netName}`,
     label: `Invert ${netName}`,
     explanation:
-      "The signal reaches its readers upside down: every 1 becomes 0 and every 0 becomes 1.",
+      "An inverter slipped into the wire inverts the signal for every gate that reads it.",
     apply(circuit) {
       const net = netId(circuit, netName);
       const { components, nets } = detach(circuit, net);
@@ -86,7 +86,8 @@ export function stuckAt(netName: string, value: 0 | 1): Fault {
   return {
     id: `stuck:${netName}:${value}`,
     label: `Hold ${netName} at ${value}`,
-    explanation: `The wire is tied to ${value}; the gate that used to drive it has no say.`,
+    explanation:
+      "The signal is held at one value whatever drives it, like a shorted or jammed input.",
     apply(circuit) {
       const net = netId(circuit, netName);
       const { components, nets } = detach(circuit, net);
@@ -109,7 +110,7 @@ export function wrongGate(path: string, kind: string): Fault {
   return {
     id: `wrong-gate:${path}:${kind}`,
     label: `Replace ${path} with ${kind.toUpperCase()}`,
-    explanation: `The gate at ${path} is the wrong kind: a ${kind.toUpperCase()} where the design needs something else.`,
+    explanation: "One gate is the wrong kind, as a wrong part fitted or a design slip would be.",
     apply(circuit) {
       if (!circuit.components.some((c) => c.path === path)) {
         throw new RangeError(`${circuit.name} has no component at ${path}`);

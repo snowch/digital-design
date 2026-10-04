@@ -44,31 +44,37 @@ export function portProblem(
   });
 }
 
-/** The circuit an artifact holds for a challenge, or why there is none. */
+/**
+ * The circuit an artifact holds for a challenge, or why there is none. Whatever form the artifact
+ * takes is graded: a drawn circuit, a library id, or text elaborated under the challenge's
+ * construct gate. The graded direction only decides what to say when there is nothing yet.
+ */
 export function circuitOf(
   challenge: Challenge,
   artifact: Artifact,
   strings: ViewStrings = DEFAULT_VIEW_STRINGS,
 ): { circuit?: Circuit; blocked?: string } {
-  if (challenge.gradedDirection === "write") {
-    const text = artifact.hdl ?? "";
-    if (!text.trim()) return { blocked: strings.grade.nothingWritten };
-    const result = elaborate(text, { allowed: challenge.allowedConstructs as Construct[] });
+  let circuit: Circuit | undefined;
+  if (artifact.circuit) circuit = artifact.circuit as Circuit;
+  else if (artifact.libraryId) circuit = libraryCircuit(artifact.libraryId);
+  else if (artifact.hdl?.trim()) {
+    const result = elaborate(artifact.hdl, { allowed: challenge.allowedConstructs as Construct[] });
     const errors = result.messages.filter((m) => m.severity !== "warning");
     if (errors.length || !result.circuit) {
       return {
         blocked: errors.map((m) => (m.at ? `${m.text} (line ${m.at.line})` : m.text)).join("\n"),
       };
     }
-    const ports = portProblem(result.circuit, challenge, strings);
-    return ports ? { blocked: ports } : { circuit: result.circuit };
+    circuit = result.circuit;
   }
-  const circuit = artifact.circuit
-    ? (artifact.circuit as Circuit)
-    : artifact.libraryId
-      ? libraryCircuit(artifact.libraryId)
-      : undefined;
-  if (!circuit) return { blocked: strings.grade.nothingDrawn };
+  if (!circuit) {
+    return {
+      blocked:
+        challenge.gradedDirection === "write"
+          ? strings.grade.nothingWritten
+          : strings.grade.nothingDrawn,
+    };
+  }
   const undriven = undrivenOutputs(circuit);
   if (undriven.length)
     return { blocked: format(strings.grade.undriven, { names: list(undriven) }) };

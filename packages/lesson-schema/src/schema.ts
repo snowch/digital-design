@@ -130,6 +130,10 @@ export const Interactive = z.object({
   timeModel: TimeModel,
   /** A caption a screen reader and the page both get. */
   caption: z.string().min(1),
+  /** Markdown shown directly above the figure, inside its section. */
+  lead: z.string().optional(),
+  /** Markdown shown directly below the figure. */
+  after: z.string().optional(),
   props: z.record(z.string(), z.unknown()).default({}),
 });
 export type Interactive = z.infer<typeof Interactive>;

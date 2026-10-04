@@ -30,6 +30,19 @@ export function inverterLoop(n: number, delay?: number): Circuit {
   return b.build();
 }
 
+/**
+ * The first lesson's circuit: two buttons, A and B, and a light that shows which was pressed
+ * last. It is an SR latch with the lesson's names on it: A sets, B resets, the light is Q.
+ */
+export function twoButtonsCircuit(delay?: number): Circuit {
+  const b = new CircuitBuilder("two-buttons");
+  const a = b.input("A");
+  const bPress = b.input("B");
+  const { q } = srLatch(b, a, bPress, { name: "latch", ...(delay !== undefined ? { delay } : {}) });
+  b.output("LIGHT", q);
+  return b.build();
+}
+
 export function srLatchCircuit(delay?: number): Circuit {
   const b = new CircuitBuilder("sr-latch");
   const s = b.input("S");
@@ -112,6 +125,7 @@ export function glitchCircuit(delay = 10): Circuit {
 export const LIBRARY: Readonly<Record<string, () => Circuit>> = {
   "inverter-loop-2": () => inverterLoop(2),
   "inverter-loop-3": () => inverterLoop(3),
+  "two-buttons": () => twoButtonsCircuit(),
   "sr-latch": () => srLatchCircuit(),
   "gated-sr-latch": () => gatedSrLatchCircuit(),
   "d-latch": () => dLatchCircuit(),

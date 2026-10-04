@@ -14,6 +14,8 @@ export interface SettleSim {
   set(name: string, value: Word): void;
   /** Runs one clock cycle on `name` with the other inputs as they are. */
   clock(name: string): void;
+  /** Sets every input to 0 in one go and settles once: two buttons released together. */
+  releaseAll(): void;
   reset(): void;
 }
 
@@ -60,6 +62,14 @@ export function useSettleSim(circuit: Circuit): SettleSim {
     },
     clock: (name) => {
       sim.clockCycle(name);
+      bump();
+    },
+    releaseAll: () => {
+      for (const input of circuit.inputs) {
+        const width = circuit.nets[input.net]?.width ?? 1;
+        sim.setInput(input.net, { width, value: 0n, known: (1n << BigInt(width)) - 1n });
+      }
+      sim.settle();
       bump();
     },
     reset: () => {

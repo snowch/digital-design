@@ -28,7 +28,9 @@ const Props = z.object({
     )
     .min(1),
   until: z.number().positive(),
-  signals: z.array(z.string()).optional(),
+  signals: z
+    .array(z.union([z.string(), z.object({ net: z.string(), label: z.string() })]))
+    .optional(),
   scope: z.string().default(""),
   phases: z.array(z.object({ from: z.number(), to: z.number(), text: z.string() })).default([]),
 });

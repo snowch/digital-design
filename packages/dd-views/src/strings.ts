@@ -49,6 +49,7 @@ export interface ViewStrings {
   readonly hdl: {
     readonly ok: string;
     readonly drawn: string;
+    readonly generated: string;
   };
   readonly editor: {
     readonly drawingTitle: string;
@@ -87,6 +88,7 @@ export interface ViewStrings {
     readonly notSettled: string;
     readonly clock: string;
     readonly reset: string;
+    readonly releaseAll: string;
     readonly title: string;
   };
   readonly prediction: {
@@ -178,6 +180,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
   hdl: {
     ok: "OK. The text describes a circuit.",
     drawn: "Circuit from text",
+    generated: "The circuit as text",
   },
   editor: {
     drawingTitle: "Drawing",
@@ -206,56 +209,58 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
   },
   table: {
     now: "Now",
-    nowMark: "this row",
-    state: "What happens",
+    nowMark: "Applies now",
+    state: "What it does",
   },
   explorer: {
-    step: "Settling step",
+    step: "Step",
     stepOf: "Step {k} of {n}",
-    settled: "Settled after {n} steps.",
-    notSettled: "Did not settle: {nets} kept changing and are shown as X.",
+    settled: "Settled in {n} steps.",
+    notSettled: "These signals never settled and are shown as X: {nets}.",
     clock: "Clock {name}",
     reset: "Start again",
-    title: "The circuit",
+    releaseAll: "Release all at once",
+    title: "Circuit diagram",
   },
   prediction: {
-    commit: "Commit my prediction",
+    commit: "Check my prediction",
     again: "Predict again",
-    youSaid: "You predicted {choice}.",
-    circuitDid: "{signal} was {value}.",
-    match: "Your prediction matched.",
-    noMatch: "Your prediction did not match.",
-    traceTitle: "What the circuit did",
-    legend: "Your prediction",
+    youSaid: "You chose {choice}.",
+    circuitDid: "The circuit set {signal} to {value}.",
+    match: "You were correct.",
+    noMatch: "Your choice did not match.",
+    traceTitle: "Simulation trace",
+    legend: "Prediction options",
   },
   fault: {
-    choose: "Fault",
+    choose: "Fault options",
     healthy: "No fault",
-    run: "Run the checks",
-    allPass: "Every check passes.",
-    someFail: "{failed} of {total} checks fail.",
-    title: "The circuit with the fault",
-    failure: "{label}: {actual}, where the healthy circuit gives {expected}.",
+    run: "Run checks",
+    allPass: "All checks passed.",
+    someFail: "{failed} of {total} checks failed.",
+    title: "Faulty circuit diagram",
+    failure: "At {label}: got {actual}, expected {expected}.",
   },
   internals: {
-    title: "Inside the flip-flop",
-    diagramTitle: "The flip-flop over time",
-    time: "Time {time}",
-    previous: "Previous change",
-    next: "Next change",
+    title: "Flip-flop internals",
+    diagramTitle: "Signal timing",
+    time: "Time: {time}",
+    previous: "Step back",
+    next: "Step forward",
   },
   setupHold: {
-    offset: "D changes {offset} units {relation} the edge",
-    captured: "Q became {value} at time {time}.",
-    ignored: "Q did not change: the edge missed the new D.",
-    late: "Q changed late, at time {time}, after a false start.",
-    inWindow: "D changed inside the window where the gate model cannot be trusted.",
-    draw: "Draw what a real flip-flop might do",
-    replay: "Replay draw {seed}",
-    drawn: "Draw {seed}: Q was undecided from {from} and settled to {value} at {time}.",
-    draws: "Recorded draws",
-    diagramTitle: "D against the clock edge",
-    window: "untrusted",
+    offset: "D changes {offset} units {relation} the clock edge",
+    captured: "Q captured {value} at {time}.",
+    ignored: "Q did not change: D arrived too late.",
+    late: "Q changed to {value} at {time}, but this is unreliable because D changed inside the window.",
+    inWindow:
+      "The gate model's answer here is not to be trusted. A real flip-flop may hover between 0 and 1 before settling.",
+    draw: "Roll result",
+    replay: "Replay roll",
+    drawn: "Roll {seed}: Q became undecided at {from}, settled to {value} at {time}.",
+    draws: "Rolls",
+    diagramTitle: "Timing diagram",
+    window: "Uncertain",
     before: "before",
     after: "after",
   },
