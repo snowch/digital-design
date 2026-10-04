@@ -95,6 +95,13 @@ The runtime's and the views' own labels went through the same process; they live
   overlaps another or leaves its drawing, at both widths, before and after the figures are used.
   Diagrams are what a learner looks at longest; a figure can be right in every number and still
   fail here.
+- `tests/educational/aesthetics.spec.ts`: the look of the page, as rules and as screenshots. No
+  visible text under 11 pixels, every control at least 40 pixels tall on a phone, no line of
+  prose over about 85 characters; and the lesson header and four figures must match their stored
+  screenshots at both widths. The typefaces ship with the site, so the screenshots are the same
+  on every machine. A change to a figure's look fails until its baseline is updated on purpose
+  (`npx playwright test --update-snapshots`) and the new image is looked at before it is
+  committed.
 
 A lesson that needs a new figure adds the figure's props schema and its test with it, and a
 facts test for any number its prose will state.

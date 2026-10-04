@@ -157,6 +157,13 @@ the Vite build, Playwright. Each line below is a check and the reason it exists.
   axis labels collide, or a block whose name sits on its port names, fails a learner however
   right its data; the test measures the rendered text, so a new figure is checked the day it
   lands.
+- **The look of the page is held to rules and to screenshots**
+  (`tests/educational/aesthetics.spec.ts`). No visible text under 11 pixels, every control at
+  least 40 pixels tall on a phone, no line of prose over about 85 characters; and the lesson
+  header and four figures must match their stored screenshots, at both widths. The typefaces
+  ship with the site (Inter and JetBrains Mono) so the same commit renders the same everywhere. A
+  change that alters a figure's look fails here until its baseline is updated on purpose with
+  `npx playwright test --update-snapshots`, and the diff is reviewed in the commit.
 - **`.npmrc` sets `legacy-peer-deps`.** npm 10's peer resolution crashes on Vitest 4's peer
   ranges; the flag is the workaround and the file says so. Cross-workspace `@dd/*` dependencies
   are not declared in manifests: npm links every workspace into the root `node_modules`.

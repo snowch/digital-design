@@ -61,13 +61,19 @@ export function TruthTable({
               aria-current={i === current ? "true" : undefined}
             >
               {r.inputs.map((v, j) => (
-                <td key={`i${j}`}>{v}</td>
+                <td key={`i${j}`} className="cell-value">
+                  {v}
+                </td>
               ))}
               {r.outputs.map((v, j) => (
-                <td key={`o${j}`}>{v}</td>
+                <td key={`o${j}`} className="cell-value">
+                  {v}
+                </td>
               ))}
-              {stateColumn && <td>{r.state ?? ""}</td>}
-              {current !== undefined && <td>{i === current ? strings.table.nowMark : ""}</td>}
+              {stateColumn && <td className="cell-state">{r.state ?? ""}</td>}
+              {current !== undefined && (
+                <td className="cell-now">{i === current ? strings.table.nowMark : ""}</td>
+              )}
             </tr>
           ))}
         </tbody>

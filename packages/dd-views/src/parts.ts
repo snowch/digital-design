@@ -128,3 +128,17 @@ export const GATE_IDS: readonly string[] = [
   "buf",
   "mux2",
 ];
+
+/** The label a part kind is drawn with: the gate's name in capitals, a block's full name. */
+export function labelFor(kind: string): string {
+  return GATE_LABELS[kind] ?? COMPOSITE_LABELS[kind] ?? kind;
+}
+
+/**
+ * Whether an instance name says no more than the kind does (`dff` on a D flip-flop, `d-latch`
+ * on a D latch), so the drawing leaves it out. `norDark`, `not1` and `master` are kept.
+ */
+export function nameRepeatsKind(name: string, kind: string): boolean {
+  const plain = (t: string) => t.replace(/[^a-z0-9]/gi, "").toLowerCase();
+  return plain(name) === plain(kind);
+}

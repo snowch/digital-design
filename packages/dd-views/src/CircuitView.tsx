@@ -8,6 +8,7 @@ import { useId, useMemo, useState, type KeyboardEvent, type ReactNode } from "re
 
 import { formatWord, type Circuit, type Word } from "@dd/sim";
 
+import { labelFor, nameRepeatsKind } from "./parts";
 import { drawingAt, netOfWire, sceneOf, type PartBox } from "./scene";
 import { GateSymbol, isShaped } from "./symbols";
 import { useViewStrings } from "./strings";
@@ -65,7 +66,22 @@ export function CircuitView({
   const highlighted = new Set(highlight);
   // The net under the pointer, or the one last tapped: every wire of it lights up together.
   const [hot, setHot] = useState<number | undefined>();
+  // The trail of opened blocks, each named by its instance name, or by its kind's label when the
+  // name says no more (the `dff` block of the `dff` circuit). Two levels with one label collapse
+  // into the deeper one, and the trail is drawn only when there is a block to open or to leave.
   const crumbs = scope ? scope.split("/") : [];
+  const levels: { path: string; label: string }[] = [{ path: "", label: labelFor(circuit.name) }];
+  for (let i = 0; i < crumbs.length; i++) {
+    const path = crumbs.slice(0, i + 1).join("/");
+    const block = circuit.composites.find((c) => c.path === path);
+    const name = crumbs[i] ?? "";
+    const label = block && nameRepeatsKind(name, block.kind) ? labelFor(block.kind) : name;
+    const last = levels[levels.length - 1];
+    if (last && last.label === label) levels[levels.length - 1] = { path, label };
+    else levels.push({ path, label });
+  }
+  const canOpen = drawing.parts.some((part) => sub.composites.some((c) => c.path === part.id));
+  const showTrail = onScope !== undefined && (levels.length > 1 || canOpen);
 
   const pinKey = (box: PartBox, e: KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " ") {
@@ -76,199 +92,202 @@ export function CircuitView({
 
   return (
     <div className="circuit-view">
-      {onScope && (
+      {showTrail && (
         <nav className="circuit-crumbs" aria-label={strings.circuit.where}>
-          <button type="button" className="crumb" onClick={() => onScope("")} disabled={!scope}>
-            {circuit.name}
-          </button>
-          {crumbs.map((name, i) => {
-            const path = crumbs.slice(0, i + 1).join("/");
-            return (
-              <span key={path}>
-                <span aria-hidden="true"> / </span>
-                <button
-                  type="button"
-                  className="crumb"
-                  onClick={() => onScope(path)}
-                  disabled={path === scope}
-                >
-                  {name}
-                </button>
-              </span>
-            );
-          })}
+          {levels.map((level, i) => (
+            <span key={level.path}>
+              {i > 0 && <span aria-hidden="true"> / </span>}
+              <button
+                type="button"
+                className="crumb"
+                onClick={() => onScope(level.path)}
+                disabled={level.path === scope}
+              >
+                {level.label}
+              </button>
+            </span>
+          ))}
         </nav>
       )}
-      <svg
-        className="circuit"
-        viewBox={`0 0 ${scene.width} ${scene.height}`}
-        role="img"
-        aria-labelledby={`${id}-title`}
-        style={{ width: "100%", height: "auto", maxWidth: `${scene.width * 1.5}px` }}
-      >
-        <title id={`${id}-title`}>{title}</title>
-        <g className="wires">
-          {scene.wires.map((w, i) => {
-            const net = netOfWire(sub, w.from);
-            const value = net !== undefined ? values?.[net] : undefined;
-            const level = levelOf(value);
-            const name = net !== undefined ? (sub.nets[net]?.name ?? "") : "";
-            const isHot = net !== undefined && hot === net;
-            return (
-              <g
-                key={i}
-                className={`wire wire-${level}${isHot ? " wire-hot" : ""}`}
-                data-net={name}
-                onMouseEnter={() => setHot(net)}
-                onMouseLeave={() => setHot((h) => (h === net ? undefined : h))}
-                onClick={() => setHot((h) => (h === net ? undefined : net))}
-              >
-                <title>{value ? `${name} = ${valueLabel(value)}` : name}</title>
-                {isHot && <path d={w.d} fill="none" className="wire-halo" />}
-                <path d={w.d} fill="none" className="wire-hit" />
-                <path d={w.d} fill="none" />
-                <circle cx={w.end.x} cy={w.end.y} r={3} />
-              </g>
-            );
-          })}
-        </g>
-        <g className="parts">
-          {scene.boxes.map((box) => {
-            const { part } = box;
-            const isPin = part.kind === "input" || part.kind === "output";
-            const path = fullPath(scope, part.id);
-            const marked = highlighted.has(path);
-            const composite = sub.composites.find((c) => c.path === part.id);
-            const outNet =
-              part.kind === "input"
-                ? sub.inputs.find((p) => p.name === part.name)?.net
-                : part.kind === "output"
-                  ? sub.outputs.find((p) => p.name === part.name)?.net
-                  : undefined;
-            const pinValue = outNet !== undefined ? values?.[outNet] : undefined;
-            if (isPin) {
-              const clickable = part.kind === "input" && onToggleInput;
-              const label = `${part.name ?? part.id}${pinValue ? ` = ${valueLabel(pinValue)}` : ""}`;
+      <div className="circuit-scroll">
+        <svg
+          className="circuit"
+          viewBox={`0 0 ${scene.width} ${scene.height}`}
+          role="img"
+          aria-labelledby={`${id}-title`}
+          style={{
+            // At its own size, or up to a quarter larger where the panel has room; never smaller.
+            width: `min(100%, ${scene.width * 1.25}px)`,
+            minWidth: `${scene.width}px`,
+            height: "auto",
+          }}
+        >
+          <title id={`${id}-title`}>{title}</title>
+          <g className="wires">
+            {scene.wires.map((w, i) => {
+              const net = netOfWire(sub, w.from);
+              const value = net !== undefined ? values?.[net] : undefined;
+              const level = levelOf(value);
+              const name = net !== undefined ? (sub.nets[net]?.name ?? "") : "";
+              const isHot = net !== undefined && hot === net;
+              return (
+                <g
+                  key={i}
+                  className={`wire wire-${level}${isHot ? " wire-hot" : ""}`}
+                  data-net={name}
+                  onMouseEnter={() => setHot(net)}
+                  onMouseLeave={() => setHot((h) => (h === net ? undefined : h))}
+                  onClick={() => setHot((h) => (h === net ? undefined : net))}
+                >
+                  <title>{value ? `${name} = ${valueLabel(value)}` : name}</title>
+                  {isHot && <path d={w.d} fill="none" className="wire-halo" />}
+                  <path d={w.d} fill="none" className="wire-hit" />
+                  <path d={w.d} fill="none" />
+                  <circle cx={w.end.x} cy={w.end.y} r={3} />
+                </g>
+              );
+            })}
+          </g>
+          <g className="parts">
+            {scene.boxes.map((box) => {
+              const { part } = box;
+              const isPin = part.kind === "input" || part.kind === "output";
+              const path = fullPath(scope, part.id);
+              const marked = highlighted.has(path);
+              const composite = sub.composites.find((c) => c.path === part.id);
+              const outNet =
+                part.kind === "input"
+                  ? sub.inputs.find((p) => p.name === part.name)?.net
+                  : part.kind === "output"
+                    ? sub.outputs.find((p) => p.name === part.name)?.net
+                    : undefined;
+              const pinValue = outNet !== undefined ? values?.[outNet] : undefined;
+              if (isPin) {
+                const clickable = part.kind === "input" && onToggleInput;
+                const label = `${part.name ?? part.id}${pinValue ? ` = ${valueLabel(pinValue)}` : ""}`;
+                return (
+                  <g
+                    key={part.id}
+                    className={`pin pin-${part.kind} pin-${levelOf(pinValue)}${clickable ? " pin-button" : ""}`}
+                    transform={`translate(${box.x} ${box.y})`}
+                    {...(clickable
+                      ? {
+                          role: "button",
+                          tabIndex: 0,
+                          "aria-label": `${label}. ${strings.circuit.toggle}`,
+                          onClick: () => onToggleInput(part.name ?? part.id),
+                          onKeyDown: (e: KeyboardEvent) => pinKey(box, e),
+                        }
+                      : { role: "img", "aria-label": label })}
+                  >
+                    <rect width={box.w} height={box.h} rx={6} />
+                    <text x={box.w / 2} y={box.h / 2 + 4} textAnchor="middle" className="pin-name">
+                      {part.name ?? part.id}
+                    </text>
+                    {pinValue && (
+                      <text
+                        x={box.w + 6}
+                        y={box.h / 2 + 4}
+                        textAnchor="start"
+                        className="value-label"
+                      >
+                        {valueLabel(pinValue)}
+                      </text>
+                    )}
+                  </g>
+                );
+              }
+              const openable = composite && onScope;
               return (
                 <g
                   key={part.id}
-                  className={`pin pin-${part.kind} pin-${levelOf(pinValue)}${clickable ? " pin-button" : ""}`}
+                  className={`part part-${part.kind}${marked ? " part-marked" : ""}${composite ? " part-composite" : ""}`}
                   transform={`translate(${box.x} ${box.y})`}
-                  {...(clickable
+                  data-path={path}
+                  {...(openable
                     ? {
                         role: "button",
                         tabIndex: 0,
-                        "aria-label": `${label}. ${strings.circuit.toggle}`,
-                        onClick: () => onToggleInput(part.name ?? part.id),
-                        onKeyDown: (e: KeyboardEvent) => pinKey(box, e),
+                        "aria-label": `${box.label} ${part.id}. ${strings.circuit.open}`,
+                        onClick: () => onScope(fullPath(scope, part.id)),
+                        onKeyDown: (e: KeyboardEvent) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            onScope(fullPath(scope, part.id));
+                          }
+                        },
                       }
-                    : { role: "img", "aria-label": label })}
+                    : { role: "img", "aria-label": `${box.label} ${part.id}` })}
                 >
-                  <rect width={box.w} height={box.h} rx={6} />
-                  <text x={box.w / 2} y={box.h / 2 + 4} textAnchor="middle" className="pin-name">
-                    {part.name ?? part.id}
-                  </text>
-                  {pinValue && (
-                    <text
-                      x={box.w + 6}
-                      y={box.h / 2 + 4}
-                      textAnchor="start"
-                      className="value-label"
-                    >
-                      {valueLabel(pinValue)}
+                  <title>
+                    {marked ? `${part.id}: ${strings.circuit.marked}` : `${box.label} ${part.id}`}
+                  </title>
+                  {marked && (
+                    <rect
+                      x={-6}
+                      y={-6}
+                      width={box.w + 12}
+                      height={box.h + 12}
+                      rx={8}
+                      className="mark"
+                    />
+                  )}
+                  {isShaped(part.kind) ? (
+                    <GateSymbol kind={part.kind} />
+                  ) : (
+                    <rect x={2} y={2} width={box.w - 4} height={box.h - 4} rx={4} className="box" />
+                  )}
+                  {!isShaped(part.kind) && (
+                    <text x={box.w / 2} y={-5} textAnchor="middle" className="part-label">
+                      {box.label}
                     </text>
                   )}
+                  {!nameRepeatsKind(part.id, part.kind) && (
+                    <text x={box.w / 2} y={box.h + 12} textAnchor="middle" className="part-name">
+                      {part.id}
+                    </text>
+                  )}
+                  {!isShaped(part.kind) &&
+                    box.inputs.map((p) => (
+                      <text key={p.port} x={6} y={p.at.y - box.y + 3} className="port-label">
+                        {p.port}
+                      </text>
+                    ))}
+                  {!isShaped(part.kind) &&
+                    box.outputs.map((p) => (
+                      <text
+                        key={p.port}
+                        x={box.w - 6}
+                        y={p.at.y - box.y + 3}
+                        textAnchor="end"
+                        className="port-label"
+                      >
+                        {p.port}
+                      </text>
+                    ))}
+                  {box.outputs.map((p) => {
+                    const net =
+                      sub.components.find((c) => c.path === part.id)?.outputs[p.port] ??
+                      composite?.outputs[p.port];
+                    const v = net !== undefined ? values?.[net] : undefined;
+                    return v ? (
+                      <text
+                        key={p.port}
+                        x={p.at.x - box.x + 4}
+                        y={p.at.y - box.y - 5}
+                        className={`value-label value-${levelOf(v)}`}
+                      >
+                        {valueLabel(v)}
+                      </text>
+                    ) : null;
+                  })}
                 </g>
               );
-            }
-            const openable = composite && onScope;
-            return (
-              <g
-                key={part.id}
-                className={`part part-${part.kind}${marked ? " part-marked" : ""}${composite ? " part-composite" : ""}`}
-                transform={`translate(${box.x} ${box.y})`}
-                data-path={path}
-                {...(openable
-                  ? {
-                      role: "button",
-                      tabIndex: 0,
-                      "aria-label": `${box.label} ${part.id}. ${strings.circuit.open}`,
-                      onClick: () => onScope(fullPath(scope, part.id)),
-                      onKeyDown: (e: KeyboardEvent) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          onScope(fullPath(scope, part.id));
-                        }
-                      },
-                    }
-                  : { role: "img", "aria-label": `${box.label} ${part.id}` })}
-              >
-                <title>
-                  {marked ? `${part.id}: ${strings.circuit.marked}` : `${box.label} ${part.id}`}
-                </title>
-                {marked && (
-                  <rect
-                    x={-6}
-                    y={-6}
-                    width={box.w + 12}
-                    height={box.h + 12}
-                    rx={8}
-                    className="mark"
-                  />
-                )}
-                {isShaped(part.kind) ? (
-                  <GateSymbol kind={part.kind} />
-                ) : (
-                  <rect x={2} y={2} width={box.w - 4} height={box.h - 4} rx={4} className="box" />
-                )}
-                {!isShaped(part.kind) && (
-                  <text x={box.w / 2} y={-5} textAnchor="middle" className="part-label">
-                    {box.label}
-                  </text>
-                )}
-                <text x={box.w / 2} y={box.h + 12} textAnchor="middle" className="part-name">
-                  {part.id}
-                </text>
-                {!isShaped(part.kind) &&
-                  box.inputs.map((p) => (
-                    <text key={p.port} x={6} y={p.at.y - box.y + 3} className="port-label">
-                      {p.port}
-                    </text>
-                  ))}
-                {!isShaped(part.kind) &&
-                  box.outputs.map((p) => (
-                    <text
-                      key={p.port}
-                      x={box.w - 6}
-                      y={p.at.y - box.y + 3}
-                      textAnchor="end"
-                      className="port-label"
-                    >
-                      {p.port}
-                    </text>
-                  ))}
-                {box.outputs.map((p) => {
-                  const net =
-                    sub.components.find((c) => c.path === part.id)?.outputs[p.port] ??
-                    composite?.outputs[p.port];
-                  const v = net !== undefined ? values?.[net] : undefined;
-                  return v ? (
-                    <text
-                      key={p.port}
-                      x={p.at.x - box.x + 4}
-                      y={p.at.y - box.y - 5}
-                      className={`value-label value-${levelOf(v)}`}
-                    >
-                      {valueLabel(v)}
-                    </text>
-                  ) : null;
-                })}
-              </g>
-            );
-          })}
-        </g>
-        {children}
-      </svg>
+            })}
+          </g>
+          {children}
+        </svg>
+      </div>
       <p className="wire-readout" aria-live="polite">
         {hot !== undefined
           ? `${sub.nets[hot]?.name ?? ""}${values?.[hot] ? ` = ${valueLabel(values[hot] as Word)}` : ""}`

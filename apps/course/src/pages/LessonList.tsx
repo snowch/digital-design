@@ -23,13 +23,13 @@ export function LessonList({ book, storage }: { book: Book; storage: Storage }) 
               return (
                 <li key={lesson.id}>
                   <a href={lessonHref(lesson.id)} className="lesson-link">
-                    {lesson.title}
+                    <span className="lesson-link-title">{lesson.title}</span>
+                    <span className="meta">
+                      {completion.total > 0
+                        ? STRINGS.progress(completion.passed, completion.total)
+                        : STRINGS.noChallenges}
+                    </span>
                   </a>
-                  <p className="meta">
-                    {completion.total > 0
-                      ? STRINGS.progress(completion.passed, completion.total)
-                      : STRINGS.noChallenges}
-                  </p>
                 </li>
               );
             })}

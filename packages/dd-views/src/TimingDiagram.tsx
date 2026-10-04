@@ -3,7 +3,7 @@
 // and the table under the diagram says every shown signal's value there, so the picture is
 // never the only carrier. The cursor is a slider, which a keyboard and a finger can both move.
 
-import { useId, useMemo } from "react";
+import { useEffect, useId, useMemo, useRef } from "react";
 
 import { formatWord, type Circuit, type Trace, type Word } from "@dd/sim";
 
@@ -35,8 +35,8 @@ export interface TimingDiagramProps {
 
 const LANE_H = 34;
 const LANE_GAP = 10;
-const LABEL_W = 64;
-const AXIS_H = 40;
+const LABEL_W_MIN = 64;
+const AXIS_H = 52;
 
 /** A net by its port name (an input or output of the circuit) or by its own name. */
 function resolveNet(circuit: Circuit, name: string): number | undefined {
@@ -76,11 +76,31 @@ export function TimingDiagram({
   const span = Math.max(1, end - from);
   // Readable at one pixel per unit at the least; a long run scrolls sideways in its wrapper.
   const unit = Math.max(2, Math.min(48, 700 / span));
-  const width = LABEL_W + span * unit + 16;
+  // The lane names are a drawing of their own that stays put while the trace scrolls beside it,
+  // sized to the longest name at about 7.5 pixels a character.
+  const labelW = Math.max(LABEL_W_MIN, Math.max(0, ...lanes.map((l) => l.name.length)) * 7.5 + 16);
+  const width = span * unit + 16;
   const height = AXIS_H + lanes.length * (LANE_H + LANE_GAP) + 8;
-  const x = (t: number) => LABEL_W + (t - from) * unit;
+  const x = (t: number) => (t - from) * unit;
   const at = cursor ?? end;
   const cursorValues = useMemo(() => valuesAt(circuit, trace, at), [circuit, trace, at]);
+
+  // A drawing wider than its wrapper opens on what matters, the first shaded band or else the
+  // cursor, and scrolls to keep the cursor in view as it moves.
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const focusX = x(shades[0]?.from ?? cursor ?? from);
+  useEffect(() => {
+    const el = scrollRef.current;
+    const svg = el?.querySelector("svg.timing-diagram");
+    if (!el || !svg || el.scrollWidth <= el.clientWidth + 1) return;
+    const offset =
+      svg.getBoundingClientRect().left - el.getBoundingClientRect().left + el.scrollLeft;
+    const px = offset + focusX;
+    const seen = el.clientWidth - labelW;
+    if (px < el.scrollLeft + labelW + 24 || px > el.scrollLeft + el.clientWidth - 24) {
+      el.scrollLeft = Math.max(0, px - labelW - seen / 2);
+    }
+  }, [focusX, width, labelW]);
 
   const laneY = (i: number) => AXIS_H + i * (LANE_H + LANE_GAP);
   const yFor = (top: number, value: Word): number => {
@@ -90,9 +110,11 @@ export function TimingDiagram({
     return top + LANE_H / 2;
   };
 
-  // Axis ticks: the trace's marks on their own row, staggered onto a second row when two sit
-  // closer than a label's width; a number at every unit when there are few, except under a mark;
-  // the first and last labels anchored inwards so nothing leaves the drawing.
+  // Axis ticks: the trace's marks on their own row, staggered onto a second row when two would
+  // touch (a mark's label is about 7.5 pixels a character at the drawing's 12 pixel type); a
+  // number at every unit when there are few, except under a mark; the first and last labels
+  // anchored inwards so nothing leaves the drawing. The drawing is never shown smaller than its
+  // own size: a long trace scrolls sideways in its wrapper, so no label shrinks below legibility.
   const ticks = trace.marks.filter((m) => m.time >= from && m.time <= end);
   const markTimes = new Set(ticks.map((m) => m.time));
   const plain = span <= 24 ? Array.from({ length: span + 1 }, (_, i) => from + i) : [];
@@ -100,28 +122,51 @@ export function TimingDiagram({
   const markRows: { time: number; label: string; row: number }[] = [];
   let lastX = -Infinity;
   let lastRow = 1;
+  let lastLabel = "";
   for (const m of ticks) {
     const px = x(m.time);
-    const row = px - lastX < 64 ? 1 - lastRow : 0;
+    const needed = ((lastLabel.length + m.label.length) / 2) * 7.5 + 12;
+    const row = px - lastX < needed ? 1 - lastRow : 0;
     markRows.push({ time: m.time, label: m.label, row });
     lastX = px;
     lastRow = row;
+    lastLabel = m.label;
   }
 
   return (
     <div className="timing">
-      <div className="timing-scroll">
+      <div className="timing-scroll" ref={scrollRef}>
+        <svg
+          className="timing-lanes"
+          viewBox={`0 0 ${labelW} ${height}`}
+          aria-hidden="true"
+          style={{ width: `${labelW}px`, height: `${height}px` }}
+        >
+          {lanes.map((lane, i) => (
+            <text
+              key={lane.name}
+              x={labelW - 8}
+              y={laneY(i) + LANE_H / 2 + 4}
+              textAnchor="end"
+              className="lane-label"
+            >
+              {lane.name}
+            </text>
+          ))}
+          <line
+            x1={labelW - 0.5}
+            y1={AXIS_H - 4}
+            x2={labelW - 0.5}
+            y2={height - 4}
+            className="lane-edge"
+          />
+        </svg>
         <svg
           className="timing-diagram"
           viewBox={`0 0 ${width} ${height}`}
           role="img"
           aria-labelledby={`${id}-title`}
-          style={{
-            width: "100%",
-            height: "auto",
-            minWidth: `${Math.min(width, 1400)}px`,
-            maxWidth: `${width * 1.4}px`,
-          }}
+          style={{ width: `${width}px`, height: `${height}px` }}
         >
           <title id={`${id}-title`}>{title}</title>
           <defs>
@@ -149,12 +194,12 @@ export function TimingDiagram({
             </g>
           ))}
           <g className="axis">
-            <line x1={LABEL_W} y1={AXIS_H - 4} x2={width - 8} y2={AXIS_H - 4} />
+            <line x1={0} y1={AXIS_H - 4} x2={width - 8} y2={AXIS_H - 4} />
             {plain.map((t) => (
               <g key={t}>
                 <line x1={x(t)} y1={AXIS_H - 8} x2={x(t)} y2={AXIS_H - 4} />
                 {span <= 12 && !markTimes.has(t) && (
-                  <text x={x(t)} y={AXIS_H - 11} textAnchor={anchorAt(t)} className="tick-label">
+                  <text x={x(t)} y={AXIS_H - 10} textAnchor={anchorAt(t)} className="tick-label">
                     {t}
                   </text>
                 )}
@@ -164,7 +209,7 @@ export function TimingDiagram({
               <text
                 key={`m${i}`}
                 x={x(m.time)}
-                y={m.row === 0 ? 9 : 24}
+                y={m.row === 0 ? 14 : 31}
                 textAnchor={anchorAt(m.time)}
                 className="mark-label"
               >
@@ -183,16 +228,8 @@ export function TimingDiagram({
             });
             return (
               <g key={lane.name} className="lane" data-signal={lane.name}>
-                <text
-                  x={LABEL_W - 8}
-                  y={top + LANE_H / 2 + 4}
-                  textAnchor="end"
-                  className="lane-label"
-                >
-                  {lane.name}
-                </text>
                 <line
-                  x1={LABEL_W}
+                  x1={0}
                   y1={top + LANE_H}
                   x2={width - 8}
                   y2={top + LANE_H}

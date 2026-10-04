@@ -77,6 +77,18 @@ redrafted from corrected briefs.
   the lesson says; and the roll's "20 units after the edge" is explained as when the slave's
   latch first answers.
 
+- The author found the layout crude, and it was. A design pass gave the site shipped
+  typefaces (Inter and JetBrains Mono), a text measure of 44rem with figures spanning a wider
+  66rem page, design tokens for both themes, cards for figures, canvas panels that span their
+  cards with the drawing centred and scaled up to a quarter where there is room, a shadow at
+  whichever edge of a panel has more behind it, a sticky strip of lane names beside a scrolling
+  timing diagram that opens on its shaded band or follows its cursor, values read over wires in
+  a knockout halo, block names shown only where they say more than the block's kind, words in
+  tables in the text face and values in the mono face. `tests/educational/aesthetics.spec.ts`
+  holds the page to measurable rules (no text under 11 pixels, phone controls at least 40
+  pixels tall, prose lines under about 85 characters) and to screenshots of the lesson header
+  and four figures at both widths; the shipped fonts and the pinned Chromium make the
+  screenshots stable across machines.
 - A phone screenshot from the author showed a timing diagram's labels printed on top of each
   other. A Playwright test now measures every diagram's rendered text at both widths, before and
   after the figures are used, and fails on any overlap or overflow; it found the same fault in
@@ -85,7 +97,8 @@ redrafted from corrected briefs.
 
 ### Known gaps
 
-- The timing diagram is small on a phone; it scrolls sideways and its table carries the values.
+- A long timing diagram scrolls sideways on a phone; its lane names stay put, it opens on the
+  part that matters, and its table carries the values at the cursor.
 - The drawing editor's wires route on simple rules; a dense drawing crosses itself.
 - No lesson yet uses the register, the reset or the enable; they are built and tested.
 - `docs/platform.md` and the extraction of shared primitives wait for Slice 2, by the rule of two.

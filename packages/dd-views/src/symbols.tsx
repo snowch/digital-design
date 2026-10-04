@@ -11,7 +11,7 @@ export function partHeight(kind: string, ports: number): number {
   return Math.max(PART_H, 16 + ports * 16);
 }
 
-const stroke = { fill: "var(--gate-fill)", stroke: "var(--gate-stroke)", strokeWidth: 2 };
+const stroke = { fill: "var(--gate-fill)", stroke: "var(--gate-stroke)", strokeWidth: 2.25 };
 
 function bubble(x: number, y: number): ReactElement {
   return <circle cx={x} cy={y} r={4} {...stroke} />;

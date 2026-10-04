@@ -139,7 +139,7 @@ export function sceneOf(drawing: Drawing): Scene {
     };
   });
   const width = boxes.reduce((m, b) => Math.max(m, b.x + b.w), 0) + 40;
-  const height = floor + 14 + channels * 8 + 30;
+  const height = floor + 14 + channels * 8 + 16;
   return { boxes, wires, width, height };
 }
 
