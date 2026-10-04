@@ -32,14 +32,20 @@ export function inverterLoop(n: number, delay?: number): Circuit {
 
 /**
  * The first lesson's circuit: two buttons, A and B, and a light that shows which was pressed
- * last. It is an SR latch with the lesson's names on it: A sets, B resets, the light is Q.
+ * last. It is an SR latch with the lesson's names on it and its two NOR gates at the top level,
+ * so the first view of it shows the gates and not a box: `norLight` drives LIGHT from B and the
+ * other gate's output, DARK; `norDark` drives DARK from A and LIGHT.
  */
 export function twoButtonsCircuit(delay?: number): Circuit {
   const b = new CircuitBuilder("two-buttons");
   const a = b.input("A");
   const bPress = b.input("B");
-  const { q } = srLatch(b, a, bPress, { name: "latch", ...(delay !== undefined ? { delay } : {}) });
-  b.output("LIGHT", q);
+  const light = b.net("LIGHT");
+  const dark = b.net("DARK");
+  const g = delay !== undefined ? { delay } : {};
+  b.nor([bPress, dark], { output: light, name: "norLight", ...g });
+  b.nor([a, light], { output: dark, name: "norDark", ...g });
+  b.output("LIGHT", light);
   return b.build();
 }
 

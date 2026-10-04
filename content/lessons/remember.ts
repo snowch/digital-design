@@ -131,7 +131,7 @@ export const remember: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.twoButtons,
           lead: PROSE.investigationTwoButtons,
-          props: { libraryId: "two-buttons", showSteps: true, scope: "latch" },
+          props: { libraryId: "two-buttons", showSteps: true },
         },
       ],
     },
@@ -171,10 +171,9 @@ export const remember: LessonInput = {
           lead: PROSE.faultLabLead,
           props: {
             libraryId: "two-buttons",
-            scope: "latch",
             faults: [
-              { kind: "broken-wire", net: "latch/Qb", label: LABELS.faults.cut },
-              { kind: "wrong-gate", path: "latch/norQ", gate: "or", label: LABELS.faults.or },
+              { kind: "broken-wire", net: "DARK", label: LABELS.faults.cut },
+              { kind: "wrong-gate", path: "norLight", gate: "or", label: LABELS.faults.or },
               { kind: "stuck-at", net: "A", value: 1, label: LABELS.faults.stuckA },
             ],
             run: [
