@@ -1,0 +1,109 @@
+// Checks a lesson beyond its shape: the ten sections in order, challenge ids unique and
+// referenced, hints complete, and the words each lesson is allowed to introduce.
+//
+// Every check here is a sentence a test prints, so a lesson that fails says why in the words an
+// author needs. The runtime calls `parseLesson` once per lesson at startup and the content tests
+// call it for every lesson in the course.
+
+import { Lesson, SECTION_KINDS, type Lesson as LessonType, type LessonInput } from "./schema";
+
+export interface LessonProblem {
+  readonly lesson: string;
+  readonly text: string;
+}
+
+/** Parses and checks one lesson. Throws with every problem listed if any. */
+export function parseLesson(input: LessonInput): LessonType {
+  const parsed = Lesson.safeParse(input);
+  if (!parsed.success) {
+    const where =
+      typeof input === "object" && input !== null && "id" in input
+        ? String((input as { id?: unknown }).id)
+        : "a lesson";
+    const lines = parsed.error.issues.map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`);
+    throw new Error(`${where} is not a valid lesson:\n  ${lines.join("\n  ")}`);
+  }
+  const problems = checkLesson(parsed.data);
+  if (problems.length) {
+    throw new Error(
+      `${parsed.data.id} is not a valid lesson:\n  ${problems.map((p) => p.text).join("\n  ")}`,
+    );
+  }
+  return parsed.data;
+}
+
+/** The problems with a lesson whose shape is already right. Empty when none. */
+export function checkLesson(lesson: LessonType): LessonProblem[] {
+  const problems: LessonProblem[] = [];
+  const problem = (text: string) => problems.push({ lesson: lesson.id, text });
+
+  lesson.sections.forEach((s, i) => {
+    const want = SECTION_KINDS[i];
+    if (s.kind !== want)
+      problem(`section ${i + 1} is ${s.kind}; the course's order puts ${want} here`);
+  });
+
+  const challengeIds = new Set<string>();
+  for (const c of lesson.challenges) {
+    if (challengeIds.has(c.id)) problem(`two challenges are called ${c.id}`);
+    challengeIds.add(c.id);
+    if (!c.reference.circuit && !c.reference.hdl && !c.reference.libraryId) {
+      problem(
+        `challenge ${c.id} has no reference solution, so nothing can prove it is completable`,
+      );
+    }
+    if (c.gradedDirection === "write" && c.allowedConstructs.length === 0) {
+      problem(`challenge ${c.id} grades the written text but allows no HDL constructs`);
+    }
+    const ports = new Set([...c.interface.inputs, ...c.interface.outputs].map((p) => p.name));
+    const names = new Set<string>();
+    if (c.tests.kind === "combinational") {
+      for (const v of c.tests.vectors)
+        for (const n of [...Object.keys(v.inputs), ...Object.keys(v.expect)]) names.add(n);
+    } else {
+      for (const s of c.tests.steps) {
+        for (const n of [...Object.keys(s.set ?? {}), ...Object.keys(s.expect ?? {})]) names.add(n);
+        if (s.clock) names.add(s.clock);
+      }
+    }
+    for (const n of names)
+      if (!ports.has(n))
+        problem(`challenge ${c.id}'s tests use ${n}, which its interface does not declare`);
+  }
+
+  const referenced = new Set<string>();
+  const interactiveIds = new Set<string>();
+  for (const s of lesson.sections) {
+    for (const x of s.interactives) {
+      if (interactiveIds.has(x.id)) problem(`two interactives are called ${x.id}`);
+      interactiveIds.add(x.id);
+      const ref = x.props["challengeId"];
+      if (typeof ref === "string") {
+        referenced.add(ref);
+        if (!challengeIds.has(ref))
+          problem(`interactive ${x.id} refers to challenge ${ref}, which does not exist`);
+      }
+    }
+  }
+  for (const id of challengeIds)
+    if (!referenced.has(id)) problem(`challenge ${id} is never mounted by a section`);
+
+  const challengeSection = lesson.sections.find((s) => s.kind === "challenge");
+  if (
+    lesson.challenges.length &&
+    challengeSection &&
+    !challengeSection.interactives.some((x) => typeof x.props["challengeId"] === "string")
+  ) {
+    problem("the challenge section mounts no challenge");
+  }
+
+  return problems;
+}
+
+/** The time models a lesson's interactives use, for the note every lesson states. */
+export function timeModelsUsed(lesson: LessonType): string[] {
+  const models = new Set<string>();
+  for (const s of lesson.sections)
+    for (const x of s.interactives) if (x.timeModel !== "none") models.add(x.timeModel);
+  return [...models];
+}
