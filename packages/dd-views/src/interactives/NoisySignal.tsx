@@ -130,20 +130,20 @@ export const NoisySignal = withProps(
                   list: result.wrong.map((i) => i + 1).join(", "),
                 })}
           </p>
-          {result.nearest0 && result.nearest0.gap > 0 && (
+          {result.nearest0 && (
             <p>
-              {format(strings.signal.nearest0, {
-                index: result.nearest0.index + 1,
-                gap: volts(result.nearest0.gap),
-              })}
+              {format(
+                result.nearest0.gap > 0 ? strings.signal.nearest0 : strings.signal.nearest0Wrong,
+                { index: result.nearest0.index + 1, gap: volts(Math.abs(result.nearest0.gap)) },
+              )}
             </p>
           )}
-          {result.nearest1 && result.nearest1.gap >= 0 && (
+          {result.nearest1 && (
             <p>
-              {format(strings.signal.nearest1, {
-                index: result.nearest1.index + 1,
-                gap: volts(result.nearest1.gap),
-              })}
+              {format(
+                result.nearest1.gap >= 0 ? strings.signal.nearest1 : strings.signal.nearest1Wrong,
+                { index: result.nearest1.index + 1, gap: volts(Math.abs(result.nearest1.gap)) },
+              )}
             </p>
           )}
           {data.showBand && (

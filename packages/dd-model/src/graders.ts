@@ -25,6 +25,12 @@ export type AnswerGrader = (
   expect: Readonly<Record<string, string | number>>,
 ) => AnswerResult | AnswerProblem;
 
+/**
+ * Stands for "what your bits read as" where a test compares an answer with the learner's own
+ * bits: printing the value would hand over the answer. The book shows its own words instead.
+ */
+export const OF_YOUR_BITS = "\u0000of-your-bits";
+
 export function isProblem(r: AnswerResult | AnswerProblem): r is AnswerProblem {
   return "missing" in r || "invalid" in r;
 }
@@ -128,7 +134,7 @@ function word(
       pass: n === unsignedOf(bits),
       inputs,
       actual: { unsigned: String(n) },
-      expected: { unsigned: String(unsignedOf(bits)) },
+      expected: { unsigned: OF_YOUR_BITS },
     };
   }
   const h = parseHex(answers["hex"]);
@@ -137,7 +143,7 @@ function word(
     pass: h === hexOf(bits),
     inputs,
     actual: { hex: h },
-    expected: { hex: hexOf(bits) },
+    expected: { hex: OF_YOUR_BITS },
   };
 }
 

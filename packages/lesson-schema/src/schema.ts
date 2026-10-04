@@ -188,8 +188,9 @@ export const AnswerField = z.object({
   max: z.number().optional(),
   step: z.number().positive().optional(),
   unit: z.string().optional(),
-  /** For bits: how many. */
+  /** For bits: how many, and which worths label them. */
   width: z.number().int().min(1).max(32).optional(),
+  weights: z.enum(["unsigned", "signed"]).optional(),
 });
 export type AnswerField = z.infer<typeof AnswerField>;
 

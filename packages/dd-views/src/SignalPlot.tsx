@@ -5,7 +5,7 @@
 //
 // The drawing is as wide as its box, one unit per pixel, so its text stays at the size the
 // stylesheet sets on a phone and on a desktop. Where the columns are too narrow for two digits
-// side by side, every other sample is numbered.
+// side by side, the even samples' numbers drop to a second line, each still over its column.
 
 import type { ReadResult, Recording } from "@dd/dd-model";
 import { volts } from "@dd/dd-model";
@@ -42,7 +42,10 @@ export function SignalPlot({
   const x = (i: number) => LEFT + (i + 0.5) * col;
   const y = (cv: number) => TOP + ((hi * 100 - cv) / ((hi - lo) * 100)) * PLOT;
   const rows = TOP + PLOT + 10;
-  const height = rows + 3 * ROW + 4;
+  // Two digits side by side need about 24 pixels; narrower, even samples go on a second line.
+  const stagger = col < 24;
+  const numbers = stagger ? 2 * ROW - 6 : ROW;
+  const height = rows + numbers + 2 * ROW + 4;
   const ticks = Array.from({ length: hi - lo + 1 }, (_, k) => lo + k);
   const wrong = new Set(result.wrong);
   const summary = format(strings.signal.plotSummary, {
@@ -105,26 +108,29 @@ export function SignalPlot({
           <text className="row-name" x={4} y={rows + 15}>
             {strings.signal.sample}
           </text>
-          <text className="row-name" x={4} y={rows + ROW + 15}>
+          <text className="row-name" x={4} y={rows + numbers + 15}>
             {strings.signal.sent}
           </text>
-          <text className="row-name" x={4} y={rows + 2 * ROW + 15}>
+          <text className="row-name" x={4} y={rows + numbers + ROW + 15}>
             {strings.signal.read}
           </text>
           {rec.samples.map((_, i) => (
             <g key={i}>
-              {(col >= 24 || i % 2 === 0) && (
-                <text className="row-number" x={x(i)} y={rows + 15} textAnchor="middle">
-                  {i + 1}
-                </text>
-              )}
-              <text className="row-bit" x={x(i)} y={rows + ROW + 15} textAnchor="middle">
+              <text
+                className="row-number"
+                x={x(i)}
+                y={rows + 15 + (stagger && i % 2 === 1 ? ROW - 6 : 0)}
+                textAnchor="middle"
+              >
+                {i + 1}
+              </text>
+              <text className="row-bit" x={x(i)} y={rows + numbers + 15} textAnchor="middle">
                 {rec.sent[i]}
               </text>
               <text
                 className={`row-bit${wrong.has(i) ? " wrong" : ""}`}
                 x={x(i)}
-                y={rows + 2 * ROW + 15}
+                y={rows + numbers + ROW + 15}
                 textAnchor="middle"
               >
                 {result.read[i]}

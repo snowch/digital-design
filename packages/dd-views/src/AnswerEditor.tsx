@@ -7,7 +7,7 @@
 
 import type { ComponentType } from "react";
 
-import { ANSWER_GRADERS, isProblem, parseBits, type Bit } from "@dd/dd-model";
+import { ANSWER_GRADERS, OF_YOUR_BITS, isProblem, parseBits, type Bit } from "@dd/dd-model";
 import type { Artifact, Challenge } from "@dd/lesson-schema";
 import type { ChallengeEditorProps, Verdict, VerdictFailure } from "@dd/lesson-runtime";
 
@@ -36,7 +36,12 @@ export function gradeAnswers(
   const labelOf = (id: string) => challenge.fields.find((f) => f.id === id)?.label ?? id;
   const term = (key: string) => strings.answers.terms[key] ?? labelOf(key);
   const named = (values: Readonly<Record<string, string>>) =>
-    Object.fromEntries(Object.entries(values).map(([k, v]) => [term(k), v]));
+    Object.fromEntries(
+      Object.entries(values).map(([k, v]) => [
+        term(k),
+        v === OF_YOUR_BITS ? strings.answers.ofYourBits : v,
+      ]),
+    );
   const failures: VerdictFailure[] = [];
   const results = cases.map((c) => grader(answers, c.given, c.expect));
   // Every field missing anywhere is named at once, in the order the challenge asks for them.
@@ -95,6 +100,7 @@ export const AnswerEditor: ComponentType<ChallengeEditorProps> = ({
               <BitRow
                 bits={bits}
                 label={f.label}
+                weights={f.weights ?? "unsigned"}
                 onFlip={(i) => set(f.id, bits.map((b, k) => (k === i ? 1 - b : b)).join(""))}
               />
             </div>

@@ -246,7 +246,7 @@ export const signals: LessonInput = {
       task: PROSE.c2Task,
       gradedDirection: "answer",
       fields: [
-        { id: "bits", label: LABELS.fields.bits, kind: "bits", width: 16 },
+        { id: "bits", label: LABELS.fields.bits, kind: "bits", width: 16, weights: "signed" },
         { id: "unsigned", label: LABELS.fields.unsigned, kind: "number", step: 1 },
         { id: "hex", label: LABELS.fields.hex, kind: "text" },
       ],

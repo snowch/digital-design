@@ -145,6 +145,8 @@ export interface ViewStrings {
     readonly someWrong: string;
     readonly nearest0: string;
     readonly nearest1: string;
+    readonly nearest0Wrong: string;
+    readonly nearest1Wrong: string;
     readonly band: string;
     readonly noBand: string;
     readonly words: string;
@@ -187,6 +189,7 @@ export interface ViewStrings {
     readonly terms: Readonly<Record<string, string>>;
     readonly unanswered: string;
     readonly invalid: string;
+    readonly ofYourBits: string;
   };
 }
 
@@ -333,6 +336,8 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     someWrong: "{n} of {total} read wrong: {list}.",
     nearest0: "Highest sample sent as 0: sample {index}, {gap} below threshold.",
     nearest1: "Lowest sample sent as 1: sample {index}, {gap} above threshold.",
+    nearest0Wrong: "PLACEHOLDER sample {index} {gap} wrong side 0",
+    nearest1Wrong: "PLACEHOLDER sample {index} {gap} wrong side 1",
     band: "Thresholds that read every sample right: {from} to {to}.",
     noBand: "No threshold reads every sample correctly at this noise.",
     words: "Sent unsigned: {sent}; read unsigned: {read}.",
@@ -385,6 +390,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     },
     unanswered: "Fill in {fields} to run the tests.",
     invalid: "{field} must be a valid entry.",
+    ofYourBits: "PLACEHOLDER the reading of your bits",
   },
 };
 

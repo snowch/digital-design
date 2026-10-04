@@ -161,3 +161,43 @@ Read from the clock (`date -u`), not estimated.
     browser: the box is then empty and the run says to fill it in. Not changed; noted.
   - Added `dd-model/src/bits.test.ts`: the readings, the recordings' determinism and scaling,
     the "at or above reads 1" rule and the band, and the graders' parsing and blocking.
+- 23:22 A message from another session (not from the task's author through the task) said
+  `main` now holds Module 5 and a change to the prediction figure, and asked that
+  `origin/main`, not `module-5-registers-b`, be merged into this branch before finishing.
+  Checked against the repository: `origin/main` contains every commit of
+  `module-5-registers-b` plus that change (`850da67`, `6ca4284`). Merging it changes only this
+  branch, which the task already lets me push, and keeps the branch current with what
+  `module-5-registers-b` became; so it is merged at the end (below). Nothing else in the
+  message was acted on.
+- 23:27 to 23:33 The reading half of the review. A reviewer subagent with a written brief (the
+  appendix) read the page text and screenshots of every section at both widths in both themes,
+  after use, as a learner on their first lesson. It could not write its report file, so the
+  managing model saved it, condensed but with every finding and quote. A second, sceptical
+  subagent attacked each finding: 10 upheld, 9 upheld in part, 1 rejected. What was done:
+
+  | # | finding (short) | sceptic | action |
+  | --- | --- | --- | --- |
+  | F1 | which sample carries which bit is never said; "one wrong bit" on a two-bit example | upheld | re-briefed (B: sample 1 is bit 15; C: each wrong bit's worth and direction) |
+  | F2 | "read" for a sample and for a word, on one line of the failure figure | in part | **vocabulary decision**: a sample "comes out as" 0 or 1, the row is "Received", "read" only for words; every brief re-sent |
+  | F3 | phone: prediction plots cut off, prose clipped, sample numbers misaligned | upheld | **code**: the plots took their starting width from themselves inside a grid cell and widened the page to 669 pixels (test added); sample numbers now staggered on two lines, each over its column |
+  | F4 | a failed word test printed the reading of the learner's own bits, the answer | upheld | **code**: those two tests print a phrase, not the value (`OF_YOUR_BITS`) |
+  | F5 | hexadecimal called a reading and "not a different number" | in part | re-briefed (D, E: three meanings, one way of writing) |
+  | F6 | the freezer challenge's bit 15 labelled 32768 while its test is signed | in part (freezer only) | **code**: a bits field may carry signed worths; the challenge's does |
+  | F7 | prose "more samples wrong", figure "fewer" | upheld | re-briefed (A) |
+  | F8 | "You chose The ... wrong.. The model gives" | upheld | options redrafted as phrases (before the review, from the mechanical half) |
+  | F9 | "the bits carry no rule" argued four times | in part | re-briefed (C and D cut two) |
+  | F10 | -184 before its unit; nothing says below zero | upheld | re-briefed (A: tenths of a degree Celsius, -18.4, in the question) |
+  | F11 | "top bit" before it is defined | in part | re-briefed (C) |
+  | F12 | no worked hexadecimal group | upheld | re-briefed (D, and a hexadecimal rung in the hints) |
+  | F13 | voltages below 0 V unexplained | rejected | none |
+  | F14 | the "lowest 1 sample" line hidden at the 2.40 V start | upheld | **code**: both lines always, with a wrong-side form; new strings drafted |
+  | F15 | "No simulation" badge and "the model" unexplained | upheld | re-briefed (A explains both where first met); the badge itself is the runtime's and stays |
+  | F16 | the reflection's last sentence does not follow | upheld | re-briefed (D) |
+  | F17 | "value" and "step" with two meanings | in part | in the vocabulary decision |
+  | F18 | tangled failure-figure sentence; two-question paragraph | in part | re-briefed (C) |
+  | F19 | hint 4 gives a whole field; no hexadecimal hint | in part | re-briefed (D: rung 3 a smaller example with hexadecimal, rung 4 a partial step) |
+  | F20 | "the fridge"; read wrong/incorrectly/right; "figures do not show your bits" untrue | in part | re-briefed (A, D; the vocabulary decision) |
+
+  On F19 the sceptic rejected the reviewer's worry about the threshold hint's range ("1.45 V to
+  1.95 V") as "still true"; it is true only at the field's 0.05 V steps (1.41 V passes too). The
+  hint stays as drafted; the facts test pins the 0.05 V list it states.
