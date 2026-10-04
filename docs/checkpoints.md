@@ -67,8 +67,8 @@ redrafted from corrected briefs.
 - The cross-book regression run is green in all five jobs after three rounds of matching each
   book's own setup (dev requirements, the RISC-V-bound checks deselected, the query-engine book's
   npm packages and path).
-- The site is live at <https://snowch.github.io/digital-design/>, and every push to `main`
-  deploys it. The default branch is `main`. The `github-pages` environment that Pages created
+- The site is live at <https://snowch.github.io/digital-design/> with both lessons, and every
+  push to `main` deploys it. The default branch is `main`. The `github-pages` environment that Pages created
   kept a branch rule naming the session branch, which was the default at the time, and refused
   every deploy from `main` even after the default changed; the deploy job no longer declares
   that environment, so no rule binds it, and the first push after the change deployed.
@@ -118,18 +118,82 @@ redrafted from corrected briefs.
 - No lesson yet uses the register, the reset or the enable; they are built and tested.
 - `docs/platform.md` and the extraction of shared primitives wait for Slice 2, by the rule of two.
 
-### An experiment running in parallel: the same rules, a second model
+### The same rules, a second model: Module 4 against Module 5
 
 The author asked whether another model could build a lesson to the same standard, so that the
-remaining modules could be delegated. A second session, on a different model, is building
-Module 5's first lesson, registers (a word held by flip-flops sharing one clock, load-enable,
-reset, and a counter or shift register as the capstone if it fits), on the branch
-`module-5-registers-b`, under exactly the rules in `CLAUDE.md`: fact briefs, Haiku drafts,
-the term gate, pinned numbers, the two-half review, `npm run check` green. The state machine
-lesson and the extraction of primitives are kept out of it, because the build prompt makes the
-extraction a stop-and-ask checkpoint. The session writes `docs/notes/module-5-registers.md` as
-it goes: every brief sent, what each draft got wrong, the review's findings and their fates, and
-the time taken. When it pushes, the comparison runs the check and the Playwright suite on its
-branch, has two reviewers read both lessons blind under one brief with a sceptic on each
-finding, and counts what is countable: tests at each level, findings by category, sentences
-rewritten, wall-clock time. The write-up goes in this file.
+remaining modules could be delegated. A second session, on a different model, built Module 5's
+first lesson, registers, on the branch `module-5-registers-b`, under exactly the rules in
+`CLAUDE.md`: fact briefs, drafts by the drafting subagent, the term gate, pinned numbers, the
+two-half review with a sceptic, `npm run check` green, and a module note written as it went
+(`docs/notes/module-5-registers.md`). The state machine lesson and the extraction of primitives
+were kept out of it, because the build prompt makes the extraction a stop-and-ask checkpoint.
+The author then merged the branch to `main` to read it live.
+
+**What it cost.** 65 minutes of wall-clock time, 52 turns, seven subagents, about $29 at list
+price, of which the drafting subagent was under $2. Module 4 is not separable: it was built in
+one day together with the platform under it.
+
+**What it produced.** Six commits, 40 files, 2,723 lines: the lesson (13 figures, 3 challenges,
+2,949 learner-facing words against Module 4's 19 figures, 4 challenges and 2,352 words), its own
+educational tests, a facts test, a screenshot baseline, and fourteen platform fixes with tests,
+among them the term gate's lesson order (cross-module lessons were never compared), binary for
+words, one `always_ff` per register in generated text, a failure reported at the block the
+learner placed, and the educational and diagram suites extended to every lesson. On its branch
+the check runs 180 unit tests and 68 Playwright tests, against 160 and 36 on `main` before it.
+
+**How the two were compared.** Two reviewers, one on each model, each read both lessons blind
+as the learner each lesson is written for, under one brief (`docs/notes/comparison/`
+`reviewer-brief.md`), on the built site at both widths, pressing every control and checking
+every number against the facts tests; neither was told who wrote what, and neither read the
+module notes or the git history. Then two sceptics, again one on each model, attacked every
+finding in both reviews under one brief, verified each against the page or the simulator, and
+marked the findings the two reviews shared. The reviews and the verdicts are in
+`docs/notes/comparison/`.
+
+| | Module 4 (`remember`) | Module 5 (`registers`) |
+| --- | --- | --- |
+| Reviewer 1: findings (high / medium / low) | 30 (7 / 7 / 16) | 26 (0 / 5 / 21) |
+| Reviewer 2: findings (high / medium / low) | 25 (1 / 15 / 9) | 22 (0 / 9 / 13) |
+| Sceptic 1: upheld / in part / rejected | 46 / 9 / 0 | 32 / 14 / 2 |
+| Sceptic 2: upheld / in part / rejected | 46 / 9 / 0 | 39 / 9 / 0 |
+| Distinct points once shared ones are merged | 34 | 36 |
+| Code or figure defects among them | 6 | 3 |
+
+Both reviewers judged Module 5 the better read for its learner, independently and for the same
+three reasons, and both sceptics upheld the findings behind that judgement. First, Module 5's
+figures show what its prose claims; in Module 4 six things contradict the text beside them: a
+stepped figure that draws the last settling step where its status line says X, the two button
+wires of the central circuit sharing one track, the flip-flop's inner drawing with the slave's
+enable wire leaving the master's box, a phase caption that says CLK was 1 at a moment the
+figure shows 0, a roll that repeats from the third press, and a hardware note that says the
+simulator decides every race by visiting order when the settle model is built not to. Second,
+Module 5 names every signal before it asks a prediction; Module 4's first prediction asked
+about a loop the learner could not see. That is now fixed for both lessons: every prediction
+figure draws its circuit above the question. Third, Module 5 follows one question through
+predict, build, break, explain and generalise; Module 4 answers its question with the latch and
+then packs the clock, the flip-flop, setup and hold into its failure experiment.
+
+Module 5's faults are smaller: words carrying two meanings on one page (keep, D, step), the
+case for a reset made five times, an instruction to press a wire that only hovering fulfils (a
+platform bug), a bit-order example whose two ends are the same digit, and a generated drawing
+that shows parts the lesson never introduced.
+
+**Verdict.** The remaining modules can be built by the second model under these rules, and the
+rules are what made it work: the brief as a list of checked facts, the drafting subagent, the
+term gate, the pinned numbers, the educational tests, and above all the two-half review with a
+sceptic, which found what the check script could not in both lessons. Three things stay with
+the managing model: merging to `main`, the fix pass after each review, and the stop-and-ask
+checkpoints. Two things change for every module from here: the reviewers and the sceptic are
+run on a model other than the one that built the lesson, and the module note is read before
+the lesson is merged, because it is where the process shows.
+
+**Caveats.** Module 4 was the first lesson and the platform was built under it, so its faults
+include platform faults nobody had yet seen, and Module 5 had Module 4 and section 8.1 of the
+inventory to learn from. The reviewers and sceptics ran on the same two models as the builders,
+one each, which is why there were two of each; their counts agree (29 shared points by both
+sceptics, 70 distinct, 78 and 85 of 103 findings upheld whole). A controlled version, the same
+lesson by both models, was not run.
+
+**The fix queue.** Every upheld finding on either lesson is work: code first, then fact briefs
+per finding to the drafting subagent, then the whole lesson read once more. The eight code
+defects are listed at the end of `docs/notes/comparison/verdicts-1.md`.
