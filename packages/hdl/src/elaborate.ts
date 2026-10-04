@@ -23,6 +23,7 @@ import {
   type Statement,
 } from "./ast";
 import { gateMessages, constructsUsed, type Construct } from "./gate";
+import { LOOP_NOTE } from "./generate";
 import { parse } from "./parser";
 
 export interface ElaborateOptions {
@@ -644,7 +645,7 @@ class Elaborator {
           reported.add(key);
           this.warnings.push({
             severity: "warning",
-            text: `${names.join(" and ")} form a combinational loop: each is computed from the other. The hardware this describes is a latch. A synthesis tool warns about this, because timing analysis cannot follow a loop; the course builds latches on purpose here and names the warning.`,
+            text: `${names.join(" and ")}: ${LOOP_NOTE}`,
           });
         }
         return;

@@ -227,8 +227,8 @@ describe("the awkward case", () => {
       endmodule`);
     expect(r.circuit).toBeDefined();
     expect(r.messages.map((m) => m.severity)).toEqual(["warning"]);
-    expect(r.messages[0]?.text).toMatch(/combinational loop/);
-    expect(r.messages[0]?.text).toMatch(/latch/);
+    expect(r.messages[0]?.text).toMatch(/form a loop/);
+    expect(r.messages[0]?.text).toMatch(/holds a value/);
     const sim = new Simulator(r.circuit as Circuit);
     sim.setInput("s", bit1);
     sim.setInput("r", bit0);

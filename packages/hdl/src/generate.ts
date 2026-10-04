@@ -21,6 +21,10 @@ export interface Generated {
   readonly warnings: readonly string[];
 }
 
+/** What the generator says above gates that read each other, in the learner's words. */
+export const LOOP_NOTE =
+  "These gates form a loop. A loop like this is how a circuit holds a value. Tools that turn text into hardware warn about such loops.";
+
 export function generate(circuit: Circuit): Generated {
   const notes = new Set<string>();
   const warnings: string[] = [];
@@ -122,7 +126,7 @@ export function generate(circuit: Circuit): Generated {
 
   const loops = combinationalLoops(circuit, (path) => under(path) !== undefined, names);
   for (const loop of loops) {
-    const text = `${loop.join(" and ")} form a combinational loop: the gates read each other. This is a latch, and synthesis tools warn about it.`;
+    const text = `${loop.join(" and ")}: ${LOOP_NOTE}`;
     warnings.push(text);
   }
 
@@ -132,7 +136,7 @@ export function generate(circuit: Circuit): Generated {
     ");",
     ...(declareLines.length ? ["", ...declareLines] : []),
     "",
-    ...(warnings.length ? warnings.map((w) => `  // synthesis warning: ${w}`) : []),
+    ...(warnings.length ? warnings.map((w) => `  // ${w}`) : []),
     ...body,
     "endmodule",
     "",

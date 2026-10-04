@@ -82,8 +82,9 @@ describe("the round trip", () => {
     const original = srLatchCircuit();
     const gen = generate(original);
     expect(gen.warnings).toHaveLength(1);
-    expect(gen.warnings[0]).toMatch(/combinational loop/);
-    expect(gen.text).toContain("// synthesis warning:");
+    expect(gen.warnings[0]).toMatch(/form a loop/);
+    expect(gen.text).toContain("// ");
+    expect(gen.text).toMatch(/\/\/ .*form a loop/);
     expect(gen.notes.some((n) => n.includes("flattened"))).toBe(true);
     const r = elaborate(gen.text);
     expect(r.messages.map((m) => m.severity)).toEqual(["warning"]);

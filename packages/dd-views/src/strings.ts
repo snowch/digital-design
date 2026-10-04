@@ -245,8 +245,8 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     title: "Flip-flop internals",
     diagramTitle: "Signal timing",
     time: "Time: {time}",
-    previous: "Step back",
-    next: "Step forward",
+    previous: "Earlier change",
+    next: "Later change",
   },
   setupHold: {
     offset: "D changes {offset} units {relation} the clock edge",
