@@ -3,10 +3,11 @@
 
 import { describe, expect, it } from "vitest";
 
-import { inverterLoop, libraryCircuit } from "@dd/dd-model";
+import { dFlipFlopCircuit, inverterLoop, libraryCircuit } from "@dd/dd-model";
 import { Simulator, bit0, bit1, formatWord } from "@dd/sim";
 
 import { outputsPerStep } from "./interactives/script";
+import { experiment } from "./interactives/SetupHold";
 
 const f = (sim: Simulator, name: string) => formatWord(sim.read(name));
 
@@ -110,5 +111,54 @@ describe("facts for the lesson on memory", () => {
     expect(
       sim.trace.events.filter((e) => e.net === q && e.time >= 1000).map((e) => e.time),
     ).toEqual([1030]);
+  });
+
+  it("the flip-flop stepper's run: Q falls two gate delays after an edge and rises three", () => {
+    const sim = new Simulator(dFlipFlopCircuit({ delay: 10 }), { timeModel: "delay" });
+    sim.setInput("CLK", bit0);
+    sim.setInput("D", bit0);
+    const script: [number, string, 0 | 1][] = [
+      [100, "CLK", 1],
+      [200, "CLK", 0],
+      [300, "D", 1],
+      [400, "CLK", 1],
+      [500, "CLK", 0],
+      [550, "D", 0],
+      [700, "CLK", 1],
+      [800, "CLK", 0],
+    ];
+    for (const [t, input, v] of script) sim.setInputAt(input, v === 1 ? bit1 : bit0, t);
+    sim.run(900);
+    const times = (name: string) => {
+      const id = sim.resolve(name);
+      return sim.trace.events
+        .filter((e) => e.net === id)
+        .map((e) => `${e.time}:${formatWord(e.value)}`);
+    };
+    expect(times("Q")).toEqual(["120:0", "430:1", "720:0"]);
+    expect(times("dff/master/sr/Q")).toEqual(["30:0", "330:1", "580:0"]);
+    expect(times("dff/notClk.y")).toContain("510:1");
+  });
+
+  it("the setup-and-hold figure: clean at 30 before the edge, late from 25 to 15, missed from 10", () => {
+    const data = {
+      delay: 10,
+      edgeAt: 1000,
+      offsets: [-80, 40] as [number, number],
+      window: [-25, -15] as [number, number],
+      settleBetween: [5, 60] as [number, number],
+      undecidedFrom: 20,
+      show: [-120, 160] as [number, number],
+    };
+    const at = (offset: number) =>
+      experiment(data, offset).qEvents.map((e) => `${e.time}:${e.value}`);
+    expect(at(-35)).toEqual(["1030:1"]);
+    expect(at(-30)).toEqual(["1030:1"]);
+    expect(at(-25)).toEqual(["1035:1"]);
+    expect(at(-20)).toEqual(["1040:1"]);
+    expect(at(-15)).toEqual(["1045:1"]);
+    expect(at(-10)).toEqual([]);
+    expect(at(0)).toEqual([]);
+    expect(at(20)).toEqual([]);
   });
 });

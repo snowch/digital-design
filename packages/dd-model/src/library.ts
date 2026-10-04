@@ -105,6 +105,16 @@ export function dFlipFlopCircuit(options: FlipFlopCircuitOptions = {}): Circuit 
   return b.build();
 }
 
+/** The flip-flop with Q as its only output: as text, one always_ff line and nothing else. */
+export function dFlipFlopQOnlyCircuit(delay?: number): Circuit {
+  const b = new CircuitBuilder("dff-q");
+  const d = b.input("D");
+  const clk = b.input("CLK");
+  const { q } = dFlipFlop(b, d, clk, delay !== undefined ? { delay } : {});
+  b.output("Q", q);
+  return b.build();
+}
+
 export function registerCircuit(width: number, options: FlipFlopCircuitOptions = {}): Circuit {
   const b = new CircuitBuilder(`register-${width}`);
   const d = b.input("D", width);
@@ -136,6 +146,7 @@ export const LIBRARY: Readonly<Record<string, () => Circuit>> = {
   "gated-sr-latch": () => gatedSrLatchCircuit(),
   "d-latch": () => dLatchCircuit(),
   dff: () => dFlipFlopCircuit(),
+  "dff-q": () => dFlipFlopQOnlyCircuit(),
   "dff-reset": () => dFlipFlopCircuit({ reset: true }),
   "dff-reset-enable": () => dFlipFlopCircuit({ reset: true, enable: true }),
   "register-4": () => registerCircuit(4, { reset: true }),

@@ -72,18 +72,21 @@ wrong ports, text that does not elaborate) blocks the run with a sentence instea
 
 The D flip-flop is two D latches and an inverter, nothing more. In the delay model with every
 gate at 10 units and the rising edge at 1000, `packages/dd-model/src/timing.test.ts` pins what
-it does with a change on D:
+it does with a change on D. Two maps are pinned, because the answer depends on whether Q is
+already known. The lesson's figure clocks the flip-flop once first, so Q is a known 0:
 
 | D changes at | Q |
 | --- | --- |
-| 965 or earlier (35 or more before the edge) | the new value at 1030, cleanly |
-| 970 to 985 (between 35 and 10 before) | the old value shown at 1020, the new one late, at 1040 or 1045 |
+| 970 or earlier (30 or more before the edge) | the new value at 1030, cleanly |
+| 975 to 985 (25 to 15 before) | the new value late, at 1035 to 1045 |
 | 990 or later (10 before, at, or after the edge) | the old value; the edge missed the change |
 
-The model never answers X on its own here: a tie is decided by event order. That is why the
-overlay exists, and why the lesson calls 35 units the setup time and the window 35 to 10 the
-untrusted one. The numbers are what the gate delays add up to in this model; they are a
-teaching choice, not a measurement.
+From a cold start, with Q still unknown, the clean region ends at 35 before the edge and the old
+value is first shown at 1020. The model never answers X on its own here: a tie is decided by
+event order. That is why the overlay exists, and why the lesson calls 30 units the setup time,
+the band from 25 to 15 the untrusted one, and the hold time zero: a change at the edge or after
+it is simply missed. The numbers are what the gate delays add up to in this model (three gate
+delays between D and the master's closing); they are a teaching choice, not a measurement.
 
 ## The metastability overlay
 

@@ -78,4 +78,26 @@ describe("the overlay on the flip-flop", () => {
     // The same seed replays to the same draw.
     expect(q(run(3).sim)).toEqual(q(sim));
   });
+
+  it("with Q a known 0, as the lesson's figure runs it: clean at 30 before, late 25 to 15, missed from 10", () => {
+    const run = (offset: number) => {
+      const sim = new Simulator(dFlipFlopCircuit({ delay: 10 }), { timeModel: "delay" });
+      sim.setInput("D", bit0);
+      sim.setInput("CLK", bit0);
+      sim.setInputAt("CLK", bit1, 100);
+      sim.setInputAt("CLK", bit0, 200);
+      sim.setInputAt("D", bit1, 1000 + offset);
+      sim.setInputAt("CLK", bit1, 1000);
+      sim.setInputAt("CLK", bit0, 1100);
+      sim.run(1300);
+      const q = sim.resolve("Q");
+      return sim.trace.events
+        .filter((e) => e.net === q && e.time >= 1000)
+        .map((e) => `${e.time}:${formatWord(e.value)}`);
+    };
+    expect(run(-30)).toEqual(["1030:1"]);
+    expect(run(-25)).toEqual(["1035:1"]);
+    expect(run(-15)).toEqual(["1045:1"]);
+    expect(run(-10)).toEqual([]);
+  });
 });

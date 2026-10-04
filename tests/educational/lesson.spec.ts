@@ -73,7 +73,10 @@ test.describe("challenges", () => {
       if (c.gradedDirection === "write") await writeText(section, text);
       else await importText(section, text);
       await runTests(section);
-      const total = c.tests.kind === "sequence" ? c.tests.steps.length : c.tests.vectors.length;
+      const total =
+        c.tests.kind === "sequence"
+          ? c.tests.steps.filter((s) => s.expect).length
+          : c.tests.vectors.length;
       await expect(status(section)).toHaveText(format(S.challenge.passing, { total }));
       await expect(section.locator(".challenge-complete")).toHaveText(S.challenge.complete);
     });

@@ -82,7 +82,10 @@ export function runSuite(
   } catch (error) {
     return {
       passed: false,
-      total: suite.kind === "combinational" ? suite.vectors.length : suite.steps.length,
+      total:
+        suite.kind === "combinational"
+          ? suite.vectors.length
+          : suite.steps.filter((s) => s.expect).length,
       failures: [],
       blocked: error instanceof Error ? error.message : String(error),
     };
@@ -149,7 +152,8 @@ function runSequence(
       if (failure) failures.push(failure);
     }
   });
-  return { passed: failures.length === 0, total: steps.length, failures };
+  const total = steps.filter((s) => s.expect).length;
+  return { passed: failures.length === 0, total, failures };
 }
 
 function check(

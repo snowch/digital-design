@@ -198,7 +198,7 @@ export const remember: LessonInput = {
           timeModel: "delay",
           caption: LABELS.captions.setupHold,
           lead: PROSE.setupHoldLead,
-          props: {},
+          props: { window: [-25, -15] },
         },
       ],
     },
@@ -213,7 +213,7 @@ export const remember: LessonInput = {
           timeModel: "none",
           caption: LABELS.captions.tableSr,
           lead: PROSE.tableSrLead,
-          props: { table: "sr-latch" },
+          props: { table: "sr-latch", columns: ["S", "R"], showNote: false },
         },
         {
           id: "table-d",
@@ -271,7 +271,7 @@ export const remember: LessonInput = {
           caption: LABELS.captions.asText,
           lead: PROSE.asTextLead,
           after: PROSE.asTextAfter,
-          props: { libraryId: "dff" },
+          props: { libraryId: "dff-q" },
         },
         {
           id: "table-dff",

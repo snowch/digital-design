@@ -12,6 +12,9 @@ import { withProps } from "./props";
 
 const Props = z.object({
   table: z.enum(["sr-latch", "d-latch", "d-flip-flop"]).optional(),
+  /** Input columns to keep; rows whose dropped columns are not 1 or X are left out. */
+  columns: z.array(z.string()).optional(),
+  showNote: z.boolean().default(true),
   libraryId: z.string().optional(),
   caption: z.string().optional(),
 });
@@ -32,18 +35,25 @@ export const TruthTableView = withProps(
     );
     if (data.table) {
       const t = TABLES[data.table];
+      const cols = data.columns
+        ? t.inputColumns.filter((c) => data.columns?.includes(c))
+        : [...t.inputColumns];
+      const dropped = t.inputColumns.filter((c) => !cols.includes(c));
+      const rows = t.rows
+        .filter((r) => dropped.every((c) => r.inputs[c] === "1" || r.inputs[c] === "X"))
+        .map((r) => ({
+          inputs: cols.map((c) => r.inputs[c] ?? "X"),
+          outputs: [r.next],
+          state: r.state,
+        }));
       return (
         <TruthTable
           caption={data.caption ?? t.title}
-          inputColumns={t.inputColumns}
+          inputColumns={cols}
           outputColumns={[t.outputColumn]}
-          rows={t.rows.map((r) => ({
-            inputs: t.inputColumns.map((c) => r.inputs[c] ?? "X"),
-            outputs: [r.next],
-            state: r.state,
-          }))}
+          rows={rows}
           stateColumn={strings.table.state}
-          {...(t.note ? { note: t.note } : {})}
+          {...(t.note && data.showNote ? { note: t.note } : {})}
         />
       );
     }

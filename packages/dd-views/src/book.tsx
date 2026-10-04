@@ -87,7 +87,7 @@ export function grade(challenge: Challenge, artifact: Artifact): Verdict {
   const total =
     challenge.tests.kind === "combinational"
       ? challenge.tests.vectors.length
-      : challenge.tests.steps.length;
+      : challenge.tests.steps.filter((s) => s.expect).length;
   if (!circuit) return { passed: false, total, failures: [], blocked: blocked ?? "" };
   return runSuite(circuit, challenge.tests);
 }
