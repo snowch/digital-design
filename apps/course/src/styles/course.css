@@ -408,6 +408,10 @@ figure.interactive > figcaption {
 .toolbar-gap {
   flex: 1 1 auto;
 }
+.builder-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
 .builder-canvas {
   min-height: 220px;
 }

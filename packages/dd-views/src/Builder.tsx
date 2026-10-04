@@ -291,159 +291,183 @@ export function Builder({ drawing, onChange, palette, highlight = [], title }: B
           {strings.builder.tidy}
         </button>
       </div>
-      <svg
-        ref={svgRef}
-        className="circuit builder-canvas"
-        viewBox={`0 0 ${Math.max(scene.width, 720)} ${Math.max(scene.height, 300)}`}
-        role="application"
-        aria-labelledby={`${id}-title`}
-        aria-describedby={`${id}-help`}
-        style={{ width: "100%", height: "auto", maxWidth: "1100px", touchAction: "none" }}
-        onPointerMove={onMove}
-        onPointerUp={endDrag}
-        onPointerCancel={endDrag}
-        onClick={() => setSelected(undefined)}
-      >
-        <title id={`${id}-title`}>{title}</title>
-        <g className="wires">
-          {scene.wires.map((w, i) => {
-            const isSelected = selected?.kind === "wire" && selected.index === i;
-            return (
-              <g
-                key={i}
-                className={`wire wire-none${isSelected ? " wire-selected" : ""}`}
-                role="button"
-                tabIndex={0}
-                aria-label={`${format(strings.builder.wireLabel, { from: portName(w.from), to: portName(w.to) })}. ${strings.builder.wireHelp}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelected({ kind: "wire", index: i });
-                  setMessage("");
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Delete" || e.key === "Backspace") {
-                    e.preventDefault();
-                    setSelected({ kind: "wire", index: i });
-                    queueMicrotask(removeSelected);
-                  }
-                }}
-              >
-                <path d={w.d} fill="none" className="wire-hit" />
-                <path d={w.d} fill="none" />
-                <circle cx={w.end.x} cy={w.end.y} r={3} />
-              </g>
-            );
-          })}
-        </g>
-        <g className="parts">
-          {scene.boxes.map((box) => {
-            const { part } = box;
-            const isPin = part.kind === "input" || part.kind === "output";
-            const isSelected = selected?.kind === "part" && selected.id === part.id;
-            const spec = specOf(part);
-            const kindLabel = isPin
-              ? part.kind === "input"
-                ? strings.builder.inputPin
-                : strings.builder.outputPin
-              : (spec?.label ?? part.kind);
-            return (
-              <g key={part.id} className="builder-part" transform={`translate(${box.x} ${box.y})`}>
+      <div className="builder-scroll">
+        <svg
+          ref={svgRef}
+          className="circuit builder-canvas"
+          viewBox={`0 0 ${Math.max(scene.width, 720)} ${Math.max(scene.height, 300)}`}
+          role="application"
+          aria-labelledby={`${id}-title`}
+          aria-describedby={`${id}-help`}
+          style={{ width: "100%", height: "auto", minWidth: "720px", maxWidth: "1100px" }}
+          onPointerMove={onMove}
+          onPointerUp={endDrag}
+          onPointerCancel={endDrag}
+          onClick={() => setSelected(undefined)}
+        >
+          <title id={`${id}-title`}>{title}</title>
+          <g className="wires">
+            {scene.wires.map((w, i) => {
+              const isSelected = selected?.kind === "wire" && selected.index === i;
+              return (
                 <g
-                  className={`${isPin ? `pin pin-${part.kind}` : `part part-${part.kind}`}${isSelected ? " selected" : ""}${marked.has(part.id) ? " part-marked" : ""}`}
+                  key={i}
+                  className={`wire wire-none${isSelected ? " wire-selected" : ""}`}
                   role="button"
                   tabIndex={0}
-                  aria-label={`${kindLabel} ${isPin ? (part.name ?? part.id) : part.id}. ${strings.builder.partHelp}`}
-                  aria-pressed={isSelected}
-                  data-part={part.id}
+                  aria-label={`${format(strings.builder.wireLabel, { from: portName(w.from), to: portName(w.to) })}. ${strings.builder.wireHelp}`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    setSelected({ kind: "part", id: part.id });
+                    setSelected({ kind: "wire", index: i });
                     setMessage("");
                   }}
-                  onKeyDown={onPartKey(part)}
-                  onPointerDown={startDrag(part)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Delete" || e.key === "Backspace") {
+                      e.preventDefault();
+                      setSelected({ kind: "wire", index: i });
+                      queueMicrotask(removeSelected);
+                    }
+                  }}
                 >
-                  {marked.has(part.id) && (
-                    <rect
-                      x={-6}
-                      y={-6}
-                      width={box.w + 12}
-                      height={box.h + 12}
-                      rx={8}
-                      className="mark"
-                    />
-                  )}
-                  {isPin ? (
-                    <rect width={box.w} height={box.h} rx={6} />
-                  ) : isShaped(part.kind) ? (
-                    <GateSymbol kind={part.kind} />
-                  ) : (
-                    <rect x={2} y={2} width={box.w - 4} height={box.h - 4} rx={4} className="box" />
-                  )}
-                  {isPin ? (
-                    <text x={box.w / 2} y={box.h / 2 + 4} textAnchor="middle" className="pin-name">
-                      {part.name ?? part.id}
-                    </text>
-                  ) : (
-                    <>
-                      {!isShaped(part.kind) && (
+                  <path d={w.d} fill="none" className="wire-hit" />
+                  <path d={w.d} fill="none" />
+                  <circle cx={w.end.x} cy={w.end.y} r={3} />
+                </g>
+              );
+            })}
+          </g>
+          <g className="parts">
+            {scene.boxes.map((box) => {
+              const { part } = box;
+              const isPin = part.kind === "input" || part.kind === "output";
+              const isSelected = selected?.kind === "part" && selected.id === part.id;
+              const spec = specOf(part);
+              const kindLabel = isPin
+                ? part.kind === "input"
+                  ? strings.builder.inputPin
+                  : strings.builder.outputPin
+                : (spec?.label ?? part.kind);
+              return (
+                <g
+                  key={part.id}
+                  className="builder-part"
+                  transform={`translate(${box.x} ${box.y})`}
+                >
+                  <g
+                    className={`${isPin ? `pin pin-${part.kind}` : `part part-${part.kind}`}${isSelected ? " selected" : ""}${marked.has(part.id) ? " part-marked" : ""}`}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`${kindLabel} ${isPin ? (part.name ?? part.id) : part.id}. ${strings.builder.partHelp}`}
+                    aria-pressed={isSelected}
+                    data-part={part.id}
+                    style={{ touchAction: "none" }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelected({ kind: "part", id: part.id });
+                      setMessage("");
+                    }}
+                    onKeyDown={onPartKey(part)}
+                    onPointerDown={startDrag(part)}
+                  >
+                    {marked.has(part.id) && (
+                      <rect
+                        x={-6}
+                        y={-6}
+                        width={box.w + 12}
+                        height={box.h + 12}
+                        rx={8}
+                        className="mark"
+                      />
+                    )}
+                    {isPin ? (
+                      <rect width={box.w} height={box.h} rx={6} />
+                    ) : isShaped(part.kind) ? (
+                      <GateSymbol kind={part.kind} />
+                    ) : (
+                      <rect
+                        x={2}
+                        y={2}
+                        width={box.w - 4}
+                        height={box.h - 4}
+                        rx={4}
+                        className="box"
+                      />
+                    )}
+                    {isPin ? (
+                      <text
+                        x={box.w / 2}
+                        y={box.h / 2 + 4}
+                        textAnchor="middle"
+                        className="pin-name"
+                      >
+                        {part.name ?? part.id}
+                      </text>
+                    ) : (
+                      <>
+                        {!isShaped(part.kind) && (
+                          <text
+                            x={box.w / 2}
+                            y={box.h / 2 + 4}
+                            textAnchor="middle"
+                            className="part-label"
+                          >
+                            {spec?.label ?? part.kind}
+                          </text>
+                        )}
                         <text
                           x={box.w / 2}
-                          y={box.h / 2 + 4}
+                          y={box.h + 12}
                           textAnchor="middle"
-                          className="part-label"
+                          className="part-name"
                         >
-                          {spec?.label ?? part.kind}
+                          {part.id}
                         </text>
-                      )}
-                      <text x={box.w / 2} y={box.h + 12} textAnchor="middle" className="part-name">
-                        {part.id}
-                      </text>
-                      {!isShaped(part.kind) &&
-                        box.inputs.map((p) => (
-                          <text key={p.port} x={6} y={p.at.y - box.y + 3} className="port-label">
-                            {p.port}
-                          </text>
-                        ))}
-                      {!isShaped(part.kind) &&
-                        box.outputs.map((p) => (
-                          <text
-                            key={p.port}
-                            x={box.w - 6}
-                            y={p.at.y - box.y + 3}
-                            textAnchor="end"
-                            className="port-label"
-                          >
-                            {p.port}
-                          </text>
-                        ))}
-                      {isShaped(part.kind) &&
-                        box.inputs.length > 1 &&
-                        box.inputs.map((p) => (
-                          <text
-                            key={p.port}
-                            x={-8}
-                            y={p.at.y - box.y + 3}
-                            textAnchor="end"
-                            className="port-label"
-                          >
-                            {p.port}
-                          </text>
-                        ))}
-                    </>
+                        {!isShaped(part.kind) &&
+                          box.inputs.map((p) => (
+                            <text key={p.port} x={6} y={p.at.y - box.y + 3} className="port-label">
+                              {p.port}
+                            </text>
+                          ))}
+                        {!isShaped(part.kind) &&
+                          box.outputs.map((p) => (
+                            <text
+                              key={p.port}
+                              x={box.w - 6}
+                              y={p.at.y - box.y + 3}
+                              textAnchor="end"
+                              className="port-label"
+                            >
+                              {p.port}
+                            </text>
+                          ))}
+                        {isShaped(part.kind) &&
+                          box.inputs.length > 1 &&
+                          box.inputs.map((p) => (
+                            <text
+                              key={p.port}
+                              x={-8}
+                              y={p.at.y - box.y + 3}
+                              textAnchor="end"
+                              className="port-label"
+                            >
+                              {p.port}
+                            </text>
+                          ))}
+                      </>
+                    )}
+                  </g>
+                  {box.inputs.map((p) =>
+                    renderPort(box, p.port, { x: p.at.x - box.x, y: p.at.y - box.y }, "input"),
+                  )}
+                  {box.outputs.map((p) =>
+                    renderPort(box, p.port, { x: p.at.x - box.x, y: p.at.y - box.y }, "output"),
                   )}
                 </g>
-                {box.inputs.map((p) =>
-                  renderPort(box, p.port, { x: p.at.x - box.x, y: p.at.y - box.y }, "input"),
-                )}
-                {box.outputs.map((p) =>
-                  renderPort(box, p.port, { x: p.at.x - box.x, y: p.at.y - box.y }, "output"),
-                )}
-              </g>
-            );
-          })}
-        </g>
-      </svg>
+              );
+            })}
+          </g>
+        </svg>
+      </div>
       <p id={`${id}-help`} className="builder-help">
         {strings.builder.help}
       </p>

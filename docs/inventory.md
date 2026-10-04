@@ -560,3 +560,33 @@ Recorded now so it is not lost; revisited at the end of Prompt A.
   check caught, as Sizing and TCO's definition of done requires `make review` on every page.
   Fifteen modules of Haiku-drafted prose will show whether the brief-then-check split holds at
   that volume, and the per-module notes are where to record it.
+
+### 8.1 Added at Checkpoint 3, from building Slice 1
+
+- **Figures need prose on both sides.** A section's single `prose` string was not enough: the
+  first lesson's explanation wants a paragraph above each of three figures and one below the
+  last. The schema gained `lead` and `after` on an interactive. Prompt B's lesson format should
+  start from that shape, and the briefs should be written per figure, not per section.
+- **The clocked discipline cannot tell a flip-flop from a transparent latch.** A test that only
+  pulses the clock passes a D latch wired to CLK. The flip-flop's tests set CLK as an input and
+  change D while it is high. Every sequential challenge in Prompt B needs at least one step that
+  changes an input while the clock is high.
+- **The settle model's step count is what the figure shows.** The lesson said "3 steps" from the
+  simulator's iteration count; the explorer shows the two changes. The facts test now pins the
+  number the figure shows, and every number a lesson states should be read off the figure that
+  shows it, not off the engine's internals.
+- **The two-half review earns its place on the first lesson.** The first look at the built page
+  found a lane missing from the timing diagram (an output looked up by net name, not port name),
+  parts scaled up on a wide page, and a circuit that showed the names S and R before the lesson
+  had introduced them. None of these fails a unit test; all of them fail a learner.
+- **Haiku's profile held at this volume.** Over about eighty strings and thirty paragraphs: a
+  dropped fact in roughly one draft in eight, a wrong fact in one in fifteen, and two vocabulary
+  slips (a word already in use on the page, a mouse-only verb). The fixes were words added and
+  five notes sent back; no sentence was rewritten. The cost that did not scale was the brief: the
+  shared fact sheet took longer than all the checking.
+- **"Draw" could not be the overlay's verb.** The page has a drawing editor; the random outcome
+  is a "roll". Prompt B's vocabulary list should be checked against the names of the page's own
+  controls, not only against the course's terms.
+- **The bundle is 885 kB minified.** KaTeX and react-markdown are most of it, for one formula so
+  far. Prompt B should decide whether the course needs maths rendering at all before Module 1
+  ships; if not, dropping it halves the bundle.
