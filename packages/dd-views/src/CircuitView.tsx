@@ -4,7 +4,7 @@
 // level in a label at its source, unknown wires are dashed, and the signal table beside the
 // drawing says the same in text.
 
-import { useId, useMemo, type KeyboardEvent, type ReactNode } from "react";
+import { useId, useMemo, useState, type KeyboardEvent, type ReactNode } from "react";
 
 import { formatWord, type Circuit, type Word } from "@dd/sim";
 
@@ -63,6 +63,8 @@ export function CircuitView({
   const { drawing, circuit: sub } = useMemo(() => drawingAt(circuit, scope), [circuit, scope]);
   const scene = useMemo(() => sceneOf(drawing), [drawing]);
   const highlighted = new Set(highlight);
+  // The net under the pointer, or the one last tapped: every wire of it lights up together.
+  const [hot, setHot] = useState<number | undefined>();
   const crumbs = scope ? scope.split("/") : [];
 
   const pinKey = (box: PartBox, e: KeyboardEvent) => {
@@ -111,9 +113,19 @@ export function CircuitView({
             const value = net !== undefined ? values?.[net] : undefined;
             const level = levelOf(value);
             const name = net !== undefined ? (sub.nets[net]?.name ?? "") : "";
+            const isHot = net !== undefined && hot === net;
             return (
-              <g key={i} className={`wire wire-${level}`} data-net={name}>
+              <g
+                key={i}
+                className={`wire wire-${level}${isHot ? " wire-hot" : ""}`}
+                data-net={name}
+                onMouseEnter={() => setHot(net)}
+                onMouseLeave={() => setHot((h) => (h === net ? undefined : h))}
+                onClick={() => setHot((h) => (h === net ? undefined : net))}
+              >
                 <title>{value ? `${name} = ${valueLabel(value)}` : name}</title>
+                {isHot && <path d={w.d} fill="none" className="wire-halo" />}
+                <path d={w.d} fill="none" className="wire-hit" />
                 <path d={w.d} fill="none" />
                 <circle cx={w.end.x} cy={w.end.y} r={3} />
               </g>
@@ -257,6 +269,11 @@ export function CircuitView({
         </g>
         {children}
       </svg>
+      <p className="wire-readout" role="status" aria-live="polite">
+        {hot !== undefined
+          ? `${sub.nets[hot]?.name ?? ""}${values?.[hot] ? ` = ${valueLabel(values[hot] as Word)}` : ""}`
+          : "\u00a0"}
+      </p>
       {table && values && <SignalTable circuit={sub} values={values} />}
     </div>
   );

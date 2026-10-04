@@ -3,7 +3,14 @@
 
 import type { Circuit, NetId } from "@dd/sim";
 
-import { circuitToDrawing, specOf, type Drawing, type Part, type PortRef } from "./drawing";
+import {
+  circuitToDrawing,
+  specOf,
+  type Drawing,
+  type Part,
+  type PortRef,
+  type Wire,
+} from "./drawing";
 import { PART_W, partHeight } from "./symbols";
 
 export const CELL = 20;
@@ -72,30 +79,67 @@ export function portPoint(boxes: ReadonlyMap<string, PartBox>, ref: PortRef): Po
   );
 }
 
-/** An orthogonal route from an output to an input; feedback goes round underneath. */
-export function route(from: Point, to: Point, index: number, floor: number): string {
-  const stagger = (index % 5) * 4;
-  if (to.x >= from.x + 20) {
-    const midX = from.x + 10 + stagger;
+/**
+ * An orthogonal route from an output to an input. A forward wire goes right to its own vertical
+ * track, down or up, then right; a backward wire (feedback) drops to its own channel under the
+ * parts, runs left, and rises. Tracks and channels are allotted so that no two wires share a
+ * segment: wires leaving the same column take verticals 6 pixels apart, and every backward wire
+ * has a channel of its own, 8 pixels apart.
+ */
+export function route(
+  from: Point,
+  to: Point,
+  track: number,
+  channel: number | undefined,
+  floor: number,
+): string {
+  if (channel === undefined) {
+    const midX = Math.min(from.x + 8 + track * 6, to.x - 4);
     return `M ${from.x} ${from.y} H ${midX} V ${to.y} H ${to.x}`;
   }
-  const channel = floor + 12 + stagger;
-  return `M ${from.x} ${from.y} H ${from.x + 10 + stagger} V ${channel} H ${to.x - 10 - stagger} V ${to.y} H ${to.x}`;
+  const dropX = from.x + 8 + track * 6;
+  const channelY = floor + 14 + channel * 8;
+  const riseX = to.x - 8 - channel * 6;
+  return `M ${from.x} ${from.y} H ${dropX} V ${channelY} H ${riseX} V ${to.y} H ${to.x}`;
 }
 
 export function sceneOf(drawing: Drawing): Scene {
   const boxes = drawing.parts.map(partBox);
   const byId = new Map(boxes.map((b) => [b.part.id, b]));
   const floor = boxes.reduce((m, b) => Math.max(m, b.y + b.h), 0);
-  const wires: WirePath[] = [];
-  drawing.wires.forEach((w, i) => {
-    const start = portPoint(byId, w.from);
-    const end = portPoint(byId, w.to);
-    if (!start || !end) return;
-    wires.push({ from: w.from, to: w.to, start, end, d: route(start, end, i, floor) });
+  const placed = drawing.wires
+    .map((w) => {
+      const start = portPoint(byId, w.from);
+      const end = portPoint(byId, w.to);
+      return start && end ? { w, start, end } : undefined;
+    })
+    .filter((x): x is { w: Wire; start: Point; end: Point } => x !== undefined);
+  // Vertical tracks: wires leaving the same column, in order of where they start and end.
+  const byColumn = new Map<number, typeof placed>();
+  for (const p of placed) {
+    const list = byColumn.get(p.start.x) ?? [];
+    list.push(p);
+    byColumn.set(p.start.x, list);
+  }
+  const track = new Map<(typeof placed)[number], number>();
+  for (const list of byColumn.values()) {
+    list.sort((a, b) => a.start.y - b.start.y || a.end.y - b.end.y);
+    list.forEach((p, i) => track.set(p, i));
+  }
+  let channels = 0;
+  const wires: WirePath[] = placed.map((p) => {
+    const backward = p.end.x < p.start.x + 20;
+    const channel = backward ? channels++ : undefined;
+    return {
+      from: p.w.from,
+      to: p.w.to,
+      start: p.start,
+      end: p.end,
+      d: route(p.start, p.end, track.get(p) ?? 0, channel, floor),
+    };
   });
   const width = boxes.reduce((m, b) => Math.max(m, b.x + b.w), 0) + 40;
-  const height = Math.max(floor, ...wires.map(() => floor + 40)) + 40;
+  const height = floor + 14 + channels * 8 + 30;
   return { boxes, wires, width, height };
 }
 

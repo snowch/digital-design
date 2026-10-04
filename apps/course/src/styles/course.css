@@ -288,6 +288,28 @@ figure.interactive > figcaption {
   stroke: transparent !important;
   stroke-width: 14 !important;
 }
+.circuit .wire {
+  cursor: pointer;
+}
+.circuit .wire path:not(.wire-hit):not(.wire-halo) {
+  transition: stroke-width var(--motion);
+}
+.circuit .wire:hover path:not(.wire-hit):not(.wire-halo),
+.circuit .wire-hot path:not(.wire-hit):not(.wire-halo) {
+  stroke-width: 4;
+}
+.circuit .wire-halo {
+  stroke: var(--focus) !important;
+  stroke-width: 9 !important;
+  stroke-dasharray: none !important;
+  opacity: 0.3;
+}
+.wire-readout {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  margin: var(--space-1) 0 0;
+  min-height: 1.4em;
+}
 .circuit .wire-selected path:not(.wire-hit) {
   stroke: var(--focus);
   stroke-width: 4;
