@@ -373,6 +373,29 @@ class Elaborator {
       }
       case "unary": {
         if (e.operator === "~") {
+          const inner = e.operand;
+          if (
+            inner.kind === "binary" &&
+            (inner.operator === "|" || inner.operator === "&" || inner.operator === "^")
+          ) {
+            // ~(a | b) is one NOR gate, as a drawing has it; likewise NAND and XNOR. One assign
+            // with one operator is one gate, which is what the lesson says of an assign.
+            const width = this.widthOf(inner.left) ?? this.widthOf(inner.right) ?? want;
+            const l = this.expression(inner.left, width);
+            const r = this.expression(inner.right, width);
+            const lw = this.b.widthOf(l);
+            const rw = this.b.widthOf(r);
+            if (lw !== rw)
+              throw new HdlError(
+                inner.at,
+                `the two sides of ${inner.operator} differ in width: ${lw} and ${rw} bits`,
+              );
+            const kind = inner.operator === "|" ? "nor" : inner.operator === "&" ? "nand" : "xnor";
+            return this.b.gate(kind, [l, r], {
+              ...(output !== undefined ? { output } : {}),
+              ...this.g,
+            });
+          }
           const a = this.expression(e.operand, want);
           return this.b.not(a, { ...(output !== undefined ? { output } : {}), ...this.g });
         }
@@ -637,9 +660,12 @@ class Elaborator {
       if (done.has(id)) return;
       if (visiting.has(id)) {
         const cycle = stack.slice(stack.indexOf(id));
-        const names = cycle
+        const allNames = cycle
           .flatMap((cid) => Object.values(circuit.components[cid]?.outputs ?? {}))
           .map((n) => circuit.nets[n]?.name ?? String(n));
+        // The learner's own signals, where the loop has any; the gates' nets otherwise.
+        const declared = allNames.filter((n) => this.signals.has(n));
+        const names = declared.length ? declared : allNames;
         const key = [...names].sort().join(",");
         if (!reported.has(key)) {
           reported.add(key);

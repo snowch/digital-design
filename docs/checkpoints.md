@@ -61,6 +61,22 @@ redrafted from corrected briefs.
 3. The originality note in `content/lessons/remember.ts`.
 4. The bundle: 885 kB minified, most of it KaTeX and react-markdown for one formula.
 
+### Where things stand
+
+- The course's CI is green on the branch head and on `main`, which was fast-forwarded to it.
+- The cross-book regression run is green in all five jobs after three rounds of matching each
+  book's own setup (dev requirements, the RISC-V-bound checks deselected, the query-engine book's
+  npm packages and path).
+- The site is live at <https://snowch.github.io/digital-design/>, deployed from the session
+  branch: the repository's default branch is that branch, so the `github-pages` environment
+  rejects deploys from `main` until the default branch is changed to `main` or `main` is added to
+  the environment's deployment branches, both in the repository's settings.
+- The review's findings were upheld by a sceptic's pass (16 whole, 9 in part, none rejected); it
+  found three more facts, each fixed: the flip-flop shown as text no longer prints a line for an
+  unused Qb; `~(a | b)` elaborates to one NOR gate, so an assign with one operator is one gate as
+  the lesson says; and the roll's "20 units after the edge" is explained as when the slave's
+  latch first answers.
+
 ### Known gaps
 
 - The timing diagram is small on a phone; it scrolls sideways and its table carries the values.

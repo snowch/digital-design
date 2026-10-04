@@ -19,6 +19,11 @@ const Props = z.object({
   caption: z.string().optional(),
 });
 
+/** In the reference tables an X input means the row holds for either value. */
+function either(v: string): string {
+  return v === "X" ? "0 or 1" : v;
+}
+
 const TABLES = {
   "sr-latch": SR_LATCH_TABLE,
   "d-latch": D_LATCH_TABLE,
@@ -42,7 +47,7 @@ export const TruthTableView = withProps(
       const rows = t.rows
         .filter((r) => dropped.every((c) => r.inputs[c] === "1" || r.inputs[c] === "X"))
         .map((r) => ({
-          inputs: cols.map((c) => r.inputs[c] ?? "X"),
+          inputs: cols.map((c) => either(r.inputs[c] ?? "X")),
           outputs: [r.next],
           state: r.state,
         }));

@@ -26,6 +26,13 @@ export const LOOP_NOTE =
   "These gates form a loop. A loop like this is how a circuit holds a value. Tools that turn text into hardware warn about such loops.";
 
 export function generate(circuit: Circuit): Generated {
+  const readOutside = (net: NetId, path: string): boolean =>
+    circuit.outputs.some((o) => o.net === net) ||
+    circuit.components.some(
+      (c) =>
+        !(c.path === path || c.path.startsWith(`${path}/`)) &&
+        Object.values(c.inputs).includes(net),
+    );
   const notes = new Set<string>();
   const warnings: string[] = [];
   const names = nameNets(circuit);
@@ -115,7 +122,7 @@ export function generate(circuit: Circuit): Generated {
     if (owner) {
       if (emittedBehavioural.has(owner.path)) continue;
       emittedBehavioural.add(owner.path);
-      body.push(...alwaysFf(owner, names, declare, width));
+      body.push(...alwaysFf(owner, names, declare, width, readOutside));
       continue;
     }
     const out = c.outputs["y"];
@@ -149,6 +156,7 @@ function alwaysFf(
   names: Map<NetId, string>,
   declare: (n: NetId) => void,
   width: (n: NetId) => number,
+  readOutside: (net: NetId, path: string) => boolean,
 ): string[] {
   const q = c.outputs["Q"] as NetId;
   const d = c.inputs["D"] as NetId;
@@ -179,7 +187,8 @@ function alwaysFf(
   } else {
     lines.push(`  always_ff @(posedge ${names.get(clk)}) ${load}`);
   }
-  if (qb !== undefined && names.has(qb)) {
+  // Qb is written only when the text needs it: an output, or read by a gate outside this flip-flop.
+  if (qb !== undefined && names.has(qb) && readOutside(qb, c.path)) {
     declare(qb);
     lines.push(`  assign ${names.get(qb)} = ~${names.get(q)};`);
   }

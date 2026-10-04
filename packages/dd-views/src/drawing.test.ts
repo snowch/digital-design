@@ -96,13 +96,12 @@ describe("compiling a drawing", () => {
 endmodule`;
     const { circuit } = elaborate(text);
     const drawing = circuitToDrawing(circuit!);
-    // The elaborator writes ~(a | b) as an OR and a NOT; the drawing shows what the text said.
-    expect(drawing.parts.filter((p) => p.kind === "or")).toHaveLength(2);
-    expect(drawing.parts.filter((p) => p.kind === "not")).toHaveLength(2);
+    // The elaborator writes ~(a | b) as one NOR gate; the drawing shows what the text said.
+    expect(drawing.parts.filter((p) => p.kind === "nor")).toHaveLength(2);
     // Laid out: inputs in column 0, outputs to the right of every gate.
     const xs = new Map(drawing.parts.map((p) => [p.id, p.x]));
     expect(xs.get(pinId("input", "S"))).toBe(0);
-    const gates = drawing.parts.filter((p) => p.kind === "or" || p.kind === "not");
+    const gates = drawing.parts.filter((p) => p.kind === "nor");
     expect(xs.get(pinId("output", "Q"))!).toBeGreaterThan(Math.max(...gates.map((p) => p.x)));
     const compiled = compileDrawing(drawing);
     expect(compiled.errors).toEqual([]);
