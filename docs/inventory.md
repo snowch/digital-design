@@ -23,6 +23,11 @@ The prompt fixes this, and the inventory applies it throughout:
   not a code library.
 - **The computer-systems book** is a prose and doc-site reference for tone and structure. It has
   no interactives.
+- **Sizing and TCO** (`snowch/sizing-and-tco`) joined the corpus after the first draft of this
+  inventory, at the author's request. It is the origin of the two books' tooling, has interactives
+  of its own, and is where the author's prose process (a Haiku subagent drafts, the managing model
+  checks facts) and two-half review process are written down. Patterns only, as for the books:
+  sections 3.4 and 4.1.
 
 ## 1. The corpus as found
 
@@ -52,6 +57,7 @@ tables and pictures.
 | Parquet book | `snowch/parquet-book` | Make + Python + MyST site; Rust reader (also WASM) and a Python twin; labs in plain ES modules (`web/lab/`, about 1,900 lines) | 16 chapters, 5 experiments | cargo, pytest, Playwright |
 | Query-engine book | `snowch/query-engine-book` | same tooling, Python only; DuckDB reference; labs in plain ES modules (about 2,000 lines) | 19 chapters planned, 5 experiments | pytest, Playwright |
 | Computer-systems book | `snowch/computer-systems` | MyST book; measurements stamped as JSON; no browser code beyond a stylesheet | 32 chapters | pytest |
+| Sizing and TCO | `snowch/sizing-and-tco` | MyST parses, the repository renders; a model-as-code DSL and a Monte Carlo toolkit in Python; an interactive model viewer and a one-future-at-a-time page in plain ES modules (about 1,500 lines); graders under Pyodide; a browser review script; per-chapter videos in Git LFS | 24 chapters and the appendices | pytest, model and figure checks, `make review` |
 
 The author's gap list is worth a sentence: it names the same missing topics the Prompt B
 curriculum covers (combinational building blocks, arithmetic, memory, HDL, counters) and planned
@@ -70,6 +76,7 @@ no QEMU.
 | `parquet-book` | `rustup` installed the pinned 1.94.1 toolchain and the wasm target; `cargo test --workspace`; the wasm build; `pytest tests python/tests exercises/python`. | Rust: 115 passed, 0 failed, 43 ignored (the problem stubs, ignored by design). wasm build: ok. Python: 683 passed, 43 skipped (problem stubs), 113 s. | ruff, fmt, clippy; `fixtures/generate.py --check`; `pqlab figures --check`; the MyST parse, site render and link check (no MyST); the browser smoke test (needs the rendered site). |
 | `query-engine-book` | Submodule `external/parquet-book` initialised; pinned `duckdb==1.1.2`, `pyarrow==18.1.0`; `pytest -q`. | 1031 passed, 227 skipped (problem stubs and the Pyodide parity cases), 288 s. | Same MyST-dependent stages; the browser checks (panels, workbench, edits, timings, site). |
 | `computer-systems` | Submodule `xv6/xv6-riscv` initialised; `scripts/verify-setup.py`; `pytest tests/ -m "not problem"` as CI runs it. | 1698 passed, 56 skipped, 1 failed, 4 errors. The failure (`test_disasm`) and all four errors raise `ToolchainMissingError`: no `riscv64-linux-gnu-gcc`. The skips name the missing cross compiler, `qemu-system-riscv64`, and the board. | Everything that needs the cross toolchain, QEMU or the Raspberry Pi: `ci-check.sh`'s `bench.run_*  --check` stages. `make test` without the marker also runs the 213 problem stubs, which fail by design. |
+| `sizing-and-tco` (added later) | Pinned `numpy`, `Pint`, `PyYAML`; `scripts/build-stamp.py` (which `ci-check.sh` runs before pytest; without it one anchor test fails on a fragment the stamp writes); `pytest tests/ -m "not problem"`; `verify-models.py`; `verify-numbers.py`. | 1661 passed, 75 skipped, 304 problem stubs deselected, 184 s. The skips need the MyST parse or a page type the test does not apply to. `verify-models`: 4 models OK. `verify-numbers`: 46 result files verified, 1 figure awaiting a measurement, as the book says. | The MyST build, the site render and link check, the offline install, and `make review` (needs the network and a browser). |
 
 Two lessons for the course's own test design come out of this. First, every book keeps a single
 `scripts/ci-check.sh` that is exactly what CI runs, so a laptop and CI cannot drift; the course
@@ -144,7 +151,23 @@ in the two books honours it.
 | storage keys | Every key is named for the book (`lab:<path>:…`, `edit:<book>:…`, `problems:<chapter>`) because the books share the origin `snowch.github.io`. `tests/browser/site.mjs` checks the site under its base path on a shared origin. | (platform) | rule to adopt | the course will be served from the same origin and must namespace its keys and use relative URLs | both books |
 | `tests/browser/panels.mjs`, `workbench.mjs`, `edits.mjs`, `timings.mjs`, `site.mjs`, `chromium.mjs` | The panel asks before it answers and hides every measurement; predictions survive a reload; the live rerun agrees; an edited query draws the desk's answer for the same text; a broken one reports the error; reset and "Predict again" work; without JavaScript the panel says so. The workbench's shipped stubs fail with their own `NotImplementedError`, a wrong answer fails on the graders, the text is kept, reset restores. `chromium.mjs` serves the built site from disk through Playwright's route handler, with no local server, because the sandbox's proxy intercepts even loopback traffic. | (testing) | pattern: this is the "educational level" test list the prompt asks for, already worked out | generic method; and the no-server technique is needed in this very container | none |
 
-### 3.4 The computer-systems book: patterns without interactives
+### 3.4 Sizing and TCO: the viewer, the futures page, the graders and the review process
+
+| Where | What it does | Vocabulary | Pattern or code | Reusability | Duplicated |
+|---|---|---|---|---|---|
+| `sizing/viewer/app.js`: the model page | The dependency graph coloured by node kind and provenance; an input UI generated from each node's declared range; every slider recomputes every point value at once; the distribution on any node; the tornado; a Details view per node with its label and provenance source. | inspect, experiment, drill down, explain | pattern | the generic shape is "move an input, everything downstream recomputes, and the page says what is now off the stamped scenario" | the graph and the input UI are generated from the model, so there is one copy |
+| `sizing/viewer/evaluate.js` with `tests/test_viewer.py` | A second implementation of the arithmetic, in the browser, held to Python's by a test over every node of every model. The page never resamples in JavaScript: a second sampler would be a second answer nobody verified. | (correctness) | pattern: a second implementation is a liability unless a test pins it to the first | applies directly: the HDL elaborator and the circuit builder both produce netlists, and the same test vectors run against both | none |
+| resample under Pyodide (`sizing/playground/driver.py`) | The same sampler with the same seed runs in the page with the inputs the reader fixed. With nothing moved it first shows that it reproduces the stamped result, then the reader trusts it with a change. | replay, explain | pattern: agreement with the reference before trust | the course's challenge runner states agreement between the learner's circuit and the reference the same way | the query-engine book's "Run it in your browser" is the same check |
+| `sizing/viewer/futures.js`: one future at a time | One press, one draw: every input jumps to that future's value, the fleet is worked through once, the answer drops onto the pile, and ticks accumulate under each input. The clustering is drawn, not asserted. | step, experiment, explain | pattern: one step at a time with the accumulation left visible | the course's "one clock edge at a time, the trace grows" is this shape | none |
+| `growth-explorer.js`, `growth-shapes.js` | Calculators inlined in a page whose formulas arrive from the DSL in data attributes, so the page computes what the model computes. Defaults are the model's point values; teaching choices are declared beside the formulas and said on the page. | experiment | pattern: parameters come from the model, and a teaching choice is labelled as one | the lesson's initial state and its model-versus-reality note | none |
+| `checker.html` with `driver.py check` | Paste a model file; the verifier the build runs over the book's own models runs over it, and refuses a limit with no headroom with the repair named. | break, explain | pattern: the learner's checker is the build's checker | the HDL subset's gating and warnings run through one code path in the tests and in the page | none |
+| the Check under each problem (`driver.py grade`, `playground/toolkit.py`) | pytest itself, under Pyodide, over the chapter's own test file against the stub as the reader has it; counts only the marked tests, so a desk and the page give the same verdict. "Nothing here reimplements anything." | experiment, explain | pattern: the books' workbench, and its origin | the course's ChallengeRunner | the two books' workbenches |
+| `scripts/review-pages.py` | The mechanical half of a review: every page at five widths and in the dark theme; every Expand opened and closed with Escape; every slider at both ends, looking for NaN, Infinity or undefined; every node's Details written out; console errors, failed requests, broken links and anchors, images without alt text, controls with no accessible name, contrast in both themes, wording that assumes a mouse; every Check with the stub unchanged and with a reader's wrong attempts typed in. Severities: blocks, hides, look. | (review) | pattern: most of the prompt's accessibility list, made executable | the Playwright educational suite absorbs most of it; the rest is a Phase 2 script | none |
+| `.claude/skills/editorial-review/` | The reading half: one subagent per page with a written brief; a cold read as someone who has read every earlier page and none after; every finding quotes the page; a direction, never a rewrite; verify before assert; never an answer in a review; one merged report with a "fix first" list of faults that recur across pages. | (review) | pattern | a lesson-review skill in Phase 2 | none |
+| `CLAUDE.md` §6, `STYLE.md`, `tests/test_vocabulary.py`, `tests/test_book.py` | The prose process (section 4.1); twenty-four style rules and two closing passes, with a test that the checklist runs every rule; a six-word vocabulary ration enforced by a test that reads each word's home chapter from the glossary, with `% word-ok:` as the escape; every glossary term defined in a box in its home chapter; no product named; every chapter ends on a problem about the reader's own system. | (authoring) | pattern: an authoring rule with a check behind each | the course's `docs/style.md` (copied), `CLAUDE.md` (adopted), and a per-lesson term gate with a test in Phase 2 | none |
+| `chapters/notebooklm/*.mp4`, `video/littles_law.yml`, `scripts/build-video.py` | Per-chapter video summaries kept in Git LFS, and a scripted video build. | (passive media) | not adopted: the prompt prefers animation the learner drives and that answers "what changed, and why" | not inspected in depth; the LFS objects are not served to this container | none |
+
+### 3.5 The computer-systems book: patterns without interactives
 
 | Where | What it does | Vocabulary | Reusable as |
 |---|---|---|---|
@@ -155,18 +178,18 @@ in the two books honours it.
 | Problems are tests; `@pytest.mark.problem` deselected in CI; scaffolding tests prove answerability | | experiment | the challenge split described in section 2 |
 | Voice rules (`CLAUDE.md` §7): say it, do not perform it; lead with the point; name the concrete noun; British English, no em dashes | | explain | the course's prose rules |
 
-### 3.5 Vocabulary coverage
+### 3.6 Vocabulary coverage
 
-| Word | Tutorials | Parquet book | Query-engine book | Course needs it from |
-|---|---|---|---|---|
-| inspect | static pictures only | hex, tree, inspector, counters, timelines | plan tree, counters | Slice 1 (signal table, latch internals), Slice 2 (state bits, D inputs) |
-| predict | no | no (walkthroughs ask "what will this print" in prose) | the centre of every panel | both slices (one challenge per transition type in Slice 2) |
-| step | the viz page only | token stepper | no | both slices (clock edges, propagation-delay steps) |
-| experiment | no | choose a file or strategy, edit a step | variants, edit the query or the engine | both slices (move D against the clock; change an encoding) |
-| break | a static glitch figure | edit a byte; damage the magic | a broken query; an edited engine that fails its tests | both slices (setup/hold violation; faulty encoding) |
-| explain | prose and figures | inspector readings, status lines, "what this cannot tell you" | status lines, stale notes, "what this cannot tell you" | every lesson section; diagnostic feedback |
-| drill down | implicit, static (diagram to table to map to circuit) | byte to node and node to bytes | operator to counters | Slice 2 (state diagram to register bits to logic to flip-flops to gates) |
-| replay | reset to step 0 | restore the original file | predict again; rerun in the browser | both slices (replay a recorded experiment, including a recorded metastability draw) |
+| Word | Tutorials | Parquet book | Query-engine book | Sizing and TCO | Course needs it from |
+|---|---|---|---|---|---|
+| inspect | static pictures only | hex, tree, inspector, counters, timelines | plan tree, counters | the graph, a node's Details, the distribution on any node | Slice 1 (signal table, latch internals), Slice 2 (state bits, D inputs) |
+| predict | no | no (walkthroughs ask "what will this print" in prose) | the centre of every panel | no (the futures page shows a spread rather than asking for one) | both slices (one challenge per transition type in Slice 2) |
+| step | the viz page only | token stepper | no | one future at a time | both slices (clock edges, propagation-delay steps) |
+| experiment | no | choose a file or strategy, edit a step | variants, edit the query or the engine | sliders, resample with inputs held, the calculators | both slices (move D against the clock; change an encoding) |
+| break | a static glitch figure | edit a byte; damage the magic | a broken query; an edited engine that fails its tests | the checker refuses a pasted model; wrong attempts under a Check | both slices (setup/hold violation; faulty encoding) |
+| explain | prose and figures | inspector readings, status lines, "what this cannot tell you" | status lines, stale notes, "what this cannot tell you" | provenance colouring, Details, the agreement line before a resample, "what this cannot tell you" | every lesson section; diagnostic feedback |
+| drill down | implicit, static (diagram to table to map to circuit) | byte to node and node to bytes | operator to counters | graph to node to provenance source | Slice 2 (state diagram to register bits to logic to flip-flops to gates) |
+| replay | reset to step 0 | restore the original file | predict again; rerun in the browser | the same seed reproduces the stamped result; draw again | both slices (replay a recorded experiment, including a recorded metastability draw) |
 
 ## 4. Authoring infrastructure, as it exists
 
@@ -183,6 +206,39 @@ How the corpus declares, styles, tests, builds and deploys a lesson, and what th
 | Build | `myst build --html --execute` | `make`: engine, figures, MyST parse, the repository's own renderer | Vite |
 | CI | one deploy workflow | one `scripts/ci-check.sh` identical locally and in CI; a separate deploy workflow | one `npm run check`; deploy to Pages with a configurable base path |
 | Deploy | GitHub Pages, user site | GitHub Pages, project sites under a base path, every URL relative | GitHub Pages project site at `snowch.github.io/digital-design/`; the path is free today (it returns 404) and the published viz page lives under `/build/`, so nothing is shadowed |
+| Who writes the prose | not recorded | the model, directly, under each book's voice rules; in Sizing and TCO a Haiku subagent drafts from a fact brief and the managing model checks facts only | the Sizing and TCO process from the first lesson: `CLAUDE.md`, `docs/style.md`, section 4.1 |
+| Reviewing a page | nothing | Sizing and TCO: a mechanical half (`scripts/review-pages.py`: five widths, dark theme, every control, every slider end, every Check with wrong attempts) and a reading half (one subagent per page with a written brief), merged into one report with a "fix first" list | both halves: the mechanical half inside the Playwright educational suite, the reading half as a lesson-review skill, in Phase 2 |
+
+### 4.1 How prose is written and reviewed
+
+Sizing and TCO's `CLAUDE.md` records a process the other books do not have, and the course adopts
+it from its first lesson. Reader-facing prose is drafted by a Haiku subagent from a brief that is
+a list of facts, each checked against the model or the code before the brief goes out, with the
+style checklist attached. Haiku writes shorter and plainer sentences than a model that has the
+whole repository in its head, and it drops facts and gets them wrong, so the managing model
+checks the facts and nothing else: a missing fact gets the fewest words that carry it, a wrong
+draft goes back with a note, and no sentence is rewritten. Then the whole page is read once, which
+is where repeats and broken joins show; a repeat is cut by the manager, a join that needs new
+words goes back to Haiku. The book's own record of what went wrong is the useful part: briefed
+sentence by sentence, the page said the same point three times running; merged by rewriting, the
+drafts got their padding back; and three of the errors that reached a draft were the brief's.
+
+The process was tried once in this repository, on the preamble of `docs/style.md`. Six facts went
+out; about a hundred and ninety words came back in three paragraphs that pass the checklist. The
+check found one wrong fact (the draft said a file exists that Phase 2 will write), two dropped
+facts (a repository name, and the pointer to `CLAUDE.md`) and one meaning drifted ("before a
+lesson is called finished" became "before it finishes"). Each was fixed by adding words. That is
+the profile the author's `CLAUDE.md` predicts, and it is what the fact check is for.
+
+The review process has two halves (section 3.4), and the author's build prompt for that book adds
+three rules the skill files do not state: reviewers over-call, so each finding is attacked by an
+independent sceptic before anyone acts on it; a model cannot audit itself, so the findings that
+matter most are about one's own recent edits; and a cold read gives the reviewer one page plus
+every page before it and nothing else. `AUTHORING_GUIDE.md`'s list of what no check can catch
+(a claim about the repository's own state, a word with two meanings on one page, a definite
+article before an unintroduced noun, a term working before it is defined, a table nobody chose,
+the same argument twice, a number spelled as a word) is carried into the course's `CLAUDE.md`
+with the digital-design words that will trip it: *state*, *input*, *cycle*, *level*, *edge*.
 
 ## 5. Conclusions
 
@@ -233,13 +289,13 @@ Each candidate is justified by at least two appearances in the corpus.
 
 | Candidate | Corpus evidence (two or more places) | Slice 1 needs | Slice 2 needs | Verdict |
 |---|---|---|---|---|
-| **Stepper** | the viz page's prev/next/reset with a title and an explanation per step; the Parquet book's token stepper whose current step drives highlights in other views | step through clock edges and through the master/slave hand-off | step through transitions | extract at Slice 2 |
+| **Stepper** | the viz page's prev/next/reset with a title and an explanation per step; the Parquet book's token stepper whose current step drives highlights in other views; Sizing and TCO's one-future-at-a-time page (one press, one draw, the pile grows) | step through clock edges and through the master/slave hand-off | step through transitions | extract at Slice 2 |
 | **Timeline** | the Parquet book's lane timelines (`scan.js`, `changes.js`, written twice); the viz page's canvas traces with a cursor; every waveform figure in the notebooks | the timing diagram beside the circuit, with a cursor tied to the stepper | the FSM trace (CLK, inputs, state bits, outputs) | extract at Slice 2. The generic part is lanes of events over a time axis with a cursor and a selection; the waveform rendering (levels, edges, bus values, setup/hold shading) stays in `dd-views/TimingDiagram` |
-| **StateInspector** | the Parquet inspector (one selection, many readings, a path breadcrumb); the viz page's latch state boxes; the query-engine panels' counters under each case | latch state (transparent, holding), held value, Q and not-Q | state register bits, decoded state name, D inputs | extract at Slice 2 |
+| **StateInspector** | the Parquet inspector (one selection, many readings, a path breadcrumb); the viz page's latch state boxes; the query-engine panels' counters under each case; Sizing and TCO's node Details (label, kind, provenance source) opened from the graph | latch state (transparent, holding), held value, Q and not-Q | state register bits, decoded state name, D inputs | extract at Slice 2 |
 | **DrillDown** | byte to tree node and back (`pathTo`, `reveal`) in the Parquet book; the FSM tutorial's static chain from diagram to table to logic to circuit | flip-flop to latches to gates | state diagram to register bits to next-state logic to D inputs to flip-flops (from Slice 1) to gates | extract at Slice 2; this is the slice's reason to exist |
 | **PredictionChallenge** | four query-engine panels (predict, reveal, three bars on one scale, persisted, "predict again"); the plan panel's ask-before-the-button | "what will Q be after this edge?" | one prediction per transition type (stay, advance, return, reset) | extract at Slice 2. The four verbatim copies in the query-engine book are the design brief: one component, parameterised by what is predicted |
-| **FaultInjector** | the Parquet inspector's byte edit with recompute and restore; the smoke test's damaged magic; the timing tutorial's glitch figure; the query-engine book's edited engine failing its own tests | move D across the clock edge until setup or hold is violated | one faulty encoding to diagnose | extract at Slice 2. The generic shape is: a named fault applied to the model, everything recomputes, a restore |
-| TestHarness | both workbenches; the computer-systems problem marks | the finished flip-flop tested automatically with diagnostic feedback | the controller tested against its state machine | not a primitive: it belongs to `lesson-runtime` (`ChallengeRunner`), because every lesson uses it, with the domain part (what a test vector is, where divergence first appears) in `sim` |
+| **FaultInjector** | the Parquet inspector's byte edit with recompute and restore; the smoke test's damaged magic; the timing tutorial's glitch figure; the query-engine book's edited engine failing its own tests; Sizing and TCO's checker refusing a pasted model with the repair named | move D across the clock edge until setup or hold is violated | one faulty encoding to diagnose | extract at Slice 2. The generic shape is: a named fault applied to the model, everything recomputes, a restore |
+| TestHarness | both workbenches; the computer-systems problem marks; Sizing and TCO's Check under each problem, which runs the chapter's own pytest file and counts only the marked tests, so the page and a desk agree | the finished flip-flop tested automatically with diagnostic feedback | the controller tested against its state machine | not a primitive: it belongs to `lesson-runtime` (`ChallengeRunner`), because every lesson uses it, with the domain part (what a test vector is, where divergence first appears) in `sim` |
 | Replay | restore the file; predict again; the viz page's reset; rerun in the browser | replay a recorded setup/hold experiment and the one recorded metastability draw | replay a transition sequence | not a separate UI primitive: replay is an engine capability (`Snapshot`, `Trace`, a recorded seed) surfaced through the Stepper's scrubbing and a Reset. Rejected as its own component |
 
 Rejected for Prompt A, with the place that would want them later: a bit or byte inspector (Module
@@ -313,9 +369,14 @@ Deliberately left duplicated, and why:
   the author's CI but is the kind of coupling the course should not reproduce. Not reused.
 - **The books' Pyodide and WebAssembly runtime code** (`python-worker.js`, `wasm.js`, `runner.js`)
   is understood but out of scope by rule: no WebAssembly in the course.
-- **What could not be exercised here**: the three books' browser suites and MyST stages, and the
-  computer-systems toolchain stages (section 2). The cross-book regression job planned for Phase
-  2 must install what each repository's `quality.yml` installs, or it will report skips as green.
+- **What could not be exercised here**: the three books' browser suites and MyST stages, the
+  computer-systems toolchain stages, and Sizing and TCO's MyST, offline-install and `make review`
+  stages (section 2). The cross-book regression job planned for Phase 2 must install what each
+  repository's `quality.yml` installs, or it will report skips as green.
+- **Sizing and TCO's videos and video build.** The per-chapter videos are Git LFS objects the
+  anonymous clone does not fetch, and `scripts/build-video.py` with `video/littles_law.yml` was
+  not read in depth. Passive media is not what the prompt asks for, so nothing depends on
+  understanding them; they are recorded so nobody mistakes the omission for a judgement.
 
 ### 5.6 The toolchain continuity case
 
@@ -429,8 +490,20 @@ inventory, on the same branch. Nothing else until Phase 2.
   per repository that checks it out and runs its own `scripts/ci-check.sh` (books) or
   `npm run check` (course), installing what each repository's `quality.yml` installs (pinned
   Rust, pinned pyarrow and DuckDB, pinned MyST, Playwright and Chromium, and for computer-systems
-  the RISC-V and AArch64 cross compilers and QEMU). Nightly and on dispatch; red if any suite is
-  red. The books themselves are not modified.
+  the RISC-V and AArch64 cross compilers and QEMU). Sizing and TCO joins the matrix with its own
+  `ci-check.sh`. Nightly and on dispatch; red if any suite is red. The books themselves are not
+  modified.
+- **Prose.** Every learner-facing string is drafted by a Haiku subagent from a fact brief and
+  checked for facts by the managing model, then the whole lesson is read once (section 4.1,
+  `CLAUDE.md`). `docs/style.md` is the checklist, copied from Sizing and TCO with a preamble that
+  translates its two book-specific phrases. Already in place on the branch.
+- **Review.** Every lesson gets the two-half review before it is called finished: the mechanical
+  half in the Playwright suite, the reading half by one reviewer per lesson with a written brief
+  and a sceptic per finding. The skill is a Phase 2 deliverable alongside `docs/authoring.md`.
+- **Terms are gated per lesson, and a test enforces it.** The list of rationed terms and the
+  lesson that introduces each live in the lesson data; a test fails any earlier lesson that uses
+  one, with a `% word-ok:`-style exemption for a word used in another sense, as Sizing and TCO's
+  `tests/test_vocabulary.py` does. The HDL construct gate is the same rule for code.
 
 ## 7. Open questions for the author (Checkpoint 1)
 
@@ -458,6 +531,16 @@ inventory, on the same branch. Nothing else until Phase 2.
 8. **Deployment path.** `snowch.github.io/digital-design/` is free today. Confirm it as the
    target, and that linking the existing five tutorial pages to the course is a later, separate
    change to the personal site.
+9. **The prose and review process.** Sizing and TCO's process is adopted as described in section
+   4.1, and `CLAUDE.md` and `docs/style.md` are already on the branch. Veto or amend anything
+   there. One choice inside it is open: whether a Haiku draft is also used for the hints' lower
+   rungs (mistake class, smaller example), which carry facts about the learner's specific wrong
+   answer, or whether those are generated from the diagnosis directly with templated words.
+10. **The rationed terms.** Phase 2 needs the list of terms each lesson is allowed to introduce
+    (for the slices, candidates are *feedback*, *latch*, *transparent*, *edge*, *setup*, *hold*,
+    *propagation delay*, *metastable*, *state*, *encoding*, *synchronous*). Should the gate be
+    enforced by a test from the first lesson, as `tests/test_vocabulary.py` does, or kept as an
+    authoring rule until the course has more than two lessons?
 
 ## 8. What changes in Prompt B given what was learned
 
@@ -473,3 +556,7 @@ Recorded now so it is not lost; revisited at the end of Prompt A.
   Modules 5, 6 and 8 and should be ported when those modules start.
 - The author's gap list in `DIGITAL_DESIGN_TODO.md` can be retired once the Prompt B curriculum
   is published, with a pointer from the personal site.
+- Prompt B's module-done definition should add the two-half review and a note of what the fact
+  check caught, as Sizing and TCO's definition of done requires `make review` on every page.
+  Fifteen modules of Haiku-drafted prose will show whether the brief-then-check split holds at
+  that volume, and the per-module notes are where to record it.

@@ -1,0 +1,130 @@
+# CLAUDE.md
+
+Project instructions for anyone, human or AI, working on this course. They are binding.
+
+## What this is
+
+*Digital Design: From Bits to a Working Computer*: an interactive, browser-based course that
+teaches from signals to a working CPU, built on a reusable interactive learning platform. Every
+interactive follows one loop, predict, build, run, break, explain, generalise, and one vocabulary,
+inspect, predict, step, experiment, break, explain, drill down, replay.
+
+**Status: Prompt A, Checkpoint 1.** `docs/inventory.md` is written and awaits the author's
+review. No code exists. The rules below are the ones that already hold; the inventory's
+proposals (the layering, the primitives, the engine's invariants, the repository split) become
+rules here when the author approves them.
+
+Read `docs/inventory.md` first. Edit every learner-facing string against `docs/style.md`.
+
+## Where these rules came from
+
+The author's four earlier works set them: `snowch/sizing-and-tco` (the prose process, the style
+checklist, the two-half review), `snowch/computer-systems` (originality logged per chapter, the
+voice), and the two interactive books `snowch/parquet-book` and `snowch/query-engine-book` (the
+interactive UI is a view of the implementation, never a scripted animation; problems are tests;
+one check script that is exactly what CI runs). The inventory says which pattern came from where.
+
+## Haiku drafts the prose; you check it
+
+Every string a learner reads goes to a Haiku subagent to draft before it lands: lesson prose,
+hints, the diagnostic feedback after a failed test, model-versus-reality notes, labels inside the
+interactives. Haiku writes shorter, plainer sentences than a model that has the whole repository
+in its head. It also drops facts and gets them wrong. So the work splits four ways:
+
+1. **You write the brief as a list of facts**, not as prose: what the text must say, each point
+   checked against the simulator, the lesson data or the code *before* the brief goes out. Haiku
+   copies a wrong fact faithfully. Attach `docs/style.md`. A prose brief gets its wording copied.
+2. **Haiku writes the sentences, a section at a time.** Briefed sentence by sentence, nobody
+   writes the joins, and the page repeats itself where two drafts meet.
+3. **You check the facts, and nothing else.** Where a fact is missing, add the fewest words that
+   carry it. Do not rewrite Haiku's sentences. If a draft is wrong, send it back with a note.
+4. **Then read the whole lesson, start to finish.** This is `docs/style.md`'s second pass, where
+   repeats and broken joins show. Cutting a repeat is yours; a join that needs new words goes
+   back to Haiku. For this course the second pass also asks whether the interactive showed the
+   mechanism the prose claims it shows.
+
+The mechanism here is the Agent tool with `model: "haiku"`. The first draft made in this
+repository, the preamble of `docs/style.md`, came back from six facts with one fact wrong (it said
+a file exists that Phase 2 will write), two facts dropped (a repository name, a pointer to this
+file) and one meaning drifted ("before it is called finished" became "before it finishes"). Each
+was fixed by adding words; no sentence was rewritten. Expect that profile every time, and check
+for it.
+
+Engineering documents (the inventory, `docs/platform.md`, `docs/simulator.md`, this file) are
+written directly, as the author's own repositories write theirs. They still pass the checklist.
+
+## Voice
+
+Direct, precise, British English, active voice, short sentences. The learner is *you*. No
+marketing tone, no filler, no "in this lesson we will". No em dashes.
+
+**Say the thing. Do not perform it.** Three habits make a reader extract the point instead of
+receiving it: a label where a statement belongs ("that is the whole motivation"); withholding,
+then revealing ("the third part is the one that decides"); a roundabout purpose ("the line is
+there so that a reader who does not believe this table has somewhere to go"). The test for any
+sentence: does it state the point, or make the reader work it out? Headings are different: a
+heading is a label, and its test is whether somebody scanning the page can tell what the section
+contains.
+
+**Terms are rationed per lesson.** A term arrives because the circuit in front of the learner has
+just raised the question that needs it, never as a definition up front. Plain English first, the
+term second, and the lesson that introduces a term is the first lesson allowed to use it. Phase 2
+writes the list and the test that enforces it, as `tests/test_vocabulary.py` does in Sizing and
+TCO. The HDL subset is gated the same way: a construct the learner has not met is rejected with a
+plain message, not an elaboration error.
+
+**Length follows the material.** A lesson is as long as what it has to convey and no longer. The
+ten sections of the lesson format (question, motivation, prediction, investigation, construction,
+failure experiment, explanation, generalisation, challenge, reflection) stay whatever the length.
+
+## Originality
+
+The course covers ground that textbooks cover and must be original work. Do not reproduce,
+closely paraphrase or structurally mirror any existing text: not the Hack machine or HDL of
+Nand2Tetris, not Harris and Harris's chapter order, examples or exercises, and no named
+commercial ISA's mnemonics, encodings or register conventions. If you notice you are
+reconstructing a known sequence or a well-known worked example, stop and design a different one.
+The feeling of "this is the standard way to present this" is the signal, not the permission.
+Standard gate symbols and truth tables are fine. Every lesson carries an `originalityNote` in its
+data: the obvious textbook example for its topic and how this lesson's example differs. It is
+written in the same commit as the lesson, and a test fails a lesson without one.
+
+## Reviewing a lesson
+
+A review has two halves, and the test suite does neither on its own.
+
+- **The mechanical half** walks the published page in a browser at phone, tablet and desktop
+  widths and in the dark theme, presses every control, moves every input to both ends of its
+  range, runs every challenge with the shipped stub and with plausible wrong attempts, and writes
+  down what broke: console errors, a table column a phone hides, a control with no accessible
+  name, text below the contrast a reader needs, wording that assumes a mouse. Sizing and TCO's
+  `scripts/review-pages.py` is the model; in this course most of it lives in the Playwright
+  educational suite and the rest in a review script Phase 2 writes.
+- **The reading half** gives each lesson to its own reviewer with a written brief, as the
+  `editorial-review` skill in Sizing and TCO does. The reviewer reads as a learner who has done
+  every earlier lesson and none after; every finding quotes the page; a finding suggests a
+  direction and never rewrites; a number or a cross-reference is checked before it is asserted; a
+  review never contains a challenge's answer. Reviewers over-call, so each finding is attacked by
+  an independent sceptic before it is acted on. A model cannot audit itself: the findings that
+  matter most are about your own recent edits.
+
+After a review, fixes to code come first, then fact briefs per finding go to Haiku, then the
+whole lesson is read once more.
+
+## What no check can catch
+
+Each of these was published in one of the author's books and found only by a slow reread. Read
+for them before calling a lesson finished:
+
+- a claim about the repository's own state ("every lesson has a test"), which rots silently;
+  if the repository can compute it, generate it;
+- a word that means two things on one page (*state*, *input*, *cycle*, *level*, *edge*);
+- a definite article in front of a noun the lesson has not introduced;
+- a term doing work before it is defined;
+- a table or a signal list nobody chose for this lesson, rendered because the component had it;
+- the same argument made twice, far apart;
+- a number spelled as a word that the simulator did not produce.
+
+## Things that will break the build
+
+Nothing yet. Phase 2 fills this in as each check is written, with the reason each exists.
