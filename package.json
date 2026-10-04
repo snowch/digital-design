@@ -22,7 +22,8 @@
     "test:educational": "playwright test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "./scripts/check.sh"
+    "check": "./scripts/check.sh",
+    "schema": "vite-node scripts/export-schema.mts"
   },
   "devDependencies": {
     "@playwright/test": "1.56.1",
@@ -38,6 +39,7 @@
     "prettier": "^3.9.9",
     "typescript": "~5.9.3",
     "vite": "^7.3.6",
+    "vite-node": "^6.0.0",
     "vitest": "^4.1.11"
   }
 }
