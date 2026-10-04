@@ -77,6 +77,12 @@ redrafted from corrected briefs.
   the lesson says; and the roll's "20 units after the edge" is explained as when the slave's
   latch first answers.
 
+- A phone screenshot from the author showed a timing diagram's labels printed on top of each
+  other. A Playwright test now measures every diagram's rendered text at both widths, before and
+  after the figures are used, and fails on any overlap or overflow; it found the same fault in
+  every block's name and in the output pins' values, all fixed, and it will check every figure
+  Prompt B adds.
+
 ### Known gaps
 
 - The timing diagram is small on a phone; it scrolls sideways and its table carries the values.
