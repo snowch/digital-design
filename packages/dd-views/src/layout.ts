@@ -23,22 +23,43 @@ export function autoLayout(drawing: Drawing, only?: ReadonlySet<string>): Drawin
     succ.get(w.from.part)?.add(w.to.part);
     pred.get(w.to.part)?.add(w.from.part);
   }
-  // Longest path from any input pin, ignoring edges that close a cycle (found by DFS).
-  const depth = new Map<string, number>();
+  // Edges that close a cycle, found by walking forwards from the inputs: in a loop of inverters
+  // kicked by an OR gate, the edge back into the OR gate is the one to ignore, so the loop lays
+  // out as a chain. Then the longest path from the inputs over the remaining edges.
+  const back = new Set<string>();
   const state = new Map<string, 0 | 1 | 2>();
-  const visit = (id: string): number => {
-    const s = state.get(id);
-    if (s === 2) return depth.get(id) ?? 0;
-    if (s === 1) return -1; // back edge: ignore
+  const walk = (id: string): void => {
     state.set(id, 1);
+    for (const next of succ.get(id) ?? []) {
+      const s = state.get(next);
+      if (s === 1) back.add(`${id}>${next}`);
+      else if (s === undefined) walk(next);
+    }
+    state.set(id, 2);
+  };
+  const inputsFirst = [...parts].sort((p, q) =>
+    p.kind === "input" && q.kind !== "input"
+      ? -1
+      : q.kind === "input" && p.kind !== "input"
+        ? 1
+        : 0,
+  );
+  for (const p of inputsFirst) if (state.get(p.id) === undefined) walk(p.id);
+  const depth = new Map<string, number>();
+  const visiting = new Set<string>();
+  const visit = (id: string): number => {
+    const known = depth.get(id);
+    if (known !== undefined) return known;
+    if (visiting.has(id)) return 0;
+    visiting.add(id);
     let d = 0;
     for (const p of pred.get(id) ?? []) {
-      const pd = visit(p);
-      if (pd >= 0) d = Math.max(d, pd + 1);
+      if (back.has(`${p}>${id}`)) continue;
+      d = Math.max(d, visit(p) + 1);
     }
     const part = byId.get(id);
     if (part?.kind === "input") d = 0;
-    state.set(id, 2);
+    visiting.delete(id);
     depth.set(id, d);
     return d;
   };

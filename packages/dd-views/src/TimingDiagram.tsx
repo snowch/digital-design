@@ -36,7 +36,7 @@ export interface TimingDiagramProps {
 const LANE_H = 34;
 const LANE_GAP = 10;
 const LABEL_W = 64;
-const AXIS_H = 28;
+const AXIS_H = 40;
 
 /** A net by its port name (an input or output of the circuit) or by its own name. */
 function resolveNet(circuit: Circuit, name: string): number | undefined {
@@ -90,9 +90,23 @@ export function TimingDiagram({
     return top + LANE_H / 2;
   };
 
-  // Axis ticks: the trace's marks, else every unit when there are few.
+  // Axis ticks: the trace's marks on their own row, staggered onto a second row when two sit
+  // closer than a label's width; a number at every unit when there are few, except under a mark;
+  // the first and last labels anchored inwards so nothing leaves the drawing.
   const ticks = trace.marks.filter((m) => m.time >= from && m.time <= end);
+  const markTimes = new Set(ticks.map((m) => m.time));
   const plain = span <= 24 ? Array.from({ length: span + 1 }, (_, i) => from + i) : [];
+  const anchorAt = (t: number) => (t <= from ? "start" : t >= end ? "end" : "middle");
+  const markRows: { time: number; label: string; row: number }[] = [];
+  let lastX = -Infinity;
+  let lastRow = 1;
+  for (const m of ticks) {
+    const px = x(m.time);
+    const row = px - lastX < 64 ? 1 - lastRow : 0;
+    markRows.push({ time: m.time, label: m.label, row });
+    lastX = px;
+    lastRow = row;
+  }
 
   return (
     <div className="timing">
@@ -139,19 +153,19 @@ export function TimingDiagram({
             {plain.map((t) => (
               <g key={t}>
                 <line x1={x(t)} y1={AXIS_H - 8} x2={x(t)} y2={AXIS_H - 4} />
-                {span <= 12 && (
-                  <text x={x(t)} y={AXIS_H - 12} textAnchor="middle" className="tick-label">
+                {span <= 12 && !markTimes.has(t) && (
+                  <text x={x(t)} y={AXIS_H - 11} textAnchor={anchorAt(t)} className="tick-label">
                     {t}
                   </text>
                 )}
               </g>
             ))}
-            {ticks.map((m, i) => (
+            {markRows.map((m, i) => (
               <text
                 key={`m${i}`}
                 x={x(m.time)}
-                y={AXIS_H - 12}
-                textAnchor="middle"
+                y={m.row === 0 ? 9 : 24}
+                textAnchor={anchorAt(m.time)}
                 className="mark-label"
               >
                 {m.label}

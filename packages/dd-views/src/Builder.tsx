@@ -405,12 +405,7 @@ export function Builder({ drawing, onChange, palette, highlight = [], title }: B
                     ) : (
                       <>
                         {!isShaped(part.kind) && (
-                          <text
-                            x={box.w / 2}
-                            y={box.h / 2 + 4}
-                            textAnchor="middle"
-                            className="part-label"
-                          >
+                          <text x={box.w / 2} y={-5} textAnchor="middle" className="part-label">
                             {spec?.label ?? part.kind}
                           </text>
                         )}

@@ -158,9 +158,9 @@ export function CircuitView({
                   </text>
                   {pinValue && (
                     <text
-                      x={part.kind === "input" ? box.w + 6 : -6}
+                      x={box.w + 6}
                       y={box.h / 2 + 4}
-                      textAnchor={part.kind === "input" ? "start" : "end"}
+                      textAnchor="start"
                       className="value-label"
                     >
                       {valueLabel(pinValue)}
@@ -210,7 +210,7 @@ export function CircuitView({
                   <rect x={2} y={2} width={box.w - 4} height={box.h - 4} rx={4} className="box" />
                 )}
                 {!isShaped(part.kind) && (
-                  <text x={box.w / 2} y={box.h / 2 + 4} textAnchor="middle" className="part-label">
+                  <text x={box.w / 2} y={-5} textAnchor="middle" className="part-label">
                     {box.label}
                   </text>
                 )}

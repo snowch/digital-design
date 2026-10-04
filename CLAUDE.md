@@ -152,6 +152,11 @@ the Vite build, Playwright. Each line below is a check and the reason it exists.
 - **The Playwright suite drives the built site at desktop and phone widths.** Completable with
   the reference, rejects a wrong answer, keyboard-buildable, re-verified on load, not bypassable
   through storage, resettable, deterministic. A missing accessible name on a control breaks it.
+- **No label in any diagram may overlap another or leave its drawing**, at either width, before
+  or after the figures are used (`tests/educational/diagrams.spec.ts`). A timing diagram whose
+  axis labels collide, or a block whose name sits on its port names, fails a learner however
+  right its data; the test measures the rendered text, so a new figure is checked the day it
+  lands.
 - **`.npmrc` sets `legacy-peer-deps`.** npm 10's peer resolution crashes on Vitest 4's peer
   ranges; the flag is the workaround and the file says so. Cross-workspace `@dd/*` dependencies
   are not declared in manifests: npm links every workspace into the root `node_modules`.

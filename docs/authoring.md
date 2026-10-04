@@ -91,6 +91,10 @@ The runtime's and the views' own labels went through the same process; they live
   with the keyboard; saved work is graded again on load and a saved mark earns nothing; a reset
   clears the work; hints come one rung at a time; a prediction commits before the answer; the
   overlay's roll replays identically.
+- `tests/educational/diagrams.spec.ts`: no text label in any timing diagram or circuit drawing
+  overlaps another or leaves its drawing, at both widths, before and after the figures are used.
+  Diagrams are what a learner looks at longest; a figure can be right in every number and still
+  fail here.
 
 A lesson that needs a new figure adds the figure's props schema and its test with it, and a
 facts test for any number its prose will state.
