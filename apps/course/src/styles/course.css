@@ -951,6 +951,7 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
   min-height: 2.75rem;
 }
 .signal-plot-wrap {
+  min-width: 0;
   background: var(--canvas);
   border-radius: var(--radius);
   margin: var(--space-3) 0;
@@ -1141,6 +1142,7 @@ button.bit {
 }
 .prediction-plots {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3);
 }
 .answer-editor {
