@@ -8,7 +8,7 @@
 // test names an internal signal and what it should be, the earliest named signal that is wrong.
 
 import { cone, Simulator, type SimulatorOptions } from "./simulator";
-import { driverOf, type Circuit, type Component, type NetId } from "./circuit";
+import { driverOf, type Circuit, type Component, type CompositeDef, type NetId } from "./circuit";
 import { equal, formatWord, parseWord, unknown, type Word } from "./values";
 
 /** A value in a vector: a number, a bigint, a bit string with X, or "X" for unknown. */
@@ -249,22 +249,32 @@ function describe(
   coneComponents: readonly Component[],
 ): Divergence {
   const driver = driverOf(sim.circuit, net);
+  // A gate inside a block (a flip-flop, a latch, a register) is not something the learner placed
+  // or can change. The divergence is reported at the outermost block that holds the driver, with
+  // the values on that block's inputs, and the cone lists the parts outside it, nearest first.
+  const block = driver ? outermostBlock(sim.circuit, driver.path) : undefined;
+  const seenPorts = block?.inputs ?? driver?.inputs ?? {};
   const inputsSeen: Record<string, string> = {};
-  if (driver) {
-    for (const [port, inNet] of Object.entries(driver.inputs)) {
-      inputsSeen[`${port} (${sim.circuit.nets[inNet]?.name ?? inNet})`] = formatWord(
-        sim.read(inNet),
-      );
-    }
+  for (const [port, inNet] of Object.entries(seenPorts)) {
+    inputsSeen[`${port} (${sim.circuit.nets[inNet]?.name ?? inNet})`] = formatWord(sim.read(inNet));
   }
+  const outside = (path: string) => !block || !path.startsWith(`${block.path}/`);
+  const component = block ?? driver;
   return {
     net: name,
     actual,
     expected,
-    ...(driver ? { component: { kind: driver.kind, path: driver.path } } : {}),
+    ...(component ? { component: { kind: component.kind, path: component.path } } : {}),
     inputsSeen,
-    cone: coneComponents.map((c) => c.path),
+    cone: [...(block ? [block.path] : []), ...coneComponents.map((c) => c.path).filter(outside)],
   };
+}
+
+/** The outermost composite whose path contains `path`, if the component sits inside one. */
+function outermostBlock(circuit: Circuit, path: string): CompositeDef | undefined {
+  return circuit.composites
+    .filter((c) => path.startsWith(`${c.path}/`))
+    .sort((a, b) => a.path.length - b.path.length)[0];
 }
 
 function toWord(sim: Simulator, name: string, value: VectorValue): Word {

@@ -44,7 +44,11 @@ export function generate(circuit: Circuit): Generated {
   for (const o of circuit.outputs) header.push(`  output ${decl(o.net)} ${names.get(o.net)}`);
 
   // Flip-flops and registers are written as behaviour; everything under them is skipped.
-  const behavioural = circuit.composites.filter((c) => c.kind === "dff" || c.kind === "register");
+  // Only the outermost: a register's flip-flops are written by the register's one `always_ff`.
+  const clocked = circuit.composites.filter((c) => c.kind === "dff" || c.kind === "register");
+  const behavioural = clocked.filter(
+    (c) => !clocked.some((o) => o !== c && c.path.startsWith(`${o.path}/`)),
+  );
   const under = (path: string) =>
     behavioural.find((c) => path === c.path || path.startsWith(`${c.path}/`));
   if (circuit.composites.some((c) => !behavioural.includes(c) && !under(c.path))) {

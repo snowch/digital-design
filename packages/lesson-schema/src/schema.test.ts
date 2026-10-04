@@ -154,5 +154,12 @@ describe("the term gate", () => {
     expect(termProblems([first, exempt])).toEqual([]);
     const later = { ...earlier, id: "later", order: 2 };
     expect(termProblems([first, later])).toEqual([]);
+    // Order counts within a module: an earlier module's lesson with the same order is earlier.
+    const earlierModule = { ...earlier, id: "earlier-module", module: first.module - 1, order: 1 };
+    const laterModule = { ...earlier, id: "later-module", module: first.module + 1, order: 0 };
+    expect(termProblems([{ ...first, order: 1 }, earlierModule]).map((p) => p.lesson)).toEqual([
+      "earlier-module",
+    ]);
+    expect(termProblems([first, laterModule])).toEqual([]);
   });
 });

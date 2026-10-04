@@ -43,6 +43,16 @@ samp {
   font-family: var(--font-mono);
   font-size: 0.86em;
 }
+/* The mono face joins < and = into one arrow-like glyph. A learner who must type `<=` has to
+   see the two characters, so no code or text box anywhere draws ligatures. */
+code,
+pre,
+kbd,
+samp,
+textarea,
+svg {
+  font-variant-ligatures: none;
+}
 code {
   background: var(--bg-inset);
   padding: 0.05em 0.35em;

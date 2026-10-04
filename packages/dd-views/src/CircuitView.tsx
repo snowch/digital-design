@@ -39,9 +39,13 @@ export function levelOf(value: Word | undefined): Level {
   return value.value === 0n ? "low" : "high";
 }
 
+/**
+ * A value as the views write it: a bit as 0, 1 or X; a word of up to eight bits in binary, so each
+ * bit can be read off against the flip-flop that holds it; a wider word in hexadecimal.
+ */
 export function valueLabel(value: Word | undefined): string {
   if (!value) return "";
-  return value.width === 1 ? formatWord(value) : formatWord(value, 16);
+  return value.width <= 8 ? formatWord(value) : formatWord(value, 16);
 }
 
 function fullPath(scope: string, local: string): string {
@@ -242,18 +246,20 @@ export function CircuitView({
                       {box.label}
                     </text>
                   )}
-                  {!nameRepeatsKind(part.id, part.kind) && (
+                  {!nameRepeatsKind(part.id, part.kind) && !part.id.startsWith("fault/") && (
                     <text x={box.w / 2} y={box.h + 12} textAnchor="middle" className="part-name">
                       {part.id}
                     </text>
                   )}
                   {!isShaped(part.kind) &&
+                    part.kind !== "const" &&
                     box.inputs.map((p) => (
                       <text key={p.port} x={6} y={p.at.y - box.y + 3} className="port-label">
                         {p.port}
                       </text>
                     ))}
                   {!isShaped(part.kind) &&
+                    part.kind !== "const" &&
                     box.outputs.map((p) => (
                       <text
                         key={p.port}

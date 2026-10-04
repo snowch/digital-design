@@ -7,6 +7,7 @@ import { z } from "zod";
 import {
   D_FLIP_FLOP_TABLE,
   D_LATCH_TABLE,
+  REGISTER_BIT_TABLE,
   SR_LATCH_TABLE,
   libraryCircuit,
   type TruthTable as RefTable,
@@ -24,13 +25,14 @@ const TABLES: Record<string, RefTable> = {
   "sr-latch": SR_LATCH_TABLE,
   "d-latch": D_LATCH_TABLE,
   "d-flip-flop": D_FLIP_FLOP_TABLE,
+  "register-bit": REGISTER_BIT_TABLE,
 };
 
 const Props = z.object({
   libraryId: z.string(),
   clock: z.string().optional(),
   showSteps: z.boolean().default(false),
-  truthTable: z.enum(["sr-latch", "d-latch", "d-flip-flop"]).optional(),
+  truthTable: z.enum(["sr-latch", "d-latch", "d-flip-flop", "register-bit"]).optional(),
   scope: z.string().default(""),
 });
 
@@ -46,6 +48,11 @@ export function referenceRows(table: RefTable, inputNames: readonly string[]) {
       state: r.state,
     }));
   return { cols, rows };
+}
+
+/** In a reference table an X input means the row holds for either value; X elsewhere means unknown. */
+function either(v: string): string {
+  return v === "X" ? "0 or 1" : v;
 }
 
 function currentInputs(circuit: Circuit, values: readonly Word[]): Record<string, string> {
@@ -142,7 +149,7 @@ export const CircuitExplorer = withProps(
             caption={table.title}
             inputColumns={ref.cols}
             outputColumns={[table.outputColumn]}
-            rows={ref.rows}
+            rows={ref.rows.map((r) => ({ ...r, inputs: r.inputs.map(either) }))}
             stateColumn={strings.table.state}
             {...(current !== undefined ? { current } : {})}
             {...(table.note ? { note: table.note } : {})}

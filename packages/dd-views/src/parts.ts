@@ -31,6 +31,7 @@ const GATE_LABELS: Readonly<Record<string, string>> = {
   xor: "XOR",
   xnor: "XNOR",
   mux2: "MUX",
+  const: "CONST",
 };
 
 const COMPOSITE_LABELS: Readonly<Record<string, string>> = {
@@ -42,6 +43,13 @@ const COMPOSITE_LABELS: Readonly<Record<string, string>> = {
   "dff-reset": "D flip-flop with reset",
   "dff-reset-enable": "D flip-flop with reset and enable",
   "register-4": "4-bit register",
+  // The registers lesson's circuits, named in the trail above their drawings, and a register
+  // block of any width.
+  "four-flip-flops": "Four flip-flops",
+  "keep-bit": "One bit with a load enable",
+  "keep-clear-bit": "One bit with a load enable and a reset",
+  "gated-clock-bit": "Flip-flop clocked through an AND gate",
+  register: "register",
 };
 
 const COMPOSITE_DESCRIPTIONS: Readonly<Record<string, string>> = {
@@ -61,6 +69,7 @@ const GATE_INPUTS: Readonly<Record<string, readonly string[]>> = {
   not: ["a"],
   buf: ["a"],
   mux2: ["sel", "a", "b"],
+  const: [],
 };
 
 /** The spec of a part by id, or undefined if the id names nothing placeable. */

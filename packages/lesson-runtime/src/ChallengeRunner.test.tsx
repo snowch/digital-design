@@ -121,10 +121,10 @@ describe("ChallengeRunner", () => {
     await user.type(screen.getByLabelText("Your text"), "right");
     await user.click(screen.getByRole("button", { name: S.challenge.run }));
     expect(screen.getByText(S.challenge.complete)).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: /^Reset/ }));
+    await user.click(screen.getByRole("button", { name: /^Clear work/ }));
     await user.click(screen.getByRole("button", { name: S.challenge.resetCancel }));
     expect(screen.getByText(S.challenge.complete)).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: /^Reset/ }));
+    await user.click(screen.getByRole("button", { name: /^Clear work/ }));
     await user.click(screen.getByRole("button", { name: S.challenge.resetConfirm }));
     expect(screen.queryByText(S.challenge.complete)).not.toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent(S.challenge.resetDone);

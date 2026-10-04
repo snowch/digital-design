@@ -4,7 +4,7 @@
 // data and the circuit stays testable here. Each entry is a function, so every caller gets a fresh
 // netlist to simulate, break or compare.
 
-import { CircuitBuilder, type Circuit } from "@dd/sim";
+import { CircuitBuilder, type Circuit, type NetId } from "@dd/sim";
 
 import { dFlipFlop, type FlipFlopOptions } from "./flipflop";
 import { dLatch, gatedSrLatch, srLatch } from "./latches";
@@ -128,6 +128,156 @@ export function registerCircuit(width: number, options: FlipFlopCircuitOptions =
   return b.build();
 }
 
+/**
+ * Hand-placed positions for a library circuit's drawing, in grid cells: parts by instance name,
+ * pins as `in:NAME` and `out:NAME`. A view lays out whatever has no position; a lesson's main
+ * figures are placed so the wires read in the order the lesson explains them.
+ */
+export function placed(
+  circuit: Circuit,
+  at: Readonly<Record<string, readonly [number, number]>>,
+): Circuit {
+  const pos = (key: string) => {
+    const p = at[key];
+    return p ? { x: p[0], y: p[1] } : undefined;
+  };
+  const outputPins = new Map<NetId, Record<string, { x: number; y: number }>>();
+  for (const o of circuit.outputs) {
+    const p = pos(`out:${o.name}`);
+    if (p) outputPins.set(o.net, { ...(outputPins.get(o.net) ?? {}), [o.name]: p });
+  }
+  return {
+    ...circuit,
+    nets: circuit.nets.map((n) => {
+      const input = circuit.inputs.find((i) => i.net === n.id);
+      const pin = input ? pos(`in:${input.name}`) : undefined;
+      const outs = outputPins.get(n.id);
+      if (!pin && !outs) return n;
+      return {
+        ...n,
+        meta: { ...(n.meta ?? {}), ...(pin ? { pin } : {}), ...(outs ? { outputPins: outs } : {}) },
+      };
+    }),
+    components: circuit.components.map((c) => {
+      const p = c.path.includes("/") ? undefined : pos(c.name);
+      return p ? { ...c, meta: { ...(c.meta ?? {}), layout: p } } : c;
+    }),
+    composites: circuit.composites.map((c) => {
+      const p = c.path.includes("/") ? undefined : pos(c.name);
+      return p ? { ...c, meta: { ...(c.meta ?? {}), layout: p } } : c;
+    }),
+  };
+}
+
+/**
+ * The registers lesson's first circuit: four flip-flops sharing one clock, each with its own
+ * one-bit D pin and Q pin, so a learner can set the bits one by one and watch all four change at
+ * the same edge. Flip-flop `ffN` holds bit N.
+ */
+export function fourFlipFlopsCircuit(): Circuit {
+  const b = new CircuitBuilder("four-flip-flops");
+  const ds = [0, 1, 2, 3].map((i) => b.input(`D${i}`));
+  const clk = b.input("CLK");
+  ds.forEach((d, i) => {
+    const { q } = dFlipFlop(b, d, clk, { name: `ff${i}` });
+    b.output(`Q${i}`, q);
+  });
+  // Bit 3 at the top, so the drawing reads top to bottom in the order a word is written.
+  const at: Record<string, [number, number]> = { "in:CLK": [0, 21] };
+  for (let i = 0; i < 4; i++) {
+    const row = 1 + (3 - i) * 5;
+    at[`in:D${i}`] = [0, row];
+    at[`ff${i}`] = [6, row];
+    at[`out:Q${i}`] = [12, row];
+  }
+  return placed(b.build(), at);
+}
+
+/**
+ * One bit that keeps its value at an edge where EN is 0, built from gates in front of a flip-flop:
+ * CHOICE = (D AND EN) OR (Q AND NOT EN). The gates sit at the top level so the view shows them; the
+ * flip-flop is the course's own, to be opened. With `clear`, a RST input forces CHOICE to 0 through
+ * one more AND gate, so a reset wins over EN and D.
+ */
+export function keepBitCircuit(options: { clear?: boolean } = {}): Circuit {
+  const b = new CircuitBuilder(options.clear ? "keep-clear-bit" : "keep-bit");
+  const d = b.input("D");
+  const en = b.input("EN");
+  const rst = options.clear ? b.input("RST") : undefined;
+  const clk = b.input("CLK");
+  const q = b.net("Q");
+  const notEn = b.not(en, { name: "notEn" });
+  const load = b.and([d, en], { name: "andLoad", output: b.net("LOAD") });
+  const keep = b.and([q, notEn], { name: "andKeep", output: b.net("KEEP") });
+  let next = b.or([load, keep], { name: "orChoice", output: b.net("CHOICE") });
+  if (rst !== undefined) {
+    const notRst = b.not(rst, { name: "notRst" });
+    next = b.and([next, notRst], { name: "andClear", output: b.net("CLEARED") });
+  }
+  dFlipFlop(b, next, clk, { name: "ff", q });
+  b.output("Q", q);
+  // The flip-flop sits low, level with CLK, so the clock runs straight in under the gates.
+  const ffX = rst !== undefined ? 25 : 20;
+  const ffY = rst !== undefined ? 12 : 8;
+  return placed(b.build(), {
+    "in:D": [0, 1],
+    "in:EN": [0, 5],
+    ...(rst !== undefined ? { "in:RST": [0, 10] } : {}),
+    // One row below the flip-flop, so the loop's wire passes under the flip-flop's name.
+    "in:CLK": [0, ffY + 2],
+    notEn: [5, 5],
+    andLoad: [10, 1],
+    andKeep: [10, 5],
+    orChoice: [15, 3],
+    notRst: [10, 9],
+    andClear: [20, 5],
+    ff: [ffX, ffY],
+    "out:Q": [ffX + 6, ffY],
+  });
+}
+
+/**
+ * The tempting wrong way to keep a value: switch the clock off. GCLK = CLK AND EN drives the
+ * flip-flop's clock, so with EN at 0 no edge reaches it. But EN rising while CLK is 1 makes a
+ * rising edge on GCLK that the clock never made, and the flip-flop takes D at that moment.
+ */
+export function gatedClockCircuit(): Circuit {
+  const b = new CircuitBuilder("gated-clock-bit");
+  const d = b.input("D");
+  const en = b.input("EN");
+  const clk = b.input("CLK");
+  const gclk = b.and([clk, en], { name: "andClk", output: b.net("GCLK") });
+  const { q } = dFlipFlop(b, d, gclk, { name: "ff" });
+  b.output("Q", q);
+  return placed(b.build(), {
+    "in:D": [0, 1],
+    "in:CLK": [0, 4],
+    "in:EN": [0, 7],
+    andClk: [5, 4],
+    ff: [10, 1],
+    "out:Q": [16, 1],
+  });
+}
+
+/**
+ * Four flip-flops in a chain on one clock: IN feeds the first, and each flip-flop's Q feeds the
+ * next one's D. At every edge each flip-flop takes what the one before it held, so the bits move
+ * one place along. Q0 is the newest bit, Q3 the oldest.
+ */
+export function shiftFourCircuit(): Circuit {
+  const b = new CircuitBuilder("shift-4");
+  let wire = b.input("IN");
+  const clk = b.input("CLK");
+  const qs: NetId[] = [];
+  for (let i = 0; i < 4; i++) {
+    const { q } = dFlipFlop(b, wire, clk, { name: `ff${i}`, q: b.net(`Q${i}`) });
+    qs.push(q);
+    wire = q;
+  }
+  qs.forEach((q, i) => b.output(`Q${i}`, q));
+  return b.build();
+}
+
 /** Y = A AND NOT B: the glitch example, when A and B rise together. */
 export function glitchCircuit(delay = 10): Circuit {
   const b = new CircuitBuilder("glitch-and-not");
@@ -150,6 +300,29 @@ export const LIBRARY: Readonly<Record<string, () => Circuit>> = {
   "dff-reset": () => dFlipFlopCircuit({ reset: true }),
   "dff-reset-enable": () => dFlipFlopCircuit({ reset: true, enable: true }),
   "register-4": () => registerCircuit(4, { reset: true }),
+  "register-4-plain": () => registerCircuit(4),
+  "register-4-enable": () =>
+    placed(registerCircuit(4, { enable: true }), {
+      "in:D": [0, 0],
+      "in:CLK": [0, 3],
+      "in:EN": [0, 6],
+      reg: [6, 1],
+      "out:Q": [12, 1],
+    }),
+  "register-4-reset-enable": () =>
+    placed(registerCircuit(4, { reset: true, enable: true }), {
+      "in:D": [0, 0],
+      "in:CLK": [0, 3],
+      "in:RST": [0, 6],
+      "in:EN": [0, 9],
+      reg: [6, 1],
+      "out:Q": [12, 1],
+    }),
+  "four-flip-flops": () => fourFlipFlopsCircuit(),
+  "keep-bit": () => keepBitCircuit(),
+  "keep-clear-bit": () => keepBitCircuit({ clear: true }),
+  "shift-4": () => shiftFourCircuit(),
+  "gated-clock-bit": () => gatedClockCircuit(),
   "glitch-and-not": () => glitchCircuit(),
 };
 

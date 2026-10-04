@@ -1,4 +1,4 @@
-import { dFlipFlopCircuit, glitchCircuit, srLatchCircuit } from "@dd/dd-model";
+import { dFlipFlopCircuit, glitchCircuit, registerCircuit, srLatchCircuit } from "@dd/dd-model";
 import { CircuitBuilder, runSuite, type Circuit, type TestSuite } from "@dd/sim";
 import { describe, expect, it } from "vitest";
 
@@ -27,6 +27,22 @@ function agree(a: Circuit, b: Circuit, suite: TestSuite) {
 }
 
 describe("the round trip", () => {
+  it("a register with reset and enable is one always_ff, not one per flip-flop inside it", () => {
+    const original = registerCircuit(4, { reset: true, enable: true });
+    const { circuit, text } = back(original);
+    expect(text.match(/always_ff/g)).toHaveLength(1);
+    expect(text).toContain("if (RST) Q <= 4'b0000;");
+    expect(text).toContain("else if (EN) Q <= D;");
+    agree(original, circuit, {
+      kind: "sequence",
+      steps: [
+        { set: { D: "0110", EN: 1, RST: 0, CLK: 0 }, clock: "CLK", expect: { Q: "0110" } },
+        { set: { D: "1111", EN: 0 }, clock: "CLK", expect: { Q: "0110" } },
+        { set: { RST: 1, EN: 1 }, clock: "CLK", expect: { Q: "0000" } },
+      ],
+    });
+  });
+
   it("a hand-built half adder becomes assigns and comes back passing the same vectors", () => {
     const b = new CircuitBuilder("half_adder");
     const x = b.input("a");

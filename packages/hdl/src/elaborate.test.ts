@@ -238,3 +238,17 @@ describe("the awkward case", () => {
     expect(formatWord(sim.read("q"))).toBe("1");
   });
 });
+
+describe("a value of the wrong width inside always_ff", () => {
+  it("is refused with a message, not passed to the simulator", () => {
+    const r =
+      elaborate(`module wide(input logic [7:0] D, input logic RST, input logic CLK, output logic [7:0] Q);
+  always_ff @(posedge CLK) begin
+    if (RST) Q <= 4'b0000;
+    else Q <= D;
+  end
+endmodule`);
+    expect(r.circuit).toBeUndefined();
+    expect(r.messages.map((m) => m.text).join(" ")).toMatch(/4.*8|8.*4/);
+  });
+});

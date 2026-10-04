@@ -16,7 +16,8 @@ export interface VerdictDivergence {
   readonly net: string;
   readonly actual: string;
   readonly expected: string;
-  readonly component?: { readonly kind: string; readonly path: string };
+  /** The part where it diverges; `label` is how the book names that part to a learner. */
+  readonly component?: { readonly kind: string; readonly path: string; readonly label?: string };
   readonly inputsSeen: Readonly<Record<string, string>>;
   readonly cone: readonly string[];
 }

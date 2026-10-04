@@ -46,11 +46,12 @@ function pattern(term: string): RegExp {
 }
 
 /**
- * Lessons in course order. A term is at home in the first lesson that lists it under
- * `introduces`; a use before that is a problem.
+ * Lessons in course order: by module, then by order within the module. A term is at home in the
+ * first lesson that lists it under `introduces`; a use before that is a problem.
  */
 export function termProblems(lessons: readonly Lesson[]): TermProblem[] {
-  const ordered = [...lessons].sort((a, b) => a.order - b.order);
+  const ordered = [...lessons].sort((a, b) => a.module - b.module || a.order - b.order);
+  const position = new Map(ordered.map((l, i) => [l.id, i]));
   const home = new Map<string, string>();
   for (const l of ordered) for (const t of l.introduces) if (!home.has(t)) home.set(t, l.id);
   const problems: TermProblem[] = [];
@@ -59,8 +60,7 @@ export function termProblems(lessons: readonly Lesson[]): TermProblem[] {
     for (const [term, homeId] of home) {
       if (homeId === l.id) continue;
       if (exempt.has(term.toLowerCase())) continue;
-      const homeOrder = ordered.find((x) => x.id === homeId)?.order ?? 0;
-      if (l.order >= homeOrder) continue;
+      if ((position.get(l.id) ?? 0) >= (position.get(homeId) ?? 0)) continue;
       const re = pattern(term);
       for (const text of learnerText(l)) {
         const m = re.exec(text);

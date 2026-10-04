@@ -1,6 +1,7 @@
 import {
   bit0,
   bit1,
+  CircuitBuilder,
   formatWord,
   hierarchy,
   replay,
@@ -10,7 +11,9 @@ import {
 } from "@dd/sim";
 import { describe, expect, it } from "vitest";
 
-import { dFlipFlopCircuit, registerCircuit } from "./library";
+import { dFlipFlopCircuit, keepBitCircuit, registerCircuit } from "./library";
+import { REGISTER_BIT_TABLE } from "./reference";
+import { dFlipFlop } from "./flipflop";
 
 describe("the D flip-flop", () => {
   it("captures D at the rising edge and nowhere else", () => {
@@ -141,5 +144,59 @@ describe("a register", () => {
     const paths = circuit.components.map((c) => c.path);
     expect(paths.filter((p) => /^reg\/ff\d\/master\/sr\/norQ$/.test(p))).toHaveLength(4);
     expect(circuit.composites.filter((c) => c.kind === "dff")).toHaveLength(4);
+  });
+});
+
+describe("a failed test on a circuit built around a flip-flop", () => {
+  it("names the flip-flop block, not a gate inside it, and lists the gates in front of it first", () => {
+    // A bit meant to keep its value when EN is 0, built without the keep path: it loads 0.
+    const b = new CircuitBuilder("forgets");
+    const d = b.input("D");
+    const en = b.input("EN");
+    const clk = b.input("CLK");
+    const next = b.and([d, en], { name: "andLoad" });
+    const { q } = dFlipFlop(b, next, clk, { name: "ff" });
+    b.output("Q", q);
+    const verdict = runSuite(b.build(), {
+      kind: "sequence",
+      steps: [
+        { set: { D: 1, EN: 1, CLK: 0 }, clock: "CLK", expect: { Q: 1 } },
+        { label: "edge with EN 0", set: { EN: 0 }, clock: "CLK", expect: { Q: 1 } },
+      ],
+    });
+    const divergence = verdict.failures[0]?.divergence;
+    expect(verdict.failures.map((f) => f.label)).toEqual(["edge with EN 0"]);
+    expect(divergence?.component).toEqual({ kind: "dff", path: "ff" });
+    expect(Object.keys(divergence?.inputsSeen ?? {})).toEqual(["D (andLoad.y)", "CLK (CLK)"]);
+    expect(divergence?.cone.slice(0, 2)).toEqual(["ff", "andLoad"]);
+  });
+});
+
+describe("the register bit's reference table", () => {
+  // Every row, for every value of each "either" input and from both starting values of Q.
+  it("is what the keep-and-clear bit does", () => {
+    for (const row of REGISTER_BIT_TABLE.rows) {
+      const free = Object.keys(row.inputs).filter((k) => row.inputs[k] === "X");
+      for (let combo = 0; combo < 1 << free.length; combo++) {
+        for (const start of [0, 1]) {
+          const sim = new Simulator(keepBitCircuit({ clear: true }));
+          sim.setInput("CLK", bit0);
+          sim.setInput("RST", bit0);
+          sim.setInput("EN", bit1);
+          sim.setInput("D", start ? bit1 : bit0);
+          sim.clockCycle("CLK");
+          for (const name of ["RST", "EN", "D"]) {
+            const v = row.inputs[name];
+            const i = free.indexOf(name);
+            const bit = v === "X" ? (combo >> i) & 1 : Number(v);
+            sim.setInput(name, bit ? bit1 : bit0);
+          }
+          if (row.inputs["CLK"] === "↑") sim.clockCycle("CLK");
+          else sim.settle();
+          const want = row.next === "Q" ? String(start) : row.next;
+          expect(formatWord(sim.read("Q")), `${row.state} from ${start}`).toBe(want);
+        }
+      }
+    }
   });
 });
