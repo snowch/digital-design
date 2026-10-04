@@ -7,6 +7,7 @@ import { z } from "zod";
 import {
   D_FLIP_FLOP_TABLE,
   D_LATCH_TABLE,
+  REGISTER_BIT_TABLE,
   SR_LATCH_TABLE,
   libraryCircuit,
   type TruthTable as RefTable,
@@ -24,13 +25,14 @@ const TABLES: Record<string, RefTable> = {
   "sr-latch": SR_LATCH_TABLE,
   "d-latch": D_LATCH_TABLE,
   "d-flip-flop": D_FLIP_FLOP_TABLE,
+  "register-bit": REGISTER_BIT_TABLE,
 };
 
 const Props = z.object({
   libraryId: z.string(),
   clock: z.string().optional(),
   showSteps: z.boolean().default(false),
-  truthTable: z.enum(["sr-latch", "d-latch", "d-flip-flop"]).optional(),
+  truthTable: z.enum(["sr-latch", "d-latch", "d-flip-flop", "register-bit"]).optional(),
   scope: z.string().default(""),
 });
 

@@ -63,6 +63,26 @@ export const D_FLIP_FLOP_TABLE: TruthTable = {
   note: "Q changes only at the rising edge of CLK. At all other times Q holds, whatever D does.",
 };
 
+/**
+ * One bit of the registers lesson's register: a flip-flop with a reset and a load enable in front
+ * of it. The reset wins over EN, and EN decides between D and the bit's own Q. The words were
+ * drafted by the course's prose process for that lesson.
+ */
+export const REGISTER_BIT_TABLE: TruthTable = {
+  id: "register-bit",
+  title: "TITLE",
+  inputColumns: ["CLK", "RST", "EN", "D"],
+  outputColumn: "Q(next)",
+  rows: [
+    { inputs: { CLK: "↑", RST: "1", EN: "X", D: "X" }, next: "0", state: "RESET" },
+    { inputs: { CLK: "↑", RST: "0", EN: "0", D: "X" }, next: "Q", state: "KEEP" },
+    { inputs: { CLK: "↑", RST: "0", EN: "1", D: "0" }, next: "0", state: "LOAD0" },
+    { inputs: { CLK: "↑", RST: "0", EN: "1", D: "1" }, next: "1", state: "LOAD1" },
+    { inputs: { CLK: "—", RST: "X", EN: "X", D: "X" }, next: "Q", state: "NOEDGE" },
+  ],
+  note: "NOTE",
+};
+
 export interface TimingParameter {
   readonly name: string;
   readonly symbol: string;

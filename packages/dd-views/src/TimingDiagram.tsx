@@ -7,7 +7,7 @@ import { useEffect, useId, useMemo, useRef } from "react";
 
 import { formatWord, type Circuit, type Trace, type Word } from "@dd/sim";
 
-import { levelOf } from "./CircuitView";
+import { levelOf, valueLabel } from "./CircuitView";
 import { format, useViewStrings } from "./strings";
 import { segmentsOf, traceEnd, valuesAt } from "./traces";
 
@@ -119,18 +119,22 @@ export function TimingDiagram({
   const markTimes = new Set(ticks.map((m) => m.time));
   const plain = span <= 24 ? Array.from({ length: span + 1 }, (_, i) => from + i) : [];
   const anchorAt = (t: number) => (t <= from ? "start" : t >= end ? "end" : "middle");
-  const markRows: { time: number; label: string; row: number }[] = [];
-  let lastX = -Infinity;
-  let lastRow = 1;
-  let lastLabel = "";
+  // Each label's extent follows its anchor: the last mark's label runs leftwards from its time,
+  // so it is checked against the one before it by its whole width, not half of it.
+  // A label too long to centre near either end is anchored inwards instead.
+  const markRows: { time: number; label: string; row: number; anchor: string }[] = [];
+  const rightEdge = [-Infinity, -Infinity];
   for (const m of ticks) {
     const px = x(m.time);
-    const needed = ((lastLabel.length + m.label.length) / 2) * 7.5 + 12;
-    const row = px - lastX < needed ? 1 - lastRow : 0;
-    markRows.push({ time: m.time, label: m.label, row });
-    lastX = px;
-    lastRow = row;
-    lastLabel = m.label;
+    const w = m.label.length * 7.5;
+    let anchor = anchorAt(m.time);
+    if (anchor === "middle" && px - w / 2 < 0) anchor = "start";
+    if (anchor === "middle" && px + w / 2 > width) anchor = "end";
+    const left = anchor === "start" ? px : anchor === "end" ? px - w : px - w / 2;
+    const fits = (row: number) => left >= (rightEdge[row] ?? -Infinity) + 12;
+    const row = fits(0) ? 0 : fits(1) ? 1 : 0;
+    markRows.push({ time: m.time, label: m.label, row, anchor });
+    rightEdge[row] = left + w;
   }
 
   return (
@@ -210,7 +214,7 @@ export function TimingDiagram({
                 key={`m${i}`}
                 x={x(m.time)}
                 y={m.row === 0 ? 14 : 31}
-                textAnchor={anchorAt(m.time)}
+                textAnchor={m.anchor as "start" | "middle" | "end"}
                 className="mark-label"
               >
                 {m.label}
@@ -260,7 +264,7 @@ export function TimingDiagram({
                           height={LANE_H - 8}
                         />
                         <text x={x(s.from) + 4} y={top + LANE_H / 2 + 4} className="bus-value">
-                          {formatWord(s.value, 16)}
+                          {valueLabel(s.value)}
                         </text>
                       </g>
                     );
@@ -317,9 +321,7 @@ export function TimingDiagram({
               return (
                 <tr key={lane.name}>
                   <th scope="row">{lane.name}</th>
-                  <td className={`value-${levelOf(v)}`}>
-                    {v ? formatWord(v, v.width === 1 ? 2 : 16) : ""}
-                  </td>
+                  <td className={`value-${levelOf(v)}`}>{valueLabel(v)}</td>
                 </tr>
               );
             })}

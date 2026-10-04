@@ -39,9 +39,13 @@ export function levelOf(value: Word | undefined): Level {
   return value.value === 0n ? "low" : "high";
 }
 
+/**
+ * A value as the views write it: a bit as 0, 1 or X; a word of up to eight bits in binary, so each
+ * bit can be read off against the flip-flop that holds it; a wider word in hexadecimal.
+ */
 export function valueLabel(value: Word | undefined): string {
   if (!value) return "";
-  return value.width === 1 ? formatWord(value) : formatWord(value, 16);
+  return value.width <= 8 ? formatWord(value) : formatWord(value, 16);
 }
 
 function fullPath(scope: string, local: string): string {

@@ -7,7 +7,7 @@ import { dFlipFlop, dLatch, gatedSrLatch, srLatch, type LatchOptions } from "@dd
 import { CircuitBuilder, type Circuit, type NetId } from "@dd/sim";
 
 import { autoLayout } from "./layout";
-import { partSpec, type PartSpec } from "./parts";
+import { labelFor, partSpec, type PartSpec } from "./parts";
 
 /** The two-button memory as a block: an SR latch whose only output is the light. */
 function twoButtons(b: CircuitBuilder, a: NetId, bPress: NetId, options: LatchOptions): void {
@@ -30,6 +30,11 @@ export interface Part {
   readonly y: number;
   /** For a gate that takes any number of inputs: how many it has here. Default 2. */
   readonly fanIn?: number;
+  /**
+   * A block's ports, when the circuit says what they are: a register's depend on whether it was
+   * built with a reset and an enable, so its kind alone cannot say.
+   */
+  readonly ports?: { readonly inputs: readonly string[]; readonly outputs: readonly string[] };
 }
 
 export interface PortRef {
@@ -61,7 +66,16 @@ export interface Interface {
 export const EMPTY_DRAWING: Drawing = { parts: [], wires: [] };
 
 export function specOf(part: Part): PartSpec | undefined {
-  return partSpec(part.kind, part.fanIn ?? 2);
+  const spec = partSpec(part.kind, part.fanIn ?? 2);
+  if (!part.ports) return spec;
+  return {
+    id: part.kind,
+    label: spec?.label ?? labelFor(part.kind),
+    describe: spec?.describe ?? "",
+    role: "composite",
+    inputs: part.ports.inputs,
+    outputs: part.ports.outputs,
+  };
 }
 
 /** The id a pin part has for an interface port. */
@@ -216,7 +230,12 @@ export function compileDrawing(drawing: Drawing, name = "drawing"): Compiled {
         dLatch(b, ins["D"] as NetId, ins["EN"] as NetId, opts);
         break;
       case "dff":
-        dFlipFlop(b, ins["D"] as NetId, ins["CLK"] as NetId, opts);
+        // A flip-flop read back from a circuit keeps the reset and the enable it was built with.
+        dFlipFlop(b, ins["D"] as NetId, ins["CLK"] as NetId, {
+          ...opts,
+          ...(ins["RST"] !== undefined ? { reset: ins["RST"] } : {}),
+          ...(ins["EN"] !== undefined ? { enable: ins["EN"] } : {}),
+        });
         break;
       case "dff-reset":
         dFlipFlop(b, ins["D"] as NetId, ins["CLK"] as NetId, {
@@ -326,7 +345,10 @@ export function circuitToDrawing(circuit: Circuit): Drawing {
     for (const [port, net] of Object.entries(c.inputs)) addReader(net, { part: c.name, port });
   }
   for (const c of topComposites) {
-    push({ id: c.name, kind: c.kind }, layoutOf(c.meta));
+    // A block carries the ports it was built with: a flip-flop or a register with a reset and
+    // an enable has more than its kind's plain form.
+    const ports = { inputs: Object.keys(c.inputs), outputs: Object.keys(c.outputs) };
+    push({ id: c.name, kind: c.kind, ports }, layoutOf(c.meta));
     for (const [port, net] of Object.entries(c.outputs))
       driverPort.set(net, { part: c.name, port });
     for (const [port, net] of Object.entries(c.inputs)) addReader(net, { part: c.name, port });

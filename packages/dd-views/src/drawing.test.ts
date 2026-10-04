@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { registerCircuit } from "@dd/dd-model";
 import { elaborate } from "@dd/hdl";
 import { Simulator, bit0, bit1, runSuite } from "@dd/sim";
 
@@ -154,5 +155,14 @@ endmodule`;
       y: 1,
     });
     expect(back.wires).toHaveLength(6);
+  });
+});
+
+describe("a register block in a drawing", () => {
+  it("is drawn with the ports it was built with, and wired to the pins", () => {
+    const drawing = circuitToDrawing(registerCircuit(4, { reset: true, enable: true }));
+    const block = drawing.parts.find((p) => p.kind === "register");
+    expect(block?.ports).toEqual({ inputs: ["D", "CLK", "RST", "EN"], outputs: ["Q"] });
+    expect(drawing.wires).toHaveLength(5);
   });
 });
