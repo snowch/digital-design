@@ -117,3 +117,19 @@ redrafted from corrected briefs.
 - The drawing editor's wires route on simple rules; a dense drawing crosses itself.
 - No lesson yet uses the register, the reset or the enable; they are built and tested.
 - `docs/platform.md` and the extraction of shared primitives wait for Slice 2, by the rule of two.
+
+### An experiment running in parallel: the same rules, a second model
+
+The author asked whether another model could build a lesson to the same standard, so that the
+remaining modules could be delegated. A second session, on a different model, is building
+Module 5's first lesson, registers (a word held by flip-flops sharing one clock, load-enable,
+reset, and a counter or shift register as the capstone if it fits), on the branch
+`module-5-registers-b`, under exactly the rules in `CLAUDE.md`: fact briefs, Haiku drafts,
+the term gate, pinned numbers, the two-half review, `npm run check` green. The state machine
+lesson and the extraction of primitives are kept out of it, because the build prompt makes the
+extraction a stop-and-ask checkpoint. The session writes `docs/notes/module-5-registers.md` as
+it goes: every brief sent, what each draft got wrong, the review's findings and their fates, and
+the time taken. When it pushes, the comparison runs the check and the Playwright suite on its
+branch, has two reviewers read both lessons blind under one brief with a sceptic on each
+finding, and counts what is countable: tests at each level, findings by category, sentences
+rewritten, wall-clock time. The write-up goes in this file.

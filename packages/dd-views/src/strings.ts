@@ -100,6 +100,8 @@ export interface ViewStrings {
     readonly noMatch: string;
     readonly traceTitle: string;
     readonly legend: string;
+    /** The accessible name of the drawing shown above the question. */
+    readonly circuitTitle: string;
   };
   readonly fault: {
     readonly choose: string;
@@ -290,6 +292,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     noMatch: "Your choice did not match.",
     traceTitle: "Simulation trace",
     legend: "Prediction options",
+    circuitTitle: "Circuit diagram",
   },
   fault: {
     choose: "Fault options",
