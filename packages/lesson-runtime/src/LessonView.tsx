@@ -134,15 +134,6 @@ function LessonBody({ book, lesson, storage, lessonHref }: Omit<LessonViewProps,
             </ul>
           </section>
         )}
-        {models.length > 0 && (
-          <aside className="lesson-model-note" aria-labelledby="lesson-model-note">
-            <h2 id="lesson-model-note">{strings.lesson.modelNote}</h2>
-            {models.map((m) => {
-              const note = book.timeModelNotes[m as keyof Book["timeModelNotes"]];
-              return note ? <Prose key={m} markdown={note} /> : null;
-            })}
-          </aside>
-        )}
       </header>
       {lesson.sections.map((section) => {
         const headingId = `section-${section.kind}`;
@@ -170,6 +161,15 @@ function LessonBody({ book, lesson, storage, lessonHref }: Omit<LessonViewProps,
           </section>
         );
       })}
+      {models.length > 0 && (
+        <aside className="lesson-model-note" aria-labelledby="lesson-model-note">
+          <h2 id="lesson-model-note">{strings.lesson.modelNote}</h2>
+          {models.map((m) => {
+            const note = book.timeModelNotes[m as keyof Book["timeModelNotes"]];
+            return note ? <Prose key={m} markdown={note} /> : null;
+          })}
+        </aside>
+      )}
       <aside className="lesson-model-vs-reality" aria-labelledby="lesson-model-vs-reality">
         <h2 id="lesson-model-vs-reality">{strings.lesson.modelVsReality}</h2>
         <Prose markdown={lesson.modelVsReality} />
