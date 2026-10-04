@@ -1,3 +1,9 @@
-// Shared setup for every Vitest file. The jest-dom matchers extend `expect` and are harmless
-// under Node; a component test adds `// @vitest-environment jsdom` to get a document.
+// Runs before every test file. The matchers are jest-dom's; the cleanup unmounts what a test
+// rendered, which Testing Library does on its own only when Vitest's globals are on.
 import "@testing-library/jest-dom/vitest";
+import { cleanup } from "@testing-library/react";
+import { afterEach } from "vitest";
+
+afterEach(() => {
+  cleanup();
+});
