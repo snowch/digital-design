@@ -269,7 +269,7 @@ export function CircuitView({
         </g>
         {children}
       </svg>
-      <p className="wire-readout" role="status" aria-live="polite">
+      <p className="wire-readout" aria-live="polite">
         {hot !== undefined
           ? `${sub.nets[hot]?.name ?? ""}${values?.[hot] ? ` = ${valueLabel(values[hot] as Word)}` : ""}`
           : "\u00a0"}
