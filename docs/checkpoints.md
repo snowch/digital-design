@@ -124,7 +124,7 @@ The author asked whether another model could build a lesson to the same standard
 remaining modules could be delegated. A second session, on a different model, is building
 Module 5's first lesson, registers (a word held by flip-flops sharing one clock, load-enable,
 reset, and a counter or shift register as the capstone if it fits), on the branch
-`opus/module-5-registers`, under exactly the rules in `CLAUDE.md`: fact briefs, Haiku drafts,
+`module-5-registers-b`, under exactly the rules in `CLAUDE.md`: fact briefs, Haiku drafts,
 the term gate, pinned numbers, the two-half review, `npm run check` green. The state machine
 lesson and the extraction of primitives are kept out of it, because the build prompt makes the
 extraction a stop-and-ask checkpoint. The session writes `docs/notes/module-5-registers.md` as
