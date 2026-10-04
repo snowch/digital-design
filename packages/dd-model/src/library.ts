@@ -221,7 +221,8 @@ export function keepBitCircuit(options: { clear?: boolean } = {}): Circuit {
     "in:D": [0, 1],
     "in:EN": [0, 5],
     ...(rst !== undefined ? { "in:RST": [0, 10] } : {}),
-    "in:CLK": [0, ffY + 1],
+    // One row below the flip-flop, so the loop's wire passes under the flip-flop's name.
+    "in:CLK": [0, ffY + 2],
     notEn: [5, 5],
     andLoad: [10, 1],
     andKeep: [10, 5],

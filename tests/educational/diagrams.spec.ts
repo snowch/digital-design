@@ -4,7 +4,7 @@
 
 import { expect, test, type Page } from "@playwright/test";
 
-import { V, openLesson } from "./helpers";
+import { LESSONS, V, format, openLesson } from "./helpers";
 
 interface Collision {
   readonly figure: string;
@@ -75,5 +75,39 @@ test.describe("the diagrams", () => {
     await setupHold.getByRole("slider").fill("-20");
     await setupHold.getByRole("button", { name: V.setupHold.draw }).click();
     expect(await textCollisions(page)).toEqual([]);
+  });
+
+  test("the registers lesson: no label overlaps another or leaves its drawing, before and after use", async ({
+    page,
+  }) => {
+    await openLesson(page, "registers");
+    expect(await textCollisions(page)).toEqual([]);
+
+    // Commit the three predictions, press pins and the clock, open a flip-flop, run the faults.
+    for (const id of ["ix-predict-word", "ix-predict-keep", "ix-predict-chain"]) {
+      const figure = page.locator(`#${id}`);
+      await figure.getByRole("radio").nth(1).check();
+      await figure.getByRole("button", { name: V.prediction.commit }).click();
+      await expect(figure.locator("svg.timing-diagram")).toBeVisible();
+    }
+    const four = page.locator("#ix-four-flip-flops");
+    await four.getByRole("button", { name: /^D1 = 0\./ }).click();
+    await four.getByRole("button", { name: format(V.explorer.clock, { name: "CLK" }) }).click();
+    const bit = page.locator("#ix-keep-clear-bit");
+    await bit.getByRole("button", { name: /^RST = 0\./ }).click();
+    await bit.getByRole("button", { name: format(V.explorer.clock, { name: "CLK" }) }).click();
+    const faults = page.locator("#ix-keep-faults");
+    await faults.getByRole("radio").nth(3).check();
+    await faults.getByRole("button", { name: V.fault.run }).click();
+    expect(await textCollisions(page)).toEqual([]);
+    await four.getByRole("button", { name: /ff2\. / }).click();
+    expect(await textCollisions(page)).toEqual([]);
+  });
+
+  test("every lesson's diagrams are clear as first drawn", async ({ page }) => {
+    for (const lesson of LESSONS) {
+      await openLesson(page, lesson.id);
+      expect(await textCollisions(page), lesson.id).toEqual([]);
+    }
   });
 });

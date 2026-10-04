@@ -686,6 +686,14 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
 .truth-table-wrap {
   overflow-x: auto;
 }
+/* On a phone a five-input table must fit without scrolling, or its last column, the one that
+   says what the row does, is the one hidden. */
+@media (max-width: 480px) {
+  .truth-table th,
+  .truth-table td {
+    padding-right: var(--space-3);
+  }
+}
 .truth-table-note {
   color: var(--fg-muted);
   font-size: var(--text-sm);

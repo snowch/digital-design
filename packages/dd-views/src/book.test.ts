@@ -109,7 +109,11 @@ describe("grading a drawn circuit", () => {
     void broken;
     const verdict = grade(c, { circuit: wrong });
     expect(verdict.passed).toBe(false);
-    expect(verdict.failures[0]?.divergence?.component).toEqual({ kind: "or", path: "nor1" });
+    expect(verdict.failures[0]?.divergence?.component).toEqual({
+      kind: "or",
+      path: "nor1",
+      label: "OR gate",
+    });
   });
 
   it("refuses a circuit whose ports are not the challenge's", () => {

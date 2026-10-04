@@ -52,7 +52,7 @@ function FailureView({ failure }: { failure: VerdictFailure }) {
           {d.component && (
             <p>
               {format(strings.challenge.driver, {
-                kind: d.component.kind.toUpperCase(),
+                kind: d.component.label ?? `${d.component.kind.toUpperCase()} gate`,
                 path: d.component.path,
               })}{" "}
               <Values values={d.inputsSeen} />

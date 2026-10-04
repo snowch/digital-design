@@ -13,6 +13,7 @@ import { runSuite, type Circuit } from "@dd/sim";
 import { Builder } from "./Builder";
 import { CircuitView } from "./CircuitView";
 import { HdlPanel } from "./HdlPanel";
+import { GATE_IDS, labelFor } from "./parts";
 import {
   circuitToDrawing,
   compileDrawing,
@@ -25,6 +26,7 @@ import { DEFAULT_VIEW_STRINGS, format, useViewStrings, type ViewStrings } from "
 import { useSettleSim } from "./useSim";
 
 const list = (names: readonly string[]) => names.join(", ");
+const isGateKind = (kind: string) => GATE_IDS.includes(kind);
 
 /** Why a circuit cannot be tested against a challenge's interface, or undefined if it can. */
 export function portProblem(
@@ -89,7 +91,18 @@ export function grade(challenge: Challenge, artifact: Artifact): Verdict {
       ? challenge.tests.vectors.length
       : challenge.tests.steps.filter((s) => s.expect).length;
   if (!circuit) return { passed: false, total, failures: [], blocked: blocked ?? "" };
-  return runSuite(circuit, challenge.tests);
+  const verdict = runSuite(circuit, challenge.tests);
+  return { ...verdict, failures: verdict.failures.map(withPartLabel) };
+}
+
+/** The part a failure names, as the drawing labels it: "NOR gate", "D flip-flop". */
+function withPartLabel(failure: Verdict["failures"][number]): Verdict["failures"][number] {
+  const component = failure.divergence?.component;
+  if (!failure.divergence || !component) return failure;
+  const label = isGateKind(component.kind)
+    ? `${labelFor(component.kind)} gate`
+    : labelFor(component.kind);
+  return { ...failure, divergence: { ...failure.divergence, component: { ...component, label } } };
 }
 
 function markedPath(verdict: Verdict | undefined): string[] {

@@ -7,7 +7,7 @@
 
 import { expect, test, type Page } from "@playwright/test";
 
-import { openLesson } from "./helpers";
+import { LESSONS, openLesson } from "./helpers";
 
 async function designProblems(page: Page, phone: boolean): Promise<string[]> {
   return page.evaluate((isPhone) => {
@@ -46,6 +46,14 @@ async function designProblems(page: Page, phone: boolean): Promise<string[]> {
           );
       }
     }
+    // A reference table that scrolls sideways hides its last column, which says what the row does.
+    for (const wrap of document.querySelectorAll(".truth-table-wrap")) {
+      if (!visible(wrap)) continue;
+      if (wrap.scrollWidth > wrap.clientWidth + 1)
+        out.push(
+          `table ${wrap.scrollWidth - wrap.clientWidth}px too wide: "${(wrap.querySelector("caption")?.textContent ?? "").slice(0, 30)}"`,
+        );
+    }
     // Line length of prose.
     for (const p of document.querySelectorAll(".prose p")) {
       if (!visible(p)) continue;
@@ -64,8 +72,10 @@ test.describe("the look of the page", () => {
   test("text is legible, controls are reachable, and prose keeps its measure", async ({
     page,
   }, info) => {
-    await openLesson(page);
-    expect(await designProblems(page, info.project.name === "phone")).toEqual([]);
+    for (const lesson of LESSONS) {
+      await openLesson(page, lesson.id);
+      expect(await designProblems(page, info.project.name === "phone"), lesson.id).toEqual([]);
+    }
   });
 
   test("the figures that matter most look as designed", async ({ page }) => {
@@ -81,5 +91,15 @@ test.describe("the look of the page", () => {
         animations: "disabled",
       });
     }
+  });
+
+  test("the registers lesson's main figure looks as designed", async ({ page }) => {
+    await openLesson(page, "registers");
+    const figure = page.locator("#ix-keep-clear-bit");
+    await figure.scrollIntoViewIfNeeded();
+    await expect(figure).toHaveScreenshot("ix-keep-clear-bit.png", {
+      maxDiffPixelRatio: 0.02,
+      animations: "disabled",
+    });
   });
 });

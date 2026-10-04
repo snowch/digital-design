@@ -50,6 +50,11 @@ export function referenceRows(table: RefTable, inputNames: readonly string[]) {
   return { cols, rows };
 }
 
+/** In a reference table an X input means the row holds for either value; X elsewhere means unknown. */
+function either(v: string): string {
+  return v === "X" ? "0 or 1" : v;
+}
+
 function currentInputs(circuit: Circuit, values: readonly Word[]): Record<string, string> {
   const out: Record<string, string> = {};
   for (const i of circuit.inputs) {
@@ -144,7 +149,7 @@ export const CircuitExplorer = withProps(
             caption={table.title}
             inputColumns={ref.cols}
             outputColumns={[table.outputColumn]}
-            rows={ref.rows}
+            rows={ref.rows.map((r) => ({ ...r, inputs: r.inputs.map(either) }))}
             stateColumn={strings.table.state}
             {...(current !== undefined ? { current } : {})}
             {...(table.note ? { note: table.note } : {})}

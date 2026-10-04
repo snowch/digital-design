@@ -82,7 +82,7 @@ export const DEFAULT_STRINGS: Strings = {
     actual: "Actual",
     expected: "Expected",
     divergence: "Signal {net} was {actual}, but the test expected {expected}",
-    driver: "The {kind} gate {path} drives that signal. Its inputs at that moment:",
+    driver: "The {kind} {path} drives that signal. Its inputs at that moment:",
     inputsSeen: "Inputs seen",
     coneHint: "Places to look",
     oscillated:

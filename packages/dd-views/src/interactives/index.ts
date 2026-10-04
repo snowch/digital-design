@@ -32,3 +32,4 @@ export {
 };
 export { experiment, type Draw } from "./SetupHold";
 export { runScript, outputsPerStep, Step } from "./script";
+export { toFault } from "./FaultLab";

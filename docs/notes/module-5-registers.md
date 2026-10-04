@@ -88,3 +88,24 @@ went right.
     anchored inwards. The first lesson's screenshots still match.
 - 22:05 The whole check passed (Vitest, the build, 38 Playwright tests) with the lesson
   registered and placeholder words. Committed the platform work on its own.
+- 22:10 to 22:30 Two more fixes before the briefs:
+  - **The failure message called every part a gate.** The runtime's sentence was "The {kind}
+    gate {path} drives that signal", with {kind} upper-cased, so a divergence at a flip-flop
+    block would read "The DFF gate ff". The verdict's component now carries an optional `label`
+    the book supplies ("NOR gate", "D flip-flop", "register"), the runtime falls back to the old
+    form, and the sentence's "gate" moved into the label. The runtime string went to the
+    drafting subagent with the labels (brief E).
+  - A facts test, `content/lessons/registers.facts.test.ts`, written before the briefs: every
+    number and value the prose states is read off the figure's own props through the code the
+    figure runs (the three predictions' answers, the fault lab's failing checks per fault, the
+    four flip-flops before and after an edge, the gated clock, the reset bit, the challenges'
+    test counts). All nine passed first time against what the briefs say. It also pins that a
+    word is written bit 3 first: `0001` puts a 1 in ff0 alone.
+- 22:30 Educational coverage for this lesson, written while the drafts ran:
+  `tests/educational/registers.spec.ts` (each challenge completable with its reference through
+  the page; three plausible wrong attempts rejected with the failing step named, one of them
+  checking the failure names "The D flip-flop"; graded again on load and not bypassed by a
+  tampered store; reset in two steps; hints one rung at a time; three figure behaviours), the
+  diagram check extended to this lesson before and after use and to every lesson as first
+  drawn, the look rules run over every lesson, and a screenshot of the reset figure. All 15 new
+  tests passed at desktop width on the first run, with placeholder words.

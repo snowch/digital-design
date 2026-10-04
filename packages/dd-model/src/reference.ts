@@ -70,17 +70,17 @@ export const D_FLIP_FLOP_TABLE: TruthTable = {
  */
 export const REGISTER_BIT_TABLE: TruthTable = {
   id: "register-bit",
-  title: "TITLE",
+  title: "One register bit with reset and load enable",
   inputColumns: ["CLK", "RST", "EN", "D"],
   outputColumn: "Q(next)",
   rows: [
-    { inputs: { CLK: "↑", RST: "1", EN: "X", D: "X" }, next: "0", state: "RESET" },
-    { inputs: { CLK: "↑", RST: "0", EN: "0", D: "X" }, next: "Q", state: "KEEP" },
-    { inputs: { CLK: "↑", RST: "0", EN: "1", D: "0" }, next: "0", state: "LOAD0" },
-    { inputs: { CLK: "↑", RST: "0", EN: "1", D: "1" }, next: "1", state: "LOAD1" },
-    { inputs: { CLK: "—", RST: "X", EN: "X", D: "X" }, next: "Q", state: "NOEDGE" },
+    { inputs: { CLK: "↑", RST: "1", EN: "X", D: "X" }, next: "0", state: "Q resets to 0" },
+    { inputs: { CLK: "↑", RST: "0", EN: "0", D: "X" }, next: "Q", state: "Q keeps value" },
+    { inputs: { CLK: "↑", RST: "0", EN: "1", D: "0" }, next: "0", state: "Q captures 0" },
+    { inputs: { CLK: "↑", RST: "0", EN: "1", D: "1" }, next: "1", state: "Q captures 1" },
+    { inputs: { CLK: "—", RST: "X", EN: "X", D: "X" }, next: "Q", state: "Q unchanged" },
   ],
-  note: "NOTE",
+  note: "Q changes only at a rising edge of CLK; the RST input wins over EN; with EN at 0, Q keeps its value.",
 };
 
 export interface TimingParameter {

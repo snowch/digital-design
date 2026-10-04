@@ -11,8 +11,14 @@ export { S, V, format, LESSONS };
 
 export const LESSON = LESSONS.find((l) => l.id === "remember")!;
 
-export function challengeData(id: string) {
-  const c = LESSON.challenges.find((x) => x.id === id);
+export function lessonData(id: string) {
+  const l = LESSONS.find((x) => x.id === id);
+  if (!l) throw new Error(`no lesson ${id}`);
+  return l;
+}
+
+export function challengeData(id: string, lesson = LESSON) {
+  const c = lesson.challenges.find((x) => x.id === id);
   if (!c) throw new Error(`no challenge ${id}`);
   return c;
 }

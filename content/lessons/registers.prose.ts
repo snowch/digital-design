@@ -1,0 +1,86 @@
+// The words of the lesson on registers.
+//
+// Drafted by the course's prose process from briefs of checked facts (see CLAUDE.md and
+// docs/notes/module-5-registers.md) and checked against the simulator, then placed here by the
+// lesson's structure in registers.ts. Edit a fact here only after checking it; the lesson's
+// facts test (registers.facts.test.ts) holds the numbers.
+
+export const PROSE = {
+  question:
+    "The previous lesson showed how one flip-flop keeps one bit. The question at the end asked: what would it take to keep eight bits instead of one? This lesson keeps four.\n\nFour switches set a number, one bit per switch. A display shows a number. There is a Save button. The display must show what the switches held when Save was last pressed. It must keep showing that number while the switches move. When the power comes on, the display must show `0000`, not whatever the circuit happens to start with. The whole circuit runs from one clock, CLK, that rises at a steady rate and never stops.\n\nHow can a circuit keep four bits together, change them only when told to, and start from a known value?",
+  motivation:
+    "The flip-flop takes D at every rising edge of CLK. With a never-stopping clock, that means a new value at every edge. The display must change only when Save is pressed, keeping its number at every other edge. Four flip-flops keep four bits: one number. All four must change at the same moment, or the number passes through values nobody set.\n\nA flip-flop that no edge has set yet shows X. A display starting at X shows nothing anyone chose.\n\nAlmost everything a computer keeps is a number of several bits that must stay put most of the time: a count, where it is in its list of instructions, or the result of the last step kept for later.",
+  prediction:
+    'Two figures below each show four flip-flops that share one clock. Choose an answer in each figure, then press "Check my prediction". The timing diagram that appears shows what the simulator did.',
+  p1Question:
+    "Four flip-flops share one clock. Their D inputs together are written D. Their outputs are Q, as four bits with bit 3 first.\n\nThe figure sets D to `0110` while CLK is low, then gives one rising edge of CLK. Then it sets D to `1111`, and CLK does not rise again.\n\nWhat is Q at the end?",
+  p1Explain:
+    "At the rising edge, all four flip-flops took their D at once. Q became `0110`. CLK did not rise again, so the later change of D to `1111` reached no flip-flop. Q changes only at a rising edge.",
+  p2Question:
+    "The four flip-flops now have one more input, EN. At a rising edge where EN is 1, Q takes D. At a rising edge where EN is 0, Q keeps the value it had.\n\nThe figure starts the circuit fresh, with nothing set yet. It sets D to `0110` and EN to 0. EN stays at 0. CLK rises three times.\n\nWhat is Q after the third edge?",
+  p2Explain:
+    "Q is `XXXX`: unknown. No edge ever had EN at 1, so no flip-flop ever took D. Each edge kept the value each flip-flop already had. That value was never known.\n\nKeeping a value only helps once there is a known value to keep. The lesson comes back to this with a reset.",
+  fourFlipFlopsLead:
+    'Below are four flip-flops from the previous lesson: ff0 to ff3. Each has its own D input (D0 to D3) and Q output (Q0 to Q3). One clock wire CLK reaches all four.\n\nAt the start every Q is X because no edge has set them yet. Press some D pins to set a number. Press "Clock CLK". All four Q change in one step, each to its own D. Press D pins without "Clock CLK": no Q changes.\n\nPress a flip-flop block to open it and see the two latches from the previous lesson.\n\nSeveral bits kept together and treated as one value are a **word**. Flip-flops that share one clock and keep a word are a **register**. This one is a four-bit register.',
+  fourFlipFlopsAfter:
+    "Sharing one clock makes the four bits one word: all four take their D at the same edge, so the word changes in one step. This register still takes D at every edge. If you wired it to the switches with a clock that never stops, the display would follow the switches one edge too late. Save would do nothing. You need a way to tell each edge whether to take D or keep the word.",
+  construction:
+    "Keep one clock for everything. Change what each flip-flop's D sees, not when it sees it.\n\nAn input that decides whether the register takes D (EN is 1) or keeps its word (EN is 0) at each edge is a **load enable**. Here it is EN, and EN is 1 while Save is pressed. You build it for one bit. A four-bit register is four of these bits sharing EN and CLK.\n\nPress the part buttons above the drawing to add parts. Press one port, then another, to wire them. A failed test names the step and the part that drives the wrong output.",
+  buildKeepBitLead:
+    "Draw one bit of the register with its load enable. You have a D flip-flop block and AND, OR and NOT gates.",
+  c1Task:
+    "Draw a circuit with inputs D, EN and CLK and output Q.\n\nAt a rising edge of CLK where EN is 1, Q takes D. At a rising edge where EN is 0, Q keeps its value. Between edges, Q does not change, whatever D and EN do.\n\nThe tests change D, EN and CLK one step at a time and check Q after each step, including one where EN changes while CLK is 1.",
+  keepFaultsLead:
+    'The figure shows the bit with gates named: notEn (NOT of EN), andLoad (D AND EN, output LOAD), andKeep (Q AND NOT EN, output KEEP), orNext (LOAD OR KEEP, output NEXT), and flip-flop ff. "Run checks" tests this bit with four steps, each ending at a rising edge: "load 1" (D 1, EN 1), "edge with EN 0" (D 0, EN 0), "another edge with EN 0", "load 0" (EN 1, D still 0). Each step compares the faulty bit\'s Q with what a healthy bit gives.\n\nThree faults break it. Choose "KEEP wire forced to 0": KEEP is forced to 0. 2 of 4 checks fail at "edge with EN 0" and "another edge with EN 0". With EN at 0, NEXT is 0, so the edge loads 0 instead of keeping the 1. Without the path from Q, the bit forgets.\n\nChoose "EN forced to 1": the same 2 of 4 checks fail. Every edge takes D, and D is 0 there. Two different faults produce the same failed checks, so the checks alone do not say which fault it is.\n\nChoose "OR gate changed to AND": 3 of 4 checks fail at "load 1" and both edges with EN 0. LOAD needs EN 1 and KEEP needs EN 0, so they are never both 1. NEXT is always 0 and every edge loads 0. "load 0" passes only because 0 is the expected value.\n\nThe figure has no "Clock CLK" button. Press the CLK pin to raise and lower it.',
+  gatedClockLead:
+    "There is a tempting shortcut: stop the clock reaching the flip-flop when EN is 0. An AND gate, andClk, takes CLK and EN, and its output, GCLK, drives the flip-flop's CLK. With EN at 0, no edge gets through, so Q keeps its value.\n\nTry it. Press D to 1. Press CLK to 1 while EN is 0: Q stays X, because no edge reached the flip-flop. Now, with CLK still at 1, press EN to 1. Q becomes 1. CLK did not rise at that moment, yet the flip-flop saw a rising edge: GCLK rose when EN did.",
+  gatedClockAfter:
+    "With EN in the clock's path, a change on EN while CLK is 1 is a rising edge. The flip-flop takes D at a moment the clock did not choose. In the load-enable bit, CLK reaches the flip-flop directly and EN only changes what reaches D. A change on EN between edges changes nothing until the next rising edge of CLK.\n\nThis course keeps one rule from here: every flip-flop gets CLK itself, and other signals decide only what reaches D. The construction challenge's tests include a step where EN changes while CLK is 1, so a bit built with the AND-gate shortcut fails it.",
+  explanation:
+    "At every rising edge, every flip-flop takes its D. EN decides what D is: the new value when EN is 1, or the flip-flop's own Q when EN is 0. Taking its own value leaves it unchanged.\n\nCLK reaches every flip-flop unchanged, so all bits take their D at the same edge, and no other signal can make an edge. The second prediction showed what a load enable cannot do: if no flip-flop has a known value yet, keeping it keeps X.",
+  keepClearBitLead:
+    'The figure is the load-enable bit with one more input, RST, and a reference table below it. One more AND gate, andClear, takes NEXT and NOT RST (from the NOT gate notRst). While RST is 1, andClear gives 0, whatever EN and D are, so the next edge makes Q 0.\n\nTry it. Press "Start again": Q is X. Press "Clock CLK" with EN at 0: Q stays X. Press RST to 1 and press "Clock CLK": Q becomes 0. Press RST back to 0, and EN and D decide again.\n\nThe reset acts only at a rising edge, like everything else that reaches D. At an edge where RST and EN are both 1, Q becomes 0. Reset wins over EN.\n\nFor the display: set RST to 1 for one edge when the power comes on, and the display shows `0000` until the first edge with Save pressed. The table below the figure lists every case.',
+  registerAsTextLead:
+    "This register combines four of the bits from the explanation into a single unit. All four flip-flops share one clock, one reset input and one load enable. When drawn closed, the register appears as one block with inputs D, CLK, RST and EN, and output Q. D and Q are each four bits wide. Bit N of D connects to flip-flop N.\n\n`logic [3:0]` declares a signal four bits wide, numbered 3 down to 0.\n\nAt every rising edge of CLK, the code inside `always_ff @(posedge CLK) begin ... end` decides what Q becomes:\n\n- If RST is 1, the line `if (RST) Q <= 4'b0000;` makes Q take the value `0000` (a four-bit number written in binary).\n- Otherwise, if EN is 1, the line `else if (EN) Q <= D;` makes Q take D.",
+  registerAsTextAfter:
+    "When neither RST nor EN is 1, the text gives Q no instruction, so Q keeps its value. (The keep path you built from gates is written by leaving Q out.)\n\nRST is tested first, so a reset wins over a load. If both RST and EN are 1 at an edge, Q becomes `0000`, not D.\n\nTo keep a wider word, use more flip-flops and a wider range, such as `logic [7:0]` for eight bits. Nothing else in the text changes.",
+  predictChainLead:
+    "The previous lesson asked: what happens if the thing that changes D is itself a flip-flop clocked by the same edge?\n\nThis figure chains four flip-flops on one clock. IN goes to the first flip-flop's D. Each flip-flop's Q connects to the next flip-flop's D. The outputs are Q0 (the first), Q1, Q2 and Q3 (the last).\n\nWhat does this circuit do?",
+  p3Question:
+    "All four flip-flops start unknown. IN is set to 1 for one rising edge, then to 0 for two more rising edges.\n\nWhat is Q2 after the third edge?",
+  p3Explain:
+    "Q2 is 1.\n\nAt each edge, every flip-flop takes the value the one before it held just before the edge. The 1 entered Q0 at the first edge, moved to Q1 at the second and to Q2 at the third.\n\nThe bit does not move all the way along at once. Inside each flip-flop, the first latch closes at the edge before any Q changes. So each flip-flop takes the old value of the one before it.\n\nQ3 is still X: no known value has reached it yet.",
+  buildShiftLead:
+    "Flip-flops in a chain on one clock, each taking at every edge the value the one before it held, so bits move one place along: this is a **shift register**.\n\nIt takes a number one bit at a time on one wire. After four edges, it keeps the last four bits side by side: the newest in Q0, the oldest in Q3.\n\nBuild one from four D flip-flop blocks.",
+  c2Task:
+    "Draw a circuit with inputs IN and CLK, and outputs Q0, Q1, Q2 and Q3.\n\nAt each rising edge of CLK, Q0 takes IN. Q1 takes what Q0 held. Q2 takes what Q1 held. Q3 takes what Q2 held.\n\nBetween clock edges, nothing changes.\n\nThe tests send the bits 1, 0, 1, 1, 0 through, one per edge. They check the four outputs against the results. One test changes IN while CLK is 1.",
+  writeRegisterLead:
+    "Write the four-bit register with a reset and a load enable as text. The circuit your text makes is drawn under it as you type.",
+  c3Task:
+    "The module and ports are provided. D and Q are four bits wide (`logic [3:0]`). EN, RST and CLK are one bit each.\n\nWrite one `always_ff` block, using `if`, `else`, `begin` and `end`. At a rising edge of CLK: if RST is 1, Q becomes `0000`. Otherwise if EN is 1, Q takes D. Otherwise Q keeps its value.\n\nThe tests include an edge where both RST and EN are 1, and a step where EN changes while CLK is 1.",
+  reflection:
+    "A register keeps a word in flip-flops that share one clock. A load enable chooses what reaches D: it never changes when the clock arrives. At a rising edge, a reset brings every bit to a known value. A shift register is the same flip-flops wired in a chain, so bits move one place per edge.\n\nWhat if the gates before D worked out a new value from Q, such as the next number up? What would a circuit need to step through a fixed list of jobs, one per edge?",
+  modelVsReality:
+    "The clocked model gives every flip-flop its edge at the same moment. In hardware, the clock reaches different flip-flops at slightly different times.\n\nA shift register works because each flip-flop's output changes a little after the edge, later than the next flip-flop needs its D to stay put (its hold time). If the clock reached a later flip-flop late enough, a bit could pass through two flip-flops at one edge.\n\nA real flip-flop at power-on is not X. It settles to 0 or 1, but nothing says which. The simulator writes X because it cannot know. Either way, a reset is needed.\n\nThis course's reset acts at a clock edge. Many real circuits use a reset that acts the moment RST rises, without waiting for an edge. This course does not model that kind. Real chips also switch the clock off to save power, using a purpose-built part designed so an enable change cannot cause an edge. A plain AND gate, like the one in the failure experiment, fails to do this.",
+  c1Hints: [
+    "A flip-flop takes whatever reaches its D at each rising edge. To keep a value, make D see the flip-flop's own Q at the edges where EN is 0. That is feedback, as in the previous lesson.",
+    "Two ways fail: wiring D straight to the flip-flop, so every edge takes D; and putting EN in the clock's path with an AND gate. The second passes the first few tests, then fails when EN rises while CLK is 1: the AND gate's output rises then, and the flip-flop sees a rising edge that CLK never made.",
+    "An AND gate with EN as one input passes its other input while EN is 1 and gives 0 while EN is 0. An AND gate with NOT EN as one input does the opposite. An OR of the two outputs passes whichever one is not forced to 0.",
+    "The flip-flop's D is (D AND EN) OR (Q AND NOT EN), where Q comes back from the flip-flop's own output.",
+    "Place a NOT gate on EN. One AND gate takes D and EN. A second AND gate takes the flip-flop's Q and the NOT gate's output. An OR gate takes both AND outputs and drives the flip-flop's D. CLK goes straight to the flip-flop's CLK. Q is the flip-flop's Q.",
+  ],
+  c2Hints: [
+    "Each flip-flop takes, at every rising edge, whatever reaches its D. Make the first flip-flop's D come from IN. Make each other flip-flop's D come from the Q before it. Put all flip-flops on one clock.",
+    "Two common mistakes: wiring IN to every flip-flop's D makes all four take the same bit at every edge. Chaining them in the wrong order makes the new bit appear at Q3 instead of Q0.",
+    "With two flip-flops, the first takes IN and the second takes the first one's Q. After two edges, the second shows what IN was at the first edge.",
+    "The first flip-flop's D is IN, and its Q drives Q0. The second flip-flop's D is that Q0.",
+    "Place four D flip-flop blocks. Connect CLK to all four, IN to the first block's D, and each block's Q to the next block's D. Wire the four blocks' Q outputs in order to Q0, Q1, Q2 and Q3.",
+  ],
+  c3Hints: [
+    "The lines in an `always_ff` block decide what Q takes at each rising edge. Where no line gives Q a value, Q keeps the one it has.",
+    "If you test EN before RST, an edge where both are 1 loads D instead of `0000`, and the reset fails. RST must be tested first.",
+    "The previous lesson's flip-flop as text is one line:\n\n`always_ff @(posedge CLK) Q <= D;`",
+    "Start with `always_ff @(posedge CLK) begin`. Make the first line inside `if (RST) Q <= 4'b0000;`.",
+    "The complete block is:\n\n```\nalways_ff @(posedge CLK) begin\n  if (RST) Q <= 4'b0000;\n  else if (EN) Q <= D;\nend\n```",
+  ],
+} as const;
