@@ -9,12 +9,15 @@ teaches from signals to a working CPU, built on a reusable interactive learning 
 interactive follows one loop, predict, build, run, break, explain, generalise, and one vocabulary,
 inspect, predict, step, experiment, break, explain, drill down, replay.
 
-**Status: Prompt A, Checkpoint 1.** `docs/inventory.md` is written and awaits the author's
-review. No code exists. The rules below are the ones that already hold; the inventory's
-proposals (the layering, the primitives, the engine's invariants, the repository split) become
-rules here when the author approves them.
+**Status: Prompt A, Checkpoint 3.** The author approved the inventory's ten recommendations at
+Checkpoint 1. The platform packages (`lesson-schema`, `lesson-runtime`, `sim`, `dd-model`, `hdl`,
+`dd-views`), the course shell and the first lesson, `remember`, exist and pass `npm run check`.
+Slice 2 (the retry controller state machine), the extraction of shared primitives under the rule
+of two, and `docs/platform.md` are still to come.
 
-Read `docs/inventory.md` first. Edit every learner-facing string against `docs/style.md`.
+Read `docs/inventory.md` for why things are as they are, `docs/simulator.md` for what the engine
+models, and `docs/authoring.md` for how a lesson is made. Edit every learner-facing string
+against `docs/style.md`.
 
 ## Where these rules came from
 
@@ -127,4 +130,33 @@ for them before calling a lesson finished:
 
 ## Things that will break the build
 
-Nothing yet. Phase 2 fills this in as each check is written, with the reason each exists.
+`npm run check` is exactly what CI runs (`scripts/check.sh`): Prettier, `tsc --noEmit`, Vitest,
+the Vite build, Playwright. Each line below is a check and the reason it exists.
+
+- **Prettier, with `*.md` ignored.** Prose files keep their own line breaks; code does not get a
+  style argument.
+- **`tsc` strict, with `noUncheckedIndexedAccess` and `verbatimModuleSyntax`.** An index into a
+  list may be undefined and the code must say what happens then.
+- **A lesson without an `originalityNote`, or with its sections out of order, or with a
+  challenge nobody mounts, fails to parse.** The schema is the contract; the content tests parse
+  every lesson at startup and in CI.
+- **The term gate.** A lesson that uses a rationed term before the lesson that introduces it
+  fails `termProblems`, unless it lists the word under `termExemptions` with a reason.
+- **Every challenge's reference solution must pass its own tests, and its starting point must
+  not.** Otherwise the tests prove nothing about the challenge.
+- **The whole lesson must render in jsdom with no figure problem.** A figure whose props do not
+  fit its schema, or whose kind the book lacks, says so on the page and fails this test.
+- **The lesson's stated numbers are pinned.** `packages/dd-views/src/lesson-facts.test.ts` and
+  `packages/dd-model/src/timing.test.ts` hold the settle counts and the capture map the prose
+  states; change the model and the prose must change with it.
+- **The Playwright suite drives the built site at desktop and phone widths.** Completable with
+  the reference, rejects a wrong answer, keyboard-buildable, re-verified on load, not bypassable
+  through storage, resettable, deterministic. A missing accessible name on a control breaks it.
+- **`.npmrc` sets `legacy-peer-deps`.** npm 10's peer resolution crashes on Vitest 4's peer
+  ranges; the flag is the workaround and the file says so. Cross-workspace `@dd/*` dependencies
+  are not declared in manifests: npm links every workspace into the root `node_modules`.
+- **Vitest 4 has no `basic` reporter and its console capture is unreliable.** An exploration
+  writes its output to a file; a test asserts, it does not print.
+- **Learner-facing strings live in `strings.ts` files and in `remember.prose.ts` and
+  `remember.labels.ts`.** A string typed into a component is a string that skipped the prose
+  process, and the review reads for it.

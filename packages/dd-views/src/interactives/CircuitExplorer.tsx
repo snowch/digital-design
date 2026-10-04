@@ -105,6 +105,9 @@ export const CircuitExplorer = withProps(
               {format(strings.explorer.clock, { name: data.clock })}
             </button>
           )}
+          <button type="button" className="button secondary" onClick={() => sim.releaseAll()}>
+            {strings.explorer.releaseAll}
+          </button>
           <button type="button" className="button secondary" onClick={() => sim.reset()}>
             {strings.explorer.reset}
           </button>
