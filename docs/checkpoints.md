@@ -89,6 +89,16 @@ redrafted from corrected briefs.
   pixels tall, prose lines under about 85 characters) and to screenshots of the lesson header
   and four figures at both widths; the shipped fonts and the pinned Chromium make the
   screenshots stable across machines.
+- The author asked whether a design skill could be applied. One can: Anthropic's
+  `artifact-design` skill, written for claude.ai artifacts, whose fundamentals hold for any
+  page. Against it the first pass was generic in three ways it names (Inter as the safe face, a
+  warm cream ground, rounded corners on everything), so a second pass set a deliberate type
+  pairing (Source Sans 3 for prose, Archivo set narrow and heavy for headings, JetBrains Mono for
+  values, names, labels and code), biased the neutrals towards the accent's blue, cut the radii
+  to a few pixels, and gave border, fill and shadow by role: a figure's card and a drawing's
+  canvas have them; tables, option lists and disclosures inside a card have a rule or nothing.
+  The section labels, badges and hint rungs are set in the mono face, as a datasheet sets its
+  labels. Body text is 18 pixels on a 40rem measure, about 72 characters a line.
 - A phone screenshot from the author showed a timing diagram's labels printed on top of each
   other. A Playwright test now measures every diagram's rendered text at both widths, before and
   after the figures are used, and fails on any overlap or overflow; it found the same fault in

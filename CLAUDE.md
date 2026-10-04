@@ -161,9 +161,12 @@ the Vite build, Playwright. Each line below is a check and the reason it exists.
   (`tests/educational/aesthetics.spec.ts`). No visible text under 11 pixels, every control at
   least 40 pixels tall on a phone, no line of prose over about 85 characters; and the lesson
   header and four figures must match their stored screenshots, at both widths. The typefaces
-  ship with the site (Inter and JetBrains Mono) so the same commit renders the same everywhere. A
-  change that alters a figure's look fails here until its baseline is updated on purpose with
-  `npx playwright test --update-snapshots`, and the diff is reviewed in the commit.
+  ship with the site (Source Sans 3 for prose, Archivo for headings, JetBrains Mono for values
+  and code) so the same commit renders the same everywhere. A change that alters a figure's look
+  fails here until its baseline is updated on purpose with `npx playwright test
+  --update-snapshots`, and the diff is reviewed in the commit. `tokens.css` says why the faces,
+  the neutrals and the radii are what they are; a new component takes its colours and sizes
+  from there.
 - **`.npmrc` sets `legacy-peer-deps`.** npm 10's peer resolution crashes on Vitest 4's peer
   ranges; the flag is the workaround and the file says so. Cross-workspace `@dd/*` dependencies
   are not declared in manifests: npm links every workspace into the root `node_modules`.

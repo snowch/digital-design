@@ -2,7 +2,8 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 import { App } from "./App";
-import "@fontsource-variable/inter";
+import "@fontsource-variable/source-sans-3";
+import "@fontsource-variable/archivo/wdth.css";
 import "@fontsource-variable/jetbrains-mono";
 import "katex/dist/katex.min.css";
 import "./styles/tokens.css";
