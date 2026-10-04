@@ -1,4 +1,4 @@
-import { bit0, bit1, formatWord, Simulator } from "@dd/sim";
+import { applyMetastabilityOverlay, bit0, bit1, formatWord, Simulator } from "@dd/sim";
 import { describe, expect, it } from "vitest";
 
 import { dFlipFlopCircuit } from "./library";
@@ -44,5 +44,38 @@ describe("the flip-flop in the delay model, gate delay 10", () => {
     for (let offset = -40; offset <= 20; offset += 1) {
       for (const e of captureEvents(offset)) expect(e.endsWith(":X")).toBe(false);
     }
+  });
+});
+
+describe("the overlay on the flip-flop", () => {
+  it("holds the gate model off Q while Q is undecided, so the trace shows X and then the draw", () => {
+    // D changes 15 units before the edge: the gate model alone shows Q rising late, at 1045.
+    const run = (seed?: number) => {
+      const sim = new Simulator(dFlipFlopCircuit({ delay: 10 }), { timeModel: "delay" });
+      sim.setInput("D", bit0);
+      sim.setInput("CLK", bit0);
+      sim.setInputAt("CLK", bit1, 100);
+      sim.setInputAt("CLK", bit0, 200);
+      sim.setInputAt("D", bit1, 985);
+      sim.setInputAt("CLK", bit1, 1000);
+      sim.setInputAt("CLK", bit0, 1100);
+      if (seed === undefined) {
+        sim.run();
+        return { sim };
+      }
+      sim.run(1020);
+      const result = applyMetastabilityOverlay(sim, { output: "Q", seed, from: 1020 });
+      return { sim, result };
+    };
+    const q = (sim: Simulator) =>
+      sim.trace.events
+        .filter((e) => e.net === sim.resolve("Q") && e.time >= 1000)
+        .map((e) => `${e.time}:${formatWord(e.value)}:${e.cause}`);
+    expect(q(run().sim)).toEqual(["1045:1:settle"]);
+    const { sim, result } = run(3);
+    expect(result?.applied).toBe(true);
+    expect(q(sim)).toEqual(["1020:X:overlay", `${result?.settlesAt}:${result?.settlesTo}:overlay`]);
+    // The same seed replays to the same draw.
+    expect(q(run(3).sim)).toEqual(q(sim));
   });
 });

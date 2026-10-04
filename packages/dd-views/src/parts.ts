@@ -44,14 +44,15 @@ const COMPOSITE_LABELS: Readonly<Record<string, string>> = {
 };
 
 const COMPOSITE_DESCRIPTIONS: Readonly<Record<string, string>> = {
-  "sr-latch": "Two cross-coupled NOR gates. S=1 sets Q, R=1 resets it, both 0 holds.",
+  "sr-latch":
+    "Two cross-coupled NOR gates. S=1 sets Q to 1, R=1 resets it to 0, both 0 holds, both 1 is not allowed.",
   "gated-sr-latch": "An SR latch whose S and R reach it only while EN is 1.",
-  "d-latch": "Copies D to Q while EN is 1 and holds Q while EN is 0.",
+  "d-latch": "Copies D to Q while EN is 1, holds Q while EN is 0.",
   dff: "Copies D to Q at the rising edge of CLK and holds Q at every other time.",
   "dff-reset": "A D flip-flop whose Q becomes 0 at an edge where RST is 1.",
   "dff-reset-enable":
-    "A D flip-flop with a reset and an enable: at an edge where EN is 0, Q holds.",
-  "register-4": "Four D flip-flops sharing a clock, holding a 4-bit value.",
+    "A D flip-flop with a reset and an enable. At an edge where EN is 0, Q holds.",
+  "register-4": "Four D flip-flops sharing one clock, holding a 4-bit value.",
 };
 
 const GATE_INPUTS: Readonly<Record<string, readonly string[]>> = {
@@ -69,7 +70,7 @@ export function partSpec(id: string, fanIn = 2): PartSpec | undefined {
       inputs: [],
       outputs: ["y"],
       role: "pin",
-      describe: "An input of the circuit.",
+      describe: "A pin that is an input of the circuit.",
     };
   }
   if (id === "output") {
@@ -79,7 +80,7 @@ export function partSpec(id: string, fanIn = 2): PartSpec | undefined {
       inputs: ["a"],
       outputs: [],
       role: "pin",
-      describe: "An output of the circuit.",
+      describe: "A pin that is an output of the circuit.",
     };
   }
   const primitive = PRIMITIVES[id];

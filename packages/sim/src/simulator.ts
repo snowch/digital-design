@@ -103,6 +103,8 @@ export class Simulator {
   private pending: ScheduledEvent[] = [];
   private sequence = 0;
   private phase = 0;
+  /** Nets the gate model may not drive before a time: the overlay's undecided interval. */
+  private holds = new Map<NetId, number>();
 
   constructor(circuit: Circuit, options: SimulatorOptions = {}) {
     this.circuit = circuit;
@@ -259,6 +261,7 @@ export class Simulator {
       }
       this.pending.shift();
       this.time = next.time;
+      if (next.cause === "settle" && (this.holds.get(next.net) ?? -Infinity) > next.time) continue;
       if (!equal(this.values[next.net] as Word, next.value)) {
         this.values[next.net] = next.value;
         this.trace.events.push({
@@ -293,6 +296,19 @@ export class Simulator {
       cause,
       ...(note !== undefined ? { note } : {}),
     });
+  }
+
+  /**
+   * Delay model: keeps the gate model off `net` until `until`, dropping what it had scheduled
+   * there. The metastability overlay holds the flip-flop's output while it is undecided; the
+   * overlay's own events are not held.
+   */
+  holdNet(net: NetId | string, until: number): void {
+    const id = this.resolve(net);
+    this.holds.set(id, until);
+    this.pending = this.pending.filter(
+      (e) => !(e.net === id && e.cause === "settle" && e.time < until),
+    );
   }
 
   /** Delay model: the time at which an input will change, so a stimulus can be timed ahead. */
@@ -345,6 +361,7 @@ export class Simulator {
         // still pending, so a glitch shorter than the gate's delay is swallowed, as in a real gate.
         this.pending = this.pending.filter((e) => !(e.net === outNet && e.cause === "settle"));
         const current = this.values[outNet] as Word;
+        if ((this.holds.get(outNet) ?? -Infinity) > at) continue;
         if (!equal(current, v)) {
           this.pending.push({
             time: at,

@@ -8,6 +8,7 @@ import { runSuite } from "@dd/sim";
 
 import { Builder } from "./Builder";
 import { compileDrawing, emptyDrawing, type Drawing } from "./drawing";
+import { DEFAULT_VIEW_STRINGS as S, format } from "./strings";
 
 const IFACE = { inputs: [{ name: "S" }, { name: "R" }], outputs: [{ name: "Q" }] };
 
@@ -34,7 +35,7 @@ describe("Builder", () => {
 
     await user.click(screen.getByRole("button", { name: "Add NOR" }));
     await user.click(screen.getByRole("button", { name: "Add NOR" }));
-    expect(screen.getByRole("status")).toHaveTextContent("Added nor2.");
+    expect(screen.getByRole("status")).toHaveTextContent(format(S.builder.added, { id: "nor2" }));
     expect(latest?.parts.map((p) => p.id)).toEqual([
       "input:S",
       "input:R",
@@ -51,13 +52,15 @@ describe("Builder", () => {
       await user.keyboard("{Enter}");
     };
     await wire(/^R\./, /^nor1 input a\./);
-    expect(screen.getByRole("status")).toHaveTextContent("Connected R to nor1 input a.");
+    expect(screen.getByRole("status")).toHaveTextContent(
+      format(S.builder.connected, { from: "R", to: "nor1 input a" }),
+    );
     await wire(/^nor2 output y\./, /^nor1 input b\./);
     await wire(/^S\./, /^nor2 input b\./);
     await wire(/^nor1 output y\./, /^nor2 input a\./);
     await wire(/^nor1 output y\./, /^Q\./);
     expect(latest?.wires).toHaveLength(5);
-    expect(screen.queryByText(/loose ends/)).not.toBeInTheDocument();
+    expect(screen.queryByText(format(S.builder.looseEnds, { n: 1 }))).not.toBeInTheDocument();
 
     const compiled = compileDrawing(latest!);
     expect(compiled.errors).toEqual([]);
@@ -83,7 +86,7 @@ describe("Builder", () => {
     port(/^R\./).focus();
     await user.keyboard("{Enter}");
     expect(screen.getByRole("status")).toHaveTextContent(
-      "A wire joins an output to an input. S and R are both outputs.",
+      format(S.builder.notAPair, { a: "S", b: "R", role: S.builder.outputs }),
     );
     port(/^not1 input a\./).focus();
     await user.keyboard("{Enter}");
@@ -121,7 +124,9 @@ describe("Builder", () => {
     await user.keyboard("{Delete}");
     expect(latest!.parts.some((p) => p.id === "not1")).toBe(false);
     expect(latest!.wires).toHaveLength(0);
-    expect(screen.getByRole("status")).toHaveTextContent("Removed not1 and its wires.");
+    expect(screen.getByRole("status")).toHaveTextContent(
+      format(S.builder.removedPart, { id: "not1" }),
+    );
     // Pins cannot be deleted.
     screen.getByRole("button", { name: /^Input S\./ }).focus();
     await user.keyboard("{Delete}");

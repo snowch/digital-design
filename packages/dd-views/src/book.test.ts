@@ -5,6 +5,7 @@ import { parseLesson, type Challenge } from "@dd/lesson-schema";
 
 import { circuitToDrawing, compileDrawing, emptyDrawing, type Drawing } from "./drawing";
 import { grade } from "./book";
+import { DEFAULT_VIEW_STRINGS as S, format } from "./strings";
 
 const SR_STEPS = [
   { label: "press S", set: { S: 1, R: 0 }, expect: { Q: 1 } },
@@ -73,10 +74,10 @@ describe("grading a drawn circuit", () => {
     expect(grade(c, {})).toMatchObject({
       passed: false,
       total: 3,
-      blocked: "Nothing is drawn yet.",
+      blocked: S.grade.nothingDrawn,
     });
     const empty = compileDrawing(emptyDrawing(c.interface)).circuit!;
-    expect(grade(c, { circuit: empty }).blocked).toBe("Nothing drives Q.");
+    expect(grade(c, { circuit: empty }).blocked).toBe(format(S.grade.undriven, { names: "Q" }));
   });
 
   it("passes the library's latch and fails a latch with a gate wrong, naming the gate", () => {
@@ -114,7 +115,7 @@ describe("grading a drawn circuit", () => {
   it("refuses a circuit whose ports are not the challenge's", () => {
     const c = challenge();
     expect(grade(c, { libraryId: "d-latch" }).blocked).toBe(
-      "The circuit must have inputs S, R and outputs Q.",
+      format(S.grade.ports, { inputs: "S, R", outputs: "Q" }),
     );
   });
 });
@@ -122,7 +123,7 @@ describe("grading a drawn circuit", () => {
 describe("grading written text", () => {
   const c = challenge({ gradedDirection: "write" });
   it("is blocked by empty text, by a refused construct, and by the wrong ports", () => {
-    expect(grade(c, {}).blocked).toBe("Nothing is written yet.");
+    expect(grade(c, {}).blocked).toBe(S.grade.nothingWritten);
     const ff = `module latch(input logic S, input logic R, input logic CLK, output logic Q);
   always_ff @(posedge CLK) Q <= S;
 endmodule`;
@@ -131,7 +132,7 @@ endmodule`;
   assign Q = A & B;
 endmodule`;
     expect(grade(c, { hdl: wrongPorts }).blocked).toBe(
-      "The circuit must have inputs S, R and outputs Q.",
+      format(S.grade.ports, { inputs: "S, R", outputs: "Q" }),
     );
   });
 

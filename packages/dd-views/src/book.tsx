@@ -268,11 +268,11 @@ export const ChallengeEditor: ComponentType<ChallengeEditorProps> = (props) =>
 
 export const TIME_MODEL_NOTES: Book["timeModelNotes"] = {
   settle:
-    "Every gate here takes one step. After an input changes, the whole circuit is recomputed step by step until nothing changes. A circuit that never stops changing is shown as X.",
+    "Every gate takes one step. After you change an input, the circuit is recomputed step by step until nothing changes. A signal that keeps changing is shown as X. Nothing here is real time.",
   clocked:
-    "Inputs change only between clock edges. Around each edge the circuit is recomputed until it settles, as in the stepped model.",
+    "Inputs change only between clock edges. Before each edge, the circuit settles. After the clock rises and after it falls, the circuit settles again.",
   delay:
-    "Each gate here has its own delay, and changes are worked through in time order. Two changes can race, and the result depends on which arrives first.",
+    "Each gate has its own propagation delay. Changes are worked through in time order. Two changes can race, and which arrives first decides the result. This is the model in which setup and hold times can be seen.",
 };
 
 export function createBook(

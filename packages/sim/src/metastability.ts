@@ -45,7 +45,10 @@ export interface OverlayResult {
 /**
  * Marks `output` unknown (from `from`, or now if it is already unknown), draws when and to what it
  * settles, schedules both, runs the queue dry again, and returns what it did. With no `from` and a
- * known output, the overlay applies nothing and says so.
+ * known output, the overlay applies nothing and says so. While the output is undecided the gate
+ * model is held off it, so the trace shows X and then the draw, not the gates' answer in between.
+ * The overlay forces the output net only: the nets inside keep the gate model's values, and an
+ * input change after the draw recomputes the output from them.
  */
 export function applyMetastabilityOverlay(sim: Simulator, options: OverlayOptions): OverlayResult {
   const current: Word = sim.read(options.output);
@@ -58,6 +61,7 @@ export function applyMetastabilityOverlay(sim: Simulator, options: OverlayOption
   const from = options.from ?? sim.time;
   const at = from + delay;
   if (forced) {
+    sim.holdNet(options.output, at);
     sim.scheduleAt(
       options.output,
       unknown(current.width),
