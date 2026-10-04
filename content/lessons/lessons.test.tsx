@@ -43,7 +43,7 @@ describe("the course's lessons", () => {
           expect(passing.failures).toEqual([]);
           expect(passing.passed).toBe(true);
           const start =
-            c.gradedDirection === "write"
+            c.gradedDirection !== "draw"
               ? c.initial
               : { circuit: compileDrawing(emptyDrawing(c.interface)).circuit };
           expect(grade(c, start).passed).toBe(false);

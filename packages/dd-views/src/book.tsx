@@ -10,6 +10,7 @@ import type { Artifact, Challenge, Lesson } from "@dd/lesson-schema";
 import type { Book, ChallengeEditorProps, InteractiveProps, Verdict } from "@dd/lesson-runtime";
 import { runSuite, type Circuit } from "@dd/sim";
 
+import { AnswerEditor, gradeAnswers } from "./AnswerEditor";
 import { Builder } from "./Builder";
 import { CircuitView } from "./CircuitView";
 import { HdlPanel } from "./HdlPanel";
@@ -85,6 +86,7 @@ export function circuitOf(
 }
 
 export function grade(challenge: Challenge, artifact: Artifact): Verdict {
+  if (challenge.tests.kind === "answers") return gradeAnswers(challenge, artifact);
   const { circuit, blocked } = circuitOf(challenge, artifact);
   const total =
     challenge.tests.kind === "combinational"
@@ -279,7 +281,9 @@ function WriteEditor({ challenge, artifact, onChange, verdict }: ChallengeEditor
 }
 
 export const ChallengeEditor: ComponentType<ChallengeEditorProps> = (props) =>
-  props.challenge.gradedDirection === "write" ? (
+  props.challenge.gradedDirection === "answer" ? (
+    <AnswerEditor {...props} />
+  ) : props.challenge.gradedDirection === "write" ? (
     <WriteEditor {...props} />
   ) : (
     <DrawEditor {...props} />

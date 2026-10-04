@@ -47,6 +47,14 @@ export function checkLesson(lesson: LessonType): LessonProblem[] {
   for (const c of lesson.challenges) {
     if (challengeIds.has(c.id)) problem(`two challenges are called ${c.id}`);
     challengeIds.add(c.id);
+    if (c.gradedDirection === "answer") {
+      problems.push(...answerProblems(lesson.id, c));
+      continue;
+    }
+    if (c.tests.kind === "answers")
+      problem(`challenge ${c.id} has answer tests but grades a circuit`);
+    if (c.interface.outputs.length === 0)
+      problem(`challenge ${c.id} grades a circuit but its interface declares no output`);
     if (!c.reference.circuit && !c.reference.hdl && !c.reference.libraryId) {
       problem(
         `challenge ${c.id} has no reference solution, so nothing can prove it is completable`,
@@ -60,7 +68,7 @@ export function checkLesson(lesson: LessonType): LessonProblem[] {
     if (c.tests.kind === "combinational") {
       for (const v of c.tests.vectors)
         for (const n of [...Object.keys(v.inputs), ...Object.keys(v.expect)]) names.add(n);
-    } else {
+    } else if (c.tests.kind === "sequence") {
       for (const s of c.tests.steps) {
         for (const n of [...Object.keys(s.set ?? {}), ...Object.keys(s.expect ?? {})]) names.add(n);
         if (s.clock) names.add(s.clock);
@@ -98,6 +106,38 @@ export function checkLesson(lesson: LessonType): LessonProblem[] {
   }
 
   return problems;
+}
+
+/** An answers challenge needs fields, answer tests, and a reference that answers every field. */
+function answerProblems(lessonId: string, c: LessonType["challenges"][number]): LessonProblem[] {
+  const out: string[] = [];
+  if (c.tests.kind !== "answers")
+    out.push(`challenge ${c.id} grades answers but its tests are not answer tests`);
+  if (c.fields.length === 0) out.push(`challenge ${c.id} grades answers but asks for none`);
+  const ids = new Set<string>();
+  for (const f of c.fields) {
+    if (ids.has(f.id)) out.push(`challenge ${c.id} has two fields called ${f.id}`);
+    ids.add(f.id);
+    if (f.kind === "bits" && f.width === undefined)
+      out.push(`challenge ${c.id}'s field ${f.id} is a row of bits with no width`);
+  }
+  const answers = c.reference.answers;
+  if (!answers) {
+    out.push(`challenge ${c.id} has no reference answers, so nothing can prove it is completable`);
+  } else {
+    for (const f of c.fields)
+      if (answers[f.id] === undefined)
+        out.push(`challenge ${c.id}'s reference does not answer ${f.id}`);
+  }
+  return out.map((text) => ({ lesson: lessonId, text }));
+}
+
+/** How many tests a challenge's suite counts: rows, steps that expect something, or cases. */
+export function testCount(c: LessonType["challenges"][number]): number {
+  const t = c.tests;
+  if (t.kind === "combinational") return t.vectors.length;
+  if (t.kind === "sequence") return t.steps.filter((s) => s.expect).length;
+  return t.cases.length;
 }
 
 /** The time models a lesson's interactives use, for the note every lesson states. */

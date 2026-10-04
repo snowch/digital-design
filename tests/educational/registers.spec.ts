@@ -6,6 +6,8 @@
 
 import { expect, test } from "@playwright/test";
 
+import { testCount } from "@dd/lesson-schema";
+
 import {
   S,
   V,
@@ -23,10 +25,7 @@ import {
 
 const LESSON = lessonData("registers");
 const data = (id: string) => challengeData(id, LESSON);
-const total = (id: string) => {
-  const t = data(id).tests;
-  return t.kind === "sequence" ? t.steps.filter((s) => s.expect).length : t.vectors.length;
-};
+const total = (id: string) => testCount(data(id));
 
 /** The construction challenge's tempting wrong answer: EN switches the clock off. */
 const GATED_CLOCK = `module keep_bit(input logic D, input logic EN, input logic CLK, output logic Q);

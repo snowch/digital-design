@@ -2,11 +2,15 @@ import type { ComponentType } from "react";
 
 import type { InteractiveProps } from "@dd/lesson-runtime";
 
+import { BitInspector } from "./BitInspector";
 import { CircuitExplorer } from "./CircuitExplorer";
 import { CircuitText } from "./CircuitText";
 import { FaultLab } from "./FaultLab";
+import { Interpretations } from "./Interpretations";
 import { LatchInternals } from "./LatchInternals";
+import { NoisySignal } from "./NoisySignal";
 import { Prediction } from "./Prediction";
+import { ReadingPrediction } from "./ReadingPrediction";
 import { SetupHold } from "./SetupHold";
 import { TruthTableView } from "./TruthTableView";
 
@@ -19,10 +23,18 @@ export const INTERACTIVES: Readonly<Record<string, ComponentType<InteractiveProp
   "fault-lab": FaultLab,
   "latch-internals": LatchInternals,
   "setup-hold": SetupHold,
+  "noisy-signal": NoisySignal,
+  "bit-inspector": BitInspector,
+  interpretations: Interpretations,
+  "reading-prediction": ReadingPrediction,
 };
 
 export {
+  BitInspector,
   CircuitExplorer,
+  Interpretations,
+  NoisySignal,
+  ReadingPrediction,
   CircuitText,
   FaultLab,
   LatchInternals,
@@ -33,3 +45,4 @@ export {
 export { experiment, type Draw } from "./SetupHold";
 export { runScript, outputsPerStep, Step } from "./script";
 export { toFault } from "./FaultLab";
+export { answerOf } from "./ReadingPrediction";

@@ -20,11 +20,18 @@ A lesson is one module in `content/lessons/` exporting a `LessonInput` (the type
   `timeModel` the page states on a badge (`settle`, `clocked`, `delay`, `none`), a `caption`,
   `props` the kind's schema checks, and optional `lead` and `after` Markdown shown above and below
   the figure. The kind `challenge` with `props.challengeId` mounts a challenge.
-- `challenges`: each with a `title`, a Markdown `task`, `gradedDirection` (`draw` or `write`),
+- `challenges`: each with a `title`, a Markdown `task`, `gradedDirection` (`draw`, `write` or
+  `answer`),
   the `interface` (input and output names), the `palette` a drawn solution may use, the
   `allowedConstructs` text may use, `tests` (a combinational table or a sequence), five `hints` in
   ladder order (concept, mistake class, smaller example, part of the answer, whole answer), an
   optional `initial` artifact, and a `reference` solution: text, a drawn circuit, or a library id.
+  An `answer` challenge has no circuit: it declares `fields` (a number with a unit, a row of bits,
+  a short text), tests of kind `answers` that name a grader the book supplies
+  (`ANSWER_GRADERS` in `packages/dd-model/src/graders.ts`) and list cases (`label`, `given`,
+  `expect`), and a reference of `answers` by field id. A failure names the case, the answers'
+  values and what was expected; the runner, the hints, the re-grading on load and the reset are
+  the same as for a circuit.
 - `modelVsReality`: how the simulator differs from hardware, said once.
 - `originalityNote`: the obvious textbook example for the topic and how this lesson differs.
   Written in the same commit as the lesson; the schema refuses a lesson without one.
@@ -47,6 +54,10 @@ zod schema and shows a sentence in its place when they do not fit. Library ids a
 | `latch-internals` | `libraryId?`, `delay?`, `script`, `until`, `signals?`, `scope?`, `phases` | a recorded delay-model run with a cursor, a drawing that opens, and the lesson's words per phase |
 | `setup-hold` | `delay?`, `edgeAt?`, `offsets?`, `window?`, `settleBetween?`, `undecidedFrom?`, `show?` | move D against the edge; roll the overlay inside the untrusted window; replay a roll |
 | `circuit-text` | `libraryId`, `drawing?` | the circuit beside the text generated from it |
+| `noisy-signal` | `recordings` (id and label), `threshold?`, `range?`, `step?`, `noise?`, `showBand?`, `reading?` | a sampled recording read against a threshold the learner moves; how many samples read wrong, the nearest sample on each side, optionally the noise scaled up, the band of thresholds that read every sample, the bits as a number |
+| `bit-inspector` | `bits`, `readings` (`unsigned`, `signed`, `hex`), `weights?` | a word of bits to change one at a time, read several ways at once, with the sum that gives each number |
+| `interpretations` | `words` (bits and label), `readings` (two or more of `unsigned`, `signed`, `hex`, `lamps`) | one word read one way at a time, with the rule that gives the reading |
+| `reading-prediction` | `question`, `ask` (`fewer-wrong` over a recording and two thresholds, or `reading` of a word), `options`, `explain?` | commit to an answer before the model computes it |
 | `challenge` | `challengeId` | the runtime's challenge runner with the book's editor |
 
 A figure is a view of the simulator. If a lesson needs a figure that shows something the

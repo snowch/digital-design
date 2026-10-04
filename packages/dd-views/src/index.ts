@@ -13,3 +13,7 @@ export * from "./Builder";
 export * from "./HdlPanel";
 export * from "./book";
 export * from "./interactives";
+export * from "./SignalPlot";
+export * from "./BitRow";
+export * from "./useWidth";
+export * from "./AnswerEditor";

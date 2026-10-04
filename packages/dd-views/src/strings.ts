@@ -132,6 +132,62 @@ export interface ViewStrings {
     readonly before: string;
     readonly after: string;
   };
+  readonly signal: {
+    readonly plotTitle: string;
+    readonly plotSummary: string;
+    readonly recording: string;
+    readonly threshold: string;
+    readonly noise: string;
+    readonly sample: string;
+    readonly sent: string;
+    readonly read: string;
+    readonly allRight: string;
+    readonly someWrong: string;
+    readonly nearest0: string;
+    readonly nearest1: string;
+    readonly band: string;
+    readonly noBand: string;
+    readonly words: string;
+  };
+  readonly bits: {
+    readonly row: string;
+    readonly flip: string;
+    readonly fixed: string;
+    readonly digit: string;
+    readonly sum: string;
+    readonly noOnes: string;
+    readonly readings: string;
+  };
+  readonly readings: {
+    readonly names: {
+      readonly unsigned: string;
+      readonly signed: string;
+      readonly hex: string;
+      readonly lamps: string;
+    };
+    readonly how: {
+      readonly unsigned: string;
+      readonly signed: string;
+      readonly hex: string;
+      readonly lamps: string;
+    };
+    readonly readAs: string;
+    readonly word: string;
+    readonly lampOn: string;
+    readonly lampOff: string;
+    readonly lampsLabel: string;
+    readonly value: string;
+  };
+  readonly readingPrediction: {
+    readonly modelGave: string;
+    readonly same: string;
+    readonly atThreshold: string;
+  };
+  readonly answers: {
+    readonly terms: Readonly<Record<string, string>>;
+    readonly unanswered: string;
+    readonly invalid: string;
+  };
 }
 
 export const DEFAULT_VIEW_STRINGS: ViewStrings = {
@@ -263,6 +319,72 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     window: "Uncertain",
     before: "before",
     after: "after",
+  },
+  signal: {
+    plotTitle: "Samples and threshold",
+    plotSummary: "{n} samples from {low} to {high}, threshold at {threshold}, {wrong} read wrong.",
+    recording: "Recording",
+    threshold: "Threshold: {value}",
+    noise: "Noise: ×{scale}",
+    sample: "Sample",
+    sent: "Sent",
+    read: "Read",
+    allRight: "Every sample reads correctly.",
+    someWrong: "{n} of {total} read wrong: {list}.",
+    nearest0: "Highest sample sent as 0: sample {index}, {gap} below threshold.",
+    nearest1: "Lowest sample sent as 1: sample {index}, {gap} above threshold.",
+    band: "Thresholds that read every sample right: {from} to {to}.",
+    noBand: "No threshold reads every sample correctly at this noise.",
+    words: "Sent unsigned: {sent}; read unsigned: {read}.",
+  },
+  bits: {
+    row: "Bits",
+    flip: "Bit {n}, worth {value}, now {bit}; press to change.",
+    fixed: "Bit {n}, worth {value}, {bit}.",
+    digit: "Digit {digit}",
+    sum: "{terms} = {total}",
+    noOnes: "No bits are 1, so the number is 0.",
+    readings: "Readings",
+  },
+  readings: {
+    names: {
+      unsigned: "Unsigned",
+      signed: "Signed",
+      hex: "Hexadecimal",
+      lamps: "Lamps",
+    },
+    how: {
+      unsigned: "Add the worths of the bits that are 1.",
+      signed: "Add the worths of the bits that are 1, but bit 15 is worth -32768 instead of 32768.",
+      hex: "Each group of four bits is one hexadecimal digit, 0 to 9 then A to F.",
+      lamps: "A 1 lights its lamp; a 0 leaves it dark.",
+    },
+    readAs: "Read as",
+    word: "Word",
+    lampOn: "on",
+    lampOff: "off",
+    lampsLabel: "Lamps: {list}",
+    value: "Reading",
+  },
+  readingPrediction: {
+    modelGave: "The model gives: {value}.",
+    same: "the same",
+    atThreshold: "At {threshold}: {n} wrong.",
+  },
+  answers: {
+    terms: {
+      threshold: "Threshold",
+      wrong: "Samples wrong",
+      wrongSamples: "Wrong samples",
+      marginBelow: "Margin below",
+      marginAbove: "Margin above",
+      bits: "Bits",
+      signed: "Signed",
+      unsigned: "Unsigned",
+      hex: "Hexadecimal",
+    },
+    unanswered: "Fill in {fields} to run the tests.",
+    invalid: "{field} must be a valid entry.",
   },
 };
 

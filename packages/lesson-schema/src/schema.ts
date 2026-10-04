@@ -53,9 +53,26 @@ export const SequenceStep = z.object({
   internal: z.record(z.string(), VectorValue).optional(),
 });
 
+/**
+ * One case of an answers challenge: what the book's grader is given besides the learner's
+ * answers (a recording, a number to encode), and what it must produce. The grader, not the
+ * lesson, decides whether the answers meet `expect`, so a case can ask for "at least".
+ */
+export const AnswerCase = z.object({
+  label: z.string().min(1),
+  given: z.record(z.string(), z.union([z.string(), z.number()])).default({}),
+  expect: z.record(z.string(), z.union([z.string(), z.number()])),
+});
+
 export const TestSuite = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("combinational"), vectors: z.array(CombinationalVector).min(1) }),
   z.object({ kind: z.literal("sequence"), steps: z.array(SequenceStep).min(1) }),
+  /** The learner's settings or answers, checked case by case by a grader the book names. */
+  z.object({
+    kind: z.literal("answers"),
+    grader: z.string().min(1),
+    cases: z.array(AnswerCase).min(1),
+  }),
 ]);
 export type TestSuite = z.infer<typeof TestSuite>;
 
@@ -114,6 +131,8 @@ export const Artifact = z.object({
   libraryId: z.string().optional(),
   /** Text in the course's hardware description language. */
   hdl: z.string().optional(),
+  /** Settings or answers, by field id, as the learner entered them. */
+  answers: z.record(z.string(), z.string()).optional(),
 });
 export type Artifact = z.infer<typeof Artifact>;
 
@@ -156,15 +175,40 @@ export const Hints = z.tuple([
   z.string().min(1),
 ]);
 
+/**
+ * A field of an answers challenge. The book draws each kind: a number with a unit, a row of
+ * bits the learner flips, a short piece of text. `label` is what the learner reads beside it.
+ */
+export const AnswerField = z.object({
+  id: z.string().min(1),
+  label: z.string().min(1),
+  kind: z.enum(["number", "bits", "text"]),
+  /** For a number: its range, step and unit. */
+  min: z.number().optional(),
+  max: z.number().optional(),
+  step: z.number().positive().optional(),
+  unit: z.string().optional(),
+  /** For bits: how many. */
+  width: z.number().int().min(1).max(32).optional(),
+});
+export type AnswerField = z.infer<typeof AnswerField>;
+
 export const Challenge = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
   /** Markdown: what to build or write, and what the tests check. */
   task: z.string().min(1),
-  /** Which direction the grade counts; the other view stays available. */
-  gradedDirection: z.enum(["draw", "write"]),
-  /** The ports the learner's circuit must expose, by name and width. */
-  interface: z.object({ inputs: z.array(PortSpec), outputs: z.array(PortSpec).min(1) }),
+  /**
+   * What is graded: a drawn circuit, written text (the other view stays available), or the
+   * learner's answers to the challenge's `fields`.
+   */
+  gradedDirection: z.enum(["draw", "write", "answer"]),
+  /** The ports the learner's circuit must expose, by name and width. None for answers. */
+  interface: z
+    .object({ inputs: z.array(PortSpec).default([]), outputs: z.array(PortSpec).default([]) })
+    .default({ inputs: [], outputs: [] }),
+  /** What an answers challenge asks for, in order. */
+  fields: z.array(AnswerField).default([]),
   /** What the learner starts from. */
   initial: Artifact.default({}),
   tests: TestSuite,

@@ -908,3 +908,276 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
     font-size: 1.75rem;
   }
 }
+
+/* Signals and bits: the noisy-signal plot, the bit row, the readings, the answers editor */
+.noisy-recordings,
+.interp-choices {
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  padding: var(--space-2) 0;
+  margin: 0 0 var(--space-2);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-5);
+}
+.noisy-recordings legend,
+.interp-choices legend {
+  float: left;
+  width: 100%;
+  font-weight: 650;
+  padding-top: var(--space-1);
+}
+.noisy-recording,
+.interp-choice {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-height: 2.75rem;
+}
+.noisy-slider {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
+  margin: var(--space-2) 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+.noisy-slider span {
+  min-width: 15rem;
+}
+.noisy-slider input {
+  flex: 1 1 200px;
+  min-height: 2.75rem;
+}
+.signal-plot-wrap {
+  background: var(--canvas);
+  border-radius: var(--radius);
+  margin: var(--space-3) 0;
+  overflow: hidden;
+}
+.signal-plot {
+  display: block;
+}
+.signal-plot text {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  fill: var(--fg-muted);
+}
+.signal-plot .row-number {
+  font-size: 12px;
+  fill: var(--fg-faint);
+}
+.signal-plot .row-bit {
+  fill: var(--fg);
+}
+.signal-plot .row-bit.wrong {
+  fill: var(--bad);
+  font-weight: 700;
+}
+.signal-plot .tick line {
+  stroke: var(--border);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+.signal-plot .level {
+  stroke: var(--border-strong);
+  stroke-dasharray: 4 4;
+  shape-rendering: crispEdges;
+}
+.signal-plot .band {
+  fill: var(--ok-bg);
+  opacity: 0.9;
+}
+.signal-plot .threshold {
+  stroke: var(--accent);
+  stroke-width: 2;
+  shape-rendering: crispEdges;
+}
+.signal-plot .noise {
+  stroke: var(--fg-faint);
+  stroke-width: 1;
+}
+.signal-plot .read-1 .dot {
+  fill: var(--sig-high);
+  stroke: var(--sig-high);
+  stroke-width: 2;
+}
+.signal-plot .read-0 .dot {
+  fill: var(--canvas);
+  stroke: var(--sig-low);
+  stroke-width: 2;
+}
+.signal-plot .wrong-ring {
+  fill: none;
+  stroke: var(--bad);
+  stroke-width: 2;
+}
+.noisy-readout p {
+  margin: var(--space-1) 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+.noisy-readout .noisy-wrong {
+  color: var(--bad);
+  font-weight: 600;
+}
+.noisy-readout .noisy-right {
+  color: var(--ok);
+  font-weight: 600;
+}
+.bit-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-4);
+  margin: var(--space-3) 0;
+}
+.bit-group-bits {
+  display: flex;
+  gap: 4px;
+}
+.bit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 3.25rem;
+  min-height: 2.75rem;
+  padding: 2px 4px 4px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  line-height: 1.2;
+}
+button.bit {
+  cursor: pointer;
+}
+.bit.bit-1 {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+.bit-number {
+  font-size: 11px;
+  color: var(--fg-muted);
+}
+.bit-value {
+  font-size: var(--text-md);
+  font-weight: 700;
+}
+.bit-weight {
+  font-size: 11px;
+  color: var(--fg-muted);
+}
+.bit-digit {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
+  margin-top: var(--space-1);
+}
+.bit-readings {
+  margin: var(--space-3) 0 0;
+}
+.bit-reading {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--border);
+}
+.bit-reading dt {
+  font-weight: 650;
+}
+.bit-reading dd {
+  margin: 0;
+  min-width: 0;
+}
+.bit-reading-value,
+.interp-value-number {
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+.bit-sum {
+  margin: var(--space-1) 0 0;
+  overflow-wrap: anywhere;
+}
+.bit-sum code {
+  font-size: var(--text-sm);
+  white-space: normal;
+}
+.interp-result {
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-2);
+}
+.interp-how {
+  color: var(--fg-muted);
+  margin: var(--space-1) 0;
+}
+.interp-value {
+  margin: var(--space-1) 0;
+}
+.interp-value-name {
+  font-weight: 650;
+  margin-right: var(--space-2);
+}
+.lamps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: var(--space-2) 0;
+}
+.lamp {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  border: 2px solid var(--border-strong);
+  background: var(--bg-sunken);
+}
+.lamp.lamp-on {
+  background: var(--warn);
+  border-color: var(--warn);
+}
+.prediction-plots {
+  display: grid;
+  gap: var(--space-3);
+}
+.answer-editor {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-3) 0;
+}
+.answer-field {
+  display: grid;
+  gap: var(--space-1);
+}
+.answer-label {
+  font-weight: 650;
+  margin: 0;
+}
+.answer-input {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.answer-input input {
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  min-height: 2.75rem;
+  width: 12rem;
+  max-width: 100%;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+  color: var(--fg);
+}
+@media (max-width: 40rem) {
+  .bit-reading {
+    grid-template-columns: 1fr;
+  }
+  .noisy-slider span {
+    min-width: 0;
+  }
+}

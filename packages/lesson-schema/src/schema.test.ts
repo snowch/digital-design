@@ -107,6 +107,50 @@ describe("the lesson schema", () => {
     expect(checkLesson(noReference).map((p) => p.text)[0]).toMatch(/no reference solution/);
   });
 
+  it("takes a challenge whose artifact is answers, and holds it to its own rules", () => {
+    const answers = {
+      id: "c1",
+      title: "Pick a level",
+      task: "Pick one.",
+      gradedDirection: "answer" as const,
+      fields: [{ id: "level", label: "Level", kind: "number" as const, min: 0, max: 3 }],
+      tests: {
+        kind: "answers" as const,
+        grader: "level",
+        cases: [{ label: "reads it", expect: { wrong: 0 } }],
+      },
+      hints: ["concept", "mistake", "smaller", "partial", "full"] as [
+        string,
+        string,
+        string,
+        string,
+        string,
+      ],
+      reference: { answers: { level: "1.5" } },
+    };
+    const lesson = parseLesson(minimalLesson({ challenges: [answers] }));
+    expect(lesson.challenges[0]?.interface).toEqual({ inputs: [], outputs: [] });
+    expect(lesson.challenges[0]?.tests.kind).toBe("answers");
+
+    const unanswered = { ...lesson.challenges[0]!, reference: { answers: {} } };
+    expect(checkLesson({ ...lesson, challenges: [unanswered] }).map((p) => p.text)).toEqual([
+      "challenge c1's reference does not answer level",
+    ]);
+    const noFields = { ...lesson.challenges[0]!, fields: [] };
+    expect(checkLesson({ ...lesson, challenges: [noFields] }).map((p) => p.text)).toEqual([
+      "challenge c1 grades answers but asks for none",
+    ]);
+    const circuitTests = {
+      ...lesson.challenges[0]!,
+      gradedDirection: "draw" as const,
+      reference: { hdl: "module m(); endmodule" },
+    };
+    expect(checkLesson({ ...lesson, challenges: [circuitTests] }).map((p) => p.text)).toEqual([
+      "challenge c1 has answer tests but grades a circuit",
+      "challenge c1 grades a circuit but its interface declares no output",
+    ]);
+  });
+
   it("exports JSON Schema another toolchain can use", () => {
     const schema = lessonJsonSchema();
     expect(schema["type"]).toBe("object");
