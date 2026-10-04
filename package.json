@@ -1,0 +1,43 @@
+{
+  "name": "digital-design",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Digital Design: From Bits to a Working Computer. An interactive course on a reusable learning platform.",
+  "engines": {
+    "node": ">=22"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "content"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @dd/course",
+    "build": "npm run build -w @dd/course",
+    "preview": "npm run preview -w @dd/course",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:educational": "playwright test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "./scripts/check.sh"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "jsdom": "^27.4.0",
+    "prettier": "^3.9.9",
+    "typescript": "~5.9.3",
+    "vite": "^7.3.6",
+    "vitest": "^4.1.11"
+  }
+}

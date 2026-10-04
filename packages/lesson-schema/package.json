@@ -1,0 +1,13 @@
+{
+  "name": "@dd/lesson-schema",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "The lesson data format: the platform contract another book can use.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "zod": "^4.6.5"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "@dd/hdl",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "A synthesisable SystemVerilog subset: parse and elaborate to circuits, generate from circuits, gate per lesson.",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

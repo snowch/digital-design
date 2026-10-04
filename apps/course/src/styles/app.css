@@ -1,0 +1,137 @@
+/* Base layout and typography for the course shell. Phone first; the measure widens on a desk. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-text);
+  font-size: 100%;
+  line-height: var(--line);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  min-height: 100vh;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+a {
+  color: var(--accent);
+}
+
+code,
+pre,
+kbd,
+samp {
+  font-family: var(--font-mono);
+  font-size: 0.95em;
+}
+
+pre {
+  overflow-x: auto;
+  padding: var(--space-3);
+  background: var(--bg-sunken);
+  border-radius: var(--radius);
+}
+
+button {
+  font: inherit;
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--gutter);
+  top: -100px;
+  background: var(--bg-raised);
+  color: var(--fg);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  z-index: 10;
+}
+.skip-link:focus {
+  top: var(--space-2);
+}
+
+.shell-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  align-items: baseline;
+  padding: var(--space-3) var(--gutter);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-raised);
+}
+.shell-header .brand {
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--fg);
+}
+.shell-header nav a {
+  margin-right: var(--space-3);
+}
+
+.shell-main {
+  padding: var(--space-5) var(--gutter) var(--space-7);
+  max-width: var(--measure);
+  margin: 0 auto;
+}
+
+@media (min-width: 60rem) {
+  .shell-main {
+    max-width: 72rem;
+  }
+}
+
+.shell-footer {
+  padding: var(--space-4) var(--gutter);
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  border-top: 1px solid var(--border);
+}
+
+h1 {
+  font-size: var(--text-xxl);
+  line-height: 1.2;
+  margin: 0 0 var(--space-4);
+}
+h2 {
+  font-size: var(--text-xl);
+  line-height: 1.25;
+  margin: var(--space-6) 0 var(--space-3);
+}
+h3 {
+  font-size: var(--text-lg);
+  margin: var(--space-5) 0 var(--space-2);
+}
+p,
+ul,
+ol {
+  margin: 0 0 var(--space-4);
+}
+
+.lesson-list {
+  list-style: none;
+  padding: 0;
+}
+.lesson-list li {
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: var(--space-3);
+  background: var(--bg-raised);
+}
+.lesson-list .meta {
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+}

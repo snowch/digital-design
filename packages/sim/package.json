@@ -1,0 +1,10 @@
+{
+  "name": "@dd/sim",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "The simulation engine: deterministic, replayable, presentation-independent, no DOM.",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

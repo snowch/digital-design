@@ -1,0 +1,14 @@
+{
+  "name": "@dd/dd-views",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Digital-design interactives: circuit view and builder, timing diagram, truth table, latch internals, HDL panel.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  }
+}

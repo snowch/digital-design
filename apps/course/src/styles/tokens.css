@@ -1,0 +1,151 @@
+/*
+ * Design tokens for the whole course. Every colour, size and motion rule is a token here, so the
+ * views never carry a literal colour, and both themes come from one place.
+ *
+ * Two rules the tokens enforce rather than request:
+ * - Colour is never the sole carrier of a signal value. The signal tokens below have a pattern
+ *   and a text label beside them wherever they are used; a learner who cannot tell the hues apart
+ *   still reads 0, 1 and ? from the label and the line level.
+ * - Reduced motion is respected: with prefers-reduced-motion, every transition and animation
+ *   collapses to an instant change, and nothing in a lesson depends on seeing motion.
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* Surfaces and text */
+  --bg: #fbfbf9;
+  --bg-raised: #ffffff;
+  --bg-sunken: #f1f0ec;
+  --fg: #1d1d1b;
+  --fg-muted: #5b5b57;
+  --border: #d6d4cd;
+  --border-strong: #9c9a93;
+
+  /* Interaction */
+  --accent: #1d5fb8;
+  --accent-fg: #ffffff;
+  --focus: #c2410c;
+
+  /* Verdicts */
+  --ok: #1a7f37;
+  --ok-bg: #e8f5ec;
+  --bad: #b42318;
+  --bad-bg: #fbeae8;
+  --warn: #9a6700;
+  --warn-bg: #fff6d5;
+  --note-bg: #eef3fb;
+
+  /* Signal values. Each is always paired with a label (0, 1, ?) and a line level. */
+  --sig-high: #0f766e;
+  --sig-low: #7c3aed;
+  --sig-unknown: #a16207;
+  --sig-clock: #1d5fb8;
+  --sig-cursor: #c2410c;
+  --sig-shade-setup: rgba(194, 65, 12, 0.14);
+  --sig-shade-hold: rgba(124, 58, 237, 0.14);
+
+  /* Circuit drawing */
+  --wire: #3a3a37;
+  --wire-high: var(--sig-high);
+  --wire-low: var(--sig-low);
+  --wire-unknown: var(--sig-unknown);
+  --gate-fill: #ffffff;
+  --gate-stroke: #1d1d1b;
+  --gate-selected: var(--focus);
+
+  /* Type and space */
+  --font-text:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.6rem;
+  --text-xxl: 2rem;
+  --line: 1.55;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --radius: 6px;
+  --radius-lg: 10px;
+  --measure: 42rem;
+  --gutter: 16px;
+  --motion: 160ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15161a;
+    --bg-raised: #1d1f24;
+    --bg-sunken: #0f1013;
+    --fg: #ececea;
+    --fg-muted: #a7a7a3;
+    --border: #353841;
+    --border-strong: #5a5e69;
+    --accent: #7fb0f5;
+    --accent-fg: #0b1220;
+    --focus: #fb923c;
+    --ok: #4ade80;
+    --ok-bg: #12301b;
+    --bad: #f87171;
+    --bad-bg: #3a1513;
+    --warn: #facc15;
+    --warn-bg: #3a2e05;
+    --note-bg: #17233a;
+    --sig-high: #2dd4bf;
+    --sig-low: #c4b5fd;
+    --sig-unknown: #fbbf24;
+    --sig-clock: #7fb0f5;
+    --sig-cursor: #fb923c;
+    --wire: #d4d4d0;
+    --gate-fill: #1d1f24;
+    --gate-stroke: #ececea;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #15161a;
+  --bg-raised: #1d1f24;
+  --bg-sunken: #0f1013;
+  --fg: #ececea;
+  --fg-muted: #a7a7a3;
+  --border: #353841;
+  --border-strong: #5a5e69;
+  --accent: #7fb0f5;
+  --accent-fg: #0b1220;
+  --focus: #fb923c;
+  --ok: #4ade80;
+  --ok-bg: #12301b;
+  --bad: #f87171;
+  --bad-bg: #3a1513;
+  --warn: #facc15;
+  --warn-bg: #3a2e05;
+  --note-bg: #17233a;
+  --sig-high: #2dd4bf;
+  --sig-low: #c4b5fd;
+  --sig-unknown: #fbbf24;
+  --sig-clock: #7fb0f5;
+  --sig-cursor: #fb923c;
+  --wire: #d4d4d0;
+  --gate-fill: #1d1f24;
+  --gate-stroke: #ececea;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion: 0ms;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

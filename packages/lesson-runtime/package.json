@@ -1,0 +1,19 @@
+{
+  "name": "@dd/lesson-runtime",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Renders lessons from data: the ten sections, the hint ladder, the challenge runner, learner state.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "katex": "^0.19.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-markdown": "^10.1.0",
+    "rehype-katex": "^7.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0"
+  }
+}

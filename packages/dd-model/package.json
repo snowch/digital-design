@@ -1,0 +1,10 @@
+{
+  "name": "@dd/dd-model",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "The course's component library on the engine: gates, latches, flip-flops, registers, state machines, faults.",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

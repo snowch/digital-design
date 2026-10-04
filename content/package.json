@@ -1,0 +1,10 @@
+{
+  "name": "@dd/content",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "The course content: one module per lesson, typed by the lesson schema, prose as Markdown strings.",
+  "exports": {
+    ".": "./lessons/index.ts"
+  }
+}

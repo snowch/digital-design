@@ -1,0 +1,13 @@
+{
+  "name": "@dd/primitives",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Shared interaction primitives. Empty until Slice 2, by the rule of two (see README.md).",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "react": "^19.3.0"
+  }
+}

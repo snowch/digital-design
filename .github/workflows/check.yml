@@ -1,0 +1,29 @@
+name: Check
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Dependencies, exactly as the lockfile says
+        run: npm ci
+
+      - name: Playwright's Chromium, for the educational tests
+        # The npm package is pinned in package.json; this fetches the browser build it expects.
+        run: npx playwright install --with-deps chromium
+
+      - name: Everything, exactly as `npm run check` runs it
+        env:
+          CI: "true"
+        run: ./scripts/check.sh
