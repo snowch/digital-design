@@ -329,12 +329,12 @@ describe("the circuit explorer", () => {
 
 describe("the signal path drawing", () => {
   const labels = {
-    coldRoom: "Cold room",
+    fromRoom: "Cold room",
     sensor: "Sensor",
     sends: "Sends {value}",
     cable: "Cable 30 m",
     compressor: "Compressor",
-    office: "Office",
+    toRoom: "Office",
     display: "Display",
     receiver: "Receiver",
     noise: "noise",

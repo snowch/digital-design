@@ -9,11 +9,14 @@ import type { LessonInput } from "@dd/lesson-schema";
 import { LABELS } from "./signals.labels";
 import { PROSE } from "./signals.prose";
 
-/** The 16 bits the cold-room sensor sends: -184, its reading in tenths of a degree. */
+/** The 16 bits the freezer-room sensor sends: -184, the temperature in tenths of a degree. */
 export const SENSOR_BITS = "1111 1111 0100 1000";
 
-/** The freezer's reading for the word challenge: -250 tenths of a degree. */
+/** The second, colder freezer room's temperature for the word challenge: -250 tenths. */
 export const FREEZER_TENTHS = -250;
+
+/** What the sensor can measure, in tenths of a degree: the explanation's check on a reading. */
+export const SENSOR_RANGE_TENTHS = { low: -500, high: 500 } as const;
 
 export const signals: LessonInput = {
   id: "signals",
@@ -107,13 +110,22 @@ export const signals: LessonInput = {
           props: { challengeId: "set-threshold" },
         },
         {
-          id: "build-number",
-          kind: "bit-inspector",
+          id: "predict-sum",
+          kind: "reading-prediction",
           timeModel: "none",
-          caption: LABELS.captions.buildNumber,
-          lead: PROSE.buildNumberLead,
-          after: PROSE.buildNumberAfter,
-          props: { bits: "0000 0000 0000 0000", readings: ["unsigned"] },
+          caption: LABELS.captions.predictSum,
+          lead: PROSE.predictSumLead,
+          after: PROSE.predictSumAfter,
+          props: {
+            question: PROSE.p3Question,
+            ask: { kind: "reading", bits: SENSOR_BITS, reading: "unsigned" },
+            options: [
+              { value: "184", label: LABELS.options.p3Plain },
+              { value: "-184", label: LABELS.options.p3Sent },
+              { value: "65352", label: LABELS.options.p3Sum },
+            ],
+            explain: PROSE.p3Explain,
+          },
         },
       ],
     },
@@ -286,6 +298,6 @@ export const signals: LessonInput = {
     textbookExample:
       "The noise-margin diagram: two bars of output and input voltage levels (VOH, VIH, VIL, VOL) with the margins marked between them, followed by a table of the sixteen four-bit patterns with their unsigned and two's complement values, a conversion table from binary to hexadecimal, and the ASCII table as the example of bits that mean letters.",
     howThisDiffers:
-      "The lesson starts from one line a learner could meet: a cold-room temperature sensor sending its reading to a temperature display in the shop's office along a cable that runs past a compressor. The noise is a recording the model makes, and the learner moves a single threshold across it, first predicting which of two thresholds reads more samples wrong, then finding for themselves that the gap between the threshold and the nearest sample on each side is what noise has to cross; noise margin is named after that, measured on the recording, not drawn as level bars. The failure experiment turns the same noise up until no threshold works, and shows what one misread bit does to the number. The bits the display receives are the sensor's own reading, and the interpretation payoff is a real fault: read as unsigned, a freezer at -18.4 degrees shows 6535.2. Signed reading is taught as one changed place value (the top bit counts negative) on the bit inspector, not as a table or a wheel, and the same 16-bit word, the width of this course's machine, is then read as unsigned, signed, hexadecimal and as a row of lamps. No ASCII table and no four-bit pattern table appear.",
+      "The lesson starts from one line a learner could meet: a freezer-room temperature sensor sending its reading to a temperature display in the shop's office along a cable that runs past a compressor. The noise is a recording the model makes, and the learner moves a single threshold across it, first predicting which of two thresholds reads more samples wrong, then finding for themselves that the gap between the threshold and the nearest sample on each side is what noise has to cross; noise margin is named after that, measured on the recording, not drawn as level bars. The failure experiment turns the same noise up until no threshold works, and shows what one misread bit does to the number. The bits the display receives are the sensor's own reading, and the interpretation payoff is a real fault: read as unsigned, a freezer at -18.4 degrees shows 6535.2. Signed reading is taught as one changed place value (the top bit counts negative) on the bit inspector, not as a table or a wheel, and the same 16-bit word, the width of this course's machine, is then read as unsigned, signed, hexadecimal and as a row of lamps. No ASCII table and no four-bit pattern table appear.",
   },
 };

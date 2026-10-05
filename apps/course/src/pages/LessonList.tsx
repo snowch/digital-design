@@ -17,6 +17,7 @@ export function LessonList({ book, storage }: { book: Book; storage: Storage }) 
   return (
     <>
       <h1>{book.title}</h1>
+      <p className="course-assumes">{STRINGS.assumes}</p>
       {book.lessons.length === 0 && <p>{STRINGS.noLessons}</p>}
       {toWrite.length > 0 && (
         <p className="meta to-write">

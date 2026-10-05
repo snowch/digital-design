@@ -1,4 +1,4 @@
-// The scene the signals lesson starts from, drawn: the sensor in the cold room, the cable that
+// The scene the signals lesson starts from, drawn: the sensor in the freezer room, the cable that
 // runs past the compressor, and the display in the office with its receiver where the cable
 // ends; under it, the steps the sensor drives onto the cable. The steps, their two levels and the
 // number the sensor sends are the model's (dd-model: signals and bits); the drawing places the
@@ -32,13 +32,13 @@ const Props = z.object({
   recording: RecordingIdSchema,
   /** The lesson's names for the parts of the drawing, and what a screen reader is told. */
   labels: z.object({
-    coldRoom: z.string().min(1),
+    fromRoom: z.string().min(1),
     sensor: z.string().min(1),
     /** Under the sensor; {value} is the number the steps carry, read as the sensor wrote it. */
     sends: z.string().includes("{value}"),
     cable: z.string().min(1),
     compressor: z.string().min(1),
-    office: z.string().min(1),
+    toRoom: z.string().min(1),
     display: z.string().min(1),
     receiver: z.string().min(1),
     /** Beside the jagged line from the compressor to the cable. */
@@ -88,10 +88,10 @@ export const SignalPath = withProps(
     // Two rooms at the ends, each as wide as what it holds; the cable in the gap between them.
     const room = (...needs: number[]) =>
       Math.min(190, Math.max(Math.round(w * 0.22), ...needs.map(Math.ceil)));
-    const leftW = room(textWidth(L.coldRoom) + 20, textWidth(sends) + 16, textWidth(L.sensor) + 40);
+    const leftW = room(textWidth(L.fromRoom) + 20, textWidth(sends) + 16, textWidth(L.sensor) + 40);
     // The office holds the display, and the display holds the receiver with room either side.
     const rightW = room(
-      textWidth(L.office) + 20,
+      textWidth(L.toRoom) + 20,
       textWidth(L.display) + 32,
       textWidth(L.receiver) + 44,
     );
@@ -164,10 +164,10 @@ export const SignalPath = withProps(
                 rx={6}
               />
               <text className="room-name" x={left.x0 + 8} y={ROOM_TOP + 16}>
-                {L.coldRoom}
+                {L.fromRoom}
               </text>
               <text className="room-name" x={right.x0 + 8} y={ROOM_TOP + 16}>
-                {L.office}
+                {L.toRoom}
               </text>
               <line
                 className="cable"

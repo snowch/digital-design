@@ -394,6 +394,63 @@ changes, so the 1s are the thing on the page:
 - each level's label names its digit as well as its voltage (brief D3), as the paragraph above
   the drawing says: "0 V for a 0, or 3.30 V for a 1".
 
+## Third pass: what the reader brings, and what the display must be told
+
+The author settled four points on 2026-10-05, and asked for whatever is best for the reader:
+
+- **The reader already knows binary to decimal.** The course's front page now says so. The
+  construction section no longer teaches place values from scratch with a row of 16 bits at 0;
+  it asks the reader to work out what the display gets when it adds the worths of the 1s, with
+  three choices, 184, -184 and 65352, before the course answers (`predict-sum`, a reading
+  prediction). A reader who expects the bits to mean what the sensor sent picks -184; the sum is
+  65352, and the lesson's question comes from the reader's own arithmetic. The terms binary,
+  word and unsigned are named where the prediction uses them.
+- **The room is a freezer room.** In UK shops a cold room is usually a chiller held at 0 to 5
+  degrees, which would read positive and never show the fault: the signed and unsigned readings
+  agree for every number of zero or above. Frozen food is held at -18 degrees or colder, so the
+  room at -18.4 is a freezer room. The challenge's room is a second freezer room, kept colder,
+  at -25.0. The drawing's room label is "Freezer"; its label keys are now `fromRoom` and
+  `toRoom`.
+- **The range check is the turn.** The sensor measures from -50.0 to 50.0 degrees
+  (`SENSOR_RANGE_TENTHS`), so the explanation says 6535.2 cannot be the temperature: a reading
+  outside the range shows the unsigned rule does not work here. The facts test pins the range
+  and that -18.4 and -25.0 lie inside it and 6535.2 outside.
+- **The display must be told four things.** The reflection names them: which step is the top
+  bit, which rule, what one count is worth, and the unit. The hardware note says real sensors
+  come with a written description of them, and that the lesson's fault is a common one: a
+  display reading unsigned is right until the first temperature below zero. The explanation
+  adds why: when the top bit is 0 both readings agree, so the fault shows only below zero.
+- Left out on purpose: reserved patterns and offsets, which would be a tangent in Module 1.
+
+The words came from six briefs to the drafting subagent with one shared fact sheet (appendix,
+"P3"). Sent back: the explanation's first reply described its edits instead of giving them, and
+its first draft broke the join to "But the sensor did not use that rule"; the objective called
+the four agreements "values"; the front-page line twice left out that the course assumes the
+skill, and the managing session added "The course assumes" rather than send it a third time;
+the challenge's title read as setting the freezer itself; the lead used "holds", a later
+lesson's term, which the term gate caught after the managing session's fact check missed it.
+Added by the managing session, in the fewest words: "the top bit" in the lead, which later
+sections lean on, and "here" in the explanation, which had widened "the unsigned rule does not
+work" past the case in hand. Cut: the new prediction's last line, "In tenths of a degree, that
+is 6535.2 degrees.", which the explanation now states at the turn. The whole-lesson read found that
+"unsigned" was defined only in the prediction's explanation, which shows after the reader
+commits, while the paragraph under the figure already said "Read unsigned": the defining sentence
+moved under the figure, where every reader sees it, and the explanation's repeat of what the
+display got was cut. No words changed.
+
+A last read before the commit found four more. The text under a figure shows from the start, so
+the paragraph under the prediction that said "The display got 65352" gave the answer away before
+the reader chose. It moved back into the prediction's explanation, which shows once the reader
+commits; the definition of unsigned stays under the figure, and gives nothing away. A content
+test now fails any word prediction whose lead, question or after-text states its answer. The
+explanation's new sentence said a display "reads the temperature unsigned", where on this page
+only words are read; the hardware note's "these four things" pointed back over its heading and
+three paragraphs to the reflection. Both went back to the drafting subagent. Its sentence for the
+hardware note says "what a display must know" and drops the count, which the sentence does not
+need. The reflection's draft had dropped the fact sheet's examples, without which "what one
+count is worth" and "the unit" read as the same thing; the managing session added them in
+parentheses.
+
 ## Questions for the author
 
 1. The task points to "the build prompt's machine section in docs/inventory.md". There is no
@@ -1352,4 +1409,61 @@ and its voltage, as the paragraph says: "0 V for a 0, or to 3.30 V for a 1". Pla
 "3.30 V" filled in, for a narrow margin on a phone; no full stop. A reader took the low steps
 for the 1s. Returned "{digit}: {volts}", which stands.
 ````
+
+### P3-facts.md (the shared fact sheet for the third pass)
+
+````markdown
+# Shared fact sheet: Module 1, "How does the display know the temperature?", third pass
+
+Every fact below was checked against the course's model and the lesson's data. Copy facts, not wording.
+
+## The reader
+
+- The course now assumes the reader can already turn a binary number into decimal: each place is worth twice the one to its right, and the number is the sum of the worths of the 1s. The course's front page says so. The lesson no longer teaches this from scratch; it uses it.
+
+## The scene
+
+- A temperature sensor in a shop's freezer room sends the temperature to a display in the shop's office, along a cable 30 metres long that runs past the freezer room's compressor motor. (The lesson used to call it a "cold room"; that word is gone, because a cold room is usually a chiller above 0 degrees.)
+- The freezer room is at -18.4 degrees Celsius. The sensor counts in tenths of a degree Celsius, so it sends -184.
+- The sensor measures from -50.0 to 50.0 degrees Celsius.
+- The sensor sends 16 steps; step 1 carries bit 15, the top bit, written leftmost; step 16 carries bit 0, written rightmost.
+
+## The 16 bits
+
+- The display receives `1111 1111 0100 1000`, exactly as the sensor sent it.
+- The 1s are bits 15 to 8, bit 6 and bit 3. Adding their worths, every one counted as positive: 32768 + 16384 + 8192 + 4096 + 2048 + 1024 + 512 + 256 + 64 + 8 = 65352. This is the unsigned reading.
+- 65352 tenths of a degree is 6535.2 degrees. That is far outside the sensor's range of -50.0 to 50.0 degrees, so it cannot be the temperature.
+- 16 bits make 65536 different patterns. Read unsigned, they are the numbers 0 to 65535.
+- The signed reading counts bit 15 as worth -32768 and every other bit as before: -32768 + 16384 + 8192 + 4096 + 2048 + 1024 + 512 + 256 + 64 + 8 = -184.
+- When the top bit is 0, both readings give the same number. So a display that reads unsigned is right for every temperature of zero or above, and wrong for every temperature below zero. At -0.1 degrees it would show 6553.5.
+
+## What the display must be told
+
+To turn 16 bits into a temperature, the display must be told four things that the bits do not carry: which step is the top bit; which rule to read them by (unsigned or signed); what one count is worth (a tenth of a degree); and the unit (degrees Celsius).
+
+## The challenge's second freezer room
+
+- A second freezer room is kept colder, at -25.0 degrees Celsius. The sensor sends -250 there. (Its bits are the challenge's answer: never state them.)
+
+## Words
+
+Working words, each with one meaning on this page:
+- "reading": a way of reading bits, or its result. Never the temperature itself: the sensor "sends the temperature".
+- "worth": what a bit's place counts for.
+- "word": bits taken together as one number, here 16.
+- "comes out as": what a sample does, 0 or 1. "read" is for words, not samples.
+- "step": one short, fixed length of time in which the sensor drives one voltage.
+- "value": never names a bit.
+
+Rationed terms this lesson introduces, allowed: bit, threshold, noise margin, binary, word, unsigned, signed, hexadecimal.
+
+Never use (later lessons' terms): feedback, latch, transparent, edge, propagation delay, setup, hold, metastable, register, shift register.
+````
+
+The six briefs listed the strings each section needed, quoting the current text where a
+paragraph was edited, with these facts: the construction's lead, question, explanation and
+after-text; the explanation's range check and the zero-or-above sentence; the reflection's four
+agreements and the hardware note's paragraph; the challenge's lead, task sentence, section
+title, challenge title and field label; the objective, the drawing's room label and the
+front-page line; and the new prediction's caption.
 

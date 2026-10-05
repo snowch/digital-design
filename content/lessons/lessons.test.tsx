@@ -6,7 +6,14 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { INTERACTIVES, compileDrawing, createBook, emptyDrawing, grade } from "@dd/dd-views";
+import {
+  INTERACTIVES,
+  answerOf,
+  compileDrawing,
+  createBook,
+  emptyDrawing,
+  grade,
+} from "@dd/dd-views";
 import { LessonView, memoryStorage } from "@dd/lesson-runtime";
 import { termProblems } from "@dd/lesson-schema";
 
@@ -32,6 +39,22 @@ describe("the course's lessons", () => {
       for (const s of l.sections)
         for (const x of s.interactives)
           if (x.kind !== "challenge") expect(Object.keys(INTERACTIVES)).toContain(x.kind);
+  });
+
+  // A figure's lead and after-text show from the start, before the learner has chosen; only the
+  // explanation inside the figure waits for "Check my prediction".
+  it("gives no word prediction's answer in the text a learner reads before choosing", () => {
+    for (const l of LESSONS)
+      for (const s of l.sections)
+        for (const x of s.interactives) {
+          if (x.kind !== "reading-prediction") continue;
+          const p = x.props as { question: string; ask: Parameters<typeof answerOf>[0] };
+          if (p.ask.kind !== "reading") continue;
+          // The answer as a whole number: not inside a longer one, such as 18 in 18.4 or -18.
+          const answer = new RegExp(`(?<![\\w.-])${answerOf(p.ask)}(?!\\w|\\.\\d)`);
+          for (const text of [x.lead ?? "", p.question, x.after ?? ""])
+            expect(text, `${l.id}: ${x.id}`).not.toMatch(answer);
+        }
   });
 
   for (const lesson of LESSONS) {

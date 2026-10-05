@@ -95,7 +95,10 @@ you; CLAUDE.md states the rule and the division of labour. In practice, for one 
      before they go out; a brief that uses one gets it copied.
 3. Run the drafts in parallel, then check facts only: a dropped fact gets the fewest words that
    carry it; a wrong fact or a vocabulary slip goes back with a note; nothing is rewritten.
-4. Place the paragraphs: section `prose`, a figure's `lead`, a figure's `after`.
+4. Place the paragraphs: section `prose`, a figure's `lead`, a figure's `after`. A figure's
+   `lead` and `after` show from the start, so under a prediction they must not give its answer:
+   what follows from the answer goes in the prediction's `explain`, which shows once the learner
+   commits. The content tests fail a word prediction whose lead, question or after states it.
 5. Read the whole lesson once, start to finish, and give it to a reviewer with a brief (see
    CLAUDE.md, "Reviewing a lesson"). Fix code first, then re-brief the sentences a finding
    touches, then read once more.

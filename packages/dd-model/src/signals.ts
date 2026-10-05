@@ -28,7 +28,7 @@ export interface RecordingSpec {
   readonly hum?: { readonly size: Centivolts; readonly period: number; readonly phase: number };
 }
 
-/** The word the cold-room sensor sends: -184 (it counts tenths of a degree, so -18.4), as 16 bits. */
+/** The word the freezer-room sensor sends: -184 (it counts tenths of a degree, so -18.4), as 16 bits. */
 export const SENSOR_WORD: readonly Bit[] = bitsOf(-184, 16);
 
 export const RECORDINGS = {

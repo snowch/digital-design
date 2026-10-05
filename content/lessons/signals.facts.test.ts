@@ -22,7 +22,7 @@ import {
 import { answerOf, grade } from "@dd/dd-views";
 import { parseLesson } from "@dd/lesson-schema";
 
-import { FREEZER_TENTHS, SENSOR_BITS, signals } from "./signals";
+import { FREEZER_TENTHS, SENSOR_BITS, SENSOR_RANGE_TENTHS, signals } from "./signals";
 import { PROSE } from "./signals.prose";
 
 const lesson = parseLesson(signals);
@@ -106,10 +106,20 @@ describe("the signals lesson's facts", () => {
     });
   });
 
-  it("building a number: the received word is 65352 read as unsigned; 16 bits make 65536 patterns", () => {
+  it("adding the bits: the display's sum of the 1s is 65352, one of the three choices; 16 bits make 65536 patterns", () => {
     const bits = parseBits(SENSOR_BITS);
     expect(readingOf(bits, "unsigned")).toBe("65352");
-    expect(figure("build-number")["bits"]).toBe("0000 0000 0000 0000");
+    const p = figure("predict-sum");
+    const ask = p["ask"] as Parameters<typeof answerOf>[0];
+    expect(answerOf(ask)).toBe("65352");
+    expect((p["options"] as { value: string }[]).map((o) => o.value)).toEqual([
+      "184",
+      "-184",
+      "65352",
+    ]);
+    expect(PROSE.p3Explain).toContain(
+      "32768 + 16384 + 8192 + 4096 + 2048 + 1024 + 512 + 256 + 64 + 8 = 65352",
+    );
     expect(rangeOf(16)).toEqual({
       patterns: 65536,
       unsigned: [0, 65535],
@@ -131,13 +141,26 @@ describe("the signals lesson's facts", () => {
     expect(readingOf(broken.read, "unsigned")).toBe("63305");
   });
 
-  it("explaining: the sensor's word is -184 signed and 65352 unsigned, so the till shows 6535.2", () => {
+  it("explaining: the sensor's word is -184 signed and 65352 unsigned, so the display shows 6535.2", () => {
     const p = figure("signed-word");
     const bits = parseBits(p["bits"] as string);
     expect(readingOf(bits, "signed")).toBe("-184");
     expect(readingOf(bits, "unsigned")).toBe("65352");
     expect(Number(readingOf(bits, "unsigned")) / 10).toBe(6535.2);
     expect(Number(readingOf(bits, "signed")) / 10).toBe(-18.4);
+  });
+
+  it("the range check: 6535.2 is outside what the sensor measures, -18.4 and -25.0 inside", () => {
+    const { low, high } = SENSOR_RANGE_TENTHS;
+    const inside = (tenths: number) => tenths >= low && tenths <= high;
+    const bits = parseBits(SENSOR_BITS);
+    expect(inside(Number(readingOf(bits, "unsigned")))).toBe(false);
+    expect(inside(Number(readingOf(bits, "signed")))).toBe(true);
+    expect(inside(FREEZER_TENTHS)).toBe(true);
+    expect(PROSE.explanation).toContain(`from ${low / 10}.0 to ${high / 10}.0 degrees`);
+    // Read unsigned, a display is right at zero and above and wrong below: -0.1 shows 6553.5.
+    expect(Number(readingOf(bitsOf(-1, 16), "unsigned")) / 10).toBe(6553.5);
+    expect(readingOf(bitsOf(0, 16), "unsigned")).toBe(readingOf(bitsOf(0, 16), "signed"));
   });
 
   it("generalising: each word read four ways", () => {

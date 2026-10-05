@@ -45,6 +45,13 @@ describe("the lesson list", () => {
   });
 });
 
+describe("the course's front page", () => {
+  it("says what the course takes as known before Module 1", () => {
+    render(<LessonList book={book} storage={memoryStorage()} />);
+    expect(screen.getByText(STRINGS.assumes)).toBeInTheDocument();
+  });
+});
+
 describe("joinNumbers", () => {
   it("joins as prose does", () => {
     expect(joinNumbers([])).toBe("");

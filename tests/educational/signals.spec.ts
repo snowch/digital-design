@@ -275,15 +275,19 @@ test.describe("the signals lesson's figures", () => {
     await expect(figure.locator(".noisy-readout")).toContainText("63305");
   });
 
-  test("bits change the number, and the same bits read signed give the sensor's reading", async ({
+  test("the display's sum of the bits is asked for first, then the same bits read signed give the sensor's reading", async ({
     page,
   }) => {
     await openLesson(page, LESSON.id);
-    const build = page.locator("#ix-build-number");
-    await build.scrollIntoViewIfNeeded();
-    await build.locator('button[data-bit="4"]').click();
-    await build.locator('button[data-bit="1"]').click();
-    await expect(build.locator('[data-reading="unsigned"] .bit-reading-value')).toHaveText("18");
+    const sum = page.locator("#ix-predict-sum");
+    await sum.scrollIntoViewIfNeeded();
+    // The bits are drawn above the question without their worths, so the sum is the reader's.
+    await expect(sum.locator(".bit-row .bit")).toHaveCount(16);
+    await expect(sum.locator(".bit-row .bit-weight")).toHaveCount(0);
+    await sum.getByRole("radio", { name: "-184", exact: true }).check();
+    await sum.getByRole("button", { name: V.prediction.commit }).click();
+    await expect(sum.locator(".prediction-outcome")).toContainText("65352");
+    await expect(sum.locator(".prediction-outcome .bit-weight")).toHaveCount(16);
     const signed = page.locator("#ix-signed-word");
     await expect(signed.locator('[data-reading="unsigned"] .bit-reading-value')).toHaveText(
       "65352",
