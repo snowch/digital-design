@@ -69,7 +69,13 @@ the subagent that wrote every learner-facing sentence from a brief of checked fa
   sends its output bit through a plain wire part inside the copy, and the grader names every
   expected bit at its copy, so the failure names the lowest copy that went wrong ("The slice
   bit0 drives that signal", with what that copy saw). 40 of 40 at both widths after.
-- 15:59 Whole-lesson read by the managing model (below), then a reviewer per lesson.
+- 15:59 Whole-lesson read by the managing model, which sent one more label round (below).
+- 16:00 to 16:09 A reviewer per lesson, then a sceptic per review (see "Reviews").
+- 16:09 to 16:16 Fixes to code first: the figures the reviews named, and the data behind the
+  findings (the X options, the cut-wire fault, the lamp's name, new starting words).
+- 16:16 to 16:24 Fact briefs per upheld finding to the drafting subagent, one per lesson; the
+  managing model's own cuts; a second read of each lesson, start to finish, on the built page.
+- 16:25 Merged `main` (the preface page) and ran the check.
 
 ## Why four lessons
 
@@ -97,7 +103,9 @@ three to five figures).
 - adders: carry, half adder, full adder, overflow. **Exemption added to Module 1** (`signals`):
   "carry", used there as the everyday verb ("carry it across"); the term gate's stem pattern
   matched it. That is the only edit to Module 1.
-- alu: ALU. ("slice", "select input", "ripple adder" are explained where used, not rationed.)
+- alu: ALU. ("slice" and "select input" are explained where used, not rationed. The first
+  drafts named "ripple adder" without bolding it; the review caught it, and the lesson now
+  describes the arrangement without a name.)
 - No Module 4 or 5 term is used; no Module 2 term is rationed here.
 
 ## Where Module 3 leans on Module 2
@@ -126,3 +134,130 @@ The managing session should check each against Module 2 when both land:
   existing lessons' do. Text is introduced in Module 4, so a Module 2 or 3 learner meets a panel
   of text they have not been taught; the fact sheet tells the drafts not to mention it. Whether
   those panels should be hidden before Module 4 is the managing session's call.
+
+## Reused
+
+- The simulator, the fault lab, the explorer, the prediction figure, the drawing editor with its
+  diagnosis, the hint ladder, saved work and its re-grading on load: all as they were.
+- The `mux2` primitive is untouched and unused here: every selector the learner meets is gates or
+  a block built from gates, so no part does the learner's work.
+- Module 1's rooms, words and readings (-184, -250, `FF48`, `FF06`) carry the story; Module 1's
+  reflection question is answered in the adders lesson.
+
+## Added to the platform, and why
+
+- **Blocks** (`dd-model/src/combinational.ts`): 2-way and 4-way selector, decoder,
+  demultiplexer, encoder, equality comparator, half adder, full adder, adder of any width, ALU
+  slice, split and join. Each is a composite of gates, so every one opens to its gates; each has an
+  exhaustive test. The editor can place the ones a challenge needs (`BLOCKS`).
+- **Words in drawings** (`drawing.ts`, `Builder.tsx`, `CircuitView.tsx`): pins and block ports
+  carry their width; a wire between two widths is refused with a message, and a stored one is
+  listed as not connected; a word's wire draws wide; split and join cross between a word and its
+  bits. The editor was one bit wide, and buses are the module's subject.
+- **Word inputs in explorers** (`WordInputs.tsx`): a row of bit boxes per word input, each bit
+  pressable, with its worth shown. `toggle()` could only flip a one-bit input.
+- **Readings in the signal table**: an explorer can show unsigned and signed columns, so the
+  adders lesson can read one sum both ways.
+- **Chained slices** (`chain.ts`, `gradeChain`): a challenge can grade a one-bit slice by copying
+  it to the widths each test chooses; a failure names the lowest copy that went wrong and what it
+  saw. The capstone is a slice graded at 1, 4, 8 and 16 bits.
+- **Drawing fixes found by Module 3's figures**: boxes widen for long port names; wide words in
+  hexadecimal; label halos; new parts placed clear of others; pins inside an opened block no
+  longer toggle the top level's input (found by the mechanical walk: pressing CIN inside an
+  opened block said "B is 4 bits wide"); a constant part shows its value.
+- **After the reviews**: every gate symbol draws a short lead from its shape to its output pin
+  (the wire to Y seemed to start in mid-air); a part no longer repeats at its port the value its
+  output pin shows (four stacked labels on the decoder). Both change every drawing a little, so
+  the stored screenshots were updated on purpose (see "The check").
+- Every new string is in `dd-views/src/strings.ts` or `parts.ts`, drafted like the lessons'.
+
+## Briefs and drafts
+
+One shared fact sheet (`00-facts.md`: what the learner knows, the rooms, the numbers, the words
+not to use) went with every brief, with `docs/style.md`. Labels went first so prose could quote
+them. What came back, and what was done:
+
+- **Labels, L1 to L4, and the view strings V** (15:39). L1 dropped Y's value from every
+  prediction option ("Y is 0, room A's bit" came back as "room A's bit") and gave two wrong section
+  titles ("Open the selector block" for a block that cannot be opened). L2 used a wrong key, gave a
+  heading that repeated a figure's label, called one challenge "Two circuits", and dropped S's
+  value from options. L3 and, later, 4C described the keys instead of giving them, and were asked
+  again. L4 dropped which slice a fault was in, dropped "4-way" and "the carry into bit 0" from two
+  objectives, put backticks in a caption and brought in "operations" for the page's "jobs". V
+  started sentences in lower case and invented "addsub-bit". All sent back with notes; the second
+  drafts were right.
+- **Prose, 1A to 4C** (15:44 to 15:53). 1B called the fault lab's checks "tests" and wrote
+  counts as words; it also dropped two construction facts. 2A wrote "you see each gate's output
+  step by step" (wrong: the diagram shows inputs and output) and garbled lesson 1's question. 2B
+  dropped the commas from check names and wrote counts as words. 3B used em dashes and started a
+  sentence with "Ha2". 4A got two facts wrong: adding was "to check room B's cooling", and Module 1
+  had "shown" how to negate a word. 1C used "carry", a term lesson 3 introduces, because the
+  managing model's brief did; it was redrafted with "bring".
+- **One fact the managing model got wrong in a brief**: the adders brief stated "-8" in the lead
+  to the prediction that asks what `1000` reads signed. The draft copied it, as drafts do, and the
+  managing model's read caught it; the sentence was cut.
+- **After the first whole-lesson read** (15:59): the page called one block "2-way selector" and
+  "two-input selector"; seven label keys went back for one name.
+- **Fix briefs FX1 to FX4** (16:18 to 16:24), one per lesson, each key with its current text
+  and the facts it must now say. FX1 came back with "An OR gate and an AND gate ... each ask what
+  they give" (the gates asking) and "A 2-way selector ... chooses a whole word" (one selector);
+  both went back. FX1 also used "holds", a term Module 4 introduces; the word came from the
+  managing model's own brief, and the term gate caught it. FX2 missed one paragraph's "line"
+  because the brief did not list it. FX3 came back right. FX4 kept an old opening sentence that no
+  longer matched its list; it went back.
+- **The managing model's own edits**, all cuts or a few added words, never a rewritten sentence:
+  the editor's help text repeated in two construction sections; the motivation sentence that gave
+  the decoder's design away; four repeated sentences found on the second read; "we" to "the
+  display"; "ripple adder" to "an adder like this"; "pass" to "succeed" for a check in the ALU
+  lesson; "of the circuit" after "an input"; "The drawing labels such a block" for the
+  demultiplexer and comparator; "Press a wire to see its name and value" in the ALU's fault lab.
+
+The profile CLAUDE.md predicts held: drafts dropped facts and copied the brief's mistakes
+faithfully. Three of the wrong facts on the page came from the managing model's briefs, not the
+drafts.
+
+## Reviews
+
+The mechanical half walked each lesson at 1280 and 375 pixels, light and dark, pressing every
+control and running each challenge's starting point, a wrong attempt and the reference; it found
+the opened-block pin bug and the phone table overflow above. The reading half gave each lesson to
+its own reviewer (brief `R-review.md`), and each review to its own sceptic (`S-sceptic.md`). The
+reports are summarised here; the sceptic's verdict decided what was done.
+
+| Lesson | Findings | Upheld | In part | Rejected |
+| --- | --- | --- | --- | --- |
+| selectors | 23 | 14 | 5 | 4 |
+| decoders | 25 | 12 | 7 | 6 |
+| adders | 24 | 12 | 8 | 4 |
+| alu | 21 | 10 | 6 | 5 |
+
+The findings that mattered most, all upheld:
+
+- **selectors**: the model note said the stepped model hides the dip a 2-way selector makes when
+  S falls; the model shows it (Y goes 1, 1, 0, 1), and the cause is the extra gate on A's side,
+  not varying gate times. The managing model wrote that fact into the brief.
+- **decoders**: a fault said the cut wire "reads X", which no earlier lesson explains, and the
+  closing line ("one gate accepts an extra pattern") did not match two of the faults.
+- **adders**: the question attributed a thermometer to lesson 2 and ignored that Module 1 had shown
+  room B at -25.0; the signed-overflow rule was stated from one example; the adder figure's
+  starting sum showed the prediction's answer a scroll below it.
+- **alu**: "only overflow differs" was false for subtraction (lesson 3's rules break: 3 - 6 has
+  COUT 0 though negative); "four results per bit" contradicted the one adder; the jobs did not fit
+  the rooms' words ("FE4E reads -434" meant nothing).
+
+Rejected, with the sceptic's reason: hiding the fault outcomes until a fault is run (every fault
+lab in the course shows them from the start; that is a platform decision, not a lesson's);
+"Check my prediction" sharing a verb with the fault lab's checks (the platform's button, on every
+lesson); the encoder's inside described in the prediction lead (describing the closed block is the
+exercise); a heading with a colon; the sentence on what makes a negative word ("NOT B plus 1")
+being a sum rather than a prediction.
+
+Actions, fixes to code first: the figures (word selector staggered, full adder's internals
+re-placed, gate leads, port value labels); X removed from every prediction; the decoder's third
+fault is now "notS1 becomes a wire"; the lamp is Y2 throughout; the adder figure starts at
+`0011` + `0010`; the add/sub figure at 2 - 3; the 16-bit ALU's AND job uses B = `8000`. Then the
+fix briefs above, then a second read, then the mechanical half again.
+
+Platform items raised by the reviews and left for the managing session: the fault labs' outcomes
+visible before running (course-wide); "As text" and "Import from text" panels before Module 4;
+"lesson 1" meaning this module's first lesson, not the course's (course-wide naming).
