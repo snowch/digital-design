@@ -249,10 +249,11 @@ export const INSIDE: Readonly<Record<string, Readonly<Record<string, readonly [n
       "in:D": [0, 1],
       "in:CLK": [0, 4],
       notClk: [4, 4],
-      master: [8, 1],
-      slave: [12, 6],
-      "out:Q": [16, 6],
-      "out:Qb": [16, 8],
+      // Two cells past the inverter, for its output's turn up and the value written there.
+      master: [9, 1],
+      slave: [13, 6],
+      "out:Q": [17, 6],
+      "out:Qb": [17, 8],
     },
   };
 
@@ -305,7 +306,7 @@ export function keepBitCircuit(options: { clear?: boolean } = {}): Circuit {
   dFlipFlop(b, next, clk, { name: "ff", q });
   b.output("Q", q);
   // The flip-flop sits low, level with CLK, so the clock runs straight in under the gates.
-  const ffX = rst !== undefined ? 25 : 20;
+  const ffX = rst !== undefined ? 26 : 21;
   const ffY = rst !== undefined ? 12 : 8;
   return placed(b.build(), {
     "in:D": [0, 1],
@@ -314,11 +315,12 @@ export function keepBitCircuit(options: { clear?: boolean } = {}): Circuit {
     // One row below the flip-flop, so the loop's wire passes under the flip-flop's name.
     "in:CLK": [0, ffY + 2],
     notEn: [5, 5],
-    andLoad: [10, 1],
-    andKeep: [10, 5],
-    orChoice: [15, 3],
-    notRst: [10, 9],
-    andClear: [20, 5],
+    // Two cells clear of the inverter, for its output's turn and the loop's, half a cell apart.
+    andLoad: [11, 1],
+    andKeep: [11, 5],
+    orChoice: [16, 3],
+    notRst: [11, 9],
+    andClear: [21, 5],
     ff: [ffX, ffY],
     "out:Q": [ffX + 6, ffY],
   });

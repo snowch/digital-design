@@ -358,9 +358,13 @@ export function CircuitView({
                       composite?.outputs[p.port];
                     const v = net !== undefined ? values?.[net] : undefined;
                     // An output pin shows its own value, so a part driving one does not repeat
-                    // it at its port, where ports 20 pixels apart would stack the labels.
+                    // it at its port, where ports 20 pixels apart would stack the labels. An
+                    // output no wire leaves feeds nothing, so its value is not written either.
                     const shownAtPin = sub.outputs.some((o) => o.net === net);
-                    return v && !shownAtPin ? (
+                    const wired = scene.wires.some(
+                      (w) => w.from.part === part.id && w.from.port === p.port,
+                    );
+                    return v && wired && !shownAtPin ? (
                       <text
                         key={p.port}
                         x={p.at.x - box.x + 6}
