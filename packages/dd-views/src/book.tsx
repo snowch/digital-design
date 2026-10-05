@@ -150,6 +150,7 @@ export function limitFailures(
         format(strings.limits.only, { kinds }),
         format(strings.limits.onlyFound, {
           list: others.map((g) => `${labelFor(g.kind)} ${g.path}`).join(", "),
+          kinds,
         }),
         others.map((g) => g.path),
       );

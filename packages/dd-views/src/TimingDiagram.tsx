@@ -76,7 +76,13 @@ export function TimingDiagram({
     .filter((l): l is { name: string; net: number } => l.net !== undefined);
   const span = Math.max(1, end - from);
   // Readable at one pixel per unit at the least; a long run scrolls sideways in its wrapper.
-  const unit = Math.max(2, Math.min(48, 700 / span));
+  // A short run is stretched until its longest mark label fits inside it: a one-step prediction
+  // labelled "WARM 1, DOOR 1" once drew a label wider than its whole drawing.
+  const longestMark = Math.max(
+    0,
+    ...trace.marks.filter((m) => m.time >= from && m.time <= end).map((m) => m.label.length * 7.5),
+  );
+  const unit = Math.max(2, Math.min(48, 700 / span), longestMark / span);
   // The lane names are a drawing of their own that stays put while the trace scrolls beside it,
   // sized to the longest name at about 7.5 pixels a character.
   const labelW = Math.max(LABEL_W_MIN, Math.max(0, ...lanes.map((l) => l.name.length)) * 7.5 + 16);

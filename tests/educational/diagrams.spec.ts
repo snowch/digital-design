@@ -129,6 +129,35 @@ test.describe("the diagrams", () => {
     }
   });
 
+  // Module 2
+  test("Module 2: no label overlaps another or leaves its drawing, before and after use", async ({
+    page,
+  }) => {
+    for (const [lesson, predictions] of [
+      ["gates", ["ix-predict-alarm"]],
+      ["nand", ["ix-predict-tied"]],
+      ["fewer-gates", ["ix-predict-warm", "ix-too-short"]],
+    ] as const) {
+      await openLesson(page, lesson);
+      expect(await textCollisions(page), lesson).toEqual([]);
+      for (const id of predictions) {
+        const figure = page.locator(`#${id}`);
+        await figure.getByRole("radio").nth(1).check();
+        await figure.getByRole("button", { name: V.prediction.commit }).click();
+      }
+      for (const faults of await page.locator(".fault-lab").all()) {
+        await faults.getByRole("radio").nth(2).check();
+        await faults.getByRole("button", { name: V.fault.run }).click();
+      }
+      for (const pins of await page.locator(".explorer").all())
+        await pins
+          .getByRole("button", { name: new RegExp(`${V.circuit.toggle}$`) })
+          .first()
+          .click();
+      expect(await textCollisions(page), `${lesson} after use`).toEqual([]);
+    }
+  });
+
   test("every lesson's diagrams are clear as first drawn", async ({ page }) => {
     for (const lesson of LESSONS) {
       await openLesson(page, lesson.id);

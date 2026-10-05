@@ -89,7 +89,7 @@ export const CircuitCompare = withProps(
                         ? format(strings.compare.gates, { n: s.gates })
                         : format(strings.compare.depth, { n: s.depth }),
                     )
-                    .join(" ")}
+                    .join(", ")}
                 </p>
               )}
             </div>

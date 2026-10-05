@@ -212,7 +212,9 @@ describe("grading a circuit's limits", () => {
   it("fails a gate of a kind not allowed, and still reports the rows", () => {
     const v = grade(xor({ only: ["nand"] }), oneXor);
     expect(v.failures.map((f) => f.label)).toEqual([format(S.limits.only, { kinds: "NAND" })]);
-    expect(v.failures[0]?.detail).toBe(format(S.limits.onlyFound, { list: "XOR xor" }));
+    expect(v.failures[0]?.detail).toBe(
+      format(S.limits.onlyFound, { list: "XOR xor", kinds: "NAND" }),
+    );
     const wrongRows = grade(xor({ only: ["nand"] }), { circuit: libraryCircuit("and-gate") });
     expect(wrongRows.failures.map((f) => f.label)).toEqual([
       "A 0, B 1",

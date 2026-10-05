@@ -112,4 +112,15 @@ test.describe("the look of the page", () => {
       animations: "disabled",
     });
   });
+
+  // Module 2
+  test("Module 2's pairs figure looks as designed", async ({ page }) => {
+    await openLesson(page, "fewer-gates");
+    const figure = page.locator("#ix-call-pairs");
+    await figure.scrollIntoViewIfNeeded();
+    await expect(figure).toHaveScreenshot("ix-call-pairs.png", {
+      maxDiffPixelRatio: 0.02,
+      animations: "disabled",
+    });
+  });
 });
