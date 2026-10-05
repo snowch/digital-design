@@ -586,18 +586,19 @@ export function combinationalLibrary(place: Place): Readonly<Record<string, () =
         "out:Y2": [13, 4],
         "out:Y3": [13, 6],
       }),
-    // The four AND gates in a column, each beside its lamp; the NOT gates below them, so the
-    // wires from S1 and S0 to the lower gates pass no part.
+    // The four AND gates in a column, each beside its lamp. Each NOT gate sits on its input's row,
+    // half a cell up so the wire into it runs straight, and the inputs sit on rows between the
+    // gates' inputs, so no branch to a gate runs along a wire that leaves a NOT gate.
     "decoder-gates": () =>
       place(decoderGates(), {
-        "in:S1": [0, 1],
-        "in:S0": [0, 4],
+        "in:S1": [0, 3],
+        notS1: [5, 2.5],
+        "in:S0": [0, 7],
+        notS0: [5, 6.5],
         and0: [11, 1],
         and1: [11, 5],
         and2: [11, 9],
         and3: [11, 13],
-        notS1: [5, 17],
-        notS0: [5, 20],
         "out:Y0": [16, 1],
         "out:Y1": [16, 5],
         "out:Y2": [16, 9],

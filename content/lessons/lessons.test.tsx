@@ -6,13 +6,19 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { applyFaults, libraryCircuit } from "@dd/dd-model";
 import {
   INTERACTIVES,
   answerOf,
   compileDrawing,
   createBook,
+  drawingAt,
   emptyDrawing,
   grade,
+  sceneOf,
+  sceneProblems,
+  straighten,
+  toFault,
 } from "@dd/dd-views";
 import { LessonView, memoryStorage } from "@dd/lesson-runtime";
 import { termProblems } from "@dd/lesson-schema";
@@ -39,6 +45,37 @@ describe("the course's lessons", () => {
       for (const s of l.sections)
         for (const x of s.interactives)
           if (x.kind !== "challenge") expect(Object.keys(INTERACTIVES)).toContain(x.kind);
+  });
+
+  // Every circuit drawing a learner can see, drawn as a figure draws it (straightened): each
+  // figure's circuit, under each fault its fault lab offers, and the inside of every block in it.
+  it("draws no wire through a part it does not join, and no two signals along one line", () => {
+    const found: string[] = [];
+    const check = (name: string, circuit: ReturnType<typeof libraryCircuit>) => {
+      for (const scope of ["", ...circuit.composites.map((c) => c.path)]) {
+        const scene = sceneOf(straighten(drawingAt(circuit, scope).drawing));
+        found.push(
+          ...sceneProblems(scene).map((p) => `${name}${scope ? ` (${scope})` : ""}: ${p}`),
+        );
+      }
+    };
+    for (const l of LESSONS)
+      for (const s of l.sections)
+        for (const x of s.interactives) {
+          const p = x.props as {
+            libraryId?: unknown;
+            circuits?: readonly { libraryId?: unknown }[];
+            faults?: readonly Parameters<typeof toFault>[0][];
+          };
+          const ids = [p.libraryId, ...(p.circuits ?? []).map((c) => c.libraryId)];
+          for (const id of ids) {
+            if (typeof id !== "string") continue;
+            check(`${l.id} ${x.id}`, libraryCircuit(id));
+            for (const f of p.faults ?? [])
+              check(`${l.id} ${x.id} with a fault`, applyFaults(libraryCircuit(id), [toFault(f)]));
+          }
+        }
+    expect([...new Set(found)]).toEqual([]);
   });
 
   // A scene draws the lesson's own world, so every signal it names is one the lesson's circuits use.

@@ -157,10 +157,17 @@ the Vite build, Playwright. Each line below is a check and the reason it exists.
   axis labels collide, or a block whose name sits on its port names, fails a learner however
   right its data; the test measures the rendered text, so a new figure is checked the day it
   lands.
+- **No wire in a circuit drawing may mislead.** A wire may not enter a gate outside its drawn
+  body or leave it off its output lead, step up or down by less than a grid cell where it could
+  run straight, pass through a part or a part's label or name, or run along another signal's wire
+  (`tests/educational/diagrams.spec.ts` in the browser; the content tests for every figure's
+  circuit, under every fault, and inside every block a learner can open). A wire through a part
+  reads as a connection that is not there; `docs/notes/straight-wires.md` says how the geometry
+  and the router keep to this.
 - **The look of the page is held to rules and to screenshots**
   (`tests/educational/aesthetics.spec.ts`). No visible text under 11 pixels, every control at
   least 40 pixels tall on a phone, no line of prose over about 85 characters; and the lesson
-  header and four figures must match their stored screenshots, at both widths. The typefaces
+  header and the figures the test names must match their stored screenshots, at both widths. The typefaces
   ship with the site (Source Sans 3 for prose, Archivo for headings, JetBrains Mono for values
   and code) so the same commit renders the same everywhere. A change that alters a figure's look
   fails here until its baseline is updated on purpose with `npx playwright test

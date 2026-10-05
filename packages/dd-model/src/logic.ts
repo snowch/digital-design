@@ -195,20 +195,23 @@ export function callRowsCircuit(): Circuit {
   const r4 = b.and([nw, d, c], { name: "and4", output: b.net("R4") });
   const call = b.or([r1, r2, r3, r4], { name: "orCall", output: b.net("CALL") });
   b.output("CALL", call);
-  // The inverters sit below the AND gates, so the wires to the gates run in clear rows.
+  // Each inverter sits on its input's row, half a cell up so the wire into it runs straight; each
+  // signal and its opposite then leave from beside each other for the AND gates on the right. The
+  // inputs sit on rows between the gates' inputs, so no branch to a gate runs along a wire that
+  // leaves an inverter.
   return placed(b.build(), {
-    "in:WARM": [0, 1],
-    "in:DOOR": [0, 11],
-    "in:CLOSED": [0, 21],
+    "in:WARM": [0, 4],
+    notWarm: [5, 3.5],
+    "in:DOOR": [0, 9],
+    notDoor: [5, 8.5],
+    "in:CLOSED": [0, 14],
+    notClosed: [5, 13.5],
     and1: [14, 1],
-    and2: [14, 8],
-    and3: [14, 15],
-    and4: [14, 22],
-    notWarm: [5, 29],
-    notDoor: [5, 33],
-    notClosed: [5, 37],
-    orCall: [22, 11],
-    "out:CALL": [28, 11],
+    and2: [14, 6],
+    and3: [14, 11],
+    and4: [14, 16],
+    orCall: [22, 7],
+    "out:CALL": [28, 8],
   });
 }
 

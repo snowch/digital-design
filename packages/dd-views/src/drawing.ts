@@ -14,9 +14,10 @@ import {
 } from "@dd/dd-model";
 import { CircuitBuilder, type Circuit, type NetId } from "@dd/sim";
 
-import { autoLayout } from "./layout";
+import { ROW_STEP, autoLayout } from "./layout";
 import { DEFAULT_VIEW_STRINGS, format } from "./strings";
 import { labelFor, partSpec, type PartSpec } from "./parts";
+import { CELL, isShaped, partHeight, partWidth, pinWidth } from "./symbols";
 
 /** The two-button memory as a block: an SR latch whose only output is the light. */
 function twoButtons(b: CircuitBuilder, a: NetId, bPress: NetId, options: LatchOptions): void {
@@ -108,6 +109,26 @@ export function specOf(part: Part): PartSpec | undefined {
     inputs: part.ports.inputs,
     outputs: part.ports.outputs,
   };
+}
+
+/**
+ * How many grid rows a part takes in a column: its body, the name written under a gate or the
+ * label over a block, and a row's gap, but never fewer than the layout's usual step.
+ */
+export function rowsOf(part: Part): number {
+  if (part.kind === "input" || part.kind === "output") return ROW_STEP;
+  const spec = specOf(part);
+  const body = partHeight(Math.max(spec?.inputs.length ?? 1, spec?.outputs.length ?? 1));
+  const label = isShaped(part.kind) ? 0 : 20;
+  return Math.max(ROW_STEP, Math.ceil((body + 16 + label) / CELL));
+}
+
+/** How many grid columns a part's body takes. */
+export function colsOf(part: Part): number {
+  if (part.kind === "input" || part.kind === "output")
+    return Math.ceil(pinWidth(part.name ?? part.id) / CELL);
+  const spec = specOf(part);
+  return Math.ceil(partWidth(part.kind, spec?.inputs ?? [], spec?.outputs ?? []) / CELL);
 }
 
 /** The id a pin part has for an interface port. */
@@ -463,5 +484,7 @@ export function circuitToDrawing(circuit: Circuit): Drawing {
     for (const to of readers) wires.push({ from, to });
   }
   const drawing: Drawing = { parts, wires };
-  return unplaced.length ? autoLayout(drawing, new Set(unplaced.map((p) => p.id))) : drawing;
+  return unplaced.length
+    ? autoLayout(drawing, new Set(unplaced.map((p) => p.id)), rowsOf, colsOf)
+    : drawing;
 }

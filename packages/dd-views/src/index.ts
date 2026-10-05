@@ -18,3 +18,4 @@ export * from "./BitRow";
 export * from "./useWidth";
 export * from "./AnswerEditor";
 export * from "./WordInputs";
+export * from "./straighten";

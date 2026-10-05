@@ -4,11 +4,13 @@
 
 import { describe, expect, it } from "vitest";
 
-import { applyFaults, brokenWire, libraryCircuit, stuckAt, wrongGate } from "@dd/dd-model";
+import { LIBRARY, applyFaults, brokenWire, libraryCircuit, stuckAt, wrongGate } from "@dd/dd-model";
 
 import { nameRepeatsKind } from "./parts";
-import { drawingAt, sceneOf, type PartBox, type WirePath } from "./scene";
+import { drawingAt, partBox, sceneOf, type PartBox, type WirePath } from "./scene";
 import { netOfWire } from "./scene";
+import { straighten } from "./straighten";
+import { isShaped } from "./symbols";
 
 interface Segment {
   readonly x1: number;
@@ -70,7 +72,10 @@ function problems(
   scope: string,
   faults = [] as Parameters<typeof applyFaults>[1],
 ) {
-  const { drawing, circuit } = drawingAt(applyFaults(libraryCircuit(circuitId), faults), scope);
+  // As a figure shows it: straightened.
+  const at = drawingAt(applyFaults(libraryCircuit(circuitId), faults), scope);
+  const { circuit } = at;
+  const drawing = straighten(at.drawing);
   const scene = sceneOf(drawing);
   const found: string[] = [];
   const net = (w: WirePath) => netOfWire(circuit, w.from);
@@ -91,6 +96,32 @@ function problems(
   );
   return { found, drawing };
 }
+
+describe("the drawing's geometry", () => {
+  it("puts every port of every library drawing on one 10-pixel lattice, so any two line up", () => {
+    const off = Object.keys(LIBRARY).flatMap((id) =>
+      sceneOf(drawingAt(libraryCircuit(id), "").drawing).boxes.flatMap((b) =>
+        [...b.inputs, ...b.outputs]
+          .filter((p) => (((p.at.y - b.y) % 10) + 10) % 10 !== 2)
+          .map((p) => `${id}: ${b.part.id}.${p.port} at ${p.at.y - b.y}`),
+      ),
+    );
+    expect(off).toEqual([]);
+  });
+
+  it("draws a gate tall enough that its body spans every input", () => {
+    for (const fanIn of [1, 2, 3, 4, 5]) {
+      const box = partBox({ id: "g", kind: fanIn === 1 ? "not" : "and", x: 0, y: 0, fanIn });
+      expect(isShaped(box.part.kind)).toBe(true);
+      for (const p of box.inputs) {
+        expect(p.at.y).toBeGreaterThanOrEqual(box.y + 4);
+        expect(p.at.y).toBeLessThanOrEqual(box.y + box.h - 4);
+      }
+      // The output lead is drawn at half the height, where the output pin is.
+      expect(box.outputs[0]?.at.y).toBe(box.y + box.h / 2);
+    }
+  });
+});
 
 describe("the hand-placed drawings", () => {
   it("draws the two-button circuit with each button's wire to its own gate", () => {

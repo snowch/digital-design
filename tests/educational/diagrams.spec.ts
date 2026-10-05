@@ -49,6 +49,159 @@ async function textCollisions(page: Page): Promise<Collision[]> {
   });
 }
 
+interface WireFault {
+  readonly figure: string;
+  readonly problem: string;
+}
+
+/**
+ * Every place a circuit drawing's wires look broken: a wire that meets a gate off the gate's
+ * drawn body or off its output lead; a wire that steps up or down by less than a grid cell
+ * (20 pixels) where it could run straight; a wire that passes through a part, which looks like a
+ * connection that is not there; and a wire through a part's label or name, which strikes it out.
+ * Measured on the rendered page, in the drawing's own units, so it checks what a learner sees.
+ */
+async function wireFaults(page: Page): Promise<WireFault[]> {
+  return page.evaluate(() => {
+    const out: { figure: string; problem: string }[] = [];
+    const SHAPED = /\bpart-(and|nand|or|nor|xor|xnor|not|buf)\b/;
+    // A wire's path is M x y, then H x and V y steps; feedback adds a channel under the parts.
+    const points = (d: string) => {
+      const t = d.trim().split(/\s+/);
+      const pts: { x: number; y: number }[] = [];
+      let x = 0;
+      let y = 0;
+      for (let i = 0; i < t.length;) {
+        const c = t[i++];
+        if (c === "M") {
+          x = Number(t[i++]);
+          y = Number(t[i++]);
+        } else if (c === "H") x = Number(t[i++]);
+        else if (c === "V") y = Number(t[i++]);
+        pts.push({ x, y });
+      }
+      return pts;
+    };
+    for (const svg of document.querySelectorAll<SVGSVGElement>("svg.circuit")) {
+      const figure = svg.closest("figure")?.id ?? svg.closest("section")?.id ?? "drawing";
+      const toSvg = svg.getScreenCTM()?.inverse();
+      if (!toSvg) continue;
+      const wires = [...svg.querySelectorAll("g.wires > g.wire")].map((g) => {
+        const path = g.querySelector("path:not(.wire-hit):not(.wire-halo)");
+        return {
+          net: (g as SVGGElement).dataset["net"] ?? "a wire",
+          pts: points(path?.getAttribute("d") ?? ""),
+        };
+      });
+      for (const w of wires)
+        for (let k = 1; k < w.pts.length; k++) {
+          const a = w.pts[k - 1]!;
+          const b = w.pts[k]!;
+          const step = Math.abs(b.y - a.y);
+          if (a.x === b.x && step > 0 && step < 20)
+            out.push({ figure, problem: `${w.net} steps ${step} px instead of running straight` });
+        }
+      // Each part's top-left corner, so a wire's end can be given to the part it reaches: the
+      // nearest part at or above it in the same column.
+      const parts = [...svg.querySelectorAll<SVGGElement>("g.part, g.pin")].map((g) => {
+        const at = toSvg.multiply(g.getScreenCTM()!);
+        return { g, x: at.e, y: at.f };
+      });
+      const owner = (x: number, y: number) =>
+        parts
+          .filter((p) => Math.abs(p.x - x) < 0.5 && p.y <= y + 1)
+          .reduce<(typeof parts)[number] | undefined>(
+            (a, p) => (!a || p.y > a.y ? p : a),
+            undefined,
+          );
+      // A part's outline, 3 pixels inside its edge: a wire that crosses it seems to connect there.
+      const outlines = parts.map(({ g, x, y }) => {
+        const shape =
+          g.querySelector<SVGGraphicsElement>("rect.box") ??
+          g.querySelector<SVGGraphicsElement>(":scope > rect:not(.mark)") ??
+          [...g.querySelectorAll<SVGPathElement>("path")].find(
+            (p) => p.getAttribute("fill") !== "none",
+          );
+        const b = shape?.getBBox();
+        const name = g.getAttribute("aria-label") ?? "a part";
+        return b
+          ? {
+              name,
+              x1: x + b.x + 3,
+              y1: y + b.y + 3,
+              x2: x + b.x + b.width - 3,
+              y2: y + b.y + b.height - 3,
+            }
+          : undefined;
+      });
+      for (const w of wires)
+        for (let k = 1; k < w.pts.length; k++) {
+          const a = w.pts[k - 1]!;
+          const b = w.pts[k]!;
+          for (const o of outlines) {
+            if (!o) continue;
+            const across =
+              a.y === b.y
+                ? a.y > o.y1 && a.y < o.y2 && Math.max(a.x, b.x) > o.x1 && Math.min(a.x, b.x) < o.x2
+                : a.x > o.x1 &&
+                  a.x < o.x2 &&
+                  Math.max(a.y, b.y) > o.y1 &&
+                  Math.min(a.y, b.y) < o.y2;
+            if (across) out.push({ figure, problem: `${w.net} passes through ${o.name}` });
+          }
+        }
+      // A part's label or name that a wire runs through is struck out. A value written on its
+      // own wire is placed there on purpose, so it is not counted.
+      const words = [
+        ...svg.querySelectorAll<SVGTextElement>("text.part-label, text.part-name, text.pin-name"),
+      ].map((t) => {
+        const r = t.getBoundingClientRect();
+        const a = new DOMPoint(r.left, r.top).matrixTransform(toSvg);
+        const b = new DOMPoint(r.right, r.bottom).matrixTransform(toSvg);
+        return { text: t.textContent ?? "", x1: a.x + 1, y1: a.y + 2, x2: b.x - 1, y2: b.y - 2 };
+      });
+      for (const w of wires)
+        for (let k = 1; k < w.pts.length; k++) {
+          const a = w.pts[k - 1]!;
+          const b = w.pts[k]!;
+          for (const o of words) {
+            const across =
+              a.y === b.y
+                ? a.y > o.y1 && a.y < o.y2 && Math.max(a.x, b.x) > o.x1 && Math.min(a.x, b.x) < o.x2
+                : a.x > o.x1 &&
+                  a.x < o.x2 &&
+                  Math.max(a.y, b.y) > o.y1 &&
+                  Math.min(a.y, b.y) < o.y2;
+            if (across)
+              out.push({ figure, problem: `${w.net} runs through the words "${o.text}"` });
+          }
+        }
+      for (const { g, y } of parts) {
+        if (!SHAPED.test(g.getAttribute("class") ?? "")) continue;
+        const paths = [...g.querySelectorAll<SVGPathElement>("path")];
+        const body = paths.find((p) => p.getAttribute("fill") !== "none");
+        const lead = paths.find((p) => /H 60$/.test((p.getAttribute("d") ?? "").trim()));
+        if (!body || !lead) continue;
+        const box = body.getBBox();
+        const top = y + box.y;
+        const bottom = y + box.y + box.height;
+        const leadY = y + Number((lead.getAttribute("d") ?? "").trim().split(/\s+/)[2]);
+        const name = g.querySelector(".part-name")?.textContent ?? "a gate";
+        for (const w of wires) {
+          const start = w.pts[0];
+          const end = w.pts[w.pts.length - 1];
+          if (!start || !end) continue;
+          if (owner(end.x, end.y)?.g === g && (end.y < top + 2 || end.y > bottom - 2))
+            out.push({ figure, problem: `${w.net} enters ${name} outside its body` });
+          if (owner(start.x - 60, start.y)?.g === g && Math.abs(start.y - leadY) > 0.5)
+            out.push({ figure, problem: `${w.net} leaves ${name} off its output lead` });
+        }
+      }
+    }
+    return out;
+  });
+}
+
 test.describe("the diagrams", () => {
   test("no label overlaps another or leaves its drawing, before and after use", async ({
     page,
@@ -155,6 +308,15 @@ test.describe("the diagrams", () => {
           .first()
           .click();
       expect(await textCollisions(page), `${lesson} after use`).toEqual([]);
+    }
+  });
+
+  test("every wire meets its gate on the gate's body and runs straight or turns by a cell", async ({
+    page,
+  }) => {
+    for (const lesson of LESSONS) {
+      await openLesson(page, lesson.id);
+      expect(await wireFaults(page), lesson.id).toEqual([]);
     }
   });
 

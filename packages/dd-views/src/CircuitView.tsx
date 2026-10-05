@@ -10,6 +10,7 @@ import { formatWord, type Circuit, type Word } from "@dd/sim";
 
 import { labelFor, nameRepeatsKind } from "./parts";
 import { drawingAt, netOfWire, sceneOf, type PartBox } from "./scene";
+import { straighten } from "./straighten";
 import { GateSymbol, isShaped } from "./symbols";
 import { useOverflows } from "./useWidth";
 import { useViewStrings } from "./strings";
@@ -90,7 +91,11 @@ export function CircuitView({
 }: CircuitViewProps) {
   const strings = useViewStrings();
   const id = useId();
-  const { drawing, circuit: sub } = useMemo(() => drawingAt(circuit, scope), [circuit, scope]);
+  // A read-only drawing is straightened: parts nudged up or down so its wires run straight.
+  const { drawing, circuit: sub } = useMemo(() => {
+    const at = drawingAt(circuit, scope);
+    return { ...at, drawing: straighten(at.drawing) };
+  }, [circuit, scope]);
   const scene = useMemo(() => sceneOf(drawing), [drawing]);
   const highlighted = new Set(highlight);
   // The net under the pointer, focused, or last pressed: every wire of it lights up together.
@@ -193,6 +198,9 @@ export function CircuitView({
                   <path d={w.d} fill="none" className="wire-hit" />
                   <path d={w.d} fill="none" />
                   <circle cx={w.end.x} cy={w.end.y} r={3} />
+                  {w.junctions.map((j) => (
+                    <circle key={`${j.x},${j.y}`} cx={j.x} cy={j.y} r={3} className="junction" />
+                  ))}
                 </g>
               );
             })}
@@ -295,12 +303,13 @@ export function CircuitView({
                     />
                   )}
                   {isShaped(part.kind) ? (
-                    <GateSymbol kind={part.kind} />
+                    <GateSymbol kind={part.kind} h={box.h} />
                   ) : (
                     <rect x={2} y={2} width={box.w - 4} height={box.h - 4} rx={4} className="box" />
                   )}
                   {!isShaped(part.kind) && (
-                    <text x={box.w / 2} y={-5} textAnchor="middle" className="part-label">
+                    // A block's name sits clear of the value written by its first output.
+                    <text x={box.w / 2} y={-8} textAnchor="middle" className="part-label">
                       {box.label}
                     </text>
                   )}
@@ -349,12 +358,12 @@ export function CircuitView({
                       composite?.outputs[p.port];
                     const v = net !== undefined ? values?.[net] : undefined;
                     // An output pin shows its own value, so a part driving one does not repeat
-                    // it at its port, where ports 16 pixels apart would stack the labels.
+                    // it at its port, where ports 20 pixels apart would stack the labels.
                     const shownAtPin = sub.outputs.some((o) => o.net === net);
                     return v && !shownAtPin ? (
                       <text
                         key={p.port}
-                        x={p.at.x - box.x + 4}
+                        x={p.at.x - box.x + 6}
                         y={p.at.y - box.y - 5}
                         className={`value-label value-${levelOf(v)}`}
                       >

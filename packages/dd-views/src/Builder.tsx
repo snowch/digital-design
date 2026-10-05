@@ -17,13 +17,15 @@ import { autoLayout } from "./layout";
 import {
   drawingWarnings,
   refWidth,
+  colsOf,
+  rowsOf,
   specOf,
   type Drawing,
   type Part,
   type PortRef,
 } from "./drawing";
-import { CELL, partBox, sceneOf, type PartBox } from "./scene";
-import { GateSymbol, isShaped } from "./symbols";
+import { partBox, sceneOf, type PartBox } from "./scene";
+import { CELL, GateSymbol, isShaped } from "./symbols";
 import { format, useViewStrings } from "./strings";
 import { nameRepeatsKind, partSpec } from "./parts";
 
@@ -314,7 +316,7 @@ export function Builder({ drawing, onChange, palette, highlight = [], title }: B
         <button
           type="button"
           className="button secondary"
-          onClick={() => onChange(autoLayout(drawing))}
+          onClick={() => onChange(autoLayout(drawing, undefined, rowsOf, colsOf))}
         >
           {strings.builder.tidy}
         </button>
@@ -360,6 +362,9 @@ export function Builder({ drawing, onChange, palette, highlight = [], title }: B
                   <path d={w.d} fill="none" className="wire-hit" />
                   <path d={w.d} fill="none" />
                   <circle cx={w.end.x} cy={w.end.y} r={3} />
+                  {w.junctions.map((j) => (
+                    <circle key={`${j.x},${j.y}`} cx={j.x} cy={j.y} r={3} className="junction" />
+                  ))}
                 </g>
               );
             })}
@@ -410,7 +415,7 @@ export function Builder({ drawing, onChange, palette, highlight = [], title }: B
                     {isPin ? (
                       <rect width={box.w} height={box.h} rx={4} />
                     ) : isShaped(part.kind) ? (
-                      <GateSymbol kind={part.kind} />
+                      <GateSymbol kind={part.kind} h={box.h} />
                     ) : (
                       <rect
                         x={2}
@@ -433,7 +438,7 @@ export function Builder({ drawing, onChange, palette, highlight = [], title }: B
                     ) : (
                       <>
                         {!isShaped(part.kind) && (
-                          <text x={box.w / 2} y={-5} textAnchor="middle" className="part-label">
+                          <text x={box.w / 2} y={-8} textAnchor="middle" className="part-label">
                             {spec?.label ?? part.kind}
                           </text>
                         )}
