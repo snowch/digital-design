@@ -380,6 +380,20 @@ session attacked its seven findings before acting:
 | The step numbers measure 3.16:1 on the canvas (4.47:1 dark), under the 4.5:1 small text needs | upheld, measured | the step and sample numbers use the muted colour, 5.53:1 (7.55:1 dark), in the drawing and in the signal plot |
 | The dashed lines at both levels read as two tracks | rejected: they are labelled "3.30 V" and "0 V" at the left and match the plots below | none |
 
+### The author misread the strip
+
+The same day the author read the strip's six dips as the 1s: steps 9, 11, 12, 14, 15 and 16,
+worth 128, 32, 16, 4, 2 and 1, which add to 183. The figure was right; the dips are the 0s (183
+is what -184's pattern gives with every step flipped). But a reader who knows binary read it
+the wrong way round, so a first-lesson reader would too: the eight high steps at the start made
+a long flat line that looked like a resting level, and the dips looked like the pulses. Two
+changes, so the 1s are the thing on the page:
+
+- each high step is a filled column from 0 V up to 3.30 V, so a 1 reads as something there and
+  a 0 as a gap, as in the plots below, where a 1 is a filled dot and a 0 a hollow one;
+- each level's label names its digit as well as its voltage (brief D3), as the paragraph above
+  the drawing says: "0 V for a 0, or 3.30 V for a 1".
+
 ## Questions for the author
 
 1. The task points to "the build prompt's machine section in docs/inventory.md". There is no
@@ -1327,5 +1341,15 @@ setup", and its banned list left out the later lessons' terms (the Module 1 buil
 same gap in its own briefs). The fourth brief carried the full list, and its draft stands: "The cable from cold room to office
 and the steps as voltages." The label came back
 "noise", right first time.
+````
+
+### D3-strip-levels.md (the managing session's brief after the author misread the strip)
+
+````markdown
+level: the label beside each of the strip's two levels, giving the digit the level stands for
+and its voltage, as the paragraph says: "0 V for a 0, or to 3.30 V for a 1". Placeholders
+{digit} (1 or 0) and {volts} ("3.30 V" or "0 V"), each once; at most 10 characters with "1" and
+"3.30 V" filled in, for a narrow margin on a phone; no full stop. A reader took the low steps
+for the 1s. Returned "{digit}: {volts}", which stands.
 ````
 

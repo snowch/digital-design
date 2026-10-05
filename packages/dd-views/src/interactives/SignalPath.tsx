@@ -252,16 +252,25 @@ export const SignalPath = withProps(
               <line className="level" x1={LEFT} x2={w - RIGHT} y1={yHigh} y2={yHigh} />
               <line className="level" x1={LEFT} x2={w - RIGHT} y1={yLow} y2={yLow} />
               <text className="tick" x={LEFT - 8} y={yHigh + 4} textAnchor="end">
-                {high}
+                {format(strings.path.level, { digit: 1, volts: high })}
               </text>
               <text className="tick" x={LEFT - 8} y={yLow + 4} textAnchor="end">
-                {low}
+                {format(strings.path.level, { digit: 0, volts: low })}
               </text>
               {rec.sent.map((bit, i) => {
                 const x0 = LEFT + i * col;
                 const prev = rec.sent[i - 1];
                 return (
                   <g key={i} className="step" data-step={i + 1} data-level={bit}>
+                    {bit === 1 && (
+                      <rect
+                        className="step-fill"
+                        x={x0 + 1}
+                        y={yHigh}
+                        width={Math.max(1, col - 2)}
+                        height={yLow - yHigh}
+                      />
+                    )}
                     {prev !== undefined && prev !== bit && (
                       <line className="step-edge" x1={x0} x2={x0} y1={yHigh} y2={yLow} />
                     )}

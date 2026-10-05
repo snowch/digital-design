@@ -364,6 +364,9 @@ describe("the signal path drawing", () => {
     const steps = [...container.querySelectorAll("g.step")];
     expect(steps.map((g) => g.getAttribute("data-level")).join("")).toBe(rec.sent.join(""));
     expect(container.querySelectorAll(".step-high")).toHaveLength(rec.sent.filter((b) => b).length);
+    expect(container.querySelectorAll(".step-fill")).toHaveLength(rec.sent.filter((b) => b).length);
+    expect(svg).toHaveTextContent(format(S.path.level, { digit: 1, volts: "3.30 V" }));
+    expect(svg).toHaveTextContent(format(S.path.level, { digit: 0, volts: "0 V" }));
     for (const text of [
       "Cold room",
       "Sensor",

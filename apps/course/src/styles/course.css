@@ -1154,6 +1154,10 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
 .signal-path .step-high {
   stroke: var(--sig-high);
 }
+.signal-path .step-fill {
+  fill: var(--sig-high);
+  opacity: 0.22;
+}
 .signal-path .step-low {
   stroke: var(--sig-low);
 }

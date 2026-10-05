@@ -148,6 +148,8 @@ export interface ViewStrings {
   readonly path: {
     /** The label of the row of step numbers under the strip of steps. */
     readonly step: string;
+    /** Beside each level of the strip: {digit} is 1 or 0, {volts} the level's voltage. */
+    readonly level: string;
   };
   readonly signal: {
     readonly plotTitle: string;
@@ -356,6 +358,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
   },
   path: {
     step: "Step",
+    level: "{digit}: {volts}",
   },
   signal: {
     plotTitle: "Samples and threshold",
