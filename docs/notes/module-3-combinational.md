@@ -9,7 +9,7 @@ the subagent that wrote every learner-facing sentence from a brief of checked fa
 ## Times
 
 - Started: 2026-10-05 15:03 UTC (first command in the session).
-- Finished: (filled in at the end)
+- Finished: 2026-10-05 16:46 UTC (the push after the last green check). About 1 hour 50 minutes in all.
 
 ## Log
 
@@ -274,6 +274,8 @@ visible before running (course-wide); "As text" and "Import from text" panels be
   expected the adder figure to start at `0111` + `0001`, which the reviews had moved so the
   figure no longer shows the prediction's answer. The spec now checks the new start and presses
   bits to the lead's first sum, `1111` + `0001`.
+- After that fix, on `318b6ec`: Prettier, `tsc`, Vitest 297 of 297, the build, Playwright 179 of
+  179 at desktop and phone. Exit status 0. The only commit after it changes this note.
 - What the check caught that a reader would not: the term gate caught "holds" (a Module 4 term,
   from the managing model's brief) and, earlier, "carry" in lesson 1; the facts tests held every
   number the fix briefs stated before any draft was placed; the chain grader's first failure
