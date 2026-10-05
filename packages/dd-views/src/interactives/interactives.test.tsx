@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
+import { bitsText, readingOf, recording } from "@dd/dd-model";
 import { LessonStore, memoryStorage } from "@dd/lesson-runtime";
 import type { Interactive, Lesson } from "@dd/lesson-schema";
 
@@ -12,6 +13,7 @@ import { FaultLab } from "./FaultLab";
 import { LatchInternals } from "./LatchInternals";
 import { Prediction } from "./Prediction";
 import { SetupHold, experiment } from "./SetupHold";
+import { SignalPath } from "./SignalPath";
 
 const lesson = { id: "remember", challenges: [] } as unknown as Lesson;
 
@@ -322,5 +324,57 @@ describe("the circuit explorer", () => {
     expect(screen.getByRole("row", { current: true })).toHaveTextContent(S.table.edgeMark);
     await user.click(screen.getByRole("button", { name: /^RST = 0\./ }));
     expect(screen.getByRole("row", { current: true })).toHaveTextContent("Q resets to 0");
+  });
+});
+
+describe("the signal path drawing", () => {
+  const labels = {
+    coldRoom: "Cold room",
+    sensor: "Sensor",
+    sends: "Sends {value}",
+    cable: "Cable 30 m",
+    compressor: "Compressor",
+    office: "Office",
+    display: "Display",
+    receiver: "Receiver",
+    steps: "The {n} steps the sensor sends",
+    title: "Sensor, cable and display",
+    summary: "Sends {value} in {n} steps at {low} or {high}: {levels}.",
+  };
+  const interactive = (props: Record<string, unknown>): Interactive => ({
+    id: "path",
+    kind: "signal-path",
+    timeModel: "none",
+    caption: "c",
+    props,
+  });
+
+  it("draws the steps the model's recording sends, and fills every number from the model", () => {
+    const { container } = mount(
+      SignalPath as typeof Prediction,
+      interactive({ recording: "compressor", labels }),
+    );
+    const rec = recording("compressor");
+    const svg = screen.getByRole("img", { name: /^Sensor, cable and display\./ });
+    expect(svg.getAttribute("data-steps")).toBe(rec.sent.join(""));
+    expect(svg.getAttribute("aria-label")).toBe(
+      `Sensor, cable and display. Sends ${readingOf(rec.sent, "signed")} in ${rec.sent.length} steps at 0 V or 3.30 V: ${bitsText(rec.sent)}.`,
+    );
+    const steps = [...container.querySelectorAll("g.step")];
+    expect(steps.map((g) => g.getAttribute("data-level")).join("")).toBe(rec.sent.join(""));
+    expect(container.querySelectorAll(".step-high")).toHaveLength(rec.sent.filter((b) => b).length);
+    for (const text of ["Cold room", "Sensor", "Cable 30 m", "Compressor", "Office", "Display"])
+      expect(svg).toHaveTextContent(text);
+    expect(svg).toHaveTextContent(`Sends ${readingOf(rec.sent, "signed")}`);
+    expect(svg).toHaveTextContent(`The ${rec.sent.length} steps the sensor sends`);
+    expect(svg).toHaveTextContent(S.path.step);
+  });
+
+  it("says what is wrong with props that leave out a number's place", () => {
+    mount(
+      SignalPath as typeof Prediction,
+      interactive({ recording: "compressor", labels: { ...labels, sends: "Sends" } }),
+    );
+    expect(screen.getByRole("note")).toHaveTextContent("labels.sends");
   });
 });

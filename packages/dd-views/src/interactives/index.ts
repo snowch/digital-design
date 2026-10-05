@@ -12,6 +12,7 @@ import { NoisySignal } from "./NoisySignal";
 import { Prediction } from "./Prediction";
 import { ReadingPrediction } from "./ReadingPrediction";
 import { SetupHold } from "./SetupHold";
+import { SignalPath } from "./SignalPath";
 import { TruthTableView } from "./TruthTableView";
 
 /** The interactives lessons may name by kind. */
@@ -27,6 +28,7 @@ export const INTERACTIVES: Readonly<Record<string, ComponentType<InteractiveProp
   "bit-inspector": BitInspector,
   interpretations: Interpretations,
   "reading-prediction": ReadingPrediction,
+  "signal-path": SignalPath,
 };
 
 export {
@@ -40,6 +42,7 @@ export {
   LatchInternals,
   Prediction,
   SetupHold,
+  SignalPath,
   TruthTableView,
 };
 export { experiment, type Draw } from "./SetupHold";

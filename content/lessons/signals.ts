@@ -32,7 +32,21 @@ export const signals: LessonInput = {
     "hexadecimal",
   ],
   sections: [
-    { kind: "question", title: LABELS.titles.question, prose: PROSE.question },
+    {
+      kind: "question",
+      title: LABELS.titles.question,
+      prose: PROSE.question,
+      interactives: [
+        {
+          id: "signal-path",
+          kind: "signal-path",
+          timeModel: "none",
+          caption: LABELS.captions.signalPath,
+          after: PROSE.questionAfter,
+          props: { recording: "compressor", labels: LABELS.path },
+        },
+      ],
+    },
     { kind: "motivation", title: LABELS.titles.motivation, prose: PROSE.motivation },
     {
       kind: "prediction",

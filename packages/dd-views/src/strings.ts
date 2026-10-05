@@ -144,6 +144,11 @@ export interface ViewStrings {
     /** The mark on the diagram's axis at the clock edge. */
     readonly edge: string;
   };
+  /** The signals lesson's drawing of the sensor, the cable and the display. */
+  readonly path: {
+    /** The label of the row of step numbers under the strip of steps. */
+    readonly step: string;
+  };
   readonly signal: {
     readonly plotTitle: string;
     readonly plotSummary: string;
@@ -348,6 +353,9 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     before: "before",
     after: "after",
     edge: "rising edge",
+  },
+  path: {
+    step: "Step",
   },
   signal: {
     plotTitle: "Samples and threshold",

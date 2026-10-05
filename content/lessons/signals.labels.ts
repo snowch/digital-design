@@ -26,6 +26,7 @@ export const LABELS = {
     c2: "Set the freezer temperature",
   },
   captions: {
+    signalPath: "The sensor sends temperature along the cable to the display in steps.",
     predictThreshold: "Compare two thresholds on the same signal.",
     exploreSignal: "Choose a recording and move the threshold.",
     setThreshold: "Type your threshold and run the tests.",
@@ -43,6 +44,20 @@ export const LABELS = {
     p2Positive: "32768",
     p2Negative: "-32768",
     p2Zero: "0",
+  },
+  path: {
+    coldRoom: "Cold room",
+    sensor: "Sensor",
+    sends: "Sends {value}",
+    cable: "Cable 30 m",
+    compressor: "Compressor",
+    office: "Office",
+    display: "Display",
+    receiver: "Receiver",
+    steps: "The {n} steps the sensor sends",
+    title: "Temperature sensor, cable and display",
+    summary:
+      "The sensor in the cold room sends {value}. It sends this along the 30-metre cable, which runs past the compressor, to the receiver inside the display in the office. The sensor drives {n} steps, each at {low} or {high}. The steps in order are {levels}.",
   },
   recordings: {
     quiet: "Compressor off",

@@ -330,6 +330,39 @@ title it returned, "How does the temperature display know the temperature?", rep
 managing session cut the first "temperature". Where only the noun changed ("the till" to "the
 display" in ten sentences), the word was replaced and no sentence rewritten.
 
+## A drawing of the setup, at the author's suggestion
+
+On 2026-10-05 the author asked whether a schematic of the setup, the cold room, the cable and the
+display, would help. It does: the question asked the learner to hold a sensor, a 30-metre cable, a
+compressor and a display in their head from a paragraph, and the first drawing on the page was an
+abstract voltage plot. What was built:
+
+- **A new figure kind, `signal-path`** (`packages/dd-views/src/interactives/SignalPath.tsx`):
+  the cold room with the sensor and the number it sends, the cable with its length and an arrow
+  towards the office, the compressor under the cable with a jagged line to it, and the office with
+  the display and, inside it, the receiver where the cable ends. Under that, a strip of the steps
+  the sensor drives: each step's level, its number and its 0 or 1. The steps, the two levels and
+  the number the sensor sends come from the model (the compressor recording's `sent`, `low` and
+  `high`, and the signed reading of the sent steps), so the drawing cannot disagree with the plots
+  below it; the strip uses the signal plot's margins, so each step sits over its sample's column.
+- **Placed between the question's first paragraph and the rest.** The first paragraph describes
+  the scene the drawing shows; the receiver and the word "sample" come in the paragraph after it.
+  The question's prose was split at its first paragraph break (`question` and `questionAfter`);
+  no word changed.
+- **Drawn at the width of its box**, one unit per pixel, so its 12-pixel text stays that size on
+  a phone and nothing scrolls. The first build measured its own padded box and drew 25 pixels too
+  wide, which the page clipped; it now measures the box inside the figure's card, as the
+  noisy-signal figure does.
+- **Words from the drafting subagent** (brief D1, appendix): thirteen strings, each with a length
+  limit so the labels fit a phone. Three went back once: "Cable 30m" had no space before its unit,
+  which the course always writes ("0 V", "3.30 V"); the strip's title "{n} steps" dropped whose
+  steps they are; the caption's "steps it sends" left "it" pointing at the display.
+- **Checks**: a unit test (the strip draws the recording's own steps; every number in the
+  accessible description is the model's; a props mistake shows on the page), a facts test (the
+  drawing's steps, levels and number are the ones the question states, and it sits between the
+  scene and the receiver's samples), a page test (it is the lesson's first figure and fits its
+  box), and the diagram collision check now measures `svg.signal-path` at both widths.
+
 ## Questions for the author
 
 1. The task points to "the build prompt's machine section in docs/inventory.md". There is no
@@ -1224,3 +1257,31 @@ Say that comparison and nothing more; do not state 1.65 V.
 Lesson list: one sentence for a single missing module ({n}) and one for several ({list}, joined
 as "2 and 3"), plain statements, no apology, no date.
 ````
+
+### D1-drawing-labels.md (the managing session's brief for the drawing's words)
+
+````markdown
+The drawing sits after the question's first paragraph. Left to right: the cold room with the
+sensor and, under it, the number it sends; the cable running right to the office, with an arrow
+towards the office and its length above it; the compressor under the middle of the cable with a
+jagged line to it; the office with the display, and inside the display a smaller box where the
+cable ends, the receiver. Under that, a strip of the 16 steps the sensor sends, high (3.30 V) or
+low (0 V), with each step's number and its 0 or 1. The figure fills every number from the model.
+
+Not to be used (the next paragraph introduces the receiver and "sample"): sample, bit, binary,
+word, threshold, noise margin, unsigned, signed, hexadecimal, signal, digital. Sentence case, no
+full stop on labels.
+
+coldRoom (at most 10 characters); sensor (10); sends, with {value} (12 without it); cable, with
+its length, 30 metres, written short (11); compressor (10); office (10); display (10); receiver
+(9); steps, the strip's title with {n} (40 without it, no full stop); step, the row label (6);
+title, the accessible name naming the sensor, the cable and the display (50); summary, one or two
+sentences carrying in order: the sensor in the cold room sends {value}; along the 30-metre cable,
+past the compressor, to the receiver inside the display in the office; it drives {n} steps, each
+at {low} or {high}; the steps in order are {levels}; caption, one line saying what the figure
+shows: the sensor, the cable, the display and the steps the sensor sends (70, with a full stop).
+
+Notes sent back after the first draft: "30m" needs a space before its unit, as the course writes
+"0 V"; "{n} steps" drops whose steps they are; in the caption, "it" points at the display.
+````
+

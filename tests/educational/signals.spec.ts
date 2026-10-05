@@ -191,6 +191,22 @@ test.describe("the signals lesson's challenges", () => {
 });
 
 test.describe("the signals lesson's figures", () => {
+  test("the drawing of the sensor, the cable and the display comes first, inside the page", async ({
+    page,
+  }) => {
+    await openLesson(page, LESSON.id);
+    const figures = page.locator("figure.interactive");
+    await expect(figures.first()).toHaveAttribute("id", "ix-signal-path");
+    const drawing = page.locator("#ix-signal-path svg.signal-path");
+    await expect(drawing).toBeVisible();
+    await expect(drawing.locator("g.step")).toHaveCount(16);
+    await expect(drawing).toHaveAttribute("data-sends", "-184");
+    // Drawn at the width of its box, so a phone gets the whole drawing, not a scrolling one.
+    const box = await page.locator("#ix-signal-path .signal-path-wrap").boundingBox();
+    const svg = await drawing.boundingBox();
+    expect(svg!.width).toBeLessThanOrEqual(box!.width + 1);
+  });
+
   test("the threshold prediction must be committed before the model answers", async ({ page }) => {
     await openLesson(page, LESSON.id);
     const figure = page.locator("#ix-predict-threshold");

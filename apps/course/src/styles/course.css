@@ -1025,6 +1025,88 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
   stroke: var(--bad);
   stroke-width: 2;
 }
+/* The signals lesson's drawing: the sensor, the cable, the display, and the steps sent */
+.signal-path-wrap {
+  min-width: 0;
+  background: var(--canvas);
+  border-radius: var(--radius);
+  margin: var(--space-3) 0;
+  overflow: hidden;
+}
+.signal-path {
+  display: block;
+}
+.signal-path text {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  fill: var(--fg);
+}
+.signal-path .room {
+  fill: none;
+  stroke: var(--border-strong);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+}
+.signal-path .room-name,
+.signal-path .strip-title {
+  fill: var(--fg-muted);
+  font-weight: 600;
+}
+.signal-path .device {
+  fill: var(--gate-fill);
+  stroke: var(--gate-stroke);
+  stroke-width: 2;
+}
+.signal-path .display,
+.signal-path .machine {
+  fill: var(--bg-sunken);
+  stroke: var(--gate-stroke);
+  stroke-width: 2;
+}
+.signal-path .cable {
+  stroke: var(--wire);
+  stroke-width: 3;
+  shape-rendering: crispEdges;
+}
+.signal-path .arrow {
+  fill: var(--wire);
+}
+.signal-path .interference {
+  fill: none;
+  stroke: var(--sig-unknown);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+.signal-path .sends,
+.signal-path .cable-name,
+.signal-path .tick,
+.signal-path .row-name {
+  fill: var(--fg-muted);
+}
+.signal-path .row-number {
+  fill: var(--fg-faint);
+}
+.signal-path .level {
+  stroke: var(--border-strong);
+  stroke-dasharray: 4 4;
+  shape-rendering: crispEdges;
+}
+.signal-path .step-high,
+.signal-path .step-low {
+  stroke-width: 3;
+  shape-rendering: crispEdges;
+}
+.signal-path .step-high {
+  stroke: var(--sig-high);
+}
+.signal-path .step-low {
+  stroke: var(--sig-low);
+}
+.signal-path .step-edge {
+  stroke: var(--fg-faint);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
 .noisy-readout p {
   margin: var(--space-1) 0;
   font-family: var(--font-mono);

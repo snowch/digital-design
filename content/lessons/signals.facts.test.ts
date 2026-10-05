@@ -23,6 +23,7 @@ import { answerOf, grade } from "@dd/dd-views";
 import { parseLesson } from "@dd/lesson-schema";
 
 import { FREEZER_TENTHS, SENSOR_BITS, signals } from "./signals";
+import { PROSE } from "./signals.prose";
 
 const lesson = parseLesson(signals);
 
@@ -155,5 +156,25 @@ describe("the signals lesson's facts", () => {
     expect(bitsText(bits)).toBe("1111 1111 0000 0110");
     expect(readingOf(bits, "unsigned")).toBe("65286");
     expect(hexOf(bits)).toBe("FF06");
+  });
+});
+
+describe("the drawing of the sensor, the cable and the display", () => {
+  it("draws the steps, the levels and the number the question states", () => {
+    const rec = recording(figure("signal-path")["recording"] as RecordingId);
+    expect(bitsText(rec.sent)).toBe(SENSOR_BITS);
+    expect(rec.sent).toHaveLength(16);
+    expect(readingOf(rec.sent, "signed")).toBe("-184");
+    expect([rec.low, rec.high]).toEqual([0, 330]);
+    expect(volts(rec.high)).toBe("3.30 V");
+    for (const fact of ["16 steps", "-184", "0 V", "3.30 V", "30 metres"])
+      expect(PROSE.question).toContain(fact);
+  });
+
+  it("sits in the question section, between the scene and the receiver's samples", () => {
+    const question = lesson.sections.find((s) => s.kind === "question")!;
+    expect(question.interactives.map((x) => x.id)).toEqual(["signal-path"]);
+    expect(question.prose).not.toContain("**sample**");
+    expect(question.interactives[0]!.after).toContain("**sample**");
   });
 });
