@@ -9,7 +9,7 @@ facts. It records what went wrong as plainly as what went right.
 Read from the clock (`date -u`), not estimated.
 
 - Started: 2026-10-05 15:02 UTC (first command in the session).
-- Finished: (filled in at the end).
+- Finished: 2026-10-05 16:36 UTC (the last commit, with the note complete). About 94 minutes in all.
 
 ## Log
 
@@ -198,6 +198,14 @@ Read from the clock (`date -u`), not estimated.
     the gates, not the wires", which is wrong (cut); my own earlier edits that a redraft made
     unnecessary were retired from the edit list. One label went stale (lesson 1's prediction
     section was still titled "Freezer warm, door open"); found at the second read and redrafted.
+- 16:12 to 16:24 The mechanical half once more, on the rebuilt page, all twelve configurations:
+  no console error, no unnamed control, no overflow; every challenge as before; the fault
+  figure's outcomes appear only after "Run checks". Then each lesson read once more, start to
+  finish: no new finding.
+- 16:25 Check green (286 Vitest tests, 180 Playwright tests); committed. `main` had moved (a page
+  before the first lesson, two commits); merged, with one conflict where both sides appended to
+  `course.css` (both kept). The check on the merged head: green, 291 Vitest tests, 184 Playwright
+  tests. Pushed.
 
 ## The reviews, the sceptics' verdicts, and what was done
 
