@@ -347,7 +347,8 @@ truth table figure; the timing diagram; the educational test helpers; the diagra
 
 ## The terms each lesson introduces
 
-- `gates`: gate, truth table, Boolean expression, XOR.
+- `gates`: gate, truth table, Boolean expression, XOR; later also SystemVerilog
+  (`systemverilog.md`).
 - `nand`: NAND, universal. NOR is introduced but not rationed (see 15:34 above). "Tied" is a
   plain word defined where it is first used.
 - `fewer-gates`: depth.

@@ -56,7 +56,7 @@ export const gates: LessonInput = {
   module: 2,
   order: 1,
   objectives: [...LABELS.objectives],
-  introduces: ["gate", "truth table", "Boolean expression", "XOR"],
+  introduces: ["gate", "truth table", "Boolean expression", "XOR", "SystemVerilog"],
   sections: [
     {
       kind: "question",
