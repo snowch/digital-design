@@ -3,7 +3,7 @@
 // checked against the lesson's structure.
 
 export const LABELS = {
-  title: "How can one display show any room?",
+  title: "How can one circuit pick one of several words?",
   objectives: [
     "Build a circuit from AND, OR and NOT gates that passes one of two inputs to its output, chosen by a select input.",
     "Explain why only one of the two AND gates passes at a time.",

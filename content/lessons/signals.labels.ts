@@ -2,7 +2,7 @@
 // prose process from a brief of facts (see CLAUDE.md) and checked against the lesson's structure.
 
 export const LABELS = {
-  title: "How does the display know the temperature?",
+  title: "How does voltage on a wire become a number?",
   objectives: [
     "Choose a threshold for a noisy signal and explain why the gap between the threshold and the nearest sample on each side matters.",
     "Name the four things a display must be told to interpret 16 bits as a temperature.",
