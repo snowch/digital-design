@@ -53,6 +53,31 @@ test.describe("the lesson pages", () => {
     });
   }
 
+  for (const lesson of LESSONS) {
+    test(`${lesson.id} still fits the screen after every figure has been used`, async ({
+      page,
+    }) => {
+      // A figure can widen the page only once it is used: a drawing that appears after a
+      // prediction is committed, or grows when a slider moves. Measured against the viewport,
+      // because a phone's emulation stretches the page's own widths to fit its content.
+      await openLesson(page, lesson.id);
+      for (const figure of await page.locator("figure.interactive").all()) {
+        const commit = figure.getByRole("button", { name: V.prediction.commit });
+        if (await commit.count()) {
+          await figure.getByRole("radio").first().check();
+          await commit.click();
+        }
+        for (const slider of await figure.getByRole("slider").all())
+          for (const end of ["min", "max"] as const)
+            await slider.fill((await slider.getAttribute(end)) ?? "0");
+      }
+      const width = page.viewportSize()!.width;
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+        width,
+      );
+    });
+  }
+
   test("the lesson list shows progress recomputed from stored work", async ({ page }) => {
     await page.goto("#/");
     await expect(page.getByRole("link", { name: LESSON.title })).toBeVisible();

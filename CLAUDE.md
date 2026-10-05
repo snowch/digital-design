@@ -164,7 +164,8 @@ the Vite build, Playwright. Each line below is a check and the reason it exists.
   ship with the site (Source Sans 3 for prose, Archivo for headings, JetBrains Mono for values
   and code) so the same commit renders the same everywhere. A change that alters a figure's look
   fails here until its baseline is updated on purpose with `npx playwright test
-  --update-snapshots`, and the diff is reviewed in the commit. `tokens.css` says why the faces,
+  --update-snapshots=all` for that figure's test (plain `--update-snapshots` skips a change
+  inside the 2% tolerance), and the diff is reviewed in the commit. `tokens.css` says why the faces,
   the neutrals and the radii are what they are; a new component takes its colours and sizes
   from there.
 - **`.npmrc` sets `legacy-peer-deps`.** npm 10's peer resolution crashes on Vitest 4's peer

@@ -329,6 +329,28 @@ banned words by hand first.
 4. A threshold box of `type="number"` cannot hold a comma decimal ("1,70") in an English
    browser. Left as it is.
 
+## After the note: the author's go-ahead on the recommendations
+
+2026-10-05 06:11 UTC. The author answered "go with your recommendations". Done, from "What I
+would change":
+
+- **The page-width check after use, for every lesson.** `lesson.spec.ts` now commits each
+  prediction and moves each slider to both ends in every lesson, then measures the page against
+  the viewport. Proved by putting the old CSS back for one run: the phone case failed with 669
+  against 375; with the fix it passes for all three lessons.
+- **Working words in the fact sheet, and banned words scanned in the briefs**, written into
+  docs/authoring.md's prose process, with this lesson's "reading" and "value" as the example.
+- **Screenshot baselines updated with `--update-snapshots=all`**, in docs/authoring.md and in
+  CLAUDE.md's line on the screenshots.
+- **A commit carries the tests for the code it changes**, in docs/authoring.md.
+- Not done: the placement script's re-check of the managing model's cuts. The script lives in
+  the session's scratchpad, not in the repository, so there is nothing to change here; the
+  lesson is recorded above.
+
+The three questions for the author were questions, not recommendations, and stay open: the
+missing machine section, the "No simulation" badge, and comma decimals in the number box. The
+six commit messages that name a model are unchanged for the reason given above.
+
 ## Appendix: the briefs, as sent
 
 Each brief went to a drafting subagent with docs/style.md attached; the fact sheet went with
