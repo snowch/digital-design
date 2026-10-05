@@ -363,6 +363,23 @@ abstract voltage plot. What was built:
   scene and the receiver's samples), a page test (it is the lesson's first figure and fits its
   box), and the diagram collision check now measures `svg.signal-path` at both widths.
 
+### The drawing's review
+
+An independent reviewer, a different model from the one that built the drawing, read the
+question section as a first-time learner from screenshots at 1280 and 375 pixels and in the dark
+theme. It found every label and number right against the paragraph and the model. The managing
+session attacked its seven findings before acting:
+
+| Finding | Sceptic | What was done |
+| --- | --- | --- |
+| The "No simulation" badge is now the first thing on the course's first figure, and is explained two sections later | in part: on a drawing with nothing to run, the badge's plain reading is true; the general fix, no badge on a figure with nothing to run, is the author's open question 2 below | left for the author |
+| The jagged mark between the compressor and the cable has no name until the next paragraph; three names for one machine | in part: the mark is unnamed; the opening paragraph's "the cold room's compressor motor" carries both later names | a label beside the mark, drafted (brief D2) |
+| The caption repeats the paragraph and the strip's title | upheld | redrafted to say only what the drawing adds (brief D2) |
+| "Receiver" is drawn before the words introduce it | rejected: the labelled box now grounds the next paragraph's "The receiver in the display", which then says what it does | none |
+| On a phone the compressor box fills the gap between the rooms; the step-number label names only the first of two staggered lines | upheld | rooms only as wide as what they hold, and a narrower compressor box; the row name sits between its two lines, in the drawing and in the signal plot, which shared the fault |
+| The step numbers measure 3.16:1 on the canvas (4.47:1 dark), under the 4.5:1 small text needs | upheld, measured | the step and sample numbers use the muted colour, 5.53:1 (7.55:1 dark), in the drawing and in the signal plot |
+| The dashed lines at both levels read as two tracks | rejected: they are labelled "3.30 V" and "0 V" at the left and match the plots below | none |
+
 ## Questions for the author
 
 1. The task points to "the build prompt's machine section in docs/inventory.md". There is no
@@ -1283,5 +1300,27 @@ shows: the sensor, the cable, the display and the steps the sensor sends (70, wi
 
 Notes sent back after the first draft: "30m" needs a space before its unit, as the course writes
 "0 V"; "{n} steps" drops whose steps they are; in the caption, "it" points at the display.
+````
+
+### D2-drawing-review.md (the managing session's brief after the drawing's review)
+
+````markdown
+caption: the current caption, "The sensor sends temperature along the cable to the display in
+steps.", repeats the paragraph above it and the strip's title. Say only what the drawing adds:
+where each part sits, and that the strip draws the steps as two voltages in order, step 1
+first. Do not restate that the sensor sends the temperature to the display. One sentence, at
+most 80 characters.
+
+noise: the label beside the jagged line between the compressor and the cable, naming what it
+stands for, the noise the compressor puts onto the cable; one word, lower case, at most 6
+characters, the word the paragraph after the drawing uses.
+
+Notes sent back: the first caption, "Cold room (left), office (right), compressor under cable:
+steps as two voltages.", dropped the order and was a bracketed list, not a sentence like the
+lesson's other captions; the second, "Steps go from cold room to office shown as two voltages
+in order, compressor below.", ran its clauses on and restated the paragraph. The third brief
+asked for the plain naming caption the course gives figures with no controls ("The reference
+table for the latch."): "The setup and the steps as voltages." The label came back "noise",
+right first time.
 ````
 

@@ -337,6 +337,7 @@ describe("the signal path drawing", () => {
     office: "Office",
     display: "Display",
     receiver: "Receiver",
+    noise: "noise",
     steps: "The {n} steps the sensor sends",
     title: "Sensor, cable and display",
     summary: "Sends {value} in {n} steps at {low} or {high}: {levels}.",
@@ -363,7 +364,15 @@ describe("the signal path drawing", () => {
     const steps = [...container.querySelectorAll("g.step")];
     expect(steps.map((g) => g.getAttribute("data-level")).join("")).toBe(rec.sent.join(""));
     expect(container.querySelectorAll(".step-high")).toHaveLength(rec.sent.filter((b) => b).length);
-    for (const text of ["Cold room", "Sensor", "Cable 30 m", "Compressor", "Office", "Display"])
+    for (const text of [
+      "Cold room",
+      "Sensor",
+      "Cable 30 m",
+      "Compressor",
+      "noise",
+      "Office",
+      "Display",
+    ])
       expect(svg).toHaveTextContent(text);
     expect(svg).toHaveTextContent(`Sends ${readingOf(rec.sent, "signed")}`);
     expect(svg).toHaveTextContent(`The ${rec.sent.length} steps the sensor sends`);

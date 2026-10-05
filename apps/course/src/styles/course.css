@@ -978,7 +978,8 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
 }
 .signal-plot .row-number {
   font-size: 12px;
-  fill: var(--fg-faint);
+  /* Muted, not faint: faint measures 3.2:1 on the canvas, under the 4.5:1 small text needs. */
+  fill: var(--fg-muted);
 }
 .signal-plot .row-bit {
   fill: var(--fg);
@@ -1083,8 +1084,9 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
 .signal-path .row-name {
   fill: var(--fg-muted);
 }
-.signal-path .row-number {
-  fill: var(--fg-faint);
+.signal-path .row-number,
+.signal-path .noise-name {
+  fill: var(--fg-muted);
 }
 .signal-path .level {
   stroke: var(--border-strong);

@@ -26,7 +26,7 @@ export const LABELS = {
     c2: "Set the freezer temperature",
   },
   captions: {
-    signalPath: "The sensor sends temperature along the cable to the display in steps.",
+    signalPath: "The setup and the steps as voltages.",
     predictThreshold: "Compare two thresholds on the same signal.",
     exploreSignal: "Choose a recording and move the threshold.",
     setThreshold: "Type your threshold and run the tests.",
@@ -54,6 +54,7 @@ export const LABELS = {
     office: "Office",
     display: "Display",
     receiver: "Receiver",
+    noise: "noise",
     steps: "The {n} steps the sensor sends",
     title: "Temperature sensor, cable and display",
     summary:

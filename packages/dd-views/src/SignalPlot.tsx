@@ -121,7 +121,8 @@ export function SignalPlot({
           />
         )}
         <g className="rows">
-          <text className="row-name" x={4} y={rows + 15}>
+          {/* Between its two lines of numbers when they are staggered, so it names both. */}
+          <text className="row-name" x={4} y={rows + 15 + (stagger ? (ROW - 6) / 2 : 0)}>
             {strings.signal.sample}
           </text>
           <text className="row-name" x={4} y={rows + numbers + 15}>

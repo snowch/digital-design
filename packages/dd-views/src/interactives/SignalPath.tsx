@@ -41,6 +41,8 @@ const Props = z.object({
     office: z.string().min(1),
     display: z.string().min(1),
     receiver: z.string().min(1),
+    /** Beside the jagged line from the compressor to the cable. */
+    noise: z.string().min(1),
     /** Over the strip; {n} is the number of steps. */
     steps: z.string().includes("{n}"),
     title: z.string().min(1),
@@ -61,12 +63,13 @@ const PAD = 8;
 // The setup.
 const ROOM_TOP = 6;
 const ROOM_BOTTOM = 124;
+const COMPRESSOR_TOP = 112;
 const CABLE_Y = 70;
 // The strip: the signal plot's margins and row height.
 const LEFT = 86;
 const RIGHT = 10;
 const ROW = 22;
-const STRIP_TOP = 150;
+const STRIP_TOP = 164;
 
 export const SignalPath = withProps(
   Props,
@@ -82,34 +85,32 @@ export const SignalPath = withProps(
     const low = levelText(rec.low);
     const high = levelText(rec.high);
 
-    // Two rooms at the ends, wide enough for their names; the cable between them.
-    const roomW = Math.min(
-      190,
-      Math.max(
-        Math.round(w * 0.22),
-        100,
-        textWidth(L.coldRoom) + 20,
-        textWidth(L.office) + 20,
-        textWidth(sends) + 16,
-        textWidth(L.sensor) + 40,
-        textWidth(L.display) + 32,
-        textWidth(L.receiver) + 28,
-      ),
+    // Two rooms at the ends, each as wide as what it holds; the cable in the gap between them.
+    const room = (...needs: number[]) =>
+      Math.min(190, Math.max(Math.round(w * 0.22), ...needs.map(Math.ceil)));
+    const leftW = room(textWidth(L.coldRoom) + 20, textWidth(sends) + 16, textWidth(L.sensor) + 40);
+    // The office holds the display, and the display holds the receiver with room either side.
+    const rightW = room(
+      textWidth(L.office) + 20,
+      textWidth(L.display) + 32,
+      textWidth(L.receiver) + 44,
     );
-    const left = { x0: PAD, x1: PAD + roomW };
-    const right = { x0: w - PAD - roomW, x1: w - PAD };
+    const left = { x0: PAD, x1: PAD + leftW };
+    const right = { x0: w - PAD - rightW, x1: w - PAD };
     const leftCx = (left.x0 + left.x1) / 2;
     const gapCx = (left.x1 + right.x0) / 2;
 
-    const sensorW = Math.min(roomW - 20, textWidth(L.sensor) + 32);
+    const sensorW = Math.min(leftW - 20, textWidth(L.sensor) + 32);
     const sensor = { x: leftCx - sensorW / 2, y: CABLE_Y - 18, w: sensorW, h: 36 };
-    const display = { x: right.x0 + 8, y: 30, w: roomW - 16, h: 82 };
+    const display = { x: right.x0 + 8, y: 30, w: rightW - 16, h: 82 };
     const receiver = { x: display.x + 6, y: CABLE_Y - 13, w: display.w - 12, h: 26 };
-    const compressorW = textWidth(L.compressor) + 16;
-    const compressor = { x: gapCx - compressorW / 2, y: 98, w: compressorW, h: 24 };
+    // The compressor hangs below the rooms' lower edge, so it does not read as a third room.
+    const compressorW = textWidth(L.compressor) + 12;
+    const compressor = { x: gapCx - compressorW / 2, y: COMPRESSOR_TOP, w: compressorW, h: 24 };
     const arrowTip = right.x0 - 6;
     // A jagged line from the compressor up to the cable: the noise it puts on the line.
-    const jag = [0, 1, 2, 3, 4, 5]
+    const jagSteps = Math.floor((compressor.y - CABLE_Y - 6) / 4);
+    const jag = Array.from({ length: jagSteps + 1 }, (_, k) => k)
       .map((k) => `${gapCx + (k % 2 === 0 ? -5 : 5)},${compressor.y - k * 4}`)
       .join(" ");
 
@@ -150,7 +151,7 @@ export const SignalPath = withProps(
                 className="room"
                 x={left.x0}
                 y={ROOM_TOP}
-                width={roomW}
+                width={leftW}
                 height={ROOM_BOTTOM - ROOM_TOP}
                 rx={6}
               />
@@ -158,7 +159,7 @@ export const SignalPath = withProps(
                 className="room"
                 x={right.x0}
                 y={ROOM_TOP}
-                width={roomW}
+                width={rightW}
                 height={ROOM_BOTTOM - ROOM_TOP}
                 rx={6}
               />
@@ -183,6 +184,9 @@ export const SignalPath = withProps(
                 {L.cable}
               </text>
               <polyline className="interference" points={jag} />
+              <text className="noise-name" x={gapCx + 10} y={compressor.y - 10}>
+                {L.noise}
+              </text>
               <rect
                 className="machine"
                 x={compressor.x}
@@ -287,7 +291,7 @@ export const SignalPath = withProps(
                   </g>
                 );
               })}
-              <text className="row-name" x={4} y={rows + 15}>
+              <text className="row-name" x={4} y={rows + 15 + (stagger ? (ROW - 6) / 2 : 0)}>
                 {strings.path.step}
               </text>
               <text className="row-name" x={4} y={rows + numbers + 15}>
