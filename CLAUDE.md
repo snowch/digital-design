@@ -15,7 +15,8 @@ Checkpoint 1. The platform packages (`lesson-schema`, `lesson-runtime`, `sim`, `
 Slice 2 (the retry controller state machine), the extraction of shared primitives under the rule
 of two, and `docs/platform.md` are still to come.
 
-Read `docs/inventory.md` for why things are as they are, `docs/simulator.md` for what the engine
+Read `docs/plan.md` for the modules, their order and the decisions taken since the course brief,
+`docs/inventory.md` for why things are as they are, `docs/simulator.md` for what the engine
 models, and `docs/authoring.md` for how a lesson is made. Edit every learner-facing string
 against `docs/style.md`.
 

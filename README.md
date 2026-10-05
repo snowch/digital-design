@@ -14,6 +14,8 @@ the extraction of shared primitives, and `docs/platform.md` are still to come.
 ## Read first
 
 - [`CLAUDE.md`](CLAUDE.md): the binding project rules, including what breaks the build and why.
+- [`docs/plan.md`](docs/plan.md): the modules in order, what each builds, the checkpoints, and the
+  decisions taken since the course brief.
 - [`docs/inventory.md`](docs/inventory.md): the corpus as found, its tests run, every interaction
   catalogued, the layering and the decisions the author approved.
 - [`docs/simulator.md`](docs/simulator.md): what the engine models, its three time models, the
