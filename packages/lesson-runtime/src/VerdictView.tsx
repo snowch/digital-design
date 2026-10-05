@@ -25,20 +25,23 @@ function FailureView({ failure }: { failure: VerdictFailure }) {
   return (
     <li className="verdict-failure">
       <h4>{format(strings.challenge.failedTest, { label: failure.label })}</h4>
-      <dl className="verdict-values">
-        <dt>{strings.challenge.inputs}</dt>
-        <dd>
-          <Values values={failure.inputs} />
-        </dd>
-        <dt>{strings.challenge.actual}</dt>
-        <dd>
-          <Values values={failure.actual} />
-        </dd>
-        <dt>{strings.challenge.expected}</dt>
-        <dd>
-          <Values values={failure.expected} />
-        </dd>
-      </dl>
+      {failure.detail !== undefined && <p className="verdict-detail">{failure.detail}</p>}
+      {failure.detail === undefined && (
+        <dl className="verdict-values">
+          <dt>{strings.challenge.inputs}</dt>
+          <dd>
+            <Values values={failure.inputs} />
+          </dd>
+          <dt>{strings.challenge.actual}</dt>
+          <dd>
+            <Values values={failure.actual} />
+          </dd>
+          <dt>{strings.challenge.expected}</dt>
+          <dd>
+            <Values values={failure.expected} />
+          </dd>
+        </dl>
+      )}
       {failure.oscillated && <p className="verdict-oscillated">{strings.challenge.oscillated}</p>}
       {d && (
         <div className="verdict-divergence">

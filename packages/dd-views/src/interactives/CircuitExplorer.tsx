@@ -17,7 +17,7 @@ import { formatWord, type Circuit, type Word } from "@dd/sim";
 
 import { CircuitView } from "../CircuitView";
 import { format, useViewStrings } from "../strings";
-import { TruthTable, rowFor } from "../TruthTable";
+import { TruthTable, enumerateTable, rowFor } from "../TruthTable";
 import { useSettleSim } from "../useSim";
 import { withProps } from "./props";
 
@@ -32,7 +32,8 @@ const Props = z.object({
   libraryId: z.string(),
   clock: z.string().optional(),
   showSteps: z.boolean().default(false),
-  truthTable: z.enum(["sr-latch", "d-latch", "d-flip-flop", "register-bit"]).optional(),
+  /** A reference table by name, or "circuit": every row of this circuit, from the simulator (Module 2). */
+  truthTable: z.enum(["sr-latch", "d-latch", "d-flip-flop", "register-bit", "circuit"]).optional(),
   scope: z.string().default(""),
   /** Offer "Release all at once": only where two inputs pressed together are the experiment. */
   releaseAll: z.boolean().default(false),
@@ -89,6 +90,15 @@ export const CircuitExplorer = withProps(
       (n) => circuit.nets[n]?.name ?? String(n),
     );
     const table = data.truthTable ? TABLES[data.truthTable] : undefined;
+    // Module 2: the circuit's own table, every row worked out by the simulator, with the row of
+    // the inputs now marked.
+    const own = useMemo(
+      () => (data.truthTable === "circuit" ? enumerateTable(circuit) : undefined),
+      [data.truthTable, circuit],
+    );
+    const ownCurrent = own
+      ? rowFor(own.inputColumns, own.rows, currentInputs(circuit, sim.values))
+      : undefined;
     const ref = table
       ? referenceRows(
           table,
@@ -112,6 +122,9 @@ export const CircuitExplorer = withProps(
           values={shown}
           title={strings.explorer.title}
           onToggleInput={(name) => sim.toggle(name)}
+          // The circuit's own table marks the row of the values now, so the signal list would
+          // say the same thing twice.
+          table={own === undefined}
           scope={scope}
           {...(data.canOpen ? { onScope: setScope } : {})}
         />
@@ -160,6 +173,15 @@ export const CircuitExplorer = withProps(
                 : format(strings.explorer.notSettled, { nets: oscillating.join(", ") })}
             </p>
           </div>
+        )}
+        {own && (
+          <TruthTable
+            caption={strings.explorer.ownTable}
+            inputColumns={own.inputColumns}
+            outputColumns={own.outputColumns}
+            rows={own.rows}
+            {...(ownCurrent !== undefined ? { current: ownCurrent } : {})}
+          />
         )}
         {table && ref && (
           <TruthTable

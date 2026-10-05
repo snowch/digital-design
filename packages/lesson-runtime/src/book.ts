@@ -30,6 +30,13 @@ export interface VerdictFailure {
   readonly expected: Readonly<Record<string, string>>;
   readonly divergence?: VerdictDivergence;
   readonly oscillated?: boolean;
+  /**
+   * A failure that is not about one row or step (Module 2's gate budget, depth, kinds of gate):
+   * the book's sentence saying what was found, shown under the failure's label.
+   */
+  readonly detail?: string;
+  /** The parts that failure is about, for the editor to mark. */
+  readonly marked?: readonly string[];
 }
 
 /** What the grader says about an artifact. */

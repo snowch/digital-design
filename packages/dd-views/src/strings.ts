@@ -98,6 +98,8 @@ export interface ViewStrings {
     readonly reset: string;
     readonly releaseAll: string;
     readonly title: string;
+    /** Module 2: the caption of a circuit's own truth table under its drawing. */
+    readonly ownTable: string;
   };
   readonly prediction: {
     readonly commit: string;
@@ -214,6 +216,39 @@ export interface ViewStrings {
     /** The accessible name of the samples drawn above a question about them. */
     readonly samplesTitle: string;
   };
+  /** Module 2: two circuits side by side, compared row by row. */
+  readonly compare: {
+    readonly drawing: string;
+    readonly gates: string;
+    readonly depth: string;
+    readonly tableCaption: string;
+    readonly agree: string;
+    readonly same: string;
+    readonly differs: string;
+    readonly allSame: string;
+    readonly someDiffer: string;
+  };
+  /** Module 2: a truth table's rows in pairs that differ in one input. */
+  readonly pairs: {
+    readonly choose: string;
+    readonly caption: string;
+    readonly at: string;
+    readonly matters: string;
+    readonly yes: string;
+    readonly no: string;
+    readonly summary: string;
+  };
+  /** Module 2: the tests a challenge's limits add, and what a failed one found. */
+  readonly limits: {
+    readonly gates: string;
+    readonly gatesFound: string;
+    readonly depth: string;
+    readonly depthFound: string;
+    readonly only: string;
+    readonly onlyFound: string;
+    /** Joins a list of kinds in `only`: "NAND" or "NAND and NOR". */
+    readonly and: string;
+  };
   readonly answers: {
     readonly terms: Readonly<Record<string, string>>;
     readonly unanswered: string;
@@ -314,6 +349,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     reset: "Start again",
     releaseAll: "Release all at once",
     title: "Circuit diagram",
+    ownTable: "Every row of this circuit",
   },
   prediction: {
     commit: "Check my prediction",
@@ -424,6 +460,35 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     same: "the same",
     atThreshold: "At {threshold}: {n} come out wrong.",
     samplesTitle: "Signal samples",
+  },
+  compare: {
+    drawing: "{label}: circuit diagram",
+    gates: "Gates: {n}",
+    depth: "Depth: {n}",
+    tableCaption: "Both circuits, row by row",
+    agree: "Agree?",
+    same: "Same",
+    differs: "Differs",
+    allSame: "The two circuits give the same output in all {total} rows.",
+    someDiffer: "The two circuits differ in {n} of {total} rows.",
+  },
+  pairs: {
+    choose: "Input to test",
+    caption: "Rows in pairs that differ only in {input}",
+    at: "{input} = {value}",
+    matters: "Does {input} matter?",
+    yes: "Yes",
+    no: "No",
+    summary: "{input} changes the output in {n} of {total} pairs.",
+  },
+  limits: {
+    gates: "At most {limit} gates",
+    gatesFound: "Your circuit has {count} gates. The limit is {limit}.",
+    depth: "At most {limit} gates on any path from an input to an output",
+    depthFound: "The longest path passes through {count} gates: {path}. The limit is {limit}.",
+    only: "{kinds} gates only",
+    onlyFound: "These gates are another kind: {list}.",
+    and: " and ",
   },
   answers: {
     terms: {

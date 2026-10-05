@@ -14,6 +14,9 @@ import { ReadingPrediction } from "./ReadingPrediction";
 import { SetupHold } from "./SetupHold";
 import { SignalPath } from "./SignalPath";
 import { TruthTableView } from "./TruthTableView";
+// Module 2
+import { CircuitCompare } from "./CircuitCompare";
+import { InputPairs } from "./InputPairs";
 
 /** The interactives lessons may name by kind. */
 export const INTERACTIVES: Readonly<Record<string, ComponentType<InteractiveProps>>> = {
@@ -29,6 +32,9 @@ export const INTERACTIVES: Readonly<Record<string, ComponentType<InteractiveProp
   interpretations: Interpretations,
   "reading-prediction": ReadingPrediction,
   "signal-path": SignalPath,
+  // Module 2
+  "circuit-compare": CircuitCompare,
+  "input-pairs": InputPairs,
 };
 
 export {
@@ -44,7 +50,10 @@ export {
   SetupHold,
   SignalPath,
   TruthTableView,
+  CircuitCompare,
+  InputPairs,
 };
+export { compareAnswer } from "./CircuitCompare";
 export { experiment, type Draw } from "./SetupHold";
 export { runScript, outputsPerStep, Step } from "./script";
 export { toFault } from "./FaultLab";

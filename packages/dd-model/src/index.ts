@@ -7,3 +7,6 @@ export * from "./library";
 export * from "./bits";
 export * from "./signals";
 export * from "./graders";
+export * from "./measure";
+export * from "./tables";
+export * from "./logic";

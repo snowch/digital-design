@@ -194,6 +194,18 @@ export const AnswerField = z.object({
 });
 export type AnswerField = z.infer<typeof AnswerField>;
 
+/**
+ * Module 2: what a drawn or written circuit may use besides passing its tests. Each limit set is
+ * one more test: at most `gates` gates, at most `depth` gates on any path from an input to an
+ * output, and gates of the kinds in `only` and no others.
+ */
+export const Limits = z.object({
+  gates: z.number().int().min(1).optional(),
+  depth: z.number().int().min(1).optional(),
+  only: z.array(z.string().min(1)).min(1).optional(),
+});
+export type Limits = z.infer<typeof Limits>;
+
 export const Challenge = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
@@ -217,6 +229,8 @@ export const Challenge = z.object({
   allowedConstructs: z.array(z.string()).default([]),
   /** What the editor offers to build a drawn solution with, by id. The book interprets the ids. */
   palette: z.array(z.string()).default([]),
+  /** Module 2: a gate budget, a depth and the kinds of gate allowed, each graded as a test. */
+  limits: Limits.optional(),
   hints: Hints,
   /** The reference solution: what the educational tests complete the challenge with, and what rung five offers. */
   reference: Artifact,

@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { z } from "zod";
 
 import { libraryCircuit } from "@dd/dd-model";
-import { generate } from "@dd/hdl";
+import { expressionModule, generate } from "@dd/hdl";
 import type { InteractiveProps } from "@dd/lesson-runtime";
 
 import { CircuitView } from "../CircuitView";
@@ -15,6 +15,11 @@ import { withProps } from "./props";
 const Props = z.object({
   libraryId: z.string(),
   drawing: z.boolean().default(true),
+  /**
+   * "gates": one `assign` per gate, as a drawing's text is written. "expression" (Module 2): one
+   * `assign` per output, the whole expression from the inputs.
+   */
+  form: z.enum(["gates", "expression"]).default("gates"),
 });
 
 export const CircuitText = withProps(
@@ -22,12 +27,15 @@ export const CircuitText = withProps(
   function CircuitText({ data, interactive }: InteractiveProps & { data: z.infer<typeof Props> }) {
     const strings = useViewStrings();
     const circuit = useMemo(() => libraryCircuit(data.libraryId), [data.libraryId]);
-    const generated = useMemo(() => generate(circuit), [circuit]);
+    const text = useMemo(
+      () => (data.form === "expression" ? expressionModule(circuit) : generate(circuit).text),
+      [circuit, data.form],
+    );
     return (
       <div className="circuit-text" data-interactive={interactive.id}>
         {data.drawing && <CircuitView circuit={circuit} title={strings.hdl.drawn} table={false} />}
         <pre className="hdl-generated" aria-label={strings.hdl.generated}>
-          {generated.text}
+          {text}
         </pre>
       </div>
     );

@@ -155,3 +155,70 @@ endmodule`;
     expect(verdict.failures.map((f) => f.label)).toEqual(["release"]);
   });
 });
+
+// Module 2
+describe("grading a circuit's limits", () => {
+  const xor = (limits: Challenge["limits"]) =>
+    challenge({
+      interface: {
+        inputs: [
+          { name: "A", width: 1 },
+          { name: "B", width: 1 },
+        ],
+        outputs: [{ name: "Y", width: 1 }],
+      },
+      tests: {
+        kind: "combinational",
+        vectors: [
+          { label: "A 0, B 0", inputs: { A: 0, B: 0 }, expect: { Y: 0 } },
+          { label: "A 0, B 1", inputs: { A: 0, B: 1 }, expect: { Y: 1 } },
+          { label: "A 1, B 0", inputs: { A: 1, B: 0 }, expect: { Y: 1 } },
+          { label: "A 1, B 1", inputs: { A: 1, B: 1 }, expect: { Y: 0 } },
+        ],
+      },
+      ...(limits ? { limits } : {}),
+    });
+  const fiveNand = { circuit: libraryCircuit("xor-nand-5") };
+  const fourNand = { circuit: libraryCircuit("xor-nand-4") };
+  const oneXor = { circuit: libraryCircuit("xor-gate") };
+
+  it("passes a circuit inside every limit, counting each limit as a test", () => {
+    expect(grade(xor({ gates: 4, depth: 3, only: ["nand"] }), fourNand)).toMatchObject({
+      passed: true,
+      total: 7,
+      failures: [],
+    });
+  });
+  it("fails a circuit over its gate budget, naming the count and marking every gate", () => {
+    const v = grade(xor({ gates: 4 }), fiveNand);
+    expect(v.passed).toBe(false);
+    expect(v.total).toBe(5);
+    expect(v.failures).toHaveLength(1);
+    expect(v.failures[0]).toMatchObject({
+      index: 4,
+      label: format(S.limits.gates, { limit: 4 }),
+      detail: format(S.limits.gatesFound, { count: 5, limit: 4 }),
+    });
+    expect(v.failures[0]?.marked).toHaveLength(5);
+  });
+  it("fails a circuit too deep, naming the longest path", () => {
+    const v = grade(xor({ depth: 2 }), fourNand);
+    expect(v.failures[0]).toMatchObject({
+      label: format(S.limits.depth, { limit: 2 }),
+      detail: format(S.limits.depthFound, { count: 3, path: "nandM, nandP, nandY", limit: 2 }),
+      marked: ["nandM", "nandP", "nandY"],
+    });
+  });
+  it("fails a gate of a kind not allowed, and still reports the rows", () => {
+    const v = grade(xor({ only: ["nand"] }), oneXor);
+    expect(v.failures.map((f) => f.label)).toEqual([format(S.limits.only, { kinds: "NAND" })]);
+    expect(v.failures[0]?.detail).toBe(format(S.limits.onlyFound, { list: "XOR xor" }));
+    const wrongRows = grade(xor({ only: ["nand"] }), { circuit: libraryCircuit("and-gate") });
+    expect(wrongRows.failures.map((f) => f.label)).toEqual([
+      "A 0, B 1",
+      "A 1, B 0",
+      "A 1, B 1",
+      format(S.limits.only, { kinds: "NAND" }),
+    ]);
+  });
+});

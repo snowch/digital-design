@@ -9,6 +9,8 @@ import { CircuitBuilder, type Circuit, type NetId } from "@dd/sim";
 import { dFlipFlop, type FlipFlopOptions } from "./flipflop";
 import { dLatch, gatedSrLatch, srLatch } from "./latches";
 import { register } from "./register";
+// Module 2's circuits live in their own file and join the library below.
+import { LOGIC_LIBRARY } from "./logic";
 
 /**
  * A loop of `n` inverters with a `kick` input ORed into it. While kick is 1 the loop is forced;
@@ -411,6 +413,8 @@ export const LIBRARY: Readonly<Record<string, () => Circuit>> = {
   "shift-4": () => shiftFourCircuit(),
   "gated-clock-bit": () => gatedClockCircuit(),
   "glitch-and-not": () => glitchCircuit(),
+  // Module 2
+  ...LOGIC_LIBRARY,
 };
 
 export function libraryCircuit(id: string): Circuit {

@@ -4,9 +4,9 @@
 
 import { useMemo, useState, type ComponentType } from "react";
 
-import { libraryCircuit } from "@dd/dd-model";
+import { depthOf, gatesNotOf, gatesOf, libraryCircuit } from "@dd/dd-model";
 import { elaborate, generate, type Construct } from "@dd/hdl";
-import type { Artifact, Challenge, Lesson } from "@dd/lesson-schema";
+import { limitCount, type Artifact, type Challenge, type Lesson } from "@dd/lesson-schema";
 import type { Book, ChallengeEditorProps, InteractiveProps, Verdict } from "@dd/lesson-runtime";
 import { runSuite, type Circuit } from "@dd/sim";
 
@@ -89,12 +89,72 @@ export function grade(challenge: Challenge, artifact: Artifact): Verdict {
   if (challenge.tests.kind === "answers") return gradeAnswers(challenge, artifact);
   const { circuit, blocked } = circuitOf(challenge, artifact);
   const total =
-    challenge.tests.kind === "combinational"
+    (challenge.tests.kind === "combinational"
       ? challenge.tests.vectors.length
-      : challenge.tests.steps.filter((s) => s.expect).length;
+      : challenge.tests.steps.filter((s) => s.expect).length) + limitCount(challenge);
   if (!circuit) return { passed: false, total, failures: [], blocked: blocked ?? "" };
   const verdict = runSuite(circuit, challenge.tests);
-  return { ...verdict, failures: verdict.failures.map(withPartLabel) };
+  const failures = [
+    ...verdict.failures.map(withPartLabel),
+    ...limitFailures(challenge, circuit, verdict.total),
+  ];
+  return { ...verdict, total, passed: failures.length === 0, failures };
+}
+
+/**
+ * Module 2: each limit a challenge sets is one more test, numbered after the suite's. A failed
+ * one says what the circuit has and marks the parts it is about: every gate over a budget, the
+ * gates on the longest path, the gates of a kind not allowed.
+ */
+export function limitFailures(
+  challenge: Challenge,
+  circuit: Circuit,
+  first: number,
+  strings: ViewStrings = DEFAULT_VIEW_STRINGS,
+): Verdict["failures"] {
+  const limits = challenge.limits;
+  if (!limits) return [];
+  const out: Verdict["failures"][number][] = [];
+  let index = first;
+  const fail = (label: string, detail: string, marked: readonly string[]) =>
+    out.push({ index, label, inputs: {}, actual: {}, expected: {}, detail, marked });
+  if (limits.gates !== undefined) {
+    const gates = gatesOf(circuit);
+    if (gates.length > limits.gates)
+      fail(
+        format(strings.limits.gates, { limit: limits.gates }),
+        format(strings.limits.gatesFound, { count: gates.length, limit: limits.gates }),
+        gates.map((g) => g.path),
+      );
+    index++;
+  }
+  if (limits.depth !== undefined) {
+    const d = depthOf(circuit);
+    if (d.depth > limits.depth)
+      fail(
+        format(strings.limits.depth, { limit: limits.depth }),
+        format(strings.limits.depthFound, {
+          count: d.depth,
+          path: d.path.join(", "),
+          limit: limits.depth,
+        }),
+        d.path,
+      );
+    index++;
+  }
+  if (limits.only) {
+    const kinds = limits.only.map(labelFor).join(strings.limits.and);
+    const others = gatesNotOf(circuit, limits.only);
+    if (others.length)
+      fail(
+        format(strings.limits.only, { kinds }),
+        format(strings.limits.onlyFound, {
+          list: others.map((g) => `${labelFor(g.kind)} ${g.path}`).join(", "),
+        }),
+        others.map((g) => g.path),
+      );
+  }
+  return out;
 }
 
 /** The part a failure names, as the drawing labels it: "NOR gate", "D flip-flop". */
@@ -108,7 +168,9 @@ function withPartLabel(failure: Verdict["failures"][number]): Verdict["failures"
 }
 
 function markedPath(verdict: Verdict | undefined): string[] {
-  const path = verdict?.failures[0]?.divergence?.component?.path;
+  const first = verdict?.failures[0];
+  if (first?.marked) return [...first.marked];
+  const path = first?.divergence?.component?.path;
   return path ? [path] : [];
 }
 

@@ -48,6 +48,7 @@ export function checkLesson(lesson: LessonType): LessonProblem[] {
     if (challengeIds.has(c.id)) problem(`two challenges are called ${c.id}`);
     challengeIds.add(c.id);
     if (c.gradedDirection === "answer") {
+      if (c.limits) problem(`challenge ${c.id} grades answers but sets limits on a circuit`);
       problems.push(...answerProblems(lesson.id, c));
       continue;
     }
@@ -132,12 +133,26 @@ function answerProblems(lessonId: string, c: LessonType["challenges"][number]): 
   return out.map((text) => ({ lesson: lessonId, text }));
 }
 
-/** How many tests a challenge's suite counts: rows, steps that expect something, or cases. */
+/**
+ * How many tests a challenge counts: rows, steps that expect something, or cases, and one more
+ * for each limit it sets (Module 2's gate budget, depth and kinds of gate).
+ */
 export function testCount(c: LessonType["challenges"][number]): number {
   const t = c.tests;
-  if (t.kind === "combinational") return t.vectors.length;
-  if (t.kind === "sequence") return t.steps.filter((s) => s.expect).length;
-  return t.cases.length;
+  const suite =
+    t.kind === "combinational"
+      ? t.vectors.length
+      : t.kind === "sequence"
+        ? t.steps.filter((s) => s.expect).length
+        : t.cases.length;
+  return suite + limitCount(c);
+}
+
+/** How many limits a challenge sets: each is graded as one test. */
+export function limitCount(c: LessonType["challenges"][number]): number {
+  const l = c.limits;
+  if (!l) return 0;
+  return (l.gates !== undefined ? 1 : 0) + (l.depth !== undefined ? 1 : 0) + (l.only ? 1 : 0);
 }
 
 /** The time models a lesson's interactives use, for the note every lesson states. */

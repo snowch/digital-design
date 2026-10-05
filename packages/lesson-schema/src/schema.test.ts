@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { lessonJsonSchema } from "./jsonSchema";
 import { SECTION_KINDS, type LessonInput } from "./schema";
-import { checkLesson, parseLesson, timeModelsUsed } from "./validate";
+import { checkLesson, parseLesson, testCount, timeModelsUsed } from "./validate";
 import { termProblems } from "./vocabulary";
 
 /** The smallest lesson the schema accepts, to vary from. */
@@ -148,6 +148,30 @@ describe("the lesson schema", () => {
     expect(checkLesson({ ...lesson, challenges: [circuitTests] }).map((p) => p.text)).toEqual([
       "challenge c1 has answer tests but grades a circuit",
       "challenge c1 grades a circuit but its interface declares no output",
+    ]);
+  });
+
+  // Module 2
+  it("counts each limit on a circuit as one more test, and refuses limits on answers", () => {
+    const lesson = parseLesson(minimalLesson());
+    const c = lesson.challenges[0]!;
+    expect(testCount(c)).toBe(1);
+    expect(testCount({ ...c, limits: { gates: 4 } })).toBe(2);
+    expect(testCount({ ...c, limits: { gates: 4, depth: 2, only: ["nand"] } })).toBe(4);
+    const answers = {
+      ...c,
+      gradedDirection: "answer" as const,
+      limits: { gates: 1 },
+      fields: [{ id: "f", label: "F", kind: "text" as const }],
+      tests: {
+        kind: "answers" as const,
+        grader: "g",
+        cases: [{ label: "l", given: {}, expect: {} }],
+      },
+      reference: { answers: { f: "x" } },
+    };
+    expect(checkLesson({ ...lesson, challenges: [answers] }).map((p) => p.text)).toEqual([
+      "challenge c1 grades answers but sets limits on a circuit",
     ]);
   });
 
