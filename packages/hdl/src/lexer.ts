@@ -38,6 +38,8 @@ export const KEYWORDS = new Set([
 
 // Longest symbols first, so `<=` is not read as `<` then `=`.
 const SYMBOLS = [
+  // Module 6: the start of a list of values, `'{`.
+  "'{",
   "<=",
   "&&",
   "||",

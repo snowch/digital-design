@@ -11,6 +11,8 @@
 
 import type { CircuitBuilder, NetId } from "@dd/sim";
 
+import { ram4, wordRegister, wordSelector } from "./memory";
+
 /** Nets for a block's ports, by port name. */
 export type PortNets = Readonly<Record<string, NetId>>;
 
@@ -421,6 +423,26 @@ export const BLOCKS: Readonly<Record<string, BlockDef>> = {
   "full-adder": def("full-adder", ["A", "B", "CIN"], ["SUM", "COUT"], fullAdder),
   "split-4": def("split-4", ["W"], ["b3", "b2", "b1", "b0"], split4, { W: 4 }),
   "join-4": def("join-4", ["b3", "b2", "b1", "b0"], ["W"], join4, { W: 4 }),
+  // Module 6: the memory lessons' blocks (memory.ts). Each builder is called through an arrow, so
+  // the import cycle between the two files is never followed while either is being loaded.
+  "word-register": def(
+    "word-register",
+    ["D", "EN", "CLK"],
+    ["Q"],
+    (b, ins, o) => wordRegister(b, ins, o),
+    { D: 4, Q: 4 },
+  ),
+  "word-selector-2": def(
+    "word-selector-2",
+    ["A", "B", "S"],
+    ["Y"],
+    (b, ins, o) => wordSelector(b, ins, o),
+    { A: 4, B: 4, Y: 4 },
+  ),
+  ram: def("ram", ["A1", "A0", "D", "WE", "CLK"], ["Q"], (b, ins, o) => ram4(b, ins, o), {
+    D: 4,
+    Q: 4,
+  }),
 };
 
 /** The width of a block's port: 1 unless the block says otherwise. */

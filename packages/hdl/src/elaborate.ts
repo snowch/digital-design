@@ -12,7 +12,7 @@
 // path (a latch would be inferred; the course leaves the missing path unknown).
 
 import { CircuitBuilder, driverOf, type Circuit, type NetId } from "@dd/sim";
-import { dFlipFlop, register } from "@dd/dd-model";
+import { dFlipFlop, memoryBlock, register, romBlock } from "@dd/dd-model";
 
 import {
   HdlError,
@@ -28,6 +28,7 @@ import {
 import { gateMessages, constructsUsed, type Construct } from "./gate";
 import { LOOP_NOTE } from "./generate";
 import { parse } from "./parser";
+import { arrayWrite, type ArrayMemory } from "./memory";
 
 export interface ElaborateOptions {
   /** The constructs the lesson has met. Omit to allow the whole subset. */
@@ -90,6 +91,8 @@ class Elaborator {
   private readonly driven = new Map<NetId, Position>();
   private readonly warnings: Message[] = [];
   private readonly g: { delay?: number };
+  /** Module 6: the module's memories, written as arrays, by name. */
+  private readonly arrays = new Map<string, ArrayMemory>();
 
   constructor(
     private readonly module: Module,
@@ -113,7 +116,12 @@ class Elaborator {
     }
     for (const d of m.declarations) {
       const width = d.range ? this.rangeWidth(d.range, d.at) : 1;
-      if (this.signals.has(d.name)) throw new HdlError(d.at, `${d.name} is declared twice`);
+      if (this.signals.has(d.name) || this.arrays.has(d.name))
+        throw new HdlError(d.at, `${d.name} is declared twice`);
+      if (d.array) {
+        this.declareArray(d.name, width, d.array, d.init, d.at);
+        continue;
+      }
       this.signals.set(d.name, { net: this.b.net(d.name, width), width, role: "logic", at: d.at });
     }
     for (const item of m.items) {
@@ -146,6 +154,18 @@ class Elaborator {
             throw new HdlError(item.at, `a clock is one bit; ${item.clock} is ${clock.width}`);
           const targets = new Set<string>();
           this.collectTargets(item.body, targets);
+          // Module 6: an always_ff that writes a memory writes that memory alone.
+          const array = [...targets].find((t) => this.arrays.has(t));
+          if (array !== undefined) {
+            this.writeArray(
+              this.arrays.get(array) as ArrayMemory,
+              targets,
+              item.body,
+              clock.net,
+              item.at,
+            );
+            break;
+          }
           // The shapes the generator writes for a flip-flop or register with a reset, an enable
           // or both come back as that block with those ports, not as selectors in front of it.
           const shape = targets.size === 1 ? registerShape(item.body) : undefined;
@@ -175,6 +195,7 @@ class Elaborator {
         }
       }
     }
+    for (const memory of this.arrays.values()) this.buildArray(memory);
     for (const [name, s] of this.signals) {
       if (s.role === "output") {
         this.b.output(name, s.net);
@@ -226,6 +247,11 @@ class Elaborator {
   }
 
   private target(name: string, at: Position, selected: boolean): Signal {
+    if (this.arrays.has(name))
+      throw new HdlError(
+        at,
+        `${name} is a memory: write one of its words at a clock edge, in an \`always_ff\` of its own, as \`if (WE) ${name}[A] <= D;\``,
+      );
     const s = this.signals.get(name);
     if (!s)
       throw new HdlError(at, `${name} is not declared; declare it as a port or with \`logic\``);
@@ -402,6 +428,11 @@ class Elaborator {
       case "identifier": {
         const p = this.params.get(e.name);
         if (p !== undefined) return this.constant_(p, 0n, want ?? 32, e.at, output);
+        if (this.arrays.has(e.name))
+          throw new HdlError(
+            e.at,
+            `${e.name} is a memory: read one of its words by its address, as ${e.name}[A]`,
+          );
         const s = this.signals.get(e.name);
         if (!s) throw new HdlError(e.at, `${e.name} is not declared`);
         if (output !== undefined) {
@@ -510,6 +541,8 @@ class Elaborator {
         return y;
       }
       case "index": {
+        if (e.subject.kind === "identifier" && this.arrays.has(e.subject.name))
+          return this.readArray(this.arrays.get(e.subject.name) as ArrayMemory, e, output);
         const subject = this.expression(e.subject, undefined);
         const hi = Number(this.constant(e.hi));
         const lo = Number(this.constant(e.lo));
@@ -613,6 +646,8 @@ class Elaborator {
       case "ternary":
         return this.widthOf(e.then) ?? this.widthOf(e.otherwise);
       case "index":
+        if (e.subject.kind === "identifier" && this.arrays.has(e.subject.name))
+          return this.arrays.get(e.subject.name)?.width;
         return Number(this.constant(e.hi)) - Number(this.constant(e.lo)) + 1;
       case "concat": {
         let sum = 0;
@@ -689,6 +724,148 @@ class Elaborator {
     return hi - lo + 1;
   }
 
+  // ---- Module 6: memories written as arrays ------------------------------------------------
+
+  /** An array's shape and list of values, checked: words from 0, every value fitting a word. */
+  private declareArray(
+    name: string,
+    width: number,
+    dims: { from: Expression; to?: Expression },
+    init: readonly Expression[] | undefined,
+    at: Position,
+  ): void {
+    const from = Number(this.constant(dims.from));
+    let words = from;
+    if (dims.to !== undefined) {
+      if (from !== 0)
+        throw new HdlError(
+          at,
+          `an array's words start at 0 in this course: write [0:${Number(this.constant(dims.to)) - from}]`,
+        );
+      words = Number(this.constant(dims.to)) + 1;
+    }
+    if (!Number.isInteger(words) || words < 1)
+      throw new HdlError(at, `${name} needs at least one word`);
+    if (words * width + 1 > 1024)
+      throw new HdlError(
+        at,
+        `${name} is ${words} words of ${width} bits; the course's memories hold at most 1023 bits`,
+      );
+    let values: bigint[] | undefined;
+    if (init) {
+      if (init.length !== words)
+        throw new HdlError(
+          at,
+          `${name} has ${words} words but its list has ${init.length} value${init.length === 1 ? "" : "s"}; give one value per word`,
+        );
+      values = init.map((v) => {
+        const n = this.constant(v);
+        if (n < 0n || n >= 1n << BigInt(width))
+          throw new HdlError(
+            v.at,
+            `${v.kind === "literal" ? v.text : "this value"} does not fit in a word of ${width} bits`,
+          );
+        if (v.kind === "literal" && v.width !== undefined && v.width !== width)
+          this.widthMismatch(v.at, v.width, width);
+        return n;
+      });
+    }
+    this.arrays.set(name, {
+      name,
+      width,
+      words,
+      ...(values ? { init: values } : {}),
+      reads: [],
+      at,
+    });
+  }
+
+  /** A read of one word: a read port on the memory, its output a fresh net. */
+  private readArray(
+    memory: ArrayMemory,
+    e: Extract<Expression, { kind: "index" }>,
+    output: NetId | undefined,
+  ): NetId {
+    if (e.hi !== e.lo)
+      throw new HdlError(e.at, `read one word of ${memory.name} at a time, as ${memory.name}[A]`);
+    const address = this.expression(e.hi, undefined);
+    const q = this.b.net(`${memory.name}_q${memory.reads.length}`, memory.width);
+    memory.reads.push({ address, q });
+    if (output !== undefined) {
+      this.b.gate("buf", [q], { output, ...this.g });
+      return output;
+    }
+    return q;
+  }
+
+  /** The always_ff that writes a memory: one word, at an address, while a condition holds. */
+  private writeArray(
+    memory: ArrayMemory,
+    targets: ReadonlySet<string>,
+    body: Statement,
+    clock: NetId,
+    at: Position,
+  ): void {
+    const shape = arrayWrite(body);
+    if (targets.size !== 1 || !shape || shape.target.name !== memory.name)
+      throw new HdlError(
+        at,
+        `write ${memory.name} in an \`always_ff\` of its own, one word at a time: \`if (WE) ${memory.name}[A] <= D;\``,
+      );
+    if (memory.write)
+      throw new HdlError(
+        at,
+        `${memory.name} is written in two places; write it in one \`always_ff\``,
+      );
+    const select = shape.target.select as NonNullable<typeof shape.target.select>;
+    if (select.hi !== select.lo)
+      throw new HdlError(at, `write one word of ${memory.name} at a time, as ${memory.name}[A]`);
+    const address = this.expression(select.hi, undefined);
+    const data = this.expression(shape.value, memory.width);
+    if (this.b.widthOf(data) !== memory.width)
+      this.widthMismatch(shape.value.at, this.b.widthOf(data), memory.width);
+    const enable = shape.enable ? this.expression(shape.enable, 1) : this.constant_(1n, 0n, 1, at);
+    if (this.b.widthOf(enable) !== 1)
+      throw new HdlError(at, "the condition that writes a memory must be one bit");
+    memory.write = { clock, enable, address, data };
+  }
+
+  /** The memory itself, once every read and the write are known. */
+  private buildArray(memory: ArrayMemory): void {
+    const outs = Object.fromEntries(memory.reads.map((r, i) => [`Q${i}`, r.q]));
+    if (memory.write) {
+      const w = memory.write;
+      memoryBlock(
+        this.b,
+        {
+          CLK: w.clock,
+          WE: w.enable,
+          WA: w.address,
+          D: w.data,
+          reads: memory.reads.map((r) => r.address),
+        },
+        {
+          name: memory.name,
+          words: memory.words,
+          width: memory.width,
+          ...(memory.init ? { init: memory.init } : {}),
+          outs,
+        },
+      );
+      return;
+    }
+    if (!memory.init)
+      throw new HdlError(
+        memory.at,
+        `${memory.name} is never written and has no list of values, so every word would be unknown`,
+      );
+    romBlock(
+      this.b,
+      { reads: memory.reads.map((r) => r.address) },
+      { name: memory.name, words: memory.words, width: memory.width, init: memory.init, outs },
+    );
+  }
+
   private widthMismatch(at: Position, got: number, want: number): never {
     throw new HdlError(
       at,
@@ -701,7 +878,8 @@ class Elaborator {
     const insideFlipFlop = (path: string) =>
       circuit.composites.some(
         (c) =>
-          (c.kind === "dff" || c.kind === "register") &&
+          // Module 6: a memory's loop holds its words, as a flip-flop's holds its bit.
+          (c.kind === "dff" || c.kind === "register" || c.kind === "memory") &&
           (path === c.path || path.startsWith(`${c.path}/`)),
       );
     const gates = circuit.components.filter((c) => !insideFlipFlop(c.path));

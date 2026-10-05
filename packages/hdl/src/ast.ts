@@ -37,6 +37,13 @@ export interface Declaration {
   readonly kind: "logic";
   readonly name: string;
   readonly range?: Range;
+  /**
+   * Module 6: a memory, written as an array of words after the name: `[0:15]` (`from` 0, `to`
+   * 15) or `[16]` (`from` 16 alone, the count).
+   */
+  readonly array?: { readonly from: Expression; readonly to?: Expression };
+  /** Module 6: the list of values the array is filled with, `= '{8'h12, 8'h34}`. */
+  readonly init?: readonly Expression[];
   readonly at: Position;
 }
 

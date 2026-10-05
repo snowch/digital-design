@@ -5,3 +5,5 @@ export * from "./simulator";
 export * from "./vectors";
 export * from "./metastability";
 export { SeededRandom } from "./rng";
+// Module 6
+export * from "./memory";

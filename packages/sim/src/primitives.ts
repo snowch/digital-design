@@ -5,6 +5,7 @@
 // with state of its own (a memory array, in Prompt B) will be a second kind of primitive with an
 // `update` on the clock, and the Simulator leaves room for it.
 
+import { MEMORY, ROM } from "./memory";
 import { andAll, concat, mux, not, orAll, slice, unknown, word, xorAll, type Word } from "./values";
 
 export interface Primitive {
@@ -122,6 +123,9 @@ export const PRIMITIVES: Readonly<Record<string, Primitive>> = {
       return { y: w };
     },
   },
+  // Module 6: memories as components with behaviour (memory.ts says why and how).
+  memory: MEMORY,
+  rom: ROM,
 };
 
 export function primitive(kind: string): Primitive {

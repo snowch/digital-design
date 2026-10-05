@@ -71,7 +71,21 @@ function constText(circuit: Circuit, path: string): string {
 }
 
 /** Blocks drawn closed for good: a split or a join holds no gates worth opening. */
-const SEALED = new Set(["split-4", "join-4"]);
+const SEALED = new Set([
+  "split-4",
+  "join-4",
+  // Module 6: a word selector holds one Module 3 selector per bit, and a memory or a ROM built as
+  // a component holds only the simulator's primitive.
+  "word-selector-2",
+  "word-selector-4",
+  "memory",
+  "rom",
+]);
+
+/** Whether a block of this kind is drawn closed for good, so a learner never sees inside it. */
+export function isSealed(kind: string): boolean {
+  return SEALED.has(kind);
+}
 
 function fullPath(scope: string, local: string): string {
   return scope ? `${scope}/${local}` : local;

@@ -15,6 +15,7 @@ import {
   drawingAt,
   emptyDrawing,
   grade,
+  isSealed,
   sceneOf,
   sceneProblems,
   straighten,
@@ -52,7 +53,13 @@ describe("the course's lessons", () => {
   it("draws no wire through a part it does not join, and no two signals along one line", () => {
     const found: string[] = [];
     const check = (name: string, circuit: ReturnType<typeof libraryCircuit>) => {
-      for (const scope of ["", ...circuit.composites.map((c) => c.path)]) {
+      // Module 6: a sealed block (a word selector, a memory as a component) never opens, so
+      // neither it nor anything inside it is a drawing a learner sees.
+      const sealed = circuit.composites.filter((c) => isSealed(c.kind)).map((c) => c.path);
+      const seen = circuit.composites
+        .map((c) => c.path)
+        .filter((path) => !sealed.some((s) => path === s || path.startsWith(`${s}/`)));
+      for (const scope of ["", ...seen]) {
         const scene = sceneOf(straighten(drawingAt(circuit, scope).drawing));
         found.push(
           ...sceneProblems(scene).map((p) => `${name}${scope ? ` (${scope})` : ""}: ${p}`),

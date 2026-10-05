@@ -267,6 +267,17 @@ export interface ViewStrings {
     readonly invalid: string;
     readonly ofYourBits: string;
   };
+  /** Module 6: the memory explorer's table of words. */
+  readonly memory: {
+    readonly caption: string;
+    readonly address: string;
+    readonly word: string;
+    readonly marks: string;
+    /** In a word's row: {ports} are the outputs whose address names this word. */
+    readonly readBy: string;
+    /** In a word's row while the write enable is 1 and the address names it. */
+    readonly writeNext: string;
+  };
 }
 
 export const DEFAULT_VIEW_STRINGS: ViewStrings = {
@@ -524,6 +535,15 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     unanswered: "Fill in {fields} to run the tests.",
     invalid: "{field} must be a valid entry.",
     ofYourBits: "What your bits read as",
+  },
+  // Module 6. Drafted by the prose process (docs/notes/module-6-memory.md).
+  memory: {
+    caption: "PLACEHOLDER Every word in the memory",
+    address: "Address",
+    word: "Word",
+    marks: "Now",
+    readBy: "PLACEHOLDER On {ports}",
+    writeNext: "PLACEHOLDER Next edge writes D here",
   },
 };
 

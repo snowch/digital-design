@@ -12,6 +12,8 @@ import { register } from "./register";
 // Module 2's circuits live in their own file and join the library below.
 import { LOGIC_LIBRARY } from "./logic";
 import { combinationalLibrary } from "./library-combinational";
+// Module 6's circuits live in their own file too.
+import { MEMORY_INSIDE, memoryLibrary } from "./library-memory";
 
 /**
  * A loop of `n` inverters with a `kick` input ORed into it. While kick is 1 the loop is forced;
@@ -254,6 +256,8 @@ export const INSIDE: Readonly<Record<string, Readonly<Record<string, readonly [n
       "out:Q": [16, 6],
       "out:Qb": [16, 8],
     },
+    // Module 6: the memory blocks a learner opens.
+    ...MEMORY_INSIDE,
   };
 
 /**
@@ -418,6 +422,8 @@ export const LIBRARY: Readonly<Record<string, () => Circuit>> = {
   ...LOGIC_LIBRARY,
   // Module 3, combinational design: selectors, decoders, adders and the ALU.
   ...combinationalLibrary(placed),
+  // Module 6, memory.
+  ...memoryLibrary(placed),
 };
 
 export function libraryCircuit(id: string): Circuit {

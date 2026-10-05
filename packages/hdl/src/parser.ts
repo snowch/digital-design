@@ -128,11 +128,18 @@ class Parser {
         const range = this.is("[") ? this.range() : undefined;
         do {
           const d = this.identifier("a signal name");
-          declarations.push(
-            range
-              ? { kind: "logic", name: d.text, range, at: d.at }
-              : { kind: "logic", name: d.text, at: d.at },
-          );
+          // Module 6: a memory is an array of words, written after the name, and may be filled
+          // from a list of values.
+          const array = this.is("[") ? this.arrayDims() : undefined;
+          const init = array && this.is("=") ? this.valueList() : undefined;
+          declarations.push({
+            kind: "logic",
+            name: d.text,
+            ...(range ? { range } : {}),
+            ...(array ? { array } : {}),
+            ...(init ? { init } : {}),
+            at: d.at,
+          });
         } while (this.is(",") && this.next());
         this.expect(";");
       } else if (this.is("wire") || this.is("reg")) {
@@ -192,6 +199,32 @@ class Parser {
       throw new HdlError(this.peek().at, "only one module per text in this course");
     }
     return { kind: "module", name, parameters, ports, declarations, items, at: start };
+  }
+
+  /** Module 6: an array's words after its name, `[0:15]` or `[16]`. */
+  private arrayDims(): { from: Expression; to?: Expression } {
+    this.expect("[");
+    const from = this.expression();
+    let to: Expression | undefined;
+    if (this.is(":")) {
+      this.next();
+      to = this.expression();
+    }
+    this.expect("]");
+    return to ? { from, to } : { from };
+  }
+
+  /** Module 6: `= '{a, b, c}`, the values an array is filled with, lowest address first. */
+  private valueList(): Expression[] {
+    this.expect("=");
+    this.expect("'{", "fill an array with a list of values written `'{8'h12, 8'h34}`");
+    const values: Expression[] = [this.expression()];
+    while (this.is(",")) {
+      this.next();
+      values.push(this.expression());
+    }
+    this.expect("}");
+    return values;
   }
 
   private range(): Range {

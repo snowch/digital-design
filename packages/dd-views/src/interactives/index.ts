@@ -20,6 +20,8 @@ import { InputPairs } from "./InputPairs";
 // Scenes and sums on paper, for any lesson
 import { ColumnSum } from "./ColumnSum";
 import { SceneFigure } from "./SceneFigure";
+// Module 6
+import { MemoryExplorer } from "./MemoryExplorer";
 
 /** The interactives lessons may name by kind. */
 export const INTERACTIVES: Readonly<Record<string, ComponentType<InteractiveProps>>> = {
@@ -41,6 +43,8 @@ export const INTERACTIVES: Readonly<Record<string, ComponentType<InteractiveProp
   // Scenes and sums on paper, for any lesson
   scene: SceneFigure,
   "column-sum": ColumnSum,
+  // Module 6
+  "memory-explorer": MemoryExplorer,
 };
 
 export {
@@ -60,6 +64,7 @@ export {
   InputPairs,
   ColumnSum,
   SceneFigure,
+  MemoryExplorer,
 };
 export { compareAnswer } from "./CircuitCompare";
 export { experiment, type Draw } from "./SetupHold";

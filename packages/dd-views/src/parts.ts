@@ -75,6 +75,15 @@ const COMPOSITE_LABELS: Readonly<Record<string, string>> = {
   "columns-alone": "half adder columns",
   "full-adder-parts": "full adder internals",
   "addsub-4": "4-bit add/subtract",
+  // Module 6: the memory lessons' blocks. Drafted by the prose process
+  // (docs/notes/module-6-memory.md).
+  "word-register": "register",
+  "word-selector-2": "word selector",
+  "word-selector-4": "word selector",
+  ram: "RAM",
+  "register-file": "register file",
+  memory: "memory",
+  rom: "ROM",
 };
 
 const COMPOSITE_DESCRIPTIONS: Readonly<Record<string, string>> = {
@@ -95,6 +104,10 @@ const COMPOSITE_DESCRIPTIONS: Readonly<Record<string, string>> = {
   "full-adder": "Adds A, B and CIN: SUM is the total's low bit, COUT its high bit.",
   "split-4": "Splits the 4-bit word W into its bits b3 (top) to b0.",
   "join-4": "Joins the bits b3 (top) to b0 into the 4-bit word W.",
+  // Module 6. Drafted by the prose process.
+  "word-register": "PLACEHOLDER register with load enable",
+  "word-selector-2": "PLACEHOLDER word selector",
+  ram: "PLACEHOLDER RAM",
 };
 
 const GATE_INPUTS: Readonly<Record<string, readonly string[]>> = {

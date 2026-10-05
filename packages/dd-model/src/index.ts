@@ -13,3 +13,5 @@ export * from "./logic";
 // Module 3: combinational blocks and the chain a slice is tested in.
 export * from "./combinational";
 export * from "./chain";
+// Module 6: memories, as gates and as components.
+export * from "./memory";
