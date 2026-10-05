@@ -226,7 +226,7 @@ test.describe("Module 2's challenges", () => {
 test.describe("Module 2's figures", () => {
   test("the predictions answer with what the simulator did", async ({ page }) => {
     const answers: [string, string, string, string][] = [
-      ["gates", "predict-alarm", "ALARM", "0"],
+      ["gates", "predict-alarm", "ALARM", "1"],
       ["nand", "predict-tied", "Y", "0"],
       ["fewer-gates", "predict-warm", "CALL", "1"],
     ];

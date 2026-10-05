@@ -54,6 +54,26 @@ export function alarmCircuit(): Circuit {
 }
 
 /**
+ * A first try at ALARM with an OR gate where the AND belongs: ALARM = WARM OR NOT DOOR. It lights
+ * with a cold freezer and the door shut, which the rule does not; the lesson's prediction.
+ */
+export function alarmOrCircuit(): Circuit {
+  const b = new CircuitBuilder("alarm-try");
+  const warm = b.input("WARM");
+  const door = b.input("DOOR");
+  const shut = b.not(door, { name: "notDoor", output: b.net("SHUT") });
+  const alarm = b.or([warm, shut], { name: "orAlarm", output: b.net("ALARM") });
+  b.output("ALARM", alarm);
+  return placed(b.build(), {
+    "in:WARM": [0, 1],
+    "in:DOOR": [0, 5],
+    notDoor: [5, 5],
+    orAlarm: [10, 1],
+    "out:ALARM": [15, 1],
+  });
+}
+
+/**
  * CLASH from AND, OR and NOT: 1 when the two sensors' WARM bits disagree, one detector per row
  * where they do. The same truth table as one XOR gate.
  */
@@ -336,6 +356,7 @@ export const LOGIC_LIBRARY: Readonly<Record<string, () => Circuit>> = {
   "nand-tied": () => tiedGate("nand"),
   "nor-tied": () => tiedGate("nor"),
   alarm: () => alarmCircuit(),
+  "alarm-try": () => alarmOrCircuit(),
   "clash-gates": () => clashGatesCircuit(),
   "clash-xor": () => clashXorCircuit(),
   "nand-or": () => nandOrCircuit(),

@@ -123,7 +123,6 @@ export const nand: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.orFaults,
           lead: PROSE.orFaultsLead,
-          after: PROSE.orFaultsAfter,
           props: {
             libraryId: "nand-or",
             faults: [
@@ -137,6 +136,7 @@ export const nand: LessonInput = {
               { label: "A 1, B 0", set: { A: 1, B: 0 } },
               { label: "A 1, B 1", set: { A: 1, B: 1 } },
             ],
+            outcomes: PROSE.orFaultsOutcomes,
           },
         },
       ],

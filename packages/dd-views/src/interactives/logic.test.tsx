@@ -13,6 +13,7 @@ import { DEFAULT_VIEW_STRINGS as S, format } from "../strings";
 import { CircuitCompare, compareAnswer } from "./CircuitCompare";
 import { CircuitExplorer } from "./CircuitExplorer";
 import { CircuitText } from "./CircuitText";
+import { FaultLab } from "./FaultLab";
 import { InputPairs } from "./InputPairs";
 
 const lesson = { id: "logic", challenges: [] } as unknown as Lesson;
@@ -130,5 +131,23 @@ describe("a circuit written as expressions", () => {
     expect(screen.getByLabelText(S.hdl.generated)).toHaveTextContent(
       "assign ALARM = WARM & ~DOOR;",
     );
+  });
+});
+
+describe("a fault in the lesson's own words", () => {
+  it("shows the lesson's explanation in place of the fault library's", async () => {
+    const user = userEvent.setup();
+    mount(
+      FaultLab as typeof CircuitCompare,
+      figure("fault-lab", {
+        libraryId: "alarm",
+        faults: [
+          { kind: "stuck-at", net: "DOOR", value: 0, label: "Broken switch", explanation: "Mine." },
+        ],
+        run: [{ label: "row", set: { WARM: 1, DOOR: 1 } }],
+      }),
+    );
+    await user.click(screen.getByLabelText("Broken switch"));
+    expect(screen.getByText("Mine.")).toBeInTheDocument();
   });
 });

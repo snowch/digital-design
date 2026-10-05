@@ -72,8 +72,10 @@ export const gates: LessonInput = {
           caption: LABELS.captions.predictAlarm,
           props: {
             question: PROSE.p1Question,
-            libraryId: "alarm",
-            run: [{ label: LABELS.steps.warmOpen, set: { WARM: 1, DOOR: 1 } }],
+            // A first try with an OR where the AND belongs, so the rule in the question does not
+            // answer it and the construction is not a copy of it.
+            libraryId: "alarm-try",
+            run: [{ label: LABELS.steps.coldShut, set: { WARM: 0, DOOR: 0 } }],
             watch: "ALARM",
             options: [
               { value: "0", label: LABELS.options.alarm0 },
@@ -143,15 +145,21 @@ export const gates: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.alarmFaults,
           lead: PROSE.alarmFaultsLead,
-          after: PROSE.alarmFaultsAfter,
           props: {
             libraryId: "alarm",
             faults: [
-              { kind: "wrong-gate", path: "andAlarm", gate: "or", label: LABELS.faults.andToOr },
+              { kind: "inverted", net: "SHUT", label: LABELS.faults.extraNot },
               { kind: "broken-wire", net: "SHUT", label: LABELS.faults.cutShut },
-              { kind: "stuck-at", net: "DOOR", value: 0, label: LABELS.faults.doorStuck },
+              {
+                kind: "stuck-at",
+                net: "DOOR",
+                value: 0,
+                label: LABELS.faults.doorStuck,
+                explanation: PROSE.doorStuckExplain,
+              },
             ],
             run: ALARM_RUN,
+            outcomes: PROSE.alarmFaultsOutcomes,
           },
         },
       ],

@@ -44,7 +44,12 @@ export const fewerGates: LessonInput = {
           props: {
             question: PROSE.p1Question,
             libraryId: "call-rows",
-            run: [{ label: LABELS.steps.coldOpenClosed, set: { WARM: 0, DOOR: 1, CLOSED: 1 } }],
+            // WARM falls with the door open and the shop closed: the question is what changes.
+            run: [
+              { label: LABELS.steps.allOne, set: { WARM: 1, DOOR: 1, CLOSED: 1 } },
+              { label: LABELS.steps.warmFalls, set: { WARM: 0 } },
+            ],
+            signals: ["WARM", { net: "R3", label: "and3" }, { net: "R4", label: "and4" }, "CALL"],
             watch: "CALL",
             options: [
               { value: "0", label: LABELS.options.call0 },

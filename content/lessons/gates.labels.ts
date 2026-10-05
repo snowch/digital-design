@@ -13,7 +13,7 @@ export const LABELS = {
   titles: {
     question: "The ALARM lamp's rule",
     motivation: "One rule, many cases",
-    prediction: "Freezer warm, door open",
+    prediction: "The first ALARM circuit",
     investigation: "NOT, AND and OR",
     construction: "Build the ALARM circuit",
     failureExperiment: "Three faults, broken rows",
@@ -27,7 +27,7 @@ export const LABELS = {
     c2: "NIGHT lamp",
   },
   captions: {
-    predictAlarm: "Predict ALARM: freezer warm, door open.",
+    predictAlarm: "Predict ALARM: freezer cold, door shut.",
     exploreNot: "Press A and watch Y and the shaded row.",
     exploreAnd: "Press A and B and watch Y and the shaded row.",
     exploreOr: "Press A and B and watch Y and the shaded row.",
@@ -39,15 +39,15 @@ export const LABELS = {
     writeNight: "Write the NIGHT lamp's circuit as text and run tests.",
   },
   faults: {
-    andToOr: "The gate andAlarm is replaced by an OR gate",
+    extraNot: "An extra NOT gate is in the wire SHUT",
     cutShut: "The wire SHUT from NOT to AND is cut",
-    doorStuck: "The door switch is broken and DOOR stays 0",
+    doorStuck: "The door switch is broken and DOOR stays 0 even when open",
   },
   options: {
     alarm0: "ALARM is 0",
     alarm1: "ALARM is 1",
   },
   steps: {
-    warmOpen: "WARM 1, DOOR 1",
+    coldShut: "WARM 0, DOOR 0",
   },
 } as const;

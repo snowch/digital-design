@@ -14,8 +14,10 @@ const lesson = parseLesson(gates);
 const outputs = (id: string) => truthTableOf(libraryCircuit(id)).rows.map((r) => r.outputs[0]);
 
 describe("the gates lesson's facts", () => {
-  it("prediction: warm with the door open gives ALARM 0", () => {
-    expect(predictionAnswer(gates, "predict-alarm")).toBe("0");
+  it("prediction: the first try, with an OR, lights ALARM with the freezer cold and the door shut", () => {
+    expect(figureOf(gates, "predict-alarm")["libraryId"]).toBe("alarm-try");
+    expect(predictionAnswer(gates, "predict-alarm")).toBe("1");
+    expect(outputs("alarm-try")).toEqual(["1", "0", "1", "1"]);
   });
 
   it("investigation: NOT has 2 rows, AND gives 1 in 1 row of 4, OR in 3 of 4", () => {
@@ -34,7 +36,7 @@ describe("the gates lesson's facts", () => {
     expect(faultChecks(gates, "alarm-faults", 0)).toEqual({
       total: 4,
       failed: [
-        { label: "WARM 0, DOOR 0", got: { ALARM: "1" }, expected: { ALARM: "0" } },
+        { label: "WARM 1, DOOR 0", got: { ALARM: "0" }, expected: { ALARM: "1" } },
         { label: "WARM 1, DOOR 1", got: { ALARM: "1" }, expected: { ALARM: "0" } },
       ],
     });

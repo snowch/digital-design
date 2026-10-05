@@ -24,7 +24,10 @@ const Props = z.object({
   watch: z.string(),
   options: z.array(z.object({ value: z.string(), label: z.string() })).min(2),
   explain: z.string().default(""),
-  signals: z.array(z.string()).optional(),
+  /** Lanes of the timing diagram: a signal's name, or an inner wire with the name to show for it. */
+  signals: z
+    .array(z.union([z.string(), z.object({ net: z.string(), label: z.string() })]))
+    .optional(),
 });
 
 interface Stored {

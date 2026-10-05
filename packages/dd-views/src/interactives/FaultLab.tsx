@@ -14,7 +14,7 @@ import {
   wrongGate,
   type Fault,
 } from "@dd/dd-model";
-import type { InteractiveProps } from "@dd/lesson-runtime";
+import { Prose, type InteractiveProps } from "@dd/lesson-runtime";
 import { formatWord, runSuite, type Diagnosis, type SequenceStep } from "@dd/sim";
 
 import { CircuitView } from "../CircuitView";
@@ -23,7 +23,9 @@ import { useSettleSim } from "../useSim";
 import { withProps } from "./props";
 import { Step, outputsPerStep } from "./script";
 
-const label = { label: z.string().optional() };
+// A lesson may name a fault and say what it models in its own words; otherwise the fault
+// library's label and explanation show (Module 2 added `explanation`).
+const label = { label: z.string().optional(), explanation: z.string().optional() };
 const FaultSpec = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("broken-wire"), net: z.string(), ...label }),
   z.object({ kind: z.literal("inverted"), net: z.string(), ...label }),
@@ -43,11 +45,20 @@ const Props = z.object({
   scope: z.string().default(""),
   /** Offer "Release all at once": only where two inputs pressed together are the experiment. */
   releaseAll: z.boolean().default(false),
+  /**
+   * Module 2: what the faults do, in the lesson's words, shown only once the checks have been
+   * run, so a lead that asks the learner to say first is not answered under the figure.
+   */
+  outcomes: z.string().optional(),
 });
 
 export function toFault(spec: z.infer<typeof FaultSpec>): Fault {
   const fault = baseFault(spec);
-  return spec.label ? { ...fault, label: spec.label } : fault;
+  return {
+    ...fault,
+    ...(spec.label ? { label: spec.label } : {}),
+    ...(spec.explanation ? { explanation: spec.explanation } : {}),
+  };
 }
 
 function baseFault(spec: z.infer<typeof FaultSpec>): Fault {
@@ -78,6 +89,7 @@ export const FaultLab = withProps(
     );
     const sim = useSettleSim(circuit);
     const [diagnosis, setDiagnosis] = useState<Diagnosis | undefined>();
+    const [ran, setRan] = useState(false);
     const expectations = useMemo(() => outputsPerStep(healthy, data.run), [healthy, data.run]);
 
     const runChecks = () => {
@@ -90,6 +102,7 @@ export const FaultLab = withProps(
         ),
       }));
       setDiagnosis(runSuite(circuit, { kind: "sequence", steps }));
+      setRan(true);
     };
     const name = `${interactive.id}-fault`;
 
@@ -170,6 +183,11 @@ export const FaultLab = withProps(
                 ))}
               </ul>
             )}
+          </div>
+        )}
+        {ran && data.outcomes && (
+          <div className="fault-outcomes">
+            <Prose markdown={data.outcomes} />
           </div>
         )}
       </div>

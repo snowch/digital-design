@@ -27,7 +27,7 @@ export const LABELS = {
     c2: "XOR in four NAND gates",
   },
   captions: {
-    predictWarm: "Predict CALL: WARM 0, DOOR 1, CLOSED 1.",
+    predictWarm: "Predict CALL when WARM changes to 0, door open, shop closed.",
     callPairs: "Choose an input and read rows in pairs.",
     buildCall: "Draw CALL with at most 4 gates and run tests.",
     tooShort: "Does the simplified circuit match the manager's in every row?",
@@ -40,7 +40,7 @@ export const LABELS = {
     call0: "CALL is 0",
     call1: "CALL is 1",
     same: "light CALL in the same rows",
-    different: "light CALL in some different row",
+    different: "light CALL in different rows",
   },
   sides: {
     rows: "Manager's circuit",
@@ -49,6 +49,7 @@ export const LABELS = {
     shared: "Shared gate",
   },
   steps: {
-    coldOpenClosed: "WARM 0, DOOR 1, CLOSED 1",
+    allOne: "WARM 1, DOOR 1, CLOSED 1",
+    warmFalls: "WARM to 0",
   },
 } as const;

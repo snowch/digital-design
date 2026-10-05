@@ -487,7 +487,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     depth: "At most {limit} gates on the longest path",
     depthFound: "The longest path contains {path} ({count} gates). The limit is {limit}.",
     only: "Only {kinds} gates",
-    onlyFound: "This circuit contains {list}, but only {kinds} are allowed.",
+    onlyFound: "This circuit contains {list}, but only {kinds} gates are allowed.",
     and: " and ",
   },
   answers: {
