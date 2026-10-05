@@ -256,14 +256,22 @@ test.describe("Module 3's figures", () => {
     await figure.scrollIntoViewIfNeeded();
     const row = (name: string) =>
       figure.locator("table.signal-table tr", { has: page.locator(`th:text-is("${name}")`) });
-    await expect(row("SUM")).toContainText("1000");
-    await expect(row("SUM")).toContainText("-8");
-    // A becomes 1111: press bit 3 of input A.
-    await figure
-      .getByRole("group", { name: format(V.words.row, { name: "A" }) })
-      .locator('[data-bit="3"]')
-      .click();
+    // It starts at 0011 + 0010, so the prediction's 1000 is not on show.
+    await expect(row("SUM")).toContainText("0101");
+    await expect(row("SUM")).toContainText("5");
+    const press = (word: string, bit: number) =>
+      figure
+        .getByRole("group", { name: format(V.words.row, { name: word }) })
+        .locator(`[data-bit="${bit}"]`)
+        .click();
+    // The lead's first sum, 1111 + 0001: press A's bits 3 and 2, and B's bits 1 and 0.
+    await press("A", 3);
+    await press("A", 2);
+    await press("B", 1);
+    await press("B", 0);
     await expect(row("A")).toContainText("1111");
+    await expect(row("A")).toContainText("-1");
+    await expect(row("B")).toContainText("0001");
     await expect(row("SUM")).toContainText("0000");
     await expect(row("COUT")).toContainText("1");
   });

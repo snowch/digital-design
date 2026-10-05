@@ -167,8 +167,9 @@ The managing session should check each against Module 2 when both land:
   opened block said "B is 4 bits wide"); a constant part shows its value.
 - **After the reviews**: every gate symbol draws a short lead from its shape to its output pin
   (the wire to Y seemed to start in mid-air); a part no longer repeats at its port the value its
-  output pin shows (four stacked labels on the decoder). Both change every drawing a little, so
-  the stored screenshots were updated on purpose (see "The check").
+  output pin shows (four stacked labels on the decoder). Both change every drawing a little; the
+  stored screenshots of the earlier lessons' figures still matched within their 2% tolerance, so
+  no baseline was updated (see "The check").
 - Every new string is in `dd-views/src/strings.ts` or `parts.ts`, drafted like the lessons'.
 
 ## Briefs and drafts
@@ -261,3 +262,37 @@ fix briefs above, then a second read, then the mechanical half again.
 Platform items raised by the reviews and left for the managing session: the fault labs' outcomes
 visible before running (course-wide); "As text" and "Import from text" panels before Module 4;
 "lesson 1" meaning this module's first lesson, not the course's (course-wide naming).
+
+## The check
+
+`./scripts/check.sh`, run to a log and its exit status read:
+
+- 15:36, the first browser run: 4 failures, 16-bit tables five pixels too wide on a phone (fixed;
+  see the log).
+- 16:25, after the review fixes and the merge of `main`: Prettier, `tsc`, Vitest (297 tests) and
+  the build passed; Playwright failed 2 of 179, one test at both widths. The Module 3 spec still
+  expected the adder figure to start at `0111` + `0001`, which the reviews had moved so the
+  figure no longer shows the prediction's answer. The spec now checks the new start and presses
+  bits to the lead's first sum, `1111` + `0001`.
+- What the check caught that a reader would not: the term gate caught "holds" (a Module 4 term,
+  from the managing model's brief) and, earlier, "carry" in lesson 1; the facts tests held every
+  number the fix briefs stated before any draft was placed; the chain grader's first failure
+  message named the join instead of the slice.
+- What it did not catch, and the reviews did: a model note that said the opposite of what the
+  model shows; "only overflow differs" for subtraction; a starting value that gave a
+  prediction's answer away. Each is a claim about the model in words, which no test reads.
+
+## What I would change
+
+- **Run the model before writing a model note's brief.** The selectors note's claim about the
+  dip came from the managing model's expectation of hardware, not from a run of the stepped model.
+  A note's facts deserve the same pinned test as a lesson's numbers.
+- **Check a starting value against every prediction on the page**, not only its own figure. Two
+  figures (adders, ALU) began on the sum a prediction above asked for.
+- **Ration the editor's help.** The first drafts repeated it in each construction section; the
+  editor already says it under every canvas.
+- **Name lessons course-wide.** "Lesson 1" in Module 3 means this module's first lesson; a learner
+  arriving from Module 2 has met other first lessons. A title would do.
+- **A pinned test for each fault outcome's lamps**, not only which checks fail. The decoders
+  bullets say which lamps light; the facts test checks only the failing checks. The managing
+  model checked the lamps by a run (16:16) that is not kept.
