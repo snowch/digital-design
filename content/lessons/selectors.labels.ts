@@ -27,6 +27,7 @@ export const LABELS = {
     c2: "4-way selector from three 2-way ones, drawn",
   },
   captions: {
+    scene: "A thick line marked 16 is 16 wires, one for each bit.",
     predictOr: "Predict what an OR gate joining room A's bit and room B's bit gives, then check.",
     predictAnd:
       "Predict what an AND gate gives when its control input S is 0 and A changes, then check.",
@@ -47,5 +48,17 @@ export const LABELS = {
     noNot: "NOT gate notS becomes a wire",
     sHigh: "Input S is stuck at 1",
     orToXor: "OR gate orY becomes XOR",
+  },
+  /** The drawing under the question. */
+  scene: {
+    roomA: "Room A",
+    roomB: "Room B",
+    sensor: "Sensor",
+    switch: "Switch",
+    circuit: "?",
+    display: "Display",
+    title: "Two rooms, a switch, and a display",
+    summary:
+      'Room A and Room B each send a word on 16 wires to the circuit marked "?" that the question asks for. The switch S also connects to this circuit. The circuit sends one word to the display on 16 wires.',
   },
 } as const;

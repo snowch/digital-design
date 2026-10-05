@@ -15,6 +15,13 @@ const DRAW_CONSTRUCTS = ["module", "ports", "logic", "assign", "op-bitwise"];
 export const ROOM_B_WORD = "0xFF06";
 export const CORRECTION_WORD = "0xFFFA";
 
+/**
+ * The sum on paper in the motivation, 3 + 3: a carry made in one column and passed on by the
+ * next, and a sum that fits both readings, so nothing there runs ahead of the lesson's overflow.
+ */
+export const PAPER_A = "0011";
+export const PAPER_B = "0011";
+
 /** The explanation's first sum, 7 + 1 in four bits, whose signed reading does not fit. */
 export const SEVEN = "0111";
 export const ONE = "0001";
@@ -78,7 +85,22 @@ export const adders: LessonInput = {
   introduces: ["carry", "half adder", "full adder", "overflow", "XNOR"],
   sections: [
     { kind: "question", title: LABELS.titles.question, prose: PROSE.question },
-    { kind: "motivation", title: LABELS.titles.motivation, prose: PROSE.motivation },
+    {
+      kind: "motivation",
+      title: LABELS.titles.motivation,
+      prose: PROSE.motivation,
+      interactives: [
+        {
+          id: "column-sum",
+          kind: "column-sum",
+          timeModel: "none",
+          caption: LABELS.captions.columnSum,
+          lead: PROSE.columnSumLead,
+          after: PROSE.columnSumAfter,
+          props: { a: PAPER_A, b: PAPER_B, labels: LABELS.columnSum },
+        },
+      ],
+    },
     {
       kind: "prediction",
       title: LABELS.titles.prediction,

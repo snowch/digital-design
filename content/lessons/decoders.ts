@@ -50,7 +50,36 @@ export const decoders: LessonInput = {
   objectives: [...LABELS.objectives],
   introduces: ["decoder", "demultiplexer", "encoder", "comparator"],
   sections: [
-    { kind: "question", title: LABELS.titles.question, prose: PROSE.question },
+    {
+      kind: "question",
+      title: LABELS.titles.question,
+      prose: PROSE.question,
+      interactives: [
+        {
+          id: "lamps-scene",
+          kind: "scene",
+          timeModel: "none",
+          caption: LABELS.captions.scene,
+          props: {
+            sources: [
+              {
+                items: [
+                  { kind: "switch", label: LABELS.scene.switch, signal: "S1" },
+                  { kind: "switch", label: LABELS.scene.switch, signal: "S0" },
+                ],
+              },
+            ],
+            circuit: LABELS.scene.circuit,
+            outputs: LABELS.scene.lamps.map((label, k) => ({
+              kind: "lamp",
+              label,
+              signal: `Y${k}`,
+            })),
+            labels: { title: LABELS.scene.title, summary: LABELS.scene.summary },
+          },
+        },
+      ],
+    },
     { kind: "motivation", title: LABELS.titles.motivation, prose: PROSE.motivation },
     {
       kind: "prediction",

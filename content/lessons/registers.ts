@@ -14,6 +14,9 @@ const DRAW_CONSTRUCTS = ["module", "ports", "logic", "assign", "op-bitwise", "al
 
 const TEXT_CONSTRUCTS = [...DRAW_CONSTRUCTS, "vector", "if"];
 
+/** What the display must show when the power comes on: the value the reset loads. */
+export const POWER_ON_VALUE = "0000";
+
 const KEEP_BIT_TEXT = `module keep_bit(input logic D, input logic EN, input logic CLK, output logic Q);
   logic NEN;
   logic LOAD;
@@ -41,7 +44,7 @@ const REGISTER_HEADER =
 
 const REGISTER_TEXT = `${REGISTER_HEADER}
   always_ff @(posedge CLK) begin
-    if (RST) Q <= 4'b0000;
+    if (RST) Q <= 4'b${POWER_ON_VALUE};
     else if (EN) Q <= D;
   end
 endmodule
@@ -55,7 +58,37 @@ export const registers: LessonInput = {
   objectives: [...LABELS.objectives],
   introduces: ["register", "shift register"],
   sections: [
-    { kind: "question", title: LABELS.titles.question, prose: PROSE.question },
+    {
+      kind: "question",
+      title: LABELS.titles.question,
+      prose: PROSE.question,
+      interactives: [
+        {
+          id: "save-scene",
+          kind: "scene",
+          timeModel: "none",
+          caption: LABELS.captions.scene,
+          props: {
+            sources: [
+              {
+                items: [
+                  { kind: "switch", label: LABELS.scene.switches, width: 4 },
+                  { kind: "button", label: LABELS.scene.save },
+                  { kind: "clock", label: LABELS.scene.clock, signal: "CLK" },
+                ],
+              },
+            ],
+            circuit: LABELS.scene.circuit,
+            // What the display must show when the power comes on: the reset value, as the
+            // question states it.
+            outputs: [
+              { kind: "readout", label: LABELS.scene.display, value: POWER_ON_VALUE, width: 4 },
+            ],
+            labels: { title: LABELS.scene.title, summary: LABELS.scene.summary },
+          },
+        },
+      ],
+    },
     { kind: "motivation", title: LABELS.titles.motivation, prose: PROSE.motivation },
     {
       kind: "prediction",

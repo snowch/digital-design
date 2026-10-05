@@ -38,6 +38,27 @@ export function digitPlaceValue(n: number): number {
   return 2 ** (n % 4);
 }
 
+/** Two words added the way a person adds on paper: one column at a time, from the right. */
+export interface ColumnSum {
+  /** The carry into each column, the rightmost first; the last is the carry out of the top. */
+  readonly carries: readonly Bit[];
+  /** The sum, highest first, one bit longer than the words: its top bit is the carry out. */
+  readonly sum: readonly Bit[];
+}
+
+export function columnSum(a: readonly Bit[], b: readonly Bit[]): ColumnSum {
+  if (a.length !== b.length) throw new Error("the two words must be the same width");
+  const n = a.length;
+  const carries: Bit[] = [0];
+  const low: Bit[] = [];
+  for (let i = 0; i < n; i++) {
+    const total = a[n - 1 - i]! + b[n - 1 - i]! + carries[i]!;
+    low.push((total % 2) as Bit);
+    carries.push(total >= 2 ? 1 : 0);
+  }
+  return { carries, sum: [carries[n]!, ...low.reverse()] };
+}
+
 /** The bit numbers of a row, in the order the row is written (highest first). */
 export function bitNumbers(width: number): number[] {
   return Array.from({ length: width }, (_, i) => width - 1 - i);

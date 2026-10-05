@@ -2,6 +2,8 @@
 // from a brief of facts (brief E, docs/notes/module-2-boolean-logic.md) and checked against the
 // lesson's structure.
 
+import { LABELS as SIGNALS } from "./signals.labels";
+
 export const LABELS = {
   title: "How do you build a circuit from a rule?",
   objectives: [
@@ -27,6 +29,7 @@ export const LABELS = {
     c2: "NIGHT lamp",
   },
   captions: {
+    scene: "WARM and DOOR from the freezer room enter a circuit that sends ALARM to a lamp.",
     predictAlarm: "Predict ALARM: freezer cold, door shut.",
     exploreNot: "Press A and watch Y and the shaded row.",
     exploreAnd: "Press A and B and watch Y and the shaded row.",
@@ -49,5 +52,16 @@ export const LABELS = {
   },
   steps: {
     coldShut: "WARM 0, DOOR 0",
+  },
+  /** The drawing under the question. The room is the one the signals lesson's drawing names. */
+  scene: {
+    room: SIGNALS.path.fromRoom,
+    sensor: "Sensor",
+    door: "Door",
+    circuit: "?",
+    lamp: "Lamp",
+    title: "Freezer room alarm circuit",
+    summary:
+      'Inside the freezer room\'s box, a sensor sends WARM and a door switch sends DOOR. Both signals go to the box marked "?", which is a circuit to be built. The circuit outputs ALARM to light a lamp.',
   },
 } as const;

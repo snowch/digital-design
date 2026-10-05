@@ -41,6 +41,27 @@ describe("the course's lessons", () => {
           if (x.kind !== "challenge") expect(Object.keys(INTERACTIVES)).toContain(x.kind);
   });
 
+  // A scene draws the lesson's own world, so every signal it names is one the lesson's circuits use.
+  it("names in each scene only signals its lesson's challenges use", () => {
+    for (const l of LESSONS)
+      for (const s of l.sections)
+        for (const x of s.interactives) {
+          if (x.kind !== "scene") continue;
+          const names = l.challenges.flatMap((c) =>
+            [...c.interface.inputs, ...c.interface.outputs].map((p) => p.name),
+          );
+          const p = x.props as {
+            sources: { items: { signal?: string }[] }[];
+            outputs: { signal?: string }[];
+          };
+          const signals = [...p.sources.flatMap((g) => g.items), ...p.outputs].flatMap((i) =>
+            i.signal ? [i.signal] : [],
+          );
+          expect(signals, `${l.id}: ${x.id}`).not.toEqual([]);
+          for (const name of signals) expect(names, `${l.id}: ${x.id}`).toContain(name);
+        }
+  });
+
   // A figure's lead and after-text show from the start, before the learner has chosen; only the
   // explanation inside the figure waits for "Check my prediction".
   it("gives no word prediction's answer in the text a learner reads before choosing", () => {

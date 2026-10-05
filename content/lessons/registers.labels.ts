@@ -27,6 +27,7 @@ export const LABELS = {
     c3: "The four-bit register, as text",
   },
   captions: {
+    scene: "A thick line marked 4 represents four wires.",
     predictWord: "Predict Q after one edge and a later change of D, then check.",
     predictKeep: "Predict Q after three edges with EN at 0 from a fresh start, then check.",
     fourFlipFlops: "Change the D pins and press Clock CLK to watch all four Q bits change at once.",
@@ -53,5 +54,16 @@ export const LABELS = {
     p3Zero: "Q2 is 0",
     p3One: "Q2 is 1",
     p3X: "The simulator cannot know Q2 (X)",
+  },
+  /** The drawing under the question. */
+  scene: {
+    switches: "Switches",
+    save: "Save",
+    clock: "Clock",
+    circuit: "?",
+    display: "Display",
+    title: "Circuit storing four bits",
+    summary:
+      "Four switches connect via four wires into the circuit the question asks you to build, marked with a question mark. A Save button and a clock with a wire labelled CLK also connect to it. Four wires from the circuit reach a display showing 0000 when power comes on.",
   },
 } as const;

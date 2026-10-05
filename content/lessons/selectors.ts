@@ -12,6 +12,9 @@ import { PROSE } from "./selectors.prose";
 /** A drawn challenge's import panel: gates as `assign`, one bit at a time. */
 const DRAW_CONSTRUCTS = ["module", "ports", "logic", "assign", "op-bitwise"];
 
+/** How many wires carry a room's word to the office, and the display's word from the circuit. */
+const WORD_WIDTH = 16;
+
 /** The two rooms' 4-bit words in the word-selector figure: the last four bits of each room's word. */
 export const ROOM_WORDS = { A: "1000", B: "0110" } as const;
 
@@ -58,7 +61,35 @@ export const selectors: LessonInput = {
   objectives: [...LABELS.objectives],
   introduces: ["multiplexer", "bus"],
   sections: [
-    { kind: "question", title: LABELS.titles.question, prose: PROSE.question },
+    {
+      kind: "question",
+      title: LABELS.titles.question,
+      prose: PROSE.question,
+      interactives: [
+        {
+          id: "rooms-scene",
+          kind: "scene",
+          timeModel: "none",
+          caption: LABELS.captions.scene,
+          props: {
+            sources: [
+              {
+                room: LABELS.scene.roomA,
+                items: [{ kind: "sensor", label: LABELS.scene.sensor, width: WORD_WIDTH }],
+              },
+              {
+                room: LABELS.scene.roomB,
+                items: [{ kind: "sensor", label: LABELS.scene.sensor, width: WORD_WIDTH }],
+              },
+              { items: [{ kind: "switch", label: LABELS.scene.switch, signal: "S" }] },
+            ],
+            circuit: LABELS.scene.circuit,
+            outputs: [{ kind: "readout", label: LABELS.scene.display, width: WORD_WIDTH }],
+            labels: { title: LABELS.scene.title, summary: LABELS.scene.summary },
+          },
+        },
+      ],
+    },
     { kind: "motivation", title: LABELS.titles.motivation, prose: PROSE.motivation },
     {
       kind: "prediction",

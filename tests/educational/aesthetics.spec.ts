@@ -119,6 +119,23 @@ test.describe("the look of the page", () => {
     });
   });
 
+  // The drawings of a lesson's question and of a sum on paper: the selectors scene has every
+  // kind of mark a scene draws (rooms, word wires, a switch, a readout).
+  test("a scene and a sum on paper look as designed", async ({ page }) => {
+    for (const [lesson, id] of [
+      ["selectors", "ix-rooms-scene"],
+      ["adders", "ix-column-sum"],
+    ] as const) {
+      await openLesson(page, lesson);
+      const figure = page.locator(`#${id}`);
+      await figure.scrollIntoViewIfNeeded();
+      await expect(figure).toHaveScreenshot(`${id}.png`, {
+        maxDiffPixelRatio: 0.02,
+        animations: "disabled",
+      });
+    }
+  });
+
   // Module 2
   test("Module 2's pairs figure looks as designed", async ({ page }) => {
     await openLesson(page, "fewer-gates");

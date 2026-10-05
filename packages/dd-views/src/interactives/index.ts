@@ -17,6 +17,9 @@ import { TruthTableView } from "./TruthTableView";
 // Module 2
 import { CircuitCompare } from "./CircuitCompare";
 import { InputPairs } from "./InputPairs";
+// Scenes and sums on paper, for any lesson
+import { ColumnSum } from "./ColumnSum";
+import { SceneFigure } from "./SceneFigure";
 
 /** The interactives lessons may name by kind. */
 export const INTERACTIVES: Readonly<Record<string, ComponentType<InteractiveProps>>> = {
@@ -35,6 +38,9 @@ export const INTERACTIVES: Readonly<Record<string, ComponentType<InteractiveProp
   // Module 2
   "circuit-compare": CircuitCompare,
   "input-pairs": InputPairs,
+  // Scenes and sums on paper, for any lesson
+  scene: SceneFigure,
+  "column-sum": ColumnSum,
 };
 
 export {
@@ -52,6 +58,8 @@ export {
   TruthTableView,
   CircuitCompare,
   InputPairs,
+  ColumnSum,
+  SceneFigure,
 };
 export { compareAnswer } from "./CircuitCompare";
 export { experiment, type Draw } from "./SetupHold";

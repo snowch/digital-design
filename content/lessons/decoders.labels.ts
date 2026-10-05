@@ -27,14 +27,15 @@ export const LABELS = {
     c2: "The equality comparator, drawn",
   },
   captions: {
-    predictLamp: "Predict: when S1 is 1 and S0 is 1, is the lamp on or off? Then check",
-    decoderBlock: "Change S1 and S0. Watch which output turns to 1",
-    buildDecoder: "Draw the four-lamp circuit and run the tests",
-    decoderFaults: "Choose a fault and run the checks",
-    demuxBlock: "Change IN, S1 and S0. Watch which output IN reaches",
-    predictDoors: "Predict the room number when doors B and C are open. Then check",
-    comparatorBlock: "Change A or B. Watch EQ turn to 0",
-    buildComparator: "Draw the equal-words circuit and run the tests",
+    scene: "Two input switches connect to a circuit box that has four lamp outputs.",
+    predictLamp: "Predict: when S1 is 1 and S0 is 1, is the lamp on or off? Then check.",
+    decoderBlock: "Change S1 and S0. Watch which output turns to 1.",
+    buildDecoder: "Draw the four-lamp circuit and run the tests.",
+    decoderFaults: "Choose a fault and run the checks.",
+    demuxBlock: "Change IN, S1 and S0. Watch which output IN reaches.",
+    predictDoors: "Predict the room number when doors B and C are open. Then check.",
+    comparatorBlock: "Change A or B. Watch EQ turn to 0.",
+    buildComparator: "Draw the equal-words circuit and run the tests.",
   },
   options: {
     p1Off: "Y2 is 0, the lamp is off",
@@ -47,5 +48,14 @@ export const LABELS = {
     ns0High: "NS0 stuck at 1",
     and3ToOr: "AND gate and3 changed to OR",
     ns1Cut: "NOT gate notS1 becomes a wire",
+  },
+  /** The drawing under the question; the lamps from top to bottom, for Y0 to Y3. */
+  scene: {
+    switch: "Switch",
+    circuit: "?",
+    lamps: ["Room A", "Room B", "Room C", "Room D"],
+    title: "Two switches, four lamps",
+    summary:
+      "Two input switches, S1 and S0, connect to a circuit box marked with a question mark. The box stands for the circuit the question asks for, which nobody has built yet. Y0 drives room A's lamp, Y1 room B's, Y2 room C's and Y3 room D's.",
   },
 } as const;

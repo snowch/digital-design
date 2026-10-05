@@ -58,7 +58,33 @@ export const gates: LessonInput = {
   objectives: [...LABELS.objectives],
   introduces: ["gate", "truth table", "Boolean expression", "XOR"],
   sections: [
-    { kind: "question", title: LABELS.titles.question, prose: PROSE.question },
+    {
+      kind: "question",
+      title: LABELS.titles.question,
+      prose: PROSE.question,
+      interactives: [
+        {
+          id: "alarm-scene",
+          kind: "scene",
+          timeModel: "none",
+          caption: LABELS.captions.scene,
+          props: {
+            sources: [
+              {
+                room: LABELS.scene.room,
+                items: [
+                  { kind: "sensor", label: LABELS.scene.sensor, signal: "WARM" },
+                  { kind: "switch", label: LABELS.scene.door, signal: "DOOR" },
+                ],
+              },
+            ],
+            circuit: LABELS.scene.circuit,
+            outputs: [{ kind: "lamp", label: LABELS.scene.lamp, signal: "ALARM" }],
+            labels: { title: LABELS.scene.title, summary: LABELS.scene.summary },
+          },
+        },
+      ],
+    },
     { kind: "motivation", title: LABELS.titles.motivation, prose: PROSE.motivation },
     {
       kind: "prediction",

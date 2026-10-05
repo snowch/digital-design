@@ -2,12 +2,33 @@
 
 import { describe, expect, it } from "vitest";
 
-import { readingOf, parseBits } from "@dd/dd-model";
+import { columnSum, readingOf, parseBits } from "@dd/dd-model";
 
 import { adders } from "./adders";
-import { explorerOutputs, faultChecks, predictionAnswer, testCountOf } from "./module3-facts";
+import {
+  explorerOutputs,
+  faultChecks,
+  figureOf,
+  predictionAnswer,
+  testCountOf,
+} from "./module3-facts";
 
 describe("facts for the adders lesson", () => {
+  it("the sum on paper: 0011 + 0011 is 0110, 3 + 3 = 6, carrying into the second and third columns", () => {
+    const p = figureOf(adders, "column-sum");
+    const a = parseBits(p["a"] as string);
+    const b = parseBits(p["b"] as string);
+    expect(readingOf(a, "unsigned")).toBe("3");
+    expect(readingOf(b, "unsigned")).toBe("3");
+    const { carries, sum } = columnSum(a, b);
+    // The carry into each column, the rightmost first, then the carry out: none out.
+    expect(carries).toEqual([0, 1, 1, 0, 0]);
+    expect(sum.slice(1)).toEqual(parseBits("0110"));
+    expect(readingOf(sum.slice(1), "unsigned")).toBe("6");
+    // The signed reading fits too, so the motivation runs nowhere near the lesson's overflow.
+    expect(readingOf(sum.slice(1), "signed")).toBe("6");
+  });
+
   it("the sum prediction: 1 + 1 gives SUM 0 (and CARRY 1)", () => {
     expect(predictionAnswer(adders, "predict-sum")).toBe("0");
   });

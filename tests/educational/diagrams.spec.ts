@@ -16,7 +16,7 @@ async function textCollisions(page: Page): Promise<Collision[]> {
   return page.evaluate(() => {
     const out: { figure: string; problem: string }[] = [];
     const svgs = document.querySelectorAll<SVGSVGElement>(
-      "svg.timing-diagram, svg.timing-lanes, svg.circuit, svg.signal-plot, svg.signal-path",
+      "svg.timing-diagram, svg.timing-lanes, svg.circuit, svg.signal-plot, svg.signal-path, svg.scene, svg.column-sum",
     );
     for (const svg of svgs) {
       const figure = svg.closest("figure")?.id ?? svg.className.baseVal;
@@ -158,10 +158,20 @@ test.describe("the diagrams", () => {
     }
   });
 
-  test("every lesson's diagrams are clear as first drawn", async ({ page }) => {
+  // A scene or a sum on paper is read whole, so on a phone it must fit its card: its labels are
+  // kept short for that, and this holds them to it.
+  test("every lesson's diagrams are clear as first drawn, and its scenes fit without scrolling", async ({
+    page,
+  }) => {
     for (const lesson of LESSONS) {
       await openLesson(page, lesson.id);
       expect(await textCollisions(page), lesson.id).toEqual([]);
+      const scrolling = await page.evaluate(() =>
+        [...document.querySelectorAll<HTMLElement>(".scene-wrap, .column-sum-figure")]
+          .filter((el) => el.scrollWidth > el.clientWidth + 1)
+          .map((el) => el.closest("figure")?.id ?? el.className),
+      );
+      expect(scrolling, lesson.id).toEqual([]);
     }
   });
 });

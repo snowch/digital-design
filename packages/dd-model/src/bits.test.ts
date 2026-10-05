@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
   bitsOf,
   bitsText,
+  columnSum,
   digitPlaceValue,
   hexOf,
   parseBits,
@@ -23,6 +24,19 @@ describe("bits", () => {
     expect(hexOf(w)).toBe("8003");
     expect(termsOf(w, "signed")).toEqual([-32768, 2, 1]);
     expect(hexOf(parseBits("101"))).toBe("5");
+  });
+
+  it("adds two words column by column, with the carry into each column and the carry out", () => {
+    const six = parseBits("0110");
+    const seven = parseBits("0111");
+    const r = columnSum(six, seven);
+    expect(r.carries).toEqual([0, 0, 1, 1, 0]);
+    expect(r.sum).toEqual([0, 1, 1, 0, 1]);
+    expect(unsignedOf([...r.sum])).toBe(unsignedOf(six) + unsignedOf(seven));
+    const out = columnSum(parseBits("1111"), parseBits("0001"));
+    expect(out.carries).toEqual([0, 1, 1, 1, 1]);
+    expect(out.sum).toEqual([1, 0, 0, 0, 0]);
+    expect(() => columnSum(parseBits("01"), parseBits("011"))).toThrow(/same width/);
   });
 
   it("gives each bit its worth inside its hexadecimal digit, and the digits agree with hexOf", () => {

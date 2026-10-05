@@ -1456,3 +1456,121 @@ button.bit {
   margin-top: var(--space-4);
   font-weight: 650;
 }
+
+/* A lesson's scene: sources in their rooms, wires into the circuit to build, and what it drives.
+   The rooms are drawn as the signals lesson draws its rooms, and a wire carrying a word is drawn
+   wide in the colour circuits give one, so the course draws one world one way. */
+.scene-wrap {
+  min-width: 0;
+  overflow-x: auto;
+  background: var(--canvas);
+  border-radius: var(--radius);
+  margin: var(--space-3) 0;
+}
+/* A scene narrower than its box is centred, as a circuit drawing is. */
+.scene {
+  display: block;
+  margin: 0 auto;
+}
+.scene text {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  fill: var(--fg);
+}
+.scene .room {
+  fill: none;
+  stroke: var(--border-strong);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+}
+.scene .room-name,
+.scene .bus-count {
+  fill: var(--fg-muted);
+}
+.scene .room-name {
+  font-weight: 600;
+}
+.scene .circuit {
+  fill: var(--bg-raised);
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+}
+.scene .circuit-name {
+  font-weight: 700;
+  font-size: 15px;
+  fill: var(--accent);
+}
+.scene .wire,
+.scene .slash {
+  stroke: var(--wire);
+}
+.scene .wire {
+  stroke-width: 2;
+}
+.scene .bus {
+  stroke: var(--wire-word);
+  stroke-width: 5;
+}
+.scene .slash {
+  stroke-width: 1.5;
+}
+.scene .arrow {
+  fill: var(--wire);
+}
+.scene .symbol,
+.scene .lamp circle,
+.scene .lamp line,
+.scene .readout rect {
+  fill: var(--gate-fill);
+  stroke: var(--gate-stroke);
+  stroke-width: 2;
+}
+.scene .symbol.clock,
+.scene .symbol.switch line {
+  fill: none;
+}
+.scene .symbol .button-top {
+  fill: var(--gate-stroke);
+}
+.scene .readout-value {
+  font-weight: 600;
+}
+
+/* A sum on paper: the digits in columns, the carries small above, each with its arrow. */
+.column-sum-figure svg {
+  display: block;
+  margin: 0 auto;
+  background: var(--canvas);
+  border-radius: var(--radius);
+}
+.column-sum text {
+  font-family: var(--font-mono);
+  fill: var(--fg);
+}
+.column-sum .digit {
+  font-size: 18px;
+}
+.column-sum .sum-digit {
+  font-weight: 700;
+}
+.column-sum .row-name,
+.column-sum .carry-digit {
+  font-size: 12px;
+  fill: var(--accent);
+}
+.column-sum .row-name {
+  fill: var(--fg-muted);
+}
+.column-sum .carry-arrow {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+.column-sum .carry-head {
+  fill: var(--accent);
+}
+.column-sum .rule {
+  stroke: var(--fg);
+  stroke-width: 1.5;
+}

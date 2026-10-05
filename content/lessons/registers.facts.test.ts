@@ -8,7 +8,8 @@ import { applyFaults, libraryCircuit } from "@dd/dd-model";
 import { outputsPerStep, runScript, toFault } from "@dd/dd-views";
 import { Simulator, bit0, bit1, formatWord, runSuite, type SequenceStep } from "@dd/sim";
 
-import { registers } from "./registers";
+import { POWER_ON_VALUE, registers } from "./registers";
+import { PROSE } from "./registers.prose";
 
 type Run = Parameters<typeof runScript>[1];
 
@@ -46,6 +47,12 @@ const checks = (faultIndex: number) => {
 };
 
 describe("facts for the registers lesson", () => {
+  it("the scene's display shows the value the question asks for at power-on", () => {
+    expect(PROSE.question).toContain(`\`${POWER_ON_VALUE}\``);
+    const outputs = figure("save-scene")["outputs"] as { value?: string }[];
+    expect(outputs.map((o) => o.value)).toEqual([POWER_ON_VALUE]);
+  });
+
   it("a word is written bit 3 first: D = 0001 puts a 1 in flip-flop ff0 alone", () => {
     const sim = runScript(libraryCircuit("register-4-plain"), [
       { set: { D: "0001", CLK: 0 } },

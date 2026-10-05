@@ -28,16 +28,17 @@ export const LABELS = {
     c3: "Overflow lamp from top bits, drawn",
   },
   captions: {
-    predictSum: "Predict the sum bit when both bits are 1, then check",
-    halfAdder: "Press A and B and watch SUM and CARRY",
-    columnsAlone: "Add two 2-bit words one column at a time and find what is lost",
-    buildFullAdder: "Draw the full adder and run the tests",
-    fullAdderFaults: "Choose a fault and run the checks",
-    adder4: "Change the two 4-bit words and read the sum both ways",
-    predictSigned: "Predict what 1000 reads as signed, then check",
-    correction: "Add -6 to room B's word and read the sum both ways",
-    buildRipple: "Draw the 4-bit adder and run the tests",
-    buildOverflow: "Draw the overflow lamp and run the tests",
+    columnSum: "Adding 3 + 3 in binary.",
+    predictSum: "Predict the sum bit when both bits are 1, then check.",
+    halfAdder: "Press A and B and watch SUM and CARRY.",
+    columnsAlone: "Add two 2-bit words one column at a time and find what is lost.",
+    buildFullAdder: "Draw the full adder and run the tests.",
+    fullAdderFaults: "Choose a fault and run the checks.",
+    adder4: "Change the two 4-bit words and read the sum both ways.",
+    predictSigned: "Predict what 1000 reads as signed, then check.",
+    correction: "Add -6 to room B's word and read the sum both ways.",
+    buildRipple: "Draw the 4-bit adder and run the tests.",
+    buildOverflow: "Draw the overflow lamp and run the tests.",
   },
   options: {
     p1Zero: "SUM is 0",
@@ -50,5 +51,12 @@ export const LABELS = {
     orToXor: "OR to XOR on carry",
     cinLow: "Carry in stuck at 0",
     sumToOr: "XOR to OR in ha2's sum",
+  },
+  /** The sum on paper in the motivation. */
+  columnSum: {
+    carries: "Carries",
+    title: "Binary addition with carries",
+    summary:
+      "The figure shows adding 0011 and 0011 (which is 3 + 3), with a sum of 0110 (which is 6). The rightmost column produces a carry into the second column, and the second column produces a carry into the third column. The third and leftmost columns produce no carries.",
   },
 } as const;
