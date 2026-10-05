@@ -10,3 +10,6 @@ export * from "./graders";
 export * from "./measure";
 export * from "./tables";
 export * from "./logic";
+// Module 3: combinational blocks and the chain a slice is tested in.
+export * from "./combinational";
+export * from "./chain";

@@ -49,6 +49,11 @@ export interface ViewStrings {
     readonly selectedPart: string;
     readonly selectedWire: string;
     readonly looseEnds: string;
+    // Module 3: wires that carry a word.
+    /** Refusing a wire whose ends differ in width: {a} and {b} are ports, {wa} and {wb} bits. */
+    readonly widthMismatch: string;
+    /** In the list of loose ends: a stored wire whose ends differ in width. */
+    readonly widthWarning: string;
   };
   readonly hdl: {
     readonly ok: string;
@@ -249,6 +254,13 @@ export interface ViewStrings {
     /** Joins a list of kinds in `only`: "NAND" or "NAND and NOR". */
     readonly and: string;
   };
+  /** Module 3: the rows of bits that set a word input, under a drawing. */
+  readonly words: {
+    /** Above a word input's bits: {name} is the input's name. */
+    readonly heading: string;
+    /** The accessible name of the row of bits. */
+    readonly row: string;
+  };
   readonly answers: {
     readonly terms: Readonly<Record<string, string>>;
     readonly unanswered: string;
@@ -301,6 +313,9 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     selectedPart: "Selected {id}.",
     selectedWire: "Wire selected.",
     looseEnds: "Unconnected ({n})",
+    widthMismatch: "{a} has {wa} bits but {b} has {wb}. They cannot be wired together.",
+    widthWarning:
+      "The wire from {a} to {b} is not connected: {a} carries {wa} bits and {b} takes {wb}.",
   },
   hdl: {
     ok: "OK. The text describes a circuit.",
@@ -489,6 +504,10 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     only: "Only {kinds} gates",
     onlyFound: "This circuit contains {list}, but only {kinds} gates are allowed.",
     and: " and ",
+  },
+  words: {
+    heading: "Input {name}",
+    row: "The bits of input {name}. Press a bit to change it.",
   },
   answers: {
     terms: {

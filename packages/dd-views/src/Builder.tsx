@@ -14,8 +14,15 @@ import {
 } from "react";
 
 import { autoLayout } from "./layout";
-import { drawingWarnings, specOf, type Drawing, type Part, type PortRef } from "./drawing";
-import { CELL, sceneOf, type PartBox } from "./scene";
+import {
+  drawingWarnings,
+  refWidth,
+  specOf,
+  type Drawing,
+  type Part,
+  type PortRef,
+} from "./drawing";
+import { CELL, partBox, sceneOf, type PartBox } from "./scene";
 import { GateSymbol, isShaped } from "./symbols";
 import { format, useViewStrings } from "./strings";
 import { nameRepeatsKind, partSpec } from "./parts";
@@ -46,11 +53,24 @@ function nextId(drawing: Drawing, kind: string): string {
   for (let n = 1; ; n++) if (!taken.has(`${kind}${n}`)) return `${kind}${n}`;
 }
 
-function freeSpot(drawing: Drawing): { x: number; y: number } {
-  const taken = new Set(drawing.parts.map((p) => `${p.x},${p.y}`));
+/**
+ * Where a new part of `kind` goes: the first spot, column by column, where its box, with room for
+ * the label above it and the name below, overlaps no part already placed. A tall block (a 4-way
+ * selector has six inputs) needs more than one row's gap, which a grid of fixed steps ignored.
+ */
+function freeSpot(drawing: Drawing, kind: string): { x: number; y: number } {
+  const margin = (b: PartBox) => ({
+    x0: b.x - 8,
+    y0: b.y - 20,
+    x1: b.x + b.w + 8,
+    y1: b.y + b.h + 18,
+  });
+  const taken = drawing.parts.map((p) => margin(partBox(p)));
   for (let x = 5; ; x += 5) {
-    for (let y = 1; y <= 13; y += 3) {
-      if (!taken.has(`${x},${y}`)) return { x, y };
+    for (let y = 1; y <= 13; y++) {
+      const m = margin(partBox({ id: "new", kind, x, y }));
+      const clash = taken.some((t) => m.x0 < t.x1 && t.x0 < m.x1 && m.y0 < t.y1 && t.y0 < m.y1);
+      if (!clash) return { x, y };
     }
   }
 }
@@ -78,7 +98,7 @@ export function Builder({ drawing, onChange, palette, highlight = [], title }: B
   };
 
   const addPart = (kind: string) => {
-    const spot = freeSpot(drawing);
+    const spot = freeSpot(drawing, kind);
     const part: Part = { id: nextId(drawing, kind), kind, x: spot.x, y: spot.y };
     onChange({ ...drawing, parts: [...drawing.parts, part] });
     setSelected({ kind: "part", id: part.id });
@@ -149,6 +169,14 @@ export function Builder({ drawing, onChange, palette, highlight = [], title }: B
     }
     const from = source ? ref : pending;
     const to = source ? pending : ref;
+    const wa = refWidth(drawing, from);
+    const wb = refWidth(drawing, to);
+    if (wa !== wb) {
+      setMessage(
+        format(strings.builder.widthMismatch, { a: portName(from), b: portName(to), wa, wb }),
+      );
+      return;
+    }
     const wires = drawing.wires.filter((w) => !(w.to.part === to.part && w.to.port === to.port));
     onChange({ ...drawing, wires: [...wires, { from, to }] });
     setPending(undefined);
@@ -312,7 +340,7 @@ export function Builder({ drawing, onChange, palette, highlight = [], title }: B
               return (
                 <g
                   key={i}
-                  className={`wire wire-none${isSelected ? " wire-selected" : ""}`}
+                  className={`wire wire-none${refWidth(drawing, w.from) > 1 ? " wire-word" : ""}${isSelected ? " wire-selected" : ""}`}
                   role="button"
                   tabIndex={0}
                   aria-label={`${format(strings.builder.wireLabel, { from: portName(w.from), to: portName(w.to) })}. ${strings.builder.wireHelp}`}

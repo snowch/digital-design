@@ -14,14 +14,17 @@ const book = createBook(LESSONS, INTERACTIVES);
 
 describe("the lesson list", () => {
   it("names the modules missing between its first and last lesson, computed from the lessons", () => {
-    const without4 = { ...book, lessons: book.lessons.filter((l) => l.module !== 4) };
-    const modules = [...new Set(without4.lessons.map((l) => l.module))].sort((a, b) => a - b);
+    // Only the course's first and last modules, so the gap is there whichever modules exist.
+    const all = book.lessons.map((l) => l.module);
+    const ends = [Math.min(...all), Math.max(...all)];
+    const endsOnly = { ...book, lessons: book.lessons.filter((l) => ends.includes(l.module)) };
+    const modules = [...new Set(endsOnly.lessons.map((l) => l.module))].sort((a, b) => a - b);
     const first = modules[0]!;
     const last = modules[modules.length - 1]!;
     const missing: number[] = [];
     for (let m = first; m <= last; m++) if (!modules.includes(m)) missing.push(m);
     expect(missing.length).toBeGreaterThan(1);
-    render(<LessonList book={without4} storage={memoryStorage()} />);
+    render(<LessonList book={endsOnly} storage={memoryStorage()} />);
     expect(screen.getByText(STRINGS.toWriteMany(missing))).toBeInTheDocument();
     expect(screen.getByText(STRINGS.toWriteMany(missing))).toHaveTextContent(joinNumbers(missing));
   });

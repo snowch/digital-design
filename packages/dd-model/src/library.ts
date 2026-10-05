@@ -11,6 +11,7 @@ import { dLatch, gatedSrLatch, srLatch } from "./latches";
 import { register } from "./register";
 // Module 2's circuits live in their own file and join the library below.
 import { LOGIC_LIBRARY } from "./logic";
+import { combinationalLibrary } from "./library-combinational";
 
 /**
  * A loop of `n` inverters with a `kick` input ORed into it. While kick is 1 the loop is forced;
@@ -415,6 +416,8 @@ export const LIBRARY: Readonly<Record<string, () => Circuit>> = {
   "glitch-and-not": () => glitchCircuit(),
   // Module 2
   ...LOGIC_LIBRARY,
+  // Module 3, combinational design: selectors, decoders, adders and the ALU.
+  ...combinationalLibrary(placed),
 };
 
 export function libraryCircuit(id: string): Circuit {

@@ -17,6 +17,21 @@ function bubble(x: number, y: number): ReactElement {
   return <circle cx={x} cy={y} r={4} {...stroke} />;
 }
 
+/**
+ * A short lead from the tip of a shape to the output pin at x=60, so the wire that starts at the
+ * pin visibly leaves the gate.
+ */
+function lead(from: number, y = 20): ReactElement {
+  return (
+    <path
+      d={`M ${from} ${y} H ${PART_W}`}
+      fill="none"
+      stroke="var(--gate-stroke)"
+      strokeWidth={2}
+    />
+  );
+}
+
 /** The symbol for a gate kind. The output pin sits at (60, 20); inputs at x=0. */
 export function GateSymbol({ kind }: { kind: string }): ReactElement {
   switch (kind) {
@@ -26,6 +41,7 @@ export function GateSymbol({ kind }: { kind: string }): ReactElement {
         <g>
           <path d="M 6 4 L 46 20 L 6 36 Z" {...stroke} />
           {kind === "not" && bubble(50, 20)}
+          {lead(kind === "not" ? 54 : 46)}
         </g>
       );
     case "and":
@@ -34,6 +50,7 @@ export function GateSymbol({ kind }: { kind: string }): ReactElement {
         <g>
           <path d="M 6 4 L 28 4 A 16 16 0 0 1 28 36 L 6 36 Z" {...stroke} />
           {kind === "nand" && bubble(50, 20)}
+          {lead(kind === "nand" ? 54 : 44)}
         </g>
       );
     case "or":
@@ -42,6 +59,7 @@ export function GateSymbol({ kind }: { kind: string }): ReactElement {
         <g>
           <path d="M 4 4 Q 16 20 4 36 Q 26 36 46 20 Q 26 4 4 4 Z" {...stroke} />
           {kind === "nor" && bubble(50, 20)}
+          {lead(kind === "nor" ? 54 : 46)}
         </g>
       );
     case "xor":
@@ -51,10 +69,16 @@ export function GateSymbol({ kind }: { kind: string }): ReactElement {
           <path d="M 0 4 Q 12 20 0 36" fill="none" stroke="var(--gate-stroke)" strokeWidth={2} />
           <path d="M 6 4 Q 18 20 6 36 Q 28 36 46 20 Q 28 4 6 4 Z" {...stroke} />
           {kind === "xnor" && bubble(50, 20)}
+          {lead(kind === "xnor" ? 54 : 46)}
         </g>
       );
     case "mux2":
-      return <path d="M 6 2 L 46 12 L 46 36 L 6 46 Z" {...stroke} />;
+      return (
+        <g>
+          <path d="M 6 2 L 46 12 L 46 36 L 6 46 Z" {...stroke} />
+          {lead(46, 24)}
+        </g>
+      );
     default:
       return <rect x={2} y={2} width={PART_W - 4} height={PART_H - 4} rx={4} {...stroke} />;
   }

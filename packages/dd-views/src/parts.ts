@@ -5,7 +5,7 @@
 // ports follow the simulator's naming (a, b, ... in; y out); a composite's ports are the ones
 // its library circuit exposes.
 
-import { LIBRARY, libraryCircuit } from "@dd/dd-model";
+import { BLOCKS, LIBRARY, libraryCircuit } from "@dd/dd-model";
 import { PRIMITIVES } from "@dd/sim";
 
 export interface PartSpec {
@@ -52,6 +52,29 @@ const COMPOSITE_LABELS: Readonly<Record<string, string>> = {
   "keep-clear-bit": "One bit with a load enable and a reset",
   "gated-clock-bit": "Flip-flop clocked through an AND gate",
   register: "register",
+  // Module 3: the combinational blocks a drawing may place, and the circuits named in the trail
+  // above their drawings. Drafted by the prose process (docs/notes/module-3-combinational.md).
+  "selector-2": "2-way selector",
+  "selector-4": "4-way selector",
+  "decoder-2": "decoder",
+  "demux-4": "demultiplexer",
+  "encoder-4": "encoder",
+  comparator: "comparator",
+  "half-adder": "half adder",
+  "full-adder": "full adder",
+  adder: "adder",
+  alu: "ALU",
+  addsub: "add/sub",
+  "alu-slice": "ALU-slice",
+  "addsub-slice": "add/sub",
+  slice: "slice",
+  "split-4": "split",
+  "join-4": "join",
+  "selector-word": "word selector",
+  "demux-block": "demultiplexer",
+  "columns-alone": "half adder columns",
+  "full-adder-parts": "full adder internals",
+  "addsub-4": "4-bit add/subtract",
 };
 
 const COMPOSITE_DESCRIPTIONS: Readonly<Record<string, string>> = {
@@ -65,6 +88,13 @@ const COMPOSITE_DESCRIPTIONS: Readonly<Record<string, string>> = {
   "dff-reset-enable":
     "A D flip-flop with a reset and an enable. At an edge where EN is 0, Q holds.",
   "register-4": "Four D flip-flops sharing one clock, holding a 4-bit value.",
+  // Module 3. Drafted by the prose process.
+  "selector-2": "Y is A while S is 0 and B while S is 1.",
+  "selector-4": "Y is A, B, C or D: the one whose number S1 S0 spells (00 is A, 11 is D).",
+  "half-adder": "Adds A and B: SUM is the total's low bit, CARRY its high bit.",
+  "full-adder": "Adds A, B and CIN: SUM is the total's low bit, COUT its high bit.",
+  "split-4": "Splits the 4-bit word W into its bits b3 (top) to b0.",
+  "join-4": "Joins the bits b3 (top) to b0 into the 4-bit word W.",
 };
 
 const GATE_INPUTS: Readonly<Record<string, readonly string[]>> = {
@@ -108,6 +138,17 @@ export function partSpec(id: string, fanIn = 2): PartSpec | undefined {
       outputs: ["y"],
       role: "gate",
       describe: primitive.describe,
+    };
+  }
+  const block = BLOCKS[id];
+  if (block) {
+    return {
+      id,
+      label: COMPOSITE_LABELS[id] ?? id,
+      inputs: block.inputs,
+      outputs: block.outputs,
+      role: "composite",
+      describe: COMPOSITE_DESCRIPTIONS[id] ?? "",
     };
   }
   if (LIBRARY[id]) {

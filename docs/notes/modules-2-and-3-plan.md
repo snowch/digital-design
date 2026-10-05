@@ -82,3 +82,37 @@ way of adding two words serve both readings?" Module 3's adders and overflow ans
 serves both readings, and the readings differ only in when the result does not fit. Module 3
 should pick the question up where its learner can see the answer, not as a callback for its own
 sake.
+
+## The merge (written by the managing session after both builds finished)
+
+Module 2 finished at 16:36 UTC and Module 3 at 16:46; each had merged `main` (with the page
+before the first lesson) into its branch. Module 2 was checked (the full check, 291 unit and 184
+browser tests), its three lessons read start to finish, and merged first, as `main` f157765.
+Module 3 was then merged onto it. Five files conflicted, every one two blocks added in the same
+place (the lesson list, the model's exports, the circuit library, the book's imports, the views'
+strings); each was resolved by keeping both. Both modules kept to this plan: each introduced only
+its own terms, neither changed Module 4 or 5, and Module 3's one edit to Module 1 is the
+exemption for "carry" the plan foresaw.
+
+Read against Module 2, Module 3's list of where it leans on Module 2 held, with three fixes:
+
+- **XNOR.** The adders lesson's overflow lamp offers an XNOR part and its hints say "Recall: an
+  XNOR gate...", but Module 2 never introduces XNOR. The lead above that challenge now says what
+  an XNOR gate is (a fact brief to the drafting subagent), and the adders lesson lists XNOR in
+  `introduces`.
+- **"Lesson 1", "Lesson 2", "Lesson 3".** Module 3 named its own lessons by number; a learner
+  arriving from Module 2 has met other first lessons. Six sentences now say "the last lesson",
+  as Module 2 does (redrafted by the drafting subagent; every other word unchanged).
+- **A prediction's answer under it.** The adders lesson asks what `1000` reads as signed; the lead
+  of the figure just below said "Read signed, the top bit is worth -8", visible before the
+  learner answers. The sentence was cut: the prediction's explanation already says it.
+
+Also changed: the front page's test for missing modules assumed Modules 2 and 3 were missing; it
+now builds its own gap from the course's first and last modules.
+
+Settled by Module 2, so no longer open: Module 3's question whether the "As text" panels should
+be hidden before Module 4 (Module 2 teaches the course's text in its first lesson), and its
+conditional notes on depth (Module 2 introduces it). Still for the author: Module 2's three
+questions (the explorer's count before any press; NOR left unrationed; drawings that scroll
+sideways on a phone) and Module 3's suggestion of a cut-wire fault in the decoders lab, now that
+Module 2 teaches X.

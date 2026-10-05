@@ -12,7 +12,7 @@ import {
   type PortRef,
   type Wire,
 } from "./drawing";
-import { PART_W, partHeight } from "./symbols";
+import { PART_W, isShaped, partHeight } from "./symbols";
 
 export const CELL = 20;
 export const PIN_W = 44;
@@ -49,12 +49,25 @@ export interface Scene {
   readonly height: number;
 }
 
+/**
+ * A box part is wide enough for its longest input name and longest output name side by side, at
+ * the drawing's 12-pixel mono face (about 7.2 pixels a character), in whole grid cells. Every
+ * block before Module 3 fits the standard width, so their drawings do not move; a full adder's
+ * CIN beside COUT does not. A gate keeps its symbol's width.
+ */
+function partWidth(kind: string, inputs: readonly string[], outputs: readonly string[]): number {
+  if (isShaped(kind)) return PART_W;
+  const longest = (names: readonly string[]) => Math.max(0, ...names.map((n) => n.length));
+  const needed = (longest(inputs) + longest(outputs)) * 7.2 + 12 + 4;
+  return needed <= PART_W ? PART_W : Math.ceil(needed / CELL) * CELL;
+}
+
 export function partBox(part: Part): PartBox {
   const spec = specOf(part);
   const inputs = spec?.inputs ?? [];
   const outputs = spec?.outputs ?? [];
   const isPin = part.kind === "input" || part.kind === "output";
-  const w = isPin ? PIN_W : PART_W;
+  const w = isPin ? PIN_W : partWidth(part.kind, inputs, outputs);
   const h = isPin ? PIN_H : partHeight(part.kind, Math.max(inputs.length, outputs.length));
   const x = part.x * CELL;
   const y = part.y * CELL;

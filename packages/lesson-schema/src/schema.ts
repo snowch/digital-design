@@ -43,6 +43,21 @@ export const CombinationalVector = z.object({
   inputs: z.record(z.string(), VectorValue),
   expect: z.record(z.string(), VectorValue),
   internal: z.record(z.string(), VectorValue).optional(),
+  /** Module 3: for a suite with a `chain`, how many copies of the slice this vector tests. */
+  slices: z.number().int().min(1).max(64).optional(),
+});
+
+/**
+ * Module 3: a slice tested at widths its tests choose. The grader makes as many copies of the
+ * learner's one-bit circuit as a vector's `slices` says and wires them into a circuit for words:
+ * copy k takes bit k of each `bitwise` input and gives bit k of each `outputs` output, `shared`
+ * inputs reach every copy, and each copy's carry out drives the next copy's carry in.
+ */
+export const ChainSpec = z.object({
+  bitwise: z.array(z.string()).min(1),
+  outputs: z.array(z.string()).min(1),
+  shared: z.array(z.string()).default([]),
+  carry: z.object({ in: z.string(), out: z.string() }).optional(),
 });
 
 export const SequenceStep = z.object({
@@ -65,7 +80,11 @@ export const AnswerCase = z.object({
 });
 
 export const TestSuite = z.discriminatedUnion("kind", [
-  z.object({ kind: z.literal("combinational"), vectors: z.array(CombinationalVector).min(1) }),
+  z.object({
+    kind: z.literal("combinational"),
+    vectors: z.array(CombinationalVector).min(1),
+    chain: ChainSpec.optional(),
+  }),
   z.object({ kind: z.literal("sequence"), steps: z.array(SequenceStep).min(1) }),
   /** The learner's settings or answers, checked case by case by a grader the book names. */
   z.object({

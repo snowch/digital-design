@@ -6,6 +6,11 @@ import { parseLesson, type Lesson, type LessonInput } from "@dd/lesson-schema";
 
 import { registers } from "./registers";
 import { remember } from "./remember";
+// Module 3, combinational design.
+import { selectors } from "./selectors";
+import { decoders } from "./decoders";
+import { adders } from "./adders";
+import { alu } from "./alu";
 import { signals } from "./signals";
 // Module 2
 import { fewerGates } from "./fewer-gates";
@@ -14,12 +19,17 @@ import { nand } from "./nand";
 
 const INPUTS: readonly LessonInput[] = [
   signals,
-  remember,
-  registers,
   // Module 2
   gates,
   nand,
   fewerGates,
+  // Module 3, combinational design.
+  selectors,
+  decoders,
+  adders,
+  alu,
+  remember,
+  registers,
 ];
 
 export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(

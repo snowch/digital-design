@@ -3,10 +3,19 @@
 // and a netlist (one the learner saved, or one elaborated from text) becomes a drawing again,
 // laid out automatically where it carries no positions.
 
-import { dFlipFlop, dLatch, gatedSrLatch, srLatch, type LatchOptions } from "@dd/dd-model";
+import {
+  BLOCKS,
+  blockPortWidth,
+  dFlipFlop,
+  dLatch,
+  gatedSrLatch,
+  srLatch,
+  type LatchOptions,
+} from "@dd/dd-model";
 import { CircuitBuilder, type Circuit, type NetId } from "@dd/sim";
 
 import { autoLayout } from "./layout";
+import { DEFAULT_VIEW_STRINGS, format } from "./strings";
 import { labelFor, partSpec, type PartSpec } from "./parts";
 
 /** The two-button memory as a block: an SR latch whose only output is the light. */
@@ -34,7 +43,14 @@ export interface Part {
    * A block's ports, when the circuit says what they are: a register's depend on whether it was
    * built with a reset and an enable, so its kind alone cannot say.
    */
-  readonly ports?: { readonly inputs: readonly string[]; readonly outputs: readonly string[] };
+  readonly ports?: {
+    readonly inputs: readonly string[];
+    readonly outputs: readonly string[];
+    /** Ports wider than one bit, by name. */
+    readonly widths?: Readonly<Record<string, number>>;
+  };
+  /** How many bits a pin carries, or a gate works on, when more than one. */
+  readonly width?: number;
 }
 
 export interface PortRef {
@@ -65,6 +81,22 @@ export interface Interface {
 
 export const EMPTY_DRAWING: Drawing = { parts: [], wires: [] };
 
+/**
+ * How many bits a part's port carries: a pin's or a gate's own width, a block's port as its kind
+ * or the circuit it was read from says, and one bit otherwise.
+ */
+export function portWidth(part: Part, port: string): number {
+  if (part.ports?.widths?.[port] !== undefined) return part.ports.widths[port];
+  if (BLOCKS[part.kind]) return blockPortWidth(part.kind, port);
+  return part.width ?? 1;
+}
+
+/** The width of the port a wire end names, in a drawing. */
+export function refWidth(drawing: Drawing, ref: PortRef): number {
+  const part = drawing.parts.find((p) => p.id === ref.part);
+  return part ? portWidth(part, ref.port) : 1;
+}
+
 export function specOf(part: Part): PartSpec | undefined {
   const spec = partSpec(part.kind, part.fanIn ?? 2);
   if (!part.ports) return spec;
@@ -86,11 +118,26 @@ export function pinId(direction: "input" | "output", name: string): string {
 /** A drawing with the interface's pins placed and nothing else, to start from. */
 export function emptyDrawing(iface: Interface): Drawing {
   const parts: Part[] = [];
+  const wide = (p: PortSpecIn) => (p.width !== undefined && p.width > 1 ? { width: p.width } : {});
   iface.inputs.forEach((p, i) => {
-    parts.push({ id: pinId("input", p.name), kind: "input", name: p.name, x: 0, y: 1 + i * 3 });
+    parts.push({
+      id: pinId("input", p.name),
+      kind: "input",
+      name: p.name,
+      x: 0,
+      y: 1 + i * 3,
+      ...wide(p),
+    });
   });
   iface.outputs.forEach((p, i) => {
-    parts.push({ id: pinId("output", p.name), kind: "output", name: p.name, x: 16, y: 1 + i * 3 });
+    parts.push({
+      id: pinId("output", p.name),
+      kind: "output",
+      name: p.name,
+      x: 16,
+      y: 1 + i * 3,
+      ...wide(p),
+    });
   });
   return { parts, wires: [] };
 }
@@ -105,6 +152,19 @@ export function withInterface(drawing: Drawing, iface: Interface): Drawing {
 /** Problems a drawing has that the compiler can still work around, as sentences. */
 export function drawingWarnings(drawing: Drawing): string[] {
   const out: string[] = [];
+  for (const w of drawing.wires) {
+    const from = refWidth(drawing, w.from);
+    const to = refWidth(drawing, w.to);
+    if (from !== to)
+      out.push(
+        format(DEFAULT_VIEW_STRINGS.builder.widthWarning, {
+          a: `${w.from.part} ${w.from.port}`,
+          b: `${w.to.part} ${w.to.port}`,
+          wa: from,
+          wb: to,
+        }),
+      );
+  }
   const driven = new Set(drawing.wires.map((w) => `${w.to.part}.${w.to.port}`));
   for (const part of drawing.parts) {
     const spec = specOf(part);
@@ -161,21 +221,27 @@ export function compileDrawing(drawing: Drawing, name = "drawing"): Compiled {
     }
     if (part.kind === "input") {
       const pinName = part.name ?? part.id;
-      outputNet.set(`${part.id}.y`, b.input(pinName, 1, { pin: { x: part.x, y: part.y } }));
+      outputNet.set(
+        `${part.id}.y`,
+        b.input(pinName, part.width ?? 1, { pin: { x: part.x, y: part.y } }),
+      );
     } else {
       for (const port of spec.outputs) {
-        outputNet.set(`${part.id}.${port}`, b.net(`${part.id}.${port}`));
+        outputNet.set(`${part.id}.${port}`, b.net(`${part.id}.${port}`, portWidth(part, port)));
       }
     }
   }
   if (errors.length) return { errors, warnings };
 
+  // A wire whose two ends differ in width is no connection: the input reads X, as an
+  // unconnected one does, and the warnings say why.
   const inputNet = (part: Part, port: string): NetId => {
     const src = sourceOf.get(`${part.id}.${port}`);
+    const width = portWidth(part, port);
     const net = src ? outputNet.get(`${src.part}.${src.port}`) : undefined;
-    if (net !== undefined) return net;
-    const open = b.net(`${part.id}.${port}.open`);
-    b.component("open", {}, { y: open }, { name: `open_${part.id}_${port}`, params: { width: 1 } });
+    if (net !== undefined && b.widthOf(net) === width) return net;
+    const open = b.net(`${part.id}.${port}.open`, width);
+    b.component("open", {}, { y: open }, { name: `open_${part.id}_${port}`, params: { width } });
     return open;
   };
 
@@ -186,17 +252,14 @@ export function compileDrawing(drawing: Drawing, name = "drawing"): Compiled {
     if (part.kind === "output") {
       const pinName = part.name ?? part.id;
       const src = sourceOf.get(`${part.id}.a`);
-      const net = src ? outputNet.get(`${src.part}.${src.port}`) : undefined;
+      const width = part.width ?? 1;
+      const found = src ? outputNet.get(`${src.part}.${src.port}`) : undefined;
+      const net = found !== undefined && b.widthOf(found) === width ? found : undefined;
       if (net === undefined) {
         // Nothing drives the pin: it reads X, and the grader refuses to test it. The drawing is
         // still a circuit, so half-finished work can be stored and shown.
-        const open = b.net(`${pinName}.open`);
-        b.component(
-          "open",
-          {},
-          { y: open },
-          { name: `open_output_${pinName}`, params: { width: 1 } },
-        );
+        const open = b.net(`${pinName}.open`, width);
+        b.component("open", {}, { y: open }, { name: `open_output_${pinName}`, params: { width } });
         b.output(pinName, open);
         continue;
       }
@@ -212,6 +275,14 @@ export function compileDrawing(drawing: Drawing, name = "drawing"): Compiled {
     }
     // A composite from the library, wired through its ports.
     const ins = Object.fromEntries(spec.inputs.map((port) => [port, inputNet(part, port)]));
+    const block = BLOCKS[part.kind];
+    if (block) {
+      const outs = Object.fromEntries(
+        spec.outputs.map((port) => [port, outputNet.get(`${part.id}.${port}`) as NetId]),
+      );
+      block.build(b, ins, { name: part.id, outs });
+      continue;
+    }
     const q = outputNet.get(`${part.id}.Q`) ?? outputNet.get(`${part.id}.LIGHT`);
     const qb = outputNet.get(`${part.id}.Qb`);
     const outs = { ...(q !== undefined ? { q } : {}), ...(qb !== undefined ? { qb } : {}) };
@@ -326,8 +397,9 @@ export function circuitToDrawing(circuit: Circuit): Drawing {
   for (const input of circuit.inputs) {
     const id = pinId("input", input.name);
     const pin = circuit.nets[input.net]?.meta?.["pin"] as { x?: number; y?: number } | undefined;
+    const width = circuit.nets[input.net]?.width ?? 1;
     push(
-      { id, kind: "input", name: input.name },
+      { id, kind: "input", name: input.name, ...(width > 1 ? { width } : {}) },
       pin && typeof pin.x === "number" && typeof pin.y === "number"
         ? { x: pin.x, y: pin.y }
         : undefined,
@@ -344,14 +416,28 @@ export function circuitToDrawing(circuit: Circuit): Drawing {
     if (c.kind === "open" && !fault) continue;
     const id = fault ? c.path : c.name;
     const fanIn = Object.keys(c.inputs).length;
-    push({ id, kind: c.kind, ...(fanIn > 2 ? { fanIn } : {}) }, layoutOf(c.meta));
+    const out = Object.values(c.outputs)[0];
+    const width = out !== undefined ? (circuit.nets[out]?.width ?? 1) : 1;
+    push(
+      { id, kind: c.kind, ...(fanIn > 2 ? { fanIn } : {}), ...(width > 1 ? { width } : {}) },
+      layoutOf(c.meta),
+    );
     for (const [port, net] of Object.entries(c.outputs)) driverPort.set(net, { part: id, port });
     for (const [port, net] of Object.entries(c.inputs)) addReader(net, { part: id, port });
   }
   for (const c of topComposites) {
     // A block carries the ports it was built with: a flip-flop or a register with a reset and
     // an enable has more than its kind's plain form.
-    const ports = { inputs: Object.keys(c.inputs), outputs: Object.keys(c.outputs) };
+    const widths = Object.fromEntries(
+      Object.entries({ ...c.inputs, ...c.outputs })
+        .map(([port, net]) => [port, circuit.nets[net]?.width ?? 1] as const)
+        .filter(([, w]) => w > 1),
+    );
+    const ports = {
+      inputs: Object.keys(c.inputs),
+      outputs: Object.keys(c.outputs),
+      ...(Object.keys(widths).length ? { widths } : {}),
+    };
     push({ id: c.name, kind: c.kind, ports }, layoutOf(c.meta));
     for (const [port, net] of Object.entries(c.outputs))
       driverPort.set(net, { part: c.name, port });
@@ -362,8 +448,9 @@ export function circuitToDrawing(circuit: Circuit): Drawing {
     const meta = circuit.nets[output.net]?.meta?.["outputPins"] as
       Record<string, { x?: number; y?: number }> | undefined;
     const pin = meta?.[output.name];
+    const width = circuit.nets[output.net]?.width ?? 1;
     push(
-      { id, kind: "output", name: output.name },
+      { id, kind: "output", name: output.name, ...(width > 1 ? { width } : {}) },
       pin && typeof pin.x === "number" && typeof pin.y === "number"
         ? { x: pin.x, y: pin.y }
         : undefined,
