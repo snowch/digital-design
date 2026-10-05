@@ -1,6 +1,6 @@
 import { LessonStore, verifyCompletion, type Book, type Storage } from "@dd/lesson-runtime";
 
-import { lessonHref } from "../route";
+import { PREFACE_HREF, lessonHref } from "../route";
 import { STRINGS } from "../strings";
 
 export function LessonList({ book, storage }: { book: Book; storage: Storage }) {
@@ -18,6 +18,9 @@ export function LessonList({ book, storage }: { book: Book; storage: Storage }) 
     <>
       <h1>{book.title}</h1>
       <p className="course-assumes">{STRINGS.assumes}</p>
+      <p className="course-start">
+        <a href={PREFACE_HREF}>{STRINGS.prefaceLink}</a>
+      </p>
       {book.lessons.length === 0 && <p>{STRINGS.noLessons}</p>}
       {toWrite.length > 0 && (
         <p className="meta to-write">
