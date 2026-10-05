@@ -20,6 +20,9 @@ who is unsure has no way to find out before Module 1 shows them, so the page hol
   shows, the five hints, the check of saved work on load, and the time badge.
 - A link to the first lesson, named from the lesson's own data.
 
+The header links to it from every page, beside "Lessons", because "how a lesson works" is
+reference a learner may want mid-lesson; the nav marks the page it is on.
+
 It is not the curriculum's Module 0, "Meet the machine", which runs a program on the finished
 computer and so cannot be written until the computer exists. When it is, "how a lesson works"
 may move into it.

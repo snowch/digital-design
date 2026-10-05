@@ -37,3 +37,19 @@ test("the front page leads to a self-check that marks answers, and on to the fir
   await expect(page.locator("section.lesson-section")).toHaveCount(10);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(first.title);
 });
+
+test("the header reaches the page from inside a lesson, and marks the page it is on", async ({
+  page,
+}) => {
+  await page.goto(`#/lesson/${LESSONS[0]!.id}`);
+  const nav = page.getByRole("navigation");
+  await nav.getByRole("link", { name: STRINGS.preface.title }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(STRINGS.preface.title);
+  await expect(nav.getByRole("link", { name: STRINGS.preface.title })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
+  await expect(nav.getByRole("link", { name: STRINGS.lessons })).not.toHaveAttribute(
+    "aria-current",
+  );
+});

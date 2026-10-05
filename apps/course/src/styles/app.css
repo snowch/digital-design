@@ -121,7 +121,8 @@ svg {
   padding: var(--space-2) 0;
   display: inline-block;
 }
-.shell-header nav a:hover {
+.shell-header nav a:hover,
+.shell-header nav a[aria-current="page"] {
   color: var(--fg);
 }
 

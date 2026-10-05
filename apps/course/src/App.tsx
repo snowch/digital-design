@@ -9,7 +9,7 @@ import { browserStorage, LessonView } from "@dd/lesson-runtime";
 
 import { LessonList } from "./pages/LessonList";
 import { Preface } from "./pages/Preface";
-import { lessonHref, useRoute } from "./route";
+import { PREFACE_HREF, lessonHref, useRoute } from "./route";
 import { STRINGS } from "./strings";
 import { useTheme, type Theme } from "./theme";
 
@@ -61,7 +61,14 @@ export function App() {
           Digital Design
         </a>
         <nav aria-label={STRINGS.lessons}>
-          <a href="#/">{STRINGS.lessons}</a>
+          <a href="#/" aria-current={route.kind === "list" ? "page" : undefined}>
+            {STRINGS.lessons}
+          </a>
+          {/* The page before the first lesson is also where "how a lesson works" lives, so it is
+              one step from any lesson. */}
+          <a href={PREFACE_HREF} aria-current={route.kind === "preface" ? "page" : undefined}>
+            {STRINGS.preface.title}
+          </a>
         </nav>
         <label className="theme-picker">
           <span>{STRINGS.theme}</span>
