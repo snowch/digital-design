@@ -76,9 +76,11 @@ export const Interpretations = withProps(
             </label>
           ))}
         </fieldset>
+        {/* Each choice shows the worths it uses: none for the lamps, which are not a number. */}
         <BitRow
           bits={bits}
-          weights={reading === "signed" ? "signed" : "unsigned"}
+          weights={reading === "signed" ? "signed" : reading === "hex" ? "digit" : "unsigned"}
+          showWeights={reading !== "lamps"}
           digits={reading === "hex"}
         />
         <div className="interp-result" role="status" aria-live="polite">
@@ -95,7 +97,9 @@ export const Interpretations = withProps(
             </div>
           ) : (
             <p className="interp-value">
-              <span className="interp-value-name">{strings.readings.value}</span>{" "}
+              <span className="interp-value-name">
+                {reading === "hex" ? strings.readings.written : strings.readings.value}
+              </span>{" "}
               <span className="interp-value-number">{value}</span>
             </p>
           )}

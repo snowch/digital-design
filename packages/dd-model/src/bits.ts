@@ -33,6 +33,11 @@ export function placeValue(width: number, n: number, reading: "unsigned" | "sign
   return reading === "signed" && n === width - 1 ? -v : v;
 }
 
+/** What bit `n` is worth inside its hexadecimal digit, the group of four it belongs to: 8, 4, 2 or 1. */
+export function digitPlaceValue(n: number): number {
+  return 2 ** (n % 4);
+}
+
 /** The bit numbers of a row, in the order the row is written (highest first). */
 export function bitNumbers(width: number): number[] {
   return Array.from({ length: width }, (_, i) => width - 1 - i);

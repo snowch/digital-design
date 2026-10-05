@@ -10,6 +10,7 @@ import type { Interactive, Lesson } from "@dd/lesson-schema";
 import { DEFAULT_VIEW_STRINGS as S, format } from "../strings";
 import { CircuitExplorer } from "./CircuitExplorer";
 import { FaultLab } from "./FaultLab";
+import { Interpretations } from "./Interpretations";
 import { LatchInternals } from "./LatchInternals";
 import { Prediction } from "./Prediction";
 import { SetupHold, experiment } from "./SetupHold";
@@ -388,5 +389,41 @@ describe("the signal path drawing", () => {
       interactive({ recording: "compressor", labels: { ...labels, sends: "Sends" } }),
     );
     expect(screen.getByRole("note")).toHaveTextContent("labels.sends");
+  });
+});
+
+describe("the four ways to show a word", () => {
+  const interactive: Interactive = {
+    id: "many",
+    kind: "interpretations",
+    timeModel: "none",
+    caption: "c",
+    props: {
+      words: [{ bits: "1111 1111 0100 1000", label: "The word" }],
+      readings: ["unsigned", "signed", "hex", "lamps"],
+    },
+  };
+  const worths = () =>
+    [...document.querySelectorAll(".bit-row .bit-weight")].map((e) => e.textContent);
+
+  it("shows each way's own worths: place worths for the numbers, 8 4 2 1 for the digits, none for the lamps", async () => {
+    const user = userEvent.setup();
+    mount(Interpretations as typeof Prediction, interactive);
+    expect(worths()[0]).toBe("32768");
+    expect(screen.getByText(S.readings.value)).toBeInTheDocument();
+    await user.click(screen.getByRole("radio", { name: S.readings.names.signed }));
+    expect(worths()[0]).toBe("-32768");
+    await user.click(screen.getByRole("radio", { name: S.readings.names.hex }));
+    expect(worths()).toEqual(Array.from({ length: 4 }, () => ["8", "4", "2", "1"]).flat());
+    expect(screen.getByText(S.readings.written)).toBeInTheDocument();
+    expect(screen.queryByText(S.readings.value)).toBeNull();
+    expect(document.querySelector(".interp-value-number")).toHaveTextContent("FF48");
+    expect(
+      screen.getByRole("img", { name: format(S.bits.inDigit, { n: 15, value: 8, bit: 1 }) }),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("radio", { name: S.readings.names.lamps }));
+    expect(worths()).toEqual([]);
+    expect(document.querySelectorAll(".lamps .lamp")).toHaveLength(16);
+    expect(document.querySelectorAll(".lamps .lamp-on")).toHaveLength(10);
   });
 });

@@ -37,7 +37,9 @@ A lesson is one module in `content/lessons/` exporting a `LessonInput` (the type
   `expect`), and a reference of `answers` by field id. A failure names the case, the answers'
   values and what was expected; the runner, the hints, the re-grading on load and the reset are
   the same as for a circuit.
-- `modelVsReality`: how the simulator differs from hardware, said once.
+- `modelVsReality`: how the simulator differs from hardware, said once. The box's heading names
+  the simulator only where some figure runs it; a lesson whose figures all have
+  `timeModel: "none"` gets "How the model differs from hardware".
 - `originalityNote`: the obvious textbook example for the topic and how this lesson differs.
   Written in the same commit as the lesson; the schema refuses a lesson without one.
 

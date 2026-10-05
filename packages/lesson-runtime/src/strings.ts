@@ -11,6 +11,8 @@ export interface Strings {
     readonly prerequisites: string;
     readonly modelNote: string;
     readonly modelVsReality: string;
+    /** The same heading for a lesson none of whose figures runs the simulator. */
+    readonly modelVsRealityNoSimulator: string;
     readonly timeModel: Readonly<Record<string, string>>;
     /** The time-model badge's accessible name; {model} is the badge's text. */
     readonly badgeLabel: string;
@@ -63,6 +65,7 @@ export const DEFAULT_STRINGS: Strings = {
     prerequisites: "Prerequisites",
     modelNote: "Time model",
     modelVsReality: "How the simulator differs from hardware",
+    modelVsRealityNoSimulator: "How the model differs from hardware",
     timeModel: {
       settle: "Stepped",
       clocked: "Clocked",

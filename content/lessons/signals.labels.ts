@@ -5,8 +5,8 @@ export const LABELS = {
   title: "How does the display know the temperature?",
   objectives: [
     "Choose a threshold for a noisy signal and explain why the gap between the threshold and the nearest sample on each side matters.",
-    "Name the four things a display must be told to interpret 16 bits as temperature.",
-    "Read the same 16 bits as unsigned, signed and hexadecimal.",
+    "Name the four things a display must be told to interpret 16 bits as a temperature.",
+    "Read the same 16 bits as unsigned and signed numbers, and write them in hexadecimal.",
     "Explain why a pattern of bits has no meaning until you choose how to read it.",
   ],
   titles: {

@@ -2,7 +2,7 @@
 // it is worth; pressed, it changes between 0 and 1. Read-only when there is no `onFlip`. Under
 // each group, optionally, the hexadecimal digit the group makes.
 
-import { bitNumbers, hexOf, placeValue, type Bit } from "@dd/dd-model";
+import { bitNumbers, digitPlaceValue, hexOf, placeValue, type Bit } from "@dd/dd-model";
 
 import { format, useViewStrings } from "./strings";
 
@@ -16,7 +16,8 @@ export function BitRow({
 }: {
   bits: readonly Bit[];
   onFlip?: (index: number) => void;
-  weights?: "unsigned" | "signed";
+  /** "digit": each bit's worth inside its group of four (8, 4, 2, 1), for a row not pressed. */
+  weights?: "unsigned" | "signed" | "digit";
   digits?: boolean;
   label?: string;
   /** Each bit's value in the number; left off where the question is what the number is. */
@@ -36,7 +37,8 @@ export function BitRow({
             {g.map((i) => {
               const n = numbers[i] as number;
               const bit = bits[i] as Bit;
-              const value = placeValue(width, n, weights);
+              const value =
+                weights === "digit" ? digitPlaceValue(n) : placeValue(width, n, weights);
               const slots = { n, value, bit };
               const inner = (
                 <>
@@ -70,7 +72,14 @@ export function BitRow({
                   key={i}
                   className={`bit bit-${bit}`}
                   role="img"
-                  aria-label={format(showWeights ? strings.bits.fixed : strings.bits.bare, slots)}
+                  aria-label={format(
+                    !showWeights
+                      ? strings.bits.bare
+                      : weights === "digit"
+                        ? strings.bits.inDigit
+                        : strings.bits.fixed,
+                    slots,
+                  )}
                   data-bit={n}
                 >
                   {inner}

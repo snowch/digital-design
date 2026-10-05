@@ -203,7 +203,11 @@ function LessonBody({ book, lesson, storage, lessonHref }: Omit<LessonViewProps,
         </aside>
       )}
       <aside className="lesson-model-vs-reality" aria-labelledby="lesson-model-vs-reality">
-        <h2 id="lesson-model-vs-reality">{strings.lesson.modelVsReality}</h2>
+        <h2 id="lesson-model-vs-reality">
+          {models.length > 0
+            ? strings.lesson.modelVsReality
+            : strings.lesson.modelVsRealityNoSimulator}
+        </h2>
         <Prose markdown={lesson.modelVsReality} />
       </aside>
     </article>

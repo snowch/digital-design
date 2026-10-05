@@ -82,6 +82,24 @@ describe("LessonView", () => {
     expect(screen.getByText("Gates here have no delay.")).toBeInTheDocument();
   });
 
+  it("names no simulator at the foot of a lesson none of whose figures runs it", () => {
+    const plain = {
+      ...lesson,
+      sections: lesson.sections.map((s) => ({
+        ...s,
+        interactives: s.interactives.map((x) => ({ ...x, timeModel: "none" as const })),
+      })),
+    };
+    render(<LessonView book={fixtureBook([plain])} lesson={plain} storage={memoryStorage()} />);
+    expect(
+      screen.getByRole("heading", { name: DEFAULT_STRINGS.lesson.modelVsRealityNoSimulator }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: DEFAULT_STRINGS.lesson.modelVsReality }),
+    ).toBeNull();
+    expect(screen.queryByRole("heading", { name: DEFAULT_STRINGS.lesson.modelNote })).toBeNull();
+  });
+
   it("links prerequisites by title through the app's router", () => {
     const first = fixtureLesson({
       id: "feedback",

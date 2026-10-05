@@ -176,6 +176,8 @@ export interface ViewStrings {
     readonly row: string;
     readonly flip: string;
     readonly fixed: string;
+    /** A bit shown with its worth inside its hexadecimal digit (8, 4, 2 or 1). */
+    readonly inDigit: string;
     /** A bit shown without its worth, above a question about what the word reads as. */
     readonly bare: string;
     readonly digit: string;
@@ -202,6 +204,8 @@ export interface ViewStrings {
     readonly lampOff: string;
     readonly lampsLabel: string;
     readonly value: string;
+    /** In place of `value` for hexadecimal, which writes the bits and reads nothing. */
+    readonly written: string;
   };
   readonly readingPrediction: {
     readonly modelGave: string;
@@ -387,6 +391,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     row: "Bits",
     flip: "Bit {n}, worth {value}, now {bit}; press to change.",
     fixed: "Bit {n}, worth {value}, {bit}.",
+    inDigit: "Bit {n}, worth {value} in its digit, {bit}.",
     bare: "Bit {n}, {bit}.",
     digit: "Digit {digit}",
     sum: "{terms} = {total}",
@@ -412,6 +417,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     lampOff: "off",
     lampsLabel: "Lamps: {list}",
     value: "Reading",
+    written: "Shown as",
   },
   readingPrediction: {
     modelGave: "The model's answer is {value}.",

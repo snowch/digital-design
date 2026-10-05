@@ -17,7 +17,8 @@ export const STRINGS = {
   noLessons: "No lessons are published yet.",
   noChallenges: "No challenges",
   /** Under the course title: what the course takes as known before Module 1. */
-  assumes: "The course assumes you can turn a binary number into decimal.",
+  assumes:
+    "The course assumes you can turn a binary number into decimal and a decimal number into binary.",
   module: (n: number) => `Module ${n}`,
   // The modules missing between the first and the last lesson; the list reads "2 and 3".
   toWriteOne: (n: number) => `Module ${n} is still to be written.`,

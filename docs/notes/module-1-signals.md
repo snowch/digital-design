@@ -451,6 +451,66 @@ need. The reflection's draft had dropped the fact sheet's examples, without whic
 count is worth" and "the unit" read as the same thing; the managing session added them in
 parentheses.
 
+### The third pass's review
+
+The committed pass went to one reviewer, reading as a learner who can turn binary into decimal,
+with the brief in the appendix ("P3-review"), and the 23 findings to an independent sceptic: 6
+upheld, 16 upheld in part, 1 rejected. The reviewer could not write its report file (the harness
+refuses report files from subagents), so the managing session saved the text it returned before
+the sceptic read it.
+
+Fixed in code first:
+
+- **The four-ways figure showed every way with place worths** (F7). Hexadecimal now shows each
+  bit's worth inside its digit, 8, 4, 2 and 1, as the lead says (`digitPlaceValue` in the model,
+  `weights="digit"` in the bit row); the lamps show no worths, since the page says they are not
+  a number; and the 16 lamps stay one row on a phone instead of wrapping after 13.
+- **Hexadecimal's result was labelled "Reading"** (F6), where the page says hexadecimal writes
+  the bits and reads nothing. It is "Shown as FF48" now, and the objective says "read ... as
+  unsigned and signed numbers, and write them in hexadecimal".
+- **The closing box's heading named "the simulator"** (F20), a word this lesson never uses. The
+  runtime now picks "How the model differs from hardware" for a lesson none of whose figures runs
+  the simulator; the remember and registers lessons keep their heading.
+
+Then one fact brief per section to the drafting subagent:
+
+- the word's definition no longer says "one number" (F1), and the step order is stated as
+  something the sensor and the display agree on (F8);
+- the range check says "a temperature outside that range", not "a reading" (F3), and the
+  explanation is three paragraphs with the join restated (F10);
+- under the signed-word figure, the missing step (the sensor writes temperatures of zero or above
+  with the top bit 0, those below with it 1) and the sense of "neither rule is wrong" (F11, F2);
+- the generalisation's last sentence says the reader must use the writer's rule (F4);
+- the hints: the first gives its condition, the third is four short sentences from the word's
+  side (F19);
+- the reflection's four things are a list, with no "worth" for the scale (F9);
+- the closing box says how a datasheet's noise margin differs from this page's (F14), and names
+  the display, not the freezer room, as the thing with the fault, without repeating when it shows
+  (F20, F15);
+- the motivation no longer uses "bit" before it is defined (F16); the prediction section
+  describes the figure as it is before the learner answers and introduces the recording (F17);
+  the investigation names the line from each dot to the voltage sent, and the failure experiment
+  counts three new things and says what grows (F18); the remedies under the failure figure are
+  two items of one shape (F22); the threshold challenge's lead points to the figure instead of
+  repeating the instruction (F15);
+- the front page assumes decimal to binary as well, which the challenge needs (F13).
+
+Sent back: the failure experiment's remedies, whose redraft turned cause and effect round ("two
+voltages further apart, by making the gap wider") and dropped "for example"; the reflection and
+closing-box drafts, which came back as descriptions instead of text; and the list's first item,
+"The position of the top bit: bit 15", which says nothing because the top bit is bit 15 by
+definition. Added by the managing session: "by its own rule" in "each gives the right number, by
+its own rule, from the same bits", which the draft dropped and the sentence needs; "a" in the
+objective. Cut: "each counted as positive" from the prediction's question, which made -184
+impossible by its own wording (F12; the definition under the figure keeps it); "sixteen" became
+"16" (F23). The whole-lesson read then cut two sentences under the signed-word figure: "The
+display went wrong because it read the word by a different rule from the one the sensor wrote it
+with", which repeats the explanation just above, and "The bits are the same in both", which
+repeats "from the same bits".
+
+Not acted on: F5 (rejected); the word labels in the four-ways figure (F21, minor); and the parts
+the sceptic rejected, among them "the result was -184" (F10) and the prediction's caption (F12).
+
 ## Questions for the author
 
 1. The task points to "the build prompt's machine section in docs/inventory.md". There is no
@@ -1467,3 +1527,133 @@ agreements and the hardware note's paragraph; the challenge's lead, task sentenc
 title, challenge title and field label; the objective, the drawing's room label and the
 front-page line; and the new prediction's caption.
 
+
+### P3-review.md (the reviewer's brief for the third pass)
+
+````markdown
+# Review brief: Module 1, "How does the display know the temperature?" (the reading half, third pass)
+
+You are reviewing one lesson of an interactive course, *Digital Design: From Bits to a Working
+Computer*, as its learner would meet it. Read as a learner for whom this is the FIRST lesson of
+the course. They can turn a binary number into decimal (the course's front page says the course
+assumes it) and know everyday arithmetic. They know nothing about circuits, electronics or the
+inside of a computer, and know a volt only as the number on a battery.
+
+## What changed in this pass
+
+Read the whole lesson, start to finish. These parts are new, and the findings that matter most
+are likely to be in them or where they join the old text:
+
+- The scene is a shop's freezer room (it used to be a "cold room"); the challenge uses a second,
+  colder freezer room.
+- The construction section no longer teaches binary place values from scratch. It asks the
+  learner to predict what the 16 bits add up to (figure "Predict what these 16 bits sum to."),
+  names binary, word and unsigned around that prediction, and gives the outcome after the learner
+  commits.
+- The explanation now checks the result against the sensor's range before it turns to the other
+  rule; the paragraph under the signed-word figure says when an unsigned display is right.
+- The reflection names four things a display must be told; the box "How the simulator differs
+  from hardware" ends with a paragraph about real sensors.
+- The front page states what the course assumes.
+
+## What to read
+
+- The page as text, before and after the three predictions are answered:
+  <scratchpad>/m1-pass3/review/page-before.txt
+  and page-after.txt (same folder). The text inside a prediction's outcome shows only after the
+  learner presses "Check my prediction"; everything else shows from the start.
+- Screenshots in the same folder, read as images: `1280-sNN.png` and `375-sNN.png` are the ten
+  sections at desktop and phone width after the predictions were answered; `*-front.png` the
+  front page; `*-hardware-note.png` the closing box.
+- The hints, which the page hides behind buttons: /home/user/dd-main/content/lessons/signals.prose.ts
+  (keys c1Hints, c2Hints).
+- To check a fact (a number, a sample, a reading), read the lesson's data
+  (/home/user/dd-main/content/lessons/signals.ts), its facts test
+  (/home/user/dd-main/content/lessons/signals.facts.test.ts) and the model
+  (/home/user/dd-main/packages/dd-model/src/signals.ts, bits.ts, graders.ts). Check a number or a
+  cross-reference before you assert it is wrong.
+- The style checklist: /home/user/dd-main/docs/style.md. The project rules:
+  /home/user/dd-main/CLAUDE.md (sections "Voice", "Reviewing a lesson" and "What no check can
+  catch").
+
+## What to look for
+
+- Anything the learner cannot follow on a first reading: a term used before it is explained, a
+  definite article in front of something not yet introduced, a step that assumes knowledge this
+  learner does not have.
+- A word that means two things on one page (for example: reading, read, value, worth, count,
+  sample, word, level, step, signal).
+- A claim the figures do not show, or a figure that does not show what the prose says it shows.
+- A number that is wrong, or stated without the figure that shows it.
+- Anything shown before a prediction is answered that gives its answer away.
+- The same argument made twice, far apart; a paragraph that answers two questions; a join between
+  paragraphs that does not follow.
+- The style checklist's first and second passes.
+- The figures' own labels: unclear, wrong or inconsistent with the prose.
+- The challenges: can the learner tell what to do and what the tests check?
+- The lesson's capstone is that the learner can explain why a bit pattern has no meaning until
+  someone chooses how to read it. Does the lesson get them there?
+
+## Rules for your report
+
+- Every finding quotes the page (or the file) exactly, says where (section and figure), says what
+  is wrong and why, and suggests a direction. Never rewrite the text yourself: no replacement
+  sentences.
+- Never write a challenge's answer in your report.
+- Number your findings F1, F2, ... in order of importance. Mark each "fact", "clarity", "style"
+  or "figure".
+- Be specific and brief. Do not praise. Do not change any file except your report.
+
+Write the report to
+<scratchpad>/m1-pass3/review/report.md
+and reply "done".
+````
+
+### P3-sceptic.md (the sceptic's brief for the third pass)
+
+````markdown
+# Sceptic brief: attack each review finding (Module 1, third pass)
+
+A reviewer read one lesson of an interactive course as its learner and wrote findings. Reviewers
+over-call. Your job is to attack each finding independently before anyone acts on it.
+
+Read, all in <scratchpad>/m1-pass3/review/:
+- the reviewer's brief: brief.md (it says who the learner is and what changed in this pass)
+- the review: report.md
+- the page text: page-before.txt and page-after.txt (the text inside a prediction's outcome shows
+  only after the learner presses "Check my prediction"; everything else shows from the start)
+- screenshots: 1280-sNN.png and 375-sNN.png (the ten sections after use), *-front.png,
+  *-hardware-note.png
+
+And to check facts: the lesson data and words, /home/user/dd-main/content/lessons/signals.ts,
+signals.prose.ts and signals.labels.ts; the model, /home/user/dd-main/packages/dd-model/src/
+(signals.ts, bits.ts, graders.ts); the facts test, /home/user/dd-main/content/lessons/signals.facts.test.ts;
+the rules, /home/user/dd-main/CLAUDE.md and /home/user/dd-main/docs/style.md.
+
+For each finding (F1, F2, ...): check its quote against the page (is it quoted exactly, is it
+where the reviewer says?); check any fact it asserts against the data, model or facts test; then
+judge whether it is a real problem for this learner, who can turn binary into decimal and has
+done no earlier lesson. Verdict per finding: UPHELD, UPHELD IN PART (say which part), or
+REJECTED, with one to three sentences of reason. Do not rewrite any text and do not propose
+replacement sentences. Never write a challenge's answer. Do not change any file.
+
+Return your verdicts as text in your final reply, one block per finding. Do not write a file:
+the harness refuses report files from subagents.
+````
+
+### P3-header.md (the header every third-pass fix brief began with)
+
+````markdown
+You draft learner-facing text for an interactive course on digital design. Read the style guide first, /home/user/dd-main/docs/style.md, and follow it: British English, active voice, short sentences, the reader is "you", no em dashes, no filler, no marketing tone.
+
+Return only the text asked for, each piece labelled as asked (A, B, ...), with no commentary and no description of changes.
+
+Words you must not use anywhere: feedback, latch, transparent, edge, propagation delay, setup, hold, metastable, register, shift register.
+
+Working words on this page, each with one meaning:
+- "read" and "reading" are only for words (bits taken together): never for a temperature, a voltage or a sample.
+- "worth" is only what a bit's place counts for.
+- a sample "comes out as" 0 or 1.
+- "step" is one short, fixed length of time in which the sensor drives one voltage.
+- "value" never names a bit.
+````

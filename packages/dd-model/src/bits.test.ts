@@ -2,7 +2,16 @@
 
 import { describe, expect, it } from "vitest";
 
-import { bitsOf, bitsText, hexOf, parseBits, signedOf, termsOf, unsignedOf } from "./bits";
+import {
+  bitsOf,
+  bitsText,
+  digitPlaceValue,
+  hexOf,
+  parseBits,
+  signedOf,
+  termsOf,
+  unsignedOf,
+} from "./bits";
 import { ANSWER_GRADERS, isProblem, parseHex, parseNumber } from "./graders";
 import { readBits, recording, safeBand } from "./signals";
 
@@ -14,6 +23,19 @@ describe("bits", () => {
     expect(hexOf(w)).toBe("8003");
     expect(termsOf(w, "signed")).toEqual([-32768, 2, 1]);
     expect(hexOf(parseBits("101"))).toBe("5");
+  });
+
+  it("gives each bit its worth inside its hexadecimal digit, and the digits agree with hexOf", () => {
+    expect([15, 14, 13, 12, 11, 3, 2, 1, 0].map(digitPlaceValue)).toEqual([
+      8, 4, 2, 1, 8, 8, 4, 2, 1,
+    ]);
+    const w = parseBits("1111 1111 0100 1000");
+    const digit = (group: number) =>
+      [0, 1, 2, 3]
+        .map((k) => 4 * group + k)
+        .filter((n) => w[w.length - 1 - n] === 1)
+        .reduce((sum, n) => sum + digitPlaceValue(n), 0);
+    expect([3, 2, 1, 0].map((g) => digit(g).toString(16).toUpperCase()).join("")).toBe(hexOf(w));
   });
 
   it("writes a value back as bits, negative values as signed, and refuses what does not fit", () => {
