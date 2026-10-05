@@ -76,14 +76,17 @@ you; CLAUDE.md states the rule and the division of labour. In practice, for one 
    the rationed terms and where each is introduced, the words to avoid) and one brief per group
    of sections, each listing the facts in order, where each figure sits, and how long the section
    is. Attach `docs/style.md`.
-
-   Next to the rationed terms, the fact sheet lists the lesson's working words, each with its one
-   meaning on the page, before any brief goes out: *keep* for a value that stays, *press* and
-   *release* for a button, *take* for what a flip-flop does at the edge, *step* for the stepped
-   model's step and nothing else. Every draft copies the fact sheet's words, so a word that means
-   two things there means two things on the page; both module notes found their biggest reading
-   faults in words of this kind. Scan your own briefs for the meanings the list rules out before
-   sending them.
+   - The fact sheet also lists the lesson's **working words**, each with its one meaning on this
+     page: the everyday words the lesson leans on, not only the rationed terms. Drafts copy the
+     fact sheet's wording, so a word it uses in two senses comes back in two senses on the page.
+     The signals lesson's fact sheet used "reading" for the sensor's temperature and for a way of
+     reading bits, and "value" for a bit and for what its place is worth; both reached the page
+     and cost a second round of every brief. The first fix pass's list for the circuit lessons:
+     *keep* for a value that stays, *press* and *release* for a button, *take* for what a
+     flip-flop does at the edge, *step* for the stepped model's step and nothing else.
+   - The banned list includes every term a *later* lesson introduces: the term gate counts an
+     earlier lesson's use of it as a failure. Scan the briefs themselves for the banned words
+     before they go out; a brief that uses one gets it copied.
 3. Run the drafts in parallel, then check facts only: a dropped fact gets the fewest words that
    carry it; a wrong fact or a vocabulary slip goes back with a note; nothing is rewritten.
 4. Place the paragraphs: section `prose`, a figure's `lead`, a figure's `after`.
@@ -119,8 +122,16 @@ The runtime's and the views' own labels went through the same process; they live
   prose over about 85 characters; and the lesson header and four figures must match their stored
   screenshots at both widths. The typefaces ship with the site, so the screenshots are the same
   on every machine. A change to a figure's look fails until its baseline is updated on purpose
-  (`npx playwright test --update-snapshots`) and the new image is looked at before it is
-  committed.
+  and the new image is looked at before it is committed. Update the figure you changed with
+  `npx playwright test -g "<its test>" --update-snapshots=all`: plain `--update-snapshots`
+  rewrites only a baseline that fails, and a fix smaller than the test's 2% tolerance leaves the
+  old image as the record.
+- `tests/educational/lesson.spec.ts` also uses every figure of every lesson (commits each
+  prediction, moves each slider to both ends) and then measures the page against the viewport.
+  A figure that widens the page only once it is used passes every check made on a fresh page.
+
+A commit carries the tests for the code it changes, so that every commit passes the check on
+its own.
 
 A lesson that needs a new figure adds the figure's props schema and its test with it, and a
 facts test for any number its prose will state.

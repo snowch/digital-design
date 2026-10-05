@@ -308,6 +308,28 @@ banned words by hand first.
 - The commit order: the platform commit alone does not typecheck (one spec changed in the
   lesson commit). Keep a commit's tests with the code they test.
 
+## Review 2, after deployment
+
+A reader's review of the deployed lesson reached the author on 2026-10-05 and was passed to the
+managing session. Every number the reviewer recomputed matched the page. Each finding was attacked
+by the managing session as sceptic before anything changed, as CLAUDE.md asks.
+
+| Finding | Sceptic | What was done |
+| --- | --- | --- |
+| The receiver, a shop's till, is opaque outside the UK and unrealistic: a till does not monitor a cold room | upheld; the course's own hardware note already called the fault invented | the receiver is a temperature display in the shop's office, which staff read; "till" is gone from the title, the section title, the prose, the challenge and the originality note; "receiver" still names the part that measures the voltage; nothing the lesson teaches changed |
+| "1.40 V, nearer the middle": the middle is 1.65 V | in part: "nearer" is a comparison with 2.40 V, but a reader can take it as "near" | redrafted: "closer to the middle than 2.40 V" |
+| Say why the sensor sends 16 steps when -184 would fit in fewer | in part: the reason the course gives (16-bit words) uses terms the question may not; a plain reason fits | redrafted: the display expects 16 steps, so the sensor always sends 16, however large or small the temperature |
+| Define "step" where it is first met | in part: the next sentence already says what happens in a step, not what a step is | redrafted: a step is a short, fixed length of time |
+| Add "Celsius" to "6535.2 degrees" and lean into the absurdity | rejected: the unit is set in the question and the page says "degrees" throughout; the voice rule says state the fault, do not perform it | none |
+| Flag the reflection's adding question as a preview of a later lesson | rejected: the course's reviews of Modules 4 and 5 upheld the opposite rule, no claims about later lessons | none |
+| Restate the threshold rule near the threshold challenge | rejected: the first hint carries the rule, and the same argument twice far apart is a fault CLAUDE.md names | none |
+| The site lists Modules 1, 4 and 5 with a gap | upheld, course-level | the lesson list computes the module numbers missing between its first and last lesson and says they are still to be written (`apps/course/src/pages/LessonList.tsx`, with a test); the sentence is generated, so it cannot rot |
+
+The three redrafts came from one brief of facts to the drafting subagent (the appendix, "R2"). The
+title it returned, "How does the temperature display know the temperature?", repeated a word; the
+managing session cut the first "temperature". Where only the noun changed ("the till" to "the
+display" in ten sentences), the word was replaced and no sentence rewritten.
+
 ## Questions for the author
 
 1. The task points to "the build prompt's machine section in docs/inventory.md". There is no
@@ -328,6 +350,28 @@ banned words by hand first.
    the repository names a model.
 4. A threshold box of `type="number"` cannot hold a comma decimal ("1,70") in an English
    browser. Left as it is.
+
+## After the note: the author's go-ahead on the recommendations
+
+2026-10-05 06:11 UTC. The author answered "go with your recommendations". Done, from "What I
+would change":
+
+- **The page-width check after use, for every lesson.** `lesson.spec.ts` now commits each
+  prediction and moves each slider to both ends in every lesson, then measures the page against
+  the viewport. Proved by putting the old CSS back for one run: the phone case failed with 669
+  against 375; with the fix it passes for all three lessons.
+- **Working words in the fact sheet, and banned words scanned in the briefs**, written into
+  docs/authoring.md's prose process, with this lesson's "reading" and "value" as the example.
+- **Screenshot baselines updated with `--update-snapshots=all`**, in docs/authoring.md and in
+  CLAUDE.md's line on the screenshots.
+- **A commit carries the tests for the code it changes**, in docs/authoring.md.
+- Not done: the placement script's re-check of the managing model's cuts. The script lives in
+  the session's scratchpad, not in the repository, so there is nothing to change here; the
+  lesson is recorded above.
+
+The three questions for the author were questions, not recommendations, and stay open: the
+missing machine section, the "No simulation" badge, and comma decimals in the number box. The
+six commit messages that name a model are unchanged for the reason given above.
 
 ## Appendix: the briefs, as sent
 
@@ -1158,4 +1202,25 @@ judge whether it is a real problem for this learner. Verdict per finding: UPHELD
 do not propose replacement sentences. Do not change any file except the one below.
 
 Write your verdicts to <scratchpad>/review/sceptic.md and reply "done".
+````
+
+### R2-review-2.md (the managing session's brief, after the deployment review)
+
+````markdown
+The receiver becomes a temperature display in the shop's office, which staff read. "receiver"
+still names the part inside the display that measures the cable's voltage. Terms not yet
+introduced at the question, not to be used there: bit, binary, word, threshold, signal, digital.
+
+title: a question in the shape of "How does the till know the temperature?" with the display.
+
+question (three paragraphs; keep every unaffected sentence): 1. the temperature goes to a display
+in the shop's office, not a till; 2. the sensor always sends 16 steps, however large or small the
+temperature, because 16 is what the display expects, in plain words near "16 steps"; 3. a step is
+a short, fixed time, said where it is first met; 4. keep "**sample**" in bold as now.
+
+p1Question: the middle of 0 V and 3.30 V is 1.65 V; 1.40 V is nearer the middle than 2.40 V is.
+Say that comparison and nothing more; do not state 1.65 V.
+
+Lesson list: one sentence for a single missing module ({n}) and one for several ({list}, joined
+as "2 and 3"), plain statements, no apology, no date.
 ````

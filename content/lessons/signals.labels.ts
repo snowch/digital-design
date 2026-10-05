@@ -2,7 +2,7 @@
 // prose process from a brief of facts (see CLAUDE.md) and checked against the lesson's structure.
 
 export const LABELS = {
-  title: "How does the till know the temperature?",
+  title: "How does the display know the temperature?",
   objectives: [
     "Choose a threshold for a noisy signal and explain why the gap between the threshold and the nearest sample on each side matters.",
     "Read a row of bits as a binary number by adding place values.",
@@ -10,7 +10,7 @@ export const LABELS = {
     "Explain why a pattern of bits has no meaning until you choose how to read it.",
   ],
   titles: {
-    question: "The sensor and the till",
+    question: "The sensor and the display",
     motivation: "Two levels survive noise",
     prediction: "Which threshold?",
     investigation: "Moving the threshold",
