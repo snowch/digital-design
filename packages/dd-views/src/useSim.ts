@@ -3,7 +3,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 
-import { Simulator, bit0, bit1, isKnown, type Circuit, type Word } from "@dd/sim";
+import { Simulator, bit0, bit1, isKnown, parseWord, type Circuit, type Word } from "@dd/sim";
 
 export interface SettleSim {
   readonly sim: Simulator;
@@ -19,27 +19,37 @@ export interface SettleSim {
   reset(): void;
 }
 
-function fresh(circuit: Circuit): Simulator {
+/** Starting values for some inputs, as a lesson writes them: bits, a number or 0x hexadecimal. */
+export type InitialInputs = Readonly<Record<string, string | number>>;
+
+function fresh(circuit: Circuit, initial: InitialInputs = {}): Simulator {
   const sim = new Simulator(circuit);
   for (const input of circuit.inputs) {
     const width = circuit.nets[input.net]?.width ?? 1;
-    sim.setInput(input.net, { width, value: 0n, known: (1n << BigInt(width)) - 1n });
+    const given = initial[input.name];
+    sim.setInput(
+      input.net,
+      given !== undefined
+        ? parseWord(String(given), width)
+        : { width, value: 0n, known: (1n << BigInt(width)) - 1n },
+    );
   }
   sim.settle();
   return sim;
 }
 
-export function useSettleSim(circuit: Circuit): SettleSim {
+export function useSettleSim(circuit: Circuit, initial?: InitialInputs): SettleSim {
   const [generation, setGeneration] = useState(0);
   const [sims] = useState(() => new Map<Circuit, Simulator>());
   const sim = useMemo(() => {
     let s = sims.get(circuit);
     if (!s) {
       sims.clear();
-      s = fresh(circuit);
+      s = fresh(circuit, initial);
       sims.set(circuit, s);
     }
     return s;
+    // The starting values are read once per circuit, as the circuit itself is.
   }, [circuit, sims]);
   const bump = useCallback(() => setGeneration((g) => g + 1), []);
   const values = useMemo(() => sim.snapshotValues(), [sim, generation]);
@@ -73,7 +83,7 @@ export function useSettleSim(circuit: Circuit): SettleSim {
       bump();
     },
     reset: () => {
-      sims.set(circuit, fresh(circuit));
+      sims.set(circuit, fresh(circuit, initial));
       bump();
     },
   };

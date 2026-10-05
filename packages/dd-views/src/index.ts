@@ -17,3 +17,4 @@ export * from "./SignalPlot";
 export * from "./BitRow";
 export * from "./useWidth";
 export * from "./AnswerEditor";
+export * from "./WordInputs";

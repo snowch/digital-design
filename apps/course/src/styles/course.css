@@ -504,6 +504,15 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
 .circuit .wire-unknown circle {
   fill: var(--wire-unknown);
 }
+/* A wire that carries a word (a bus) is drawn wide in one colour: its value is a word, not a
+   level, and the label at its source writes the bits. Module 3. */
+.circuit .wire-word path:not(.wire-hit):not(.wire-halo) {
+  stroke: var(--wire-word);
+  stroke-width: 5;
+}
+.circuit .wire-word circle {
+  fill: var(--wire-word);
+}
 .circuit .wire-hit {
   stroke: transparent !important;
   stroke-width: 14 !important;
@@ -573,6 +582,15 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
 .circuit .part-label {
   font-weight: 700;
   font-size: 12px;
+}
+/* A block's name above it and its instance name below are drawn over a halo of the canvas, as
+   the values are, so a wire that runs behind one (a bus's bits on their way to a join) breaks
+   around the word instead of striking through it. Module 3. */
+.circuit .part-label,
+.circuit .part-name {
+  paint-order: stroke;
+  stroke: var(--canvas);
+  stroke-width: 4px;
 }
 .circuit .part-name,
 .circuit .port-label {
@@ -709,6 +727,13 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
   padding: var(--space-2) var(--space-5) var(--space-2) 0;
   text-align: left;
   border-bottom: 1px solid var(--border);
+}
+/* A signal table with readings has two more columns (Module 3): on a phone its gaps close up. */
+@media (max-width: 480px) {
+  .signal-table.with-readings th,
+  .signal-table.with-readings td {
+    padding-right: var(--space-3);
+  }
 }
 .signal-table th:last-child,
 .signal-table td:last-child,

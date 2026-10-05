@@ -19,6 +19,7 @@ import { CircuitView } from "../CircuitView";
 import { format, useViewStrings } from "../strings";
 import { TruthTable, rowFor } from "../TruthTable";
 import { useSettleSim } from "../useSim";
+import { WordInputs } from "../WordInputs";
 import { withProps } from "./props";
 
 const TABLES: Record<string, RefTable> = {
@@ -38,6 +39,10 @@ const Props = z.object({
   releaseAll: z.boolean().default(false),
   /** Let the learner open a block to see inside it; off where the inside is a challenge's answer. */
   canOpen: z.boolean().default(true),
+  /** Module 3: starting values for some inputs (bits, a number or 0x hexadecimal). */
+  initial: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
+  /** Module 3: each word in the signal table read as a number, these ways. */
+  readings: z.array(z.enum(["unsigned", "signed"])).default([]),
 });
 
 /** The reference table restricted to the inputs the circuit has, with a wildcard for X. */
@@ -76,7 +81,7 @@ export const CircuitExplorer = withProps(
   }: InteractiveProps & { data: z.infer<typeof Props> }) {
     const strings = useViewStrings();
     const circuit = useMemo(() => libraryCircuit(data.libraryId), [data.libraryId]);
-    const sim = useSettleSim(circuit);
+    const sim = useSettleSim(circuit, data.initial);
     const [scope, setScope] = useState(data.scope);
     const history = sim.sim.lastSettle?.history ?? [sim.values];
     const [step, setStep] = useState(history.length - 1);
@@ -114,7 +119,11 @@ export const CircuitExplorer = withProps(
           onToggleInput={(name) => sim.toggle(name)}
           scope={scope}
           {...(data.canOpen ? { onScope: setScope } : {})}
+          readings={data.readings}
         />
+        {scope === "" && (
+          <WordInputs circuit={circuit} values={sim.values} onSet={(n, v) => sim.set(n, v)} />
+        )}
         <div className="explorer-actions">
           {data.clock && (
             <button

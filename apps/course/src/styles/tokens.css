@@ -66,6 +66,8 @@
   --wire-high: var(--sig-high);
   --wire-low: var(--sig-low);
   --wire-unknown: var(--sig-unknown);
+  /* A wire carrying a word: the neutral wire colour, drawn wider (Module 3). */
+  --wire-word: var(--wire);
   --gate-fill: #ffffff;
   --gate-stroke: #171a21;
   --gate-selected: var(--focus);

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { applyFaults, libraryCircuit, registerCircuit, stuckAt } from "@dd/dd-model";
 import { elaborate } from "@dd/hdl";
-import { Simulator, bit0, bit1, runSuite } from "@dd/sim";
+import { Simulator, bit0, bit1, formatWord, parseWord, runSuite } from "@dd/sim";
 
 import {
   circuitToDrawing,
@@ -163,7 +163,12 @@ describe("a register block in a drawing", () => {
   it("is drawn with the ports it was built with, and wired to the pins", () => {
     const drawing = circuitToDrawing(registerCircuit(4, { reset: true, enable: true }));
     const block = drawing.parts.find((p) => p.kind === "register");
-    expect(block?.ports).toEqual({ inputs: ["D", "CLK", "RST", "EN"], outputs: ["Q"] });
+    // Since Module 3 a block's ports carry their widths, so a drawing knows D and Q are words.
+    expect(block?.ports).toEqual({
+      inputs: ["D", "CLK", "RST", "EN"],
+      outputs: ["Q"],
+      widths: { D: 4, Q: 4 },
+    });
     expect(drawing.wires).toHaveLength(5);
   });
 });
@@ -190,5 +195,76 @@ describe("a fault drawn in a hand-placed circuit", () => {
     expect(drawing.wires.some((w) => w.from.part === fixed?.id && w.to.part === "orChoice")).toBe(
       true,
     );
+  });
+});
+
+describe("Module 3: blocks, words and widths in a drawing", () => {
+  it("compiles a 2-way selector block placed from the palette, wired to pins", () => {
+    const iface = {
+      inputs: [{ name: "A" }, { name: "B" }, { name: "S" }],
+      outputs: [{ name: "Y" }],
+    };
+    const start = emptyDrawing(iface);
+    const drawing = {
+      parts: [...start.parts, { id: "sel1", kind: "selector-2", x: 5, y: 1 }],
+      wires: [
+        { from: { part: "input:A", port: "y" }, to: { part: "sel1", port: "A" } },
+        { from: { part: "input:B", port: "y" }, to: { part: "sel1", port: "B" } },
+        { from: { part: "input:S", port: "y" }, to: { part: "sel1", port: "S" } },
+        { from: { part: "sel1", port: "Y" }, to: { part: "output:Y", port: "a" } },
+      ],
+    };
+    const { circuit, errors } = compileDrawing(drawing);
+    expect(errors).toEqual([]);
+    expect(circuit?.composites.map((c) => c.kind)).toEqual(["selector-2"]);
+    // Read back, it is one block again, with its ports.
+    const back = circuitToDrawing(circuit!);
+    expect(back.parts.find((p) => p.id === "sel1")?.ports?.inputs).toEqual(["A", "B", "S"]);
+  });
+
+  it("gives word pins their width, and treats a wire between different widths as no wire", () => {
+    const iface = { inputs: [{ name: "A", width: 4 }], outputs: [{ name: "Y" }] };
+    const start = emptyDrawing(iface);
+    expect(start.parts.find((p) => p.id === "input:A")?.width).toBe(4);
+    const drawing = {
+      parts: [...start.parts, { id: "not1", kind: "not", x: 5, y: 1 }],
+      wires: [
+        { from: { part: "input:A", port: "y" }, to: { part: "not1", port: "a" } },
+        { from: { part: "not1", port: "y" }, to: { part: "output:Y", port: "a" } },
+      ],
+    };
+    const { circuit, warnings } = compileDrawing(drawing);
+    expect(warnings.join(" ")).toContain("4 bits");
+    const not = circuit!.components.find((c) => c.name === "not1")!;
+    const read = circuit!.components.find((c) => c.outputs["y"] === not.inputs["a"]);
+    expect(read?.kind).toBe("open");
+  });
+
+  it("reaches a bit of a word through a split block, and makes a word with a join block", () => {
+    const iface = { inputs: [{ name: "A", width: 4 }], outputs: [{ name: "Y", width: 4 }] };
+    const start = emptyDrawing(iface);
+    // Y is A with bits 3 and 0 swapped.
+    const drawing = {
+      parts: [
+        ...start.parts,
+        { id: "split1", kind: "split-4", x: 4, y: 1 },
+        { id: "join1", kind: "join-4", x: 9, y: 1 },
+      ],
+      wires: [
+        { from: { part: "input:A", port: "y" }, to: { part: "split1", port: "W" } },
+        { from: { part: "split1", port: "b3" }, to: { part: "join1", port: "b0" } },
+        { from: { part: "split1", port: "b2" }, to: { part: "join1", port: "b2" } },
+        { from: { part: "split1", port: "b1" }, to: { part: "join1", port: "b1" } },
+        { from: { part: "split1", port: "b0" }, to: { part: "join1", port: "b3" } },
+        { from: { part: "join1", port: "W" }, to: { part: "output:Y", port: "a" } },
+      ],
+    };
+    const { circuit, errors, warnings } = compileDrawing(drawing);
+    expect(errors).toEqual([]);
+    expect(warnings).toEqual([]);
+    const sim = new Simulator(circuit!);
+    sim.setInput("A", parseWord("1000", 4));
+    sim.settle();
+    expect(formatWord(sim.read("Y"))).toBe("0001");
   });
 });

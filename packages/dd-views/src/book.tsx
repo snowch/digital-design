@@ -4,11 +4,11 @@
 
 import { useMemo, useState, type ComponentType } from "react";
 
-import { libraryCircuit } from "@dd/dd-model";
+import { chainSlices, libraryCircuit } from "@dd/dd-model";
 import { elaborate, generate, type Construct } from "@dd/hdl";
 import type { Artifact, Challenge, Lesson } from "@dd/lesson-schema";
 import type { Book, ChallengeEditorProps, InteractiveProps, Verdict } from "@dd/lesson-runtime";
-import { runSuite, type Circuit } from "@dd/sim";
+import { bitAt, parseWord, runSuite, type Circuit } from "@dd/sim";
 
 import { AnswerEditor, gradeAnswers } from "./AnswerEditor";
 import { Builder } from "./Builder";
@@ -25,6 +25,7 @@ import {
 } from "./drawing";
 import { DEFAULT_VIEW_STRINGS, format, useViewStrings, type ViewStrings } from "./strings";
 import { useSettleSim } from "./useSim";
+import { WordInputs } from "./WordInputs";
 
 const list = (names: readonly string[]) => names.join(", ");
 const isGateKind = (kind: string) => GATE_IDS.includes(kind);
@@ -93,8 +94,49 @@ export function grade(challenge: Challenge, artifact: Artifact): Verdict {
       ? challenge.tests.vectors.length
       : challenge.tests.steps.filter((s) => s.expect).length;
   if (!circuit) return { passed: false, total, failures: [], blocked: blocked ?? "" };
+  if (challenge.tests.kind === "combinational" && challenge.tests.chain)
+    return gradeChain(circuit, challenge.tests.vectors, challenge.tests.chain);
   const verdict = runSuite(circuit, challenge.tests);
   return { ...verdict, failures: verdict.failures.map(withPartLabel) };
+}
+
+type Vectors = Extract<Challenge["tests"], { kind: "combinational" }>["vectors"];
+type Chain = NonNullable<Extract<Challenge["tests"], { kind: "combinational" }>["chain"]>;
+
+/**
+ * Module 3: a slice graded at the widths its tests choose. The vectors are run in groups by how
+ * many copies of the slice each asks for, each group against a chain of that many copies, and
+ * the failures are put back in the vectors' order.
+ */
+function gradeChain(slice: Circuit, vectors: Vectors, chain: Chain): Verdict {
+  const counts = [...new Set(vectors.map((v) => v.slices ?? 1))];
+  const failures: Verdict["failures"][number][] = [];
+  for (const count of counts) {
+    const indices = vectors.flatMap((v, i) => ((v.slices ?? 1) === count ? [i] : []));
+    const circuit = chainSlices(slice, count, chain);
+    const verdict = runSuite(circuit, {
+      kind: "combinational",
+      vectors: indices.map((i) => {
+        const { slices: _slices, ...rest } = vectors[i]!;
+        // Each expected output bit, named at its copy from bit 0 up, so a failure is reported at
+        // the lowest copy that went wrong rather than at the join that makes the word.
+        const internal: Record<string, string> = {};
+        for (const name of chain.outputs) {
+          const value = rest.expect[name];
+          if (value === undefined) continue;
+          const word = parseWord(String(value), count);
+          for (let k = 0; k < count; k++) internal[`bit${k}.${name}`] = bitAt(word, k);
+        }
+        return { ...rest, internal: { ...internal, ...(rest.internal ?? {}) } };
+      }),
+    });
+    if (verdict.blocked)
+      return { passed: false, total: vectors.length, failures: [], blocked: verdict.blocked };
+    for (const f of verdict.failures)
+      failures.push(withPartLabel({ ...f, index: indices[f.index] ?? f.index }));
+  }
+  failures.sort((a, b) => a.index - b.index);
+  return { passed: failures.length === 0, total: vectors.length, failures };
 }
 
 /** The part a failure names, as the drawing labels it: "NOR gate", "D flip-flop". */
@@ -136,6 +178,9 @@ export function TryIt({
         onScope={setScope}
         {...(highlight ? { highlight } : {})}
       />
+      {scope === "" && (
+        <WordInputs circuit={circuit} values={sim.values} onSet={(n, v) => sim.set(n, v)} />
+      )}
       <div className="try-it-actions">
         {clockName && (
           <button type="button" className="button secondary" onClick={() => sim.clock(clockName)}>

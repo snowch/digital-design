@@ -13,6 +13,7 @@ import { drawingAt, netOfWire, sceneOf, type PartBox } from "./scene";
 import { GateSymbol, isShaped } from "./symbols";
 import { useOverflows } from "./useWidth";
 import { useViewStrings } from "./strings";
+import { readingText } from "./WordInputs";
 
 export interface CircuitViewProps {
   readonly circuit: Circuit;
@@ -28,6 +29,8 @@ export interface CircuitViewProps {
   readonly title: string;
   /** Show the table of inputs and outputs as text. Default true. */
   readonly table?: boolean;
+  /** Readings of each word in the table, as numbers (Module 3). */
+  readonly readings?: readonly ("unsigned" | "signed")[];
   readonly children?: ReactNode;
 }
 
@@ -42,12 +45,23 @@ export function levelOf(value: Word | undefined): Level {
 
 /**
  * A value as the views write it: a bit as 0, 1 or X; a word of up to eight bits in binary, so each
- * bit can be read off against the flip-flop that holds it; a wider word in hexadecimal.
+ * bit can be read off against the flip-flop that holds it; a wider word in hexadecimal, written as
+ * Module 1 writes it (`FF48`: capitals, a digit per four bits, no prefix). A wider word with an
+ * unknown bit keeps the engine's form.
  */
 export function valueLabel(value: Word | undefined): string {
   if (!value) return "";
-  return value.width <= 8 ? formatWord(value) : formatWord(value, 16);
+  if (value.width <= 8) return formatWord(value);
+  const full = (1n << BigInt(value.width)) - 1n;
+  if (value.known !== full) return formatWord(value, 16);
+  return value.value
+    .toString(16)
+    .toUpperCase()
+    .padStart(Math.ceil(value.width / 4), "0");
 }
+
+/** Blocks drawn closed for good: a split or a join holds no gates worth opening. */
+const SEALED = new Set(["split-4", "join-4"]);
 
 function fullPath(scope: string, local: string): string {
   return scope ? `${scope}/${local}` : local;
@@ -62,6 +76,7 @@ export function CircuitView({
   onToggleInput,
   title,
   table = true,
+  readings = [],
   children,
 }: CircuitViewProps) {
   const strings = useViewStrings();
@@ -90,7 +105,9 @@ export function CircuitView({
     if (last && last.label === label) levels[levels.length - 1] = { path, label };
     else levels.push({ path, label });
   }
-  const canOpen = drawing.parts.some((part) => sub.composites.some((c) => c.path === part.id));
+  const canOpen = drawing.parts.some((part) =>
+    sub.composites.some((c) => c.path === part.id && !SEALED.has(c.kind)),
+  );
   const showTrail = onScope !== undefined && (levels.length > 1 || canOpen);
 
   const pinKey = (box: PartBox, e: KeyboardEvent) => {
@@ -141,10 +158,11 @@ export function CircuitView({
               const level = levelOf(value);
               const name = net !== undefined ? (sub.nets[net]?.name ?? "") : "";
               const isHot = net !== undefined && hot === net;
+              const wide = net !== undefined && (sub.nets[net]?.width ?? 1) > 1;
               return (
                 <g
                   key={i}
-                  className={`wire wire-${level}${isHot ? " wire-hot" : ""}`}
+                  className={`wire wire-${level}${wide ? " wire-word" : ""}${isHot ? " wire-hot" : ""}`}
                   data-net={name}
                   role="button"
                   tabIndex={0}
@@ -176,7 +194,9 @@ export function CircuitView({
               const isPin = part.kind === "input" || part.kind === "output";
               const path = fullPath(scope, part.id);
               const marked = highlighted.has(path);
-              const composite = sub.composites.find((c) => c.path === part.id);
+              const composite = sub.composites.find(
+                (c) => c.path === part.id && !SEALED.has(c.kind),
+              );
               const outNet =
                 part.kind === "input"
                   ? sub.inputs.find((p) => p.name === part.name)?.net
@@ -185,7 +205,9 @@ export function CircuitView({
                     : undefined;
               const pinValue = outNet !== undefined ? values?.[outNet] : undefined;
               if (isPin) {
-                const clickable = part.kind === "input" && onToggleInput;
+                // A word's pin is not a button; its bits are set under the drawing.
+                const oneBit = outNet === undefined || (sub.nets[outNet]?.width ?? 1) === 1;
+                const clickable = part.kind === "input" && oneBit && onToggleInput;
                 const label = `${part.name ?? part.id}${pinValue ? ` = ${valueLabel(pinValue)}` : ""}`;
                 return (
                   <g
@@ -206,16 +228,23 @@ export function CircuitView({
                     <text x={box.w / 2} y={box.h / 2 + 4} textAnchor="middle" className="pin-name">
                       {part.name ?? part.id}
                     </text>
-                    {pinValue && (
-                      <text
-                        x={box.w + 6}
-                        y={box.h / 2 + 4}
-                        textAnchor="start"
-                        className="value-label"
-                      >
-                        {valueLabel(pinValue)}
-                      </text>
-                    )}
+                    {pinValue &&
+                      (part.kind === "input" && pinValue.width > 1 ? (
+                        // A word's wire is wide and turns close to its pin, so the word's value
+                        // sits above the pin rather than across the wire (Module 3).
+                        <text x={box.w / 2} y={-5} textAnchor="middle" className="value-label">
+                          {valueLabel(pinValue)}
+                        </text>
+                      ) : (
+                        <text
+                          x={box.w + 6}
+                          y={box.h / 2 + 4}
+                          textAnchor="start"
+                          className="value-label"
+                        >
+                          {valueLabel(pinValue)}
+                        </text>
+                      ))}
                   </g>
                 );
               }
@@ -319,7 +348,7 @@ export function CircuitView({
           ? `${sub.nets[hot]?.name ?? ""}${values?.[hot] ? ` = ${valueLabel(values[hot] as Word)}` : ""}`
           : "\u00a0"}
       </p>
-      {table && values && <SignalTable circuit={sub} values={values} />}
+      {table && values && <SignalTable circuit={sub} values={values} readings={readings} />}
     </div>
   );
 }
@@ -329,10 +358,12 @@ export function SignalTable({
   circuit,
   values,
   caption,
+  readings = [],
 }: {
   circuit: Circuit;
   values: readonly Word[];
   caption?: string;
+  readings?: readonly ("unsigned" | "signed")[];
 }) {
   const strings = useViewStrings();
   const rows = [
@@ -340,13 +371,18 @@ export function SignalTable({
     ...circuit.outputs.map((p) => ({ role: strings.circuit.output, ...p })),
   ];
   return (
-    <table className="signal-table">
+    <table className={`signal-table${readings.length ? " with-readings" : ""}`}>
       <caption>{caption ?? strings.circuit.signals}</caption>
       <thead>
         <tr>
           <th scope="col">{strings.circuit.signal}</th>
           <th scope="col">{strings.circuit.role}</th>
           <th scope="col">{strings.circuit.value}</th>
+          {readings.map((r) => (
+            <th scope="col" key={r}>
+              {strings.readings.names[r]}
+            </th>
+          ))}
         </tr>
       </thead>
       <tbody>
@@ -355,6 +391,9 @@ export function SignalTable({
             <th scope="row">{r.name}</th>
             <td>{r.role}</td>
             <td className={`value-${levelOf(values[r.net])}`}>{valueLabel(values[r.net])}</td>
+            {readings.map((k) => (
+              <td key={k}>{readingText(values[r.net], k)}</td>
+            ))}
           </tr>
         ))}
       </tbody>

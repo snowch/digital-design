@@ -9,6 +9,7 @@ import { CircuitBuilder, type Circuit, type NetId } from "@dd/sim";
 import { dFlipFlop, type FlipFlopOptions } from "./flipflop";
 import { dLatch, gatedSrLatch, srLatch } from "./latches";
 import { register } from "./register";
+import { combinationalLibrary } from "./library-combinational";
 
 /**
  * A loop of `n` inverters with a `kick` input ORed into it. While kick is 1 the loop is forced;
@@ -411,6 +412,8 @@ export const LIBRARY: Readonly<Record<string, () => Circuit>> = {
   "shift-4": () => shiftFourCircuit(),
   "gated-clock-bit": () => gatedClockCircuit(),
   "glitch-and-not": () => glitchCircuit(),
+  // Module 3, combinational design: selectors, decoders, adders and the ALU.
+  ...combinationalLibrary(placed),
 };
 
 export function libraryCircuit(id: string): Circuit {
