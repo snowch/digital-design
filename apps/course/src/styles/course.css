@@ -199,6 +199,56 @@ figure.interactive > figcaption {
 figure.interactive > figcaption .badge {
   margin-right: 0;
 }
+/* The time-model badge is a button: it opens its model's note under the caption. */
+.time-model-toggle {
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.time-model-toggle .badge {
+  gap: 0.45em;
+}
+.time-model-toggle:hover .badge {
+  border-color: var(--accent);
+  color: var(--fg);
+}
+.time-model-toggle:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+.badge-mark {
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid currentColor;
+  transition: transform var(--motion);
+}
+.time-model-toggle[aria-expanded="true"] .badge-mark {
+  transform: rotate(180deg);
+}
+.time-model-note {
+  flex-basis: 100%;
+  margin: var(--space-1) 0 0;
+  padding: var(--space-2) var(--space-3);
+  border-left: 3px solid var(--border-strong);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--note-bg);
+  color: var(--fg);
+  font-size: var(--text-sm);
+}
+.time-model-note[hidden] {
+  display: none;
+}
+.time-model-note .prose p {
+  margin: 0;
+}
 figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
   padding: var(--space-4) var(--space-5);
   border: 1px solid var(--border);
@@ -914,6 +964,9 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
   }
   figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
     padding: var(--space-3);
+  }
+  .time-model-toggle {
+    min-height: 2.5rem;
   }
   h1 {
     font-size: 1.75rem;

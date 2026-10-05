@@ -17,9 +17,14 @@ A lesson is one module in `content/lessons/` exporting a `LessonInput` (the type
   investigation, construction, failureExperiment, explanation, generalisation, challenge,
   reflection. Each has a title, Markdown `prose` shown first, and `interactives`.
 - An interactive has an `id` (unique in the lesson), a `kind` the book's registry knows, a
-  `timeModel` the page states on a badge (`settle`, `clocked`, `delay`, `none`), a `caption`,
+  `timeModel` (`settle`, `clocked`, `delay`, `none`), a `caption`,
   `props` the kind's schema checks, and optional `lead` and `after` Markdown shown above and below
   the figure. The kind `challenge` with `props.challengeId` mounts a challenge.
+- A figure that runs the simulator shows its time model on a badge ("Stepped", "Clocked", "Gate
+  delays"), and pressing the badge shows that model's note, the book's `timeModelNotes`, under
+  the caption, so a reader learns the rules where the figure is. A figure with `timeModel: "none"`
+  shows no badge: a label saying what a figure is not tells the reader nothing. Prose need not
+  explain the badges; it may name the model a figure runs where that matters to the argument.
 - `challenges`: each with a `title`, a Markdown `task`, `gradedDirection` (`draw`, `write` or
   `answer`),
   the `interface` (input and output names), the `palette` a drawn solution may use, the

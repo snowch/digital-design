@@ -12,6 +12,8 @@ export interface Strings {
     readonly modelNote: string;
     readonly modelVsReality: string;
     readonly timeModel: Readonly<Record<string, string>>;
+    /** The time-model badge's accessible name; {model} is the badge's text. */
+    readonly badgeLabel: string;
     readonly unknownInteractive: string;
     readonly brokenInteractive: string;
   };
@@ -65,8 +67,8 @@ export const DEFAULT_STRINGS: Strings = {
       settle: "Stepped",
       clocked: "Clocked",
       delay: "Gate delays",
-      none: "No simulation",
     },
+    badgeLabel: "Time model: {model}",
     unknownInteractive: "Unknown interactive type: {kind}",
     brokenInteractive: "The {kind} figure could not be shown: {message}",
   },

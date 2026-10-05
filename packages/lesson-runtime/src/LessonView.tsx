@@ -2,7 +2,7 @@
 // model note and the model-versus-reality note. Interactives come from the book's registry by
 // kind; the `challenge` kind is the runtime's own.
 
-import { Component, type ErrorInfo, type ReactNode } from "react";
+import { Component, useState, type ErrorInfo, type ReactNode } from "react";
 
 import type { Interactive, Lesson } from "@dd/lesson-schema";
 import { timeModelsUsed } from "@dd/lesson-schema";
@@ -75,7 +75,16 @@ function InteractiveFigure({
       </p>
     );
   }
+  // A badge only on a figure that runs the simulator: it names the rules that made what the
+  // figure shows, and opens that model's note where the reader is, not at the foot of the page.
+  // A figure that runs nothing gets no badge: a label saying what a figure is not tells nothing.
+  const simulated = interactive.timeModel !== "none";
   const badge = strings.lesson.timeModel[interactive.timeModel] ?? interactive.timeModel;
+  const note = simulated
+    ? book.timeModelNotes[interactive.timeModel as keyof Book["timeModelNotes"]]
+    : undefined;
+  const [noteOpen, setNoteOpen] = useState(false);
+  const noteId = `ix-${interactive.id}-model`;
   return (
     <figure
       className="interactive"
@@ -85,7 +94,30 @@ function InteractiveFigure({
     >
       {interactive.lead && <Prose markdown={interactive.lead} className="figure-lead" />}
       <figcaption>
-        <span className="badge time-model">{badge}</span> {interactive.caption}
+        {simulated &&
+          (note !== undefined ? (
+            <button
+              type="button"
+              className="time-model-toggle"
+              aria-expanded={noteOpen}
+              aria-controls={noteId}
+              aria-label={format(strings.lesson.badgeLabel, { model: badge })}
+              onClick={() => setNoteOpen((open) => !open)}
+            >
+              <span className="badge time-model">
+                {badge}
+                <span className="badge-mark" aria-hidden="true" />
+              </span>
+            </button>
+          ) : (
+            <span className="badge time-model">{badge}</span>
+          ))}{" "}
+        {interactive.caption}
+        {note !== undefined && (
+          <div id={noteId} className="time-model-note" hidden={!noteOpen}>
+            <Prose markdown={note} />
+          </div>
+        )}
       </figcaption>
       <FigureBoundary
         fallback={(message) => (

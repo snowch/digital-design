@@ -372,7 +372,7 @@ session attacked its seven findings before acting:
 
 | Finding | Sceptic | What was done |
 | --- | --- | --- |
-| The "No simulation" badge is now the first thing on the course's first figure, and is explained two sections later | in part: on a drawing with nothing to run, the badge's plain reading is true; the general fix, no badge on a figure with nothing to run, is the author's open question 2 below | left for the author |
+| The "No simulation" badge is now the first thing on the course's first figure, and is explained two sections later | in part: on a drawing with nothing to run, the badge's plain reading is true; the general fix, no badge on a figure with nothing to run, was the author's question 2 below | decided by the author the same day: no badge on a figure that runs nothing, and each remaining badge opens its model's note |
 | The jagged mark between the compressor and the cable has no name until the next paragraph; three names for one machine | in part: the mark is unnamed; the opening paragraph's "the cold room's compressor motor" carries both later names | a label beside the mark, drafted (brief D2) |
 | The caption repeats the paragraph and the strip's title | upheld | redrafted to say only what the drawing adds (brief D2) |
 | "Receiver" is drawn before the words introduce it | rejected: the labelled box now grounds the next paragraph's "The receiver in the display", which then says what it does | none |
@@ -386,10 +386,10 @@ session attacked its seven findings before acting:
    such section on this branch or on `main`. The lesson states only that the course builds a
    computer that works on 16-bit words. If the machine's fixed facts are written down somewhere,
    the generalisation section could say more about where such a word lives in it.
-2. Every figure in this lesson carries the runtime's "No simulation" badge, which the prose now
-   explains. A Module 1 lesson has no time model at all; the author may prefer that the runtime
-   omit the badge for `timeModel: "none"`, which would change the existing lessons' text figures
-   too.
+2. ~~Every figure in this lesson carries the runtime's "No simulation" badge.~~ **Decided on
+   2026-10-05:** a figure that runs nothing shows no badge, and the remaining badges open their
+   model's note under the caption. The prediction section's two sentences about the badge were
+   cut, since they were no longer true; nothing else in the lesson mentioned it.
 3. **Six commit messages on this branch carry a model name.** The session's attribution
    trailer, which the session appends to every commit message, named the model, and the task
    forbids model names in commit message bodies. Found at 23:50 by scanning the branch's

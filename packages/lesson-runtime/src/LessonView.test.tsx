@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
 import { SECTION_KINDS } from "@dd/lesson-schema";
@@ -7,7 +8,7 @@ import { SECTION_KINDS } from "@dd/lesson-schema";
 import { LessonView } from "./LessonView";
 import { fixtureBook, fixtureLesson } from "./fixtures";
 import { memoryStorage } from "./state";
-import { DEFAULT_STRINGS } from "./strings";
+import { DEFAULT_STRINGS, format } from "./strings";
 
 describe("LessonView", () => {
   const lesson = fixtureLesson();
@@ -37,6 +38,30 @@ describe("LessonView", () => {
     expect(screen.getByText("Unknown interactive type: nothing-has-this")).toBeInTheDocument();
   });
 
+  it("gives a simulated figure a badge that opens its model's note, and others no badge", async () => {
+    const user = userEvent.setup();
+    render(<LessonView book={book} lesson={lesson} storage={memoryStorage()} />);
+    const loop = document.getElementById("ix-loop") as HTMLElement;
+    const badge = within(loop).getByRole("button", {
+      name: format(DEFAULT_STRINGS.lesson.badgeLabel, {
+        model: DEFAULT_STRINGS.lesson.timeModel["settle"] ?? "",
+      }),
+    });
+    expect(badge).toHaveAttribute("aria-expanded", "false");
+    const note = book.timeModelNotes.settle ?? "";
+    expect(within(loop).getByText(note)).not.toBeVisible();
+    await user.click(badge);
+    expect(badge).toHaveAttribute("aria-expanded", "true");
+    expect(within(loop).getByText(note)).toBeVisible();
+    await user.click(badge);
+    expect(within(loop).getByText(note)).not.toBeVisible();
+    // A figure that runs nothing names no time model at all.
+    const none = document.querySelector('[data-time-model="none"]') as HTMLElement;
+    expect(none).not.toBeNull();
+    expect(none.querySelector(".badge")).toBeNull();
+    expect(within(none).queryByRole("button", { expanded: false })).toBeNull();
+  });
+
   it("mounts the challenge section's challenge through the runner", () => {
     render(<LessonView book={book} lesson={lesson} storage={memoryStorage()} />);
     expect(screen.getByRole("heading", { level: 3, name: /Remember a press/ })).toBeInTheDocument();
@@ -48,7 +73,9 @@ describe("LessonView", () => {
     expect(
       screen.getByRole("heading", { name: DEFAULT_STRINGS.lesson.modelNote }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/Every gate takes one step/)).toBeInTheDocument();
+    // At the foot of the lesson; each simulated figure's badge also holds the note, hidden.
+    const foot = screen.getByRole("complementary", { name: DEFAULT_STRINGS.lesson.modelNote });
+    expect(within(foot).getByText(/Every gate takes one step/)).toBeVisible();
     expect(
       screen.getByRole("heading", { name: DEFAULT_STRINGS.lesson.modelVsReality }),
     ).toBeInTheDocument();
