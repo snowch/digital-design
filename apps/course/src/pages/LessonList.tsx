@@ -6,10 +6,23 @@ import { STRINGS } from "../strings";
 export function LessonList({ book, storage }: { book: Book; storage: Storage }) {
   const byModule = new Map<number, typeof book.lessons>();
   for (const l of book.lessons) byModule.set(l.module, [...(byModule.get(l.module) ?? []), l]);
+  // The module numbers missing between the first and the last lesson, so the page says which
+  // modules are still to be written instead of leaving a gap the reader has to explain.
+  const present = [...byModule.keys()].sort((a, b) => a - b);
+  const first = present[0];
+  const last = present[present.length - 1];
+  const toWrite: number[] = [];
+  if (first !== undefined && last !== undefined)
+    for (let m = first; m <= last; m++) if (!byModule.has(m)) toWrite.push(m);
   return (
     <>
       <h1>{book.title}</h1>
       {book.lessons.length === 0 && <p>{STRINGS.noLessons}</p>}
+      {toWrite.length > 0 && (
+        <p className="meta to-write">
+          {toWrite.length === 1 ? STRINGS.toWriteOne(toWrite[0]!) : STRINGS.toWriteMany(toWrite)}
+        </p>
+      )}
       {[...byModule.entries()].map(([module, lessons]) => (
         <section key={module} aria-labelledby={`module-${module}`}>
           <h2 id={`module-${module}`}>{STRINGS.module(module)}</h2>
