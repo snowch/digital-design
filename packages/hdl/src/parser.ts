@@ -217,7 +217,7 @@ class Parser {
   /** Module 6: `= '{a, b, c}`, the values an array is filled with, lowest address first. */
   private valueList(): Expression[] {
     this.expect("=");
-    this.expect("'{", "fill an array with a list of values written `'{8'h12, 8'h34}`");
+    this.expect("'{", "Fill an array with values written as `'{8'h12, 8'h34}`.");
     const values: Expression[] = [this.expression()];
     while (this.is(",")) {
       this.next();

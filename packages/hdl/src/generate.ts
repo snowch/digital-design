@@ -45,7 +45,10 @@ export function generate(circuit: Circuit): Generated {
 
   // Flip-flops and registers are written as behaviour; everything under them is skipped.
   // Only the outermost: a register's flip-flops are written by the register's one `always_ff`.
-  const clocked = circuit.composites.filter((c) => c.kind === "dff" || c.kind === "register");
+  // Module 6: a memory or a ROM built as a component is written as an array, as it is read.
+  const clocked = circuit.composites.filter(
+    (c) => c.kind === "dff" || c.kind === "register" || c.kind === "memory" || c.kind === "rom",
+  );
   const behavioural = clocked.filter(
     (c) => !clocked.some((o) => o !== c && c.path.startsWith(`${o.path}/`)),
   );
@@ -126,7 +129,11 @@ export function generate(circuit: Circuit): Generated {
     if (owner) {
       if (emittedBehavioural.has(owner.path)) continue;
       emittedBehavioural.add(owner.path);
-      body.push(...alwaysFf(owner, names, declare, width, readOutside));
+      body.push(
+        ...(owner.kind === "memory" || owner.kind === "rom"
+          ? memoryText(owner, circuit, names, declare)
+          : alwaysFf(owner, names, declare, width, readOutside)),
+      );
       continue;
     }
     const out = c.outputs["y"];
@@ -195,6 +202,47 @@ function alwaysFf(
   if (qb !== undefined && names.has(qb) && readOutside(qb, c.path)) {
     declare(qb);
     lines.push(`  assign ${names.get(qb)} = ~${names.get(q)};`);
+  }
+  return lines;
+}
+
+/**
+ * Module 6: a memory as an array. Its words are declared after its name, filled from a list of
+ * values if it was made with one, each read is an `assign` of one word by its address, and the
+ * write is an `always_ff` of its own.
+ */
+function memoryText(
+  c: CompositeDef,
+  circuit: Circuit,
+  names: Map<NetId, string>,
+  declare: (n: NetId) => void,
+): string[] {
+  const cells = circuit.components.find((x) => x.path === `${c.path}/cells`);
+  const words = Number(cells?.params?.["words"] ?? 1);
+  const width = Number(cells?.params?.["width"] ?? 1);
+  const init = String(cells?.params?.["init"] ?? "").trim();
+  const name = identifier(c.name);
+  const digits = Math.ceil(width / 4);
+  const list = init
+    ? ` = '{${init
+        .split(/\s+/)
+        .map((v) => `${width}'h${v.toUpperCase().padStart(digits, "0")}`)
+        .join(", ")}}`
+    : "";
+  const vector = width === 1 ? "logic" : `logic [${width - 1}:0]`;
+  const lines = [`  ${vector} ${name} [0:${words - 1}]${list};`];
+  const single = c.inputs["A"] !== undefined;
+  const reads = Object.keys(c.outputs).filter((p) => p.startsWith("Q"));
+  for (const port of reads) {
+    const q = c.outputs[port] as NetId;
+    const address = (single ? c.inputs["A"] : c.inputs[`R${port.slice(1)}`]) as NetId;
+    declare(q);
+    lines.push(`  assign ${names.get(q)} = ${name}[${names.get(address)}];`);
+  }
+  if (c.kind === "memory") {
+    const g = (p: string) => names.get(c.inputs[p] as NetId);
+    const at = single ? g("A") : g("WA");
+    lines.push(`  always_ff @(posedge ${g("CLK")}) if (${g("WE")}) ${name}[${at}] <= ${g("D")};`);
   }
   return lines;
 }

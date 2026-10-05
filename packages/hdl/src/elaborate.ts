@@ -250,7 +250,7 @@ class Elaborator {
     if (this.arrays.has(name))
       throw new HdlError(
         at,
-        `${name} is a memory: write one of its words at a clock edge, in an \`always_ff\` of its own, as \`if (WE) ${name}[A] <= D;\``,
+        `${name} is a memory; write one word at a clock edge in an \`always_ff\` of its own, like \`if (WE) ${name}[A] <= D;\`.`,
       );
     const s = this.signals.get(name);
     if (!s)
@@ -399,6 +399,10 @@ class Elaborator {
 
   /** Elaborates `e` so that its final gate drives `target`. */
   private into(e: Expression, target: NetId, width: number): void {
+    if (e.kind === "index" && e.subject.kind === "identifier" && this.arrays.has(e.subject.name)) {
+      this.readArray(this.arrays.get(e.subject.name) as ArrayMemory, e, target);
+      return;
+    }
     switch (e.kind) {
       case "identifier":
       case "literal":
@@ -431,7 +435,7 @@ class Elaborator {
         if (this.arrays.has(e.name))
           throw new HdlError(
             e.at,
-            `${e.name} is a memory: read one of its words by its address, as ${e.name}[A]`,
+            `${e.name} is a memory; read one word by its address, like \`${e.name}[A]\`.`,
           );
         const s = this.signals.get(e.name);
         if (!s) throw new HdlError(e.at, `${e.name} is not declared`);
@@ -740,7 +744,7 @@ class Elaborator {
       if (from !== 0)
         throw new HdlError(
           at,
-          `an array's words start at 0 in this course: write [0:${Number(this.constant(dims.to)) - from}]`,
+          `Arrays start at 0 in this course; write \`[0:${Number(this.constant(dims.to)) - from}]\` instead.`,
         );
       words = Number(this.constant(dims.to)) + 1;
     }
@@ -756,14 +760,14 @@ class Elaborator {
       if (init.length !== words)
         throw new HdlError(
           at,
-          `${name} has ${words} words but its list has ${init.length} value${init.length === 1 ? "" : "s"}; give one value per word`,
+          `${name} has ${words} words, but the list has ${init.length} value${init.length === 1 ? "" : "s"}; give one value per word.`,
         );
       values = init.map((v) => {
         const n = this.constant(v);
         if (n < 0n || n >= 1n << BigInt(width))
           throw new HdlError(
             v.at,
-            `${v.kind === "literal" ? v.text : "this value"} does not fit in a word of ${width} bits`,
+            `\`${v.kind === "literal" ? v.text : "this value"}\` does not fit in a word of ${width} bits.`,
           );
         if (v.kind === "literal" && v.width !== undefined && v.width !== width)
           this.widthMismatch(v.at, v.width, width);
@@ -787,14 +791,16 @@ class Elaborator {
     output: NetId | undefined,
   ): NetId {
     if (e.hi !== e.lo)
-      throw new HdlError(e.at, `read one word of ${memory.name} at a time, as ${memory.name}[A]`);
+      throw new HdlError(
+        e.at,
+        `Read or write one word of ${memory.name} at a time, like \`${memory.name}[A]\`.`,
+      );
     const address = this.expression(e.hi, undefined);
-    const q = this.b.net(`${memory.name}_q${memory.reads.length}`, memory.width);
+    // The memory drives the signal the read is assigned to, as `assign Q = mem[A]` says.
+    if (output !== undefined && this.b.widthOf(output) !== memory.width)
+      this.widthMismatch(e.at, memory.width, this.b.widthOf(output));
+    const q = output ?? this.b.net(`${memory.name}_q${memory.reads.length}`, memory.width);
     memory.reads.push({ address, q });
-    if (output !== undefined) {
-      this.b.gate("buf", [q], { output, ...this.g });
-      return output;
-    }
     return q;
   }
 
@@ -810,16 +816,19 @@ class Elaborator {
     if (targets.size !== 1 || !shape || shape.target.name !== memory.name)
       throw new HdlError(
         at,
-        `write ${memory.name} in an \`always_ff\` of its own, one word at a time: \`if (WE) ${memory.name}[A] <= D;\``,
+        `Write ${memory.name} in an \`always_ff\` of its own, one word at a time: \`if (WE) ${memory.name}[A] <= D;\`.`,
       );
     if (memory.write)
       throw new HdlError(
         at,
-        `${memory.name} is written in two places; write it in one \`always_ff\``,
+        `${memory.name} is written in two places; write it in one \`always_ff\`.`,
       );
     const select = shape.target.select as NonNullable<typeof shape.target.select>;
     if (select.hi !== select.lo)
-      throw new HdlError(at, `write one word of ${memory.name} at a time, as ${memory.name}[A]`);
+      throw new HdlError(
+        at,
+        `Read or write one word of ${memory.name} at a time, like \`${memory.name}[A]\`.`,
+      );
     const address = this.expression(select.hi, undefined);
     const data = this.expression(shape.value, memory.width);
     if (this.b.widthOf(data) !== memory.width)
@@ -857,7 +866,7 @@ class Elaborator {
     if (!memory.init)
       throw new HdlError(
         memory.at,
-        `${memory.name} is never written and has no list of values, so every word would be unknown`,
+        `${memory.name} is never written and has no list of values; every word would be unknown.`,
       );
     romBlock(
       this.b,

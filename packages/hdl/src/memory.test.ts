@@ -8,6 +8,7 @@ import { runSuite, type SequenceStep } from "@dd/sim";
 
 import { elaborate } from "./elaborate";
 import { ALL_CONSTRUCTS } from "./gate";
+import { generate } from "./generate";
 
 const REGFILE = `module regs(input logic [1:0] WA, input logic [3:0] D, input logic WE, input logic CLK,
   input logic [1:0] RA, input logic [1:0] RB, output logic [3:0] QA, output logic [3:0] QB);
@@ -59,10 +60,10 @@ describe("arrays", () => {
     const r = elaborate(REGFILE, { allowed });
     expect(r.circuit).toBeUndefined();
     expect(r.messages[0]?.text).toBe(
-      "This challenge does not use a memory written as an array, such as `logic [7:0] mem [0:15]`.",
+      "This challenge does not use arrays to declare memories, like `logic [7:0] mem [0:15]`.",
     );
     const t = elaborate(TABLE, { allowed: [...allowed, "array"] });
-    expect(t.messages[0]?.text).toMatch(/^This challenge does not use an array filled from a list/);
+    expect(t.messages[0]?.text).toMatch(/^This challenge does not use array initialisation/);
   });
 
   it("say plainly what is wrong with a memory written another way", () => {
@@ -73,9 +74,9 @@ ${body}
 endmodule
 `).messages[0]?.text;
     expect(wrong("  assign Q = mem[A];\n  assign mem[A] = D;")).toMatch(
-      /is a memory: write one of its words at a clock edge/,
+      /is a memory; write one word at a clock edge/,
     );
-    expect(wrong("  assign Q = mem;")).toMatch(/read one of its words by its address/);
+    expect(wrong("  assign Q = mem;")).toMatch(/read one word by its address/);
     expect(wrong("  assign Q = mem[A];")).toMatch(/never written and has no list of values/);
     expect(
       wrong(
@@ -83,7 +84,20 @@ endmodule
       ),
     ).toMatch(/in an `always_ff` of its own, one word at a time/);
     expect(elaborate(TABLE.replace("8'h78}", "8'h78, 8'h9A}")).messages[0]?.text).toMatch(
-      /has 4 words but its list has 5 values/,
+      /has 4 words, but the list has 5 values/,
     );
+  });
+});
+
+describe("a memory written back as text", () => {
+  it("comes out as the array it was elaborated from, and elaborates to the same behaviour", () => {
+    const first = elaborate(REGFILE);
+    const text = generate(first.circuit!).text;
+    expect(text).toContain("logic [3:0] words [0:3];");
+    expect(text).toContain("assign QA = words[RA];");
+    expect(text).toContain("always_ff @(posedge CLK) if (WE) words[WA] <= D;");
+    expect(elaborate(text).messages).toEqual([]);
+    const rom = generate(elaborate(TABLE).circuit!).text;
+    expect(rom).toContain("logic [7:0] values [0:3] = '{8'h12, 8'h34, 8'h56, 8'h78};");
   });
 });

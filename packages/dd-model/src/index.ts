@@ -15,3 +15,4 @@ export * from "./combinational";
 export * from "./chain";
 // Module 6: memories, as gates and as components.
 export * from "./memory";
+export { FILLED_BYTES } from "./library-memory";

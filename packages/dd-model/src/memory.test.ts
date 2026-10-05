@@ -88,21 +88,23 @@ describe("the four-word RAM, as gates", () => {
 
 describe("a memory as a component", () => {
   it("behaves as the gates do: write at an edge with WE 1, read with no edge", () => {
-    const s = sim(libraryCircuit("memory-16"), { A: "0101", D: "10100101", WE: 1, CLK: 0 });
-    expect(q(s)).toBe("XXXXXXXX");
+    const w = (n: number) => n.toString(2).padStart(16, "0");
+    const x = "X".repeat(16);
+    const s = sim(libraryCircuit("memory-16"), { A: "0101", D: w(0xa5c3), WE: 1, CLK: 0 });
+    expect(q(s)).toBe(x);
     s.clockCycle("CLK");
-    expect(q(s)).toBe("10100101");
+    expect(q(s)).toBe(w(0xa5c3));
     set(s, { A: "0100", WE: 0 });
-    expect(q(s)).toBe("XXXXXXXX");
+    expect(q(s)).toBe(x);
     set(s, { CLK: 1 });
-    set(s, { WE: 1, D: "11110000" });
-    expect(q(s)).toBe("XXXXXXXX");
+    set(s, { WE: 1, D: w(0xf0f0) });
+    expect(q(s)).toBe(x);
     set(s, { CLK: 0, A: "0101", WE: 0 });
-    expect(q(s)).toBe("10100101");
+    expect(q(s)).toBe(w(0xa5c3));
     const state = s.circuit.nets.find((n) => n.name === "memory/state")!;
-    const words = memoryWords(s.read(state.id), 16, 8).map((w) => formatWord(w));
-    expect(words[5]).toBe("10100101");
-    expect(words[4]).toBe("XXXXXXXX");
+    const words = memoryWords(s.read(state.id), 16, 16).map((v) => formatWord(v));
+    expect(words[5]).toBe(w(0xa5c3));
+    expect(words[4]).toBe(x);
   });
 });
 
@@ -116,4 +118,94 @@ describe("the register file", () => {
     expect(q(s, "QA")).toBe("0111");
     expect(q(s, "QB")).toBe("1000");
   });
+});
+
+describe("the memory of bytes", () => {
+  it("keeps a word as two bytes, the low byte at the even address", () => {
+    const s = sim(libraryCircuit("byte-memory-block"), {
+      A: "0110",
+      D: "1111111101001000",
+      WORD: 1,
+      WE: 1,
+      CLK: 0,
+    });
+    s.clockCycle("CLK");
+    expect(q(s)).toBe("1111111101001000");
+    set(s, { WE: 0, WORD: 0, A: "0111" });
+    expect(q(s)).toBe("0000000011111111");
+    set(s, { A: "0110" });
+    expect(q(s)).toBe("0000000001001000");
+  });
+
+  it("writes one byte at an odd address from D's low byte", () => {
+    const s = sim(libraryCircuit("byte-memory-block"), {
+      A: "0100",
+      D: "1111111101001000",
+      WORD: 1,
+      WE: 1,
+      CLK: 0,
+    });
+    s.clockCycle("CLK");
+    set(s, { A: "0101", WORD: 0, D: "0000000000010010" });
+    s.clockCycle("CLK");
+    set(s, { A: "0100", WORD: 1, WE: 0 });
+    expect(q(s)).toBe("0001001001001000");
+  });
+
+  it("refuses a word at an odd address: ODD is 1, a write changes nothing, a read gives the word below", () => {
+    const s = sim(libraryCircuit("byte-memory-block"), {
+      A: "0100",
+      D: "1111111101001000",
+      WORD: 1,
+      WE: 1,
+      CLK: 0,
+    });
+    s.clockCycle("CLK");
+    set(s, { A: "0101", D: "0000000000000000" });
+    expect(formatWord(s.read("ODD"))).toBe("1");
+    s.clockCycle("CLK");
+    set(s, { WE: 0 });
+    expect(q(s)).toBe("1111111101001000");
+  });
+
+  it("can be filled from a list", () => {
+    const s = sim(libraryCircuit("byte-memory-filled"), { A: "0010", WORD: 1 });
+    expect(q(s)).toBe("1111111101001000");
+  });
+});
+
+describe("the shop's memory", () => {
+  const start = {
+    A5: 0,
+    A4: 0,
+    A: "0000",
+    D: "0",
+    WORD: 1,
+    WE: 0,
+    CLK: 0,
+    SENSOR: "1111111101001000",
+  };
+  for (const id of ["shop-memory-block", "shop-parts"]) {
+    it(`${id}: gives each part a quarter of the addresses`, () => {
+      const s = sim(libraryCircuit(id), start);
+      expect(q(s)).toBe("1111111100000110");
+      set(s, { A: "0110" });
+      expect(q(s)).toBe("0000000000110010");
+      set(s, { A5: 1, A4: 1 });
+      expect(q(s)).toBe("1111111101001000");
+      set(s, { A5: 1, A4: 0, D: "0000000000010010", WE: 1 });
+      s.clockCycle("CLK");
+      expect(q(s, "DISPLAY")).toBe("0000000000010010");
+      set(s, { A: "1111", WE: 0 });
+      expect(q(s)).toBe("0000000000010010");
+      set(s, { A5: 0, A4: 1, A: "0100", WE: 1, D: "0000001111101000" });
+      s.clockCycle("CLK");
+      set(s, { WE: 0 });
+      expect(q(s)).toBe("0000001111101000");
+      expect(q(s, "DISPLAY")).toBe("0000000000010010");
+      set(s, { A5: 1, A4: 1, WE: 1, D: "0" });
+      s.clockCycle("CLK");
+      expect(q(s)).toBe("1111111101001000");
+    });
+  }
 });

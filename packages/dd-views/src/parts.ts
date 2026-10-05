@@ -77,13 +77,28 @@ const COMPOSITE_LABELS: Readonly<Record<string, string>> = {
   "addsub-4": "4-bit add/subtract",
   // Module 6: the memory lessons' blocks. Drafted by the prose process
   // (docs/notes/module-6-memory.md).
-  "word-register": "register",
   "word-selector-2": "word selector",
   "word-selector-4": "word selector",
   ram: "RAM",
   "register-file": "register file",
   memory: "memory",
   rom: "ROM",
+  "word-register-16": "register",
+  "word-selector-16": "word selector",
+  "split-address": "split",
+  "split-bytes": "split",
+  "join-bytes": "join",
+  "byte-memory": "memory of bytes",
+  "byte-rom": "ROM of bytes",
+  "table-rom": "ROM",
+  "shop-memory": "shop memory",
+  // Module 6's circuits, named in the trail above their drawings.
+  "ram-block": "Four-word RAM",
+  "ram-wide": "RAM with three-bit address",
+  "memory-16": "Memory of 16 words",
+  "regfile-block": "Four-word register file",
+  "byte-memory-block": "Memory of 16 bytes",
+  "shop-memory-block": "The shop's memory",
 };
 
 const COMPOSITE_DESCRIPTIONS: Readonly<Record<string, string>> = {
@@ -105,9 +120,16 @@ const COMPOSITE_DESCRIPTIONS: Readonly<Record<string, string>> = {
   "split-4": "Splits the 4-bit word W into its bits b3 (top) to b0.",
   "join-4": "Joins the bits b3 (top) to b0 into the 4-bit word W.",
   // Module 6. Drafted by the prose process.
-  "word-register": "PLACEHOLDER register with load enable",
-  "word-selector-2": "PLACEHOLDER word selector",
-  ram: "PLACEHOLDER RAM",
+  register: "Copies D to Q at a rising edge of CLK while EN is 1; keeps its word while EN is 0.",
+  "word-selector-2": "Y is the word on A while S is 0 and the word on B while S is 1.",
+  ram: "The word at the address A1 A0 takes D at a rising edge where WE is 1; Q is always the word at that address.",
+  "word-register-16":
+    "Copies D to Q at a rising edge of CLK while EN is 1; keeps its word while EN is 0.",
+  "word-selector-16": "Y is the word on A, B, C or D, the one S1 S0 names (00 is A, 11 is D).",
+  "byte-memory":
+    "A names a byte; WORD 1 reads or writes 16 bits at an even address, WORD 0 one byte; ODD is 1 for a word at an odd address, which is refused.",
+  "table-rom":
+    "Eight 16-bit words fixed when made; read with A and WORD as the byte memory is; never written.",
 };
 
 const GATE_INPUTS: Readonly<Record<string, readonly string[]>> = {

@@ -266,6 +266,8 @@ export interface ViewStrings {
     readonly unanswered: string;
     readonly invalid: string;
     readonly ofYourBits: string;
+    /** Module 6: in place of the word a memory reads out, which would give the answer away. */
+    readonly ofTheMemory: string;
   };
   /** Module 6: the memory explorer's table of words. */
   readonly memory: {
@@ -277,6 +279,14 @@ export interface ViewStrings {
     readonly readBy: string;
     /** In a word's row while the write enable is 1 and the address names it. */
     readonly writeNext: string;
+    /** The memory map's table (lesson 6.4). */
+    readonly mapCaption: string;
+    readonly addresses: string;
+    readonly part: string;
+    /** A part's addresses, {first} to {last}, in binary. */
+    readonly range: string;
+    /** In the row of the part the address names now. */
+    readonly chosen: string;
   };
 }
 
@@ -535,15 +545,21 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     unanswered: "Fill in {fields} to run the tests.",
     invalid: "{field} must be a valid entry.",
     ofYourBits: "What your bits read as",
+    ofTheMemory: "What the memory gives",
   },
   // Module 6. Drafted by the prose process (docs/notes/module-6-memory.md).
   memory: {
-    caption: "PLACEHOLDER Every word in the memory",
+    caption: "Every word the memory keeps, by address",
     address: "Address",
     word: "Word",
     marks: "Now",
-    readBy: "PLACEHOLDER On {ports}",
-    writeNext: "PLACEHOLDER Next edge writes D here",
+    readBy: "On {ports}",
+    writeNext: "Writes next",
+    mapCaption: "Which part answers each address",
+    addresses: "Addresses",
+    part: "Part",
+    range: "{first} to {last}",
+    chosen: "Chosen",
   },
 };
 

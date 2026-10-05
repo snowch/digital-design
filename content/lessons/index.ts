@@ -16,6 +16,11 @@ import { signals } from "./signals";
 import { fewerGates } from "./fewer-gates";
 import { gates } from "./gates";
 import { nand } from "./nand";
+// Module 6, memory.
+import { ram } from "./ram";
+import { registerFile } from "./register-file";
+import { bytes } from "./bytes";
+import { memoryMap } from "./memory-map";
 
 const INPUTS: readonly LessonInput[] = [
   signals,
@@ -30,6 +35,11 @@ const INPUTS: readonly LessonInput[] = [
   alu,
   remember,
   registers,
+  // Module 6, memory.
+  ram,
+  registerFile,
+  bytes,
+  memoryMap,
 ];
 
 export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(

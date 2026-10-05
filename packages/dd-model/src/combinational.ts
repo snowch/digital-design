@@ -11,7 +11,7 @@
 
 import type { CircuitBuilder, NetId } from "@dd/sim";
 
-import { ram4, wordRegister, wordSelector } from "./memory";
+import { byteMemoryPart, ram4, tableRom, wideRegister, wordRegister, wordSelector } from "./memory";
 
 /** Nets for a block's ports, by port name. */
 export type PortNets = Readonly<Record<string, NetId>>;
@@ -425,13 +425,12 @@ export const BLOCKS: Readonly<Record<string, BlockDef>> = {
   "join-4": def("join-4", ["b3", "b2", "b1", "b0"], ["W"], join4, { W: 4 }),
   // Module 6: the memory lessons' blocks (memory.ts). Each builder is called through an arrow, so
   // the import cycle between the two files is never followed while either is being loaded.
-  "word-register": def(
-    "word-register",
-    ["D", "EN", "CLK"],
-    ["Q"],
-    (b, ins, o) => wordRegister(b, ins, o),
-    { D: 4, Q: 4 },
-  ),
+  // A register read back from a learner's drawing is a `register` composite, so the block is
+  // placed under that kind and compiles again after every edit.
+  register: def("register", ["D", "EN", "CLK"], ["Q"], (b, ins, o) => wordRegister(b, ins, o), {
+    D: 4,
+    Q: 4,
+  }),
   "word-selector-2": def(
     "word-selector-2",
     ["A", "B", "S"],
@@ -442,6 +441,31 @@ export const BLOCKS: Readonly<Record<string, BlockDef>> = {
   ram: def("ram", ["A1", "A0", "D", "WE", "CLK"], ["Q"], (b, ins, o) => ram4(b, ins, o), {
     D: 4,
     Q: 4,
+  }),
+  "word-register-16": def(
+    "word-register-16",
+    ["D", "EN", "CLK"],
+    ["Q"],
+    (b, ins, o) => wideRegister(b, ins, o),
+    { D: 16, Q: 16 },
+  ),
+  "word-selector-16": def(
+    "word-selector-16",
+    ["A", "B", "C", "D", "S1", "S0"],
+    ["Y"],
+    (b, ins, o) => wordSelector(b, ins, { ...o, kind: "word-selector-16" }),
+    { A: 16, B: 16, C: 16, D: 16, Y: 16 },
+  ),
+  "byte-memory": def(
+    "byte-memory",
+    ["A", "WORD", "D", "WE", "CLK"],
+    ["Q", "ODD"],
+    (b, ins, o) => byteMemoryPart(b, ins, o),
+    { A: 4, D: 16, Q: 16 },
+  ),
+  "table-rom": def("table-rom", ["A", "WORD"], ["Q", "ODD"], (b, ins, o) => tableRom(b, ins, o), {
+    A: 4,
+    Q: 16,
   }),
 };
 

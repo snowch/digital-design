@@ -44,12 +44,16 @@ function joinBits(b: CircuitBuilder, bits: readonly NetId[], out: NetId): void {
  * A selector for words: Y is the input S1 S0 names (A for 00 up to D for 11), or, with two
  * inputs, A while S is 0 and B while S is 1. One Module 3 selector per bit.
  */
-export function wordSelector(b: CircuitBuilder, ins: PortNets, options: BlockOptions = {}) {
+export function wordSelector(
+  b: CircuitBuilder,
+  ins: PortNets,
+  options: BlockOptions & { readonly kind?: string } = {},
+) {
   const four = ins["C"] !== undefined;
   const names = four ? ["A", "B", "C", "D"] : ["A", "B"];
   const words = names.map((n) => need(ins, n));
   const width = b.widthOf(words[0] as NetId);
-  const kind = four ? "word-selector-4" : "word-selector-2";
+  const kind = options.kind ?? (four ? "word-selector-4" : "word-selector-2");
   const y = options.outs?.["Y"] ?? b.net("Y", width);
   const selects: Record<string, NetId> = four
     ? { S1: need(ins, "S1"), S0: need(ins, "S0") }
@@ -88,6 +92,26 @@ export function wordRegister(b: CircuitBuilder, ins: PortNets, options: BlockOpt
     name: options.name ?? "register",
     q,
   });
+  return { Q: q };
+}
+
+/**
+ * A 16-bit register as a closed block: Module 5's register inside, which a learner does not open
+ * here, since sixteen flip-flops drawn at once teach nothing the four-bit one did not.
+ */
+export function wideRegister(b: CircuitBuilder, ins: PortNets, options: BlockOptions = {}) {
+  const d = need(ins, "D");
+  const en = need(ins, "EN");
+  const clk = need(ins, "CLK");
+  const q = options.outs?.["Q"] ?? b.net("Q", b.widthOf(d));
+  b.scope(
+    options.name ?? "word-register-16",
+    "word-register-16",
+    (bb) => {
+      wordRegister(bb, { D: d, EN: en, CLK: clk }, { name: "register", outs: { Q: q } });
+    },
+    { inputs: { D: d, EN: en, CLK: clk }, outputs: { Q: q } },
+  );
   return { Q: q };
 }
 
@@ -308,4 +332,306 @@ export function romBlock(
         },
   );
   return single ? { Q: qs[0] as NetId } : Object.fromEntries(qs.map((q, i) => [`Q${i}`, q]));
+}
+
+/**
+ * A register file of any size, as a component: `words` words of `width` bits, written as a memory
+ * is (WA, D, WE and an edge) and read at two addresses at once, RA and RB, onto QA and QB. The
+ * gates of a small one are `regFile4`; this is the one a larger design uses.
+ */
+export function registerFile(
+  b: CircuitBuilder,
+  ins: { CLK: NetId; WE: NetId; WA: NetId; D: NetId; RA: NetId; RB: NetId },
+  options: MemoryOptions,
+) {
+  const out = memoryBlock(
+    b,
+    { CLK: ins.CLK, WE: ins.WE, WA: ins.WA, D: ins.D, reads: [ins.RA, ins.RB] },
+    {
+      ...options,
+      name: options.name ?? "regfile",
+      outs: {
+        ...(options.outs?.["QA"] !== undefined ? { Q0: options.outs["QA"] } : {}),
+        ...(options.outs?.["QB"] !== undefined ? { Q1: options.outs["QB"] } : {}),
+      },
+    },
+  );
+  return { QA: out["Q0"] as NetId, QB: out["Q1"] as NetId };
+}
+
+/** A byte address split, as a closed block: the row (A3 A2 A1) and A0, which picks the bank. */
+function splitAddress(b: CircuitBuilder, a: NetId): { row: NetId; a0: NetId } {
+  const row = b.net("ROW", 3);
+  const a0 = b.net("A0");
+  b.scope(
+    "splitA",
+    "split-address",
+    (bb) => {
+      bb.component("slice", { a }, { y: row }, { name: "row", params: { hi: 3, lo: 1 } });
+      bb.component("bit", { a }, { y: a0 }, { name: "a0", params: { index: 0 } });
+    },
+    { inputs: { A: a }, outputs: { ROW: row, A0: a0 } },
+  );
+  return { row, a0 };
+}
+
+/** A 16-bit word split into its two bytes, as a closed block. */
+function splitBytes(b: CircuitBuilder, w: NetId): { hi: NetId; lo: NetId } {
+  const hi = b.net("DH", 8);
+  const lo = b.net("DL", 8);
+  b.scope(
+    "splitD",
+    "split-bytes",
+    (bb) => {
+      bb.component("slice", { a: w }, { y: hi }, { name: "hi", params: { hi: 15, lo: 8 } });
+      bb.component("slice", { a: w }, { y: lo }, { name: "lo", params: { hi: 7, lo: 0 } });
+    },
+    { inputs: { W: w }, outputs: { HI: hi, LO: lo } },
+  );
+  return { hi, lo };
+}
+
+/** Two bytes joined into a 16-bit word, the high byte on top, as a closed block. */
+function joinBytes(b: CircuitBuilder, hi: NetId, lo: NetId, w: NetId): void {
+  b.scope(
+    "joinQ",
+    "join-bytes",
+    (bb) => {
+      bb.component("join", { a: lo, b: hi }, { y: w }, { name: "join", params: { width: 16 } });
+    },
+    { inputs: { HI: hi, LO: lo }, outputs: { W: w } },
+  );
+}
+
+/**
+ * Lesson 6.3's memory of bytes: sixteen bytes in two banks of eight, the even addresses in one and
+ * the odd in the other, so a 16-bit word at an even address is one row of both banks, its low byte
+ * at the even address. A is the byte's address; WORD 1 asks for a word, 0 for a byte. A byte comes
+ * out on Q's low eight bits, with the high eight 0; a word comes out whole. A word whose address is
+ * odd would need two rows: ODD says so, a write then changes nothing, and a read gives the word at
+ * the even address below, since the banks see only the row. A ROM of bytes (`rom` true) is the same
+ * without the write.
+ */
+export function byteMemory(
+  b: CircuitBuilder,
+  ins: { A: NetId; WORD: NetId; D?: NetId; WE?: NetId; CLK?: NetId },
+  options: {
+    readonly name?: string;
+    readonly kind?: string;
+    /** The sixteen bytes it is filled with, lowest address first. */
+    readonly init?: readonly (bigint | number)[];
+    readonly outs?: Readonly<Partial<Record<string, NetId>>>;
+  } = {},
+) {
+  const rom = ins.WE === undefined;
+  const kind = options.kind ?? (rom ? "byte-rom" : "byte-memory");
+  const q = options.outs?.["Q"] ?? b.net("Q", 16);
+  const odd = options.outs?.["ODD"] ?? b.net("ODD");
+  const evens = options.init?.filter((_, k) => k % 2 === 0);
+  const odds = options.init?.filter((_, k) => k % 2 === 1);
+  b.scope(
+    options.name ?? kind,
+    kind,
+    (bb) => {
+      const { row, a0 } = splitAddress(bb, ins.A);
+      bb.and([ins.WORD, a0], { name: "andOdd", output: odd });
+      let qe: NetId;
+      let qo: NetId;
+      if (rom) {
+        qe = romBlock(
+          bb,
+          { A: row },
+          { name: "even", words: 8, width: 8, init: evens ?? [], outs: { Q: bb.net("QE", 8) } },
+        ).Q as NetId;
+        qo = romBlock(
+          bb,
+          { A: row },
+          { name: "odd", words: 8, width: 8, init: odds ?? [], outs: { Q: bb.net("QO", 8) } },
+        ).Q as NetId;
+      } else {
+        const d = ins.D as NetId;
+        const { hi, lo } = splitBytes(bb, d);
+        const na0 = bb.not(a0, { name: "notA0", output: bb.net("NA0") });
+        const weE = bb.and([ins.WE as NetId, na0], { name: "andEven", output: bb.net("WEE") });
+        const pick = bb.xor([ins.WORD, a0], { name: "xorOdd", output: bb.net("PICK") });
+        const weO = bb.and([ins.WE as NetId, pick], { name: "andOddWE", output: bb.net("WEO") });
+        const dOdd = wordSelector(
+          bb,
+          { A: lo, B: hi, S: ins.WORD },
+          { name: "selD", outs: { Y: bb.net("DO", 8) } },
+        ).Y;
+        qe = memoryBlock(
+          bb,
+          { A: row, D: lo, WE: weE, CLK: ins.CLK as NetId },
+          {
+            name: "even",
+            words: 8,
+            width: 8,
+            ...(evens ? { init: evens } : {}),
+            outs: { Q: bb.net("QE", 8) },
+          },
+        ).Q as NetId;
+        qo = memoryBlock(
+          bb,
+          { A: row, D: dOdd, WE: weO, CLK: ins.CLK as NetId },
+          {
+            name: "odd",
+            words: 8,
+            width: 8,
+            ...(odds ? { init: odds } : {}),
+            outs: { Q: bb.net("QO", 8) },
+          },
+        ).Q as NetId;
+      }
+      const byte = wordSelector(
+        bb,
+        { A: qe, B: qo, S: a0 },
+        { name: "selByte", outs: { Y: bb.net("BYTE", 8) } },
+      ).Y;
+      const low = wordSelector(
+        bb,
+        { A: byte, B: qe, S: ins.WORD },
+        { name: "selLow", outs: { Y: bb.net("LOW", 8) } },
+      ).Y;
+      const zero = bb.net("ZERO", 8);
+      bb.component("const", {}, { y: zero }, { name: "zero", params: { width: 8, value: "0" } });
+      const high = wordSelector(
+        bb,
+        { A: zero, B: qo, S: ins.WORD },
+        { name: "selHigh", outs: { Y: bb.net("HIGH", 8) } },
+      ).Y;
+      joinBytes(bb, high, low, q);
+    },
+    {
+      inputs: rom
+        ? { A: ins.A, WORD: ins.WORD }
+        : {
+            A: ins.A,
+            WORD: ins.WORD,
+            D: ins.D as NetId,
+            WE: ins.WE as NetId,
+            CLK: ins.CLK as NetId,
+          },
+      outputs: { Q: q, ODD: odd },
+    },
+  );
+  return { Q: q, ODD: odd };
+}
+
+/** Lesson 6.4's table, fixed when the shop's memory is made: eight 16-bit words, as 16 bytes. */
+export const SHOP_TABLE_WORDS: readonly number[] = [
+  0xff06, 0xff4c, 0x0014, 0x0032, 0xff6a, 0xff88, 0x0050, 0x0064,
+];
+
+/** Words as the bytes a memory of bytes keeps them in: each word's low byte first. */
+export function bytesOfWords(words: readonly number[]): number[] {
+  return words.flatMap((w) => [w & 0xff, (w >> 8) & 0xff]);
+}
+
+/**
+ * Lesson 6.4's memory of the shop: a six-bit byte address, A5 A4 on two pins and A3 to A0 on A.
+ * Module 3's decoder reads A5 A4 and gives each part a quarter of the addresses: 00 the ROM of the
+ * table, 01 the RAM (a memory of bytes), 10 the display (a 16-bit register: a write anywhere there
+ * sets it, a read gives it back), 11 the sensor (a read gives the reading on SENSOR; a write does
+ * nothing). Q is the word or byte the address names; DISPLAY is what the display shows.
+ */
+export function shopMemory(
+  b: CircuitBuilder,
+  ins: PortNets,
+  options: BlockOptions & { readonly table?: readonly number[] } = {},
+) {
+  const [a5, a4, a, d, word, we, clk, sensor] = [
+    "A5",
+    "A4",
+    "A",
+    "D",
+    "WORD",
+    "WE",
+    "CLK",
+    "SENSOR",
+  ].map((p) => need(ins, p)) as NetId[];
+  const q = options.outs?.["Q"] ?? b.net("Q", 16);
+  const display = options.outs?.["DISPLAY"] ?? b.net("DISPLAY", 16);
+  b.scope(
+    options.name ?? "shop",
+    "shop-memory",
+    (bb) => {
+      const ys = decoder2(bb, { S1: a5 as NetId, S0: a4 as NetId }, { name: "decoder" });
+      const rom = byteMemory(
+        bb,
+        { A: a as NetId, WORD: word as NetId },
+        {
+          name: "rom",
+          init: bytesOfWords(options.table ?? SHOP_TABLE_WORDS),
+          outs: { Q: bb.net("QROM", 16), ODD: bb.net("ODDROM") },
+        },
+      );
+      const weRam = bb.and([ys["Y1"] as NetId, we as NetId], {
+        name: "andRam",
+        output: bb.net("WERAM"),
+      });
+      const ram = byteMemory(
+        bb,
+        { A: a as NetId, WORD: word as NetId, D: d as NetId, WE: weRam, CLK: clk as NetId },
+        { name: "ram", outs: { Q: bb.net("QRAM", 16), ODD: bb.net("ODDRAM") } },
+      );
+      const enDisplay = bb.and([ys["Y2"] as NetId, we as NetId], {
+        name: "andDisplay",
+        output: bb.net("WEDISP"),
+      });
+      wideRegister(
+        bb,
+        { D: d as NetId, EN: enDisplay, CLK: clk as NetId },
+        { name: "display", outs: { Q: display } },
+      );
+      wordSelector(
+        bb,
+        { A: rom.Q, B: ram.Q, C: display, D: sensor as NetId, S1: a5 as NetId, S0: a4 as NetId },
+        { name: "selector", outs: { Y: q } },
+      );
+    },
+    {
+      inputs: {
+        A5: a5 as NetId,
+        A4: a4 as NetId,
+        A: a as NetId,
+        D: d as NetId,
+        WORD: word as NetId,
+        WE: we as NetId,
+        CLK: clk as NetId,
+        SENSOR: sensor as NetId,
+      },
+      outputs: { Q: q, DISPLAY: display },
+    },
+  );
+  return { Q: q, DISPLAY: display };
+}
+
+/** The table ROM as a block a drawing may place: A and WORD in, Q and ODD out. */
+export function tableRom(b: CircuitBuilder, ins: PortNets, options: BlockOptions = {}) {
+  return byteMemory(
+    b,
+    { A: need(ins, "A"), WORD: need(ins, "WORD") },
+    {
+      name: options.name ?? "table-rom",
+      kind: "table-rom",
+      init: bytesOfWords(SHOP_TABLE_WORDS),
+      ...(options.outs ? { outs: options.outs } : {}),
+    },
+  );
+}
+
+/** The memory of bytes as a block a drawing may place. */
+export function byteMemoryPart(b: CircuitBuilder, ins: PortNets, options: BlockOptions = {}) {
+  return byteMemory(
+    b,
+    {
+      A: need(ins, "A"),
+      WORD: need(ins, "WORD"),
+      D: need(ins, "D"),
+      WE: need(ins, "WE"),
+      CLK: need(ins, "CLK"),
+    },
+    { name: options.name ?? "byte-memory", ...(options.outs ? { outs: options.outs } : {}) },
+  );
 }

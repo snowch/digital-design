@@ -72,8 +72,9 @@ const EXPLAIN: Record<Construct, string> = {
   case: "`case`",
   "op-arith": "arithmetic with `+` and `-`",
   // Module 6
-  array: "a memory written as an array, such as `logic [7:0] mem [0:15]`",
-  "array-init": "an array filled from a list of values, `= '{...}`",
+  // Module 6: drafted by the prose process (docs/notes/module-6-memory.md).
+  array: "arrays to declare memories, like `logic [7:0] mem [0:15]`",
+  "array-init": "array initialisation like `= '{...}`",
 };
 
 /** What to write instead, where there is something. */
