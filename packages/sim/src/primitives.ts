@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The primitives the simulator evaluates.
 //
 // Every primitive is a pure function from its input words to its output words: no state, no

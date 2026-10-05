@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The theme follows the system unless the learner picks one; the choice is kept in this browser.
 
 import { useEffect, useState } from "react";

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The diagrams, checked as drawings: no label in any timing diagram or circuit drawing on the
 // page overlaps another or leaves its drawing, at desktop and phone widths, before and after the
 // figures have been used. A diagram whose text collides fails a learner however right its data.
@@ -202,6 +204,123 @@ async function wireFaults(page: Page): Promise<WireFault[]> {
   });
 }
 
+/**
+ * What makes wires hard to tell apart, as first drawn: two signals side by side closer than half
+ * a cell (10 pixels), which read as one thick line; two wires that leave one column and enter
+ * another in the same order yet cross, which a better order of turns would not; and a wire that
+ * touches or runs within 3 pixels of a value written on the drawing. Measured on the rendered page,
+ * in the drawing's own units.
+ */
+async function crowding(page: Page): Promise<WireFault[]> {
+  return page.evaluate(() => {
+    const out: { figure: string; problem: string }[] = [];
+    const points = (d: string) => {
+      const t = d.trim().split(/\s+/);
+      const pts: { x: number; y: number }[] = [];
+      let x = 0;
+      let y = 0;
+      for (let i = 0; i < t.length;) {
+        const c = t[i++];
+        if (c === "M") {
+          x = Number(t[i++]);
+          y = Number(t[i++]);
+        } else if (c === "H") x = Number(t[i++]);
+        else if (c === "V") y = Number(t[i++]);
+        pts.push({ x, y });
+      }
+      return pts;
+    };
+    type Pt = { x: number; y: number };
+    type Seg = { a: Pt; b: Pt };
+    const overlap = (p: number, q: number, r: number, t: number) =>
+      Math.min(Math.max(p, q), Math.max(r, t)) - Math.max(Math.min(p, q), Math.min(r, t));
+    const through = (h: Seg, v: Seg) =>
+      h.a.y === h.b.y &&
+      v.a.x === v.b.x &&
+      v.a.x > Math.min(h.a.x, h.b.x) &&
+      v.a.x < Math.max(h.a.x, h.b.x) &&
+      h.a.y > Math.min(v.a.y, v.b.y) &&
+      h.a.y < Math.max(v.a.y, v.b.y);
+    for (const svg of document.querySelectorAll<SVGSVGElement>("svg.circuit")) {
+      const figure = svg.closest("figure")?.id ?? svg.closest("section")?.id ?? "drawing";
+      const toSvg = svg.getScreenCTM()?.inverse();
+      if (!toSvg) continue;
+      const wires = [...svg.querySelectorAll("g.wires > g.wire")].map((g) => {
+        const path = g.querySelector("path:not(.wire-hit):not(.wire-halo)");
+        const pts = points(path?.getAttribute("d") ?? "");
+        return {
+          net: (g as SVGGElement).dataset["net"] ?? "a wire",
+          pts,
+          segs: pts.slice(1).map((b, k) => ({ a: pts[k]!, b })),
+        };
+      });
+      const reported = new Set<string>();
+      const report = (key: string, problem: string) => {
+        if (reported.has(key)) return;
+        reported.add(key);
+        out.push({ figure, problem });
+      };
+      wires.forEach((w, i) =>
+        wires.slice(i + 1).forEach((v) => {
+          if (w.net === v.net) return;
+          for (const s of w.segs)
+            for (const t of v.segs) {
+              const sv = s.a.x === s.b.x && s.a.y !== s.b.y;
+              const tv = t.a.x === t.b.x && t.a.y !== t.b.y;
+              const sh = s.a.y === s.b.y && s.a.x !== s.b.x;
+              const th = t.a.y === t.b.y && t.a.x !== t.b.x;
+              let gap = 0;
+              let along = 0;
+              if (sv && tv) {
+                gap = Math.abs(s.a.x - t.a.x);
+                along = overlap(s.a.y, s.b.y, t.a.y, t.b.y);
+              } else if (sh && th) {
+                gap = Math.abs(s.a.y - t.a.y);
+                along = overlap(s.a.x, s.b.x, t.a.x, t.b.x);
+              } else continue;
+              if (gap > 1 && gap < 10 && along > 2)
+                report(
+                  `${w.net}|${v.net}|near`,
+                  `${w.net} and ${v.net} run ${gap} px apart, closer than half a cell`,
+                );
+            }
+          const [w0, w1] = [w.pts[0], w.pts[w.pts.length - 1]];
+          const [v0, v1] = [v.pts[0], v.pts[v.pts.length - 1]];
+          if (!w0 || !w1 || !v0 || !v1) return;
+          const sameOrder = w0.x === v0.x && w1.x === v1.x && (w0.y - v0.y) * (w1.y - v1.y) > 0;
+          if (sameOrder && w.segs.some((s) => v.segs.some((t) => through(s, t) || through(t, s))))
+            report(
+              `${w.net}|${v.net}|cross`,
+              `${w.net} and ${v.net} cross though they keep their order`,
+            );
+        }),
+      );
+      const values = [...svg.querySelectorAll<SVGTextElement>("text.value-label")].map((t) => {
+        const r = t.getBoundingClientRect();
+        const a = new DOMPoint(r.left, r.top).matrixTransform(toSvg);
+        const b = new DOMPoint(r.right, r.bottom).matrixTransform(toSvg);
+        return { text: t.textContent ?? "", x1: a.x, y1: a.y, x2: b.x, y2: b.y };
+      });
+      for (const w of wires)
+        for (const s of w.segs) {
+          if (s.a.x !== s.b.x || s.a.y === s.b.y) continue;
+          for (const l of values)
+            if (
+              s.a.x > l.x1 - 3 &&
+              s.a.x < l.x2 + 3 &&
+              Math.max(s.a.y, s.b.y) > l.y1 + 1 &&
+              Math.min(s.a.y, s.b.y) < l.y2 - 1
+            )
+              report(
+                `${w.net}|${l.text}|${l.x1}`,
+                `${w.net} touches the value "${l.text}" written beside it`,
+              );
+        }
+    }
+    return out;
+  });
+}
+
 test.describe("the diagrams", () => {
   test("no label overlaps another or leaves its drawing, before and after use", async ({
     page,
@@ -317,6 +436,15 @@ test.describe("the diagrams", () => {
     for (const lesson of LESSONS) {
       await openLesson(page, lesson.id);
       expect(await wireFaults(page), lesson.id).toEqual([]);
+    }
+  });
+
+  test("no two wires run closer than half a cell, cross needlessly, or touch a written value", async ({
+    page,
+  }) => {
+    for (const lesson of LESSONS) {
+      await openLesson(page, lesson.id);
+      expect(await crowding(page), lesson.id).toEqual([]);
     }
   });
 

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // A word as a row of bits, highest first, in groups of four. Each bit shows its number and what
 // it is worth; pressed, it changes between 0 and 1. Read-only when there is no `onFlip`. Under
 // each group, optionally, the hexadecimal digit the group makes.

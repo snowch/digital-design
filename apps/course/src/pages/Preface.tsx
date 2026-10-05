@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The page before the first lesson: what the course is, what it takes as known, a check the
 // learner can run on themselves, and how a lesson works. It ends at the first lesson, whichever
 // that is when the page is built.

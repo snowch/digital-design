@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Tokens of the subset. Comments are skipped; positions are kept for messages.
 
 import { HdlError, type Position } from "./ast";

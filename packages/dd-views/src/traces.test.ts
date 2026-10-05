@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 import { describe, expect, it } from "vitest";
 
 import { dFlipFlopCircuit, libraryCircuit } from "@dd/dd-model";

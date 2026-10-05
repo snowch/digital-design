@@ -1,4 +1,6 @@
 // @vitest-environment jsdom
+// Copyright © 2026 Chris Snow
+
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";

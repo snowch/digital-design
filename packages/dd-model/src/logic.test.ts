@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 2: the measures, the tables and the circuits the logic lessons use.
 
 import { describe, expect, it } from "vitest";

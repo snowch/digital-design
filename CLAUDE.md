@@ -136,6 +136,9 @@ the Vite build, Playwright. Each line below is a check and the reason it exists.
 
 - **Prettier, with `*.md` ignored.** Prose files keep their own line breaks; code does not get a
   style argument.
+- **Every source file carries its author's copyright line** ("Copyright © 2026 Chris Snow") near
+  its top, and every page carries it in its footer. `node scripts/copyright.mjs --check` fails a
+  file without it; `node scripts/copyright.mjs` adds the line, so run it on a new file.
 - **`tsc` strict, with `noUncheckedIndexedAccess` and `verbatimModuleSyntax`.** An index into a
   list may be undefined and the code must say what happens then.
 - **A lesson without an `originalityNote`, or with its sections out of order, or with a
@@ -164,7 +167,10 @@ the Vite build, Playwright. Each line below is a check and the reason it exists.
   (`tests/educational/diagrams.spec.ts` in the browser; the content tests for every figure's
   circuit, under every fault, and inside every block a learner can open). A wire through a part
   reads as a connection that is not there; `docs/notes/straight-wires.md` says how the geometry
-  and the router keep to this.
+  and the router keep to this. In every drawing as first shown, two signals may not run side by side
+  closer than half a cell, which reads as one thick line, nor two wires cross that leave one column
+  and enter another in the same order, nor any wire touch a written value; the first two hold under
+  every fault as well (the same tests; `docs/notes/roomy-wires.md`).
 - **The look of the page is held to rules and to screenshots**
   (`tests/educational/aesthetics.spec.ts`). No visible text under 11 pixels, every control at
   least 40 pixels tall on a phone, no line of prose over about 85 characters; and the lesson

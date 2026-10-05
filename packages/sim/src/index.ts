@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 export * from "./values";
 export * from "./circuit";
 export * from "./primitives";

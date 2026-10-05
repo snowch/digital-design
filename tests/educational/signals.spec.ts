@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The signals lesson's challenges and figures, driven through the page: each answers challenge
 // completable with its reference, plausible wrong attempts rejected with the failing case, what
 // the answers gave and what was expected, an unanswered field blocking the run with a sentence,

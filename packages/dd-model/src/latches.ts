@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Latches: memory from feedback.
 //
 // Every function here adds a composite to a CircuitBuilder and returns the nets a caller wires

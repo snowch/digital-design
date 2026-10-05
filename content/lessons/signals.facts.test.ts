@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Facts the signals lesson's prose states, read off the figures that show them: each test runs a
 // figure's own props through the model the figure runs (dd-model: signals, bits, graders), so a
 // change to the lesson's data or to the model that moves a number the prose states fails here.

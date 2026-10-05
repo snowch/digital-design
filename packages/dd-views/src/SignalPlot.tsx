@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // A recording drawn against a threshold: one dot per sample at the voltage the receiver
 // measured, a stick from the level the sender drove to the dot (the noise), the threshold as a
 // line, and under the plot the sample numbers, the bits sent and the bits read. Every value is

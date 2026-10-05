@@ -1,4 +1,6 @@
 // @vitest-environment jsdom
+// Copyright © 2026 Chris Snow
+
 // The links at the bottom of a lesson, worked out from the list of lessons, so they stay right as
 // lessons are added: the lesson before and the lesson after in the list's order, the page before
 // the first lesson, and the way back to the list after the last.

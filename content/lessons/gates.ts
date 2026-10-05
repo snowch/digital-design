@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Lesson: Module 2, lesson 1, gates and truth tables.
 //
 // The structure is here; the words are in gates.prose.ts and gates.labels.ts. The circuits are

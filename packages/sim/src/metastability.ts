@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The metastability overlay: the one place the deterministic engine steps aside.
 //
 // In the delay model, a flip-flop whose D input changes too close to the clock edge gets an

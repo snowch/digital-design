@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 3's combinational blocks, built from gates and from each other.
 //
 // Every block here is a scope in the netlist, so a view draws it closed, as one box with its

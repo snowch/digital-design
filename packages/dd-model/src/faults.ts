@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The fault library: named ways to break a circuit, so a lesson can ask "what happens now?"
 //
 // Each fault takes a circuit and returns a new one; the original is untouched. A fault is applied
