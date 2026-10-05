@@ -6,9 +6,23 @@ import { parseLesson, type Lesson, type LessonInput } from "@dd/lesson-schema";
 
 import { registers } from "./registers";
 import { remember } from "./remember";
+// Module 3, combinational design.
+import { selectors } from "./selectors";
+import { decoders } from "./decoders";
+import { adders } from "./adders";
+import { alu } from "./alu";
 import { signals } from "./signals";
 
-const INPUTS: readonly LessonInput[] = [signals, remember, registers];
+const INPUTS: readonly LessonInput[] = [
+  signals,
+  // Module 3, combinational design.
+  selectors,
+  decoders,
+  adders,
+  alu,
+  remember,
+  registers,
+];
 
 export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(
   (a, b) => a.module - b.module || a.order - b.order,

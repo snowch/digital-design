@@ -34,6 +34,14 @@ export const signals: LessonInput = {
     "signed",
     "hexadecimal",
   ],
+  // Module 3 rations "carry" for the adder's carry; this lesson uses the everyday verb.
+  termExemptions: [
+    {
+      term: "carry",
+      reason:
+        'Used as the everyday verb ("carry it across", noise that carries a sample), not the carry an adder passes from one column to the next.',
+    },
+  ],
   sections: [
     {
       kind: "question",
