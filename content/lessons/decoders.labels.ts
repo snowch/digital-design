@@ -56,6 +56,6 @@ export const LABELS = {
     lamps: ["Room A", "Room B", "Room C", "Room D"],
     title: "Two switches, four lamps",
     summary:
-      "Two input switches, S1 and S0, connect to a circuit box marked with a question mark. The box stands for the circuit the question asks for, which nobody has built yet. Y0 drives room A's lamp, Y1 room B's, Y2 room C's and Y3 room D's.",
+      "Two input switches, S1 and S0, connect to a circuit box marked with a question mark. The box stands for the circuit the question asks you to build. Y0 drives room A's lamp, Y1 room B's, Y2 room C's and Y3 room D's.",
   },
 } as const;

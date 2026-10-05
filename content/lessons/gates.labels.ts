@@ -62,6 +62,6 @@ export const LABELS = {
     lamp: "Lamp",
     title: "Freezer room alarm circuit",
     summary:
-      'Inside the freezer room\'s box, a sensor sends WARM and a door switch sends DOOR. Both signals go to the box marked "?", which is a circuit to be built. The circuit outputs ALARM to light a lamp.',
+      "Inside the freezer room, a sensor sends WARM and a door switch sends DOOR. Both wires go into a box marked with a question mark, which is the circuit you need to build. From the box, the wire ALARM goes to a lamp.",
   },
 } as const;

@@ -22,7 +22,7 @@ const wire = {
   width: z.number().int().min(1).max(64).default(1),
 };
 const Source = z.object({
-  kind: z.enum(["switch", "sensor", "button", "clock"]),
+  kind: z.enum(["switch", "sensor", "receiver", "button", "clock"]),
   label: z.string().min(1),
   ...wire,
 });
@@ -304,8 +304,12 @@ function SourceSymbol({ kind, x, y }: { kind: SourceItem["kind"]; x: number; y: 
           <circle cx={x + 16} cy={y} r={2.5} />
         </g>
       );
+    // The signals lesson draws a sensor and a receiver as the same box; so does a scene.
     case "sensor":
-      return <rect className="symbol sensor" x={x} y={y - 7} width={SYMBOL} height={14} rx={3} />;
+    case "receiver":
+      return (
+        <rect className={`symbol ${kind}`} x={x} y={y - 7} width={SYMBOL} height={14} rx={3} />
+      );
     case "button":
       return (
         <g className="symbol button">

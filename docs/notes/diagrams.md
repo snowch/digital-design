@@ -16,9 +16,9 @@ drawings draw one, with a slash and its count.
 - **gates**: the freezer room (named as the signals lesson's drawing names it) with a sensor on
   WARM and the door switch on DOOR, into `?`, out on ALARM to a lamp. CLOSED is left out: ALARM's
   rule does not use it, and the drawing is of the question's circuit.
-- **selectors**: rooms A and B, each a sensor on 16 wires, and the switch on S, into `?`, out on
-  16 wires to the display. The office is not drawn: the switch is in it, beside the display, and
-  a drawing that put the display in the office and the switch outside it would be wrong.
+- **selectors**: what is in the office: a receiver for each room's cable, each putting its room's
+  word on 16 wires, and the switch on S, into `?`, out on 16 wires to the display. The rooms are
+  not drawn (see the review below), and nor is the office, since everything drawn is in it.
 - **decoders**: switches on S1 and S0 into `?`, out on Y0 to Y3 to a lamp for each room.
 - **registers**: the four switches on 4 wires, the Save button, the clock on CLK, into `?`, out on
   4 wires to the display showing `0000`, the value the question asks for at power-on. The load
@@ -72,6 +72,40 @@ sentence about how a carry is written, is now "Adding 3 + 3 in binary."
 Also changed: every caption in the adders and decoders lessons now ends with a full stop, as
 every other lesson's captions do.
 
+## The review
+
+One reviewer read the five figures in place as a learner who has done every earlier lesson, and
+reported ten findings; an independent sceptic checked each against the files. Upheld, and done:
+
+- **Selectors contradicted Module 1** (upheld, not blocking). Module 1 has the sensor send its word
+  as 16 steps, one after another, on one cable to a receiver; the scene had each room's sensor
+  send 16 wires, and the lesson's motivation already said "wiring both cables to the display's
+  16 wires". The question now says each cable ends at a receiver of its own in the office, which
+  reads the 16 steps, as in Module 1, and puts the word on 16 wires; the motivation joins the
+  receivers' wires, not the cables; the scene draws the two receivers (drawn as Module 1 draws a
+  receiver) instead of rooms and sensors. A scene with rooms, sensors, cables and receivers in one
+  row does not fit a phone. The gates scene's sensor sending WARM stays: that lesson's own text
+  has "two sensors sending warm bits".
+- **A screen reader does not speak a lone "?"**, so the gates and selectors summaries now say "a
+  box marked with a question mark", as the others did; the gates summary no longer calls the
+  room's outline a box as well.
+- **The decoders summary said "nobody" has built the circuit**; it is the learner, and the
+  summary now says so.
+- **The adders lead now works the column the figure was chosen for**: 1, 1 and the carry make 3,
+  `11`, so the column writes 1 and passes 1 on. It says nothing of what a circuit can add, which
+  is the investigation's point. The prediction below now says "The figure below", since the sum on
+  paper is the nearer figure.
+- **Nothing said what the registers scene's 0000 is**; its caption now says the display must
+  show 0000 when the power comes on, and the summary says "must show", not "showing".
+
+Rejected by the sceptic: "thick line" against the lesson's later "wide line" (two words for one
+mark, six sections apart; the selectors caption says "wide line" now anyway, being redrafted),
+and the adders caption repeating the lead (a caption names its figure). Each redraft went back
+through the drafting subagent; facts added by the managing session: "of its own" and "as in
+Module 1" in the selectors question, and "small ... on the left" in its caption, where the draft
+said "each box" of a drawing with three kinds of box. The selectors summary first came back
+without what the box stands for, and was sent back.
+
 ## The checks
 
 - Unit tests (`scene.test.tsx`): a scene draws each source in its room, the circuit's box and
@@ -85,6 +119,8 @@ every other lesson's captions do.
   columns, none out, and a sum that fits both readings). The registers scene's `0000` is the
   constant the reference register resets to, and `registers.facts.test.ts` pins it to the
   question.
+- `aesthetics.spec.ts` holds the gates and selectors scenes and the sum on paper to stored
+  screenshots at both widths; between them they draw every mark a scene has.
 - `diagrams.spec.ts` checks every scene and sum on paper for label collisions and, now, for
   sideways scrolling, at desktop and phone widths. The content test, the sum's facts test and
   the scrolling check were each seen to fail on a broken input (a wrong signal name, a wrong sum,

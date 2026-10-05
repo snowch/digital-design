@@ -119,10 +119,12 @@ test.describe("the look of the page", () => {
     });
   });
 
-  // The drawings of a lesson's question and of a sum on paper: the selectors scene has every
-  // kind of mark a scene draws (rooms, word wires, a switch, a readout).
-  test("a scene and a sum on paper look as designed", async ({ page }) => {
+  // The drawings of a lesson's question and of a sum on paper. Between them the two scenes have
+  // every mark a scene draws: a room, a sensor and a lamp (gates); receivers, word wires, a
+  // switch and a readout (selectors).
+  test("the scenes and a sum on paper look as designed", async ({ page }) => {
     for (const [lesson, id] of [
+      ["gates", "ix-alarm-scene"],
       ["selectors", "ix-rooms-scene"],
       ["adders", "ix-column-sum"],
     ] as const) {

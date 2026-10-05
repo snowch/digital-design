@@ -12,7 +12,7 @@ import { PROSE } from "./selectors.prose";
 /** A drawn challenge's import panel: gates as `assign`, one bit at a time. */
 const DRAW_CONSTRUCTS = ["module", "ports", "logic", "assign", "op-bitwise"];
 
-/** How many wires carry a room's word to the office, and the display's word from the circuit. */
+/** How many wires carry a room's word from its receiver, and the display's word from the circuit. */
 const WORD_WIDTH = 16;
 
 /** The two rooms' 4-bit words in the word-selector figure: the last four bits of each room's word. */
@@ -72,15 +72,16 @@ export const selectors: LessonInput = {
           timeModel: "none",
           caption: LABELS.captions.scene,
           props: {
+            // What is in the office: each room's cable ends at its own receiver, which puts the
+            // room's word on 16 wires, as the question says; the rooms are not drawn.
             sources: [
               {
-                room: LABELS.scene.roomA,
-                items: [{ kind: "sensor", label: LABELS.scene.sensor, width: WORD_WIDTH }],
+                items: [
+                  { kind: "receiver", label: LABELS.scene.receiverA, width: WORD_WIDTH },
+                  { kind: "receiver", label: LABELS.scene.receiverB, width: WORD_WIDTH },
+                ],
               },
-              {
-                room: LABELS.scene.roomB,
-                items: [{ kind: "sensor", label: LABELS.scene.sensor, width: WORD_WIDTH }],
-              },
+              // A group of its own, so the gap above it keeps S clear of room B's count.
               { items: [{ kind: "switch", label: LABELS.scene.switch, signal: "S" }] },
             ],
             circuit: LABELS.scene.circuit,

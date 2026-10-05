@@ -11,11 +11,11 @@ export const PROSE = {
   motivation:
     "When you add on paper, you go one column at a time from the right. In decimal, 7 + 5 in one column gives 12: you write 2 and pass 1 to the next column on the left. Binary works the same way, just with two digits instead of ten. 1 + 1 in binary is 2, written `10`: you write 0 and pass 1 to the next column on the left. The bit a column passes to the next column on its left is the **carry**.",
   columnSumLead:
-    "The figure adds the binary words `0011` and `0011`, which is 3 + 3. Each carry is written as a small 1 above the column it goes into, with an arrow from the column that made it. The sum is `0110`, which is 6.",
+    "The figure adds the binary words `0011` and `0011`, which is 3 + 3. Each carry is written as a small 1 above the column it goes into, with an arrow from the column that made it. The second column from the right adds 1, 1 and the carry 1. Three 1s make 3, which is `11` in binary, so that column writes 1 and passes 1 on to the next column. The sum is `0110`, which is 6.",
   columnSumAfter:
     "So a column of an addition needs two outputs: the sum bit for that column, and the carry to the next. Start with the rightmost column, which has no carry coming into it.",
   prediction:
-    'The figure draws a circuit for one column with no carry coming in. It has two inputs, A and B, and two outputs, SUM and CARRY. Choose an answer, then press "Check my prediction". The page will show what the simulator gave, with a timing diagram.',
+    'The figure below draws a circuit for one column with no carry coming in. It has two inputs, A and B, and two outputs, SUM and CARRY. Choose an answer, then press "Check my prediction". The page will show what the simulator gave, with a timing diagram.',
   p1Question:
     "The circuit uses an XOR gate, xorSum, that takes A and B and drives SUM. An AND gate, andCarry, takes A and B and drives CARRY. Now A is 1 and B is 1. What is SUM?",
   p1Explain:

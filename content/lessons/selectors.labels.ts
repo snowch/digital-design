@@ -27,7 +27,8 @@ export const LABELS = {
     c2: "4-way selector from three 2-way ones, drawn",
   },
   captions: {
-    scene: "A thick line marked 16 is 16 wires, one for each bit.",
+    scene:
+      "Each small box on the left is a receiver for one room's cable. A wide line marked 16 carries one word on 16 wires.",
     predictOr: "Predict what an OR gate joining room A's bit and room B's bit gives, then check.",
     predictAnd:
       "Predict what an AND gate gives when its control input S is 0 and A changes, then check.",
@@ -51,14 +52,13 @@ export const LABELS = {
   },
   /** The drawing under the question. */
   scene: {
-    roomA: "Room A",
-    roomB: "Room B",
-    sensor: "Sensor",
+    receiverA: "Room A",
+    receiverB: "Room B",
     switch: "Switch",
     circuit: "?",
     display: "Display",
-    title: "Two rooms, a switch, and a display",
+    title: "Choosing which receiver feeds the display",
     summary:
-      'Room A and Room B each send a word on 16 wires to the circuit marked "?" that the question asks for. The switch S also connects to this circuit. The circuit sends one word to the display on 16 wires.',
+      "On the left, a receiver for room A is above a receiver for room B. Each has a wide line marked 16 running right into a box marked with a question mark, which represents the circuit the question asks you to build. A switch output named S also runs into the box, and from the box a wide line marked 16 runs to the display.",
   },
 } as const;
