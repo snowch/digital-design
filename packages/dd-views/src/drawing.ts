@@ -9,6 +9,7 @@ import {
   dFlipFlop,
   dLatch,
   gatedSrLatch,
+  register,
   srLatch,
   type LatchOptions,
 } from "@dd/dd-model";
@@ -340,6 +341,15 @@ export function compileDrawing(drawing: Drawing, name = "drawing"): Compiled {
           ...opts,
           reset: ins["RST"] as NetId,
           enable: ins["EN"] as NetId,
+        });
+        break;
+      // Module 5: a register read back from a circuit keeps its width, reset and enable.
+      case "register":
+        register(b, ins["D"] as NetId, ins["CLK"] as NetId, {
+          ...opts,
+          width: portWidth(part, "D"),
+          ...(ins["RST"] !== undefined ? { reset: ins["RST"] } : {}),
+          ...(ins["EN"] !== undefined ? { enable: ins["EN"] } : {}),
         });
         break;
       default:

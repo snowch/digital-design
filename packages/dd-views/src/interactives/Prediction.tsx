@@ -26,7 +26,17 @@ const Props = z.object({
   explain: z.string().default(""),
   /** Lanes of the timing diagram: a signal's name, or an inner wire with the name to show for it. */
   signals: z
-    .array(z.union([z.string(), z.object({ net: z.string(), label: z.string() })]))
+    .array(
+      z.union([
+        z.string(),
+        z.object({
+          net: z.string(),
+          label: z.string(),
+          // Module 5: names for some values of a word, such as a state's name for its code.
+          names: z.record(z.string(), z.string()).optional(),
+        }),
+      ]),
+    )
     .optional(),
 });
 

@@ -16,6 +16,23 @@ export interface Module {
   readonly ports: readonly Port[];
   readonly declarations: readonly Declaration[];
   readonly items: readonly Item[];
+  /** Module 5: enumerated types, `typedef enum logic [1:0] {A, B} t;`. */
+  readonly enums?: readonly EnumType[];
+  readonly at: Position;
+}
+
+/** Module 5: a named list of constants of one width, such as a state machine's states. */
+export interface EnumType {
+  readonly name: string;
+  readonly range?: Range;
+  readonly members: readonly EnumMember[];
+  readonly at: Position;
+}
+
+export interface EnumMember {
+  readonly name: string;
+  /** The value written after `=`, if any; otherwise one more than the member before (0 first). */
+  readonly value?: Expression;
   readonly at: Position;
 }
 
@@ -37,6 +54,8 @@ export interface Declaration {
   readonly kind: "logic";
   readonly name: string;
   readonly range?: Range;
+  /** Module 5: the enumerated type the signal was declared with, instead of `logic`. */
+  readonly type?: string;
   readonly at: Position;
 }
 

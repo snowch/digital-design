@@ -71,7 +71,15 @@ function constText(circuit: Circuit, path: string): string {
 }
 
 /** Blocks drawn closed for good: a split or a join holds no gates worth opening. */
-const SEALED = new Set(["split-4", "join-4"]);
+const SEALED = new Set([
+  "split-4",
+  "join-4",
+  // Module 5: the state machines' words of two and three bits.
+  "split-2",
+  "split-3",
+  "join-2",
+  "join-3",
+]);
 
 function fullPath(scope: string, local: string): string {
   return scope ? `${scope}/${local}` : local;

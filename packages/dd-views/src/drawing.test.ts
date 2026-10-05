@@ -268,3 +268,50 @@ describe("Module 3: blocks, words and widths in a drawing", () => {
     expect(formatWord(sim.read("Y"))).toBe("0001");
   });
 });
+
+// Module 5: a 4-bit register with a reset and an enable, placed from the palette, compiles; read
+// back from the circuit it is a "register" block that compiles again with the same behaviour.
+describe("a register placed in a drawing", () => {
+  const iface = {
+    inputs: [{ name: "D", width: 4 }, { name: "EN" }, { name: "RST" }, { name: "CLK" }],
+    outputs: [{ name: "Q", width: 4 }],
+  };
+  const drawing = (): Drawing => {
+    const base = emptyDrawing(iface);
+    const wire = (from: string, to: string) => ({
+      from: { part: pinId("input", from), port: "y" },
+      to: { part: "reg", port: to },
+    });
+    return {
+      parts: [...base.parts, { id: "reg", kind: "register-4-reset-enable", x: 6, y: 1 }],
+      wires: [
+        wire("D", "D"),
+        wire("CLK", "CLK"),
+        wire("RST", "RST"),
+        wire("EN", "EN"),
+        { from: { part: "reg", port: "Q" }, to: { part: pinId("output", "Q"), port: "a" } },
+      ],
+    };
+  };
+  const run = (circuit: NonNullable<ReturnType<typeof compileDrawing>["circuit"]>) => {
+    const sim = new Simulator(circuit);
+    sim.setInput("D", parseWord("0110", 4));
+    sim.setInput("EN", bit1);
+    sim.setInput("RST", bit0);
+    sim.setInput("CLK", bit0);
+    sim.clockCycle("CLK");
+    const loaded = formatWord(sim.read("Q"));
+    sim.setInput("RST", bit1);
+    sim.clockCycle("CLK");
+    return [loaded, formatWord(sim.read("Q"))];
+  };
+
+  it("compiles from the palette and again from the circuit it made", () => {
+    const first = compileDrawing(drawing());
+    expect(first.errors).toEqual([]);
+    expect(run(first.circuit!)).toEqual(["0110", "0000"]);
+    const again = compileDrawing(circuitToDrawing(first.circuit!));
+    expect(again.errors).toEqual([]);
+    expect(run(again.circuit!)).toEqual(["0110", "0000"]);
+  });
+});

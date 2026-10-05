@@ -12,6 +12,8 @@ import { register } from "./register";
 // Module 2's circuits live in their own file and join the library below.
 import { LOGIC_LIBRARY } from "./logic";
 import { combinationalLibrary } from "./library-combinational";
+// Module 5 after the registers lesson: counters, register transfer, state machines.
+import { module5Library } from "./library-module5";
 
 /**
  * A loop of `n` inverters with a `kick` input ORed into it. While kick is 1 the loop is forced;
@@ -418,6 +420,8 @@ export const LIBRARY: Readonly<Record<string, () => Circuit>> = {
   ...LOGIC_LIBRARY,
   // Module 3, combinational design: selectors, decoders, adders and the ALU.
   ...combinationalLibrary(placed),
+  // Module 5: counters, register transfer and state machines.
+  ...module5Library(placed),
 };
 
 export function libraryCircuit(id: string): Circuit {

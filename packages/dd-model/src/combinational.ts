@@ -11,6 +11,8 @@
 
 import type { CircuitBuilder, NetId } from "@dd/sim";
 
+import { register } from "./register";
+
 /** Nets for a block's ports, by port name. */
 export type PortNets = Readonly<Record<string, NetId>>;
 
@@ -421,6 +423,23 @@ export const BLOCKS: Readonly<Record<string, BlockDef>> = {
   "full-adder": def("full-adder", ["A", "B", "CIN"], ["SUM", "COUT"], fullAdder),
   "split-4": def("split-4", ["W"], ["b3", "b2", "b1", "b0"], split4, { W: 4 }),
   "join-4": def("join-4", ["b3", "b2", "b1", "b0"], ["W"], join4, { W: 4 }),
+  // Module 5: a 4-bit register with a reset and a load enable, as the registers lesson built it.
+  "register-4-reset-enable": def(
+    "register-4-reset-enable",
+    ["D", "CLK", "RST", "EN"],
+    ["Q"],
+    (b, ins, options = {}) => {
+      const q = register(b, need(ins, "D"), need(ins, "CLK"), {
+        name: options.name ?? "register",
+        width: 4,
+        reset: need(ins, "RST"),
+        enable: need(ins, "EN"),
+        ...(options.outs?.["Q"] !== undefined ? { q: options.outs["Q"] } : {}),
+      }).q;
+      return { Q: q };
+    },
+    { D: 4, Q: 4 },
+  ),
 };
 
 /** The width of a block's port: 1 unless the block says otherwise. */

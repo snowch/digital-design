@@ -22,7 +22,17 @@ export interface SettleSim {
 /** Starting values for some inputs, as a lesson writes them: bits, a number or 0x hexadecimal. */
 export type InitialInputs = Readonly<Record<string, string | number>>;
 
-function fresh(circuit: Circuit, initial: InitialInputs = {}): Simulator {
+/** Module 5: a step run before a figure first shows: inputs set, then a clock pulsed or a settle. */
+export interface PrimeStep {
+  readonly set?: Readonly<Record<string, string | number>>;
+  readonly clock?: string;
+}
+
+function fresh(
+  circuit: Circuit,
+  initial: InitialInputs = {},
+  prime: readonly PrimeStep[] = [],
+): Simulator {
   const sim = new Simulator(circuit);
   for (const input of circuit.inputs) {
     const width = circuit.nets[input.net]?.width ?? 1;
@@ -35,17 +45,30 @@ function fresh(circuit: Circuit, initial: InitialInputs = {}): Simulator {
     );
   }
   sim.settle();
+  for (const step of prime) {
+    for (const [name, value] of Object.entries(step.set ?? {})) {
+      const net = circuit.inputs.find((i) => i.name === name)?.net;
+      const width = net !== undefined ? (circuit.nets[net]?.width ?? 1) : 1;
+      sim.setInput(name, parseWord(String(value), width));
+    }
+    if (step.clock) sim.clockCycle(step.clock);
+    else sim.settle();
+  }
   return sim;
 }
 
-export function useSettleSim(circuit: Circuit, initial?: InitialInputs): SettleSim {
+export function useSettleSim(
+  circuit: Circuit,
+  initial?: InitialInputs,
+  prime?: readonly PrimeStep[],
+): SettleSim {
   const [generation, setGeneration] = useState(0);
   const [sims] = useState(() => new Map<Circuit, Simulator>());
   const sim = useMemo(() => {
     let s = sims.get(circuit);
     if (!s) {
       sims.clear();
-      s = fresh(circuit, initial);
+      s = fresh(circuit, initial, prime);
       sims.set(circuit, s);
     }
     return s;
@@ -83,7 +106,7 @@ export function useSettleSim(circuit: Circuit, initial?: InitialInputs): SettleS
       bump();
     },
     reset: () => {
-      sims.set(circuit, fresh(circuit, initial));
+      sims.set(circuit, fresh(circuit, initial, prime));
       bump();
     },
   };

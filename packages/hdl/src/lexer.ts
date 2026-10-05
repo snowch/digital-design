@@ -34,6 +34,9 @@ export const KEYWORDS = new Set([
   "parameter",
   "localparam",
   "initial",
+  // Module 5: enumerated types.
+  "typedef",
+  "enum",
 ]);
 
 // Longest symbols first, so `<=` is not read as `<` then `=`.

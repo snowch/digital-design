@@ -24,7 +24,9 @@ export type Construct =
   | "always_ff"
   | "if"
   | "case"
-  | "op-arith";
+  | "op-arith"
+  // Module 5: an enumerated type, such as a state machine's states.
+  | "enum";
 
 export const ALL_CONSTRUCTS: readonly Construct[] = [
   "module",
@@ -44,6 +46,8 @@ export const ALL_CONSTRUCTS: readonly Construct[] = [
   "if",
   "case",
   "op-arith",
+  // Module 5
+  "enum",
 ];
 
 /** What each construct is, in the words the gate uses when it refuses one. */
@@ -65,6 +69,8 @@ const EXPLAIN: Record<Construct, string> = {
   if: "`if` and `else`",
   case: "`case`",
   "op-arith": "arithmetic with `+` and `-`",
+  // Module 5
+  enum: "a list of names declared with `typedef enum`",
 };
 
 /** What to write instead, where there is something. */
@@ -77,6 +83,8 @@ const INSTEAD: Partial<Record<Construct, string>> = {
   concat: "use one-bit signals",
   select: "use one-bit signals",
   "op-arith": "write the gates out; adders come in a later module",
+  // Module 5
+  enum: "write each value as a number, such as `2'b01`",
 };
 
 /** Every construct the text uses, in order of first appearance. */
@@ -89,6 +97,8 @@ export function constructsUsed(module: Module): Construct[] {
   if (module.ports.length) add("ports");
   if (module.ports.some((p) => p.range)) add("vector");
   if (module.parameters.length) add("parameter");
+  // Module 5
+  if (module.enums?.length) add("enum");
   for (const d of module.declarations) {
     add("logic");
     if (d.range) add("vector");

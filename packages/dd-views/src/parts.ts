@@ -75,6 +75,18 @@ const COMPOSITE_LABELS: Readonly<Record<string, string>> = {
   "columns-alone": "half adder columns",
   "full-adder-parts": "full adder internals",
   "addsub-4": "4-bit add/subtract",
+  // Module 5: placeholders until the drafting subagent's words replace them.
+  "register-4-reset-enable": "4-bit register",
+  "split-2": "split",
+  "split-3": "split",
+  "join-2": "join",
+  "join-3": "join",
+  "add-one": "add one",
+  "next-state-logic": "next-state logic",
+  "output-logic": "output logic",
+  "counter-4": "counter",
+  "now-prev": "NOW and PREV",
+  swap: "swap",
 };
 
 const COMPOSITE_DESCRIPTIONS: Readonly<Record<string, string>> = {
@@ -95,6 +107,9 @@ const COMPOSITE_DESCRIPTIONS: Readonly<Record<string, string>> = {
   "full-adder": "Adds A, B and CIN: SUM is the total's low bit, COUT its high bit.",
   "split-4": "Splits the 4-bit word W into its bits b3 (top) to b0.",
   "join-4": "Joins the bits b3 (top) to b0 into the 4-bit word W.",
+  // Module 5: placeholder until drafted.
+  "register-4-reset-enable":
+    "Four D flip-flops sharing one clock. At an edge where RST is 1, Q becomes 0000; otherwise where EN is 1, Q takes D.",
 };
 
 const GATE_INPUTS: Readonly<Record<string, readonly string[]>> = {
