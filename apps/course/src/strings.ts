@@ -57,4 +57,13 @@ export const STRINGS = {
   missing: (path: string) => `There is no page at ${path}.`,
   noLesson: (id: string) => `There is no lesson called ${id}.`,
   backToLessons: "Back to the lessons",
+  /** The links at the bottom of a lesson to the lesson before it and the lesson after it. */
+  pager: {
+    /** What a screen reader calls the links' bar; the bar at the top of the page is "Lessons". */
+    label: "Next and previous lesson",
+    previous: "Previous",
+    next: "Next",
+    /** On the last lesson written so far, above "Back to the lessons". */
+    notYet: "Next lesson is still to be written.",
+  },
 };

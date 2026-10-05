@@ -191,7 +191,8 @@ ol {
 .lesson-list li {
   margin-bottom: var(--space-3);
 }
-.lesson-list .lesson-link {
+.lesson-list .lesson-link,
+.lesson-pager .lesson-link {
   display: block;
   padding: var(--space-4) var(--space-5);
   border: 1px solid var(--border);
@@ -202,7 +203,8 @@ ol {
   text-decoration: none;
   transition: box-shadow var(--motion);
 }
-.lesson-list .lesson-link-title {
+.lesson-list .lesson-link-title,
+.lesson-pager .lesson-link-title {
   display: block;
   font-family: var(--font-display);
   font-stretch: 92%;
@@ -210,15 +212,46 @@ ol {
   font-size: var(--text-lg);
   letter-spacing: -0.01em;
 }
-.lesson-list .lesson-link:hover {
+.lesson-list .lesson-link:hover,
+.lesson-pager .lesson-link:hover {
   box-shadow: var(--shadow);
   color: var(--accent-strong);
 }
-.lesson-list .meta {
+.lesson-list .meta,
+.lesson-pager .meta {
   display: block;
   color: var(--fg-muted);
   font-size: var(--text-sm);
   margin: var(--space-1) 0 0;
+}
+
+/* The lesson before and the lesson after, at the bottom of a lesson: side by side as wide as the
+   prose above them, the way back on the left and the way on on the right; one above the other on
+   a phone, in the same order. */
+.lesson-pager {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  max-width: var(--measure);
+  margin-top: var(--space-7);
+}
+.lesson-pager .pager-after {
+  text-align: right;
+}
+.lesson-pager .pager-way {
+  display: block;
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-1);
+}
+@media (max-width: 40rem) {
+  .lesson-pager {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+  .lesson-pager .pager-after {
+    text-align: left;
+  }
 }
 
 @media (min-width: 48rem) {

@@ -8,6 +8,7 @@ import { LESSONS } from "@dd/content";
 import { browserStorage, LessonView } from "@dd/lesson-runtime";
 
 import { LessonList } from "./pages/LessonList";
+import { LessonPager } from "./pages/LessonPager";
 import { Preface } from "./pages/Preface";
 import { PREFACE_HREF, lessonHref, useRoute } from "./route";
 import { STRINGS } from "./strings";
@@ -25,13 +26,16 @@ export function App() {
   else if (route.kind === "lesson") {
     const lesson = book.lessons.find((l) => l.id === route.id);
     page = lesson ? (
-      <LessonView
-        key={lesson.id}
-        book={book}
-        lesson={lesson}
-        storage={storage}
-        lessonHref={lessonHref}
-      />
+      <>
+        <LessonView
+          key={lesson.id}
+          book={book}
+          lesson={lesson}
+          storage={storage}
+          lessonHref={lessonHref}
+        />
+        <LessonPager book={book} lessonId={lesson.id} />
+      </>
     ) : (
       <>
         <h1>{STRINGS.noLesson(route.id)}</h1>

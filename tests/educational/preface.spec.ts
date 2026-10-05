@@ -42,7 +42,7 @@ test("the header reaches the page from inside a lesson, and marks the page it is
   page,
 }) => {
   await page.goto(`#/lesson/${LESSONS[0]!.id}`);
-  const nav = page.getByRole("navigation");
+  const nav = page.getByRole("navigation", { name: STRINGS.lessons, exact: true });
   await nav.getByRole("link", { name: STRINGS.preface.title }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(STRINGS.preface.title);
   await expect(nav.getByRole("link", { name: STRINGS.preface.title })).toHaveAttribute(
