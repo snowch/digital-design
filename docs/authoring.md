@@ -47,10 +47,10 @@ zod schema and shows a sentence in its place when they do not fit. Library ids a
 
 | kind | props | what it does |
 | --- | --- | --- |
-| `circuit-explorer` | `libraryId`, `clock?`, `showSteps?`, `truthTable?` (`sr-latch`, `d-latch`, `d-flip-flop`), `scope?` | the circuit running live: press inputs, clock it, scrub the settling steps, see the reference table's row |
+| `circuit-explorer` | `libraryId`, `clock?`, `showSteps?`, `truthTable?` (`sr-latch`, `d-latch`, `d-flip-flop`, `register-bit`), `scope?`, `releaseAll?` (offer "Release all at once") | the circuit running live: press inputs, clock it, scrub the settling steps, see the reference table's row |
 | `prediction` | `question`, `libraryId`, `run` (steps), `watch`, `options`, `explain?`, `signals?` | commit to a value before the simulator runs the script and answers |
 | `truth-table` | `table?` or `libraryId?`, `caption?` | a reference table, or a small circuit enumerated by the simulator |
-| `fault-lab` | `libraryId`, `faults` (broken-wire, inverted, stuck-at, wrong-gate, each with an optional label), `run`, `scope?` | apply a fault, press the inputs, run checks whose expectations are the healthy circuit's own behaviour |
+| `fault-lab` | `libraryId`, `faults` (broken-wire, inverted, stuck-at, wrong-gate, each with an optional label), `run`, `scope?`, `releaseAll?` | apply a fault, press the inputs, run checks whose expectations are the healthy circuit's own behaviour |
 | `latch-internals` | `libraryId?`, `delay?`, `script`, `until`, `signals?`, `scope?`, `phases` | a recorded delay-model run with a cursor, a drawing that opens, and the lesson's words per phase |
 | `setup-hold` | `delay?`, `edgeAt?`, `offsets?`, `window?`, `settleBetween?`, `undecidedFrom?`, `show?` | move D against the edge; roll the overlay inside the untrusted window; replay a roll |
 | `circuit-text` | `libraryId`, `drawing?` | the circuit beside the text generated from it |

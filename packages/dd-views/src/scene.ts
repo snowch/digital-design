@@ -1,6 +1,7 @@
 // The geometry of a drawing on screen: where each part, port and wire goes, in pixels.
 // Shared by the circuit view (read-only) and the builder (editable), so both draw the same way.
 
+import { INSIDE, placed } from "@dd/dd-model";
 import type { Circuit, NetId } from "@dd/sim";
 
 import {
@@ -183,8 +184,23 @@ export function netOfWire(circuit: Circuit, from: PortRef): NetId | undefined {
   return composite?.outputs[from.port];
 }
 
+/**
+ * The inside of a block placed by hand, when the library has a drawing for its kind and that
+ * drawing names every part inside it. Otherwise the block is laid out automatically.
+ */
+function placedInside(sub: Circuit, circuit: Circuit, scope: string): Circuit {
+  const kind = circuit.composites.find((c) => c.path === scope)?.kind;
+  const at = kind ? INSIDE[kind] : undefined;
+  if (!at) return sub;
+  const names = [
+    ...sub.components.filter((c) => !c.path.includes("/")).map((c) => c.path),
+    ...sub.composites.filter((c) => !c.path.includes("/")).map((c) => c.path),
+  ];
+  return names.every((n) => n in at) ? placed(sub, at) : sub;
+}
+
 /** A drawing of the circuit at `scope`, laid out where it carries no positions. */
 export function drawingAt(circuit: Circuit, scope: string): { drawing: Drawing; circuit: Circuit } {
-  const sub = subCircuit(circuit, scope);
+  const sub = placedInside(subCircuit(circuit, scope), circuit, scope);
   return { drawing: circuitToDrawing(sub), circuit: sub };
 }

@@ -34,6 +34,8 @@ const Props = z.object({
   showSteps: z.boolean().default(false),
   truthTable: z.enum(["sr-latch", "d-latch", "d-flip-flop", "register-bit"]).optional(),
   scope: z.string().default(""),
+  /** Offer "Release all at once": only where two inputs pressed together are the experiment. */
+  releaseAll: z.boolean().default(false),
 });
 
 /** The reference table restricted to the inputs the circuit has, with a wildcard for X. */
@@ -77,8 +79,10 @@ export const CircuitExplorer = withProps(
     const history = sim.sim.lastSettle?.history ?? [sim.values];
     const [step, setStep] = useState(history.length - 1);
     useEffect(() => setStep(history.length - 1), [sim.values, history.length]);
-    const shown =
-      (data.showSteps ? history[Math.min(step, history.length - 1)] : undefined) ?? sim.values;
+    // The last step is the simulator's own values, so a net it marked X after a loop that never
+    // settled is drawn as X, as the status line says, and not as the last value it swung to.
+    const last = history.length - 1;
+    const shown = (data.showSteps && step < last ? history[step] : undefined) ?? sim.values;
     const oscillating = (sim.sim.lastSettle?.oscillating ?? []).map(
       (n) => circuit.nets[n]?.name ?? String(n),
     );
@@ -112,9 +116,11 @@ export const CircuitExplorer = withProps(
               {format(strings.explorer.clock, { name: data.clock })}
             </button>
           )}
-          <button type="button" className="button secondary" onClick={() => sim.releaseAll()}>
-            {strings.explorer.releaseAll}
-          </button>
+          {data.releaseAll && (
+            <button type="button" className="button secondary" onClick={() => sim.releaseAll()}>
+              {strings.explorer.releaseAll}
+            </button>
+          )}
           <button type="button" className="button secondary" onClick={() => sim.reset()}>
             {strings.explorer.reset}
           </button>

@@ -223,4 +223,21 @@ describe("the circuit explorer", () => {
     expect(table).toHaveTextContent("Q");
     expect(screen.getByRole("status")).toHaveTextContent(format(S.explorer.settled, { n: 2 }));
   });
+
+  it("draws the X the status names when a loop never settles, not the last value it swung to", async () => {
+    const user = userEvent.setup();
+    mount(CircuitExplorer as typeof Prediction, {
+      id: "odd",
+      kind: "circuit-explorer",
+      timeModel: "settle",
+      caption: "c",
+      props: { libraryId: "inverter-loop-3", showSteps: true },
+    });
+    await user.click(screen.getByRole("button", { name: /^kick = 0\./ }));
+    await user.click(screen.getByRole("button", { name: /^kick = 1\./ }));
+    expect(screen.getByRole("status")).toHaveTextContent(/never settled/);
+    const table = screen.getByRole("table", { name: S.circuit.signals });
+    const q = [...table.querySelectorAll("tr")].find((r) => r.cells[0]?.textContent === "q");
+    expect(q?.cells[2]?.textContent).toBe("X");
+  });
 });

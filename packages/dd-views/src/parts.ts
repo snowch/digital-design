@@ -32,6 +32,8 @@ const GATE_LABELS: Readonly<Record<string, string>> = {
   xnor: "XNOR",
   mux2: "MUX",
   const: "CONST",
+  // A cut wire, drawn only where a fault put it: what the cut wire's readers now see.
+  open: "CUT",
 };
 
 const COMPOSITE_LABELS: Readonly<Record<string, string>> = {
@@ -70,6 +72,7 @@ const GATE_INPUTS: Readonly<Record<string, readonly string[]>> = {
   buf: ["a"],
   mux2: ["sel", "a", "b"],
   const: [],
+  open: [],
 };
 
 /** The spec of a part by id, or undefined if the id names nothing placeable. */

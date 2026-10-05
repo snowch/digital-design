@@ -339,8 +339,9 @@ export function circuitToDrawing(circuit: Circuit): Drawing {
     // figure shows what the fault did; it is named by its path, which no drawn part shares.
     const fault = c.path.startsWith("fault/");
     if (c.path.includes("/") && !fault) continue;
-    // An open is an unconnected input: in a drawing that is simply no wire.
-    if (c.kind === "open") continue;
+    // An open is an unconnected input: in a drawing that is simply no wire. A cut a fault made
+    // is drawn, so the figure shows where the wire was broken.
+    if (c.kind === "open" && !fault) continue;
     const id = fault ? c.path : c.name;
     const fanIn = Object.keys(c.inputs).length;
     push({ id, kind: c.kind, ...(fanIn > 2 ? { fanIn } : {}) }, layoutOf(c.meta));

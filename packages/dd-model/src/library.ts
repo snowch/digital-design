@@ -46,7 +46,17 @@ export function twoButtonsCircuit(delay?: number): Circuit {
   b.nor([bPress, dark], { output: light, name: "norLight", ...g });
   b.nor([a, light], { output: dark, name: "norDark", ...g });
   b.output("LIGHT", light);
-  return b.build();
+  // Placed by hand, so each button's wire runs to its own gate and no wire crosses a gate: A
+  // reaches norDark at the top, B reaches norLight lower down, DARK runs forward and LIGHT runs
+  // back under both. A fault's added part goes below, and the gates stay where they were.
+  return placed(b.build(), {
+    "in:A": [0, 1],
+    // B's pin sits lowest, so the wire LIGHT sends back runs under it and not through a name.
+    "in:B": [0, 7],
+    norDark: [4, 1],
+    norLight: [9, 5],
+    "out:LIGHT": [14, 5],
+  });
 }
 
 export function srLatchCircuit(delay?: number): Circuit {
@@ -168,6 +178,26 @@ export function placed(
     }),
   };
 }
+
+/**
+ * Hand-placed drawings of a block's inside, by the block's kind, for the view that opens it. The
+ * flip-flop's: D and CLK on the left, the inverter under D, the master above and the slave lower
+ * and to the right, so CLK runs to the slave's EN under the inverter and through no box. A block
+ * built with more inside (an enable, a reset) has parts this list does not name and is laid out
+ * automatically.
+ */
+export const INSIDE: Readonly<Record<string, Readonly<Record<string, readonly [number, number]>>>> =
+  {
+    dff: {
+      "in:D": [0, 1],
+      "in:CLK": [0, 4],
+      notClk: [4, 4],
+      master: [8, 1],
+      slave: [12, 6],
+      "out:Q": [16, 6],
+      "out:Qb": [16, 8],
+    },
+  };
 
 /**
  * The registers lesson's first circuit: four flip-flops sharing one clock, each with its own

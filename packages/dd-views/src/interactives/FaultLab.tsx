@@ -41,6 +41,8 @@ const Props = z.object({
   faults: z.array(FaultSpec).min(1),
   run: z.array(Step).min(1),
   scope: z.string().default(""),
+  /** Offer "Release all at once": only where two inputs pressed together are the experiment. */
+  releaseAll: z.boolean().default(false),
 });
 
 export function toFault(spec: z.infer<typeof FaultSpec>): Fault {
@@ -132,9 +134,11 @@ export const FaultLab = withProps(
           onScope={setScope}
         />
         <div className="fault-actions">
-          <button type="button" className="button secondary" onClick={() => sim.releaseAll()}>
-            {strings.explorer.releaseAll}
-          </button>
+          {data.releaseAll && (
+            <button type="button" className="button secondary" onClick={() => sim.releaseAll()}>
+              {strings.explorer.releaseAll}
+            </button>
+          )}
           <button type="button" className="button primary" onClick={runChecks}>
             {strings.fault.run}
           </button>

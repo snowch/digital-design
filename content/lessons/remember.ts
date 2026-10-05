@@ -182,6 +182,7 @@ export const remember: LessonInput = {
               { label: "press B", set: { A: 0, B: 1 } },
               { label: "release B", set: { A: 0, B: 0 } },
             ],
+            releaseAll: true,
           },
         },
         {

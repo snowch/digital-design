@@ -253,6 +253,7 @@ export function CircuitView({
                   )}
                   {!isShaped(part.kind) &&
                     part.kind !== "const" &&
+                    part.kind !== "open" &&
                     box.inputs.map((p) => (
                       <text key={p.port} x={6} y={p.at.y - box.y + 3} className="port-label">
                         {p.port}
@@ -260,6 +261,7 @@ export function CircuitView({
                     ))}
                   {!isShaped(part.kind) &&
                     part.kind !== "const" &&
+                    part.kind !== "open" &&
                     box.outputs.map((p) => (
                       <text
                         key={p.port}
