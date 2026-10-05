@@ -253,6 +253,18 @@ describe("the circuit explorer", () => {
     expect(screen.getByRole("status")).toHaveTextContent(format(S.explorer.settled, { n: 2 }));
   });
 
+  it("says one step without a plural when the circuit settles in one", () => {
+    mount(CircuitExplorer as typeof Prediction, {
+      id: "race",
+      kind: "circuit-explorer",
+      timeModel: "settle",
+      caption: "c",
+      props: { libraryId: "two-latches", showSteps: true, canOpen: false },
+    });
+    expect(screen.getByRole("status")).toHaveTextContent(S.explorer.settledOne);
+    expect(screen.getByRole("status")).not.toHaveTextContent("1 steps");
+  });
+
   it("draws the X the status names when a loop never settles, not the last value it swung to", async () => {
     const user = userEvent.setup();
     mount(CircuitExplorer as typeof Prediction, {

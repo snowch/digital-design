@@ -154,7 +154,9 @@ export const CircuitExplorer = withProps(
             </label>
             <p role="status">
               {sim.converged
-                ? format(strings.explorer.settled, { n: history.length - 1 })
+                ? history.length === 2
+                  ? strings.explorer.settledOne
+                  : format(strings.explorer.settled, { n: history.length - 1 })
                 : format(strings.explorer.notSettled, { nets: oscillating.join(", ") })}
             </p>
           </div>

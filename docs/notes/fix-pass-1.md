@@ -72,6 +72,18 @@ Read from the clock (`date -u`), not estimated.
   library's short instance name "reg" under the block's label, and the closed two-button block
   showed its instance name "light"; both now show the label alone.
 - 01:05 Full check green; third commit pushed.
+- 02:05 to 02:25 The parent session's review of the branch (the full check on its final head, both
+  lessons read start to finish, every changed figure looked at at 1280 and 375 pixels). Two
+  findings, both fixed here with one brief (P1, appendix) to the drafting subagent:
+  - **A join broke in the redraft of `buildDLatchLead` (1-A8).** The cut that stopped the lead
+    repeating the task also removed the one sentence that introduced D and EN, so "While EN is 1,
+    the circuit is transparent" followed a paragraph about S, R and Qb with nothing to point at.
+    The redraft now says the next challenge's circuit has inputs D and EN and output Q before it
+    says what transparent means. The first draft used "component", a word the lesson never uses;
+    sent back once.
+  - **"Settled in 1 steps."** The new two-latch figure settles in one step, the first figure to do
+    so, and the status line had one form for every count. A second string for one step
+    (`explorer.settledOne`), chosen by the explorer when the history holds one step, with a test.
 
 ## Every finding, and what was done
 
@@ -1620,4 +1632,31 @@ The reference table "One register bit with reset and load enable" (rows' "What i
 current "Q resets to 0", "Q keeps value", "Q captures 0", "Q captures 1", "Q unchanged". The lessons
 say Q "takes" D. Return `reg.take0` and `reg.take1` for the two "captures" rows, in the same shape as
 "Q resets to 0". The others stay.
+````
+
+### P1-d-latch-lead.md (the parent session's brief, after its review)
+
+````markdown
+STRING 1: the second paragraph of `buildDLatchLead`, above the challenge "The follow-and-keep
+circuit". The paragraph before it (unchanged) names the two-button circuit a latch, its inputs S
+and R, its outputs Q and Qb, and says the next challenge's part buttons offer the latch as one
+block. The current second paragraph, "While EN is 1, the circuit is transparent: a change on D
+passes straight through to Q. This circuit is called a D latch.", names D and EN with no
+introduction, and "the circuit" has nothing to point at. The task text below already says "Draw
+a circuit with inputs D and EN and output Q. When EN is 1, Q copies D. When EN is 0, Q keeps what
+it had."; do not repeat that wording.
+
+Facts, in this order:
+1. The next challenge asks for a new circuit built around the latch block, with two inputs, D
+   and EN, and the output Q.
+2. While EN is 1, the circuit is transparent: a change on D passes straight through to Q. Keep
+   "transparent".
+3. This circuit is called a D latch. Keep "D latch".
+One short paragraph. "keep", never "hold". Do not say what happens while EN is 0.
+
+STRING 2: the status line of a stepped figure after the simulator settled in exactly one step.
+Other counts read "Settled in {n} steps.". Write the one-step line in the same shape.
+
+Note sent back after the first draft: "component" is a word the lesson never uses; its words are
+"part" and "block". Change that phrase only.
 ````

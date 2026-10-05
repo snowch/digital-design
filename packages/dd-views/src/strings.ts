@@ -92,6 +92,7 @@ export interface ViewStrings {
     readonly step: string;
     readonly stepOf: string;
     readonly settled: string;
+    readonly settledOne: string;
     readonly notSettled: string;
     readonly clock: string;
     readonly reset: string;
@@ -296,6 +297,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     step: "Step",
     stepOf: "Step {k} of {n}",
     settled: "Settled in {n} steps.",
+    settledOne: "Settled in 1 step.",
     notSettled: "These signals never settled and are shown as X: {nets}.",
     clock: "Clock {name}",
     reset: "Start again",
