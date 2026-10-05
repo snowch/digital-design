@@ -66,14 +66,13 @@ export const decoders: LessonInput = {
             question: PROSE.p1Question,
             libraryId: "lamp-2",
             run: [{ label: "S1 = 1, S0 = 1", set: { S1: 1, S0: 1 } }],
-            watch: "L",
+            watch: "Y2",
             options: [
               { value: "0", label: LABELS.options.p1Off },
               { value: "1", label: LABELS.options.p1On },
-              { value: "X", label: LABELS.options.p1Unknown },
             ],
             explain: PROSE.p1Explain,
-            signals: ["S1", "S0", "L"],
+            signals: ["S1", "S0", "Y2"],
           },
         },
       ],
@@ -126,7 +125,7 @@ export const decoders: LessonInput = {
             faults: [
               { kind: "stuck-at", net: "NS0", value: 1, label: LABELS.faults.ns0High },
               { kind: "wrong-gate", path: "and3", gate: "or", label: LABELS.faults.and3ToOr },
-              { kind: "broken-wire", net: "NS1", label: LABELS.faults.ns1Cut },
+              { kind: "wrong-gate", path: "notS1", gate: "buf", label: LABELS.faults.ns1Cut },
             ],
             run: [
               { label: "S1 0, S0 0", set: { S1: 0, S0: 0 } },

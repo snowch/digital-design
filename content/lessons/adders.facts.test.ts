@@ -24,8 +24,12 @@ describe("facts for the adders lesson", () => {
     }); // the second half adder's XOR made an OR
   });
 
-  it("the 4-bit adder: 7 + 1 is 1000, which reads 8 unsigned and -8 signed; 15 + 1 is 0000 with a carry out", () => {
-    expect(explorerOutputs(adders, "adder-4")).toEqual({ SUM: "1000", COUT: "0" });
+  it("the 4-bit adder: 3 + 2 to start; 7 + 1 is 1000, 8 unsigned and -8 signed; 15 + 1 is 0000 with a carry out", () => {
+    expect(explorerOutputs(adders, "adder-4")).toEqual({ SUM: "0101", COUT: "0" });
+    expect(explorerOutputs(adders, "adder-4", { A: "0111", B: "0001" })).toEqual({
+      SUM: "1000",
+      COUT: "0",
+    });
     expect(readingOf(parseBits("1000"), "unsigned")).toBe("8");
     expect(readingOf(parseBits("1000"), "signed")).toBe("-8");
     expect(explorerOutputs(adders, "adder-4", { A: "1111", B: "0001" })).toEqual({
@@ -33,6 +37,19 @@ describe("facts for the adders lesson", () => {
       COUT: "1",
     });
     expect(readingOf(parseBits("1111"), "signed")).toBe("-1");
+  });
+
+  it("two negative words that overflow, and a positive with a negative that does not", () => {
+    // -8 + -1 is -9, which does not fit: the sum's top bit is 0 though both top bits are 1.
+    expect(explorerOutputs(adders, "adder-4", { A: "1000", B: "1111" })).toEqual({
+      SUM: "0111",
+      COUT: "1",
+    });
+    // 5 + -3 is 2: a carry out, and the signed sum fits.
+    expect(explorerOutputs(adders, "adder-4", { A: "0101", B: "1101" })).toEqual({
+      SUM: "0010",
+      COUT: "1",
+    });
   });
 
   it("the correction: -250 + -6 is -256, with a carry out of the top bit", () => {

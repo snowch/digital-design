@@ -60,6 +60,15 @@ export function valueLabel(value: Word | undefined): string {
     .padStart(Math.ceil(value.width / 4), "0");
 }
 
+/** A constant part's value in binary, as its params give it. */
+function constText(circuit: Circuit, path: string): string {
+  const c = circuit.components.find((x) => x.path === path);
+  const width = Number(c?.params?.["width"] ?? 1);
+  return BigInt(String(c?.params?.["value"] ?? "0"))
+    .toString(2)
+    .padStart(width, "0");
+}
+
 /** Blocks drawn closed for good: a split or a join holds no gates worth opening. */
 const SEALED = new Set(["split-4", "join-4"]);
 
@@ -207,7 +216,9 @@ export function CircuitView({
               if (isPin) {
                 // A word's pin is not a button; its bits are set under the drawing.
                 const oneBit = outNet === undefined || (sub.nets[outNet]?.width ?? 1) === 1;
-                const clickable = part.kind === "input" && oneBit && onToggleInput;
+                // Inside an opened block a pin is the block's port, not an input of the circuit:
+                // pressing it would set whichever top-level input shares its name.
+                const clickable = part.kind === "input" && oneBit && scope === "" && onToggleInput;
                 const label = `${part.name ?? part.id}${pinValue ? ` = ${valueLabel(pinValue)}` : ""}`;
                 return (
                   <g
@@ -293,6 +304,18 @@ export function CircuitView({
                       {box.label}
                     </text>
                   )}
+                  {part.kind === "const" && (
+                    // A fixed value shows its bits inside its box, so a drawing says what it is
+                    // even before anything runs (Module 3).
+                    <text
+                      x={box.w / 2}
+                      y={box.h / 2 + 4}
+                      textAnchor="middle"
+                      className="const-value"
+                    >
+                      {constText(sub, part.id)}
+                    </text>
+                  )}
                   {!nameRepeatsKind(part.id, part.kind) && !part.id.startsWith("fault/") && (
                     <text x={box.w / 2} y={box.h + 12} textAnchor="middle" className="part-name">
                       {part.id}
@@ -325,7 +348,10 @@ export function CircuitView({
                       sub.components.find((c) => c.path === part.id)?.outputs[p.port] ??
                       composite?.outputs[p.port];
                     const v = net !== undefined ? values?.[net] : undefined;
-                    return v ? (
+                    // An output pin shows its own value, so a part driving one does not repeat
+                    // it at its port, where ports 16 pixels apart would stack the labels.
+                    const shownAtPin = sub.outputs.some((o) => o.net === net);
+                    return v && !shownAtPin ? (
                       <text
                         key={p.port}
                         x={p.at.x - box.x + 4}

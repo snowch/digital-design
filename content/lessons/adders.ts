@@ -19,6 +19,13 @@ export const CORRECTION_WORD = "0xFFFA";
 export const SEVEN = "0111";
 export const ONE = "0001";
 
+/**
+ * Where the 4-bit adder starts: 3 + 2, which fits both ways, so its table does not answer the
+ * signed-reading prediction above it before the learner commits.
+ */
+export const START_A = "0011";
+export const START_B = "0010";
+
 const bits4 = (n: number) => n.toString(2).padStart(4, "0");
 
 /** Every pattern of A, B and CIN, labelled as the page shows it. */
@@ -90,7 +97,6 @@ export const adders: LessonInput = {
             options: [
               { value: "0", label: LABELS.options.p1Zero },
               { value: "1", label: LABELS.options.p1One },
-              { value: "X", label: LABELS.options.p1Unknown },
             ],
             explain: PROSE.p1Explain,
             signals: ["A", "B", "SUM", "CARRY"],
@@ -200,7 +206,7 @@ export const adders: LessonInput = {
           props: {
             libraryId: "adder-4-block",
             canOpen: false,
-            initial: { A: SEVEN, B: ONE, CIN: 0 },
+            initial: { A: START_A, B: START_B, CIN: 0 },
             readings: ["unsigned", "signed"],
           },
         },

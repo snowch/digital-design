@@ -7,7 +7,7 @@ export const LABELS = {
   objectives: [
     "Build a circuit that lights one of four lamps, the one whose number two select inputs spell.",
     "Explain each output as the answer to: do the select inputs equal my number?",
-    "Send one input to one of four outputs, and turn one of four lines into its number.",
+    "Send one input to one of four outputs, and turn one of four signals into its number.",
     "Build a circuit that shows whether two 4-bit words are equal.",
   ],
   titles: {
@@ -33,13 +33,12 @@ export const LABELS = {
     decoderFaults: "Choose a fault and run the checks",
     demuxBlock: "Change IN, S1 and S0. Watch which output IN reaches",
     predictDoors: "Predict the room number when doors B and C are open. Then check",
-    comparatorBlock: "Change words A and B. Watch when EQ turns to 1",
+    comparatorBlock: "Change A or B. Watch EQ turn to 0",
     buildComparator: "Draw the equal-words circuit and run the tests",
   },
   options: {
-    p1Off: "L is 0, the lamp is off",
-    p1On: "L is 1, the lamp is on",
-    p1Unknown: "L is X, the simulator cannot know",
+    p1Off: "Y2 is 0, the lamp is off",
+    p1On: "Y2 is 1, the lamp is on",
     p2Room1: "S is 01, room B",
     p2Room2: "S is 10, room C",
     p2Room3: "S is 11, room D",
@@ -47,6 +46,6 @@ export const LABELS = {
   faults: {
     ns0High: "NS0 stuck at 1",
     and3ToOr: "AND gate and3 changed to OR",
-    ns1Cut: "NS1 wire cut",
+    ns1Cut: "NOT gate notS1 becomes a wire",
   },
 } as const;

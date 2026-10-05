@@ -78,7 +78,6 @@ export const selectors: LessonInput = {
             options: [
               { value: "0", label: LABELS.options.p1RoomA },
               { value: "1", label: LABELS.options.p1RoomB },
-              { value: "X", label: LABELS.options.p1Unknown },
             ],
             explain: PROSE.p1Explain,
             signals: ["A", "B", "Y"],
@@ -100,7 +99,6 @@ export const selectors: LessonInput = {
             options: [
               { value: "0", label: LABELS.options.p2Zero },
               { value: "1", label: LABELS.options.p2One },
-              { value: "X", label: LABELS.options.p2Unknown },
             ],
             explain: PROSE.p2Explain,
             signals: ["S", "A", "Y"],

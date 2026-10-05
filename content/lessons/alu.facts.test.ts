@@ -39,8 +39,18 @@ describe("facts for the ALU lesson", () => {
     }); // the carry into bit 2 lost
   });
 
-  it("the add-or-subtract row: 3 - 6 is 1101, -3", () => {
-    expect(explorerOutputs(alu, "addsub-row")).toEqual({ SUM: "1101", COUT: "0" });
+  it("the add-or-subtract row: 2 - 3 is 1111, -1, with no carry out; 2 + 3 is 0101", () => {
+    expect(explorerOutputs(alu, "addsub-row")).toEqual({ SUM: "1111", COUT: "0" });
+    expect(explorerOutputs(alu, "addsub-row", { SUB: 0 })).toEqual({ SUM: "0101", COUT: "0" });
+    // Subtracting, COUT is 1 exactly when A is at least B, read unsigned.
+    expect(explorerOutputs(alu, "addsub-row", { A: "0110", B: "0011" })).toEqual({
+      SUM: "0011",
+      COUT: "1",
+    });
+  });
+
+  it("AND with 8000 keeps bit 15 alone: room A's word is below zero", () => {
+    expect(explorerOutputs(alu, "alu-16", { B: "0x8000", OP1: 0, OP0: 0 })["Y"]).toBe("8000");
   });
 
   it("the 16-bit ALU on the two rooms' words", () => {

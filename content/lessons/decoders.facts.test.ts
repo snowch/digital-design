@@ -26,7 +26,7 @@ describe("facts for the decoders lesson", () => {
     expect(faultChecks(decoders, "decoder-faults", 2)).toEqual({
       failed: ["S1 0, S0 0", "S1 0, S0 1", "S1 1, S0 0", "S1 1, S0 1"],
       total: 4,
-    }); // NS1 cut: Y0 or Y1 is unknown in every check
+    }); // notS1 made a plain wire: and0 copies and2 and and1 copies and3, so two lamps light or none
   });
 
   it("the comparator starts with two equal words and says so", () => {

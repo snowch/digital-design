@@ -40,10 +40,8 @@ export const LABELS = {
   options: {
     p1RoomA: "Y is 0, room A's bit",
     p1RoomB: "Y is 1, room B's bit",
-    p1Unknown: "The simulator cannot know Y (X)",
     p2Zero: "Y is 0",
     p2One: "Y is 1",
-    p2Unknown: "The simulator cannot know Y (X)",
   },
   faults: {
     noNot: "NOT gate notS becomes a wire",

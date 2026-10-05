@@ -199,7 +199,7 @@ export const alu: LessonInput = {
           after: PROSE.addsubRowAfter,
           props: {
             libraryId: "addsub-4",
-            initial: { A: "0011", B: "0110", SUB: 1 },
+            initial: { A: SMALL_A, B: SMALL_B, SUB: 1 },
             readings: ["signed"],
           },
         },

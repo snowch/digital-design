@@ -42,7 +42,6 @@ export const LABELS = {
   options: {
     p1Zero: "SUM is 0",
     p1One: "SUM is 1",
-    p1Unknown: "SUM is X, the simulator cannot know",
     p2Eight: "1000 reads 8 signed",
     p2MinusEight: "1000 reads -8 signed",
     p2Zero: "1000 reads 0 signed",

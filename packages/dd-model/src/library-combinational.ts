@@ -116,7 +116,7 @@ function lampTwo(): Circuit {
   const b = new CircuitBuilder("lamp-2");
   const { S1, S0 } = pins(b, ["S1", "S0"]) as Record<string, NetId>;
   const n0 = b.not(S0!, { name: "notS0", output: b.net("NS0") });
-  b.output("L", b.and([S1!, n0], { name: "and2", output: b.net("L") }));
+  b.output("Y2", b.and([S1!, n0], { name: "and2", output: b.net("Y2") }));
   return b.build();
 }
 
@@ -548,13 +548,13 @@ export function combinationalLibrary(place: Place): Readonly<Record<string, () =
         splitA: [5, 1],
         "in:B": [0, 9],
         splitB: [5, 8],
-        "in:S": [0, 21],
+        "in:S": [0, 30],
         sel3: [13, 1],
-        sel2: [13, 6],
-        sel1: [13, 11],
-        sel0: [13, 16],
-        joinY: [21, 7],
-        "out:Y": [27, 8],
+        sel2: [17, 8],
+        sel1: [21, 15],
+        sel0: [25, 22],
+        joinY: [31, 1],
+        "out:Y": [37, 2],
       }),
     "selector-4-block": () =>
       place(selector4Block(), {
@@ -568,8 +568,24 @@ export function combinationalLibrary(place: Place): Readonly<Record<string, () =
         "out:Y": [13, 2],
       }),
     "selector-4-blocks": () => selector4Blocks(),
-    "lamp-2": () => lampTwo(),
-    "decoder-block": () => decoderBlock(),
+    "lamp-2": () =>
+      place(lampTwo(), {
+        "in:S1": [0, 1],
+        "in:S0": [0, 5],
+        notS0: [5, 4],
+        and2: [11, 2],
+        "out:Y2": [16, 2],
+      }),
+    "decoder-block": () =>
+      place(decoderBlock(), {
+        "in:S1": [0, 1],
+        "in:S0": [0, 4],
+        "decoder-2": [6, 1],
+        "out:Y0": [13, 0],
+        "out:Y1": [13, 2],
+        "out:Y2": [13, 4],
+        "out:Y3": [13, 6],
+      }),
     // The four AND gates in a column, each beside its lamp; the NOT gates below them, so the
     // wires from S1 and S0 to the lower gates pass no part.
     "decoder-gates": () =>
@@ -617,14 +633,14 @@ export function combinationalLibrary(place: Place): Readonly<Record<string, () =
       }),
     "full-adder-parts": () =>
       place(fullAdderParts(), {
-        "in:A": [0, 1],
-        "in:B": [0, 3],
-        "in:CIN": [0, 8],
+        "in:A": [0, 0],
+        "in:B": [0, 2],
+        "in:CIN": [0, 6],
         ha1: [5, 1],
         ha2: [11, 5],
-        orCarry: [18, 1],
-        "out:COUT": [23, 1],
-        "out:SUM": [23, 6],
+        orCarry: [18, 2],
+        "out:COUT": [23, 2],
+        "out:SUM": [23, 5],
       }),
     "adder-4-block": () => place(adderBlock(4), ADDER_BLOCK_AT),
     "adder-16-block": () => place(adderBlock(16), ADDER_BLOCK_AT),

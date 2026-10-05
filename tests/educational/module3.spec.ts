@@ -231,7 +231,7 @@ test.describe("Module 3's figures", () => {
   test("the predictions answer with what the simulator did", async ({ page }) => {
     const answers: Record<string, Record<string, [string, string]>> = {
       selectors: { "predict-or": ["Y", "1"], "predict-and": ["Y", "0"] },
-      decoders: { "predict-lamp": ["L", "0"], "predict-doors": ["S", "11"] },
+      decoders: { "predict-lamp": ["Y2", "0"], "predict-doors": ["S", "11"] },
       adders: { "predict-sum": ["SUM", "0"] },
       alu: { "predict-minus": ["NEG", "1101"] },
     };

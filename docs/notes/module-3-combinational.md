@@ -108,13 +108,18 @@ The managing session should check each against Module 2 when both land:
   now (every lesson; the fact sheet tells the drafts the learner knows them).
 - "An AND gate gives 1 only when every input is 1" and "an XOR gate gives 1 when its two inputs
   differ" are restated briefly, as reminders, in selectors, decoders and adders.
-- The drawing editor and "Run tests" with a diagnosis are assumed known; each construction
-  section still says how to add parts and wire them, in one or two sentences.
+- The drawing editor and "Run tests" with a diagnosis are assumed known. The first drafts said
+  in each construction section how to add parts and wire them; the reviews found that a repeat of
+  the editor's own help, and it was cut. If Module 2 does not teach the editor, the editor's help
+  text is all a learner gets.
 - **Depth**, in Module 2's sense, is named twice: the decoders model note (a tree of gates) and
   the adders model note (faster adders have less depth). If Module 2 does not name depth, those
   two sentences need a reword.
-- "Module 2" is named in four places (selectors prediction, decoders motivation, adders and
-  decoders model notes).
+- "Module 2" is named in three places (decoders motivation, adders and decoders model notes).
+- **X** (the simulator's unknown value) is not used. The first drafts offered "the simulator
+  cannot know (X)" as a prediction answer and a cut wire as a fault; the reviews found no lesson
+  before them explains X, so the options went and the fault became a gate turned into a plain
+  wire. If Module 2 teaches X, a cut-wire fault would be a fair addition to the decoders lab.
 - Not leaned on: NAND universality, simplification, truth tables (no truth table is shown; the
   tests are the rows).
 - Every drawn challenge shows the editor's "As text" and "Import from text" panels, as the
