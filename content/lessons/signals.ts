@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Lesson: Module 1, lesson 1, signals and bits.
 //
 // The structure is here; the words are in signals.prose.ts and signals.labels.ts. The recordings,

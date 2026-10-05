@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Copyright © 2026 Chris Snow
+
 # Exactly what CI runs. Run it before pushing: `npm run check`.
 #
 # CI invokes this same script, so a laptop and CI cannot drift. Each stage says what it protects,
@@ -9,6 +11,11 @@ cd "$(dirname "$0")/.."
 echo "== formatting =="
 # One formatter, pinned, so a diff is never a reformat.
 npx prettier --check .
+
+echo "== copyright =="
+# Every source file carries its author's copyright line; a new file without it fails here.
+# `node scripts/copyright.mjs` adds the line.
+node scripts/copyright.mjs --check
 
 echo "== types =="
 # Strict TypeScript over every package, the content and the tests, with no emit: the build below

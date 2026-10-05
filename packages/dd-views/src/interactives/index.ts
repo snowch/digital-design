@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 import type { ComponentType } from "react";
 
 import type { InteractiveProps } from "@dd/lesson-runtime";

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Scripted runs of a circuit in the settle model, shared by the prediction and the fault lab:
 // set inputs, pulse a clock or settle and tick, step by step, recording the trace.
 

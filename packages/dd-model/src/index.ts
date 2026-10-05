@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 export * from "./latches";
 export * from "./flipflop";
 export * from "./register";

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The drawing editor: place parts from a palette, wire output ports to input ports, move and
 // delete, all with a pointer or with the keyboard alone. The drawing is the learner's; this
 // component owns no state but the selection and a wire in progress. Every change goes up as a

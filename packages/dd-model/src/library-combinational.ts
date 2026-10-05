@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 3's circuits, by the id a lesson names them with. Each is a function, so every caller
 // gets a fresh netlist. The blocks they are built from are in combinational.ts; here they are
 // wired into the circuits the lessons' figures show and the challenges' reference solutions.
@@ -595,14 +597,14 @@ export function combinationalLibrary(place: Place): Readonly<Record<string, () =
         notS1: [5, 2.5],
         "in:S0": [0, 7],
         notS0: [5, 6.5],
-        and0: [11, 1],
-        and1: [11, 5],
-        and2: [11, 9],
-        and3: [11, 13],
-        "out:Y0": [16, 1],
-        "out:Y1": [16, 5],
-        "out:Y2": [16, 9],
-        "out:Y3": [16, 13],
+        and0: [12, 1],
+        and1: [12, 5],
+        and2: [12, 9],
+        and3: [12, 13],
+        "out:Y0": [17, 1],
+        "out:Y1": [17, 5],
+        "out:Y2": [17, 9],
+        "out:Y3": [17, 13],
       }),
     "demux-block": () =>
       place(demuxBlock(), {
@@ -659,6 +661,8 @@ export function combinationalLibrary(place: Place): Readonly<Record<string, () =
     "addsub-slice": () => addSubSliceParts(),
     // A staircase: bit 0's slice low on the left, bit 3's high on the right, so each carry runs
     // up and to the right into the next slice, and the wires into each slice pass none of the others.
+    // Two cells between slices: room for a carry's turn, the SUB wire's and the values written at
+    // each slice's outputs, half a cell apart.
     "addsub-4": () =>
       place(sliceRow(4, "addsub"), {
         "in:A": [0, 2],
@@ -667,13 +671,13 @@ export function combinationalLibrary(place: Place): Readonly<Record<string, () =
         splitA: [4, 1],
         splitB: [4, 7],
         carryIn: [5, 26],
-        bit3: [26, 4],
-        bit2: [21, 9],
-        bit1: [16, 14],
+        bit3: [29, 4],
+        bit2: [23, 9],
+        bit1: [17, 14],
         bit0: [11, 19],
-        join: [31, 24],
-        "out:SUM": [36, 25],
-        "out:COUT": [36, 5],
+        join: [34, 24],
+        "out:SUM": [39, 25],
+        "out:COUT": [39, 5],
       }),
     "alu-slice-parts": () => aluSliceParts(),
     "alu-4": () => sliceRow(4, "alu"),

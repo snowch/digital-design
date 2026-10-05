@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // A drawing is what the learner edits; a circuit is what the simulator runs. This module goes
 // both ways: a drawing compiles to a netlist with positions kept in the components' metadata,
 // and a netlist (one the learner saved, or one elaborated from text) becomes a drawing again,

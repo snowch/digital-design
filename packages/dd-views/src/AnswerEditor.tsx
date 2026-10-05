@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The editor and the grade for a challenge whose artifact is the learner's settings or answers.
 //
 // Each field the challenge declares is drawn by its kind: a number with its unit, a row of bits

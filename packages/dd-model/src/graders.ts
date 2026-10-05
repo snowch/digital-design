@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The graders for challenges whose artifact is the learner's settings or answers.
 //
 // A grader takes the learner's answers (as typed), what a test case gives it, and what the case

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // A row of copies of one circuit: the way a test reaches a width the learner never drew.
 //
 // A slice is a circuit for one bit of a word (one bit of A, one bit of B, a carry in; one bit of

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Lesson: Module 2, lesson 2, one kind of gate.
 //
 // The structure is here; the words are in nand.prose.ts and nand.labels.ts. The circuits are the

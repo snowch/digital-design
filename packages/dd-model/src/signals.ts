@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // A signal on a wire, sampled, and read against a threshold.
 //
 // The lesson's recordings are what a receiver at the end of a long cable measures once per bit:

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The digital-design book: the grader and the challenge editor the runtime calls, and the
 // registry of interactives the lessons name. The grader is the engine's test runner behind a
 // check that the artifact is a circuit with the challenge's ports.

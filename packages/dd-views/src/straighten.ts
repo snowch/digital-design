@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // A drawing nudged so its wires run straight. Every port lies on one 10-pixel lattice (symbols.tsx),
 // so a wire whose two ends are a half or a whole cell apart can be made straight by moving the part
 // it feeds up or down by that much. Parts are taken left to right, and each moves to whichever of

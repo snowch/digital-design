@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The contract between the runtime and a book.
 //
 // The runtime renders lessons and knows nothing about circuits. A book supplies the interactives

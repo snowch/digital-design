@@ -1,4 +1,6 @@
 // @vitest-environment jsdom
+// Copyright © 2026 Chris Snow
+
 // Module 2's figures: two circuits compared, a table read in pairs, a circuit's own table in the
 // explorer, and a circuit written as one expression per output.
 

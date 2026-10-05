@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 export * from "./parts";
 export * from "./drawing";
 export * from "./layout";

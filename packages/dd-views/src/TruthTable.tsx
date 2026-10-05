@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // A truth table: the reference's rows as data, or a circuit's rows enumerated by the simulator.
 // The row matching the inputs now is marked, in text as well as by shading.
 

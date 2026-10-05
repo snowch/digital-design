@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Every word the runtime itself puts in front of a learner, in one place.
 //
 // The sentences were drafted by the course's prose process (see CLAUDE.md) from a brief of facts,

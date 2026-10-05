@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The course shell: header, routes, footer. Lessons render through the runtime with the
 // digital-design book; the shell itself knows nothing about circuits.
 
@@ -86,7 +88,10 @@ export function App() {
       <main id="main" className="shell-main" tabIndex={-1}>
         {page}
       </main>
-      <footer className="shell-footer">{STRINGS.footer}</footer>
+      <footer className="shell-footer">
+        <p>{STRINGS.footer}</p>
+        <p className="copyright">{STRINGS.copyright}</p>
+      </footer>
     </>
   );
 }

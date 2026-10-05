@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The educational tests: the built course, driven in a browser.
 //
 // They hold every lesson to the prompt's "educational level": every exercise is completable with

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The shell's own words. Drafted by the prose process; see CLAUDE.md.
 
 /** Joins numbers as prose does: "2", "2 and 3", "2, 3 and 6". */
@@ -14,6 +16,8 @@ export const STRINGS = {
   themeLight: "Light",
   themeDark: "Dark",
   footer: "Everything runs in your browser. Nothing is sent anywhere.",
+  /** Under the footer's line, on every page. */
+  copyright: "© 2026 Chris Snow",
   noLessons: "No lessons are published yet.",
   noChallenges: "No challenges",
   /** Under the course title: what the course takes as known before Module 1. */

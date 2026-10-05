@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // A small seeded random number generator, for the one place the engine is not deterministic by
 // design: the metastability overlay. Its draws are recorded in the trace, so a replay reproduces
 // them; the generator exists so that an experiment can be re-created from its seed alone.

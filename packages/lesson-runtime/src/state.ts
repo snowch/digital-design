@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Learner state: browser-local, namespaced, versioned, and never trusted for completion.
 //
 // Everything a learner does in a lesson is kept under one storage key per lesson,

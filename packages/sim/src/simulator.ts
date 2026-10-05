@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The simulator: two time models, one trace, snapshots and replay.
 //
 // **Settle** is the combinational model. Every gate takes one unit of time, and the whole

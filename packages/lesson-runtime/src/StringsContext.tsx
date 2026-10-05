@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 import { createContext, useContext } from "react";
 
 import { DEFAULT_STRINGS, type Strings } from "./strings";

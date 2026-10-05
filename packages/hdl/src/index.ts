@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 export * from "./ast";
 export { tokenize, type Token } from "./lexer";
 export { parse, describePosition } from "./parser";

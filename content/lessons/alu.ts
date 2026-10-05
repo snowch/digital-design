@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Lesson: Module 3, lesson 4, the ALU: one block, four jobs, any width.
 //
 // The structure is here; the words are in alu.prose.ts and alu.labels.ts. The circuits are the

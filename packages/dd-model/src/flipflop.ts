@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The D flip-flop: two D latches in series, opened on opposite halves of the clock.
 //
 // The master latch is transparent while CLK is 0 and holds while CLK is 1; the slave is the other

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Checks a lesson beyond its shape: the ten sections in order, challenge ids unique and
 // referenced, hints complete, and the words each lesson is allowed to introduce.
 //
