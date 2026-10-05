@@ -1320,7 +1320,12 @@ steps as two voltages.", dropped the order and was a bracketed list, not a sente
 lesson's other captions; the second, "Steps go from cold room to office shown as two voltages
 in order, compressor below.", ran its clauses on and restated the paragraph. The third brief
 asked for the plain naming caption the course gives figures with no controls ("The reference
-table for the latch."): "The setup and the steps as voltages." The label came back "noise",
-right first time.
+table for the latch."), and its draft, "The setup and the steps as voltages.", was caught by
+the term gate: "setup" is a term the remember lesson introduces, so this lesson may not use it
+in any sense. The word was the managing session's: the third brief said "a drawing of the
+setup", and its banned list left out the later lessons' terms (the Module 1 build had found the
+same gap in its own briefs). The fourth brief carried the full list, and its draft stands: "The cable from cold room to office
+and the steps as voltages." The label came back
+"noise", right first time.
 ````
 

@@ -26,7 +26,7 @@ export const LABELS = {
     c2: "Set the freezer temperature",
   },
   captions: {
-    signalPath: "The setup and the steps as voltages.",
+    signalPath: "The cable from cold room to office and the steps as voltages.",
     predictThreshold: "Compare two thresholds on the same signal.",
     exploreSignal: "Choose a recording and move the threshold.",
     setThreshold: "Type your threshold and run the tests.",
