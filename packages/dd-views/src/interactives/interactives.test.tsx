@@ -245,7 +245,7 @@ describe("the circuit explorer", () => {
       props: { libraryId: "sr-latch", showSteps: true, truthTable: "sr-latch" },
     });
     // Both inputs 0 from the start: the latch is undecided, and the table says Hold.
-    expect(screen.getByRole("row", { current: true })).toHaveTextContent("Hold");
+    expect(screen.getByRole("row", { current: true })).toHaveTextContent("Keep");
     await user.click(screen.getByRole("button", { name: /^S = 0\./ }));
     expect(screen.getByRole("row", { current: true })).toHaveTextContent("Set");
     const table = screen.getByRole("table", { name: S.circuit.signals });

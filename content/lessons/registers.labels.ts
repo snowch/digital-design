@@ -2,15 +2,15 @@
 // process from a brief of facts (see CLAUDE.md) and checked against the lesson's structure.
 
 export const LABELS = {
-  title: "How does a circuit keep several bits together?",
+  title: "How does a circuit store several bits together?",
   objectives: [
-    "Build a register from flip-flops sharing one clock, and say why all bits change at the same moment.",
+    "Store a word in flip-flops that share one clock, and say why all bits change at the same moment.",
     "Build one bit with a load enable, and say why the clock must reach the flip-flop unchanged.",
     "Add a reset so a register starts at 0, and write it with reset and load enable as text.",
     "Build a shift register, and say where a bit is after each clock edge.",
   ],
   titles: {
-    question: "Saving and keeping four bits",
+    question: "Storing four bits",
     motivation: "From one bit to four",
     prediction: "Predicting four bits",
     investigation: "Four flip-flops on one clock",

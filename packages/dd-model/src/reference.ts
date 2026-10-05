@@ -2,7 +2,7 @@
 //
 // These are the tables from the author's "Sequential Logic Quick Reference", kept here so that a
 // lesson's reference block renders them and the component tests hold the simulated latches and
-// flip-flop to them. A row's next state is `0`, `1`, `Q` (unchanged) or `?` (the forbidden input,
+// flip-flop to them. A row's next state is `0`, `1`, `Q` (unchanged) or `?` (the combination to avoid,
 // which the model answers with both outputs low and, on release, an undecidable race).
 
 export type NextState = "0" | "1" | "Q" | "?";
@@ -28,11 +28,11 @@ export const SR_LATCH_TABLE: TruthTable = {
   inputColumns: ["EN", "S", "R"],
   outputColumn: "Q(next)",
   rows: [
-    { inputs: { EN: "0", S: "X", R: "X" }, next: "Q", state: "Hold" },
-    { inputs: { EN: "1", S: "0", R: "0" }, next: "Q", state: "Hold" },
+    { inputs: { EN: "0", S: "X", R: "X" }, next: "Q", state: "Keep" },
+    { inputs: { EN: "1", S: "0", R: "0" }, next: "Q", state: "Keep" },
     { inputs: { EN: "1", S: "0", R: "1" }, next: "0", state: "Reset" },
     { inputs: { EN: "1", S: "1", R: "0" }, next: "1", state: "Set" },
-    { inputs: { EN: "1", S: "1", R: "1" }, next: "?", state: "Forbidden" },
+    { inputs: { EN: "1", S: "1", R: "1" }, next: "?", state: "Avoid" },
   ],
   note: "The most basic memory element, with one input combination that breaks the rule that Q and Qb are opposites.",
 };
@@ -43,24 +43,24 @@ export const D_LATCH_TABLE: TruthTable = {
   inputColumns: ["EN", "D"],
   outputColumn: "Q(next)",
   rows: [
-    { inputs: { EN: "0", D: "X" }, next: "Q", state: "Hold" },
+    { inputs: { EN: "0", D: "X" }, next: "Q", state: "Keep" },
     { inputs: { EN: "1", D: "0" }, next: "0", state: "Reset" },
     { inputs: { EN: "1", D: "1" }, next: "1", state: "Set" },
   ],
-  note: "Removes the forbidden input by never letting S and R both be 1.",
+  note: "The D latch ensures S and R are never both 1.",
 };
 
 export const D_FLIP_FLOP_TABLE: TruthTable = {
   id: "d-flip-flop",
-  title: "D flip-flop (edge-triggered)",
+  title: "D flip-flop",
   inputColumns: ["CLK", "D"],
   outputColumn: "Q(next)",
   rows: [
-    { inputs: { CLK: "↑", D: "0" }, next: "0", state: "Captures 0" },
-    { inputs: { CLK: "↑", D: "1" }, next: "1", state: "Captures 1" },
-    { inputs: { CLK: "—", D: "X" }, next: "Q", state: "No edge: unchanged" },
+    { inputs: { CLK: "↑", D: "0" }, next: "0", state: "Takes 0" },
+    { inputs: { CLK: "↑", D: "1" }, next: "1", state: "Takes 1" },
+    { inputs: { CLK: "—", D: "X" }, next: "Q", state: "Keeps value" },
   ],
-  note: "Q changes only at the rising edge of CLK. At all other times Q holds, whatever D does.",
+  note: "Q changes only at the rising edge of CLK. At all other times Q keeps its value, whatever D does.",
 };
 
 /**
@@ -76,8 +76,8 @@ export const REGISTER_BIT_TABLE: TruthTable = {
   rows: [
     { inputs: { CLK: "↑", RST: "1", EN: "X", D: "X" }, next: "0", state: "Q resets to 0" },
     { inputs: { CLK: "↑", RST: "0", EN: "0", D: "X" }, next: "Q", state: "Q keeps value" },
-    { inputs: { CLK: "↑", RST: "0", EN: "1", D: "0" }, next: "0", state: "Q captures 0" },
-    { inputs: { CLK: "↑", RST: "0", EN: "1", D: "1" }, next: "1", state: "Q captures 1" },
+    { inputs: { CLK: "↑", RST: "0", EN: "1", D: "0" }, next: "0", state: "Q takes 0" },
+    { inputs: { CLK: "↑", RST: "0", EN: "1", D: "1" }, next: "1", state: "Q takes 1" },
     { inputs: { CLK: "—", RST: "X", EN: "X", D: "X" }, next: "Q", state: "Q unchanged" },
   ],
   note: "Q changes only at a rising edge of CLK; the RST input wins over EN; with EN at 0, Q keeps its value.",

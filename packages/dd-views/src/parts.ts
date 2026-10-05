@@ -152,5 +152,7 @@ export function labelFor(kind: string): string {
  */
 export function nameRepeatsKind(name: string, kind: string): boolean {
   const plain = (t: string) => t.replace(/[^a-z0-9]/gi, "").toLowerCase();
-  return plain(name) === plain(kind);
+  // The library's default instance names that only shorten their kind: `reg` on a register.
+  const SHORT: Readonly<Record<string, string>> = { reg: "register" };
+  return plain(name) === plain(kind) || SHORT[plain(name)] === plain(kind);
 }

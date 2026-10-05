@@ -113,7 +113,7 @@ describe("facts for the lesson on memory", () => {
     ).toEqual([1030]);
   });
 
-  it("the flip-flop stepper's run: Q falls two gate delays after an edge and rises three", () => {
+  it("the flip-flop stepper's run: Q falls two gate delays after an edge and rises three; D changing while CLK is 1 moves nothing", () => {
     const sim = new Simulator(dFlipFlopCircuit({ delay: 10 }), { timeModel: "delay" });
     sim.setInput("CLK", bit0);
     sim.setInput("D", bit0);
@@ -122,6 +122,8 @@ describe("facts for the lesson on memory", () => {
       [200, "CLK", 0],
       [300, "D", 1],
       [400, "CLK", 1],
+      [450, "D", 0],
+      [470, "D", 1],
       [500, "CLK", 0],
       [550, "D", 0],
       [700, "CLK", 1],
@@ -137,7 +139,18 @@ describe("facts for the lesson on memory", () => {
     };
     expect(times("Q")).toEqual(["120:0", "430:1", "720:0"]);
     expect(times("dff/master/sr/Q")).toEqual(["30:0", "330:1", "580:0"]);
-    expect(times("dff/notClk.y")).toContain("510:1");
+    // The master closes 10 after each rise (its EN is NOT CLK) and opens 10 after each fall.
+    expect(times("dff/notClk.y")).toEqual([
+      "10:1",
+      "110:0",
+      "210:1",
+      "410:0",
+      "510:1",
+      "710:0",
+      "810:1",
+    ]);
+    // D falls at 450 and rises at 470 while CLK is 1: neither the master's Q nor Q moves.
+    expect(times("D")).toEqual(["0:0", "300:1", "450:0", "470:1", "550:0"]);
   });
 
   it("the setup-and-hold figure: clean at 30 before the edge, late from 25 to 15, missed from 10", () => {

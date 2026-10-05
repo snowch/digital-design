@@ -299,7 +299,7 @@ test.describe("the figures", () => {
     await openLesson(page);
     const figure = page.locator("#ix-internals");
     await figure.scrollIntoViewIfNeeded();
-    await expect(figure.locator(".internals-phase")).toContainText("CLK is 0 from time 0");
+    await expect(figure.locator(".internals-phase")).toContainText("CLK is 0 and D is 0");
     const next = figure.getByRole("button", { name: V.internals.next });
     for (let i = 0; i < 12; i++) {
       const t = Number((await figure.locator(".internals-time").textContent())?.replace(/\D/g, ""));
@@ -332,5 +332,42 @@ test.describe("the figures", () => {
     const note = internals.locator(".circuit-view .scroll-note");
     if (isMobile) await expect(note).toHaveText(V.circuit.scrollNote);
     else await expect(note).toHaveCount(0);
+  });
+
+  test("two latches sharing one EN pass a change of D straight through both", async ({ page }) => {
+    await openLesson(page);
+    const figure = page.locator("#ix-race");
+    await figure.scrollIntoViewIfNeeded();
+    const value = (name: string) =>
+      figure.locator("table.signal-table tr", { has: page.locator(`th:text-is("${name}")`) });
+    await figure.getByRole("button", { name: /^EN = 0\./ }).click();
+    await figure.getByRole("button", { name: /^D = 0\./ }).click();
+    await expect(value("Q1")).toContainText("1");
+    await expect(value("Q")).toContainText("1");
+  });
+
+  test("the investigation shows the two-button circuit closed, so the challenge is not a copy", async ({
+    page,
+  }) => {
+    await openLesson(page);
+    const figure = page.locator("#ix-two-buttons");
+    await expect(figure.locator("svg.circuit text.part-name", { hasText: "norLight" })).toHaveCount(
+      0,
+    );
+    await expect(figure.locator("svg.circuit [role=button][aria-label*='open']")).toHaveCount(0);
+  });
+
+  test("the flip-flop's recorded run changes D while CLK is 1, and Q does not move", async ({
+    page,
+  }) => {
+    await openLesson(page);
+    const figure = page.locator("#ix-internals");
+    await figure.scrollIntoViewIfNeeded();
+    const next = figure.getByRole("button", { name: V.internals.next });
+    const time = async () =>
+      Number((await figure.locator(".internals-time").textContent())?.replace(/\D/g, ""));
+    for (let i = 0; i < 40 && (await time()) < 450; i++) await next.click();
+    expect(await time()).toBe(450);
+    await expect(figure.locator(".internals-phase")).toContainText("D fell at time 450");
   });
 });

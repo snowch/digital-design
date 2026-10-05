@@ -92,8 +92,9 @@ export function twoButtonsBlockCircuit(): Circuit {
   const a = b.input("A");
   const bPress = b.input("B");
   const light = b.net("LIGHT");
+  // Named for its kind, so the drawing shows the block's label and no second name under it.
   b.scope(
-    "light",
+    "two-buttons",
     "two-buttons",
     (bb) => {
       const dark = bb.net("DARK");
@@ -107,7 +108,7 @@ export function twoButtonsBlockCircuit(): Circuit {
   return placed(b.build(), {
     "in:A": [0, 1],
     "in:B": [0, 4],
-    light: [5, 1],
+    "two-buttons": [5, 1],
     "out:LIGHT": [10, 1],
   });
 }

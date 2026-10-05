@@ -153,6 +153,7 @@ export const registers: LessonInput = {
           timeModel: "clocked",
           caption: LABELS.captions.keepFaults,
           lead: PROSE.keepFaultsLead,
+          after: PROSE.keepFaultsAfter,
           props: {
             libraryId: "keep-bit",
             faults: [

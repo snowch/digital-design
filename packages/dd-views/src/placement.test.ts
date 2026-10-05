@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 
 import { applyFaults, brokenWire, libraryCircuit, stuckAt, wrongGate } from "@dd/dd-model";
 
+import { nameRepeatsKind } from "./parts";
 import { drawingAt, sceneOf, type PartBox, type WirePath } from "./scene";
 import { netOfWire } from "./scene";
 
@@ -125,5 +126,10 @@ describe("the hand-placed drawings", () => {
     const c = libraryCircuit("four-flip-flops");
     expect(c.inputs.map((i) => i.name)).toEqual(["D3", "D2", "D1", "D0", "CLK"]);
     expect(c.outputs.map((o) => o.name)).toEqual(["Q3", "Q2", "Q1", "Q0"]);
+  });
+
+  it("draws a register block with its label alone, not the library's short name for it", () => {
+    expect(nameRepeatsKind("reg", "register")).toBe(true);
+    expect(nameRepeatsKind("ff0", "dff")).toBe(false);
   });
 });
