@@ -43,6 +43,8 @@ export interface Draw {
 interface Stored {
   readonly offset: number;
   readonly draws: readonly Draw[];
+  /** The roll on show at this offset, by seed; none means the gate model's own answer. */
+  readonly shown?: number;
 }
 
 export interface Experiment {
@@ -51,8 +53,16 @@ export interface Experiment {
   readonly overlay?: OverlayResult;
 }
 
-/** One run: Q known 0, then D rises `offset` units from the edge. With a seed, the overlay draws. */
-export function experiment(data: Data, offset: number, seed?: number): Experiment {
+/**
+ * One run: Q known 0, then D rises `offset` units from the edge. With a seed, the overlay draws.
+ * With a label, the edge is marked on the trace, so the diagram's axis shows where it is.
+ */
+export function experiment(
+  data: Data,
+  offset: number,
+  seed?: number,
+  edgeLabel?: string,
+): Experiment {
   const circuit = dFlipFlopCircuit({ delay: data.delay });
   const sim = new Simulator(circuit, { timeModel: "delay" });
   sim.setInput("D", bit0);
@@ -63,6 +73,10 @@ export function experiment(data: Data, offset: number, seed?: number): Experimen
   sim.setInputAt("CLK", bit1, data.edgeAt);
   sim.setInputAt("CLK", bit0, data.edgeAt + 100);
   let overlay: OverlayResult | undefined;
+  if (edgeLabel !== undefined) {
+    sim.run(data.edgeAt);
+    sim.mark(edgeLabel);
+  }
   if (seed !== undefined) {
     sim.run(data.edgeAt + data.undecidedFrom);
     overlay = applyMetastabilityOverlay(sim, {
@@ -88,32 +102,35 @@ export const SetupHold = withProps(
     const offset = stored?.offset ?? data.offsets[0];
     const draws = stored?.draws ?? [];
     const inWindow = offset >= data.window[0] && offset <= data.window[1];
-    const lastDraw = draws.find((d) => d.offset === offset);
+    const lastDraw = draws.find((d) => d.offset === offset && d.seed === stored?.shown);
     const result = useMemo(
-      () => experiment(data, offset, lastDraw?.seed),
-      [data, offset, lastDraw?.seed],
+      () => experiment(data, offset, lastDraw?.seed, strings.setupHold.edge),
+      [data, offset, lastDraw?.seed, strings.setupHold.edge],
     );
+    // Times are said from the edge, as the prose and the slider say them.
+    const after = (time: number) => time - data.edgeAt;
     const circuit = result.sim.circuit;
 
     const describe = (): string => {
       if (result.overlay?.applied && lastDraw) {
         return format(strings.setupHold.drawn, {
           seed: lastDraw.seed,
-          from: lastDraw.from,
+          from: after(lastDraw.from),
           value: lastDraw.settlesTo,
-          time: lastDraw.settlesAt,
+          time: after(lastDraw.settlesAt),
         });
       }
       const events = result.qEvents;
       if (events.length === 0) return strings.setupHold.ignored;
       const last = events[events.length - 1] as { time: number; value: string };
       if (last.time === data.edgeAt + 3 * data.delay)
-        return format(strings.setupHold.captured, { value: last.value, time: last.time });
-      return format(strings.setupHold.late, { time: last.time, value: last.value });
+        return format(strings.setupHold.captured, { value: last.value, time: after(last.time) });
+      return format(strings.setupHold.late, { time: after(last.time), value: last.value });
     };
 
     const draw = () => {
-      const seed = draws.length + 1;
+      // Every roll is kept and gets the next seed, so a new roll is never a repeat of an old one.
+      const seed = draws.reduce((m, d) => Math.max(m, d.seed), 0) + 1;
       const r = experiment(data, offset, seed);
       if (
         !r.overlay?.applied ||
@@ -128,10 +145,9 @@ export const SetupHold = withProps(
         settlesAt: r.overlay.settlesAt,
         settlesTo: r.overlay.settlesTo,
       };
-      setStored({ offset, draws: [...draws.filter((d) => d.offset !== offset), next] });
+      setStored({ offset, draws: [...draws, next], shown: seed });
     };
-    const replay = (d: Draw) =>
-      setStored({ offset: d.offset, draws: [...draws.filter((x) => x.offset !== d.offset), d] });
+    const replay = (d: Draw) => setStored({ offset: d.offset, draws, shown: d.seed });
 
     const shades: Shade[] = [
       {
@@ -185,9 +201,9 @@ export const SetupHold = withProps(
                 <li key={d.seed}>
                   {format(strings.setupHold.drawn, {
                     seed: d.seed,
-                    from: d.from,
+                    from: after(d.from),
                     value: d.settlesTo,
-                    time: d.settlesAt,
+                    time: after(d.settlesAt),
                   })}{" "}
                   <button type="button" className="button secondary" onClick={() => replay(d)}>
                     {format(strings.setupHold.replay, { seed: d.seed })}

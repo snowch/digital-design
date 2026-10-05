@@ -397,6 +397,12 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
 .circuit-scroll {
   display: flex;
 }
+/* Said in words as well as by the shadow: a learner on a phone may not know the drawing moves. */
+.scroll-note {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
+}
 .circuit-scroll > .circuit {
   flex: none;
   margin-inline: auto;
@@ -687,11 +693,16 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
   overflow-x: auto;
 }
 /* On a phone a five-input table must fit without scrolling, or its last column, the one that
-   says what the row does, is the one hidden. */
+   says what the row does, is the one hidden. A table that marks the row the next edge applies
+   has one column more, so the gaps are narrower still. */
 @media (max-width: 480px) {
   .truth-table th,
   .truth-table td {
     padding-right: var(--space-3);
+  }
+  .truth-table-wrap.edge-table th,
+  .truth-table-wrap.edge-table td {
+    padding-right: var(--space-2);
   }
 }
 .truth-table-note {

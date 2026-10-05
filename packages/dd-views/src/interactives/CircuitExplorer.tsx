@@ -36,6 +36,8 @@ const Props = z.object({
   scope: z.string().default(""),
   /** Offer "Release all at once": only where two inputs pressed together are the experiment. */
   releaseAll: z.boolean().default(false),
+  /** Let the learner open a block to see inside it; off where the inside is a challenge's answer. */
+  canOpen: z.boolean().default(true),
 });
 
 /** The reference table restricted to the inputs the circuit has, with a wildcard for X. */
@@ -93,8 +95,15 @@ export const CircuitExplorer = withProps(
           circuit.inputs.map((i) => i.name),
         )
       : undefined;
+    // A table whose rows are clock edges (a ↑ in the clock's column) marks the row the next edge
+    // will apply to the inputs now; the clock's own level is not a row of that table.
+    const edgeTable =
+      ref !== undefined && data.clock !== undefined && ref.cols.includes(data.clock);
     const current = ref
-      ? rowFor(ref.cols, ref.rows, currentInputs(circuit, sim.values))
+      ? rowFor(ref.cols, ref.rows, {
+          ...currentInputs(circuit, sim.values),
+          ...(edgeTable ? { [data.clock as string]: "↑" } : {}),
+        })
       : undefined;
     return (
       <div className="explorer" data-interactive={interactive.id}>
@@ -104,7 +113,7 @@ export const CircuitExplorer = withProps(
           title={strings.explorer.title}
           onToggleInput={(name) => sim.toggle(name)}
           scope={scope}
-          onScope={setScope}
+          {...(data.canOpen ? { onScope: setScope } : {})}
         />
         <div className="explorer-actions">
           {data.clock && (
@@ -158,6 +167,7 @@ export const CircuitExplorer = withProps(
             rows={ref.rows.map((r) => ({ ...r, inputs: r.inputs.map(either) }))}
             stateColumn={strings.table.state}
             {...(current !== undefined ? { current } : {})}
+            atEdge={edgeTable}
             {...(table.note ? { note: table.note } : {})}
           />
         )}

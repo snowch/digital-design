@@ -1,5 +1,5 @@
-// Predict, then see. The same shape as the circuit prediction: the learner commits to an answer
-// before the model gives its own. Two kinds of question: which of two thresholds reads more of a
+// Predict, then see. The same shape as the circuit prediction: what the question is about is
+// drawn above it, and the learner commits to an answer before the model gives its own. Two kinds of question: which of two thresholds reads more of a
 // recording wrong, and what a word reads as one way. The answer is computed by the model, never
 // taken from the lesson's data.
 
@@ -81,6 +81,8 @@ export const ReadingPrediction = withProps(
         data-interactive={interactive.id}
         data-committed={stored ? "true" : "false"}
       >
+        {/* Once committed, the outcome below draws the same thing with the answer on it. */}
+        {!stored && <Before ask={data.ask} />}
         <Prose markdown={data.question} />
         <fieldset className="prediction-options" disabled={stored !== undefined}>
           <legend className="visually-hidden">{strings.prediction.legend}</legend>
@@ -136,6 +138,29 @@ export const ReadingPrediction = withProps(
     );
   },
 );
+
+/**
+ * What the question is about, drawn above it before the learner commits, with nothing that gives
+ * the answer: the recording's samples with no threshold and no bits read, or the word's bits
+ * with no worths.
+ */
+function Before({ ask }: { ask: AskData }) {
+  const strings = useViewStrings();
+  if (ask.kind === "reading") return <BitRow bits={parseBits(ask.bits)} showWeights={false} />;
+  const rec = recording(ask.recording);
+  const [first] = ask.thresholds;
+  return (
+    <div className="prediction-before">
+      <SignalPlot
+        rec={rec}
+        threshold={first}
+        result={readBits(rec, first)}
+        title={strings.readingPrediction.samplesTitle}
+        plain
+      />
+    </div>
+  );
+}
 
 function Outcome({ ask }: { ask: AskData }) {
   const strings = useViewStrings();

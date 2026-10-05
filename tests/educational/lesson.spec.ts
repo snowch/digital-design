@@ -53,6 +53,55 @@ test.describe("the lesson pages", () => {
     });
   }
 
+  // A phone's emulation widens `innerWidth` to fit whatever the page grew to, so the page is
+  // measured against the viewport, and only after every figure has been used: the signals
+  // lesson's prediction once widened the page only after it was committed.
+  for (const lesson of LESSONS) {
+    test(`${lesson.id} stays inside a phone's width after every figure has been used`, async ({
+      page,
+      isMobile,
+    }) => {
+      test.skip(!isMobile, "the phone's width is the one that overflows");
+      test.setTimeout(240_000);
+      await openLesson(page, lesson.id);
+      page.on("dialog", (d) => d.accept());
+      const figures = page.locator("figure.interactive");
+      const count = await figures.count();
+      for (let f = 0; f < count; f++) {
+        const figure = figures.nth(f);
+        await figure.scrollIntoViewIfNeeded();
+        // Every choice: each fault, and a prediction's first answer, then its commit button.
+        const radios = figure.getByRole("radio");
+        for (let i = 0; i < (await radios.count()); i++) {
+          const radio = radios.nth(i);
+          if (await radio.isEnabled()) await radio.check({ timeout: 500 }).catch(() => {});
+        }
+        // Every slider to both ends.
+        const sliders = figure.locator("input[type=range]");
+        for (let i = 0; i < (await sliders.count()); i++) {
+          const slider = sliders.nth(i);
+          for (const end of ["min", "max"]) {
+            const value = await slider.getAttribute(end);
+            if (value !== null) await slider.fill(value).catch(() => {});
+          }
+        }
+        // Every button, the drawing's pins and blocks among them, once each.
+        const buttons = figure.locator("button:visible, svg [role=button]:not(.wire)");
+        const n = await buttons.count();
+        for (let i = 0; i < n && i < 80; i++) {
+          const button = buttons.nth(i);
+          if (!(await button.isVisible().catch(() => false))) continue;
+          if (!(await button.isEnabled().catch(() => false))) continue;
+          await button.click({ timeout: 500 }).catch(() => {});
+        }
+      }
+      const width = page.viewportSize()!.width;
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+        width,
+      );
+    });
+  }
+
   test("the lesson list shows progress recomputed from stored work", async ({ page }) => {
     await page.goto("#/");
     await expect(page.getByRole("link", { name: LESSON.title })).toBeVisible();
@@ -241,7 +290,7 @@ test.describe("the figures", () => {
     const first = await roll();
     const second = await roll();
     expect(first).toBe(second);
-    expect(first).toMatch(/1$|0$|at \d+\.$/);
+    expect(first).toMatch(/^Roll 1:/);
   });
 
   test("the flip-flop stepper moves the cursor and shows the phase for that moment", async ({
@@ -258,5 +307,30 @@ test.describe("the figures", () => {
       await next.click();
     }
     await expect(figure.locator(".internals-phase")).toContainText("CLK rose at time 100");
+  });
+
+  test("an odd loop that never settles is drawn as X, as its status line says", async ({
+    page,
+  }) => {
+    await openLesson(page);
+    const figure = page.locator("#ix-loop-three");
+    await figure.scrollIntoViewIfNeeded();
+    await figure.getByRole("button", { name: /^kick = 0\./ }).click();
+    await figure.getByRole("button", { name: /^kick = 1\./ }).click();
+    await expect(figure.locator("[role=status]")).toContainText("q");
+    const q = figure.locator("table.signal-table tr", { has: page.locator('th:text-is("q")') });
+    await expect(q).toContainText("X");
+  });
+
+  test("a drawing wider than the screen says it scrolls; one that fits says nothing", async ({
+    page,
+    isMobile,
+  }) => {
+    await openLesson(page);
+    const internals = page.locator("#ix-internals");
+    await internals.scrollIntoViewIfNeeded();
+    const note = internals.locator(".circuit-view .scroll-note");
+    if (isMobile) await expect(note).toHaveText(V.circuit.scrollNote);
+    else await expect(note).toHaveCount(0);
   });
 });

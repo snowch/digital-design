@@ -217,4 +217,45 @@ test.describe("the registers lesson's figures", () => {
       );
     }
   });
+
+  test("a press or a tap on a wire shows its name and value, and a second press keeps them", async ({
+    page,
+    isMobile,
+  }) => {
+    await openLesson(page, LESSON.id);
+    const figure = page.locator("#ix-gated-clock");
+    const gclk = figure.locator('g.wire[data-net="GCLK"] path.wire-hit');
+    await gclk.scrollIntoViewIfNeeded();
+    // A point on the wire itself, halfway along it, in the page's coordinates.
+    const at = await gclk.evaluate((el) => {
+      const path = el as SVGPathElement;
+      const p = path.getPointAtLength(path.getTotalLength() / 2);
+      const m = path.getScreenCTM()!;
+      return { x: p.x * m.a + p.y * m.c + m.e, y: p.x * m.b + p.y * m.d + m.f };
+    });
+    const press = () =>
+      isMobile ? page.touchscreen.tap(at.x, at.y) : page.mouse.click(at.x, at.y);
+    await press();
+    await expect(figure.locator(".wire-readout")).toHaveText("GCLK = 0");
+    await press();
+    await expect(figure.locator(".wire-readout")).toHaveText("GCLK = 0");
+  });
+
+  test("the text box shows <= as the two characters a learner types", async ({ page }) => {
+    await openLesson(page, LESSON.id);
+    const box = challenge(page, "register-in-text").locator("textarea.hdl-text").first();
+    await expect(box).toHaveCSS("font-variant-ligatures", "none");
+  });
+
+  test("the register written as text is drawn as one register block with RST and EN", async ({
+    page,
+  }) => {
+    await openLesson(page, LESSON.id);
+    const section = challenge(page, "register-in-text");
+    await section.scrollIntoViewIfNeeded();
+    await writeText(section, data("register-in-text").reference.hdl!);
+    const drawn = section.locator(".hdl-panel svg.circuit");
+    await expect(drawn.locator("text.part-label")).toHaveText(["register"]);
+    await expect(drawn.locator("text.port-label")).toContainText(["D", "CLK", "RST", "EN", "Q"]);
+  });
 });

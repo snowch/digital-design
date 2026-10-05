@@ -16,18 +16,28 @@ export interface HdlPanelProps {
   readonly title: string;
   readonly highlight?: readonly string[];
   readonly rows?: number;
+  /** The starting text: while the text is still this, nothing has been written to judge. */
+  readonly untouched?: string;
 }
 
 export function messageLine(m: Message): string {
   return m.at ? format("{text} (line {line})", { text: m.text, line: m.at.line }) : m.text;
 }
 
-export function HdlPanel({ text, onChange, allowed, title, highlight, rows = 10 }: HdlPanelProps) {
+export function HdlPanel({
+  text,
+  onChange,
+  allowed,
+  title,
+  highlight,
+  rows = 10,
+  untouched,
+}: HdlPanelProps) {
   const strings = useViewStrings();
   const id = useId();
   const result = useMemo(
-    () => (text.trim() ? elaborate(text, { allowed }) : undefined),
-    [text, allowed],
+    () => (text.trim() && text !== untouched ? elaborate(text, { allowed }) : undefined),
+    [text, allowed, untouched],
   );
   const errors = result?.messages.filter((m) => m.severity !== "warning") ?? [];
   const warnings = result?.messages.filter((m) => m.severity === "warning") ?? [];

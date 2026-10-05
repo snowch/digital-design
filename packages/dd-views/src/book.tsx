@@ -265,6 +265,7 @@ function WriteEditor({ challenge, artifact, onChange, verdict }: ChallengeEditor
         allowed={challenge.allowedConstructs as Construct[]}
         title={strings.editor.writeTitle}
         highlight={marked}
+        {...(challenge.initial.hdl !== undefined ? { untouched: challenge.initial.hdl } : {})}
       />
       {result.circuit && (
         <details className="editor-try" open>

@@ -12,12 +12,15 @@ export function BitRow({
   weights = "unsigned",
   digits = false,
   label,
+  showWeights = true,
 }: {
   bits: readonly Bit[];
   onFlip?: (index: number) => void;
   weights?: "unsigned" | "signed";
   digits?: boolean;
   label?: string;
+  /** Each bit's value in the number; left off where the question is what the number is. */
+  showWeights?: boolean;
 }) {
   const strings = useViewStrings();
   const width = bits.length;
@@ -43,9 +46,11 @@ export function BitRow({
                   <span className="bit-value" aria-hidden="true">
                     {bit}
                   </span>
-                  <span className="bit-weight" aria-hidden="true">
-                    {value}
-                  </span>
+                  {showWeights && (
+                    <span className="bit-weight" aria-hidden="true">
+                      {value}
+                    </span>
+                  )}
                 </>
               );
               return onFlip ? (
@@ -65,7 +70,7 @@ export function BitRow({
                   key={i}
                   className={`bit bit-${bit}`}
                   role="img"
-                  aria-label={format(strings.bits.fixed, slots)}
+                  aria-label={format(showWeights ? strings.bits.fixed : strings.bits.bare, slots)}
                   data-bit={n}
                 >
                   {inner}

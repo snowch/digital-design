@@ -131,7 +131,7 @@ describe("grading written text", () => {
     const ff = `module latch(input logic S, input logic R, input logic CLK, output logic Q);
   always_ff @(posedge CLK) Q <= S;
 endmodule`;
-    expect(grade(c, { hdl: ff }).blocked).toMatch(/not met/);
+    expect(grade(c, { hdl: ff }).blocked).toMatch(/does not use/);
     const wrongPorts = `module latch(input logic A, input logic B, output logic Q);
   assign Q = A & B;
 endmodule`;

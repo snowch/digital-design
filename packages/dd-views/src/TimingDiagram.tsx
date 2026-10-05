@@ -10,6 +10,7 @@ import { formatWord, type Circuit, type Trace, type Word } from "@dd/sim";
 import { levelOf, valueLabel } from "./CircuitView";
 import { format, useViewStrings } from "./strings";
 import { segmentsOf, traceEnd, valuesAt } from "./traces";
+import { useOverflows } from "./useWidth";
 
 export interface Shade {
   readonly from: number;
@@ -87,7 +88,8 @@ export function TimingDiagram({
 
   // A drawing wider than its wrapper opens on what matters, the first shaded band or else the
   // cursor, and scrolls to keep the cursor in view as it moves.
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const [overflowRef, overflows] = useOverflows<HTMLDivElement>();
   const focusX = x(shades[0]?.from ?? cursor ?? from);
   useEffect(() => {
     const el = scrollRef.current;
@@ -139,7 +141,14 @@ export function TimingDiagram({
 
   return (
     <div className="timing">
-      <div className="timing-scroll" ref={scrollRef}>
+      {overflows && <p className="scroll-note">{strings.circuit.scrollNote}</p>}
+      <div
+        className="timing-scroll"
+        ref={(el) => {
+          scrollRef.current = el;
+          overflowRef(el);
+        }}
+      >
         <svg
           className="timing-lanes"
           viewBox={`0 0 ${labelW} ${height}`}

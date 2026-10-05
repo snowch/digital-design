@@ -141,7 +141,7 @@ describe("the setup and hold experiment", () => {
       storage,
     );
     expect(screen.getByRole("status")).toHaveTextContent(
-      format(S.setupHold.captured, { value: "1", time: 1030 }),
+      format(S.setupHold.captured, { value: "1", time: 30 }),
     );
     expect(screen.queryByRole("button", { name: S.setupHold.draw })).not.toBeInTheDocument();
     const slider = screen.getByRole("slider");
@@ -149,7 +149,7 @@ describe("the setup and hold experiment", () => {
     const { fireEvent } = await import("@testing-library/react");
     fireEvent.change(slider, { target: { value: "-15" } });
     expect(screen.getByRole("status")).toHaveTextContent(
-      format(S.setupHold.late, { time: 1045, value: "1" }),
+      format(S.setupHold.late, { time: 45, value: "1" }),
     );
     await user.click(screen.getByRole("button", { name: S.setupHold.draw }));
     expect(screen.getByRole("status")).toHaveTextContent(/Roll 1:/);
@@ -160,6 +160,35 @@ describe("the setup and hold experiment", () => {
     expect(screen.getByRole("status")).toHaveTextContent(S.setupHold.ignored);
     await user.click(screen.getByRole("button", { name: format(S.setupHold.replay, { seed: 1 }) }));
     expect(screen.getByRole("status")).toHaveTextContent(/Roll 1:/);
+  });
+
+  it("keeps every roll, gives each new roll the next seed, and marks the edge", async () => {
+    const user = userEvent.setup();
+    const storage = memoryStorage();
+    mount(
+      SetupHold as typeof Prediction,
+      { id: "sh", kind: "setup-hold", timeModel: "delay", caption: "c", props: {} },
+      storage,
+    );
+    const { fireEvent } = await import("@testing-library/react");
+    fireEvent.change(screen.getByRole("slider"), { target: { value: "-20" } });
+    for (let i = 0; i < 4; i++) {
+      await user.click(screen.getByRole("button", { name: S.setupHold.draw }));
+    }
+    expect(screen.getByRole("status")).toHaveTextContent(/Roll 4:/);
+    fireEvent.change(screen.getByRole("slider"), { target: { value: "-25" } });
+    await user.click(screen.getByRole("button", { name: S.setupHold.draw }));
+    expect(screen.getByRole("status")).toHaveTextContent(/Roll 5:/);
+    const stored = JSON.parse(storage.get("dd:v1:remember") ?? "{}");
+    expect(stored.slots.sh.draws.map((d: { seed: number }) => d.seed)).toEqual([1, 2, 3, 4, 5]);
+    for (let seed = 1; seed <= 5; seed++) {
+      expect(
+        screen.getByRole("button", { name: format(S.setupHold.replay, { seed }) }),
+      ).toBeInTheDocument();
+    }
+    await user.click(screen.getByRole("button", { name: format(S.setupHold.replay, { seed: 2 }) }));
+    expect(screen.getByRole("status")).toHaveTextContent(/Roll 2:/);
+    expect(document.querySelector(".mark-label")).toHaveTextContent(S.setupHold.edge);
   });
 });
 
@@ -239,5 +268,47 @@ describe("the circuit explorer", () => {
     const table = screen.getByRole("table", { name: S.circuit.signals });
     const q = [...table.querySelectorAll("tr")].find((r) => r.cells[0]?.textContent === "q");
     expect(q?.cells[2]?.textContent).toBe("X");
+  });
+
+  it("shows a wire's name and value on a press, and keeps it until another wire is pressed", async () => {
+    const user = userEvent.setup();
+    mount(CircuitExplorer as typeof Prediction, {
+      id: "bit",
+      kind: "circuit-explorer",
+      timeModel: "clocked",
+      caption: "c",
+      props: { libraryId: "keep-bit", clock: "CLK" },
+    });
+    const readout = () => document.querySelector(".wire-readout")?.textContent?.trim();
+    const keep = document.querySelector('g.wire[data-net="KEEP"]') as Element;
+    const choice = document.querySelector('g.wire[data-net="CHOICE"]') as Element;
+    // A tap on a phone is a click with no pointer left resting on the wire.
+    const { fireEvent } = await import("@testing-library/react");
+    fireEvent.click(keep);
+    expect(readout()).toBe("KEEP = X");
+    fireEvent.click(keep);
+    expect(readout()).toBe("KEEP = X");
+    fireEvent.click(choice);
+    expect(readout()).toBe("CHOICE = X");
+    // From the keyboard: a wire is a button with its name.
+    const wire = screen.getByRole("button", { name: new RegExp(`^LOAD\\. ${S.circuit.showWire}`) });
+    wire.focus();
+    await user.keyboard("{Enter}");
+    expect(readout()).toBe("LOAD = 0");
+  });
+
+  it("marks the row the next clock edge will apply in a table whose rows are edges", async () => {
+    const user = userEvent.setup();
+    mount(CircuitExplorer as typeof Prediction, {
+      id: "reset-bit",
+      kind: "circuit-explorer",
+      timeModel: "clocked",
+      caption: "c",
+      props: { libraryId: "keep-clear-bit", clock: "CLK", truthTable: "register-bit" },
+    });
+    expect(screen.getByRole("row", { current: true })).toHaveTextContent("Q keeps value");
+    expect(screen.getByRole("row", { current: true })).toHaveTextContent(S.table.edgeMark);
+    await user.click(screen.getByRole("button", { name: /^RST = 0\./ }));
+    expect(screen.getByRole("row", { current: true })).toHaveTextContent("Q resets to 0");
   });
 });

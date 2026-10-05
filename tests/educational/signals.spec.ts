@@ -194,19 +194,41 @@ test.describe("the signals lesson's figures", () => {
   test("the threshold prediction must be committed before the model answers", async ({ page }) => {
     await openLesson(page, LESSON.id);
     const figure = page.locator("#ix-predict-threshold");
-    await expect(figure.locator("svg.signal-plot")).toHaveCount(0);
+    // The samples are drawn above the question before the commit, with no threshold, no bits
+    // read and no rings: nothing that answers it.
+    const before = figure.locator("svg.signal-plot[data-plain]");
+    await expect(before).toHaveCount(1);
+    await expect(before.locator("line.threshold, .wrong-ring")).toHaveCount(0);
+    await expect(figure.locator("svg.signal-plot[data-wrong]")).toHaveCount(0);
     await expect(figure.getByRole("button", { name: V.prediction.commit })).toBeDisabled();
     await figure.getByRole("radio").nth(1).check();
     await figure.getByRole("button", { name: V.prediction.commit }).click();
     await expect(figure.locator(".prediction-match")).toBeVisible();
-    await expect(figure.locator("svg.signal-plot")).toHaveCount(2);
-    await expect(figure.locator("svg.signal-plot").first()).toHaveAttribute("data-wrong", "4,5,12");
+    await expect(figure.locator("svg.signal-plot[data-wrong]")).toHaveCount(2);
+    await expect(before).toHaveCount(0);
+    await expect(figure.locator("svg.signal-plot[data-wrong]").first()).toHaveAttribute(
+      "data-wrong",
+      "4,5,12",
+    );
     // The plots fit the page: a drawing that took its width from itself widened the whole page on
     // a phone. Measured against the viewport, which a phone's emulation does not stretch.
     const width = page.viewportSize()!.width;
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
       width,
     );
+  });
+
+  test("the word's bits are drawn above the reading question, without their worths", async ({
+    page,
+  }) => {
+    await openLesson(page, LESSON.id);
+    const figure = page.locator("#ix-predict-top");
+    await expect(figure.locator(".bit-row .bit")).toHaveCount(16);
+    await expect(figure.locator(".bit-row .bit-weight")).toHaveCount(0);
+    await expect(figure.locator(".bit-row .bit-value").first()).toHaveText("1");
+    await figure.getByRole("radio").first().check();
+    await figure.getByRole("button", { name: V.prediction.commit }).click();
+    await expect(figure.locator(".prediction-outcome .bit-weight")).toHaveCount(16);
   });
 
   test("the investigation's threshold and recording change what is read", async ({ page }) => {

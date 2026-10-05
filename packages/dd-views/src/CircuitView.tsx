@@ -11,6 +11,7 @@ import { formatWord, type Circuit, type Word } from "@dd/sim";
 import { labelFor, nameRepeatsKind } from "./parts";
 import { drawingAt, netOfWire, sceneOf, type PartBox } from "./scene";
 import { GateSymbol, isShaped } from "./symbols";
+import { useOverflows } from "./useWidth";
 import { useViewStrings } from "./strings";
 
 export interface CircuitViewProps {
@@ -68,8 +69,13 @@ export function CircuitView({
   const { drawing, circuit: sub } = useMemo(() => drawingAt(circuit, scope), [circuit, scope]);
   const scene = useMemo(() => sceneOf(drawing), [drawing]);
   const highlighted = new Set(highlight);
-  // The net under the pointer, or the one last tapped: every wire of it lights up together.
-  const [hot, setHot] = useState<number | undefined>();
+  // The net under the pointer, focused, or last pressed: every wire of it lights up together.
+  // A wire's name and value show while it is pointed at or focused, and stay after a press or a
+  // tap until another wire is pressed, so a phone, which has no pointing, shows them too.
+  const [hovered, setHovered] = useState<number | undefined>();
+  const [pressed, setPressed] = useState<number | undefined>();
+  const hot = hovered ?? pressed;
+  const [scrollRef, overflows] = useOverflows<HTMLDivElement>();
   // The trail of opened blocks, each named by its instance name, or by its kind's label when the
   // name says no more (the `dff` block of the `dff` circuit). Two levels with one label collapse
   // into the deeper one, and the trail is drawn only when there is a block to open or to leave.
@@ -113,7 +119,8 @@ export function CircuitView({
           ))}
         </nav>
       )}
-      <div className="circuit-scroll">
+      {overflows && <p className="scroll-note">{strings.circuit.scrollNote}</p>}
+      <div className="circuit-scroll" ref={scrollRef}>
         <svg
           className="circuit"
           viewBox={`0 0 ${scene.width} ${scene.height}`}
@@ -139,9 +146,20 @@ export function CircuitView({
                   key={i}
                   className={`wire wire-${level}${isHot ? " wire-hot" : ""}`}
                   data-net={name}
-                  onMouseEnter={() => setHot(net)}
-                  onMouseLeave={() => setHot((h) => (h === net ? undefined : h))}
-                  onClick={() => setHot((h) => (h === net ? undefined : net))}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`${name}. ${strings.circuit.showWire}`}
+                  onMouseEnter={() => setHovered(net)}
+                  onMouseLeave={() => setHovered((h) => (h === net ? undefined : h))}
+                  onFocus={() => setHovered(net)}
+                  onBlur={() => setHovered((h) => (h === net ? undefined : h))}
+                  onClick={() => setPressed(net)}
+                  onKeyDown={(e: KeyboardEvent) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setPressed(net);
+                    }
+                  }}
                 >
                   <title>{value ? `${name} = ${valueLabel(value)}` : name}</title>
                   {isHot && <path d={w.d} fill="none" className="wire-halo" />}

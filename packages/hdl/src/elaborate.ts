@@ -16,7 +16,10 @@ import { dFlipFlop, register } from "@dd/dd-model";
 
 import {
   HdlError,
+  type Assignment,
   type Expression,
+  type Identifier,
+  type Literal,
   type Message,
   type Module,
   type Position,
@@ -143,6 +146,13 @@ class Elaborator {
             throw new HdlError(item.at, `a clock is one bit; ${item.clock} is ${clock.width}`);
           const targets = new Set<string>();
           this.collectTargets(item.body, targets);
+          // The shapes the generator writes for a flip-flop or register with a reset, an enable
+          // or both come back as that block with those ports, not as selectors in front of it.
+          const shape = targets.size === 1 ? registerShape(item.body) : undefined;
+          if (shape) {
+            this.clocked(shape, clock.net, item.at);
+            break;
+          }
           const env = new Map<string, NetId>();
           for (const name of targets) env.set(name, this.target(name, item.at, false).net);
           this.exec(item.body, env, "<=", targets);
@@ -175,6 +185,44 @@ class Elaborator {
     const circuit = this.b.build();
     this.loopWarnings(circuit);
     return { circuit, warnings: this.warnings };
+  }
+
+  /** A flip-flop or register with the reset and enable a recognised shape names. */
+  private clocked(shape: RegisterShape, clock: NetId, at: Position): void {
+    const target = this.target(
+      shape.target.name,
+      shape.target.at,
+      shape.target.select !== undefined,
+    );
+    const load = this.expression(shape.load, target.width);
+    if (this.b.widthOf(load) !== target.width)
+      this.widthMismatch(shape.load.at, this.b.widthOf(load), target.width);
+    if (shape.zero && shape.zero.width !== undefined && shape.zero.width !== target.width)
+      this.widthMismatch(shape.zero.at, shape.zero.width, target.width);
+    const options = {
+      ...(shape.reset ? { reset: this.expression(shape.reset, 1) } : {}),
+      ...(shape.enable ? { enable: this.expression(shape.enable, 1) } : {}),
+      q: target.net,
+      ...this.g,
+    };
+    this.claim(target.net, at, target.width);
+    if (target.width === 1)
+      dFlipFlop(this.b, load, clock, { name: `${shape.target.name}_ff`, ...options });
+    else
+      register(this.b, load, clock, {
+        name: `${shape.target.name}_reg`,
+        width: target.width,
+        ...options,
+      });
+  }
+
+  private readonly used = new Map<string, number>();
+
+  /** A part name not used before in this module: two selectors for one signal are two parts. */
+  private unique(name: string): string {
+    const n = (this.used.get(name) ?? 0) + 1;
+    this.used.set(name, n);
+    return n === 1 ? name : `${name}${n}`;
   }
 
   private target(name: string, at: Position, selected: boolean): Signal {
@@ -317,7 +365,7 @@ class Elaborator {
         "mux2",
         { sel: cond, a: elseNet, b: thenNet },
         { y },
-        { name: `${name}_mux`, ...this.g },
+        { name: this.unique(`${name}_mux`), ...this.g },
       );
       env.set(name, y);
     }
@@ -699,4 +747,62 @@ class Elaborator {
     for (const g of gates) visit(g.id, []);
     void driverOf;
   }
+}
+
+interface RegisterShape {
+  readonly target: Assignment["target"];
+  readonly load: Expression;
+  readonly reset?: Identifier;
+  /** The reset's value as written, all zeros. */
+  readonly zero?: Literal;
+  readonly enable?: Identifier;
+}
+
+/** A statement with any single-statement `begin ... end` around it taken off. */
+function bare(s: Statement): Statement {
+  return s.kind === "block" && s.statements.length === 1 ? bare(s.statements[0] as Statement) : s;
+}
+
+function assignment(s: Statement | undefined): Assignment | undefined {
+  const b = s ? bare(s) : undefined;
+  return b?.kind === "assignment" && b.operator === "<=" && b.target.select === undefined
+    ? b
+    : undefined;
+}
+
+function zero(e: Expression): Literal | undefined {
+  return e.kind === "literal" && e.value === 0n && e.unknown === 0n ? e : undefined;
+}
+
+/**
+ * The three shapes the generator writes for a clocked block with a reset or an enable:
+ * `if (R) Q <= 0; else if (E) Q <= D;`, `if (R) Q <= 0; else Q <= D;` and `if (E) Q <= D;`, with
+ * R and E plain names. Anything else is elaborated as written, through selectors.
+ */
+export function registerShape(body: Statement): RegisterShape | undefined {
+  const top = bare(body);
+  if (top.kind !== "if" || top.condition.kind !== "identifier") return undefined;
+  const first = assignment(top.then);
+  if (!first) return undefined;
+  if (top.otherwise === undefined) {
+    return { target: first.target, load: first.value, enable: top.condition };
+  }
+  const reset = zero(first.value);
+  if (!reset) return undefined;
+  const rest = bare(top.otherwise);
+  const plain = assignment(rest);
+  if (plain && plain.target.name === first.target.name) {
+    return { target: first.target, load: plain.value, reset: top.condition, zero: reset };
+  }
+  if (rest.kind !== "if" || rest.otherwise !== undefined || rest.condition.kind !== "identifier")
+    return undefined;
+  const loaded = assignment(rest.then);
+  if (!loaded || loaded.target.name !== first.target.name) return undefined;
+  return {
+    target: first.target,
+    load: loaded.value,
+    reset: top.condition,
+    zero: reset,
+    enable: rest.condition,
+  };
 }

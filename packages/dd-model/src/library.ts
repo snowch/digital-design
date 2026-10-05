@@ -59,6 +59,59 @@ export function twoButtonsCircuit(delay?: number): Circuit {
   });
 }
 
+/**
+ * The race a flip-flop prevents: two D latches in a row sharing one EN. While EN is 1 both are
+ * open, so a change of D runs through the first latch and on through the second at once. Q1 is
+ * the first latch's output; Q is the second's.
+ */
+export function twoLatchesCircuit(): Circuit {
+  const b = new CircuitBuilder("two-latches");
+  const d = b.input("D");
+  const en = b.input("EN");
+  const first = dLatch(b, d, en, { name: "first", q: b.net("Q1") });
+  const second = dLatch(b, first.q, en, { name: "second" });
+  b.output("Q1", first.q);
+  b.output("Q", second.q);
+  return placed(b.build(), {
+    "in:D": [0, 1],
+    "in:EN": [0, 5],
+    first: [5, 1],
+    second: [11, 1],
+    "out:Q1": [11, 7],
+    "out:Q": [16, 1],
+  });
+}
+
+/**
+ * The two-button circuit closed, as one block with A and B in and LIGHT out: what it does, with
+ * the gates inside it left for the learner to build. The investigation shows this; the gates are
+ * drawn after the construction, in the fault lab.
+ */
+export function twoButtonsBlockCircuit(): Circuit {
+  const b = new CircuitBuilder("two-buttons-block");
+  const a = b.input("A");
+  const bPress = b.input("B");
+  const light = b.net("LIGHT");
+  b.scope(
+    "light",
+    "two-buttons",
+    (bb) => {
+      const dark = bb.net("DARK");
+      bb.nor([bPress, dark], { output: light, name: "norLight" });
+      bb.nor([a, light], { output: dark, name: "norDark" });
+      return { q: light };
+    },
+    () => ({ inputs: { A: a, B: bPress }, outputs: { LIGHT: light } }),
+  );
+  b.output("LIGHT", light);
+  return placed(b.build(), {
+    "in:A": [0, 1],
+    "in:B": [0, 4],
+    light: [5, 1],
+    "out:LIGHT": [10, 1],
+  });
+}
+
 export function srLatchCircuit(delay?: number): Circuit {
   const b = new CircuitBuilder("sr-latch");
   const s = b.input("S");
@@ -206,12 +259,13 @@ export const INSIDE: Readonly<Record<string, Readonly<Record<string, readonly [n
  */
 export function fourFlipFlopsCircuit(): Circuit {
   const b = new CircuitBuilder("four-flip-flops");
-  const ds = [0, 1, 2, 3].map((i) => b.input(`D${i}`));
+  // Pins made from bit 3 down, so the signal table lists them in the order a word is written.
+  const ds = new Map([3, 2, 1, 0].map((i) => [i, b.input(`D${i}`)] as const));
   const clk = b.input("CLK");
-  ds.forEach((d, i) => {
-    const { q } = dFlipFlop(b, d, clk, { name: `ff${i}` });
+  for (const i of [3, 2, 1, 0]) {
+    const { q } = dFlipFlop(b, ds.get(i) as NetId, clk, { name: `ff${i}` });
     b.output(`Q${i}`, q);
-  });
+  }
   // Bit 3 at the top, so the drawing reads top to bottom in the order a word is written.
   const at: Record<string, [number, number]> = { "in:CLK": [0, 21] };
   for (let i = 0; i < 4; i++) {
@@ -322,9 +376,11 @@ export const LIBRARY: Readonly<Record<string, () => Circuit>> = {
   "inverter-loop-2": () => inverterLoop(2),
   "inverter-loop-3": () => inverterLoop(3),
   "two-buttons": () => twoButtonsCircuit(),
+  "two-buttons-block": () => twoButtonsBlockCircuit(),
   "sr-latch": () => srLatchCircuit(),
   "gated-sr-latch": () => gatedSrLatchCircuit(),
   "d-latch": () => dLatchCircuit(),
+  "two-latches": () => twoLatchesCircuit(),
   dff: () => dFlipFlopCircuit(),
   "dff-q": () => dFlipFlopQOnlyCircuit(),
   "dff-reset": () => dFlipFlopCircuit({ reset: true }),

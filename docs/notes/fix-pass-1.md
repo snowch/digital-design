@@ -28,3 +28,14 @@ Read from the clock (`date -u`), not estimated.
     commit.
 - 00:00 to 00:11 Code first: the stepped view's X, the controls each figure needs, the
   two-button drawing and its faults, the flip-flop's inside. Full check green at 00:11.
+- 00:12 to 00:43 Code, second batch: every roll kept with its own seed, the edge marked on the
+  setup-and-hold axis and its status lines counted from the edge; a press or tap on a wire shows
+  and keeps its name; the `<=` ligature; the register-bit table marking the row the next edge
+  applies; the register written as text drawn as one register block with RST and EN; no message
+  on an untouched text box; the editor's refusal says the challenge does not use a construct; a
+  note above any drawing wider than the screen; the four flip-flops' pins listed from bit 3; the
+  signals lesson's two predictions draw their subject above the question (item 1a); the shared
+  phone-width test after use (item 1b); the working-words rule in docs/authoring.md (item 1c).
+  The new strings went to the drafting subagent as brief V (appendix); two drafts went back
+  (`parts.open` came back as "OPEN", the simulator's own name; three status lines put {value}
+  and {time} side by side, "Q became 1 30 time units"). Full check green at 00:43.

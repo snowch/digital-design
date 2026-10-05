@@ -25,18 +25,24 @@ export function SignalPlot({
   result,
   band,
   title,
+  plain = false,
 }: {
   rec: Recording;
   threshold: number;
   result: ReadResult;
   band?: { from: number; to: number } | undefined;
   title?: string;
+  /**
+   * The samples alone, before a question about reading them is answered: no threshold line, no
+   * row of bits read, no rings on the samples read wrong, and every dot one colour.
+   */
+  plain?: boolean;
 }) {
   const strings = useViewStrings();
   const [ref, width] = useWidth<HTMLDivElement>(640);
   const n = rec.samples.length;
-  const lo = Math.min(-1, Math.floor(Math.min(...rec.samples, threshold) / 100));
-  const hi = Math.max(4, Math.ceil(Math.max(...rec.samples, threshold) / 100));
+  const lo = Math.min(-1, Math.floor(Math.min(...rec.samples, plain ? 0 : threshold) / 100));
+  const hi = Math.max(4, Math.ceil(Math.max(...rec.samples, plain ? 0 : threshold) / 100));
   const w = Math.max(width, 260);
   const col = (w - LEFT - RIGHT) / n;
   const x = (i: number) => LEFT + (i + 0.5) * col;
@@ -45,16 +51,17 @@ export function SignalPlot({
   // Two digits side by side need about 24 pixels; narrower, even samples go on a second line.
   const stagger = col < 24;
   const numbers = stagger ? 2 * ROW - 6 : ROW;
-  const height = rows + numbers + 2 * ROW + 4;
+  const height = rows + numbers + (plain ? 1 : 2) * ROW + 4;
   const ticks = Array.from({ length: hi - lo + 1 }, (_, k) => lo + k);
-  const wrong = new Set(result.wrong);
-  const summary = format(strings.signal.plotSummary, {
-    n,
-    low: volts(Math.min(...rec.samples)),
-    high: volts(Math.max(...rec.samples)),
-    threshold: volts(threshold),
-    wrong: result.wrong.length,
-  });
+  const wrong = new Set(plain ? [] : result.wrong);
+  const range = { n, low: volts(Math.min(...rec.samples)), high: volts(Math.max(...rec.samples)) };
+  const summary = plain
+    ? format(strings.signal.plainSummary, range)
+    : format(strings.signal.plotSummary, {
+        ...range,
+        threshold: volts(threshold),
+        wrong: result.wrong.length,
+      });
 
   return (
     <div className="signal-plot-wrap" ref={ref}>
@@ -65,8 +72,9 @@ export function SignalPlot({
         viewBox={`0 0 ${w} ${height}`}
         role="img"
         aria-label={`${title ?? strings.signal.plotTitle}. ${summary}`}
-        data-threshold={threshold}
-        data-wrong={result.wrong.join(",")}
+        {...(plain
+          ? { "data-plain": "true" }
+          : { "data-threshold": threshold, "data-wrong": result.wrong.join(",") })}
       >
         {ticks.map((v) => (
           <g key={v} className="tick">
@@ -93,7 +101,7 @@ export function SignalPlot({
           return (
             <g
               key={i}
-              className={`sample ${one ? "read-1" : "read-0"}${wrong.has(i) ? " wrong" : ""}`}
+              className={`sample ${plain ? "unread" : one ? "read-1" : "read-0"}${wrong.has(i) ? " wrong" : ""}`}
               data-sample={i + 1}
               data-volts={s}
             >
@@ -103,7 +111,15 @@ export function SignalPlot({
             </g>
           );
         })}
-        <line className="threshold" x1={LEFT} x2={w - RIGHT} y1={y(threshold)} y2={y(threshold)} />
+        {!plain && (
+          <line
+            className="threshold"
+            x1={LEFT}
+            x2={w - RIGHT}
+            y1={y(threshold)}
+            y2={y(threshold)}
+          />
+        )}
         <g className="rows">
           <text className="row-name" x={4} y={rows + 15}>
             {strings.signal.sample}
@@ -111,9 +127,11 @@ export function SignalPlot({
           <text className="row-name" x={4} y={rows + numbers + 15}>
             {strings.signal.sent}
           </text>
-          <text className="row-name" x={4} y={rows + numbers + ROW + 15}>
-            {strings.signal.read}
-          </text>
+          {!plain && (
+            <text className="row-name" x={4} y={rows + numbers + ROW + 15}>
+              {strings.signal.read}
+            </text>
+          )}
           {rec.samples.map((_, i) => (
             <g key={i}>
               <text
@@ -127,14 +145,16 @@ export function SignalPlot({
               <text className="row-bit" x={x(i)} y={rows + numbers + 15} textAnchor="middle">
                 {rec.sent[i]}
               </text>
-              <text
-                className={`row-bit${wrong.has(i) ? " wrong" : ""}`}
-                x={x(i)}
-                y={rows + numbers + ROW + 15}
-                textAnchor="middle"
-              >
-                {result.read[i]}
-              </text>
+              {!plain && (
+                <text
+                  className={`row-bit${wrong.has(i) ? " wrong" : ""}`}
+                  x={x(i)}
+                  y={rows + numbers + ROW + 15}
+                  textAnchor="middle"
+                >
+                  {result.read[i]}
+                </text>
+              )}
             </g>
           ))}
         </g>

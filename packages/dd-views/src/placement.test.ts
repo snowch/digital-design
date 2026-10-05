@@ -120,4 +120,10 @@ describe("the hand-placed drawings", () => {
     expect(problems("dff", "dff").found).toEqual([]);
     expect(problems("four-flip-flops", "ff3").found).toEqual([]);
   });
+
+  it("lists the four flip-flops' pins from bit 3 down, the order a word is written", () => {
+    const c = libraryCircuit("four-flip-flops");
+    expect(c.inputs.map((i) => i.name)).toEqual(["D3", "D2", "D1", "D0", "CLK"]);
+    expect(c.outputs.map((o) => o.name)).toEqual(["Q3", "Q2", "Q1", "Q0"]);
+  });
 });

@@ -194,7 +194,7 @@ describe("elaborating always_ff", () => {
 });
 
 describe("the construct gate", () => {
-  it("refuses a construct the lesson has not met with a plain sentence, before elaborating", () => {
+  it("refuses a construct the challenge does not allow with a plain sentence, before elaborating", () => {
     const r = elaborate(
       "module m(input logic s, a, b, output logic y); always_comb begin if (s) y = a; else y = b; end endmodule",
       {
@@ -204,7 +204,7 @@ describe("the construct gate", () => {
     expect(r.circuit).toBeUndefined();
     expect(r.messages.map((m) => m.severity)).toEqual(["gate", "gate"]);
     expect(r.messages[0]?.text).toBe(
-      "This lesson has not met `always_comb` yet. Here, describe the logic with `assign`.",
+      "This challenge does not use `always_comb`. Instead, describe the logic with `assign`.",
     );
     expect(r.messages[1]?.text).toMatch(/`if` and `else`/);
   });
@@ -250,5 +250,88 @@ describe("a value of the wrong width inside always_ff", () => {
 endmodule`);
     expect(r.circuit).toBeUndefined();
     expect(r.messages.map((m) => m.text).join(" ")).toMatch(/4.*8|8.*4/);
+  });
+});
+
+describe("a register with a reset and an enable, written the way the generator writes it", () => {
+  const header =
+    "module r(input logic [3:0] D, input logic CLK, input logic RST, input logic EN, output logic [3:0] Q);";
+  const parts = (source: string) => {
+    const circuit = circuitOf(source);
+    return {
+      circuit,
+      top: circuit.composites.filter((c) => !c.path.includes("/")),
+      selectors: circuit.components.filter((c) => c.kind === "mux2" && !c.path.includes("/")),
+      constants: circuit.components.filter((c) => c.kind === "const" && !c.path.includes("/")),
+    };
+  };
+
+  it("comes back as one register block with RST and EN ports, and no selector or constant", () => {
+    const { top, selectors, constants } = parts(`${header}
+  always_ff @(posedge CLK) begin
+    if (RST) Q <= 4'b0000;
+    else if (EN) Q <= D;
+  end
+endmodule`);
+    expect(top.map((c) => [c.kind, Object.keys(c.inputs).sort()])).toEqual([
+      ["register", ["CLK", "D", "EN", "RST"]],
+    ]);
+    expect(selectors).toEqual([]);
+    expect(constants).toEqual([]);
+  });
+
+  it("behaves as the text says: the reset wins, EN 0 keeps, EN 1 loads", () => {
+    const { circuit } = parts(`${header}
+  always_ff @(posedge CLK) begin
+    if (RST) Q <= 4'b0000;
+    else if (EN) Q <= D;
+  end
+endmodule`);
+    const d = runSuite(circuit, {
+      kind: "sequence",
+      steps: [
+        { label: "load", set: { D: "0110", EN: 1, RST: 0, CLK: 0 } },
+        { label: "edge", set: { CLK: 1 }, expect: { Q: "0110" } },
+        { label: "low, EN 0", set: { CLK: 0, EN: 0, D: "1111" } },
+        { label: "edge keeps", set: { CLK: 1 }, expect: { Q: "0110" } },
+        { label: "low, both", set: { CLK: 0, EN: 1, RST: 1 } },
+        { label: "edge resets", set: { CLK: 1 }, expect: { Q: "0000" } },
+      ],
+    });
+    expect(d.failures).toEqual([]);
+  });
+
+  it("refuses a reset value of the wrong width", () => {
+    const result = elaborate(`${header}
+  always_ff @(posedge CLK) begin
+    if (RST) Q <= 2'b00;
+    else if (EN) Q <= D;
+  end
+endmodule`);
+    expect(result.messages.some((m) => /2 bits wide/.test(m.text))).toBe(true);
+  });
+
+  it("elaborates any other shape as written, through selectors", () => {
+    const { top, selectors } = parts(`${header}
+  always_ff @(posedge CLK) begin
+    if (EN) Q <= D;
+    else if (RST) Q <= 4'b0000;
+  end
+endmodule`);
+    expect(top.map((c) => Object.keys(c.inputs).sort())).toEqual([["CLK", "D"]]);
+    expect(selectors.length).toBeGreaterThan(0);
+  });
+});
+
+describe("selectors for one signal", () => {
+  it("each get a name of their own, so a drawing does not stack them", () => {
+    const circuit = circuitOf(`module m(input logic a, b, c, d, CLK, output logic Q);
+  always_ff @(posedge CLK) begin
+    if (a) Q <= b;
+    else if (c) Q <= d;
+  end
+endmodule`);
+    const names = circuit.components.filter((c) => c.kind === "mux2").map((c) => c.name);
+    expect(new Set(names).size).toBe(names.length);
   });
 });

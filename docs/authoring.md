@@ -76,6 +76,14 @@ you; CLAUDE.md states the rule and the division of labour. In practice, for one 
    the rationed terms and where each is introduced, the words to avoid) and one brief per group
    of sections, each listing the facts in order, where each figure sits, and how long the section
    is. Attach `docs/style.md`.
+
+   Next to the rationed terms, the fact sheet lists the lesson's working words, each with its one
+   meaning on the page, before any brief goes out: *keep* for a value that stays, *press* and
+   *release* for a button, *take* for what a flip-flop does at the edge, *step* for the stepped
+   model's step and nothing else. Every draft copies the fact sheet's words, so a word that means
+   two things there means two things on the page; both module notes found their biggest reading
+   faults in words of this kind. Scan your own briefs for the meanings the list rules out before
+   sending them.
 3. Run the drafts in parallel, then check facts only: a dropped fact gets the fewest words that
    carry it; a wrong fact or a vocabulary slip goes back with a note; nothing is rewritten.
 4. Place the paragraphs: section `prose`, a figure's `lead`, a figure's `after`.

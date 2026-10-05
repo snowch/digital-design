@@ -161,4 +161,15 @@ describe("facts for the lesson on memory", () => {
     expect(at(0)).toEqual([]);
     expect(at(20)).toEqual([]);
   });
+
+  it("two D latches sharing one EN: while EN is 1 a change of D runs through both at once", () => {
+    const steps = outputsPerStep(libraryCircuit("two-latches"), [
+      { set: { D: 0, EN: 1 } },
+      { set: { D: 1, EN: 1 } },
+      { set: { D: 1, EN: 0 } },
+      { set: { D: 0, EN: 0 } },
+    ]);
+    expect(steps.map((s) => formatWord(s["Q1"]!))).toEqual(["0", "1", "1", "1"]);
+    expect(steps.map((s) => formatWord(s["Q"]!))).toEqual(["0", "1", "1", "1"]);
+  });
 });

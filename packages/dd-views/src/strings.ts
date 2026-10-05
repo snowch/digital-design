@@ -15,6 +15,10 @@ export interface ViewStrings {
     readonly value: string;
     readonly input: string;
     readonly output: string;
+    /** The accessible name's second half on a wire in a drawing, after the wire's name. */
+    readonly showWire: string;
+    /** Above a drawing wider than its box, which scrolls sideways (a phone). */
+    readonly scrollNote: string;
   };
   readonly builder: {
     readonly palette: string;
@@ -80,6 +84,9 @@ export interface ViewStrings {
     readonly now: string;
     readonly nowMark: string;
     readonly state: string;
+    /** For a table whose rows are clock edges: the column, and the mark on the row the next edge applies. */
+    readonly edge: string;
+    readonly edgeMark: string;
   };
   readonly explorer: {
     readonly step: string;
@@ -133,10 +140,14 @@ export interface ViewStrings {
     readonly window: string;
     readonly before: string;
     readonly after: string;
+    /** The mark on the diagram's axis at the clock edge. */
+    readonly edge: string;
   };
   readonly signal: {
     readonly plotTitle: string;
     readonly plotSummary: string;
+    /** The plot's summary when it is drawn without a threshold. */
+    readonly plainSummary: string;
     readonly recording: string;
     readonly threshold: string;
     readonly noise: string;
@@ -157,6 +168,8 @@ export interface ViewStrings {
     readonly row: string;
     readonly flip: string;
     readonly fixed: string;
+    /** A bit shown without its worth, above a question about what the word reads as. */
+    readonly bare: string;
     readonly digit: string;
     readonly sum: string;
     readonly noOnes: string;
@@ -186,6 +199,8 @@ export interface ViewStrings {
     readonly modelGave: string;
     readonly same: string;
     readonly atThreshold: string;
+    /** The accessible name of the samples drawn above a question about them. */
+    readonly samplesTitle: string;
   };
   readonly answers: {
     readonly terms: Readonly<Record<string, string>>;
@@ -207,6 +222,8 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     value: "Value",
     input: "Input",
     output: "Output",
+    showWire: "Press to show the wire's name and value under the drawing.",
+    scrollNote: "The drawing is wider than the screen. Scroll sideways to see the rest.",
   },
   builder: {
     palette: "Parts palette",
@@ -272,6 +289,8 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     now: "Now",
     nowMark: "Applies now",
     state: "What it does",
+    edge: "Next edge",
+    edgeMark: "Applies at the next edge",
   },
   explorer: {
     step: "Step",
@@ -312,24 +331,27 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
   },
   setupHold: {
     offset: "D changes {offset} units {relation} the clock edge",
-    captured: "Q captured {value} at {time}.",
+    captured: "Q became {value}, {time} time units after the edge; the flip-flop took D cleanly.",
     ignored: "Q did not change: D arrived too late.",
-    late: "Q changed to {value} at {time}, but this is unreliable because D changed inside the window.",
+    late: "Q became {value}, {time} time units after the edge. D changed inside the uncertain band; this answer is not to be trusted.",
     inWindow:
       "The gate model's answer here is not to be trusted. A real flip-flop may hover between 0 and 1 before settling.",
     draw: "Roll result",
-    replay: "Replay roll",
-    drawn: "Roll {seed}: Q became undecided at {from}, settled to {value} at {time}.",
+    replay: "Replay roll {seed}",
+    drawn:
+      "Roll {seed}: Q became undecided {from} time units after the edge and settled to {value}, {time} time units after the edge.",
     draws: "Rolls",
     diagramTitle: "Timing diagram",
     window: "Uncertain",
     before: "before",
     after: "after",
+    edge: "rising edge",
   },
   signal: {
     plotTitle: "Samples and threshold",
     plotSummary:
       "{n} samples from {low} to {high}, threshold at {threshold}, {wrong} come out wrong.",
+    plainSummary: "{n} samples from {low} to {high}.",
     recording: "Recording",
     threshold: "Threshold: {value}",
     noise: "Noise: ×{scale}",
@@ -352,6 +374,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     row: "Bits",
     flip: "Bit {n}, worth {value}, now {bit}; press to change.",
     fixed: "Bit {n}, worth {value}, {bit}.",
+    bare: "Bit {n}, {bit}.",
     digit: "Digit {digit}",
     sum: "{terms} = {total}",
     noOnes: "No bits are 1, so the number is 0.",
@@ -381,6 +404,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     modelGave: "The model's answer is {value}.",
     same: "the same",
     atThreshold: "At {threshold}: {n} come out wrong.",
+    samplesTitle: "Signal samples",
   },
   answers: {
     terms: {

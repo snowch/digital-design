@@ -20,6 +20,8 @@ export interface TruthTableProps {
   readonly stateColumn?: string;
   /** Index of the row to mark as the one in force now. */
   readonly current?: number;
+  /** The marked row is the one the next clock edge will apply, not one in force now. */
+  readonly atEdge?: boolean;
   readonly note?: string;
 }
 
@@ -30,11 +32,14 @@ export function TruthTable({
   rows,
   stateColumn,
   current,
+  atEdge = false,
   note,
 }: TruthTableProps) {
   const strings = useViewStrings();
+  const nowHead = atEdge ? strings.table.edge : strings.table.now;
+  const nowMark = atEdge ? strings.table.edgeMark : strings.table.nowMark;
   return (
-    <div className="truth-table-wrap">
+    <div className={`truth-table-wrap${atEdge ? " edge-table" : ""}`}>
       <table className="truth-table">
         <caption>{caption}</caption>
         <thead>
@@ -50,7 +55,7 @@ export function TruthTable({
               </th>
             ))}
             {stateColumn && <th scope="col">{stateColumn}</th>}
-            {current !== undefined && <th scope="col">{strings.table.now}</th>}
+            {current !== undefined && <th scope="col">{nowHead}</th>}
           </tr>
         </thead>
         <tbody>
@@ -72,7 +77,7 @@ export function TruthTable({
               ))}
               {stateColumn && <td className="cell-state">{r.state ?? ""}</td>}
               {current !== undefined && (
-                <td className="cell-now">{i === current ? strings.table.nowMark : ""}</td>
+                <td className="cell-now">{i === current ? nowMark : ""}</td>
               )}
             </tr>
           ))}

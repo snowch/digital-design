@@ -61,7 +61,7 @@ const EXPLAIN: Record<Construct, string> = {
   select: "a bit or part select such as `a[0]` or `a[3:2]`",
   concat: "concatenation with `{a, b}`",
   always_comb: "`always_comb`",
-  always_ff: "`always_ff @(posedge clk)`",
+  always_ff: "`always_ff`",
   if: "`if` and `else`",
   case: "`case`",
   "op-arith": "arithmetic with `+` and `-`",
@@ -172,7 +172,7 @@ export function constructsUsed(module: Module): Construct[] {
   return used;
 }
 
-/** Messages for every construct the text uses that the lesson has not met. Empty when none. */
+/** Messages for every construct the text uses that the challenge does not allow. Empty when none. */
 export function gateMessages(module: Module, allowed: readonly Construct[]): Message[] {
   const set = new Set(allowed);
   return constructsUsed(module)
@@ -181,7 +181,7 @@ export function gateMessages(module: Module, allowed: readonly Construct[]): Mes
       const instead = INSTEAD[c];
       return {
         severity: "gate",
-        text: `This lesson has not met ${EXPLAIN[c]} yet.${instead ? ` Here, ${instead}.` : ""}`,
+        text: `This challenge does not use ${EXPLAIN[c]}.${instead ? ` Instead, ${instead}.` : ""}`,
       };
     });
 }
