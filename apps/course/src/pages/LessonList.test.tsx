@@ -6,6 +6,7 @@ import { INTERACTIVES, createBook } from "@dd/dd-views";
 import { memoryStorage } from "@dd/lesson-runtime";
 import { LESSONS } from "@dd/content";
 
+import { PREFACE_HREF } from "../route";
 import { STRINGS, joinNumbers } from "../strings";
 import { LessonList } from "./LessonList";
 
@@ -49,6 +50,14 @@ describe("the course's front page", () => {
   it("says what the course takes as known before Module 1", () => {
     render(<LessonList book={book} storage={memoryStorage()} />);
     expect(screen.getByText(STRINGS.assumes)).toBeInTheDocument();
+  });
+
+  it("links to the page before the first lesson", () => {
+    render(<LessonList book={book} storage={memoryStorage()} />);
+    expect(screen.getByRole("link", { name: STRINGS.prefaceLink })).toHaveAttribute(
+      "href",
+      PREFACE_HREF,
+    );
   });
 });
 

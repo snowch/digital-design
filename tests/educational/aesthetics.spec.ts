@@ -76,6 +76,12 @@ test.describe("the look of the page", () => {
       await openLesson(page, lesson.id);
       expect(await designProblems(page, info.project.name === "phone"), lesson.id).toEqual([]);
     }
+    // The front page and the page before the first lesson are held to the same rules.
+    for (const path of ["#/", "#/start"]) {
+      await page.goto(path);
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      expect(await designProblems(page, info.project.name === "phone"), path).toEqual([]);
+    }
   });
 
   test("the figures that matter most look as designed", async ({ page }) => {

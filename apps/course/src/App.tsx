@@ -8,6 +8,7 @@ import { LESSONS } from "@dd/content";
 import { browserStorage, LessonView } from "@dd/lesson-runtime";
 
 import { LessonList } from "./pages/LessonList";
+import { Preface } from "./pages/Preface";
 import { lessonHref, useRoute } from "./route";
 import { STRINGS } from "./strings";
 import { useTheme, type Theme } from "./theme";
@@ -20,6 +21,7 @@ export function App() {
 
   let page: React.ReactNode;
   if (route.kind === "list") page = <LessonList book={book} storage={storage} />;
+  else if (route.kind === "preface") page = <Preface book={book} />;
   else if (route.kind === "lesson") {
     const lesson = book.lessons.find((l) => l.id === route.id);
     page = lesson ? (
