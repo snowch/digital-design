@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // A lesson's scene, drawn: where its signals come from and where they go. The sources sit on the
 // left, in the rooms the lesson names; each one's wire runs straight to a box for the circuit the
 // lesson asks for, and from that box to the lamps or readout it drives. A bus, several wires

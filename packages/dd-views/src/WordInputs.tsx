@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The inputs of a circuit that carry a word, as rows of bits to press (Module 3). A word's pin in
 // a drawing is not a button: flipping it between 0 and 1 means nothing for four bits. Each bit
 // here is, and the simulator settles after every press. A one-bit input stays a pin to press.

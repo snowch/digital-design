@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The words the digital-design views put in front of a learner. Drafted by the prose process
 // from a brief of facts and checked against the code; see CLAUDE.md.
 

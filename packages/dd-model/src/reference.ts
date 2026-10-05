@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The quick reference's tables as data.
 //
 // These are the tables from the author's "Sequential Logic Quick Reference", kept here so that a

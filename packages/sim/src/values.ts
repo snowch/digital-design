@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Signal values.
 //
 // A signal carries a word of `width` bits. Each bit is 0, 1 or unknown (X). Unknown is a real

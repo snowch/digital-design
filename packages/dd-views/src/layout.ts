@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Automatic placement for a drawing without positions: inputs on the left, outputs on the right,
 // everything else in columns by its distance from the inputs. Feedback (a loop) is broken at the
 // edge that closes it, so a latch lays out as two gates side by side with the cross wires going

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The geometry of a drawing on screen: where each part, port and wire goes, in pixels.
 // Shared by the circuit view (read-only) and the builder (editable), so both draw the same way.
 

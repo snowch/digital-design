@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Elaboration: from the syntax tree to a circuit the engine runs.
 //
 // `assign` and `always_comb` become gates; `always_ff @(posedge clk)` becomes the course's own

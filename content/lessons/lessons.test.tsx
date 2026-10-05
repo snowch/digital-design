@@ -1,4 +1,6 @@
 // @vitest-environment jsdom
+// Copyright © 2026 Chris Snow
+
 // Every lesson in the course, checked as content: it parses, its challenges can be completed with
 // their reference solutions and not with their starting points, its rationed terms are in order,
 // every figure it names exists and takes the props it gives, and the whole page renders.

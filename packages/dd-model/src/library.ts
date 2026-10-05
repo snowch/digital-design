@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The canonical circuits lessons refer to by id.
 //
 // A lesson's data names a circuit from this library rather than building one, so the lesson stays

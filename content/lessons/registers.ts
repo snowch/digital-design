@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Lesson: How does a circuit hold a word?  (module 5, lesson 1)
 //
 // The structure is here; the words are in registers.prose.ts and registers.labels.ts. Everything

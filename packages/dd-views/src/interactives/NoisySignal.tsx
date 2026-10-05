@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // A recording from a sensor line, read against a threshold the learner moves. Below the plot:
 // how many samples read wrong, and how near the threshold the nearest sample of each kind came.
 // Optionally a choice of recordings, a noise control that scales the same noise up, the band of

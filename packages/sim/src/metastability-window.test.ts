@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 import { describe, expect, it } from "vitest";
 
 import { CircuitBuilder } from "./circuit";

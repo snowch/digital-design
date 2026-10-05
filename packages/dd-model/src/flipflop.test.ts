@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 import {
   bit0,
   bit1,

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // A recursive-descent parser for the subset in ast.ts.
 //
 // Errors are HdlErrors with a position and a plain sentence. The parser accepts the whole subset;

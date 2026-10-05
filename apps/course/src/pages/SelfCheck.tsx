@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Four conversions a learner can try before Module 1, two each way, to see whether they are
 // ready for it. The answers, and the working shown under a wrong one, are the model's (dd-model:
 // bits), as every number in a lesson is.

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The lesson format as JSON Schema, for a book whose toolchain is not TypeScript.
 
 import { z } from "zod";

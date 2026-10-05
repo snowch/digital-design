@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The course's lessons, in order. Each lesson is a module in this directory; adding one here is
 // what publishes it. Every lesson is parsed when the app starts, so an invalid lesson fails fast
 // with its problems listed, and the content tests parse the same list.

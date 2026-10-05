@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The page before the first lesson, in the browser: the front page leads to it, its self-check
 // marks each answer and shows the model's working under a wrong one, and it ends at the first
 // lesson.
@@ -52,4 +54,11 @@ test("the header reaches the page from inside a lesson, and marks the page it is
   await expect(nav.getByRole("link", { name: STRINGS.lessons })).not.toHaveAttribute(
     "aria-current",
   );
+});
+
+test("every page carries its author's copyright", async ({ page }) => {
+  for (const path of ["#/", "#/start", `#/lesson/${LESSONS[0]!.id}`]) {
+    await page.goto(path);
+    await expect(page.getByRole("contentinfo")).toContainText(STRINGS.copyright);
+  }
 });

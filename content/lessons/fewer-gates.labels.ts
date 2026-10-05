@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Titles, objectives, captions and labels of the lesson "How do you build a circuit with fewer gates?", drafted by the prose process
 // from a brief of facts (brief E, docs/notes/module-2-boolean-logic.md) and checked against the
 // lesson's structure.

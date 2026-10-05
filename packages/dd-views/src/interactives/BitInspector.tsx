@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // A word of bits the learner changes one at a time, read several ways at once. Each reading is
 // the model's (dd-model/bits); for a number, the sum of the 1 bits' values is shown beside it.
 

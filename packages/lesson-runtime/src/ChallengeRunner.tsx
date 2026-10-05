@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // A challenge on the page: the task, the book's editor, the run button, the verdict, the hints.
 //
 // Completion is a property of the work on screen, not a flag: the badge shows when the artifact

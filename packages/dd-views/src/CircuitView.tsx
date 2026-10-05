@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // A circuit, drawn. Values on the wires come from a simulator; the view never computes one.
 // A composite is a closed box until opened, and opening it shows its own gates in place of the
 // whole circuit, with a breadcrumb back. Colour never carries a value alone: every wire has its

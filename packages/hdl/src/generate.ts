@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Generation: from a circuit to the subset's text.
 //
 // Each gate becomes one `assign`. A flip-flop or a register composite becomes one `always_ff`,

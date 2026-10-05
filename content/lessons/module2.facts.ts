@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Shared helpers for Module 2's facts tests: run a lesson's figure through the code the figure
 // runs, so a number the prose states is read off the page's own source.
 

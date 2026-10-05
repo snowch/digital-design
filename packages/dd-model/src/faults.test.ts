@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 import { bit0, bit1, formatWord, Simulator, validate } from "@dd/sim";
 import { describe, expect, it } from "vitest";
 

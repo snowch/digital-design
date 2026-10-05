@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The lesson's central drawings are placed by hand so that the wires read as the prose says. These
 // tests hold the placements to that: no wire runs through a part it does not connect to, no two
 // different signals share a stretch of wire, and a fault leaves every gate where it was.

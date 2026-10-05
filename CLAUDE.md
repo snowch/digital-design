@@ -136,6 +136,9 @@ the Vite build, Playwright. Each line below is a check and the reason it exists.
 
 - **Prettier, with `*.md` ignored.** Prose files keep their own line breaks; code does not get a
   style argument.
+- **Every source file carries its author's copyright line** ("Copyright © 2026 Chris Snow") near
+  its top, and every page carries it in its footer. `node scripts/copyright.mjs --check` fails a
+  file without it; `node scripts/copyright.mjs` adds the line, so run it on a new file.
 - **`tsc` strict, with `noUncheckedIndexedAccess` and `verbatimModuleSyntax`.** An index into a
   list may be undefined and the code must say what happens then.
 - **A lesson without an `originalityNote`, or with its sections out of order, or with a

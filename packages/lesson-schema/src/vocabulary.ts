@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The term gate: a rationed word may appear only in the lesson that introduces it and after.
 //
 // Each lesson lists the terms it introduces. This check reads every lesson's prose, hints, tasks

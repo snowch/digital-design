@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Bits and the ways a word of them can be read.
 //
 // A word is a row of bits written with the highest bit first, as the lesson writes it: "0110" is

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 2: a circuit's outputs as whole expressions, and back.
 
 import { describe, expect, it } from "vitest";

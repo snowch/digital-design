@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Five hints, one at a time, in a fixed order. How many are shown is the learner's state.
 
 import { Prose } from "./Prose";

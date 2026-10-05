@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Reading a trace: the value of a net at a time, and the segments of a lane for drawing.
 
 import { unknown, type Circuit, type NetId, type Trace, type Word } from "@dd/sim";

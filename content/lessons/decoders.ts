@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Lesson: Module 3, lesson 2, decoders, demultiplexers, encoders and the comparator.
 //
 // The structure is here; the words are in decoders.prose.ts and decoders.labels.ts. The circuits

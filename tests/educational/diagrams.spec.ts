@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The diagrams, checked as drawings: no label in any timing diagram or circuit drawing on the
 // page overlaps another or leaves its drawing, at desktop and phone widths, before and after the
 // figures have been used. A diagram whose text collides fails a learner however right its data.

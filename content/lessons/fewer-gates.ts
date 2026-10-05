@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Lesson: Module 2, lesson 3, fewer gates and shorter paths.
 //
 // The structure is here; the words are in fewer-gates.prose.ts and fewer-gates.labels.ts. The

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 3's blocks against what each is for, every input pattern where there are few enough, and
 // the chain a slice is tested in against the ALU built in one piece.
 
