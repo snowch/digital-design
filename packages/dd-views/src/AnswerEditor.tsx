@@ -7,7 +7,14 @@
 
 import type { ComponentType } from "react";
 
-import { ANSWER_GRADERS, OF_YOUR_BITS, isProblem, parseBits, type Bit } from "@dd/dd-model";
+import {
+  ANSWER_GRADERS,
+  OF_YOUR_BITS,
+  OTHER_THAN,
+  isProblem,
+  parseBits,
+  type Bit,
+} from "@dd/dd-model";
 import type { Artifact, Challenge } from "@dd/lesson-schema";
 import type { ChallengeEditorProps, Verdict, VerdictFailure } from "@dd/lesson-runtime";
 
@@ -39,7 +46,11 @@ export function gradeAnswers(
     Object.fromEntries(
       Object.entries(values).map(([k, v]) => [
         term(k),
-        v === OF_YOUR_BITS ? strings.answers.ofYourBits : v,
+        v === OF_YOUR_BITS
+          ? strings.answers.ofYourBits
+          : v.startsWith(OTHER_THAN)
+            ? format(strings.answers.otherThan, { value: v.slice(OTHER_THAN.length) })
+            : v,
       ]),
     );
   const failures: VerdictFailure[] = [];

@@ -45,6 +45,11 @@ export const CombinationalVector = z.object({
   internal: z.record(z.string(), VectorValue).optional(),
   /** Module 3: for a suite with a `chain`, how many copies of the slice this vector tests. */
   slices: z.number().int().min(1).max(64).optional(),
+  /**
+   * Module 7: for a written challenge, the values this vector gives the text's parameters, such
+   * as its width `N`; the text is elaborated once per set of values and tested at each.
+   */
+  parameters: z.record(z.string(), z.number().int()).optional(),
 });
 
 /**
@@ -55,7 +60,8 @@ export const CombinationalVector = z.object({
  */
 export const ChainSpec = z.object({
   bitwise: z.array(z.string()).min(1),
-  outputs: z.array(z.string()).min(1),
+  /** Module 7: may be empty, for a slice whose only result travels along the chain. */
+  outputs: z.array(z.string()).default([]),
   shared: z.array(z.string()).default([]),
   carry: z.object({ in: z.string(), out: z.string() }).optional(),
 });

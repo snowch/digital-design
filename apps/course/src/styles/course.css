@@ -306,7 +306,8 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
 }
 .verdict-values {
   display: grid;
-  grid-template-columns: max-content 1fr;
+  /* minmax(0, ...) lets a 64-bit value (Module 7) wrap instead of widening the page. */
+  grid-template-columns: max-content minmax(0, 1fr);
   gap: var(--space-1) var(--space-4);
   margin: 0 0 var(--space-2);
 }
@@ -318,6 +319,7 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
 }
 .values .value {
   margin-right: var(--space-2);
+  overflow-wrap: anywhere;
 }
 .verdict.blocked {
   border-left: 4px solid var(--warn);
@@ -914,6 +916,12 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
   padding: var(--space-2) 0;
   margin: var(--space-3) 0;
 }
+/* At the top of a suite lab nothing sits above the fault choices to rule off. */
+.suite-lab > .fault-choices:first-child {
+  border-top: 0;
+  margin-top: 0;
+  padding-top: 0;
+}
 .fault-choices legend {
   float: left;
   width: 100%;
@@ -949,6 +957,8 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
 }
 .fault-failures {
   padding-left: var(--space-5);
+  /* A 64-bit word in a failed check (Module 7) wraps rather than widening the page. */
+  overflow-wrap: anywhere;
 }
 .internals-phase {
   background: var(--note-bg);
@@ -1573,4 +1583,91 @@ button.bit {
 .column-sum .rule {
   stroke: var(--fg);
   stroke-width: 1.5;
+}
+
+/* Module 7: the carry stepped from slice to slice, and a generated suite run against the ALU. */
+.carry-cases {
+  border: 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: var(--space-2) 0;
+  margin: var(--space-3) 0;
+}
+.carry-cases legend {
+  float: left;
+  width: 100%;
+  font-weight: 650;
+  padding: var(--space-1) 0 0;
+  margin-bottom: var(--space-1);
+}
+.carry-cases legend + * {
+  clear: both;
+}
+.carry-grid {
+  background: var(--canvas);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+}
+.carry-row-label {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+}
+.carry-cells {
+  list-style: none;
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(16, minmax(0, 1fr));
+  gap: 2px;
+}
+.carry-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.4;
+  padding: 2px 0;
+}
+.carry-cell .carry-c {
+  font-weight: 700;
+}
+.carry-cell .carry-y {
+  color: var(--fg-muted);
+  border-top: 1px solid var(--border);
+  width: 100%;
+  text-align: center;
+}
+.carry-cell.changed {
+  border-color: var(--sig-cursor);
+  outline: 2px solid var(--sig-cursor);
+  outline-offset: -1px;
+}
+.carry-key {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+}
+.suite-seed {
+  margin: var(--space-3) 0;
+}
+.suite-table {
+  border-collapse: collapse;
+  margin: var(--space-3) 0;
+}
+.suite-table th,
+.suite-table td {
+  text-align: left;
+  padding: var(--space-1) var(--space-4) var(--space-1) 0;
+  border-bottom: 1px solid var(--border);
+}
+.suite-failures ul {
+  margin: var(--space-1) 0 var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  overflow-wrap: anywhere;
 }

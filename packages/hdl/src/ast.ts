@@ -49,7 +49,10 @@ export type Item = ContinuousAssign | AlwaysComb | AlwaysFf;
 
 export interface ContinuousAssign {
   readonly kind: "assign";
+  /** The signal assigned; for a concatenation, its first part. */
   readonly target: LValue;
+  /** Module 7: a concatenation as the target, `{COUT, SUM}`, its parts from the top bits down. */
+  readonly targets?: readonly LValue[];
   readonly value: Expression;
   readonly at: Position;
 }

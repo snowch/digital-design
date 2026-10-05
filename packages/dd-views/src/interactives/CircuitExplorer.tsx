@@ -44,6 +44,8 @@ const Props = z.object({
   initial: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
   /** Module 3: each word in the signal table read as a number, these ways. */
   readings: z.array(z.enum(["unsigned", "signed"])).default([]),
+  /** Module 7: a row of bit boxes per word input; off for a 64-bit word, set by `initial`. */
+  wordInputs: z.boolean().default(true),
 });
 
 /** The reference table restricted to the inputs the circuit has, with a wildcard for X. */
@@ -134,7 +136,7 @@ export const CircuitExplorer = withProps(
           {...(data.canOpen ? { onScope: setScope } : {})}
           readings={data.readings}
         />
-        {scope === "" && (
+        {scope === "" && data.wordInputs && (
           <WordInputs circuit={circuit} values={sim.values} onSet={(n, v) => sim.set(n, v)} />
         )}
         <div className="explorer-actions">

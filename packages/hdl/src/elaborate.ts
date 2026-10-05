@@ -12,7 +12,7 @@
 // path (a latch would be inferred; the course leaves the missing path unknown).
 
 import { CircuitBuilder, driverOf, type Circuit, type NetId } from "@dd/sim";
-import { dFlipFlop, register } from "@dd/dd-model";
+import { dFlipFlop, register, rippleAdder } from "@dd/dd-model";
 
 import {
   HdlError,
@@ -20,6 +20,7 @@ import {
   type Expression,
   type Identifier,
   type Literal,
+  type LValue,
   type Message,
   type Module,
   type Position,
@@ -34,6 +35,8 @@ export interface ElaborateOptions {
   readonly allowed?: readonly Construct[];
   /** Gate delay for the delay model. */
   readonly delay?: number;
+  /** Module 7: values for the module's parameters, in place of the defaults its text gives. */
+  readonly parameters?: Readonly<Record<string, number>>;
 }
 
 export interface Elaboration {
@@ -90,6 +93,7 @@ class Elaborator {
   private readonly driven = new Map<NetId, Position>();
   private readonly warnings: Message[] = [];
   private readonly g: { delay?: number };
+  private readonly overrides: Readonly<Record<string, number>>;
 
   constructor(
     private readonly module: Module,
@@ -97,11 +101,15 @@ class Elaborator {
   ) {
     this.b = new CircuitBuilder(module.name);
     this.g = options.delay !== undefined ? { delay: options.delay } : {};
+    this.overrides = options.parameters ?? {};
   }
 
   run(): { circuit: Circuit; warnings: Message[] } {
     const m = this.module;
-    for (const p of m.parameters) this.params.set(p.name, this.constant(p.value));
+    for (const p of m.parameters) {
+      const given = this.overrides[p.name];
+      this.params.set(p.name, given !== undefined ? BigInt(given) : this.constant(p.value));
+    }
     for (const port of m.ports) {
       const width = port.range ? this.rangeWidth(port.range, port.at) : 1;
       if (this.signals.has(port.name))
@@ -119,6 +127,10 @@ class Elaborator {
     for (const item of m.items) {
       switch (item.kind) {
         case "assign": {
+          if (item.targets) {
+            this.concatAssign(item.targets, item.value, item.at);
+            break;
+          }
           const target = this.target(
             item.target.name,
             item.target.at,
@@ -463,10 +475,18 @@ class Elaborator {
       case "binary": {
         const op = e.operator;
         if (op === "+" || op === "-") {
-          throw new HdlError(
-            e.at,
-            "arithmetic on signals comes in a later module; here `+` and `-` work on constants such as widths",
-          );
+          // The width the sum is worked out at: the widest operand, or the width it is assigned
+          // to if that is wider, as SystemVerilog has it; then the low bits are kept.
+          const width = Math.max(want ?? 0, this.widthOf(e) ?? 0);
+          if (width === 0)
+            throw new HdlError(e.at, "give one side of the sum a width, such as a declared signal");
+          const sum = this.arith(e, width);
+          if (want === undefined || want === width) {
+            if (output === undefined) return sum;
+            this.b.gate("buf", [sum], { output, ...this.g });
+            return output;
+          }
+          return this.fit(sum, want, output);
         }
         if (op === "&&" || op === "||") {
           const l = this.expression(e.left, 1);
@@ -609,6 +629,11 @@ class Elaborator {
           e.operator === "!="
         )
           return 1;
+        if (e.operator === "+" || e.operator === "-") {
+          const l = this.widthOf(e.left);
+          const r = this.widthOf(e.right);
+          return l === undefined ? r : r === undefined ? l : Math.max(l, r);
+        }
         return this.widthOf(e.left) ?? this.widthOf(e.right);
       case "ternary":
         return this.widthOf(e.then) ?? this.widthOf(e.otherwise);
@@ -687,6 +712,121 @@ class Elaborator {
     if (lo !== 0) throw new HdlError(at, `ranges in this course end at 0: write [${hi - lo}:0]`);
     if (hi < 0) throw new HdlError(at, "a range's high bit must be 0 or more");
     return hi - lo + 1;
+  }
+
+  /**
+   * Module 7: an expression worked out at `width` bits, as SystemVerilog works out a sum: every
+   * operand is widened with 0s to that width first (so `~B` inside a wider sum turns over the new
+   * top bits too), and `+` and `-` become the course's adder. `a + b + c` with `c` one bit wide is
+   * one adder with `c` as its carry in; `a - b` is `a` plus NOT `b` plus 1.
+   */
+  private arith(e: Expression, width: number): NetId {
+    switch (e.kind) {
+      case "literal":
+        if (e.width === undefined) return this.constant_(e.value, e.unknown, width, e.at);
+        return this.fit(this.expression(e, e.width), width);
+      case "identifier":
+        if (this.params.has(e.name))
+          return this.constant_(this.params.get(e.name) as bigint, 0n, width, e.at);
+        return this.fit(this.expression(e, undefined), width);
+      case "unary":
+        if (e.operator === "~") return this.b.not(this.arith(e.operand, width), this.g);
+        return this.fit(this.expression(e, 1), width);
+      case "binary": {
+        const op = e.operator;
+        if (op === "&" || op === "|" || op === "^") {
+          const kind = op === "&" ? "and" : op === "|" ? "or" : "xor";
+          return this.b.gate(kind, [this.arith(e.left, width), this.arith(e.right, width)], this.g);
+        }
+        if (op === "+") {
+          const l = e.left;
+          if (this.widthOf(e.right) === 1 && l.kind === "binary" && l.operator === "+")
+            return this.adder(
+              this.arith(l.left, width),
+              this.arith(l.right, width),
+              this.expression(e.right, 1),
+              width,
+            );
+          return this.adder(
+            this.arith(e.left, width),
+            this.arith(e.right, width),
+            this.constant_(0n, 0n, 1, e.at),
+            width,
+          );
+        }
+        if (op === "-")
+          return this.adder(
+            this.arith(e.left, width),
+            this.b.not(this.arith(e.right, width), this.g),
+            this.constant_(1n, 0n, 1, e.at),
+            width,
+          );
+        return this.fit(this.expression(e, undefined), width);
+      }
+      case "ternary": {
+        const cond = this.expression(e.condition, 1);
+        if (this.b.widthOf(cond) !== 1)
+          throw new HdlError(e.at, "the condition of `? :` must be one bit");
+        const y = this.b.net(`sel${e.at.line}_${e.at.column}`, width);
+        this.b.component(
+          "mux2",
+          { sel: cond, a: this.arith(e.otherwise, width), b: this.arith(e.then, width) },
+          { y },
+          { ...this.g },
+        );
+        return y;
+      }
+      default:
+        return this.fit(this.expression(e, undefined), width);
+    }
+  }
+
+  /** The course's adder block, `width` bits wide: A + B + CIN, its carry out unused. */
+  private adder(a: NetId, b: NetId, cin: NetId, width: number): NetId {
+    const sum = this.b.net(`sum${this.counter++}`, width);
+    const cout = this.b.net(`carry${this.counter++}`);
+    rippleAdder(
+      this.b,
+      { A: a, B: b, CIN: cin },
+      { name: this.unique("adder"), width, outs: { SUM: sum, COUT: cout } },
+    );
+    return sum;
+  }
+
+  /** A net widened with 0s on the left, or cut to its low bits, to `width` bits. */
+  private fit(net: NetId, width: number, output?: NetId): NetId {
+    const w = this.b.widthOf(net);
+    if (w === width) {
+      if (output === undefined) return net;
+      this.b.gate("buf", [net], { output, ...this.g });
+      return output;
+    }
+    const y = output ?? this.b.net(`fit${this.counter++}`, width);
+    if (w > width) {
+      if (width === 1) this.b.component("bit", { a: net }, { y }, { params: { index: 0 } });
+      else this.b.component("slice", { a: net }, { y }, { params: { hi: width - 1, lo: 0 } });
+      return y;
+    }
+    const zeros = this.constant_(0n, 0n, width - w, { line: 0, column: 0 });
+    this.b.component("join", { a: net, b: zeros }, { y }, { params: { width } });
+    return y;
+  }
+
+  /** `assign {COUT, SUM} = value;`: the value at the parts' total width, top bits to the first. */
+  private concatAssign(targets: readonly LValue[], value: Expression, at: Position): void {
+    const parts = targets.map((t) => ({ t, s: this.target(t.name, t.at, t.select !== undefined) }));
+    const total = parts.reduce((n, p) => n + p.s.width, 0);
+    const self = this.widthOf(value);
+    const v = this.fit(this.expression(value, Math.max(total, self ?? 0)), total);
+    let hi = total - 1;
+    for (const { s } of parts) {
+      const lo = hi - s.width + 1;
+      this.claim(s.net, at, s.width);
+      if (s.width === 1)
+        this.b.component("bit", { a: v }, { y: s.net }, { params: { index: lo }, ...this.g });
+      else this.b.component("slice", { a: v }, { y: s.net }, { params: { hi, lo }, ...this.g });
+      hi = lo - 1;
+    }
   }
 
   private widthMismatch(at: Position, got: number, want: number): never {

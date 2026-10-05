@@ -148,11 +148,26 @@ class Parser {
         this.expect(";");
       } else if (this.is("assign")) {
         const at = this.next().at;
-        const target = this.lvalue();
-        this.expect("=");
-        const value = this.expression();
-        this.expect(";");
-        items.push({ kind: "assign", target, value, at });
+        // Module 7: `assign {COUT, SUM} = ...` gives each part its own bits of the value.
+        if (this.is("{")) {
+          this.next();
+          const targets: LValue[] = [this.lvalue()];
+          while (this.is(",")) {
+            this.next();
+            targets.push(this.lvalue());
+          }
+          this.expect("}");
+          this.expect("=");
+          const value = this.expression();
+          this.expect(";");
+          items.push({ kind: "assign", target: targets[0] as LValue, targets, value, at });
+        } else {
+          const target = this.lvalue();
+          this.expect("=");
+          const value = this.expression();
+          this.expect(";");
+          items.push({ kind: "assign", target, value, at });
+        }
       } else if (this.is("always_comb")) {
         const at = this.next().at;
         items.push({ kind: "always_comb", body: this.statement("="), at });

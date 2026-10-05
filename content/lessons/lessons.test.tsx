@@ -51,8 +51,18 @@ describe("the course's lessons", () => {
   // figure's circuit, under each fault its fault lab offers, and the inside of every block in it.
   it("draws no wire through a part it does not join, and no two signals along one line", () => {
     const found: string[] = [];
-    const check = (name: string, circuit: ReturnType<typeof libraryCircuit>) => {
-      for (const scope of ["", ...circuit.composites.map((c) => c.path)]) {
+    // A figure that lets nobody open its blocks (Module 7: the slice is a later challenge's
+    // answer) shows only its top level, so only that is a drawing a learner can see.
+    const check = (name: string, circuit: ReturnType<typeof libraryCircuit>, open = true) => {
+      // Blocks of one kind are drawn alike inside, so each kind is drawn once: the 64-bit ALU
+      // has hundreds of blocks of a handful of kinds (Module 7).
+      const kinds = new Set<string>();
+      const scopes = (open ? circuit.composites : []).filter((c) => {
+        if (kinds.has(c.kind)) return false;
+        kinds.add(c.kind);
+        return true;
+      });
+      for (const scope of ["", ...scopes.map((c) => c.path)]) {
         const scene = sceneOf(straighten(drawingAt(circuit, scope).drawing));
         found.push(
           ...sceneProblems(scene).map((p) => `${name}${scope ? ` (${scope})` : ""}: ${p}`),
@@ -64,19 +74,27 @@ describe("the course's lessons", () => {
         for (const x of s.interactives) {
           const p = x.props as {
             libraryId?: unknown;
+            canOpen?: boolean;
             circuits?: readonly { libraryId?: unknown }[];
             faults?: readonly Parameters<typeof toFault>[0][];
           };
+          // Module 7's carry-stepping and suite figures run a circuit but never draw it.
+          if (x.kind === "carry-steps" || x.kind === "suite-lab") continue;
           const ids = [p.libraryId, ...(p.circuits ?? []).map((c) => c.libraryId)];
           for (const id of ids) {
             if (typeof id !== "string") continue;
-            check(`${l.id} ${x.id}`, libraryCircuit(id));
+            const open = p.canOpen !== false && x.kind !== "prediction";
+            check(`${l.id} ${x.id}`, libraryCircuit(id), open);
             for (const f of p.faults ?? [])
-              check(`${l.id} ${x.id} with a fault`, applyFaults(libraryCircuit(id), [toFault(f)]));
+              check(
+                `${l.id} ${x.id} with a fault`,
+                applyFaults(libraryCircuit(id), [toFault(f)]),
+                open,
+              );
           }
         }
     expect([...new Set(found)]).toEqual([]);
-  });
+  }, 30_000);
 
   // A scene draws the lesson's own world, so every signal it names is one the lesson's circuits use.
   it("names in each scene only signals its lesson's challenges use", () => {

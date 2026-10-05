@@ -156,7 +156,8 @@ export function constructsUsed(module: Module): Construct[] {
     switch (item.kind) {
       case "assign":
         add("assign");
-        if (item.target.select) add("select");
+        if (item.targets) add("concat");
+        if ((item.targets ?? [item.target]).some((t) => t.select)) add("select");
         expression(item.value);
         break;
       case "always_comb":

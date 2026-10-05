@@ -16,6 +16,11 @@ import { signals } from "./signals";
 import { fewerGates } from "./fewer-gates";
 import { gates } from "./gates";
 import { nand } from "./nand";
+// Module 7, the ALU
+import { aluJobs } from "./alu-jobs";
+import { flags } from "./flags";
+import { wideAlu } from "./wide-alu";
+import { aluTests } from "./alu-tests";
 
 const INPUTS: readonly LessonInput[] = [
   signals,
@@ -30,6 +35,11 @@ const INPUTS: readonly LessonInput[] = [
   alu,
   remember,
   registers,
+  // Module 7, the ALU
+  aluJobs,
+  flags,
+  wideAlu,
+  aluTests,
 ];
 
 export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(

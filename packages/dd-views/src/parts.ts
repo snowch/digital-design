@@ -75,6 +75,19 @@ const COMPOSITE_LABELS: Readonly<Record<string, string>> = {
   "columns-alone": "half adder columns",
   "full-adder-parts": "full adder internals",
   "addsub-4": "4-bit add/subtract",
+  // Module 7: the ALU's blocks and circuits.
+  alu8: "ALU",
+  "alu8-slice": "slice",
+  "alu-flag-slice": "slice",
+  "alu-group-4": "4-bit group",
+  "alu-group-16": "16-bit group",
+  "word-piece": "bits",
+  "word-join": "join",
+  "top-bit": "top bit",
+  "alu8-4": "4-bit ALU",
+  "alu8-flags-4": "4-bit ALU",
+  "alu8-flags-64": "64-bit ALU",
+  "operand-carry": "second word and carry in",
 };
 
 const COMPOSITE_DESCRIPTIONS: Readonly<Record<string, string>> = {

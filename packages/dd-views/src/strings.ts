@@ -261,11 +261,43 @@ export interface ViewStrings {
     /** The accessible name of the row of bits. */
     readonly row: string;
   };
+  /** Module 7: the carry stepped from slice to slice. */
+  readonly carrySteps: {
+    readonly cases: string;
+    readonly caseSteps: string;
+    readonly gridLabel: string;
+    readonly rowLabel: string;
+    readonly cellLabel: string;
+    readonly key: string;
+    readonly back: string;
+    readonly next: string;
+    readonly end: string;
+    readonly result: string;
+    readonly settled: string;
+    readonly answer: string;
+  };
+  /** Module 7: a generated test suite run against the ALU. */
+  readonly suite: {
+    readonly seed: string;
+    readonly run: string;
+    readonly newSeed: string;
+    readonly allPass: string;
+    readonly someFail: string;
+    readonly group: string;
+    readonly cases: string;
+    readonly wrong: string;
+    readonly groups: Readonly<Record<"normal" | "boundary" | "random" | "adversarial", string>>;
+    readonly firstWrong: string;
+    readonly failure: string;
+    readonly answer: string;
+  };
   readonly answers: {
     readonly terms: Readonly<Record<string, string>>;
     readonly unanswered: string;
     readonly invalid: string;
     readonly ofYourBits: string;
+    /** Module 7: what a test that a fault must change expects, around the right result. */
+    readonly otherThan: string;
   };
 }
 
@@ -509,6 +541,40 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     heading: "Input {name}",
     row: "The bits of input {name}. Press a bit to change it.",
   },
+  // Module 7 (placeholders until drafted)
+  carrySteps: {
+    cases: "Which change to watch",
+    caseSteps: "{label} ({n} steps)",
+    gridLabel: "Each slice's carry out and its bit of Y at this step",
+    rowLabel: "Bits {hi} to {lo}",
+    cellLabel: "Bit {k}: carry out {carry}, Y {y}",
+    key: "Top digit: the slice's carry out. Bottom digit: its bit of Y.",
+    back: "Back a step",
+    next: "Next step",
+    end: "Last step",
+    result: "Y is {y}.",
+    settled: "Nothing changes after step {n}.",
+    answer: "The circuit's answer: {answer}.",
+  },
+  suite: {
+    seed: "{width}-bit ALU. Random tests drawn with seed {seed}.",
+    run: "Run the suite",
+    newSeed: "New random tests",
+    allPass: "All {total} tests pass.",
+    someFail: "{failed} of {total} tests fail.",
+    group: "Kind of test",
+    cases: "Tests",
+    wrong: "Failed",
+    groups: {
+      normal: "Normal",
+      boundary: "Boundary",
+      random: "Random",
+      adversarial: "Adversarial",
+    },
+    firstWrong: "{group} tests that fail, the first few:",
+    failure: "{label}: gave {got}, should give {want}",
+    answer: "The first kind of test to catch it: {answer}.",
+  },
   answers: {
     terms: {
       threshold: "Threshold",
@@ -520,10 +586,14 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       signed: "Signed",
       unsigned: "Unsigned",
       hex: "Hexadecimal",
+      // Module 7
+      faulty: "The faulty ALU gives",
     },
     unanswered: "Fill in {fields} to run the tests.",
     invalid: "{field} must be a valid entry.",
     ofYourBits: "What your bits read as",
+    // Module 7
+    otherThan: "anything other than {value}",
   },
 };
 

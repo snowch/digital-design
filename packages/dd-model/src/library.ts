@@ -4,6 +4,7 @@
 // data and the circuit stays testable here. Each entry is a function, so every caller gets a fresh
 // netlist to simulate, break or compare.
 
+import { ALU_INSIDE, aluLibrary } from "./library-alu";
 import { CircuitBuilder, type Circuit, type NetId } from "@dd/sim";
 
 import { dFlipFlop, type FlipFlopOptions } from "./flipflop";
@@ -254,6 +255,8 @@ export const INSIDE: Readonly<Record<string, Readonly<Record<string, readonly [n
       "out:Q": [16, 6],
       "out:Qb": [16, 8],
     },
+    // Module 7, the ALU
+    ...ALU_INSIDE,
   };
 
 /**
@@ -418,6 +421,8 @@ export const LIBRARY: Readonly<Record<string, () => Circuit>> = {
   ...LOGIC_LIBRARY,
   // Module 3, combinational design: selectors, decoders, adders and the ALU.
   ...combinationalLibrary(placed),
+  // Module 7, the ALU: eight jobs, four flags, any width.
+  ...aluLibrary(placed),
 };
 
 export function libraryCircuit(id: string): Circuit {

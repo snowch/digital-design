@@ -176,14 +176,23 @@ export class Simulator {
     }
     this.phase++;
     const history: Word[][] = [[...this.values]];
-    const seen = new Map<string, number>();
-    seen.set(this.key(this.values), 0);
+    // A state is looked up by a hash of every net's value, kept up to date from the nets that
+    // change, and confirmed against the stored state, so a repeat is found exactly as a full
+    // comparison would find it without writing every value out at every step.
+    let hash = 0;
+    for (let net = 0; net < this.values.length; net++)
+      hash = (hash + this.netHash(net, this.values[net] as Word)) >>> 0;
+    const seen = new Map<number, number[]>([[hash, [0]]]);
     let iterations = 0;
     let changedNets: Set<NetId> = new Set();
+    // Every gate is worked out at the first step. After that a gate whose inputs did not change
+    // gives what it gave a step ago, which its output already shows, so only the readers of the
+    // nets that changed are worked out again. The result is the same as working out every gate.
+    let due: readonly Component[] = this.circuit.components;
     while (iterations < this.maxIterations) {
       const next = [...this.values];
       changedNets = new Set();
-      for (const c of this.circuit.components) {
+      for (const c of due) {
         const outputs = this.evaluate(c, this.values);
         for (const [port, net] of Object.entries(c.outputs)) {
           const v = outputs[port];
@@ -200,11 +209,18 @@ export class Simulator {
       }
       for (const net of changedNets) {
         this.trace.events.push({ time: this.time, net, value: next[net] as Word, cause: "settle" });
+        hash =
+          (hash -
+            this.netHash(net, this.values[net] as Word) +
+            this.netHash(net, next[net] as Word) +
+            0x100000000) >>>
+          0;
       }
       this.values = next;
       history.push([...next]);
-      const k = this.key(next);
-      const earlier = seen.get(k);
+      const earlier = (seen.get(hash) ?? []).find((i) =>
+        (history[i] as Word[]).every((w, net) => equal(w, next[net] as Word)),
+      );
       if (earlier !== undefined) {
         // The state repeated: a cycle. Every net that varies within the cycle is undecidable.
         const oscillating = this.varyingWithin(history.slice(earlier));
@@ -212,7 +228,10 @@ export class Simulator {
         this.lastSettle = { converged: false, iterations, oscillating, history };
         return this.lastSettle;
       }
-      seen.set(k, history.length - 1);
+      seen.set(hash, [...(seen.get(hash) ?? []), history.length - 1]);
+      const readers = new Set<Component>();
+      for (const net of changedNets) for (const c of this.readers.get(net) ?? []) readers.add(c);
+      due = [...readers];
     }
     const oscillating = [...changedNets];
     this.markUnknown(oscillating);
@@ -404,8 +423,16 @@ export class Simulator {
     return out;
   }
 
-  private key(values: readonly Word[]): string {
-    return values.map((w) => `${w.value.toString(16)}/${w.known.toString(16)}`).join(",");
+  /** A net's share of a state's hash: its id, and the low bits of its value and of its mask. */
+  private netHash(net: NetId, w: Word): number {
+    const v = Number(w.value & 0xffffffn);
+    const k = Number(w.known & 0xffffffn);
+    return (
+      (Math.imul(net + 1, 0x9e3779b1) ^
+        Math.imul(v + 1, 0x85ebca6b) ^
+        Math.imul(k + 7, 0xc2b2ae35)) >>>
+      0
+    );
   }
 
   resolve(net: NetId | string): NetId {

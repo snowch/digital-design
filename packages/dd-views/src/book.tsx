@@ -96,6 +96,12 @@ export function grade(challenge: Challenge, artifact: Artifact): Verdict {
   if (!circuit) return { passed: false, total, failures: [], blocked: blocked ?? "" };
   if (challenge.tests.kind === "combinational" && challenge.tests.chain)
     return gradeChain(circuit, challenge.tests.vectors, challenge.tests.chain);
+  if (
+    challenge.tests.kind === "combinational" &&
+    artifact.hdl?.trim() &&
+    challenge.tests.vectors.some((v) => v.parameters)
+  )
+    return gradeWidths(challenge, artifact.hdl, challenge.tests.vectors);
   const verdict = runSuite(circuit, challenge.tests);
   const failures = [
     ...verdict.failures.map(withPartLabel),
@@ -162,6 +168,49 @@ export function limitFailures(
 }
 
 type Vectors = Extract<Challenge["tests"], { kind: "combinational" }>["vectors"];
+
+/**
+ * Module 7: a text graded at the widths its tests choose. The text is elaborated once for each set
+ * of parameter values the vectors give (a text that does not elaborate at one of them is blocked
+ * with that width's messages), each group of vectors is run against its circuit, and the
+ * failures are put back in the vectors' order.
+ */
+function gradeWidths(challenge: Challenge, hdl: string, vectors: Vectors): Verdict {
+  const keyOf = (v: Vectors[number]) => JSON.stringify(v.parameters ?? {});
+  const keys = [...new Set(vectors.map(keyOf))];
+  const failures: Verdict["failures"][number][] = [];
+  for (const key of keys) {
+    const parameters = JSON.parse(key) as Record<string, number>;
+    const result = elaborate(hdl, {
+      allowed: challenge.allowedConstructs as Construct[],
+      parameters,
+    });
+    const errors = result.messages.filter((m) => m.severity !== "warning");
+    if (errors.length || !result.circuit)
+      return {
+        passed: false,
+        total: vectors.length,
+        failures: [],
+        blocked: errors.map((m) => (m.at ? `${m.text} (line ${m.at.line})` : m.text)).join("\n"),
+      };
+    const ports = portProblem(result.circuit, challenge, DEFAULT_VIEW_STRINGS);
+    if (ports) return { passed: false, total: vectors.length, failures: [], blocked: ports };
+    const indices = vectors.flatMap((v, i) => (keyOf(v) === key ? [i] : []));
+    const verdict = runSuite(result.circuit, {
+      kind: "combinational",
+      vectors: indices.map((i) => {
+        const { parameters: _p, slices: _s, ...rest } = vectors[i]!;
+        return rest;
+      }),
+    });
+    if (verdict.blocked)
+      return { passed: false, total: vectors.length, failures: [], blocked: verdict.blocked };
+    for (const f of verdict.failures)
+      failures.push(withPartLabel({ ...f, index: indices[f.index] ?? f.index }));
+  }
+  failures.sort((a, b) => a.index - b.index);
+  return { passed: failures.length === 0, total: vectors.length, failures };
+}
 type Chain = NonNullable<Extract<Challenge["tests"], { kind: "combinational" }>["chain"]>;
 
 /**

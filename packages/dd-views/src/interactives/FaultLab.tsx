@@ -26,7 +26,7 @@ import { Step, outputsPerStep } from "./script";
 // A lesson may name a fault and say what it models in its own words; otherwise the fault
 // library's label and explanation show (Module 2 added `explanation`).
 const label = { label: z.string().optional(), explanation: z.string().optional() };
-const FaultSpec = z.discriminatedUnion("kind", [
+export const FaultSpec = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("broken-wire"), net: z.string(), ...label }),
   z.object({ kind: z.literal("inverted"), net: z.string(), ...label }),
   z.object({
@@ -50,6 +50,8 @@ const Props = z.object({
    * run, so a lead that asks the learner to say first is not answered under the figure.
    */
   outcomes: z.string().optional(),
+  /** Module 7: let the learner open a block; off where the inside is a later challenge's answer. */
+  canOpen: z.boolean().default(true),
 });
 
 export function toFault(spec: z.infer<typeof FaultSpec>): Fault {
@@ -144,7 +146,7 @@ export const FaultLab = withProps(
           title={strings.fault.title}
           onToggleInput={(n) => sim.toggle(n)}
           scope={scope}
-          onScope={setScope}
+          {...(data.canOpen ? { onScope: setScope } : {})}
         />
         <div className="fault-actions">
           {data.releaseAll && (

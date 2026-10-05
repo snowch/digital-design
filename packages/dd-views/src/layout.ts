@@ -82,8 +82,15 @@ export function autoLayout(
   const inner = parts.filter((p) => p.kind !== "input" && p.kind !== "output");
   const maxInner = inner.reduce((m, p) => Math.max(m, depth.get(p.id) ?? 0), 0);
   const columns = new Map<number, Part[]>();
+  // A fixed value is a source like an input, so it goes below the inputs: placed in the first
+  // column of gates, its kind label above it lands on the name under the gate above.
+  const isSource = (p: Part) => p.kind === "const" && (pred.get(p.id)?.size ?? 0) === 0;
   const columnOf = (p: Part) =>
-    p.kind === "input" ? 0 : p.kind === "output" ? maxInner + 1 : Math.max(1, depth.get(p.id) ?? 1);
+    p.kind === "input" || isSource(p)
+      ? 0
+      : p.kind === "output"
+        ? maxInner + 1
+        : Math.max(1, depth.get(p.id) ?? 1);
   for (const p of parts) {
     const c = columnOf(p);
     const list = columns.get(c) ?? [];
@@ -105,9 +112,18 @@ export function autoLayout(
     const widest = Math.max(...(columns.get(c) ?? []).map((p) => colsOf?.(p) ?? 0));
     x += widest + WIRE_ROOM;
   }
-  for (const [c, list] of columns) {
+  // Outputs stack in the order of the parts that drive them, so their wires do not cross.
+  const driverRow = (p: Part) =>
+    Math.min(...[...(pred.get(p.id) ?? [])].map((d) => placed.get(d)?.y ?? Infinity), Infinity);
+  for (const c of [...columns.keys()].sort((a, b) => a - b)) {
+    const list = columns.get(c) ?? [];
     const moving = only ? list.filter((p) => only.has(p.id)) : list;
-    moving.sort((p, q) => p.id.localeCompare(q.id));
+    moving.sort(
+      (p, q) =>
+        (p.kind === "output" && q.kind === "output" ? driverRow(p) - driverRow(q) : 0) ||
+        Number(isSource(p)) - Number(isSource(q)) ||
+        p.id.localeCompare(q.id),
+    );
     let y = below + 1;
     for (const p of moving) {
       placed.set(p.id, { x: xOf.get(c) ?? c * COLUMN_STEP, y });

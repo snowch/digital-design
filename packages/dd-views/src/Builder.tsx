@@ -61,10 +61,12 @@ function nextId(drawing: Drawing, kind: string): string {
  * selector has six inputs) needs more than one row's gap, which a grid of fixed steps ignored.
  */
 function freeSpot(drawing: Drawing, kind: string): { x: number; y: number } {
+  // A port's circle sits outside its part's box, so two parts side by side need a cell between
+  // them, or one's output port lands on the other's input (Module 7's slice, ten parts).
   const margin = (b: PartBox) => ({
-    x0: b.x - 8,
+    x0: b.x - 20,
     y0: b.y - 20,
-    x1: b.x + b.w + 8,
+    x1: b.x + b.w + 20,
     y1: b.y + b.h + 18,
   });
   const taken = drawing.parts.map((p) => margin(partBox(p)));

@@ -8,6 +8,11 @@
 
 import { bitsText, hexOf, parseBits, signedOf, unsignedOf, type Bit } from "./bits";
 import { readBits, recording, RECORDING_IDS, volts, type RecordingId } from "./signals";
+import { Simulator, formatWord, word as wordOf } from "@dd/sim";
+
+import { aluResult, hexWord, opBits } from "./alu";
+import { applyFaults, stuckAt } from "./faults";
+import { libraryCircuit } from "./library";
 
 export interface AnswerResult {
   readonly pass: boolean;
@@ -147,5 +152,59 @@ function word(
   };
 }
 
+// ---- Module 7 ------------------------------------------------------------------------------
+
+/**
+ * Stands for "anything other than this value" where a test passes only if a faulty circuit's
+ * result differs from the right one. The book shows its own words around the value.
+ */
+export const OTHER_THAN = "\u0000other-than:";
+
+/**
+ * The fault-finding challenge. Answers `a` and `b`, two words in hexadecimal. A case gives a
+ * library ALU (`libraryId`), a net to hold at a value (`net`, `value`) and a job (`job`, its code
+ * 0 to 7); it passes when the ALU with that fault gives a different Y or COUT from the right
+ * answer, worked out in bigints: the two words expose the fault.
+ */
+function exposes(
+  answers: Readonly<Record<string, string>>,
+  given: Readonly<Record<string, string | number>>,
+): AnswerResult | AnswerProblem {
+  const gone = missing(answers, ["a", "b"]);
+  if (gone) return gone;
+  const a = parseHex(answers["a"]);
+  if (a === undefined) return { invalid: "a" };
+  const b = parseHex(answers["b"]);
+  if (b === undefined) return { invalid: "b" };
+  const healthy = libraryCircuit(String(given["libraryId"]));
+  const width = healthy.nets[healthy.inputs.find((i) => i.name === "A")?.net ?? 0]?.width ?? 16;
+  const av = BigInt(`0x${a}`);
+  const bv = BigInt(`0x${b}`);
+  if (av >> BigInt(width) || bv >> BigInt(width))
+    return { invalid: av >> BigInt(width) ? "a" : "b" };
+  const job = Number(given["job"]);
+  const broken = applyFaults(healthy, [
+    stuckAt(String(given["net"]), Number(given["value"]) as 0 | 1),
+  ]);
+  const sim = new Simulator(broken);
+  sim.setInput("A", wordOf(width, av));
+  sim.setInput("B", wordOf(width, bv));
+  for (const [port, v] of Object.entries(opBits(job))) sim.setInput(port, wordOf(1, v));
+  sim.settle();
+  const right = aluResult(job, av, bv, width);
+  const text = (y: string, c: string) => `Y ${y}, COUT ${c}`;
+  const got = text(
+    formatWord(sim.read("Y"), 16).replace(/^0x/, "").toUpperCase(),
+    formatWord(sim.read("COUT")),
+  );
+  const want = text(hexWord(right.Y, width), String(right.COUT));
+  return {
+    pass: got !== want,
+    inputs: { a: hexWord(av, width), b: hexWord(bv, width) },
+    actual: { faulty: got },
+    expected: { faulty: `${OTHER_THAN}${want}` },
+  };
+}
+
 /** The graders lessons may name in an answers challenge's tests. */
-export const ANSWER_GRADERS: Readonly<Record<string, AnswerGrader>> = { threshold, word };
+export const ANSWER_GRADERS: Readonly<Record<string, AnswerGrader>> = { threshold, word, exposes };
