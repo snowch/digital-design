@@ -1382,3 +1382,52 @@ button.bit {
 .verdict-detail {
   margin: var(--space-2) 0;
 }
+
+/* The page before the first lesson, and its self-check: a card like a figure's, with the answer
+   fields the answer challenges use. */
+.self-check {
+  max-width: var(--measure);
+  margin: var(--space-4) 0;
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-raised);
+  box-shadow: var(--shadow-sm);
+}
+@media (max-width: 40rem) {
+  .self-check {
+    padding: var(--space-3);
+  }
+}
+.self-check h3 {
+  margin-top: 0;
+}
+.self-check-items {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-3) 0;
+  padding: 0;
+  list-style: none;
+}
+.self-check-result {
+  margin: 0;
+}
+.self-check-result.right {
+  color: var(--ok);
+}
+/* The working is arithmetic, so it is set like the course's other numbers. */
+.self-check-result.wrong {
+  color: var(--bad);
+  font-family: var(--font-mono);
+}
+.self-check-result.blank {
+  color: var(--fg-muted);
+}
+.self-check-score {
+  font-weight: 650;
+  min-height: 1.5em;
+}
+.preface-start {
+  margin-top: var(--space-4);
+  font-weight: 650;
+}
