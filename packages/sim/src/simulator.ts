@@ -107,6 +107,12 @@ export class Simulator {
   private phase = 0;
   /** Nets the gate model may not drive before a time: the overlay's undecided interval. */
   private holds = new Map<NetId, number>();
+  /**
+   * The inputs set since the last settle that ended with nothing changing, or `all` when no such
+   * settle has run (Module 8). After such a settle every gate gives what its inputs make it give,
+   * so only the readers of these nets can change at the next settle's first step.
+   */
+  private dirty: Set<NetId> | "all" = "all";
 
   constructor(circuit: Circuit, options: SimulatorOptions = {}) {
     this.circuit = circuit;
@@ -162,6 +168,7 @@ export class Simulator {
     this.trace.stimuli.push({ time: this.time, phase: this.phase, net: id, value });
     if (!equal(this.values[id] as Word, value)) {
       this.values[id] = value;
+      if (this.dirty !== "all") this.dirty.add(id);
       this.trace.events.push({ time: this.time, net: id, value, cause: "stimulus" });
       if (this.timeModel === "delay") this.scheduleReaders(id);
     }
@@ -177,7 +184,35 @@ export class Simulator {
       throw new Error("settle() belongs to the settle model; use run() in the delay model");
     }
     this.phase++;
-    const history: Word[][] = [[...this.values]];
+    // The history is kept as the state before the first step and, for each step, the nets that
+    // changed (Module 8: copying every net's value at every step was most of a 64-bit datapath's
+    // settle). A step's whole state is put together only when something asks for it.
+    const base = [...this.values];
+    const deltas: (readonly [NetId, Word])[][] = [];
+    const stateAt = (step: number): Word[] => {
+      const out = [...base];
+      for (let i = 0; i < step; i++) for (const [net, w] of deltas[i] ?? []) out[net] = w;
+      return out;
+    };
+    const result = (converged: boolean, iterations: number, oscillating: NetId[]): SettleResult => {
+      let history: Word[][] | undefined;
+      return {
+        converged,
+        iterations,
+        oscillating,
+        get history() {
+          if (!history) {
+            history = [[...base]];
+            const now = [...base];
+            for (const changes of deltas) {
+              for (const [net, w] of changes) now[net] = w;
+              history.push([...now]);
+            }
+          }
+          return history;
+        },
+      };
+    };
     // A state is looked up by a hash of every net's value, kept up to date from the nets that
     // change, and confirmed against the stored state, so a repeat is found exactly as a full
     // comparison would find it without writing every value out at every step.
@@ -186,58 +221,69 @@ export class Simulator {
       hash = (hash + this.netHash(net, this.values[net] as Word)) >>> 0;
     const seen = new Map<number, number[]>([[hash, [0]]]);
     let iterations = 0;
-    let changedNets: Set<NetId> = new Set();
+    let changes: [NetId, Word][] = [];
     // Every gate is worked out at the first step. After that a gate whose inputs did not change
     // gives what it gave a step ago, which its output already shows, so only the readers of the
     // nets that changed are worked out again. The result is the same as working out every gate.
     let due: readonly Component[] = this.circuit.components;
+    // Module 8: after a settle that ended with nothing changing, only the readers of the inputs
+    // set since can change at the first step, so only they are worked out; the steps, the history
+    // and the result are the same as working out every gate.
+    if (this.dirty !== "all") {
+      const readers = new Set<Component>();
+      for (const net of this.dirty) for (const c of this.readers.get(net) ?? []) readers.add(c);
+      due = [...readers];
+    }
+    this.dirty = "all";
     while (iterations < this.maxIterations) {
-      const next = [...this.values];
-      changedNets = new Set();
+      // Every gate due at this step reads the values of the step before: the changes are
+      // gathered first and made together. Each net has one driver, so no net changes twice.
+      changes = [];
       for (const c of due) {
         const outputs = this.evaluate(c, this.values);
-        for (const [port, net] of Object.entries(c.outputs)) {
+        for (const port in c.outputs) {
+          const net = c.outputs[port] as NetId;
           const v = outputs[port];
-          if (v && !equal(next[net] as Word, v)) {
-            next[net] = v;
-            changedNets.add(net);
-          }
+          if (v && !equal(this.values[net] as Word, v)) changes.push([net, v]);
         }
       }
       iterations++;
-      if (changedNets.size === 0) {
-        this.lastSettle = { converged: true, iterations, oscillating: [], history };
+      if (changes.length === 0) {
+        this.dirty = new Set();
+        this.lastSettle = result(true, iterations, []);
         return this.lastSettle;
       }
-      for (const net of changedNets) {
-        this.trace.events.push({ time: this.time, net, value: next[net] as Word, cause: "settle" });
+      for (const [net, v] of changes) {
+        this.trace.events.push({ time: this.time, net, value: v, cause: "settle" });
         hash =
           (hash -
             this.netHash(net, this.values[net] as Word) +
-            this.netHash(net, next[net] as Word) +
+            this.netHash(net, v) +
             0x100000000) >>>
           0;
       }
-      this.values = next;
-      history.push([...next]);
+      for (const [net, v] of changes) this.values[net] = v;
+      deltas.push(changes);
+      const step = deltas.length;
       const earlier = (seen.get(hash) ?? []).find((i) =>
-        (history[i] as Word[]).every((w, net) => equal(w, next[net] as Word)),
+        stateAt(i).every((w, net) => equal(w, this.values[net] as Word)),
       );
       if (earlier !== undefined) {
         // The state repeated: a cycle. Every net that varies within the cycle is undecidable.
-        const oscillating = this.varyingWithin(history.slice(earlier));
+        const states = Array.from({ length: step - earlier + 1 }, (_, k) => stateAt(earlier + k));
+        const oscillating = this.varyingWithin(states);
         this.markUnknown(oscillating);
-        this.lastSettle = { converged: false, iterations, oscillating, history };
+        this.lastSettle = result(false, iterations, oscillating);
         return this.lastSettle;
       }
-      seen.set(hash, [...(seen.get(hash) ?? []), history.length - 1]);
+      seen.set(hash, [...(seen.get(hash) ?? []), step]);
       const readers = new Set<Component>();
-      for (const net of changedNets) for (const c of this.readers.get(net) ?? []) readers.add(c);
+      for (const [net] of changes) for (const c of this.readers.get(net) ?? []) readers.add(c);
       due = [...readers];
     }
-    const oscillating = [...changedNets];
+    const oscillating = changes.map(([net]) => net);
     this.markUnknown(oscillating);
-    this.lastSettle = { converged: false, iterations, oscillating, history };
+    this.lastSettle = result(false, iterations, oscillating);
     return this.lastSettle;
   }
 
@@ -355,6 +401,7 @@ export class Simulator {
   restore(snapshot: Snapshot): void {
     this.time = snapshot.time;
     this.values = [...snapshot.values];
+    this.dirty = "all";
     this.pending = [...snapshot.pending];
     this.sequence = snapshot.sequence;
   }
@@ -427,8 +474,16 @@ export class Simulator {
 
   /** A net's share of a state's hash: its id, and the low bits of its value and of its mask. */
   private netHash(net: NetId, w: Word): number {
-    const v = Number(w.value & 0xffffffn);
-    const k = Number(w.known & 0xffffffn);
+    // Every bit counts (Module 8): a hash of a word's low bits alone made two states of a
+    // 64-bit datapath that differ above them collide, and each collision compares whole states.
+    const fold = (x: bigint) => {
+      let h = 0;
+      for (let rest = x; rest > 0n; rest >>= 32n)
+        h = (Math.imul(h, 0x01000193) ^ Number(rest & 0xffffffffn)) >>> 0;
+      return h;
+    };
+    const v = w.width <= 24 ? Number(w.value) : fold(w.value);
+    const k = w.width <= 24 ? Number(w.known) : fold(w.known);
     return (
       (Math.imul(net + 1, 0x9e3779b1) ^
         Math.imul(v + 1, 0x85ebca6b) ^

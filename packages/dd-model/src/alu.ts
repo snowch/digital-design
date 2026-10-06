@@ -449,7 +449,6 @@ export interface AluOptions {
 export function aluCircuit(options: AluOptions): Circuit {
   const { width } = options;
   const flags = options.flags ?? false;
-  const arrange = options.arrange ?? (width === 4 ? "row" : "groups");
   const name = `alu8${flags ? "-flags" : ""}-${width}${options.closed ? "-block" : ""}`;
   const b = new CircuitBuilder(name);
   const A = b.input("A", width);
@@ -457,11 +456,31 @@ export function aluCircuit(options: AluOptions): Circuit {
   const OP2 = b.input("OP2");
   const OP1 = b.input("OP1");
   const OP0 = b.input("OP0");
-  const Y = b.net("Y", width);
-  const COUT = b.net("COUT");
-  const ZERO = flags ? b.net("ZERO") : undefined;
-  const MINUS = flags ? b.net("MINUS") : undefined;
-  const OVER = flags ? b.net("OVER") : undefined;
+  const outputs = aluParts(b, { A, B, OP2, OP1, OP0 }, options);
+  for (const [n, net] of Object.entries(outputs)) b.output(n, net);
+  return b.build();
+}
+
+/**
+ * The ALU's parts built into `b` from the nets of its five inputs, at this level or (`closed`) as
+ * one block `alu` of kind `alu8`; its output nets by name, Y first. Module 8's datapath places it
+ * closed, with output nets of its own (`outs`).
+ */
+export function aluParts(
+  b: CircuitBuilder,
+  ins: { A: NetId; B: NetId; OP2: NetId; OP1: NetId; OP0: NetId },
+  options: AluOptions & { readonly outs?: Readonly<Partial<Record<string, NetId>>> },
+): Record<string, NetId> {
+  const { width } = options;
+  const flags = options.flags ?? false;
+  const arrange = options.arrange ?? (width === 4 ? "row" : "groups");
+  const { A, B, OP2, OP1, OP0 } = ins;
+  const named = (n: string) => options.outs?.[n] ?? b.net(n);
+  const Y = options.outs?.["Y"] ?? b.net("Y", width);
+  const COUT = named("COUT");
+  const ZERO = flags ? named("ZERO") : undefined;
+  const MINUS = flags ? named("MINUS") : undefined;
+  const OVER = flags ? named("OVER") : undefined;
   const body = (bb: CircuitBuilder) => {
     const c0 = carryInGates(bb, { OP2, OP1, OP0 });
     let z0: NetId | undefined;
@@ -469,15 +488,23 @@ export function aluCircuit(options: AluOptions): Circuit {
       z0 = bb.net("Z0");
       bb.component("const", {}, { y: z0 }, { name: "one", params: { width: 1, value: "1" } });
     }
-    const ins: RowIns = { A, B, CIN: c0, ...(z0 !== undefined ? { ZIN: z0 } : {}), OP2, OP1, OP0 };
+    const rowIns: RowIns = {
+      A,
+      B,
+      CIN: c0,
+      ...(z0 !== undefined ? { ZIN: z0 } : {}),
+      OP2,
+      OP1,
+      OP0,
+    };
     const outs: RowOuts = {
       Y,
       COUT,
       ...(ZERO !== undefined ? { ZOUT: ZERO } : {}),
       ...(OVER !== undefined ? { OVER } : {}),
     };
-    if (arrange === "row" && width !== 4) flatRow(bb, ins, outs, width, flags);
-    else groupBody(bb, width, ins, outs, flags);
+    if (arrange === "row" && width !== 4) flatRow(bb, rowIns, outs, width, flags);
+    else groupBody(bb, width, rowIns, outs, flags);
     if (MINUS !== undefined) topBit(bb, Y, MINUS, width);
   };
   const outputs = {
@@ -489,8 +516,7 @@ export function aluCircuit(options: AluOptions): Circuit {
   };
   if (options.closed) b.scope("alu", "alu8", body, { inputs: { A, B, OP2, OP1, OP0 }, outputs });
   else body(b);
-  for (const [n, net] of Object.entries(outputs)) b.output(n, net);
-  return b.build();
+  return outputs;
 }
 
 /**

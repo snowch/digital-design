@@ -25,3 +25,9 @@ export { FILLED_BYTES } from "./library-memory";
 // Module 7, the ALU: eight jobs, four flags, any width, and its generated test suite.
 export * from "./alu";
 export * from "./testcases";
+// Module 8, the datapath: the machine's instructions in bigints, and programs as data.
+export * from "./machine";
+export * from "./assemble";
+export * from "./datapath";
+export * from "./datapath-run";
+export * from "./machine-suite";

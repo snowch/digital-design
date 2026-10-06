@@ -99,6 +99,9 @@ export class CircuitBuilder {
   private composites: CompositeDef[] = [];
   private prefix: string[] = [];
   private counters = new Map<string, number>();
+  /** Every net name and composite path so far, kept as they are made (Module 8: a 64-bit
+   * datapath has tens of thousands of nets, and rebuilding this set per net was quadratic). */
+  private taken = new Set<string>();
 
   constructor(readonly name: string) {}
 
@@ -107,6 +110,7 @@ export class CircuitBuilder {
     const id = this.nets.length;
     const full = this.unique(this.qualify(name));
     this.nets.push(meta ? { id, name: full, width, meta } : { id, name: full, width });
+    this.taken.add(full);
     return id;
   }
 
@@ -218,6 +222,7 @@ export class CircuitBuilder {
     const result = body(this);
     this.prefix.pop();
     const resolved = typeof ports === "function" ? ports(result) : ports;
+    this.taken.add(path);
     this.composites.push({
       path,
       kind,
@@ -263,8 +268,7 @@ export class CircuitBuilder {
   }
 
   private unique(full: string): string {
-    const taken = new Set(this.nets.map((n) => n.name));
-    for (const c of this.composites) taken.add(c.path);
+    const taken = this.taken;
     if (!taken.has(full)) return full;
     let i = 2;
     while (taken.has(`${full}${i}`)) i++;

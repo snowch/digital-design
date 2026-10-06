@@ -37,8 +37,11 @@ export interface MemoryShape {
   readonly words: number;
   readonly width: number;
   readonly reads: number;
-  /** The words a memory is filled with, lowest address first, or none: it starts unknown. */
-  readonly init?: readonly bigint[];
+  /**
+   * The words a memory is filled with, lowest address first, or none: it starts unknown. Module 8:
+   * a word given as `x` in the list starts unknown, as a register nothing has set.
+   */
+  readonly init?: readonly (bigint | undefined)[];
 }
 
 /** A memory's shape from a component's params. */
@@ -52,14 +55,14 @@ export function memoryShape(params?: Readonly<Record<string, unknown>>): MemoryS
       ? text
           .trim()
           .split(/[\s,]+/)
-          .map((t) => BigInt(`0x${t}`))
+          .map((t) => (t.toLowerCase() === "x" ? undefined : BigInt(`0x${t}`)))
       : undefined;
   return { words, width, reads, ...(init ? { init } : {}) };
 }
 
 /** The list of values a lesson gives, as the `init` param stores it: hexadecimal, one per word. */
-export function initParam(values: readonly (bigint | number)[]): string {
-  return values.map((v) => BigInt(v).toString(16)).join(" ");
+export function initParam(values: readonly (bigint | number | undefined)[]): string {
+  return values.map((v) => (v === undefined ? "x" : BigInt(v).toString(16))).join(" ");
 }
 
 /** The width of a memory's state net: its words and the filled bit. */
@@ -89,11 +92,10 @@ function filled(state: Word, shape: MemoryShape): boolean {
 function initial(shape: MemoryShape): Word[] {
   return Array.from({ length: shape.words }, (_, k) => {
     const v = shape.init?.[k];
-    return v === undefined
-      ? shape.init
-        ? word(shape.width, 0)
-        : unknown(shape.width)
-      : word(shape.width, v);
+    if (v !== undefined) return word(shape.width, v);
+    // Past the end of a list, a word is 0; a word the list gives as `x`, or a memory with no
+    // list, starts unknown.
+    return shape.init && k >= shape.init.length ? word(shape.width, 0) : unknown(shape.width);
   });
 }
 
