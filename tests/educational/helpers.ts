@@ -28,6 +28,19 @@ export function challengeData(id: string, lesson = LESSON) {
 export async function openLesson(page: Page, lessonId = LESSON.id): Promise<void> {
   await page.goto(`#/lesson/${lessonId}`);
   await expect(page.locator("section.lesson-section")).toHaveCount(10);
+  await fontsLoaded(page);
+}
+
+/**
+ * Waits for the typefaces the site ships. Until one arrives, its text is drawn in a fallback
+ * face, whose glyph boxes are smaller: on a cold first load in CI, every label in the signals
+ * lesson's figures measured 10.9 pixels high, under the aesthetics test's 11, before the fonts
+ * came.
+ */
+export async function fontsLoaded(page: Page): Promise<void> {
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+  });
 }
 
 /** The challenge's section on the page, by challenge id. */

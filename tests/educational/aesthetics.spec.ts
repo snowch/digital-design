@@ -9,7 +9,7 @@
 
 import { expect, test, type Page } from "@playwright/test";
 
-import { LESSONS, openLesson } from "./helpers";
+import { LESSONS, fontsLoaded, openLesson } from "./helpers";
 
 async function designProblems(page: Page, phone: boolean): Promise<string[]> {
   return page.evaluate((isPhone) => {
@@ -82,6 +82,7 @@ test.describe("the look of the page", () => {
     for (const path of ["#/", "#/start"]) {
       await page.goto(path);
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      await fontsLoaded(page);
       expect(await designProblems(page, info.project.name === "phone"), path).toEqual([]);
     }
   });
