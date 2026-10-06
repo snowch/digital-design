@@ -84,6 +84,14 @@ export const fetch: LessonInput = {
   order: 3,
   objectives: [...LABELS.objectives],
   introduces: ["program counter", "fetch"],
+  // Module 9 rations "illegal instruction"; this lesson's machine already stops on one.
+  termExemptions: [
+    {
+      term: "illegal instruction",
+      reason:
+        "Names cause 21 in quotation marks, as the decoder's output says it, where the machine stops on a word of 0s; lesson 9.2 teaches which words are illegal and why.",
+    },
+  ],
   sections: [
     { kind: "question", title: LABELS.titles.question, prose: PROSE.question },
     { kind: "motivation", title: LABELS.titles.motivation, prose: PROSE.motivation },

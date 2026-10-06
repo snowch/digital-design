@@ -701,9 +701,12 @@ function placedInside(sub: Circuit, circuit: Circuit, scope: string): Circuit {
   const kind = composite?.kind;
   const at = kind ? INSIDE[kind] : undefined;
   if (!at) return sub;
+  // Module 9: a part that carries its own place (a fault's fixed value, given `at`) need not be
+  // named in the drawing.
+  const own = (meta: Readonly<Record<string, unknown>> | undefined) => meta?.["layout"] !== undefined;
   const names = [
-    ...sub.components.filter((c) => !c.path.includes("/")).map((c) => c.path),
-    ...sub.composites.filter((c) => !c.path.includes("/")).map((c) => c.path),
+    ...sub.components.filter((c) => !c.path.includes("/") && !own(c.meta)).map((c) => c.path),
+    ...sub.composites.filter((c) => !c.path.includes("/") && !own(c.meta)).map((c) => c.path),
   ];
   return names.every((n) => n in at) ? placed(sub, at) : sub;
 }

@@ -25,6 +25,16 @@ import { CAUSES } from "./machine";
 export interface ControlOptions {
   /** Module 9's capstone: kind 9, job 0, is a call through a register. */
   readonly callThroughRegister?: boolean;
+  /**
+   * Whether the decoder gives MEM, a load or a store, for the controller of lesson 9.3 on; the
+   * decoder lessons 9.1 and 9.2 draw it without. Given unless false.
+   */
+  readonly mem?: boolean;
+}
+
+/** The decoder's outputs, with MEM or without. */
+export function decoderOutputs(options: ControlOptions = {}): readonly string[] {
+  return options.mem === false ? DECODER9_OUTPUTS.filter((n) => n !== "MEM") : DECODER9_OUTPUTS;
 }
 
 /** The kind the capstone's call through a register uses: the first kind `docs/isa.md` leaves free. */
@@ -352,7 +362,7 @@ export function controlDecoder(
   options: ControlOptions = {},
 ): Record<string, NetId> {
   const outs = Object.fromEntries(
-    DECODER9_OUTPUTS.map((n) => [n, given.outs?.[n] ?? b.net(n, n === "CAUSED" ? 8 : 1)]),
+    decoderOutputs(options).map((n) => [n, given.outs?.[n] ?? b.net(n, n === "CAUSED" ? 8 : 1)]),
   );
   block(
     b,
@@ -368,7 +378,7 @@ export function controlDecoder(
       const j = jobBits(bb, ins.J);
       const signalOuts = [
         ...CONTROL_SIGNALS.filter((s) => !Object.values(names).includes(s)),
-        "MEM",
+        ...(options.mem === false ? [] : ["MEM"]),
       ];
       const lineIns = Object.fromEntries(
         Object.entries(lines).map(([n, line]) => [names[Number(n)] as string, line]),
@@ -478,7 +488,7 @@ export function decoderCircuit(options: ControlOptions = {}): Circuit {
   const b = new CircuitBuilder("decoder");
   const ins = { K: b.input("K", 4), J: b.input("J", 4), C: b.input("C", 12) };
   const outs = controlDecoder(b, ins, {}, options);
-  for (const n of DECODER9_OUTPUTS) b.output(n, outs[n] as NetId);
+  for (const n of decoderOutputs(options)) b.output(n, outs[n] as NetId);
   return b.build();
 }
 
@@ -545,8 +555,25 @@ export function controllerMachine(options: ControlOptions = {}): Machine {
   };
 }
 
+/** The states each kind passes through, from its fetch, one edge each (the table above). */
+export function stateSequence(kind: number, options: ControlOptions = {}): ControlState[] {
+  if (options.callThroughRegister && kind === CALL_REGISTER_KIND)
+    return ["FETCH", "READ", "ALU", "WRITE"];
+  const sequences: Readonly<Record<number, ControlState[]>> = {
+    1: ["FETCH", "READ", "ALU", "WRITE"],
+    2: ["FETCH", "READ", "ALU", "WRITE"],
+    3: ["FETCH", "READ", "ALU", "MEMORY", "WRITE"],
+    4: ["FETCH", "READ", "ALU", "MEMORY"],
+    5: ["FETCH", "READ", "ALU"],
+    6: ["FETCH", "READ", "WRITE"],
+    7: ["FETCH", "READ", "ALU"],
+  };
+  return sequences[kind] ?? ["FETCH", "READ"];
+}
+
 /** The edges each kind takes, from its fetch to the edge that ends it (the sequence above). */
 export function edgesOfKind(kind: number, options: ControlOptions = {}): number | undefined {
-  if (options.callThroughRegister && kind === CALL_REGISTER_KIND) return 4;
-  return { 1: 4, 2: 4, 3: 5, 4: 4, 5: 3, 6: 3, 7: 3 }[kind];
+  if (!(options.callThroughRegister && kind === CALL_REGISTER_KIND) && (kind < 1 || kind > 7))
+    return undefined;
+  return stateSequence(kind, options).length;
 }

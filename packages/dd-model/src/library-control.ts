@@ -76,6 +76,11 @@ export const CONTROL_INSIDE_ROUTES: Readonly<Record<string, Routes>> = {
     // GO from the stop logic up beside the bus, into the bus and over to the controller.
     "stops.GO>bus.GO": [28],
     "stops.GO>controller.GO": [28, 13.1, 19.75],
+    // CHECKING down past the bus and under the stop logic, into it from below.
+    "controller.CHECKING>stops.CHECKING": [27, 33.8, 19.6],
+    // The memory's causes in under the decoder, nested.
+    "input:CAUSEF.y>stops.CAUSEF": [18.5],
+    "input:CAUSEM.y>stops.CAUSEM": [19.2],
   },
   datapath: {
     // The held result back along the top to the memory's address selector.
@@ -220,14 +225,14 @@ export const CONTROL_INSIDE: Readonly<Record<string, At>> = {
     "in:CLK": [0, 6],
     "in:RST": [0, 8],
     "in:IR": [0, 18.5],
-    "in:CAUSEF": [0, 27],
-    "in:CAUSEM": [0, 29],
+    "in:CAUSEF": [0, 29],
+    "in:CAUSEM": [0, 31],
     controller: [20, 1],
-    bus: [30, 3],
+    bus: [33, 3],
     digits: [4, 15.5],
     decoder: [12, 13],
     stops: [20, 27],
-    "out:CONTROL": [40, 13.5],
+    "out:CONTROL": [43, 13.5],
     "out:HALT": [30, 28],
     "out:CAUSE": [30, 30],
   },
@@ -336,7 +341,7 @@ export function placedMachine(options: MulticycleOptions): Circuit {
 export function controlLibrary(place: Place): Readonly<Record<string, () => Circuit>> {
   placeFn = place;
   return {
-    decoder: () => laid(decoderCircuit(), "decoder"),
+    decoder: () => laid(decoderCircuit({ mem: false }), "decoder"),
     "decoder-call-register": () => laid(decoderCircuit({ callThroughRegister: true }), "decoder"),
     "machine-edges": () => placedMachine({ name: "machine" }),
     "machine-edges-call": () => placedMachine({ name: "machine", callThroughRegister: true }),

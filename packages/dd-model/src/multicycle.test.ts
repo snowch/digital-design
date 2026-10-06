@@ -43,16 +43,16 @@ describe("the machine with a part of its control broken", () => {
     expect(compareMulticycle(SOURCE).differences).toEqual([]);
   });
   it("fails when the IR takes the memory's word at every edge", () => {
-    expect(broken("IREN", 1)).not.toEqual([]);
+    expect(broken("control/IREN", 1)).not.toEqual([]);
   });
   it("fails when a load's word is never held", () => {
-    expect(broken("HOLDM", 0)[0]).toMatch(/R2/);
+    expect(broken("control/HOLDM", 0)[0]).toMatch(/R2/);
   });
   it("fails when the decoder's checks are never counted", () => {
-    expect(broken("CHECKING", 0)).not.toEqual([]);
+    expect(broken("control/CHECKING", 0)).not.toEqual([]);
   });
   it("fails when the PC moves at every edge", () => {
-    expect(broken("PCEN", 1)).not.toEqual([]);
+    expect(broken("control/PCEN", 1)).not.toEqual([]);
   });
 });
 

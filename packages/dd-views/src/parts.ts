@@ -172,6 +172,7 @@ const COMPOSITE_LABELS: Readonly<Record<string, string>> = {
   "word-register-3": "register",
   "held-64": "held word",
   "held-32": "register",
+  "word-register-32": "register",
   "hold-ab": "held A and B",
   "split-control": "split",
   "join-control": "join",

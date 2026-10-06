@@ -263,7 +263,11 @@ export const DatapathFigure = withProps(
     const before = edge ? registerWords(circuit, edge.before) : [];
     const shown = data.shown ?? Array.from({ length: 16 }, (_, k) => k);
     const netValue = (name: string) => {
-      const id = circuit.nets.find((n) => n.name === name)?.id;
+      // Module 9: a word inside a block of the machine, by its own name (HR is datapath/HR).
+      const id = (
+        circuit.nets.find((n) => n.name === name) ??
+        circuit.nets.find((n) => n.name.endsWith(`/${name}`))
+      )?.id;
       return id === undefined ? undefined : values[id];
     };
     const changedAt = (k: number): string[] => {
@@ -606,6 +610,8 @@ function ControlPanes({
   const names = Object.fromEntries(
     Object.entries(CONTROL_STATES).map(([name, code]) => [code, name]),
   );
+  // A signal's net by its name: the control unit names its own inside it (control/PCEN).
+  const inside = (n: string) => (circuit.nets.some((x) => x.name === n) ? n : `control/${n}`);
   return (
     <div className="control-panes">
       {data.microOps && (
@@ -629,8 +635,10 @@ function ControlPanes({
           title={t.timingTitle}
           signals={[
             "CLK",
-            { net: "S", label: "S", names },
-            ...data.timing.filter((n) => n !== "S" && n !== "CLK"),
+            { net: inside("S"), label: "S", names },
+            ...data.timing
+              .filter((n) => n !== "S" && n !== "CLK")
+              .map((n) => ({ net: inside(n), label: n })),
           ]}
         />
       )}

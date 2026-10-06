@@ -68,10 +68,15 @@ export const VIEW_SIGNALS = [
   "STOP",
 ] as const;
 
-/** A net's word, by its name at the top level or its last part inside a block. */
+/**
+ * A net's word, by its name at the top level, in the control unit (the drawn machine names the
+ * controller's signals control/PCEN; a text names them as it likes), or its last part inside a
+ * block.
+ */
 export function netWord(circuit: Circuit, values: readonly Word[], name: string): Word | undefined {
   const n =
     circuit.nets.find((x) => x.name === name) ??
+    circuit.nets.find((x) => x.name === `control/${name}`) ??
     circuit.nets.find((x) => x.name.endsWith(`/${name}`));
   return n === undefined ? undefined : values[n.id];
 }

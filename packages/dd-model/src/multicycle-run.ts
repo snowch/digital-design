@@ -33,7 +33,10 @@ const hex = (v: bigint | number | undefined) =>
 
 /** The value of a one-bit net the simulator holds now: 1, 0, or undefined while unknown. */
 export function bitOf(sim: Simulator, name: string): 0 | 1 | undefined {
-  const id = sim.circuit.nets.find((n) => n.name === name)?.id;
+  const id = (
+    sim.circuit.nets.find((n) => n.name === name) ??
+    sim.circuit.nets.find((n) => n.name === `control/${name}`)
+  )?.id;
   if (id === undefined) return undefined;
   const w = sim.snapshotValues()[id];
   if (!w || w.known !== 1n) return undefined;

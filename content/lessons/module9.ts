@@ -6,6 +6,9 @@
 // (packages/hdl: machine9-modules.ts), built from the same parts as the drawn machine, and
 // module9.test.ts runs Module 8's suite through the text against the reference.
 
+import { decoderCircuit } from "@dd/dd-model";
+import { Simulator, word } from "@dd/sim";
+
 /** The control signals' names, in the order the decoder's text lists them. */
 const SIGNALS = [
   "WRITEY",
@@ -235,7 +238,8 @@ export function machineTop(callRegister = false): string {
     .CAUSEF(CAUSEF), .MQ(MQ), .CAUSEM(CAUSEM), .DISPLAY(DISPLAY), .LAMPS(LAMPS));
 
   always_ff @(posedge CLK)
-    if (IREN) IR <= FETCHED;
+    if (RST) IR <= 32'h0;
+    else if (IREN) IR <= FETCHED;
 
   decoder dec (.K(IR[31:28]), .J(IR[27:24]), .C(IR[11:0]), .WRITEY(WRITEY),
     .LOAD(LOAD), .STORE(STORE), .BYTE(BYTE), .AZERO(AZERO), .BCONST(BCONST),
@@ -350,3 +354,279 @@ R2 <= -250
 R3 <= R1 - R2
 word[display] <= R3
 stop`;
+
+// Lesson 9.1: the control signals as text.
+
+/** The control signals of lesson 9.1, without the controller's MEM, which lesson 9.3 adds. */
+export const SIGNALS_9_1 = SIGNALS.filter((s) => s !== "MEM");
+
+/** The module of lesson 9.1's challenge: K and J in, the twelve control signals out. */
+export function signalsModule(kinds: readonly number[]): string {
+  return `module signals(
+  input logic [3:0] K,
+  input logic [3:0] J,
+${SIGNALS_9_1.map((s, i) => `  output logic ${s}${i === SIGNALS_9_1.length - 1 ? "" : ","}`).join("\n")}
+);
+  always_comb begin
+${SIGNALS_9_1.map((s) => `    ${s} = 1'b0;`).join("\n")}
+    case (K)
+${kinds.map((k) => `      ${(SIGNAL_ARMS[k] as string).replace(" MEM = 1'b1;", "")}`).join("\n")}
+      default: WRITEY = 1'b0;
+    endcase
+  end
+endmodule
+`;
+}
+
+/** Lesson 9.1's construction: WRITEY and BCONST from K, one comparison a kind. */
+const WRITES_HEADER = `module writes(
+  input logic [3:0] K,
+  output logic WRITEY,
+  output logic BCONST
+);`;
+
+export const WRITES_START = `${WRITES_HEADER}
+  assign WRITEY = 1'b0;
+  assign BCONST = 1'b0;
+endmodule
+`;
+
+export const WRITES_REFERENCE = `${WRITES_HEADER}
+  assign WRITEY = (K == 4'h1) | (K == 4'h2) | (K == 4'h3) | (K == 4'h6);
+  assign BCONST = (K == 4'h2) | (K == 4'h3) | (K == 4'h4) | (K == 4'h7);
+endmodule
+`;
+
+// Lesson 9.2: the checks as text.
+
+const OUTSIDE_HEADER = `module outside(
+  input logic [11:0] C,
+  output logic OUTSIDE
+);`;
+
+/** Lesson 9.2's construction's start: reads only the low three bits, so -1 and 8 pass. */
+export const OUTSIDE_START = `${OUTSIDE_HEADER}
+  assign OUTSIDE = C[2] & (C[1] | C[0]);
+endmodule
+`;
+
+export const OUTSIDE_REFERENCE = `${OUTSIDE_HEADER}
+  assign OUTSIDE = ${OUTSIDE_EXPRESSION};
+endmodule
+`;
+
+const CHECKS_HEADER = `module checks(
+  input logic [3:0] K,
+  input logic [3:0] J,
+  input logic [11:0] C,
+  output logic ILLEGAL
+);`;
+
+/** Lesson 9.2's challenge's start: only the kinds the machine does not know. */
+export const CHECKS_START = `${CHECKS_HEADER}
+  assign ILLEGAL = ${illegalLines()[0]};
+endmodule
+`;
+
+export const CHECKS_REFERENCE = `${CHECKS_HEADER}
+  assign ILLEGAL = ${illegalLines()[0]}
+${illegalLines()
+  .slice(1)
+  .map((l) => `    | ${l}`)
+  .join("\n")};
+endmodule
+`;
+
+// Tests read off the decoder's own circuit.
+
+/** An instruction's digits a test gives the decoder, and its label. */
+export interface DecoderCase {
+  readonly label: string;
+  readonly K: number;
+  readonly J: number;
+  readonly C?: number;
+}
+
+/**
+ * A combinational test for each case: the inputs a challenge's module has of K, J and C, and the
+ * outputs it names, each expected as the drawn decoder gives it (`ILLEGAL` is CAUSED's 21).
+ */
+export function decoderVectors(
+  cases: readonly DecoderCase[],
+  inputs: readonly ("K" | "J" | "C")[],
+  outputs: readonly string[],
+  callThroughRegister = false,
+) {
+  const sim = new Simulator(decoderCircuit({ callThroughRegister }));
+  return cases.map((c) => {
+    sim.setInput("K", word(4, c.K));
+    sim.setInput("J", word(4, c.J));
+    sim.setInput("C", word(12, c.C ?? 0));
+    sim.settle();
+    const out = sim.outputs();
+    const value = (n: string) =>
+      n === "ILLEGAL" ? (out["CAUSED"]?.value === 0x21n ? 1 : 0) : Number(out[n]?.value ?? 0n);
+    const given = { K: c.K, J: c.J, C: c.C ?? 0 };
+    return {
+      label: c.label,
+      inputs: Object.fromEntries(inputs.map((n) => [n, given[n]])),
+      expect: Object.fromEntries(outputs.map((n) => [n, value(n)])),
+    };
+  });
+}
+
+const hex = (n: number, digits: number) => n.toString(16).toUpperCase().padStart(digits, "0");
+
+/** Every kind and job, with the constant given, labelled by the instruction's first two digits. */
+export function everyKindAndJob(c = 0): DecoderCase[] {
+  return Array.from({ length: 256 }, (_, n) => ({
+    label: `K ${hex(n >> 4, 1)}, J ${hex(n & 15, 1)}`,
+    K: n >> 4,
+    J: n & 15,
+    C: c,
+  }));
+}
+
+// Lesson 9.3: the memory's address and the instruction register, and the controller's states.
+
+const FETCHPORT_HEADER = `module fetchport(
+  input logic CLK,
+  input logic RST,
+  input logic FETCHING,
+  input logic IREN,
+  input logic [63:0] PC,
+  input logic [63:0] HR,
+  input logic [31:0] FETCHED,
+  output logic [63:0] ADDR,
+  output logic [31:0] IR
+);`;
+
+/** The start: Module 8's way, one address and the IR a bus. */
+export const FETCHPORT_START = `${FETCHPORT_HEADER}
+  assign ADDR = PC;
+  assign IR = FETCHED;
+endmodule
+`;
+
+export const FETCHPORT_REFERENCE = `${FETCHPORT_HEADER}
+  always_comb
+    case (FETCHING)
+      1'b0: ADDR = HR;
+      1'b1: ADDR = PC;
+    endcase
+  always_ff @(posedge CLK)
+    if (RST) IR <= 32'h0;
+    else if (IREN) IR <= FETCHED;
+endmodule
+`;
+
+/** The controller's ports, for lesson 9.3: its next state from CALL, MEM and WRITEY, and GO. */
+const STATES_HEADER = `module controller(
+  input logic CLK,
+  input logic RST,
+  input logic GO,
+  input logic CALL,
+  input logic MEM,
+  input logic WRITEY,
+  output logic [2:0] S
+);
+  ${STATE_TYPE}
+  state_t state;
+  state_t next;
+  always_ff @(posedge CLK) begin
+    if (RST) state <= FETCH;
+    else if (GO) state <= next;
+  end`;
+
+/** The start: every instruction takes the same four edges, and the memory's state is never used. */
+export const STATES_START = `${STATES_HEADER}
+  always_comb begin
+    case (state)
+      FETCH: next = READ;
+      READ: next = ALU;
+      ALU: next = WRITE;
+      default: next = FETCH;
+    endcase
+  end
+  assign S = state;
+endmodule
+`;
+
+export const STATES_REFERENCE = `${STATES_HEADER}
+${nextStateBlock(READ_ARM)}
+  assign S = state;
+endmodule
+`;
+
+// Lesson 9.4: the output logic.
+
+const OUTPUTS_HEADER = `module outputs(
+  input logic [2:0] S,
+  input logic GO,
+  input logic MEM,
+  input logic WRITEY,
+  input logic LOAD,
+  input logic STORE,
+${EDGE_OUTPUTS.map((s, i) => `  output logic ${s}${i === EDGE_OUTPUTS.length - 1 ? "" : ","}`).join("\n")}
+);`;
+
+/** The start: the fetch's signals alone. */
+export const OUTPUTS_START = `${OUTPUTS_HEADER}
+  assign FETCHING = (S == 3'b000);
+  assign IREN = (S == 3'b000) & GO;
+${EDGE_OUTPUTS.filter((s) => s !== "FETCHING" && s !== "IREN")
+  .map((s) => `  assign ${s} = 1'b0;`)
+  .join("\n")}
+endmodule
+`;
+
+export const OUTPUTS_REFERENCE = `${OUTPUTS_HEADER}
+  logic ENDS;
+  assign FETCHING = (S == 3'b000);
+  assign IREN = (S == 3'b000) & GO;
+  assign CHECKING = (S == 3'b001);
+  assign HOLDAB = (S == 3'b001) & GO;
+  assign HOLDR = (S == 3'b010) & GO;
+  assign MLOAD = (S == 3'b011) & LOAD;
+  assign MSTORE = (S == 3'b011) & STORE;
+  assign HOLDM = (S == 3'b011) & LOAD & GO;
+  assign WREG = (S == 3'b100) & WRITEY & GO;
+  assign ENDS = (S == 3'b100) | ((S == 3'b011) & ~WRITEY) | ((S == 3'b010) & ~MEM & ~WRITEY);
+  assign PCEN = ENDS & GO;
+endmodule
+`;
+
+/** The output logic's rule, as the lesson states it, for the challenge's tests. */
+export function edgeOutputs(
+  state: "FETCH" | "READ" | "ALU" | "MEMORY" | "WRITE",
+  s: { GO: number; MEM: number; WRITEY: number; LOAD: number; STORE: number },
+): Record<string, number> {
+  const is = (x: string) => (state === x ? 1 : 0);
+  const ends =
+    is("WRITE") | (is("MEMORY") & (1 - s.WRITEY)) | (is("ALU") & (1 - s.MEM) & (1 - s.WRITEY));
+  return {
+    FETCHING: is("FETCH"),
+    IREN: is("FETCH") & s.GO,
+    CHECKING: is("READ"),
+    HOLDAB: is("READ") & s.GO,
+    HOLDR: is("ALU") & s.GO,
+    MLOAD: is("MEMORY") & s.LOAD,
+    MSTORE: is("MEMORY") & s.STORE,
+    HOLDM: is("MEMORY") & s.LOAD & s.GO,
+    WREG: is("WRITE") & s.WRITEY & s.GO,
+    PCEN: ends & s.GO,
+  };
+}
+
+// Lesson 9.5: the capstone's program, a call through a register.
+
+/** The office chooses at run time which room's reading to show: R4 holds the routine's address. */
+export const CHOOSE = `R4 <= showA
+call R4, R15
+stop
+showA: R2 <= word[sensorA]
+word[display] <= R2
+goto R15
+showB: R2 <= word[sensorB]
+word[display] <= R2
+goto R15`;

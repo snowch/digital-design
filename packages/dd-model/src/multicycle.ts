@@ -6,7 +6,7 @@
 // - one memory port: one address, the PC's while the instruction is fetched and the ALU's held
 //   result while a load or a store uses the memory, chosen by a selector in front of the memory;
 // - an IR that is a register: it takes the instruction at the fetch edge and holds it while the
-//   memory's address moves on to the data;
+//   memory's address moves on to the data (0 from a reset until the first fetch);
 // - registers that hold each step's words for the next edge: HA and HB the words of registers A
 //   and B, HR the ALU's result, HM the word a load read;
 // - a controller, Module 5's state machine (control.ts), whose state says which step the edge
@@ -40,6 +40,7 @@ import {
   constant,
   datapathRegister,
   digits,
+  edgeRegister,
   machineMemory,
   mux,
   nextPcParts,
@@ -414,7 +415,9 @@ export function multicycleCircuit(options: MulticycleOptions = {}): Circuit {
     SENSORA: b.input("SENSORA", 64),
     SENSORB: b.input("SENSORB", 64),
   };
-  // The nets between the blocks, and the ones the figures and the comparison read by name.
+  // The nets between the blocks, and the ones the figures and the comparison read by name. The
+  // control unit's own signals are named inside it (control/PCEN), so a fault on one is drawn
+  // inside the block where its wire is.
   const pc = b.net("PC", 64);
   const ir = b.net("IR", 32);
   const addr = b.net("ADDR", 64);
@@ -445,13 +448,13 @@ export function multicycleCircuit(options: MulticycleOptions = {}): Circuit {
       "CALL",
       "JUMP",
       "MEM",
-    ].map((n) => [n, b.net(n, n === "CAUSED" ? 8 : 1)]),
+    ].map((n) => [n, b.net(`control/${n}`, n === "CAUSED" ? 8 : 1)]),
   );
   const sig = (n: string) => signals[n] as NetId;
   const edge = Object.fromEntries(
-    [...EDGE_SIGNALS, "S"].map((n) => [n, b.net(n, n === "S" ? 3 : 1)]),
+    [...EDGE_SIGNALS, "S"].map((n) => [n, b.net(`control/${n}`, n === "S" ? 3 : 1)]),
   ) as Record<EdgeSignal | "S", NetId>;
-  const go = b.net("GO");
+  const go = b.net("control/GO");
 
   // The control unit.
   b.scope(
@@ -537,9 +540,11 @@ export function multicycleCircuit(options: MulticycleOptions = {}): Circuit {
       wordSelector(db, { A: hr, B: pc, S: s("FETCHING") }, { name: "pickAddr", outs: { Y: addr } });
       db.scope(
         "ir",
-        "held-32",
-        (bb) => heldRegister(bb, "register", { D: fetched, EN: s("IREN"), CLK: clk }, ir),
-        { inputs: { D: fetched, EN: s("IREN"), CLK: clk }, outputs: { Q: ir } },
+        "word-register-32",
+        // The IR holds 0 from a reset until the first fetch, so the decoder never reads an
+        // unknown word; its checks do not count until the edge after a fetch.
+        (bb) => edgeRegister(bb, "register", { D: fetched, EN: s("IREN"), RST: rst, CLK: clk }, ir),
+        { inputs: { D: fetched, RST: rst, EN: s("IREN"), CLK: clk }, outputs: { Q: ir } },
       );
       const d = digits(db, ir);
       const regs = registerFile64(

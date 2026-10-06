@@ -137,6 +137,7 @@ const SEALED = new Set([
   "constant-bits",
   "cause-word",
   "split-control",
+  "word-register-32",
   "join-control",
 ]);
 
