@@ -6,7 +6,15 @@
 // level in a label at its source, unknown wires are dashed, and the signal table beside the
 // drawing says the same in text.
 
-import { useCallback, useId, useMemo, useState, type KeyboardEvent, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
 
 import { DrillDown, StateInspector, drillLevels } from "@dd/primitives";
 import { formatWord, type Circuit, type Word } from "@dd/sim";
@@ -48,6 +56,11 @@ export interface CircuitViewProps {
    * on the part on screen, and zoom (`Overview.tsx`). Tried first on one figure.
    */
   readonly overview?: boolean;
+  /**
+   * Module 8: the parts, by name, a drawing wider than its box opens on: scrolled so they stand
+   * in the middle of the box, as the lesson's words point at them.
+   */
+  readonly focus?: readonly string[];
 }
 
 type Level = "high" | "low" | "unknown" | "none";
@@ -159,6 +172,7 @@ export function CircuitView({
   children,
   writtenWidth,
   overview = false,
+  focus,
 }: CircuitViewProps) {
   const written = (v: Word | undefined) =>
     v !== undefined && (writtenWidth === undefined || v.width <= writtenWidth);
@@ -190,6 +204,20 @@ export function CircuitView({
     [scrollRef, widthRef],
   );
   const large = overview && boxWidth > 0 && scene.width > boxWidth - BOX_PADDING;
+  // The parts the lesson names, in the middle of the box when the drawing first shows; not when
+  // the zoomable strip is there, which has its own way about.
+  const focusKey = focus?.join(" ") ?? "";
+  useEffect(() => {
+    if (!box || large || focusKey === "") return;
+    const names = new Set(focusKey.split(" "));
+    const parts = scene.boxes.filter((b) => names.has(b.part.name ?? b.part.id));
+    if (parts.length === 0 || box.scrollWidth <= box.clientWidth + 1) return;
+    const left = Math.min(...parts.map((b) => b.x));
+    const right = Math.max(...parts.map((b) => b.x + b.w));
+    const svg = box.querySelector("svg.circuit");
+    const scale = svg ? svg.getBoundingClientRect().width / scene.width : 1;
+    box.scrollLeft = Math.max(0, ((left + right) / 2) * scale - box.clientWidth / 2);
+  }, [box, large, focusKey, scene]);
   const zoom = useZoom(large ? box : null, scene.width, scene.height, boxWidth - BOX_PADDING);
   // The trail of opened blocks, each named by its instance name, or by its kind's label when the
   // name says no more (the `dff` block of the `dff` circuit). Two levels with one label collapse

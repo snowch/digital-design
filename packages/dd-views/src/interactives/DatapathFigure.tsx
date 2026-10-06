@@ -77,6 +77,8 @@ const Props = z.object({
   canOpen: z.boolean().default(true),
   /** The whole drawing small above it, and zoom, when it is wider than its box (a trial). */
   overview: z.boolean().default(false),
+  /** The parts, by name, the drawing opens on when it is wider than its box. */
+  focus: z.array(z.string()).optional(),
   /** Faults the learner may put in, one at a time; the figure starts again with each. */
   faults: z.array(FaultSpec).default([]),
   /** Shown once the learner has made an edge, so the results do not answer the lead's question. */
@@ -372,6 +374,7 @@ export const DatapathFigure = withProps(
           table={false}
           writtenWidth={4}
           overview={data.overview}
+          {...(data.focus ? { focus: data.focus } : {})}
           {...(data.canOpen ? { onScope: setScope } : {})}
         />
         {committed && status && (
@@ -404,7 +407,9 @@ export const DatapathFigure = withProps(
             </button>
           </div>
         )}
-        {asking && committed && data.explain && <Prose markdown={data.explain} />}
+        {/* The why comes after the learner's own edge has shown the what: before it, the
+            explanation would describe an edge the drawing has not made. */}
+        {asking && committed && ran && data.explain && <Prose markdown={data.explain} />}
         {data.steps && (
           <section className="datapath-steps" aria-label={t.stepsHeading}>
             <p className="datapath-steps-heading">{t.stepsHeading}</p>
