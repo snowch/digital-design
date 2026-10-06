@@ -1899,6 +1899,10 @@ button.bit {
 }
 /* A flex item will not shrink below its content unless told: a table of 64-bit words is wider
    than a phone, so each table keeps to the column and scrolls inside its own box. */
+/* Hidden until a prediction is committed: the display above would otherwise win over [hidden]. */
+.datapath-tables[hidden] {
+  display: none;
+}
 .datapath-tables > * {
   min-width: 0;
   max-width: 100%;

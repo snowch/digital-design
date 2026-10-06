@@ -41,6 +41,9 @@ import { format, useViewStrings } from "../strings";
 import { FaultSpec, toFault } from "./FaultLab";
 import { withProps } from "./props";
 
+/** How many edges "Run until it stops" makes before it gives up on a machine that never stops. */
+const RUN_LIMIT = 500;
+
 const Inputs = z.record(z.string(), z.union([z.string(), z.number()]));
 
 const Props = z.object({
@@ -145,6 +148,10 @@ export const DatapathFigure = withProps(
     const [edge, setEdge] = useState<Edge | undefined>();
     const [stopped, setStopped] = useState(false);
     const [ran, setRan] = useState(false);
+    // The faults the learner has run, each shown its own outcome only once it has been run.
+    const [ranFaults, setRanFaults] = useState<ReadonlySet<number>>(new Set());
+    // A run that reached 500 edges without stopping says so, rather than looking as if nothing ran.
+    const [gaveUp, setGaveUp] = useState(false);
     const [step, setStep] = useState(Number.POSITIVE_INFINITY);
     const [scope, setScope] = useState("");
     const [stored, setStored] = useSlot<Stored>(store, interactive.id);
@@ -168,6 +175,10 @@ export const DatapathFigure = withProps(
     const shownState = stepping ? datapathState(circuit, values) : state;
     const bump = () => setGeneration((g) => g + 1);
 
+    const noteRun = () => {
+      if (faults.length === 0 || faultAt >= 0) setRan(true);
+      if (faultAt >= 0) setRanFaults((was) => new Set([...was, faultAt]));
+    };
     const clock = () => {
       if (stopped) return;
       const before = sim.snapshotValues();
@@ -176,23 +187,26 @@ export const DatapathFigure = withProps(
       setEdge({ before, history: high.history });
       setStep(Number.POSITIVE_INFINITY);
       if (halting) setStopped(true);
-      if (faults.length === 0 || faultAt >= 0) setRan(true);
+      noteRun();
       bump();
     };
     const run = () => {
       let before = sim.snapshotValues();
-      for (let k = 0; k < 500; k++) {
+      let halted = false;
+      for (let k = 0; k < RUN_LIMIT; k++) {
         before = sim.snapshotValues();
         const halting = datapathState(circuit, before).halt === 1;
         const { high } = sim.clockCycle("CLK");
         setEdge({ before, history: high.history });
         if (halting) {
           setStopped(true);
+          halted = true;
           break;
         }
       }
+      setGaveUp(!halted);
       setStep(Number.POSITIVE_INFINITY);
-      if (faults.length === 0 || faultAt >= 0) setRan(true);
+      noteRun();
       bump();
     };
     const restart = (from: typeof built) => {
@@ -200,6 +214,7 @@ export const DatapathFigure = withProps(
       setChosen(0);
       setEdge(undefined);
       setStopped(false);
+      setGaveUp(false);
       bump();
     };
     const reset = () => {
@@ -207,6 +222,7 @@ export const DatapathFigure = withProps(
       setChosen(0);
       setEdge(undefined);
       setStopped(false);
+      setGaveUp(false);
       bump();
     };
     const choose = (k: number) => {
@@ -247,11 +263,13 @@ export const DatapathFigure = withProps(
     const reason = reasonKey(state);
     const status = stopped
       ? format(t.stopped, { reason: t.reasons[reason ?? ""] ?? "" })
-      : reason !== undefined
-        ? format(t.halting, { reason: t.reasons[reason] ?? reason })
-        : state.pc !== undefined
-          ? format(t.running, { pc: hex3(state.pc) })
-          : "";
+      : gaveUp
+        ? format(t.gaveUp, { edges: RUN_LIMIT, pc: hex3(state.pc ?? 0) })
+        : reason !== undefined
+          ? format(t.halting, { reason: t.reasons[reason] ?? reason })
+          : state.pc !== undefined
+            ? format(t.running, { pc: hex3(state.pc) })
+            : "";
 
     return (
       <div className="explorer datapath-figure" data-interactive={interactive.id}>
@@ -318,7 +336,8 @@ export const DatapathFigure = withProps(
           circuit={circuit}
           {...(committed ? { values } : {})}
           title={strings.explorer.title}
-          onToggleInput={toggle}
+          // Before a prediction is committed the pins clock nothing: an edge would answer it.
+          onToggleInput={committed ? toggle : () => undefined}
           scope={scope}
           table={false}
           writtenWidth={4}
@@ -346,7 +365,6 @@ export const DatapathFigure = withProps(
           </div>
         )}
         {asking && committed && data.explain && <Prose markdown={data.explain} />}
-        {ran && data.outcomes && <Prose markdown={data.outcomes} />}
         {data.steps && (
           <section className="datapath-steps" aria-label={t.stepsHeading}>
             <p className="datapath-steps-heading">{t.stepsHeading}</p>
@@ -525,6 +543,14 @@ export const DatapathFigure = withProps(
             </div>
           )}
         </div>
+        {/* What the edges showed, in the lesson's words: below the figure, and only once the
+            learner has made them, so the text does not answer what the lead asks them to find. */}
+        {faultAt >= 0 && ranFaults.has(faultAt) && data.faults[faultAt]?.outcome && (
+          <Prose markdown={data.faults[faultAt]?.outcome ?? ""} />
+        )}
+        {(faults.length === 0 ? ran : ranFaults.size === faults.length) && data.outcomes && (
+          <Prose markdown={data.outcomes} />
+        )}
       </div>
     );
   },

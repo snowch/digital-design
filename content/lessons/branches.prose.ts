@@ -36,7 +36,11 @@ export const PROSE = {
   branchFaultsLead:
     'This circuit runs the loop that adds 5 + 4 + 3 + 2 + 1. Pick one of two faults. In the first, "MET stuck at 1", the condition block gives 1 for every branch. In the second, "MET stuck at 0", it gives 0. Press "Run until it stops". Before you do, say what you think the display will show.',
   branchFaultsAfter:
-    '- "MET stuck at 1": The branch is taken every time, even when R1 equals R0. The loop never ends, so R1 counts down past 0 into negative numbers. "Run until it stops" gives up after 500 edges. No store runs, so the display stays at 0.\n- "MET stuck at 0": The branch is never taken. The loop runs once. The display shows 5. R1 holds 4. The machine stops after 8 edges.\n- Both faults leave every other instruction unchanged. Only the choice of the next instruction breaks.',
+    "Both faults leave every other instruction unchanged. Only the choice of the next instruction breaks.",
+  branchFaultMetHigh:
+    '"MET stuck at 1": The branch is taken every time, even when R1 equals R0. The loop never ends, so R1 counts down past 0 into negative numbers. "Run until it stops" gives up after 500 edges. No store runs, so the display stays at 0.',
+  branchFaultMetLow:
+    '"MET stuck at 0": The branch is never taken. The loop runs once. The display shows 5. R1 holds 4. The machine stops after 8 edges.',
   explanation:
     'The block "next PC" chooses NEXT from three words: PC + 4; the target, PC + 4c, where c is the widened constant and 4c is c times 4; and RESULT, the ALU\'s output word.\n\nNEXT is the target when the instruction is a branch and MET is 1. Otherwise NEXT is PC + 4.\n\nLike every other instruction, a branch does its work in one edge. The decoder sets BRANCH to 1. The ALU subtracts for every branch, and the condition block reads its flags. Before the edge, the next PC is worked out. At the edge, it is written into PC.',
   oneInstructionLead:

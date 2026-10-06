@@ -164,8 +164,8 @@ export const instructions: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.jobs,
           lead: PROSE.jobsLead,
-          after: PROSE.jobsAfter,
           props: {
+            outcomes: PROSE.jobsAfter,
             libraryId: "datapath-jobs",
             registers: ROOMS,
             instructions: JOBS,
@@ -208,8 +208,20 @@ export const instructions: LessonInput = {
             instructions: [JOBS[0], JOBS[1]],
             shown: [0, 1, 2, 3],
             faults: [
-              { kind: "stuck-at", net: "Y", value: 0, label: LABELS.faults.yLow },
-              { kind: "stuck-at", net: "OP0", value: 0, label: LABELS.faults.op0Low },
+              {
+                kind: "stuck-at",
+                net: "Y",
+                value: 0,
+                label: LABELS.faults.yLow,
+                outcome: PROSE.jobsFaultY,
+              },
+              {
+                kind: "stuck-at",
+                net: "OP0",
+                value: 0,
+                label: LABELS.faults.op0Low,
+                outcome: PROSE.jobsFaultOp0,
+              },
             ],
           },
         },

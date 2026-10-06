@@ -34,8 +34,10 @@ export const PROSE = {
   ],
   fetchFaultsLead:
     'The margin program again, with two faults to choose. "PC4 stuck at 0": the `+ 4` block\'s output, the bus PC4, is 0. "STOP stuck at 0": the decoder\'s output STOP is 0, no matter what instruction runs.\n\nChoose a fault. Press "Clock edge" a few times, or "Run until it stops". Say first what PC will do.',
-  fetchFaultsAfter:
-    '"PC4 stuck at 0": every edge gives PC 0. The machine runs the instruction at `000`, `R1 ← -184`, at every edge and never reaches `stop`. "Run until it stops" gives up after 500 edges. R2 stays X.\n\n"STOP stuck at 0": `stop` at `010` does not stop the machine. PC goes on to `014`, where the ROM holds `00000000`. The decoder gives cause 21 there, and the machine stops after 6 edges, with PC at `014`. The check for an instruction the decoder does not know stopped a program whose own `stop` was broken.',
+  fetchFaultPc4:
+    '"PC4 stuck at 0": every edge gives PC 0. The machine runs the instruction at `000`, `R1 ← -184`, at every edge and never reaches `stop`. "Run until it stops" gives up after 500 edges. R2 stays X.',
+  fetchFaultStop:
+    '"STOP stuck at 0": `stop` at `010` does not stop the machine. PC goes on to `014`, where the ROM holds `00000000`. The decoder gives cause 21 there, and the machine stops after 6 edges, with PC at `014`. The check for an instruction the decoder does not know stopped a program whose own `stop` was broken.',
   explanation:
     "Reading the instruction at the address PC holds is called **fetch**: taking the instruction from memory. In this machine, every edge fetches and does one instruction. Between two edges, PC settles to its new value, the ROM gives the instruction at that address on IR, and the datapath works out the result. The next edge writes the result and gives PC its next value. IR is a bus: the ROM's output at PC. It is not a register, and it changes as soon as PC does.\n\nThe decoder works out the control signals from K and J alone. For a register job, BCONST is 0. For a constant job, BCONST is 1. For both, WRITEY is 1. For `stop`, WRITEY is 0 and STOP is 1.\n\nGO, which you met in the construction, is PC's enable. The register file's write enable is now WREG: WRITEY AND GO. An edge that stops the machine changes nothing.\n\nThe ROM reports its cause on CAUSEF and the decoder on CAUSED. The stop logic passes one on as CAUSE. When CAUSE is 00, nothing is wrong; at `stop` CAUSE is also 00, and the machine stops on the decoder's STOP.",
   generalisation:

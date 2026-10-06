@@ -36,7 +36,11 @@ export const PROSE = {
   jobsFaultsLead:
     'This is the same datapath with two faults to choose from. Each holds a group of wires at 0.\n\n"The Y digit stuck at 0": the four wires from the `digits` block to the register file\'s write address (WA) are 0, whatever the instruction says.\n\n"OP0 stuck at 0": the wire from J\'s bit 0 to the ALU\'s OP0 is 0.\n\nTwo instructions to choose: `13123000` (R3 ← R1 - R2) and `12123000` (R3 ← R1 + R2). R1 holds -184 and R2 holds -250 as before. The table shows R0 to R3.\n\nChoose a fault and an instruction. Press the Clock edge button. Before you press, say which register the edge will write and what it will write.',
   jobsFaultsAfter:
-    "**The Y digit stuck at 0:** Every result goes into R0. `13123000` writes 66 into R0, and `12123000` writes -434 into R0. R3 stays X.\n\n**OP0 stuck at 0:** Subtract's code `011` becomes `010`, which is add. `13123000` writes -434 into R3, the same as `12123000`. Add's code already has OP0 at 0, so `12123000` still writes -434. That instruction cannot show this fault.\n\nA stuck digit changes which register the instruction names, or which job the instruction chooses.",
+    "A stuck digit changes which register the instruction names, or which job the instruction chooses.",
+  jobsFaultY:
+    "**The Y digit stuck at 0:** Every result goes into R0. `13123000` writes 66 into R0, and `12123000` writes -434 into R0. R3 stays X.",
+  jobsFaultOp0:
+    "**OP0 stuck at 0:** Subtract's code `011` becomes `010`, which is add. `13123000` writes -434 into R3, the same as `12123000`. Add's code already has OP0 at 0, so `12123000` still writes -434. That instruction cannot show this fault.",
   explanation:
     "One clock edge executes one instruction. The digits are wires from the `digits` block to the register file and ALU. The register file and the ALU work out RESULT before the edge, and the edge writes it.\n\nNo part moves a field. A, B and Y are the register file's two read addresses and its write address. J's low three bits become the ALU's code. The layout puts each field's wires where they need to go.\n\nWRITEY is a control signal: a single bit that tells the register file what to do at the next edge. Here you set it by hand. Later lessons add instructions that write no register. For them, WRITEY is 0.\n\nIn the course's machine, another block works out WRITEY and the other control signals from K and J.",
   generalisation:

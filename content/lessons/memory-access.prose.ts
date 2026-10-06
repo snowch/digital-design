@@ -36,7 +36,11 @@ export const PROSE = {
   memoryFaultsLead:
     'The same program, with two faults to choose.\n\n"LOAD stuck at 0": the decoder\'s output LOAD is 0, so pickLoad always gives RESULT.\n\n"STORE stuck at 1": the decoder\'s output STORE is 1 for every instruction.\n\nChoose a fault and press "Run until it stops". Say first what the display will show.',
   memoryFaultsAfter:
-    '"LOAD stuck at 0": the loads write their addresses instead of the words there. R2 holds 2008, which is `7D8`, and R3 holds 2016, which is `7E0`. R4 is 2008 - 2016 = -8, and the display shows -8. Nothing stops the machine: every address is one it accepts.\n\n"STORE stuck at 1": the machine stops at the first edge, at `000`, with cause 34. The load from room A\'s sensor has become a store to it as well, and the sensor is read only. No register is written.\n\nA check can catch a fault: the second stopped at once, while the first ran to the end with a wrong answer.',
+    "A check can catch a fault: the second stopped at once, while the first ran to the end with a wrong answer.",
+  memoryFaultLoad:
+    '"LOAD stuck at 0": the loads write their addresses instead of the words there. R2 holds 2008, which is `7D8`, and R3 holds 2016, which is `7E0`. R4 is 2008 - 2016 = -8, and the display shows -8. Nothing stops the machine: every address is one it accepts.',
+  memoryFaultStore:
+    '"STORE stuck at 1": the machine stops at the first edge, at `000`, with cause 34. The load from room A\'s sensor has become a store to it as well, and the sensor is read only. No register is written.',
   explanation:
     "The decoder sets the ALU's code to add for every load and store.\n\nA load's word arrives on MQ before the edge, and the edge writes it into the register Y names. A store's word, QB, is written at the edge into the memory.\n\nThe memory reads twice at once: the instruction at PC, and the word at ADDR. They are two reads of one memory, as the register file has two reads.\n\nThe decoder's new outputs, AZERO, LOAD, STORE and BYTE, are control signals like WRITEY and BCONST.\n\nThe memory checks every load and store before the edge. A store it refuses writes nothing: the memory's writes, like PC and the register file, wait for GO.",
   generalisation:

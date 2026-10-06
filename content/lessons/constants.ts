@@ -141,8 +141,8 @@ export const constants: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.constants,
           lead: PROSE.constantsLead,
-          after: PROSE.constantsAfter,
           props: {
+            outcomes: PROSE.constantsAfter,
             libraryId: "datapath-constants",
             registers: ROOMS,
             instructions: CONSTANT_JOBS,
@@ -179,15 +179,26 @@ export const constants: LessonInput = {
           caption: LABELS.captions.constantsFaults,
           lead: PROSE.constantsFaultsLead,
           props: {
-            outcomes: PROSE.constantsFaultsAfter,
             libraryId: "datapath-constants",
             registers: ROOMS,
             instructions: [CONSTANT_JOBS[0], CONSTANT_JOBS[1]],
             shown: [1, 2, 3],
             buses: ["WIDE", "ALUB", "RESULT"],
             faults: [
-              { kind: "stuck-at", net: "widen/C11", value: 0, label: LABELS.faults.copyLow },
-              { kind: "stuck-at", net: "BCONST", value: 0, label: LABELS.faults.bconstLow },
+              {
+                kind: "stuck-at",
+                net: "widen/C11",
+                value: 0,
+                label: LABELS.faults.copyLow,
+                outcome: PROSE.constantsFaultCopy,
+              },
+              {
+                kind: "stuck-at",
+                net: "BCONST",
+                value: 0,
+                label: LABELS.faults.bconstLow,
+                outcome: PROSE.constantsFaultBconst,
+              },
             ],
           },
         },
@@ -226,8 +237,8 @@ export const constants: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.hour,
           lead: PROSE.hourLead,
-          after: PROSE.hourAfter,
           props: {
+            outcomes: PROSE.hourAfter,
             libraryId: "datapath-constants",
             registers: {},
             instructions: [

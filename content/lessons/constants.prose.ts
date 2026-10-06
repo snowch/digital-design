@@ -35,8 +35,10 @@ export const PROSE = {
   ],
   constantsFaultsLead:
     "Two faults to choose.\n\n**The copied bit stuck at 0:** Inside the `widen` module, the internal wire that copies C's bit 11 upwards into the top 52 bits is stuck at 0. C's own 12 input wires still carry their values to the module.\n\n**BCONST stuck at 0:** The selector always chooses QB, which is the data output of the register file's read port B.\n\nTest these two instructions:\n\n- `25003F9C`: R3 ← -100\n- `22103064`: R3 ← R1 + 100\n\nBefore you start: R1 holds -184, R2 holds -250, and R0 is X.\n\nChoose one fault and one instruction. Press Clock edge and predict what R3 will hold. Say your prediction first.",
-  constantsFaultsAfter:
-    "**The copied bit stuck at 0:**\n\nWhen you run `25003F9C`, R3 holds 3996, which is the unsigned reading of `F9C`. When you run `22103064`, R3 still holds -84: because 100's bit 11 is 0, the fault changes nothing for this instruction. No constant from 0 to 2047 can show this fault, because all their bit 11s are 0.\n\n**BCONST stuck at 0:**\n\nBoth instructions write X into R3. The ALU's B input takes QB, the word output by the register the B digit selects. Both instructions have B digit 0, so QB is R0, which has never been written to. An X input gives an X output.",
+  constantsFaultCopy:
+    "**The copied bit stuck at 0:**\n\nWhen you run `25003F9C`, R3 holds 3996, which is the unsigned reading of `F9C`. When you run `22103064`, R3 still holds -84: because 100's bit 11 is 0, the fault changes nothing for this instruction. No constant from 0 to 2047 can show this fault, because all their bit 11s are 0.",
+  constantsFaultBconst:
+    "**BCONST stuck at 0:**\n\nBoth instructions write X into R3. The ALU's B input takes QB, the word output by the register the B digit selects. Both instructions have B digit 0, so QB is R0, which has never been written to. An X input gives an X output.",
   explanation:
     "The selector carries out a choice that the instruction kind makes. A register job reads the ALU's B word from register B. A constant job reads it from the constant field. BCONST is a second control signal that you set by hand in this lesson to select which one.\n\nCopying bit 11 keeps the number when read signed. Bit 11 of C is worth -2048 when read signed. In W, bit 63 is worth minus 2 to the 63. The 1s in bits 62 down to 11 add up so that bits 63 to 11 together are worth -2048: the same as C's bit 11 alone. When bit 11 is 0, the copies are 0s and add nothing. The figure below shows it for four constants.",
   generalisation:

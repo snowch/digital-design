@@ -188,8 +188,8 @@ export const memoryAccess: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.showMargin,
           lead: PROSE.showMarginLead,
-          after: PROSE.showMarginAfter,
           props: {
+            outcomes: PROSE.showMarginAfter,
             libraryId: "datapath-memory",
             program: SHOW_MARGIN,
             inputs: SENSORS,
@@ -252,6 +252,7 @@ export const memoryAccess: LessonInput = {
                 value: 0,
                 at: [50, 17],
                 label: LABELS.faults.loadLow,
+                outcome: PROSE.memoryFaultLoad,
               },
               {
                 kind: "stuck-at",
@@ -259,6 +260,7 @@ export const memoryAccess: LessonInput = {
                 value: 1,
                 at: [50, 17],
                 label: LABELS.faults.storeHigh,
+                outcome: PROSE.memoryFaultStore,
               },
             ],
           },
