@@ -230,18 +230,18 @@ test.describe("Module 8's datapath figure", () => {
     await expect(figure.locator(".datapath-steps")).toContainText(V.datapath.stepsNone);
     await figure.getByRole("button", { name: V.datapath.clock }).click();
     await expect(figure.locator(".explorer-steps")).toContainText(
-      format(V.explorer.stepOf, { k: 79, n: 79 }),
+      format(V.explorer.stepOf, { k: 155, n: 155 }),
     );
     const slider = figure.locator(".explorer-steps input[type=range]");
     await slider.focus();
     await page.keyboard.press("Home");
     await page.keyboard.press("ArrowRight");
     await expect(figure.locator(".explorer-steps")).toContainText(
-      format(V.explorer.stepOf, { k: 1, n: 79 }),
+      format(V.explorer.stepOf, { k: 1, n: 155 }),
     );
-    await expect(row(figure, V.datapath.registersCaption, "R2")).toContainText("-250");
+    await expect(row(figure, V.datapath.registersCaption, "R3")).toContainText("-250");
     await figure.getByRole("button", { name: V.datapath.back }).click();
     await expect(figure.locator(".explorer-steps")).toContainText(V.datapath.stepNothing);
-    await expect(row(figure, V.datapath.registersCaption, "R2")).toContainText("-184");
+    await expect(row(figure, V.datapath.registersCaption, "R3")).toContainText("XXXXXXXXXXXXXXXX");
   });
 });

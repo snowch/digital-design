@@ -40,7 +40,15 @@ export function WordInputs({
         return (
           <div className="word-input" key={p.name}>
             <p className="word-input-name">{format(strings.words.heading, { name: p.name })}</p>
-            <BitRow bits={bits} onFlip={flip} label={format(strings.words.row, { name: p.name })} />
+            {/* Module 8: a word wider than 16 bits shows each bit's worth inside its group of four
+                and the group's digit; its bits' worths in the number run to 19 digits and would
+                widen the row past a phone. */}
+            <BitRow
+              bits={bits}
+              onFlip={flip}
+              label={format(strings.words.row, { name: p.name })}
+              {...(width > 16 ? { weights: "digit" as const, digits: true } : {})}
+            />
           </div>
         );
       })}

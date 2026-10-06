@@ -1789,6 +1789,14 @@ button.bit {
   gap: var(--space-4);
   align-items: flex-start;
 }
-.datapath-tables .truth-table-wrap {
+/* A flex item will not shrink below its content unless told: a table of 64-bit words is wider
+   than a phone, so each table keeps to the column and scrolls inside its own box. */
+.datapath-tables > * {
+  min-width: 0;
   max-width: 100%;
+}
+/* The program's transfers are the longest cells; on a phone they wrap rather than widen the table. */
+.datapath-table td:nth-child(3) {
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
