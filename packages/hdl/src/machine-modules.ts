@@ -12,8 +12,8 @@
 // - `condition`: whether a branch is taken, from the flags and the job digit.
 
 import {
-  CAUSE_ORDER,
   DECODER_OUTPUTS,
+  DECODER_WIDTHS,
   aluParts,
   branchCondition,
   decoder,
@@ -33,7 +33,6 @@ export interface MachineContext {
   readonly registers?: readonly (bigint | undefined)[];
 }
 
-const ones = (names: readonly string[]) => Object.fromEntries(names.map((n) => [n, 1]));
 const need = (nets: Readonly<Record<string, NetId>>, name: string) => {
   const n = nets[name];
   if (n === undefined) throw new RangeError(`no net for ${name}`);
@@ -44,11 +43,10 @@ const MEMORY_INPUTS: Record<keyof MemoryPorts, number> = {
   PC: 64,
   ADDR: 64,
   D: 64,
-  WE: 1,
   LOAD: 1,
   STORE: 1,
   BYTE: 1,
-  TICK: 1,
+  GO: 1,
   RST: 1,
   CLK: 1,
   DOOR: 1,
@@ -59,12 +57,9 @@ const MEMORY_INPUTS: Record<keyof MemoryPorts, number> = {
 
 const MEMORY_OUTPUTS = {
   IR: 32,
+  CAUSEF: 8,
   MQ: 64,
-  OUTSIDE: 1,
-  NOT4: 1,
-  NOMEM: 1,
-  MISALIGN: 1,
-  RONLY: 1,
+  CAUSEM: 8,
   DISPLAY: 64,
   LAMPS: 3,
 };
@@ -132,27 +127,30 @@ export function machineModules(context: MachineContext = {}): Record<string, Cou
       },
     },
     decoder: {
-      ports: () => ({ inputs: { K: 4, J: 4, C: 12 }, outputs: ones(DECODER_OUTPUTS.full) }),
+      ports: () => ({
+        inputs: { K: 4, J: 4 },
+        outputs: Object.fromEntries(DECODER_OUTPUTS.full.map((n) => [n, DECODER_WIDTHS[n] ?? 1])),
+      }),
       build: (b, ins, outs) => {
-        decoder(
-          b,
-          { K: need(ins, "K"), J: need(ins, "J"), C: need(ins, "C") },
-          DECODER_OUTPUTS.full,
-          {
-            outs,
-            scoped: false,
-          },
-        );
+        decoder(b, { K: need(ins, "K"), J: need(ins, "J") }, DECODER_OUTPUTS.full, {
+          outs,
+          scoped: false,
+        });
       },
     },
     stops: {
       ports: () => ({
-        inputs: { ...ones(CAUSE_ORDER.map(([n]) => n)), STOP: 1 },
-        outputs: { HALT: 1, CAUSE: 8 },
+        inputs: { CAUSEF: 8, CAUSED: 8, CAUSEM: 8, STOP: 1, WRITEY: 1 },
+        outputs: { HALT: 1, CAUSE: 8, WREG: 1, GO: 1 },
       }),
       build: (b, ins, outs) => {
-        const causes = Object.fromEntries(CAUSE_ORDER.map(([n]) => [n, need(ins, n)]));
-        stopLogic(b, causes, need(ins, "STOP"), need(outs, "HALT"), { outs, scoped: false });
+        stopLogic(
+          b,
+          { CAUSEF: need(ins, "CAUSEF"), CAUSED: need(ins, "CAUSED"), CAUSEM: need(ins, "CAUSEM") },
+          { STOP: need(ins, "STOP"), WRITEY: need(ins, "WRITEY") },
+          { HALT: need(outs, "HALT"), GO: need(outs, "GO"), WREG: need(outs, "WREG") },
+          { outs, scoped: false },
+        );
       },
     },
     condition: {

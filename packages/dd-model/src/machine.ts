@@ -301,6 +301,9 @@ export function step(
     0;
   const f = fieldsOf(instruction);
   const seen = { instruction, fields: f };
+  // Module 8 builds no control registers, so its decoder does not check a control register's
+  // number: a system job 1 to 3 stops the machine as one Module 12 builds, whatever its constant.
+  if (f.k === 8 && f.j >= 1 && f.j <= 3) return stop({ kind: "later" }, seen);
   if (isIllegal(f)) return stop({ kind: "trap", cause: CAUSES.illegal }, seen);
   if (f.k === 8) {
     if (f.j === 0) return stop({ kind: "trap", cause: CAUSES.system }, seen);

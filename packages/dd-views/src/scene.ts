@@ -8,6 +8,7 @@ import type { Circuit, NetId } from "@dd/sim";
 
 import {
   circuitToDrawing,
+  routeKey,
   specOf,
   type Drawing,
   type Part,
@@ -406,11 +407,43 @@ export function sceneOf(drawing: Drawing): Scene {
     routes.set(p, points);
     for (const segment of segmentsOf(points)) drawn.push({ net: netOf(p), segment });
   };
+  // Module 8: where several nets leaving one column are fed back, each turns down half a cell
+  // further out than the one below it and takes the channel below that one's, so no two share a
+  // vertical and none crosses another; their channels are given before any other. A column with
+  // one such net is drawn as before.
+  const back = placed.filter((p) => p.end.x < p.start.x + 20);
+  const backNets = new Map<number, string[]>();
+  for (const p of back) {
+    const list = backNets.get(p.start.x) ?? [];
+    if (!list.includes(netOf(p))) list.push(netOf(p));
+    backNets.set(p.start.x, list);
+  }
+  const fedBack = new Map<string, { x: number; y: number }>();
+  for (const [x, nets] of [...backNets].sort(([a], [b]) => a - b)) {
+    if (nets.length < 2) continue;
+    const lowestFirst = [...nets].sort((a, b) => Number(b.split(",")[1]) - Number(a.split(",")[1]));
+    lowestFirst.forEach((net, k) => fedBack.set(net, { x: x + GAP + k * GAP, y: channel() }));
+  }
   for (const p of placed) {
     const { start: from, end: to } = p;
-    const trunkX = trunkOf(p);
+    // Module 8: a wire routed by hand turns where its drawing says.
+    const hand = drawing.routes?.[routeKey(p.w)];
+    if (hand) {
+      const points: Point[] = [from];
+      let at = from;
+      hand.forEach((v, i) => {
+        at = i % 2 === 0 ? { x: v * CELL, y: at.y } : { x: at.x, y: v * CELL };
+        points.push(at);
+      });
+      // Then up or down to the port's row, and across into it.
+      points.push({ x: at.x, y: to.y }, to);
+      take(p, points);
+      continue;
+    }
+    const shared = fedBack.get(netOf(p));
+    const trunkX = shared?.x ?? trunkOf(p);
     if (to.x < from.x + 20) {
-      const y = channel();
+      const y = shared?.y ?? channel();
       const riseX = landing(to.x);
       take(p, [
         from,

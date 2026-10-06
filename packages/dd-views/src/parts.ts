@@ -136,6 +136,20 @@ const COMPOSITE_LABELS: Readonly<Record<string, string>> = {
   "alu8-flags-4": "4-bit ALU",
   "alu8-flags-64": "64-bit ALU",
   "operand-carry": "second word and carry in",
+  // Module 8: the datapath's blocks. Provisional labels, to be drafted by the prose process.
+  digits: "digits",
+  decoder: "decoder",
+  registers: "register file",
+  stops: "stop logic",
+  plus4: "+ 4",
+  widen: "widen",
+  "zero-or-word": "A or 0",
+  times4: "× 4",
+  "word-adder": "adder",
+  "word-register-64": "register",
+  condition: "condition",
+  next: "next PC",
+  yWord: "word for Y",
 };
 
 const COMPOSITE_DESCRIPTIONS: Readonly<Record<string, string>> = {

@@ -23,27 +23,26 @@ export function datapathText(nextPc: string): string {
   logic [31:0] IR;
   logic [63:0] PC4, NEXT, TARGET, WIDE, QA, QB, ALUA, ALUB, RESULT, MQ, YIN;
   logic OP2, OP1, OP0, AZERO, BCONST, WRITEY, LOAD, STORE, BYTE, CALL, JUMP, BRANCH;
-  logic STOP, SYSTEM, ILLEGAL, ZERO, MINUS, COUT, OVER, MET, GO;
-  logic OUTSIDE, NOT4, NOMEM, MISALIGN, RONLY;
+  logic [7:0] CAUSEF, CAUSED, CAUSEM;
+  logic STOP, ZERO, MINUS, COUT, OVER, MET, GO, WREG;
 
   always_ff @(posedge CLK)
     if (RST) PC <= 64'h0;
     else if (GO) PC <= NEXT;
   assign PC4 = PC + 64'h4;
 
-  memory mem (.PC(PC), .ADDR(RESULT), .D(QB), .WE(STORE & GO), .LOAD(LOAD),
-    .STORE(STORE), .BYTE(BYTE), .TICK(GO), .RST(RST), .CLK(CLK), .DOOR(DOOR),
-    .WARM(WARM), .SENSORA(SENSORA), .SENSORB(SENSORB), .IR(IR), .MQ(MQ),
-    .OUTSIDE(OUTSIDE), .NOT4(NOT4), .NOMEM(NOMEM), .MISALIGN(MISALIGN),
-    .RONLY(RONLY), .DISPLAY(DISPLAY), .LAMPS(LAMPS));
+  memory mem (.PC(PC), .ADDR(RESULT), .D(QB), .LOAD(LOAD),
+    .STORE(STORE), .BYTE(BYTE), .GO(GO), .RST(RST), .CLK(CLK), .DOOR(DOOR),
+    .WARM(WARM), .SENSORA(SENSORA), .SENSORB(SENSORB), .IR(IR), .CAUSEF(CAUSEF),
+    .MQ(MQ), .CAUSEM(CAUSEM), .DISPLAY(DISPLAY), .LAMPS(LAMPS));
 
-  decoder dec (.K(IR[31:28]), .J(IR[27:24]), .C(IR[11:0]), .OP2(OP2), .OP1(OP1),
+  decoder dec (.K(IR[31:28]), .J(IR[27:24]), .OP2(OP2), .OP1(OP1),
     .OP0(OP0), .AZERO(AZERO), .BCONST(BCONST), .WRITEY(WRITEY), .LOAD(LOAD),
     .STORE(STORE), .BYTE(BYTE), .CALL(CALL), .JUMP(JUMP), .BRANCH(BRANCH),
-    .STOP(STOP), .SYSTEM(SYSTEM), .ILLEGAL(ILLEGAL));
+    .STOP(STOP), .CAUSED(CAUSED));
 
   registers regs (.RA(IR[23:20]), .RB(IR[19:16]), .WA(IR[15:12]), .D(YIN),
-    .WE(WRITEY & GO), .CLK(CLK), .QA(QA), .QB(QB));
+    .WE(WREG), .CLK(CLK), .QA(QA), .QB(QB));
 
   always_comb
     case (IR[11])
@@ -78,10 +77,8 @@ export function datapathText(nextPc: string): string {
   assign TARGET = PC + {WIDE[61:0], 2'b00};
 
 ${nextPc}
-  stops st (.OUTSIDE(OUTSIDE), .NOT4(NOT4), .ILLEGAL(ILLEGAL), .NOMEM(NOMEM),
-    .MISALIGN(MISALIGN), .RONLY(RONLY), .SYSTEM(SYSTEM), .STOP(STOP),
-    .HALT(HALT), .CAUSE(CAUSE));
-  assign GO = ~HALT;
+  stops st (.CAUSEF(CAUSEF), .CAUSED(CAUSED), .CAUSEM(CAUSEM), .STOP(STOP),
+    .WRITEY(WRITEY), .HALT(HALT), .CAUSE(CAUSE), .WREG(WREG), .GO(GO));
 endmodule
 `;
 }

@@ -70,6 +70,18 @@ export interface Wire {
 export interface Drawing {
   readonly parts: readonly Part[];
   readonly wires: readonly Wire[];
+  /**
+   * Module 8: wires routed by hand, keyed `from.port>to.port` (`decoder.LOAD>memory.LOAD`): where
+   * the wire turns, in grid cells, across first, then up or down, alternately; after the last, it
+   * goes up or down to its port's row and across into it. A drawing with routes is drawn as placed,
+   * not straightened, and its routes are held to the same checks as the router's.
+   */
+  readonly routes?: Readonly<Record<string, readonly number[]>>;
+}
+
+/** The key a hand-routed wire is found by. */
+export function routeKey(w: Wire): string {
+  return `${w.from.part}.${w.from.port}>${w.to.part}.${w.to.port}`;
 }
 
 export interface PortSpecIn {
@@ -485,7 +497,16 @@ export function circuitToDrawing(circuit: Circuit): Drawing {
     if (!from) continue;
     for (const to of readers) wires.push({ from, to });
   }
-  const drawing: Drawing = { parts, wires };
+  // Module 8: routes a library drawing gives for its wires, kept on the parts that drive them.
+  const routes: Record<string, readonly number[]> = {};
+  const gather = (meta: Readonly<Record<string, unknown>> | undefined) => {
+    const r = meta?.["routes"] as Readonly<Record<string, readonly number[]>> | undefined;
+    if (r) Object.assign(routes, r);
+  };
+  for (const c of circuit.components) if (!c.path.includes("/")) gather(c.meta);
+  for (const c of topComposites) gather(c.meta);
+  for (const input of circuit.inputs) gather(circuit.nets[input.net]?.meta);
+  const drawing: Drawing = Object.keys(routes).length ? { parts, wires, routes } : { parts, wires };
   return unplaced.length
     ? autoLayout(drawing, new Set(unplaced.map((p) => p.id)), rowsOf, colsOf)
     : drawing;

@@ -74,9 +74,6 @@ export const PARTS = {
   memory: "memory",
   decoder: "decoder",
   stops: "stops",
-  notHalt: "notHalt",
-  andWrite: "andWrite",
-  andStore: "andStore",
   pickLoad: "pickLoad",
   pickCall: "pickCall",
   condition: "condition",
@@ -86,6 +83,8 @@ export const PARTS = {
   orTake: "orTake",
   pickTake: "pickTake",
   pickJump: "pickJump",
+  back: "yWord",
+  next: "next",
 } as const;
 
 // ---- Small closed blocks --------------------------------------------------------------------
@@ -178,7 +177,7 @@ function digits(b: CircuitBuilder, ir: NetId) {
   };
   b.scope(
     PARTS.digits,
-    "instruction-digits",
+    "digits",
     (bb) => {
       slicePart(bb, ir, 31, 28, out.K, "k");
       slicePart(bb, ir, 27, 24, out.J, "j");
@@ -225,7 +224,7 @@ export function registerFile64(
     b,
     given.scoped ?? true,
     PARTS.regs,
-    "register-file-16",
+    "registers",
     (bb) => {
       const halves = [
         { name: "low", lo: 0 },
@@ -271,11 +270,12 @@ function wordAdder(
   name: string,
   kind: string,
   a: NetId,
-  bIn: NetId,
+  bIn: NetId | undefined,
   sum: NetId,
 ) {
-  b.scope(name, kind, (bb) => adderGates(bb, a, bIn, sum), {
-    inputs: kind === "add-four" ? { PC: a } : { A: a, B: bIn },
+  // The +4 block adds a fixed 4, inside it; the target's adder adds its two inputs.
+  b.scope(name, kind, (bb) => adderGates(bb, a, bIn ?? constant(bb, "FOUR", 64, 4n), sum), {
+    inputs: bIn === undefined ? { PC: a } : { A: a, B: bIn },
     outputs: { SUM: sum },
   });
 }
@@ -324,10 +324,12 @@ function wordRegister(
       });
     },
     {
+      // D first, then the reset, the enable and the clock, so the drawing's two pins (RST and
+      // CLK) have a port between them and their boxes do not touch.
       inputs: {
         D: ins.D,
-        ...(ins.EN !== undefined ? { EN: ins.EN } : {}),
         RST: ins.RST,
+        ...(ins.EN !== undefined ? { EN: ins.EN } : {}),
         CLK: ins.CLK,
       },
       outputs: { Q: q },
@@ -351,39 +353,40 @@ function anyBit(b: CircuitBuilder, w: NetId, hi: number, lo: number, name: strin
 
 /** The control signals each stage's decoder gives, in the order its block lists them. */
 export const DECODER_OUTPUTS: Readonly<Record<"fetch" | "memory" | "full", readonly string[]>> = {
-  fetch: ["OP2", "OP1", "OP0", "BCONST", "WRITEY", "STOP", "SYSTEM", "ILLEGAL"],
+  fetch: ["CAUSED", "STOP", "WRITEY", "BCONST", "OP2", "OP1", "OP0"],
   memory: [
-    "OP2",
-    "OP1",
-    "OP0",
-    "AZERO",
-    "BCONST",
+    "CAUSED",
+    "STOP",
     "WRITEY",
     "LOAD",
     "STORE",
     "BYTE",
-    "STOP",
-    "SYSTEM",
-    "ILLEGAL",
+    "AZERO",
+    "BCONST",
+    "OP2",
+    "OP1",
+    "OP0",
   ],
   full: [
-    "OP2",
-    "OP1",
-    "OP0",
-    "AZERO",
-    "BCONST",
+    "CAUSED",
+    "STOP",
     "WRITEY",
     "LOAD",
     "STORE",
     "BYTE",
+    "AZERO",
+    "BCONST",
+    "OP2",
+    "OP1",
+    "OP0",
+    "BRANCH",
     "CALL",
     "JUMP",
-    "BRANCH",
-    "STOP",
-    "SYSTEM",
-    "ILLEGAL",
   ],
 };
+
+/** Each output's width: a control signal is one bit; the decode step's cause is a byte. */
+export const DECODER_WIDTHS: Readonly<Record<string, number>> = { CAUSED: 8 };
 
 /**
  * The decoder: gates from the kind and job digits (and, for a control register's number, the
@@ -392,16 +395,18 @@ export const DECODER_OUTPUTS: Readonly<Record<"fetch" | "memory" | "full", reado
  */
 export function decoder(
   b: CircuitBuilder,
-  ins: { K: NetId; J: NetId; C: NetId },
+  ins: { K: NetId; J: NetId },
   outputs: readonly string[],
   given: Given = {},
 ): Record<string, NetId> {
-  const outs = Object.fromEntries(outputs.map((n) => [n, given.outs?.[n] ?? b.net(n)]));
+  const outs = Object.fromEntries(
+    outputs.map((n) => [n, given.outs?.[n] ?? b.net(n, DECODER_WIDTHS[n] ?? 1)]),
+  );
   block(
     b,
     given.scoped ?? true,
     PARTS.decoder,
-    "control-decoder",
+    "decoder",
     (bb) => {
       const bitsOf = (w: NetId, name: string) =>
         [0, 1, 2, 3].map((i) => {
@@ -427,16 +432,6 @@ export function decoder(
       const jobKinds = any([K(1), K(2)], "jobKinds");
       const memKinds = any([K(3), K(4)], "memKinds");
       // The constant names a control register 0 to 4: bits 11 to 3 all 0, and not 5, 6 or 7.
-      const c = ins.C;
-      const highC = anyBit(bb, c, 11, 3, "highC");
-      const c2 = bb.net("c2");
-      const c1 = bb.net("c1");
-      const c0 = bb.net("c0");
-      slicePart(bb, c, 2, 2, c2, "cBit2");
-      slicePart(bb, c, 1, 1, c1, "cBit1");
-      slicePart(bb, c, 0, 0, c0, "cBit0");
-      const over4 = both([c2, any([c1, c0], "c1or0")], "over4");
-      const badReg = any([highC, over4], "badReg");
       const signal: Record<string, () => NetId> = {
         OP2: () => both([jobKinds, j[2] as NetId], "op2"),
         OP1: () => any([both([jobKinds, j[1] as NetId], "op1Job"), memKinds, K(5), K(7)], "op1"),
@@ -460,21 +455,14 @@ export function decoder(
             [any([K(6), K(7)], "callJump"), bb.not(job[0] as NetId, { name: "notJob0" })],
             "oneBad",
           );
+          // System jobs 5 to 15. Whether a control register's number is 0 to 4 is Module 12's
+          // check, with the control registers.
           const sysBad = both(
             [
               K(8),
               any(
-                [
-                  any(
-                    [
-                      highJob,
-                      both([j[2], any([j[1], j[0]] as NetId[], "j1or0")] as NetId[], "j5to7"),
-                    ],
-                    "sysHigh",
-                  ),
-                  both([any([job[2], job[3]] as NetId[], "cJobs"), badReg], "badC"),
-                ],
-                "sysAny",
+                [highJob, both([j[2], any([j[1], j[0]] as NetId[], "j1or0")] as NetId[], "j5to7")],
+                "sysHigh",
               ),
             ],
             "sysBad",
@@ -493,73 +481,120 @@ export function decoder(
         },
       };
       for (const name of outputs) {
+        if (name === "CAUSED") {
+          // The decode step's cause: 21 for an illegal instruction, 41 for `call system`, else 00.
+          causeWord(
+            bb,
+            [
+              [signal["ILLEGAL"]!(), CAUSES.illegal],
+              [signal["SYSTEM"]!(), CAUSES.system],
+            ],
+            "caused",
+            outs[name] as NetId,
+          );
+          continue;
+        }
         const make = signal[name];
         if (!make) throw new RangeError(`the decoder has no output ${name}`);
         bb.gate("buf", [make()], { name: `out${name}`, output: outs[name] as NetId });
       }
     },
-    { inputs: { K: ins.K, J: ins.J, C: ins.C }, outputs: outs },
+    { inputs: { K: ins.K, J: ins.J }, outputs: outs },
   );
   return outs;
 }
 
 // ---- The stop logic ----------------------------------------------------------------------------
 
-/** The checks in the order the steps run, each with its cause's number. */
-export const CAUSE_ORDER: readonly (readonly [string, number])[] = [
-  ["OUTSIDE", CAUSES.outsideRom],
-  ["NOT4", CAUSES.notMultipleOf4],
-  ["ILLEGAL", CAUSES.illegal],
-  ["NOMEM", CAUSES.noMemory],
-  ["MISALIGN", CAUSES.misaligned],
-  ["RONLY", CAUSES.readOnly],
-  ["SYSTEM", CAUSES.system],
-];
+/**
+ * A step's cause as a byte: the number of the first of its checks that fails, or 00 when none
+ * does. A chain of selectors, from the last check to the first, each letting an earlier check's
+ * number win.
+ */
+function causeWord(
+  b: CircuitBuilder,
+  checks: readonly (readonly [NetId, number])[],
+  name: string,
+  out: NetId,
+): NetId {
+  let word = constant(b, `${name}None`, 8, 0n);
+  checks
+    .slice()
+    .reverse()
+    .forEach(([check, v], i) => {
+      const last = i === checks.length - 1;
+      word = mux(
+        b,
+        check,
+        word,
+        constant(b, `${name}${v.toString(16)}`, 8, BigInt(v)),
+        `${name}Pick${i}`,
+        last ? out : undefined,
+      );
+    });
+  return word;
+}
 
 /**
- * Whether this edge stops the machine, and why: HALT is 1 when any check fails or the instruction
- * stops the machine; CAUSE is the failed check's number, the lowest when several fail at once (the
- * first check in the order the steps run), or 00 for `stop`. Gates and a chain of selectors.
+ * Whether this edge stops the machine, and why. Each step gives its cause as a byte, 00 when its
+ * checks pass: fetch (CAUSEF: 11, 12), decode (CAUSED: 21, 41) and memory (CAUSEM: 31, 33, 34).
+ * HALT is 1 when any of them is not 00 or the instruction stops the machine; CAUSE is the first
+ * step's that is not 00, so the lower number wins, the first check to fail in the order the steps
+ * run; 00 for `stop`. An edge that halts changes nothing: GO, NOT HALT, holds the PC, and the
+ * register file's write waits on it (WREG), as the memory's does inside the memory.
  */
 export function stopLogic(
   b: CircuitBuilder,
-  causes: Readonly<Record<string, NetId>>,
-  stop: NetId,
-  halt: NetId,
+  causes: { readonly CAUSEF: NetId; readonly CAUSED: NetId; readonly CAUSEM?: NetId },
+  controls: { readonly STOP: NetId; readonly WRITEY: NetId },
+  nets: { readonly HALT: NetId; readonly GO: NetId; readonly WREG: NetId },
   given: Given = {},
 ) {
   const cause = given.outs?.["CAUSE"] ?? b.net("CAUSE", 8);
-  const present = CAUSE_ORDER.filter(([n]) => causes[n] !== undefined);
+  const steps = [
+    causes.CAUSEF,
+    causes.CAUSED,
+    ...(causes.CAUSEM !== undefined ? [causes.CAUSEM] : []),
+  ];
   block(
     b,
     given.scoped ?? true,
     PARTS.stops,
-    "stop-logic",
+    "stops",
     (bb) => {
-      bb.or([...present.map(([n]) => causes[n] as NetId), stop], { name: "orHalt", output: halt });
-      // From the last check to the first, each selector lets an earlier check's number win.
-      let word = constant(bb, "none", 8, 0n);
-      present
-        .slice()
-        .reverse()
-        .forEach(([n, v], i) => {
-          const last = i === present.length - 1;
-          word = mux(
-            bb,
-            causes[n] as NetId,
-            word,
-            constant(bb, `cause${n}`, 8, BigInt(v)),
-            `pick${n}`,
-            last ? cause : undefined,
-          );
-        });
+      const failed = steps.map((w, i) => anyBit(bb, w, 7, 0, `failed${i}`));
+      bb.or([...failed, controls.STOP], { name: "orHalt", output: nets.HALT });
+      // From the last step to the first, each selector lets an earlier step's cause win.
+      let word = steps[steps.length - 1] as NetId;
+      for (let i = steps.length - 2; i >= 0; i--)
+        word = mux(
+          bb,
+          failed[i] as NetId,
+          word,
+          steps[i] as NetId,
+          `pick${i}`,
+          i === 0 ? cause : undefined,
+        );
+      bb.not(nets.HALT, { name: "notHalt", output: nets.GO });
+      bb.and([controls.WRITEY, nets.GO], { name: "andWrite", output: nets.WREG });
     },
     {
-      inputs: { ...Object.fromEntries(present.map(([n]) => [n, causes[n] as NetId])), STOP: stop },
-      outputs: { HALT: halt, CAUSE: cause },
+      inputs: {
+        CAUSED: causes.CAUSED,
+        STOP: controls.STOP,
+        WRITEY: controls.WRITEY,
+        CAUSEF: causes.CAUSEF,
+        ...(causes.CAUSEM !== undefined ? { CAUSEM: causes.CAUSEM } : {}),
+      },
+      outputs: {
+        HALT: nets.HALT,
+        CAUSE: cause,
+        WREG: nets.WREG,
+        GO: nets.GO,
+      },
     },
   );
-  return { HALT: halt, CAUSE: cause };
+  return { HALT: nets.HALT, CAUSE: cause };
 }
 
 // ---- The program ROM (the fetch stage) and the memory (from the memory stage) ---------------
@@ -581,7 +616,7 @@ function romParams(rom: Uint8Array | readonly number[] | undefined): string {
 }
 
 /** The fetch checks: no instruction at the PC (outside the ROM), and a PC not a multiple of 4. */
-function fetchChecks(b: CircuitBuilder, pc: NetId) {
+function fetchCause(b: CircuitBuilder, pc: NetId, out: NetId): void {
   const outside = anyBit(b, pc, 63, 10, "outside");
   const not4 = b.or(
     [0, 1].map((i) => {
@@ -591,17 +626,24 @@ function fetchChecks(b: CircuitBuilder, pc: NetId) {
     }),
     { name: "not4" },
   );
-  return { outside, not4 };
+  causeWord(
+    b,
+    [
+      [outside, CAUSES.outsideRom],
+      [not4, CAUSES.notMultipleOf4],
+    ],
+    "causef",
+    out,
+  );
 }
 
 /** The ROM read at the PC for an instruction: 256 words of 32 bits, one read, and its checks. */
 function programRom(b: CircuitBuilder, pc: NetId, rom: DatapathOptions["rom"]) {
   const ir = b.net("IR", 32);
-  const outside = b.net("OUTSIDE");
-  const not4 = b.net("NOT4");
+  const causef = b.net("CAUSEF", 8);
   b.scope(
     PARTS.rom,
-    "program-rom",
+    "rom",
     (bb) => {
       const row = bb.net("ROW", 8);
       slicePart(bb, pc, 9, 2, row, "row");
@@ -609,29 +651,23 @@ function programRom(b: CircuitBuilder, pc: NetId, rom: DatapathOptions["rom"]) {
         "rom",
         { R0: row },
         { Q0: ir },
-        {
-          name: "cells",
-          params: { words: 256, width: 32, reads: 1, init: romParams(rom) },
-        },
+        { name: "cells", params: { words: 256, width: 32, reads: 1, init: romParams(rom) } },
       );
-      const checks = fetchChecks(bb, pc);
-      bb.gate("buf", [checks.outside], { name: "outOutside", output: outside });
-      bb.gate("buf", [checks.not4], { name: "outNot4", output: not4 });
+      fetchCause(bb, pc, causef);
     },
-    { inputs: { PC: pc }, outputs: { IR: ir, OUTSIDE: outside, NOT4: not4 } },
+    { inputs: { PC: pc }, outputs: { CAUSEF: causef, IR: ir } },
   );
-  return { IR: ir, OUTSIDE: outside, NOT4: not4 };
+  return { IR: ir, CAUSEF: causef };
 }
 
 export interface MemoryPorts {
   readonly PC: NetId;
   readonly ADDR: NetId;
   readonly D: NetId;
-  readonly WE: NetId;
   readonly LOAD: NetId;
   readonly STORE: NetId;
   readonly BYTE: NetId;
-  readonly TICK: NetId;
+  readonly GO: NetId;
   readonly RST: NetId;
   readonly CLK: NetId;
   readonly DOOR: NetId;
@@ -650,15 +686,12 @@ export interface MemoryPorts {
  */
 export function memoryNets(b: CircuitBuilder) {
   return {
-    IR: b.net("IR", 32),
+    CAUSEF: b.net("CAUSEF", 8),
+    CAUSEM: b.net("CAUSEM", 8),
     MQ: b.net("MQ", 64),
-    OUTSIDE: b.net("OUTSIDE"),
-    NOT4: b.net("NOT4"),
-    NOMEM: b.net("NOMEM"),
-    MISALIGN: b.net("MISALIGN"),
-    RONLY: b.net("RONLY"),
     DISPLAY: b.net("DISPLAY", 64),
     LAMPS: b.net("LAMPS", 3),
+    IR: b.net("IR", 32),
   };
 }
 
@@ -673,7 +706,7 @@ export function machineMemory(
     b,
     scoped,
     PARTS.memory,
-    "machine-memory",
+    "memory",
     (bb) => {
       const a = ins.ADDR;
       const bit = (i: number) => {
@@ -710,13 +743,13 @@ export function machineMemory(
       const devs = Array.from({ length: 8 }, (_, v) => devLine(v));
       const access = bb.or([ins.LOAD, ins.STORE], { name: "access" });
       // The checks.
-      bb.and([access, bb.or([high, devs[7] as NetId], { name: "noneThere" })], {
+      const noMem = bb.and([access, bb.or([high, devs[7] as NetId], { name: "noneThere" })], {
         name: "noMem",
-        output: out.NOMEM,
+        output: bb.net("NOMEM"),
       });
       const wordOff = bb.or([a2, a1, a0] as NetId[], { name: "wordOff" });
       const notByte = bb.not(ins.BYTE, { name: "notByte" });
-      bb.and(
+      const misalign = bb.and(
         [
           access,
           bb.or(
@@ -727,13 +760,24 @@ export function machineMemory(
             { name: "mis" },
           ),
         ],
-        { name: "misalign", output: out.MISALIGN },
+        { name: "misalign", output: bb.net("MISALIGN") },
       );
       const readOnlyDev = bb.or([devs[2], devs[3], devs[4]] as NetId[], { name: "readOnlyDev" });
-      bb.and([ins.STORE, bb.or([romSel, readOnlyDev], { name: "readOnly" })], {
+      const rOnly = bb.and([ins.STORE, bb.or([romSel, readOnlyDev], { name: "readOnly" })], {
         name: "rOnly",
-        output: out.RONLY,
+        output: bb.net("RONLY"),
       });
+      // The memory step's cause: no memory (31), then misaligned (33), then read-only (34).
+      causeWord(
+        bb,
+        [
+          [noMem, CAUSES.noMemory],
+          [misalign, CAUSES.misaligned],
+          [rOnly, CAUSES.readOnly],
+        ],
+        "causem",
+        out.CAUSEM,
+      );
       // The ROM: fetch at the PC, and the two halves of the word a load reads.
       const fetchRow = bb.net("FETCHROW", 8);
       slicePart(bb, ins.PC, 9, 2, fetchRow, "fetchRow");
@@ -755,11 +799,11 @@ export function machineMemory(
       );
       const romWord = bb.net("ROMWORD", 64);
       joinParts(bb, [romLow, romHigh], romWord, "joinRom");
-      const checks = fetchChecks(bb, ins.PC);
-      bb.gate("buf", [checks.outside], { name: "outOutside", output: out.OUTSIDE });
-      bb.gate("buf", [checks.not4], { name: "outNot4", output: out.NOT4 });
+      fetchCause(bb, ins.PC, out.CAUSEF);
       // The RAM: eight banks of bytes; bank k holds the bytes whose address ends in k.
-      const writeRam = bb.and([ins.WE, ramSel], { name: "writeRam" });
+      // A store writes at the edge only if the machine goes on (GO): a trap changes nothing.
+      const we = bb.and([ins.STORE, ins.GO], { name: "andStore", output: bb.net("WE") });
+      const writeRam = bb.and([we, ramSel], { name: "writeRam" });
       const lane = bb.net("LANE", 3);
       slicePart(bb, a, 2, 0, lane, "lane");
       const lowByte = bb.net("DLOW", 8);
@@ -793,7 +837,7 @@ export function machineMemory(
       joinParts(bb, ramBytes, ramWord, "joinRam");
       // The devices.
       const writeDev = (v: number) =>
-        bb.and([ins.WE, devs[v] as NetId], { name: `writeDev${v}`, output: bb.net(`WDEV${v}`) });
+        bb.and([we, devs[v] as NetId], { name: `writeDev${v}`, output: bb.net(`WDEV${v}`) });
       wordRegister(
         bb,
         "display",
@@ -815,7 +859,7 @@ export function machineMemory(
       const writeTimer = writeDev(5);
       const counting = bb.net("COUNTING");
       const nonZero = anyBit(bb, count, 63, 0, "nonZero");
-      bb.and([ins.TICK, nonZero], { name: "andCounting", output: counting });
+      bb.and([ins.GO, nonZero], { name: "andCounting", output: counting });
       const less = bb.net("LESS", 64);
       bb.scope(
         "minus1",
@@ -900,14 +944,13 @@ export function machineMemory(
     },
     {
       inputs: {
-        PC: ins.PC,
-        ADDR: ins.ADDR,
-        D: ins.D,
-        WE: ins.WE,
         LOAD: ins.LOAD,
         STORE: ins.STORE,
         BYTE: ins.BYTE,
-        TICK: ins.TICK,
+        ADDR: ins.ADDR,
+        D: ins.D,
+        PC: ins.PC,
+        GO: ins.GO,
         RST: ins.RST,
         CLK: ins.CLK,
         DOOR: ins.DOOR,
@@ -939,7 +982,7 @@ export function branchCondition(
     b,
     given.scoped ?? true,
     PARTS.condition,
-    "branch-condition",
+    "condition",
     (bb) => {
       const bits = split4(
         bb,
@@ -975,12 +1018,33 @@ export function branchCondition(
   return met;
 }
 
+/**
+ * The ALU's A input: register A, or 0 while AZERO is 1, for an address the constant gives alone.
+ * Module 6's word selector with a fixed 0 on its B input, closed (`pickA`).
+ */
+function zeroOr(b: CircuitBuilder, a: NetId, azero: NetId): NetId {
+  const y = b.net("ALUA", 64);
+  b.scope(
+    PARTS.pickA,
+    "zero-or-word",
+    (bb) => {
+      wordSelector(
+        bb,
+        { A: a, B: constant(bb, "zero", 64, 0n), S: azero },
+        { name: "pick", outs: { Y: y } },
+      );
+    },
+    { inputs: { A: a, AZERO: azero }, outputs: { Y: y } },
+  );
+  return y;
+}
+
 /** A word times 4: two 0s joined below its bits 61 to 0 (`times4`). */
 function timesFour(b: CircuitBuilder, w: NetId): NetId {
   const out = b.net("OFFSET", 64);
   b.scope(
     PARTS.times4,
-    "times-four",
+    "times4",
     (bb) => {
       const low = bb.net("W61", 62);
       slicePart(bb, w, 61, 0, low, "low");
@@ -1024,20 +1088,19 @@ export function datapathCircuit(options: DatapathOptions): Circuit {
   const halt = fetching ? b.net("HALT") : undefined;
   const go = fetching ? b.net("GO") : undefined;
   const wreg = fetching ? b.net("WREG") : (handWritey as NetId);
-  const wmem = memory ? b.net("WMEM") : undefined;
   const memOut = memory ? memoryNets(b) : undefined;
 
   // The instruction: by hand, from the ROM, or from the memory's fetch port.
   let ir: NetId;
-  let fetchCauses: { OUTSIDE: NetId; NOT4: NetId } | undefined;
+  let causef: NetId | undefined;
   if (!fetching) ir = handIr as NetId;
   else if (memOut) {
     ir = memOut.IR;
-    fetchCauses = { OUTSIDE: memOut.OUTSIDE, NOT4: memOut.NOT4 };
+    causef = memOut.CAUSEF;
   } else {
     const r = programRom(b, pc as NetId, options.rom);
     ir = r.IR;
-    fetchCauses = { OUTSIDE: r.OUTSIDE, NOT4: r.NOT4 };
+    causef = r.CAUSEF;
   }
   const d = digits(b, ir);
 
@@ -1057,7 +1120,7 @@ export function datapathCircuit(options: DatapathOptions): Circuit {
   } else {
     ctrl = decoder(
       b,
-      { K: d.K, J: d.J, C: d.C },
+      { K: d.K, J: d.J },
       DECODER_OUTPUTS[full ? "full" : memory ? "memory" : "fetch"],
     );
     op = { OP2: ctrl["OP2"] as NetId, OP1: ctrl["OP1"] as NetId, OP0: ctrl["OP0"] as NetId };
@@ -1070,13 +1133,7 @@ export function datapathCircuit(options: DatapathOptions): Circuit {
     options.registers,
   );
   const wide = stage === "jobs" ? undefined : widen(b, d.C);
-  const aluA = memory
-    ? wordSelector(
-        b,
-        { A: regs.QA, B: constant(b, "ZERO64", 64, 0n), S: ctrl["AZERO"] as NetId },
-        { name: PARTS.pickA, outs: { Y: b.net("ALUA", 64) } },
-      ).Y
-    : regs.QA;
+  const aluA = memory ? zeroOr(b, regs.QA, ctrl["AZERO"] as NetId) : regs.QA;
   const bconst = handBconst ?? ctrl["BCONST"];
   const aluB =
     wide !== undefined && bconst !== undefined
@@ -1097,24 +1154,23 @@ export function datapathCircuit(options: DatapathOptions): Circuit {
     return b.build();
   }
 
-  // The PC and its +4.
+  // The PC and its +4: at the top level until the branches' stage, which puts them in the block
+  // that works out the next PC.
   const pc4 = b.net("PC4", 64);
-  wordAdder(b, PARTS.plus4, "add-four", pc as NetId, constant(b, "FOUR", 64, 4n), pc4);
+  if (!full) wordAdder(b, PARTS.plus4, "plus4", pc as NetId, undefined, pc4);
 
   // The memory, read and written by loads and stores.
-  let back = result;
-  if (memOut && shop && wmem !== undefined) {
+  if (memOut && shop) {
     machineMemory(
       b,
       {
         PC: pc as NetId,
         ADDR: result,
         D: regs.QB,
-        WE: wmem,
         LOAD: ctrl["LOAD"] as NetId,
         STORE: ctrl["STORE"] as NetId,
         BYTE: ctrl["BYTE"] as NetId,
-        TICK: go as NetId,
+        GO: go as NetId,
         RST: rst as NetId,
         CLK: clk,
         ...shop,
@@ -1122,31 +1178,61 @@ export function datapathCircuit(options: DatapathOptions): Circuit {
       options.rom,
       memOut,
     );
-    back = wordSelector(
-      b,
-      { A: result, B: memOut.MQ, S: ctrl["LOAD"] as NetId },
-      { name: PARTS.pickLoad, outs: { Y: full ? b.net("LOADED", 64) : yIn } },
-    ).Y;
     b.output("DISPLAY", memOut.DISPLAY);
     b.output("LAMPS", memOut.LAMPS);
+    if (full) {
+      // What register Y takes: the ALU's result, the memory's word for a load, or PC + 4 for a
+      // call, as one block that opens to its two selectors.
+      const ins = {
+        RESULT: result,
+        MQ: memOut.MQ,
+        PC4: pc4,
+        LOAD: ctrl["LOAD"] as NetId,
+        CALL: ctrl["CALL"] as NetId,
+      };
+      b.scope(
+        PARTS.back,
+        "yWord",
+        (bb) => {
+          const loaded = wordSelector(
+            bb,
+            { A: result, B: memOut.MQ, S: ins.LOAD },
+            { name: PARTS.pickLoad, outs: { Y: bb.net("LOADED", 64) } },
+          ).Y;
+          wordSelector(
+            bb,
+            { A: loaded, B: pc4, S: ins.CALL },
+            { name: PARTS.pickCall, outs: { Y: yIn } },
+          );
+        },
+        { inputs: ins, outputs: { YIN: yIn } },
+      );
+    } else
+      wordSelector(
+        b,
+        { A: result, B: memOut.MQ, S: ctrl["LOAD"] as NetId },
+        { name: PARTS.pickLoad, outs: { Y: yIn } },
+      );
   }
 
   // The stop logic, and the writes it holds back.
-  const causes: Record<string, NetId> = {
-    ...(fetchCauses ?? {}),
-    ILLEGAL: ctrl["ILLEGAL"] as NetId,
-    ...(memOut ? { NOMEM: memOut.NOMEM, MISALIGN: memOut.MISALIGN, RONLY: memOut.RONLY } : {}),
-    SYSTEM: ctrl["SYSTEM"] as NetId,
+  const causes = {
+    CAUSEF: causef as NetId,
+    CAUSED: ctrl["CAUSED"] as NetId,
+    ...(memOut ? { CAUSEM: memOut.CAUSEM } : {}),
   };
-  const stops = stopLogic(b, causes, ctrl["STOP"] as NetId, halt as NetId);
-  b.not(halt as NetId, { name: PARTS.notHalt, output: go });
-  b.and([ctrl["WRITEY"] as NetId, go as NetId], { name: PARTS.andWrite, output: wreg });
-  if (wmem !== undefined)
-    b.and([ctrl["STORE"] as NetId, go as NetId], { name: PARTS.andStore, output: wmem });
+  const stops = stopLogic(
+    b,
+    causes,
+    { STOP: ctrl["STOP"] as NetId, WRITEY: ctrl["WRITEY"] as NetId },
+    { HALT: halt as NetId, GO: go as NetId, WREG: wreg },
+  );
 
-  // The next PC.
+  // The next PC: PC + 4, or in the branches' stage the branch condition and a block that chooses
+  // among PC + 4, the target PC + 4c and the ALU's result.
   let next = pc4;
   if (full) {
+    next = b.net("NEXT", 64);
     const met = branchCondition(b, {
       ZERO: flags["ZERO"] as NetId,
       MINUS: flags["MINUS"] as NetId,
@@ -1154,38 +1240,61 @@ export function datapathCircuit(options: DatapathOptions): Circuit {
       OVER: flags["OVER"] as NetId,
       J: d.J,
     });
-    const offset = timesFour(b, wide as NetId);
-    const target = b.net("TARGET", 64);
-    wordAdder(b, PARTS.target, "word-adder", pc as NetId, offset, target);
-    const taken = b.and([ctrl["BRANCH"] as NetId, met], {
-      name: PARTS.andTake,
-      output: b.net("TAKEN"),
+    const ins = {
+      PC: pc as NetId,
+      RESULT: result,
+      MET: met,
+      BRANCH: ctrl["BRANCH"] as NetId,
+      CALL: ctrl["CALL"] as NetId,
+      JUMP: ctrl["JUMP"] as NetId,
+      WIDE: wide as NetId,
+    };
+    b.scope(PARTS.next, "next", (bb) => nextPcParts(bb, ins, { NEXT: next, PC4: pc4 }), {
+      inputs: ins,
+      outputs: { NEXT: next, PC4: pc4 },
     });
-    const take = b.or([taken, ctrl["CALL"] as NetId], {
-      name: PARTS.orTake,
-      output: b.net("TAKE"),
-    });
-    const picked = wordSelector(
-      b,
-      { A: pc4, B: target, S: take },
-      { name: PARTS.pickTake, outs: { Y: b.net("TAKEPC", 64) } },
-    ).Y;
-    next = wordSelector(
-      b,
-      { A: picked, B: result, S: ctrl["JUMP"] as NetId },
-      { name: PARTS.pickJump, outs: { Y: b.net("NEXT", 64) } },
-    ).Y;
-    // A call keeps the next instruction's address in register Y.
-    wordSelector(
-      b,
-      { A: back, B: pc4, S: ctrl["CALL"] as NetId },
-      { name: PARTS.pickCall, outs: { Y: yIn } },
-    );
   }
   wordRegister(b, PARTS.pc, { D: next, EN: go as NetId, RST: rst as NetId, CLK: clk }, pc as NetId);
   b.output("HALT", halt as NetId);
   b.output("CAUSE", stops.CAUSE);
   return b.build();
+}
+
+/**
+ * The next PC's parts (the branches' stage): PC + 4; the target, PC + 4c, from the widened
+ * constant times 4 and an adder; the branch condition from the flags and the job digit; TAKE, 1
+ * for a branch whose condition is met or a call; and two selectors, the target or PC + 4 by TAKE,
+ * then the ALU's result for a jump.
+ */
+export function nextPcParts(
+  b: CircuitBuilder,
+  ins: {
+    PC: NetId;
+    RESULT: NetId;
+    MET: NetId;
+    BRANCH: NetId;
+    CALL: NetId;
+    JUMP: NetId;
+    WIDE: NetId;
+  },
+  out: { NEXT: NetId; PC4: NetId },
+): void {
+  wordAdder(b, PARTS.plus4, "plus4", ins.PC, undefined, out.PC4);
+  const offset = timesFour(b, ins.WIDE);
+  const target = b.net("TARGET", 64);
+  wordAdder(b, PARTS.target, "word-adder", ins.PC, offset, target);
+  const taken = b.and([ins.BRANCH, ins.MET], { name: PARTS.andTake, output: b.net("TAKEN") });
+  const take = b.or([taken, ins.CALL], { name: PARTS.orTake, output: b.net("TAKE") });
+  const picked = wordSelector(
+    b,
+    { A: out.PC4, B: target, S: take },
+    { name: PARTS.pickTake, outs: { Y: b.net("TAKEPC", 64) } },
+  ).Y;
+  wordSelector(
+    b,
+    { A: picked, B: ins.RESULT, S: ins.JUMP },
+    { name: PARTS.pickJump, outs: { Y: out.NEXT } },
+  );
 }
 
 export type { PortNets };

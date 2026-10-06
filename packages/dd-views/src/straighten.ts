@@ -45,6 +45,8 @@ function overlaps(a: PartBox, b: PartBox): boolean {
 }
 
 export function straighten(drawing: Drawing): Drawing {
+  // Module 8: a drawing whose wires are routed by hand is drawn where its author put it.
+  if (drawing.routes && Object.keys(drawing.routes).length) return drawing;
   const at = new Map<string, Part>(drawing.parts.map((p) => [p.id, p]));
   const box = (id: string) => {
     const p = at.get(id);

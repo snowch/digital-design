@@ -36,6 +36,12 @@ export interface CircuitViewProps {
   /** Readings of each word in the table, as numbers (Module 3). */
   readonly readings?: readonly ("unsigned" | "signed")[];
   readonly children?: ReactNode;
+  /**
+   * Module 8: the widest word whose value is written on the drawing. A datapath's 64-bit buses are
+   * many and close together, so their values are in the figure's table of buses beside it and in
+   * the readout a press or a tap gives; every narrower value is written as before.
+   */
+  readonly writtenWidth?: number;
 }
 
 type Level = "high" | "low" | "unknown" | "none";
@@ -109,6 +115,20 @@ const SEALED = new Set([
   "word-piece",
   "word-join",
   "top-bit",
+  // Module 8: the datapath's closed blocks. The decoder is Module 9's to open; the rest hold
+  // components, or one word's worth of a part the learner has already opened in an earlier module.
+  "digits",
+  "decoder",
+  "registers",
+  "stops",
+  "plus4",
+  "widen",
+  "zero-or-word",
+  "times4",
+  "word-adder",
+  "word-register-64",
+  "word-register-3",
+  "count-down",
 ]);
 
 /** Whether a block of this kind is drawn closed for good, so a learner never sees inside it. */
@@ -131,7 +151,10 @@ export function CircuitView({
   table = true,
   readings = [],
   children,
+  writtenWidth,
 }: CircuitViewProps) {
+  const written = (v: Word | undefined) =>
+    v !== undefined && (writtenWidth === undefined || v.width <= writtenWidth);
   const strings = useViewStrings();
   const id = useId();
   // A read-only drawing is straightened: parts nudged up or down so its wires run straight.
@@ -276,6 +299,7 @@ export function CircuitView({
                       {part.name ?? part.id}
                     </text>
                     {pinValue &&
+                      written(pinValue) &&
                       (part.kind === "input" && pinValue.width > 1 ? (
                         // A word's wire is wide and turns close to its pin, so the word's value
                         // sits above the pin rather than across the wire (Module 3). A value wider
@@ -399,7 +423,7 @@ export function CircuitView({
                     const wired = scene.wires.some(
                       (w) => w.from.part === part.id && w.from.port === p.port,
                     );
-                    return v && wired && !shownAtPin ? (
+                    return v && written(v) && wired && !shownAtPin ? (
                       <text
                         key={p.port}
                         x={p.at.x - box.x + 6}
