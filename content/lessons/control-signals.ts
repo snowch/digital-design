@@ -121,7 +121,7 @@ export const controlSignals: LessonInput = {
           caption: LABELS.captions.decoderOpen,
           lead: PROSE.decoderOpenLead,
           after: PROSE.decoderOpenAfter,
-          props: { libraryId: "decoder", scope: "decoder", initial: { K: 1, J: 3, C: 0 } },
+          props: { libraryId: "decoder", initial: { K: 1, J: 3, C: 0 } },
         },
       ],
     },
@@ -153,7 +153,6 @@ export const controlSignals: LessonInput = {
           lead: PROSE.decoderFaultsLead,
           props: {
             libraryId: "decoder",
-            scope: "decoder/signals",
             faults: [
               {
                 kind: "wrong-gate",

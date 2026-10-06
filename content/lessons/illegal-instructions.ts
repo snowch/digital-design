@@ -133,7 +133,6 @@ export const illegalInstructions: LessonInput = {
           after: PROSE.checksOpenAfter,
           props: {
             libraryId: "decoder",
-            scope: "decoder/checks",
             initial: { K: 8, J: 2, C: 5 },
           },
         },
@@ -167,7 +166,6 @@ export const illegalInstructions: LessonInput = {
           lead: PROSE.checkFaultsLead,
           props: {
             libraryId: "decoder",
-            scope: "decoder/checks",
             faults: [
               {
                 kind: "stuck-at",
