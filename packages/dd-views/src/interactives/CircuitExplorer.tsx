@@ -58,6 +58,8 @@ const Props = z.object({
     .default([]),
   /** Module 7: a row of bit boxes per word input; off for a 64-bit word, set by `initial`. */
   wordInputs: z.boolean().default(true),
+  /** The parts, by name, a drawing wider than its box opens on (`CircuitView`'s `focus`). */
+  focus: z.array(z.string()).optional(),
 });
 
 /** The reference table restricted to the inputs the circuit has, with a wildcard for X. */
@@ -145,6 +147,7 @@ export const CircuitExplorer = withProps(
           // say the same thing twice.
           table={own === undefined}
           scope={scope}
+          {...(data.focus ? { focus: data.focus } : {})}
           {...(data.canOpen ? { onScope: setScope } : {})}
           readings={data.readings}
         />

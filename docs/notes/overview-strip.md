@@ -99,3 +99,41 @@ after the trial went live:
 It also found every Module 8 lesson's words pointing at blocks that lie off the drawing's first
 view on a phone. The strip shows where they are; opening a figure at the part its words name is
 left for later.
+
+## Where a wide drawing opens
+
+After checkpoint 3 the author asked for the gaps the report listed to be closed, this one among
+them. A figure names the parts its words point at (`focus`), and its drawing opens with them in
+the middle of the box (`focus.ts`, `CircuitView.tsx`). Module 8's learner pass had named them in
+`fetch`, `memory-access` and `branches`. The code stepped aside for a drawing with the strip, but
+scrolled before the drawing knew it had one, so those figures opened on their parts by an accident
+of order. Opening on the named parts is now the rule, with the strip or without it, and the
+strip's frame follows.
+
+- **As many as fit, in the order given.** A phone's box shows about 320 pixels of a drawing at its
+  own size. The names are taken in order for as long as their parts fit the box together; a first
+  name too wide to fit alone is shown anyway. Before, the middle of all the names was shown, which
+  on a phone could be bare wire: `branches`' call figure opened between `next` and `yWord` with
+  neither on screen, and `memory-access`'s first figure with no named part whole. That lesson now
+  names the memory and `pickLoad` first, the load's way to R2, and `pickA` last.
+- **A part as drawn.** A part is measured on the page with its words and the values written at its
+  outputs, which reach past its box: `pickLoad` is 99 pixels across as drawn, over a box of 60. The
+  measure is taken again once the site's fonts have loaded, unless the learner has moved the
+  drawing meanwhile. A stretch up to 8 pixels wider than the box still fits, since what falls
+  outside is the halo round a word: a phone 375 pixels wide holds the memory and `pickLoad`, 318
+  pixels as drawn, in 317.
+- **A fault the learner chooses.** Its wire or its gate comes first, then the figure's own names as
+  far as they fit. A fault on a wire is found by the wire, from its driver to its nearest reader;
+  at that reader instead when the wire is longer than the box, or when it starts at the fault's
+  own fixed value, which the layout places wherever there is room (in `constants`, "BCONST stuck
+  at 0" draws its value at the far left, and acts at `pickB`). A wire is tried before a pin of the
+  same name, which the fault cuts off. A wrong gate is found by the gate, or by the block that
+  holds it, so a fault inside Module 9's control unit opens on the control unit. On a phone, Module
+  7's "C2 stuck at 0" was about 300 pixels past the first view; it now opens in the middle of the
+  box, with the two slices it joins.
+- **Two figures name their parts.** `wide-alu`'s 64-bit ALU opens on g0 and g1, as its lead asks the
+  learner to press a group; `branches`' loop on `condition` and `next`, which make NEXT, the bus its
+  lead says to watch.
+
+`focus.test.ts` holds the rule. `tests/educational/overview.spec.ts` checks the loop, the 64-bit
+ALU, and a fault in Module 7's ALU and in `memory-access`, at both widths.

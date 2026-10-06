@@ -160,7 +160,8 @@ export const memoryAccess: LessonInput = {
           caption: LABELS.captions.predictLoad,
           props: {
             libraryId: "datapath-memory",
-            focus: ["pickA", "memory", "pickLoad"],
+            // The load's way to R2 first: on a phone the memory and pickLoad fit, pickA does not.
+            focus: ["memory", "pickLoad", "pickA"],
             program: SHOW_MARGIN,
             inputs: SENSORS,
             shown: [2, 3],
@@ -192,7 +193,7 @@ export const memoryAccess: LessonInput = {
           props: {
             outcomes: PROSE.showMarginAfter,
             libraryId: "datapath-memory",
-            focus: ["pickA", "memory", "pickLoad"],
+            focus: ["memory", "pickLoad", "pickA"],
             program: SHOW_MARGIN,
             inputs: SENSORS,
             shown: [2, 3, 4, 5],

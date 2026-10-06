@@ -270,6 +270,8 @@ export const wideAlu: LessonInput = {
             libraryId: "alu8-flags-64",
             wordInputs: false,
             initial: { A: h(ALL64, 64), B: "0", OP2: 1, OP1: 1, OP0: 0 },
+            // The lead asks the learner to press a group: on a phone the first two are on screen.
+            focus: ["g0", "g1"],
           },
         },
       ],

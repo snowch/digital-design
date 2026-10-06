@@ -73,6 +73,14 @@ const Props = z.object({
   canOpen: z.boolean().default(true),
 });
 
+/**
+ * What a fault acts on, as a path from the top of the circuit: its wire's net, or its gate. A wide
+ * drawing moves there when the fault is chosen, so a learner on a phone sees what broke.
+ */
+export function faultPlace(spec: z.infer<typeof FaultSpec>): string {
+  return spec.kind === "wrong-gate" ? spec.path : spec.net;
+}
+
 export function toFault(spec: z.infer<typeof FaultSpec>): Fault {
   const fault = baseFault(spec);
   return {
@@ -104,6 +112,7 @@ export const FaultLab = withProps(
     const [chosen, setChosen] = useState<number>(-1);
     const [scope, setScope] = useState(data.scope);
     const fault = faults[chosen];
+    const spec = data.faults[chosen];
     const circuit = useMemo(
       () => (fault ? applyFaults(healthy, [fault]) : healthy),
       [healthy, fault],
@@ -158,6 +167,7 @@ export const FaultLab = withProps(
           title={strings.fault.title}
           onToggleInput={(n) => sim.toggle(n)}
           scope={scope}
+          {...(spec ? { focus: [faultPlace(spec)] } : {})}
           {...(data.canOpen ? { onScope: setScope } : {})}
         />
         <div className="fault-actions">

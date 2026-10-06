@@ -177,6 +177,8 @@ export const branches: LessonInput = {
             buses: ["RESULT", "PC4", "NEXT"],
             devices: true,
             run: true,
+            // The lead says to watch NEXT at each branch: the blocks that make it.
+            focus: ["condition", "next"],
           },
         },
       ],

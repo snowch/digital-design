@@ -19,6 +19,7 @@ import {
 import { DrillDown, StateInspector, drillLevels } from "@dd/primitives";
 import { formatWord, type Circuit, type Word } from "@dd/sim";
 
+import { focusSpan, scrollToCentre } from "./focus";
 import { BOX_PADDING, LARGE_DRAWING, OverviewStrip, useZoom } from "./Overview";
 import { labelFor, nameRepeatsKind } from "./parts";
 import { drawingAt, netOfWire, sceneOf, type PartBox } from "./scene";
@@ -59,7 +60,9 @@ export interface CircuitViewProps {
   readonly overview?: boolean;
   /**
    * Module 8: the parts, by name, a drawing wider than its box opens on: scrolled so they stand
-   * in the middle of the box, as the lesson's words point at them.
+   * in the middle of the box, as the lesson's words point at them. A name may also be a signal's,
+   * or a path into a block, which finds the block (`focus.ts`). The drawing moves there again when
+   * it changes, as when a learner chooses a fault, and the strip's frame follows.
    */
   readonly focus?: readonly string[];
 }
@@ -215,6 +218,17 @@ export function CircuitView({
     return { heldNets: held, heldParts: parts };
   }, [sub]);
   const wired = useMemo(() => new Set(scene.wires.map((w) => w.from.part)), [scene]);
+  // Module 8: in a drawing placed by hand, a wire whose net a fault holds still runs from its old
+  // driver. It carries the held value, and is drawn as held.
+  const drawnNets = useMemo(
+    () =>
+      scene.wires.map((w) => {
+        const drawn = netOfWire(sub, w.from);
+        const heldBy = drawn !== undefined ? heldNets.get(drawn) : undefined;
+        return { net: heldBy ?? drawn, held: heldBy !== undefined };
+      }),
+    [scene, sub, heldNets],
+  );
   // The net under the pointer, focused, or last pressed: every wire of it lights up together.
   // A wire's name and value show while it is pointed at or focused, and stay after a press or a
   // tap until another wire is pressed, so a phone, which has no pointing, shows them too.
@@ -235,21 +249,49 @@ export function CircuitView({
   );
   const wanted = overview ?? scene.width >= LARGE_DRAWING;
   const large = wanted && boxWidth > 0 && scene.width > boxWidth - BOX_PADDING;
-  // The parts the lesson names, in the middle of the box when the drawing first shows; not when
-  // the zoomable strip is there, which has its own way about.
+  const zoom = useZoom(large ? box : null, scene.width, scene.height, boxWidth - BOX_PADDING);
+  // The things the lesson names, in the middle of the box when the drawing first shows, and again
+  // when the drawing changes (a fault chosen). After the zoom's own effects, so a drawing that
+  // starts again at its own size is measured at that size; the strip's frame follows the scroll.
   const focusKey = focus?.join(" ") ?? "";
   useEffect(() => {
-    if (!box || large || focusKey === "") return;
-    const names = new Set(focusKey.split(" "));
-    const parts = scene.boxes.filter((b) => names.has(b.part.name ?? b.part.id));
-    if (parts.length === 0 || box.scrollWidth <= box.clientWidth + 1) return;
-    const left = Math.min(...parts.map((b) => b.x));
-    const right = Math.max(...parts.map((b) => b.x + b.w));
-    const svg = box.querySelector("svg.circuit");
-    const scale = svg ? svg.getBoundingClientRect().width / scene.width : 1;
-    box.scrollLeft = Math.max(0, ((left + right) / 2) * scale - box.clientWidth / 2);
-  }, [box, large, focusKey, scene]);
-  const zoom = useZoom(large ? box : null, scene.width, scene.height, boxWidth - BOX_PADDING);
+    const svg = box?.querySelector("svg.circuit");
+    if (!box || !svg || focusKey === "") return;
+    let placed = -1;
+    const place = () => {
+      if (box.scrollWidth <= box.clientWidth + 1) return;
+      const drawn = svg.getBoundingClientRect();
+      const scale = drawn.width / scene.width;
+      const nets = drawnNets.map((d) => (d.net !== undefined ? sub.nets[d.net]?.name : undefined));
+      // A part as drawn, its words and written values with it; a pin as its box.
+      const parts = [...svg.querySelectorAll(".parts > [data-path]")];
+      const measure = (b: PartBox) => {
+        const path = fullPath(scope, b.part.id);
+        const r = parts
+          .find((el) => el.getAttribute("data-path") === path)
+          ?.getBoundingClientRect();
+        return r
+          ? { left: (r.left - drawn.left) / scale, right: (r.right - drawn.left) / scale }
+          : { left: b.x, right: b.x + b.w };
+      };
+      const names = focusKey.split(" ");
+      const span = focusSpan(scene, nets, scope, names, box.clientWidth / scale, measure);
+      if (!span) return;
+      const inset = drawn.left - box.getBoundingClientRect().left - box.clientLeft + box.scrollLeft;
+      box.scrollLeft = scrollToCentre(span, scale, box.clientWidth, inset);
+      placed = box.scrollLeft;
+    };
+    place();
+    // The words are measured as drawn: again once the site's fonts have loaded, which widens them,
+    // unless the learner has moved the drawing meanwhile.
+    let current = true;
+    void document.fonts?.ready.then(() => {
+      if (current && box.scrollLeft === placed) place();
+    });
+    return () => {
+      current = false;
+    };
+  }, [box, focusKey, scene, sub, drawnNets, scope]);
   // The trail of opened blocks, each named by its instance name, or by its kind's label when the
   // name says no more (the `dff` block of the `dff` circuit). Two levels with one label collapse
   // into the deeper one, and the trail is drawn only when there is a block to open or to leave.
@@ -311,11 +353,7 @@ export function CircuitView({
           <title id={`${id}-title`}>{title}</title>
           <g className="wires">
             {scene.wires.map((w, i) => {
-              const drawn = netOfWire(sub, w.from);
-              // Module 8: in a drawing placed by hand, a wire whose net a fault holds still runs
-              // from its old driver. It carries the held value, and is drawn as held.
-              const heldBy = drawn !== undefined ? heldNets.get(drawn) : undefined;
-              const net = heldBy ?? drawn;
+              const { net, held } = drawnNets[i] ?? { net: undefined, held: false };
               const value = net !== undefined ? values?.[net] : undefined;
               const level = levelOf(value);
               const name = net !== undefined ? (sub.nets[net]?.name ?? "") : "";
@@ -324,7 +362,7 @@ export function CircuitView({
               return (
                 <g
                   key={i}
-                  className={`wire wire-${level}${wide ? " wire-word" : ""}${isHot ? " wire-hot" : ""}${heldBy !== undefined ? " wire-held" : ""}`}
+                  className={`wire wire-${level}${wide ? " wire-word" : ""}${isHot ? " wire-hot" : ""}${held ? " wire-held" : ""}`}
                   data-net={name}
                   role="button"
                   tabIndex={0}

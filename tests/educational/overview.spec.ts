@@ -5,7 +5,7 @@
 // a press, a drag or the keys, and a zoom from fitting the box to twice its size, from the buttons,
 // from two fingers and from a trackpad's pinch. The branches lesson's loop stands for them all.
 
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 
 import { LARGE_DRAWING } from "@dd/dd-views";
 
@@ -19,6 +19,17 @@ const box = (page: Page) => figure(page).locator(".circuit-scroll");
 
 async function drawnWidth(page: Page): Promise<number> {
   return (await drawing(page).boundingBox())?.width ?? 0;
+}
+
+/**
+ * Whether `part` lies across the drawing's box `scroll`, left to right, as shown now: all of it but
+ * the halo round its words, 4 pixels at most (`FIT_SLACK`).
+ */
+async function inBox(scroll: Locator, part: Locator): Promise<boolean> {
+  const b = await scroll.boundingBox();
+  const p = await part.boundingBox();
+  if (!b || !p) return false;
+  return p.x >= b.x - 4 && p.x + p.width <= b.x + b.width + 4;
 }
 
 /** Scrolls the page so the drawing's box starts `y` pixels below the window's top. */
@@ -212,5 +223,67 @@ test.describe("a drawing much wider than its box", () => {
     await boxAt(page, -300);
     const bar = (await figure(page).locator(".overview-bar").boundingBox())!;
     expect(Math.abs(bar.y)).toBeLessThan(2);
+  });
+});
+
+test.describe("a wide drawing opens on what its words name", () => {
+  test("the loop opens on the blocks that make NEXT, with the strip's frame on them", async ({
+    page,
+  }) => {
+    await openLesson(page, "branches");
+    await figure(page).scrollIntoViewIfNeeded();
+    for (const name of ["condition", "next"])
+      await expect
+        .poll(() => inBox(box(page), drawing(page).locator(`[data-path="${name}"]`)), name)
+        .toBe(true);
+    // The box is scrolled, at a phone's width and a desktop's, and the frame stands where it is.
+    expect(await box(page).evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+    await expect
+      .poll(() =>
+        figure(page)
+          .locator(".overview-frame")
+          .evaluate((f) => f.style.transform),
+      )
+      .not.toMatch(/^translate\(0px/);
+  });
+
+  test("the 64-bit ALU opens on two of the groups its lead asks the learner to press", async ({
+    page,
+  }) => {
+    await openLesson(page, "wide-alu");
+    const f = page.locator('[data-interactive="levels-64"]');
+    await f.scrollIntoViewIfNeeded();
+    const scroll = f.locator(".circuit-scroll");
+    for (const name of ["g0", "g1"])
+      await expect
+        .poll(() => inBox(scroll, scroll.locator(`svg.circuit [data-path="${name}"]`)), name)
+        .toBe(true);
+  });
+
+  test("a fault chosen far along the drawing comes into view, held wire and all", async ({
+    page,
+  }) => {
+    await openLesson(page, "alu-jobs");
+    const f = page.locator('[data-interactive="job-faults"]');
+    await f.scrollIntoViewIfNeeded();
+    const scroll = f.locator(".circuit-scroll");
+    await f.getByRole("radio", { name: "C2 stuck at 0" }).check();
+    // C2 runs from bit1's carry out to bit2's carry in, 600 pixels in: off a phone's first view.
+    const held = scroll.locator('svg.circuit .wire-held[data-net="C2"]').first();
+    await expect.poll(() => inBox(scroll, held)).toBe(true);
+    for (const name of ["bit1", "bit2"])
+      expect(await inBox(scroll, scroll.locator(`svg.circuit [data-path="${name}"]`)), name).toBe(
+        true,
+      );
+    // A datapath figure brings its fault first, then its own parts as far as they fit.
+    await openLesson(page, "memory-access");
+    const m = page.locator('[data-interactive="memory-faults"]');
+    await m.scrollIntoViewIfNeeded();
+    await m.getByRole("radio", { name: "LOAD stuck at 0" }).check();
+    const mScroll = m.locator(".circuit-scroll");
+    for (const name of ["memory", "pickLoad"])
+      await expect
+        .poll(() => inBox(mScroll, mScroll.locator(`svg.circuit [data-path="${name}"]`)), name)
+        .toBe(true);
   });
 });

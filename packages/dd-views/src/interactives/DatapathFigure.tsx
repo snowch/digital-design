@@ -46,7 +46,7 @@ import { TimingDiagram } from "../TimingDiagram";
 import { MicroOps, SignalsTable } from "./ControlViews";
 import { StateDiagram } from "./StateMachine";
 import { format, useViewStrings } from "../strings";
-import { FaultSpec, toFault } from "./FaultLab";
+import { FaultSpec, faultPlace, toFault } from "./FaultLab";
 import { withProps } from "./props";
 
 /** How many edges "Run until it stops" makes before it gives up on a machine that never stops. */
@@ -85,7 +85,10 @@ const Props = z.object({
   canOpen: z.boolean().default(true),
   /** The whole drawing small above it, and zoom: a large drawing has them unless this is false. */
   overview: z.boolean().optional(),
-  /** The parts, by name, the drawing opens on when it is wider than its box. */
+  /**
+   * The parts, by name, the drawing opens on when it is wider than its box: as many as fit, in the
+   * order given (`focus.ts`). A fault the learner chooses comes first, then these.
+   */
   focus: z.array(z.string()).optional(),
   /** Faults the learner may put in, one at a time; the figure starts again with each. */
   faults: z.array(FaultSpec).default([]),
@@ -152,6 +155,9 @@ export const DatapathFigure = withProps(
     const faults = useMemo(() => data.faults.map(toFault), [data.faults]);
     const [faultAt, setFaultAt] = useState(-1);
     const fault = faults[faultAt];
+    // The fault the learner has chosen first, then the parts the figure names, as far as they fit.
+    const chosenFault = data.faults[faultAt];
+    const focus = chosenFault ? [faultPlace(chosenFault), ...(data.focus ?? [])] : data.focus;
     const built = useMemo(
       () => (fault ? { ...healthy, circuit: applyFaults(healthy.circuit, [fault]) } : healthy),
       [healthy, fault],
@@ -434,7 +440,7 @@ export const DatapathFigure = withProps(
           table={false}
           writtenWidth={4}
           overview={data.overview}
-          {...(data.focus ? { focus: data.focus } : {})}
+          {...(focus ? { focus } : {})}
           {...(data.canOpen ? { onScope: setScope } : {})}
         />
         {committed && status && (
