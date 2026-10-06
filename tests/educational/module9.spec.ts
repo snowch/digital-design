@@ -184,6 +184,26 @@ test.describe("Module 9's saved work", () => {
 });
 
 test.describe("Module 9's figures", () => {
+  test("the timelines show one address reaching 7C0, and each enable before its edge", async ({
+    page,
+  }) => {
+    await openLesson(page, "several-edges");
+    const port = page.locator('[data-interactive="one-port"]');
+    await port.scrollIntoViewIfNeeded();
+    // The state lane writes the controller's states by name; the store's address is the ALU's.
+    await expect(port).toContainText("MEMORY");
+    await expect(port).toContainText("7C0");
+    await expect(port).toContainText("480107C0");
+    await expect(port).toContainText(format(V.machine8.edgeMark, { n: 8 }));
+    await openLesson(page, "micro-operations");
+    const enables = page.locator('[data-interactive="enables"]');
+    await enables.scrollIntoViewIfNeeded();
+    for (const lane of ["IREN", "HOLDAB", "HOLDR", "WREG", "PCEN", "GO"])
+      await expect(enables).toContainText(lane);
+    await expect(enables).toContainText("84000000");
+    await expect(enables).not.toContainText("HOLDM");
+  });
+
   test("the decoder's table and the map are read off its circuit", async ({ page }) => {
     await openLesson(page, "control-signals");
     const table = page.locator("#ix-signals-table table.control-signals-table");

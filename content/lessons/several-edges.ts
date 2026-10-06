@@ -22,6 +22,15 @@ import {
   STATES_START,
 } from "./module9";
 
+/**
+ * The motivation's run: a constant job, then a store. The memory's one address is the PC at each
+ * fetch and the ALU's result at the store's memory edge, while IR keeps each instruction. Not a
+ * load: the prediction after it asks how many edges a load takes.
+ */
+export const ONE_PORT = `R1 <= 5
+word[display] <= R1
+stop`;
+
 const FETCHPORT_CONSTRUCTS = [
   "module",
   "ports",
@@ -136,7 +145,32 @@ export const severalEdges: LessonInput = {
   introduces: ["instruction register"],
   sections: [
     { kind: "question", title: LABELS.titles.question, prose: PROSE.question },
-    { kind: "motivation", title: LABELS.titles.motivation, prose: PROSE.motivation },
+    {
+      kind: "motivation",
+      title: LABELS.titles.motivation,
+      prose: PROSE.motivation,
+      interactives: [
+        {
+          id: "one-port",
+          kind: "edge-timeline",
+          timeModel: "settle",
+          caption: LABELS.captions.onePort,
+          lead: PROSE.onePortLead,
+          after: PROSE.onePortAfter,
+          props: {
+            libraryId: "machine-edges",
+            program: ONE_PORT,
+            edges: 8,
+            signals: [
+              { net: "CLK" },
+              { net: "S", show: "state" },
+              { net: "ADDR", show: "address" },
+              { net: "IR", show: "word" },
+            ],
+          },
+        },
+      ],
+    },
     {
       kind: "prediction",
       title: LABELS.titles.prediction,

@@ -24,6 +24,13 @@ import {
   edgeOutputs,
 } from "./module9";
 
+/**
+ * The explanation's run: the motivation's R3 ← R1 - R2, then a stop. Each enable is 1 in the
+ * state before its edge, PCEN with the last, and GO falls in the stop's READ.
+ */
+export const SUBTRACT_STOP = `R3 <= R1 - R2
+stop`;
+
 const OUTPUTS_CONSTRUCTS = [
   "module",
   "ports",
@@ -274,7 +281,37 @@ export const microOperations: LessonInput = {
         },
       ],
     },
-    { kind: "explanation", title: LABELS.titles.explanation, prose: PROSE.explanation },
+    {
+      kind: "explanation",
+      title: LABELS.titles.explanation,
+      prose: PROSE.explanation,
+      interactives: [
+        {
+          id: "enables",
+          kind: "edge-timeline",
+          timeModel: "settle",
+          caption: LABELS.captions.enables,
+          lead: PROSE.enablesLead,
+          after: PROSE.enablesAfter,
+          props: {
+            libraryId: "machine-edges",
+            program: SUBTRACT_STOP,
+            edges: 6,
+            signals: [
+              { net: "CLK" },
+              { net: "S", show: "state" },
+              { net: "IR", show: "word" },
+              { net: "IREN" },
+              { net: "HOLDAB" },
+              { net: "HOLDR" },
+              { net: "WREG" },
+              { net: "PCEN" },
+              { net: "GO" },
+            ],
+          },
+        },
+      ],
+    },
     { kind: "generalisation", title: LABELS.titles.generalisation, prose: PROSE.generalisation },
     {
       kind: "challenge",

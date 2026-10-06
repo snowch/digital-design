@@ -28,6 +28,7 @@ export const LABELS = {
     c2: "Next state, written",
   },
   captions: {
+    onePort: "A constant job and a store, edge by edge, one lane per signal or bus.",
     predictLoadEdges: "Predict the load's edges, then check.",
     colderEdges: "Run the program edge by edge.",
     writeFetchport: "Write the address and the register and run the tests.",

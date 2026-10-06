@@ -23,6 +23,7 @@ import { z } from "zod";
 
 import {
   ACCESSES,
+  CONTROL_STATES,
   accessVerdict,
   buildDatapath,
   instructionFields,
@@ -215,23 +216,32 @@ export const WideningFigure = withProps(
 // ---------------------------------------------------------------------------------------------
 
 const TimelineProps = z.object({
-  /** The stage's drawing: datapath-fetch, -memory or -full. */
+  /** The stage's drawing: datapath-fetch, -memory or -full; Module 9's machine-edges. */
   libraryId: z.string(),
   program: z.string(),
   inputs: z.record(z.string(), z.union([z.string(), z.number()])).default({}),
   /** Edges run after the reset and drawn. */
   edges: z.number().int().min(1).max(12),
-  /** The buses drawn, in order: a word's values are written as an address, a word or signed. */
+  /**
+   * The buses drawn, in order: a word's values are written as an address, a word or signed;
+   * Module 9's `state` writes the controller's state by its name, FETCH to WRITE. A signal of
+   * Module 9's control unit, named inside it (`control/PCEN`), may be given by its name alone.
+   */
   signals: z
     .array(
       z.object({
         net: z.string(),
         label: z.string().optional(),
-        show: z.enum(["address", "word", "signed", "level"]).default("level"),
+        show: z.enum(["address", "word", "signed", "level", "state"]).default("level"),
       }),
     )
     .min(1),
 });
+
+/** The controller's states by their codes, as its lane writes them. */
+const STATE_NAMES: Readonly<Record<string, string>> = Object.fromEntries(
+  Object.entries(CONTROL_STATES).map(([name, code]) => [code, name]),
+);
 
 export const EdgeTimeline = withProps(
   TimelineProps,
@@ -266,9 +276,14 @@ export const EdgeTimeline = withProps(
     // scrolled drawing opens at the start.
     const [cursor, setCursor] = useState(run.from + 1);
     // Each word's values in the run, written as the lesson asks: short enough for its lane.
+    const c = run.circuit;
+    const known = (n: string) =>
+      [...c.inputs, ...c.outputs].some((p) => p.name === n) || c.nets.some((x) => x.name === n);
     const signals = data.signals.map((s) => {
-      if (s.show === "level") return s.label ? { net: s.net, label: s.label } : s.net;
-      const net = run.circuit.nets.find((n) => n.name === s.net);
+      const name = known(s.net) ? s.net : `control/${s.net}`;
+      if (s.show === "level") return { net: name, label: s.label ?? s.net };
+      if (s.show === "state") return { net: name, label: s.label ?? s.net, labels: STATE_NAMES };
+      const net = run.circuit.nets.find((n) => n.name === name);
       const labels: Record<string, string> = {};
       for (const e of run.trace.events) {
         if (e.net !== net?.id) continue;
@@ -284,7 +299,7 @@ export const EdgeTimeline = withProps(
                   : w.value
                 ).toString();
       }
-      return { net: s.net, label: s.label ?? s.net, labels };
+      return { net: name, label: s.label ?? s.net, labels };
     });
     return (
       <div className="machine-figure edge-timeline" data-interactive={interactive.id}>

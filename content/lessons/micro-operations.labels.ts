@@ -28,6 +28,7 @@ export const LABELS = {
     c2: "Controller, written",
   },
   captions: {
+    enables: "One instruction and a stop, edge by edge, with the enables.",
     predictTook: "Predict the register the next edge writes, then check.",
     fourViews: "Clock edges and watch the four views move.",
     writeOutputs: "Write the output logic and run the tests.",
