@@ -202,8 +202,9 @@ change was tested:
   `machine9` and `machine9-call`.
 - **The drawing**: `placedInside` accepts parts with a placement of their own (a fault's `at`), and
   eight block kinds are drawn closed.
-- Module 8's overview strip and zoom (a trial on `main`) is turned on for one Module 9 figure, the
-  four views, the module's widest drawing seen most; see the questions.
+- Module 8's overview strip and zoom (a trial on `main`) was turned on for the four views, then
+  off again at the managing session's word (12:52): the trial stays on one figure until the author
+  has tried it. The four views are where it would help most.
 
 ## Reviews
 

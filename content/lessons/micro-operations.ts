@@ -214,8 +214,6 @@ export const microOperations: LessonInput = {
             microOps: true,
             signals: VIEW_SIGNALS,
             states: true,
-            // The whole drawing small above it, and zoom: Module 8's trial, on the four views.
-            overview: true,
             timing: ["IREN", "HOLDAB", "HOLDR", "HOLDM", "WREG", "PCEN"],
           },
         },
