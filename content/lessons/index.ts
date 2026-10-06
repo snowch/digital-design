@@ -38,6 +38,7 @@ import { instructions } from "./instructions";
 import { constants } from "./constants";
 import { fetch } from "./fetch";
 import { memoryAccess } from "./memory-access";
+import { branches } from "./branches";
 
 const INPUTS: readonly LessonInput[] = [
   signals,
@@ -72,6 +73,7 @@ const INPUTS: readonly LessonInput[] = [
   constants,
   fetch,
   memoryAccess,
+  branches,
 ];
 
 export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(

@@ -58,6 +58,15 @@ export const registerTransfer: LessonInput = {
   order: 3,
   objectives: [...LABELS.objectives],
   introduces: ["register transfer"],
+  // Module 8 rations "branch" for the machine's branch instructions, introduced in the lesson
+  // branches; this lesson says "a branch" of an `if` chain, the word's everyday sense.
+  termExemptions: [
+    {
+      term: "branch",
+      reason:
+        "Names one arm of an if chain in SystemVerilog, the everyday sense, not the machine's branch instruction Module 8 introduces.",
+    },
+  ],
   sections: [
     {
       kind: "question",

@@ -1,40 +1,46 @@
 // Copyright © 2026 Christopher Snow
 
-// Titles, objectives, captions and labels of the lesson memory-access. Placeholders until drafted.
+// Titles, objectives, captions and labels of the lesson memory-access, drafted by the prose process from
+// a brief of facts (docs/notes/module-8-datapath.md and its briefs) and checked against the lesson.
 
 export const LABELS = {
-  title: "Draft 1",
-  objectives: ["Draft 2", "Draft 3", "Draft 4", "Draft 5"],
+  title: "How does an instruction read or write memory?",
+  objectives: [
+    "Read a load's and a store's digits and their address.",
+    "Predict what a load writes into a register.",
+    "Write the checks the memory makes on a load or store.",
+    "Complete the datapath's text with its two new selectors.",
+  ],
   titles: {
-    question: "Draft 6",
-    motivation: "Draft 7",
-    prediction: "Draft 8",
-    investigation: "Draft 9",
-    construction: "Draft 10",
-    failureExperiment: "Draft 11",
-    explanation: "Draft 12",
-    generalisation: "Draft 13",
-    challenge: "Draft 14",
-    reflection: "Draft 15",
+    question: "Words at addresses",
+    motivation: "Loads and stores",
+    prediction: "Load from a sensor",
+    investigation: "The display's margin",
+    construction: "The checks written",
+    failureExperiment: "When LOAD and STORE break",
+    explanation: "One memory, two reads",
+    generalisation: "Bytes, RAM and devices",
+    challenge: "Complete the datapath",
+    reflection: "What comes next",
   },
   challengeTitles: {
-    c1: "Draft 16",
-    c2: "Draft 17",
+    c1: "Memory checks, written",
+    c2: "Datapath, complete",
   },
   captions: {
-    predictLoad: "Draft 18",
-    showMargin: "Draft 19",
-    writeMemcheck: "Draft 20",
-    memoryFaults: "Draft 21",
-    writeMemory: "Draft 22",
+    predictLoad: "Predict what R2 holds after the next edge, then check.",
+    showMargin: "Run the program and watch the memory.",
+    writeMemcheck: "Write the checks and run the tests.",
+    memoryFaults: "Choose a fault and run the program.",
+    writeMemory: "Complete the text and run the tests.",
   },
   options: {
-    p1Reading: "Draft 23",
-    p1Address: "Draft 24",
-    p1Unknown: "Draft 25",
+    p1Reading: "-184",
+    p1Address: "2008",
+    p1Unknown: "X",
   },
   faults: {
-    loadLow: "Draft 26",
-    storeHigh: "Draft 27",
+    loadLow: "LOAD held at 0",
+    storeHigh: "STORE held at 1",
   },
 } as const;

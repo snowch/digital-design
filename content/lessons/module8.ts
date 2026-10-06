@@ -380,3 +380,43 @@ export const MEMORY_REFERENCE = memoryText(`  always_comb
 export const MEMORY_START = memoryText(`  assign ALUA = QA;
   assign YIN = RESULT;
 `);
+
+// Lesson 8.5: the branch condition as a module, and the next PC completed in the whole text.
+
+const CONDITION_HEADER = `module condition(
+  input logic [3:0] J,
+  input logic ZERO,
+  input logic MINUS,
+  input logic COUT,
+  input logic OVER,
+  output logic MET
+);`;
+
+export const CONDITION_REFERENCE = `${CONDITION_HEADER}
+  always_comb
+    case (J)
+      4'h0: MET = 1'b1;
+      4'h1: MET = 1'b0;
+      4'h2: MET = ZERO;
+      4'h3: MET = ~ZERO;
+      4'h4: MET = ~COUT;
+      4'h5: MET = COUT;
+      4'h6: MET = MINUS ^ OVER;
+      4'h7: MET = ~(MINUS ^ OVER);
+      default: MET = 1'b0;
+    endcase
+endmodule
+`;
+
+export const CONDITION_START = `${CONDITION_HEADER}
+  always_comb
+    case (J)
+      4'h0: MET = 1'b1;
+      default: MET = 1'b0;
+    endcase
+endmodule
+`;
+
+/** The whole datapath with the next PC left as PC + 4, for the learner to complete. */
+export const NEXT_START = datapathText(`  assign NEXT = PC4;
+`);

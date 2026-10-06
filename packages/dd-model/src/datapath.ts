@@ -23,8 +23,9 @@
 // good, and say what they are: the register file is two banks of the simulator's `memory`
 // primitive (Module 6's), 32 bits each, since 16 words of 64 bits is one bit more than a net
 // holds; the ROM is a `rom` primitive, whose words are its parameters, not a net; the RAM is eight
-// banks of bytes, as Module 6's memory of bytes is two; the PC and the devices' words are Module
-// 5's registers of flip-flops; the word selectors at the top level are Module 3's selector, one
+// banks of bytes, as Module 6's memory of bytes is two; the PC and the devices' words are one-word
+// memories written at an edge (`edgeRegister`), which behave as Module 5's registers do without
+// their latches' passing values in a stepped edge; the word selectors at the top level are Module 3's selector, one
 // per bit (Module 6's word selector). Inside the closed memory, choosing among whole words is
 // done with the simulator's `mux2`, a primitive that behaves as one selector per bit does and
 // that every register with an enable already uses, so the memory's thousands of selectors are
@@ -39,10 +40,8 @@ import { CircuitBuilder, type Circuit, type NetId } from "@dd/sim";
 
 import { aluParts } from "./alu";
 import { fullAdder, selector4, split4, type PortNets } from "./combinational";
-import { dFlipFlop } from "./flipflop";
 import { CAUSES } from "./machine";
 import { wordSelector } from "./memory";
-import { register } from "./register";
 
 export const STAGES = ["jobs", "constants", "fetch", "memory", "full"] as const;
 export type Stage = (typeof STAGES)[number];
@@ -312,28 +311,51 @@ function wordRegister(
   q: NetId,
   kind = "word-register-64",
 ) {
-  b.scope(
-    name,
-    kind,
-    (bb) => {
-      register(bb, ins.D, ins.CLK, {
-        name: "register",
-        reset: ins.RST,
-        ...(ins.EN !== undefined ? { enable: ins.EN } : {}),
-        q,
-      });
+  b.scope(name, kind, (bb) => edgeRegister(bb, "register", ins, q), {
+    // D first, then the reset, the enable and the clock, so the drawing's two pins (RST and
+    // CLK) have a port between them and their boxes do not touch.
+    inputs: {
+      D: ins.D,
+      RST: ins.RST,
+      ...(ins.EN !== undefined ? { EN: ins.EN } : {}),
+      CLK: ins.CLK,
     },
+    outputs: { Q: q },
+  });
+}
+
+/**
+ * A register that changes at a rising edge only: one word of the simulator's `memory`, written at
+ * every edge where EN or RST is 1, with 0 in place of D while RST is 1. It behaves as Module 5's
+ * register with a reset and an enable does, but as one part: a register of gate-level flip-flops
+ * passes its latches' passing values on through the settle model's steps, so a datapath stepped
+ * through one edge would show its PC and its devices' words change and change back before they
+ * settle. Here every register of the datapath takes its new word at the edge's first step.
+ */
+function edgeRegister(
+  b: CircuitBuilder,
+  name: string,
+  ins: { D: NetId; EN?: NetId; RST: NetId; CLK: NetId },
+  q: NetId,
+) {
+  const width = b.widthOf(q);
+  const d = mux(b, ins.RST, ins.D, constant(b, `${name}Zero`, width, 0n), `${name}D`);
+  const we = ins.EN === undefined ? ins.RST : b.or([ins.EN, ins.RST], { name: `${name}Write` });
+  const state = b.net(`${name}State`, width + 1);
+  const last = b.net(`${name}Last`);
+  b.component(
+    "memory",
     {
-      // D first, then the reset, the enable and the clock, so the drawing's two pins (RST and
-      // CLK) have a port between them and their boxes do not touch.
-      inputs: {
-        D: ins.D,
-        RST: ins.RST,
-        ...(ins.EN !== undefined ? { EN: ins.EN } : {}),
-        CLK: ins.CLK,
-      },
-      outputs: { Q: q },
+      CLK: ins.CLK,
+      WE: we,
+      WA: constant(b, `${name}At`, 1, 0n),
+      D: d,
+      R0: constant(b, `${name}Read`, 1, 0n),
+      state,
+      last,
     },
+    { Q0: q, stateNext: state, lastNext: last },
+    { name, params: { words: 1, width, reads: 1 } },
   );
 }
 
@@ -892,11 +914,17 @@ export function machineMemory(
       );
       // The door's last level, kept inverted so a reset (to 0) means "no edge before".
       const quiet = bb.net("QUIET");
-      dFlipFlop(bb, bb.not(ins.DOOR, { name: "notDoor" }), ins.CLK, {
-        name: "doorBefore",
-        reset: ins.RST,
-        q: quiet,
-      });
+      edgeRegister(
+        bb,
+        "doorBefore",
+        {
+          D: bb.not(ins.DOOR, { name: "notDoor" }),
+          EN: constant(bb, "always", 1, 1n),
+          RST: ins.RST,
+          CLK: ins.CLK,
+        },
+        quiet,
+      );
       const opened = bb.and([ins.DOOR, quiet], { name: "opened", output: bb.net("OPENED") });
       const writeWaiting = writeDev(6);
       const waitingBits = [reach, opened].map((set, i) => {
@@ -908,7 +936,12 @@ export function machineMemory(
           name: `stays${i}`,
         });
         const next = bb.or([set, stays], { name: `next${i}` });
-        dFlipFlop(bb, next, ins.CLK, { name: `waiting${i}`, reset: ins.RST, q: keep });
+        edgeRegister(
+          bb,
+          `waiting${i}`,
+          { D: next, EN: constant(bb, `always${i}`, 1, 1n), RST: ins.RST, CLK: ins.CLK },
+          keep,
+        );
         return keep;
       });
       const zeros = (w: number, name: string) => constant(bb, name, w, 0n);

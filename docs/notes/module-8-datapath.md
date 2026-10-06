@@ -93,3 +93,17 @@ wrote every learner-facing sentence from a brief of checked facts.
   pointing ahead); each now lists the exemption.
 - 07:12 to 07:20 Briefs: a shared fact sheet (`briefs/00-module.md`) and, per lesson, three prose
   briefs and one for labels. Lesson 8.2, `constants`, built while 8.1's drafts ran.
+- 07:20 to 07:35 Lessons 8.3 (`fetch`) and 8.4 (`memory-access`): structure, challenges and facts
+  tests, then briefs and drafts. A fault's fixed value, added to a hand-placed drawing, landed in
+  rows below the parts and on top of wires; a lesson can now say where it is drawn (`at` on a
+  stuck-at fault), and each Module 8 fault has a place checked with the scene's own problems.
+  The term gate failed on `register-transfer` ("a branch" of an `if` chain) once 8.5 rationed
+  "branch", as planned; it lists the exemption.
+- 07:35 to 07:50 Lesson 8.5 (`branches`), with the capstone. Stepping one edge of the whole
+  datapath showed PC going to 000 and back, and IR to the program's first instruction and back,
+  before settling: the PC and the devices' words were Module 5's registers of gate-level
+  flip-flops, whose latches pass values on through the settle model's steps. They are now one
+  word of the `memory` primitive each, written at an edge where EN or RST is 1 (`edgeRegister`),
+  and the 37 programs still pass on the drawing and the text. The decoder's and the ALU's own
+  passing values remain, as the gates make them: HALT passes through 1 on the way to 0, and the
+  lesson says so.
