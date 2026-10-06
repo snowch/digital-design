@@ -6,8 +6,8 @@
 
 import { Component, useState, type ErrorInfo, type ReactNode } from "react";
 
-import type { Interactive, Lesson } from "@dd/lesson-schema";
-import { timeModelsUsed } from "@dd/lesson-schema";
+import type { Interactive, Lesson } from "@platform/lesson-schema";
+import { NO_MODEL, timeModelsUsed } from "@platform/lesson-schema";
 
 import type { Book } from "./book";
 import { ChallengeRunner } from "./ChallengeRunner";
@@ -80,7 +80,7 @@ function InteractiveFigure({
   // A badge only on a figure that runs the simulator: it names the rules that made what the
   // figure shows, and opens that model's note where the reader is, not at the foot of the page.
   // A figure that runs nothing gets no badge: a label saying what a figure is not tells nothing.
-  const simulated = interactive.timeModel !== "none";
+  const simulated = interactive.timeModel !== NO_MODEL;
   const badge = strings.lesson.timeModel[interactive.timeModel] ?? interactive.timeModel;
   const note = simulated
     ? book.timeModelNotes[interactive.timeModel as keyof Book["timeModelNotes"]]

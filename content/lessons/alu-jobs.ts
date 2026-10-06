@@ -6,7 +6,7 @@
 // are the model's (packages/dd-model: alu.ts and library-alu.ts); the numbers the prose states
 // are pinned by alu-jobs.facts.test.ts, read off the figures' own props.
 
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 
 import { LABELS } from "./alu-jobs.labels";
 import { PROSE } from "./alu-jobs.prose";

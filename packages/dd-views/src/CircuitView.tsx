@@ -17,7 +17,7 @@ import {
 } from "react";
 
 import { hexOfWord } from "@dd/dd-model";
-import { DrillDown, StateInspector, drillLevels } from "@dd/primitives";
+import { DrillDown, StateInspector, drillLevels } from "@platform/primitives";
 import { formatWord, type Circuit, type Word } from "@dd/sim";
 
 import { focusSpan, scrollToCentre } from "./focus";

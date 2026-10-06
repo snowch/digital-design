@@ -7,7 +7,7 @@ import { expect, type Locator, type Page } from "@playwright/test";
 
 import { LESSONS } from "@dd/content";
 import { DEFAULT_VIEW_STRINGS as V, format, labelFor, partName, type Drawing } from "@dd/dd-views";
-import { DEFAULT_STRINGS as S } from "@dd/lesson-runtime";
+import { DEFAULT_STRINGS as S } from "@platform/lesson-runtime";
 
 export { S, V, format, LESSONS };
 

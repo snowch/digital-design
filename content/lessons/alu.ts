@@ -6,7 +6,7 @@
 // model's (packages/dd-model: combinational.ts, library-combinational.ts and chain.ts); the
 // numbers the prose states are pinned by alu.facts.test.ts, read off the figures' own props.
 
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 
 import { LABELS } from "./alu.labels";
 import { PROSE } from "./alu.prose";

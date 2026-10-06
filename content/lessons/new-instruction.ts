@@ -22,7 +22,7 @@ import {
   stateSequence,
   type MachineInputs,
 } from "@dd/dd-model";
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 
 import { LABELS } from "./new-instruction.labels";
 import { PROSE } from "./new-instruction.prose";

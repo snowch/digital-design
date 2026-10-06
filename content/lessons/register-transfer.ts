@@ -8,7 +8,7 @@
 // PREV takes NOW, both at that one edge. The lab writes the same pair, with an undo, for the
 // freezer room's 16-bit readings.
 
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 
 import { PROSE } from "./register-transfer.prose";
 import { LABELS } from "./register-transfer.labels";

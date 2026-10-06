@@ -9,7 +9,7 @@ import { useMemo } from "react";
 import { z } from "zod";
 
 import { dFlipFlopCircuit } from "@dd/dd-model";
-import { useSlot, type InteractiveProps } from "@dd/lesson-runtime";
+import { useSlot, type InteractiveProps } from "@platform/lesson-runtime";
 import {
   Simulator,
   applyMetastabilityOverlay,

@@ -14,8 +14,8 @@ import {
   libraryCircuit,
   type TruthTable as RefTable,
 } from "@dd/dd-model";
-import type { InteractiveProps } from "@dd/lesson-runtime";
-import { Stepper } from "@dd/primitives";
+import type { InteractiveProps } from "@platform/lesson-runtime";
+import { Stepper } from "@platform/primitives";
 import { formatWord, type Circuit, type Word } from "@dd/sim";
 
 import { CircuitView } from "../CircuitView";

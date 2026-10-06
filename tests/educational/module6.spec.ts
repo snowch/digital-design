@@ -14,7 +14,7 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 
 import { libraryCircuit } from "@dd/dd-model";
 import { circuitToDrawing, type Drawing } from "@dd/dd-views";
-import { testCount } from "@dd/lesson-schema";
+import { testCount } from "@platform/lesson-schema";
 
 import {
   S,

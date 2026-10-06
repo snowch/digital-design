@@ -2,7 +2,7 @@
 
 import type { ComponentType } from "react";
 
-import type { InteractiveProps } from "@dd/lesson-runtime";
+import type { InteractiveProps } from "@platform/lesson-runtime";
 
 import { BitInspector } from "./BitInspector";
 import { CircuitExplorer } from "./CircuitExplorer";

@@ -4,7 +4,7 @@
 // what publishes it. Every lesson is parsed when the app starts, so an invalid lesson fails fast
 // with its problems listed, and the content tests parse the same list.
 
-import { parseLesson, type Lesson, type LessonInput } from "@dd/lesson-schema";
+import { parseLesson, type Lesson, type LessonInput } from "@platform/lesson-schema";
 
 import { registers } from "./registers";
 import { remember } from "./remember";

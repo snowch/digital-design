@@ -8,7 +8,7 @@
 // addresses. The numbers the prose states are pinned by bytes.facts.test.ts.
 
 import { FILLED_BYTES } from "@dd/dd-model";
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 
 import { LABELS } from "./bytes.labels";
 import { PROSE } from "./bytes.prose";

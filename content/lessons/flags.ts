@@ -7,7 +7,7 @@
 // pinned by flags.facts.test.ts, read off the figures' own props.
 
 import { aluResult } from "@dd/dd-model";
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 
 import { LABELS } from "./flags.labels";
 import { PROSE } from "./flags.prose";

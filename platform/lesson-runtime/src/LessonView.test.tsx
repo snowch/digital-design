@@ -5,7 +5,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
-import { SECTION_KINDS } from "@dd/lesson-schema";
+import { SECTION_KINDS } from "@platform/lesson-schema";
 
 import { LessonView } from "./LessonView";
 import { fixtureBook, fixtureLesson } from "./fixtures";

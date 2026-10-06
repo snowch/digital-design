@@ -4,7 +4,7 @@
 // the list of lessons shows them. Before the first lesson comes the page before it; after the last
 // lesson written so far, the list of lessons, which says what is still to be written.
 
-import type { Book } from "@dd/lesson-runtime";
+import type { Book } from "@platform/lesson-runtime";
 
 import { PREFACE_HREF, lessonHref } from "../route";
 import { STRINGS } from "../strings";

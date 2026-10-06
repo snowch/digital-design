@@ -7,7 +7,7 @@
 // The structure is here; the words are in fetch.prose.ts and fetch.labels.ts. The numbers the
 // prose states are pinned by fetch.facts.test.ts, read off the figures' props.
 
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 
 import { LABELS } from "./fetch.labels";
 import { PROSE } from "./fetch.prose";

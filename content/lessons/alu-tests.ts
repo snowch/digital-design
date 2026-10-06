@@ -8,7 +8,7 @@
 // is the model's (packages/dd-model: testcases.ts); the numbers the prose states are pinned by
 // alu-tests.facts.test.ts, read off the figures' own props.
 
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 
 import { LABELS } from "./alu-tests.labels";
 import { PROSE } from "./alu-tests.prose";

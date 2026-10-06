@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 
 import { gatesOf, libraryCircuit, truthTableOf } from "@dd/dd-model";
 import { grade } from "@dd/dd-views";
-import { parseLesson, testCount } from "@dd/lesson-schema";
+import { parseLesson, testCount } from "@platform/lesson-schema";
 
 import { faultChecks, predictionAnswer } from "./module2.facts";
 import { nand } from "./nand";

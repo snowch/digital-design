@@ -14,7 +14,7 @@ import { useMemo, useState } from "react";
 import { z } from "zod";
 
 import { libraryCircuit } from "@dd/dd-model";
-import type { InteractiveProps } from "@dd/lesson-runtime";
+import type { InteractiveProps } from "@platform/lesson-runtime";
 import { memoryWords, type Circuit, type Word } from "@dd/sim";
 
 import { CircuitView, valueLabel } from "../CircuitView";

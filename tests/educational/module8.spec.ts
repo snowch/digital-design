@@ -11,7 +11,7 @@
 import { expect, test, type Locator } from "@playwright/test";
 
 import { grade } from "@dd/dd-views";
-import { testCount } from "@dd/lesson-schema";
+import { testCount } from "@platform/lesson-schema";
 
 import {
   S,

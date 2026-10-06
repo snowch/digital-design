@@ -16,7 +16,7 @@
 
 import { useCallback, useMemo, useSyncExternalStore } from "react";
 
-import type { Artifact, Challenge, Lesson } from "@dd/lesson-schema";
+import type { Artifact, Challenge, Lesson } from "@platform/lesson-schema";
 
 import type { Book, Verdict } from "./book";
 

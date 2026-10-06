@@ -8,7 +8,7 @@ import { useMemo, useState } from "react";
 import { z } from "zod";
 
 import { dFlipFlopCircuit, dLatchCircuit, libraryCircuit, srLatchCircuit } from "@dd/dd-model";
-import { Prose, type InteractiveProps } from "@dd/lesson-runtime";
+import { Prose, type InteractiveProps } from "@platform/lesson-runtime";
 import { Simulator, bit0, bit1, type Circuit } from "@dd/sim";
 
 import { CircuitView } from "../CircuitView";

@@ -7,8 +7,8 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { LessonStore, memoryStorage } from "@dd/lesson-runtime";
-import type { Interactive, Lesson } from "@dd/lesson-schema";
+import { LessonStore, memoryStorage } from "@platform/lesson-runtime";
+import type { Interactive, Lesson } from "@platform/lesson-schema";
 
 import { ColumnSum } from "./ColumnSum";
 import { SceneFigure } from "./SceneFigure";

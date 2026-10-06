@@ -13,9 +13,10 @@ inspect, predict, step, experiment, break, explain, drill down, replay.
 modules have lessons, the list of lessons on the site says: it is worked out from the lessons
 themselves. Slice 2, the retry controller, is Module 5's `state-machines` lesson. On 6 October
 2026 the course machine passed checkpoint 2 (`docs/machine.md`, `docs/isa.md`), and the first
-shared primitives were extracted under the rule of two (`packages/primitives`,
-`docs/platform.md`). The same day the course passed checkpoint 3, one instruction added to the CPU
-end to end (`docs/checkpoints.md`).
+shared primitives were extracted under the rule of two (`docs/platform.md`); with the schema and
+the runtime they then moved to `snowch/learning-platform`, when a second course took them, and
+this course takes them as a checked copy in `platform/`. The same day the course passed
+checkpoint 3, one instruction added to the CPU end to end (`docs/checkpoints.md`).
 
 Read `docs/plan.md` for the modules, their order and the decisions taken since the course brief,
 `docs/machine.md` and `docs/isa.md` for the course machine, `docs/platform.md` for what the
@@ -134,8 +135,9 @@ for them before calling a lesson finished:
 
 ## Things that will break the build
 
-`npm run check` is exactly what CI runs (`scripts/check.sh`): Prettier, `tsc --noEmit`, Vitest,
-the Vite build, Playwright. Each line below is a check and the reason it exists.
+`npm run check` is exactly what CI runs (`scripts/check.sh`): Prettier, the copyright line, the
+platform copy, `tsc --noEmit`, Vitest, the Vite build, Playwright. Each line below is a check and
+the reason it exists.
 
 - **Prettier, with `*.md` ignored.** Prose files keep their own line breaks; code does not get a
   style argument.
@@ -143,6 +145,9 @@ the Vite build, Playwright. Each line below is a check and the reason it exists.
   near its top, and every page carries it in its footer. `node scripts/copyright.mjs --check` fails
   a file without it, or with an older wording; `node scripts/copyright.mjs` adds the line, or puts
   it in place of the older one, so run it on a new file.
+- **The platform copy is unedited.** `platform/` is `snowch/learning-platform`'s packages at the
+  commit `platform/SOURCE.json` records; `node scripts/sync-platform.mjs --check` fails if a file
+  there differs. Change the platform in its own repository, then sync.
 - **`tsc` strict, with `noUncheckedIndexedAccess` and `verbatimModuleSyntax`.** An index into a
   list may be undefined and the code must say what happens then.
 - **A lesson without an `originalityNote`, or with its sections out of order, or with a
@@ -191,7 +196,8 @@ the Vite build, Playwright. Each line below is a check and the reason it exists.
   from there.
 - **`.npmrc` sets `legacy-peer-deps`.** npm 10's peer resolution crashes on Vitest 4's peer
   ranges; the flag is the workaround and the file says so. Cross-workspace `@dd/*` dependencies
-  are not declared in manifests: npm links every workspace into the root `node_modules`.
+  are not declared in manifests: npm links every workspace into the root `node_modules`, the
+  platform's `@platform/*` packages in `platform/` too.
 - **Vitest 4 has no `basic` reporter and its console capture is unreliable.** An exploration
   writes its output to a file; a test asserts, it does not print.
 - **Learner-facing strings live in `strings.ts` files and in `remember.prose.ts` and

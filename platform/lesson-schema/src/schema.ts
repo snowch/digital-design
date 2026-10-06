@@ -5,8 +5,15 @@
 // A lesson is data, not a page. It declares what it teaches, the ten sections in the course's
 // fixed order, the interactives each section mounts (by kind, so the runtime looks each up in a
 // registry a book supplies), the challenges with their tests, hints and reference solutions, the
-// model-versus-reality note, and the originality note. The runtime renders it; another book can
-// supply its own interactives and render its own lessons with the same runtime.
+// model-versus-reality note, and the originality note. The runtime renders it; a book supplies
+// its own interactives, editor and grader and renders its own lessons with the same runtime.
+//
+// Two books use the format: the digital-design course, which it was first written for, and the
+// metadata-systems course. Where a field belongs to one book's domain (a circuit, a hardware
+// description, a gate budget) its comment says so, and a book with no use for it leaves it at its
+// default. Where the second book needed a general shape it was added beside the first book's: an
+// artifact may be `text` or `data` as well as a circuit, a field may be a choice, and the model a
+// figure runs is named by the book.
 //
 // Zod is the single source: TypeScript types are inferred from these schemas and the JSON Schema
 // another toolchain would validate against is exported from them (jsonSchema.ts).
@@ -30,9 +37,16 @@ export const SECTION_KINDS = [
 export const SectionKind = z.enum(SECTION_KINDS);
 export type SectionKind = z.infer<typeof SectionKind>;
 
-/** Which of the engine's time models an interactive runs. None is transistor-level. */
-export const TimeModel = z.enum(["settle", "clocked", "delay", "none"]);
+/**
+ * Which of the book's models made what an interactive shows, named by the book: the
+ * digital-design course's `settle`, `clocked` and `delay`, the metadata course's `live` and
+ * `replay`. The page shows the name on a badge and opens the book's note for it, and a book
+ * holds its lessons to its own names with `modelProblems`. `none` is reserved: the figure runs no
+ * model and gets no badge.
+ */
+export const TimeModel = z.string().min(1);
 export type TimeModel = z.infer<typeof TimeModel>;
+export const NO_MODEL = "none";
 
 /** A value in a test vector as lesson data carries it: a number, or bits with X. */
 const VectorValue = z.union([
@@ -77,9 +91,10 @@ export const SequenceStep = z.object({
 });
 
 /**
- * One case of an answers challenge: what the book's grader is given besides the learner's
- * answers (a recording, a number to encode), and what it must produce. The grader, not the
- * lesson, decides whether the answers meet `expect`, so a case can ask for "at least".
+ * One case of a challenge the book grades case by case: what the book's grader is given besides
+ * the learner's artifact (a recording, a number to encode, the name of a fact to compute), and
+ * what it must produce. The grader, not the lesson, decides whether the artifact meets `expect`,
+ * so a case can ask for "at least", or compute what it expects from the book's own model.
  */
 export const AnswerCase = z.object({
   label: z.string().min(1),
@@ -88,13 +103,18 @@ export const AnswerCase = z.object({
 });
 
 export const TestSuite = z.discriminatedUnion("kind", [
+  /** Digital design: a circuit's outputs for each row of inputs. */
   z.object({
     kind: z.literal("combinational"),
     vectors: z.array(CombinationalVector).min(1),
     chain: ChainSpec.optional(),
   }),
+  /** Digital design: a circuit's outputs through a sequence of inputs and clock edges. */
   z.object({ kind: z.literal("sequence"), steps: z.array(SequenceStep).min(1) }),
-  /** The learner's settings or answers, checked case by case by a grader the book names. */
+  /**
+   * The learner's answers, or a written or drawn artifact, checked case by case by a grader the
+   * book names.
+   */
   z.object({
     kind: z.literal("answers"),
     grader: z.string().min(1),
@@ -103,7 +123,7 @@ export const TestSuite = z.discriminatedUnion("kind", [
 ]);
 export type TestSuite = z.infer<typeof TestSuite>;
 
-/** A circuit as plain data: the engine's netlist, which is already JSON. */
+/** Digital design: a circuit as plain data, the engine's netlist, which is already JSON. */
 export const CircuitData = z.object({
   name: z.string(),
   nets: z
@@ -151,15 +171,22 @@ export const CircuitData = z.object({
 });
 export type CircuitData = z.infer<typeof CircuitData>;
 
-/** What a learner produces for a challenge, or what a lesson hands them to start from. */
+/**
+ * What a learner produces for a challenge, or what a lesson hands them to start from. A book
+ * reads the fields it grades and leaves the rest undefined.
+ */
 export const Artifact = z.object({
-  /** A drawn circuit, or the id of one in the domain's library. */
+  /** Digital design: a drawn circuit, or the id of one in the book's library. */
   circuit: CircuitData.optional(),
   libraryId: z.string().optional(),
-  /** Text in the course's hardware description language. */
+  /** Digital design: text in the course's hardware description language. */
   hdl: z.string().optional(),
   /** Settings or answers, by field id, as the learner entered them. */
   answers: z.record(z.string(), z.string()).optional(),
+  /** Text in a notation the book names: a record, a query, an event, a small language. */
+  text: z.string().optional(),
+  /** A structured artifact the book's editor builds, such as a graph of nodes and edges. */
+  data: z.record(z.string(), z.unknown()).optional(),
 });
 export type Artifact = z.infer<typeof Artifact>;
 
@@ -172,7 +199,7 @@ export const PortSpec = z.object({
 export const Interactive = z.object({
   id: z.string().min(1),
   kind: z.string().min(1),
-  /** Which time model it runs, said on the page. */
+  /** Which of the book's models it runs, said on the page; `none` for a figure that runs none. */
   timeModel: TimeModel,
   /** A caption a screen reader and the page both get. */
   caption: z.string().min(1),
@@ -204,12 +231,13 @@ export const Hints = z.tuple([
 
 /**
  * A field of an answers challenge. The book draws each kind: a number with a unit, a row of
- * bits the learner flips, a short piece of text. `label` is what the learner reads beside it.
+ * bits the learner flips, a short piece of text, a choice among options. `label` is what the
+ * learner reads beside it.
  */
 export const AnswerField = z.object({
   id: z.string().min(1),
   label: z.string().min(1),
-  kind: z.enum(["number", "bits", "text"]),
+  kind: z.enum(["number", "bits", "text", "choice"]),
   /** For a number: its range, step and unit. */
   min: z.number().optional(),
   max: z.number().optional(),
@@ -218,13 +246,18 @@ export const AnswerField = z.object({
   /** For bits: how many, and which worths label them. */
   width: z.number().int().min(1).max(32).optional(),
   weights: z.enum(["unsigned", "signed"]).optional(),
+  /** For a choice: the options by value, each with what the learner reads for it. */
+  options: z
+    .array(z.object({ value: z.string().min(1), label: z.string().min(1) }))
+    .min(2)
+    .optional(),
 });
 export type AnswerField = z.infer<typeof AnswerField>;
 
 /**
- * Module 2: what a drawn or written circuit may use besides passing its tests. Each limit set is
- * one more test: at most `gates` gates, at most `depth` gates on any path from an input to an
- * output, and gates of the kinds in `only` and no others.
+ * Digital design, Module 2: what a drawn or written circuit may use besides passing its tests.
+ * Each limit set is one more test: at most `gates` gates, at most `depth` gates on any path from
+ * an input to an output, and gates of the kinds in `only` and no others.
  */
 export const Limits = z.object({
   gates: z.number().int().min(1).optional(),
@@ -239,11 +272,11 @@ export const Challenge = z.object({
   /** Markdown: what to build or write, and what the tests check. */
   task: z.string().min(1),
   /**
-   * What is graded: a drawn circuit, written text (the other view stays available), or the
-   * learner's answers to the challenge's `fields`.
+   * What is graded: a drawn artifact (a circuit, a graph), written text (a hardware description,
+   * a record, a query), or the learner's answers to the challenge's `fields`.
    */
   gradedDirection: z.enum(["draw", "write", "answer"]),
-  /** The ports the learner's circuit must expose, by name and width. None for answers. */
+  /** Digital design: the ports the learner's circuit must expose, by name and width. */
   interface: z
     .object({ inputs: z.array(PortSpec).default([]), outputs: z.array(PortSpec).default([]) })
     .default({ inputs: [], outputs: [] }),
@@ -252,29 +285,32 @@ export const Challenge = z.object({
   /** What the learner starts from. */
   initial: Artifact.default({}),
   tests: TestSuite,
-  /** HDL constructs this challenge's text may use. */
+  /**
+   * What a written artifact may use, by id, and what its editor offers: the hardware
+   * description's constructs, a record's fields, a query's clauses. The book interprets the ids.
+   */
   allowedConstructs: z.array(z.string()).default([]),
   /** What the editor offers to build a drawn solution with, by id. The book interprets the ids. */
   palette: z.array(z.string()).default([]),
   /**
-   * Module 5: what a written challenge's "Try it" shows. A written state machine elaborates to a
-   * tangle no drawing makes readable, so "pins" offers its inputs as buttons and its signals as a
-   * table, without the drawing.
+   * Digital design, Module 5: what a written challenge's "Try it" shows. A written state machine
+   * elaborates to a tangle no drawing makes readable, so "pins" offers its inputs as buttons and
+   * its signals as a table, without the drawing.
    */
   tryIt: z.enum(["drawing", "pins"]).default("drawing"),
   /**
-   * Module 8: how a failed test is reported. "gates" gives each value in binary and names the
-   * gate that drives the first wrong signal; "words" gives a value of eight bits or more in
-   * hexadecimal, as the lessons write words, and leaves out the gates and their generated names,
-   * which a written datapath's learner never wrote.
+   * Digital design, Module 8: how a failed test is reported. "gates" gives each value in binary
+   * and names the gate that drives the first wrong signal; "words" gives a value of eight bits or
+   * more in hexadecimal, as the lessons write words, and leaves out the gates and their generated
+   * names, which a written datapath's learner never wrote.
    */
   feedback: z.enum(["gates", "words"]).default("gates"),
-  /** Module 2: a gate budget, a depth and the kinds of gate allowed, each graded as a test. */
+  /** Digital design, Module 2: a gate budget, a depth and the kinds of gate allowed, each graded as a test. */
   limits: Limits.optional(),
   /**
-   * Module 8: modules the course supplies to a written text, by the set's name, and what they
-   * start with: the program in the ROM, in the machine's assembly, and the registers' first
-   * words by name. The book interprets the set's name.
+   * Digital design, Module 8: modules the course supplies to a written text, by the set's name,
+   * and what they start with: the program in the ROM, in the machine's assembly, and the
+   * registers' first words by name. The book interprets the set's name.
    */
   courseModules: z
     .object({
@@ -313,7 +349,7 @@ export const Lesson = z.object({
   termExemptions: z.array(z.object({ term: z.string(), reason: z.string() })).default([]),
   sections: z.array(Section).length(SECTION_KINDS.length),
   challenges: z.array(Challenge).default([]),
-  /** Markdown: what the simulator does and how hardware differs. */
+  /** Markdown: what the book's model does and how the real thing differs. */
   modelVsReality: z.string().min(1),
   originalityNote: OriginalityNote,
 });

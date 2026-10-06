@@ -9,7 +9,7 @@ import { useMemo, useState } from "react";
 import { z } from "zod";
 
 import { libraryCircuit, pairsFor, truthTableOf } from "@dd/dd-model";
-import type { InteractiveProps } from "@dd/lesson-runtime";
+import type { InteractiveProps } from "@platform/lesson-runtime";
 
 import { CircuitView } from "../CircuitView";
 import { format, useViewStrings } from "../strings";

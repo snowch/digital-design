@@ -10,7 +10,7 @@
 // table in words.
 
 import { MACHINES, machineText, nextState, stateNamed } from "@dd/dd-model";
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 
 import { PROSE } from "./state-machines.prose";
 import { LABELS } from "./state-machines.labels";

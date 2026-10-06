@@ -12,7 +12,7 @@
 
 import { z } from "zod";
 
-import type { InteractiveProps } from "@dd/lesson-runtime";
+import type { InteractiveProps } from "@platform/lesson-runtime";
 
 import { useWidth } from "../useWidth";
 import { withProps } from "./props";

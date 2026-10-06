@@ -9,7 +9,7 @@
 import { expect, test } from "@playwright/test";
 
 import { MACHINES, machineText } from "@dd/dd-model";
-import { testCount } from "@dd/lesson-schema";
+import { testCount } from "@platform/lesson-schema";
 
 import {
   S,

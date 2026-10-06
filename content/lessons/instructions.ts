@@ -8,7 +8,7 @@
 // circuits are the model's (packages/dd-model: datapath.ts, library-datapath.ts); the numbers the
 // prose states are pinned by instructions.facts.test.ts, read off the figures' own props.
 
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 
 import { LABELS } from "./instructions.labels";
 import { PROSE } from "./instructions.prose";

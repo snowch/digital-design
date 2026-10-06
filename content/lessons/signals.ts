@@ -6,7 +6,7 @@
 // the readings and the graders are the model's (packages/dd-model: signals, bits, graders); the
 // numbers the prose states are pinned by signals.facts.test.ts, read off the figures' own props.
 
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 
 import { LABELS } from "./signals.labels";
 import { PROSE } from "./signals.prose";

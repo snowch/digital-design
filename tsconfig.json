@@ -24,6 +24,8 @@
     "apps/**/*.tsx",
     "packages/**/*.ts",
     "packages/**/*.tsx",
+    "platform/**/*.ts",
+    "platform/**/*.tsx",
     "content/**/*.ts",
     "content/**/*.tsx",
     "tests/**/*.ts",

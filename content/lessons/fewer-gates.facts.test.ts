@@ -14,7 +14,7 @@ import {
 } from "@dd/dd-model";
 import { grade, runScript } from "@dd/dd-views";
 import { formatWord } from "@dd/sim";
-import { parseLesson, testCount } from "@dd/lesson-schema";
+import { parseLesson, testCount } from "@platform/lesson-schema";
 
 import { fewerGates } from "./fewer-gates";
 import { figureOf, predictionAnswer, stepsAfterPressing } from "./module2.facts";

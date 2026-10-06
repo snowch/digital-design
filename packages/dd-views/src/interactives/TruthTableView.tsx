@@ -12,7 +12,7 @@ import {
   SR_LATCH_TABLE,
   libraryCircuit,
 } from "@dd/dd-model";
-import type { InteractiveProps } from "@dd/lesson-runtime";
+import type { InteractiveProps } from "@platform/lesson-runtime";
 
 import { useViewStrings } from "../strings";
 import { TruthTable, enumerateTable } from "../TruthTable";

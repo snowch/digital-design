@@ -14,7 +14,7 @@ import {
   startDatapath,
 } from "@dd/dd-model";
 import { grade, kindSequences } from "@dd/dd-views";
-import { parseLesson, testCount } from "@dd/lesson-schema";
+import { parseLesson, testCount } from "@platform/lesson-schema";
 
 import { SENSORS } from "./memory-access";
 import { CHOOSE } from "./module9";

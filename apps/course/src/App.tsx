@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { createBook, INTERACTIVES } from "@dd/dd-views";
 import { LESSONS } from "@dd/content";
-import { browserStorage, LessonView } from "@dd/lesson-runtime";
+import { browserStorage, LessonView } from "@platform/lesson-runtime";
 
 import { LessonList } from "./pages/LessonList";
 import { LessonPager } from "./pages/LessonPager";

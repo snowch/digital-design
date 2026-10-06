@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 
 import { assemble, datapathRamWord, instructionHex } from "@dd/dd-model";
 import { grade } from "@dd/dd-views";
-import { parseLesson } from "@dd/lesson-schema";
+import { parseLesson } from "@platform/lesson-schema";
 
 import { memoryAccess, SHOW_MARGIN } from "./memory-access";
 import { figureAnswer, runToStop, signed } from "./module8-facts";

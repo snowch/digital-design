@@ -8,7 +8,7 @@
 // send the manager a message, and if it fails it must wait a while before sending it again; the
 // clock rises at a steady rate, so counting its edges measures the wait.
 
-import type { LessonInput, TestSuite } from "@dd/lesson-schema";
+import type { LessonInput, TestSuite } from "@platform/lesson-schema";
 
 import { PROSE } from "./counters.prose";
 import { LABELS } from "./counters.labels";

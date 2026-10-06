@@ -8,7 +8,7 @@
 
 import { expect, test } from "@playwright/test";
 
-import { testCount } from "@dd/lesson-schema";
+import { testCount } from "@platform/lesson-schema";
 
 import {
   S,

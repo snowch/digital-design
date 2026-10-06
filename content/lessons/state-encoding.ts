@@ -12,7 +12,7 @@
 // in an enumerated type, and the capstone writes a given machine, the freezer room's defrost.
 
 import { MACHINES, machineText, stateNamed } from "@dd/dd-model";
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 
 import { PROSE } from "./state-encoding.prose";
 import { LABELS } from "./state-encoding.labels";

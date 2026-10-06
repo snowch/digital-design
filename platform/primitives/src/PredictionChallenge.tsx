@@ -1,9 +1,11 @@
 // Copyright © 2026 Christopher Snow
 
-// Predict, commit, see, and predict again: the controls every prediction figure shares. The
-// learner picks one option and commits to it before anything is shown; "Predict again" clears
-// the commitment. What is predicted, and how its answer is worked out and drawn, stays with the
-// figure: the choice is a string, and the verdict and the outcome are the figure's to show.
+// Predict, commit, see, and (if the figure allows it) predict again: the controls every
+// prediction figure shares. The learner picks one option and commits to it before anything is
+// shown. A figure that passes `onAgain` offers "Predict again", which clears the commitment; one
+// that does not keeps the commitment as the record of what the learner expected. What is
+// predicted, and how its answer is worked out and drawn, stays with the figure: the choice is a
+// string, and the verdict and the outcome are the figure's to show.
 
 import { useState, type ReactNode } from "react";
 
@@ -19,11 +21,13 @@ export interface PredictionChallengeProps {
   /** The choice committed to, or undefined while the learner has not committed. */
   readonly committed: string | undefined;
   readonly onCommit: (choice: string) => void;
-  readonly onAgain: () => void;
+  /** Clears the commitment. Without it, a commitment stands and no "Predict again" is offered. */
+  readonly onAgain?: () => void;
   /** The options' group name, for a screen reader; it is not shown. */
   readonly legend: string;
   readonly commitLabel: string;
-  readonly againLabel: string;
+  /** The label of "Predict again"; needed only with `onAgain`. */
+  readonly againLabel?: string;
   /** Shown just before "Predict again" once committed, where a figure gives its verdict there. */
   readonly verdict?: ReactNode;
 }
@@ -69,16 +73,18 @@ export function PredictionChallenge({
       ) : (
         <>
           {verdict}
-          <button
-            type="button"
-            className="button secondary"
-            onClick={() => {
-              setPick(undefined);
-              onAgain();
-            }}
-          >
-            {againLabel}
-          </button>
+          {onAgain && againLabel && (
+            <button
+              type="button"
+              className="button secondary"
+              onClick={() => {
+                setPick(undefined);
+                onAgain();
+              }}
+            >
+              {againLabel}
+            </button>
+          )}
         </>
       )}
     </>

@@ -9,7 +9,7 @@
 // micro-operations.labels.ts. The numbers the prose states are pinned by
 // micro-operations.facts.test.ts.
 
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 
 import { LABELS } from "./micro-operations.labels";
 import { PROSE } from "./micro-operations.prose";

@@ -9,8 +9,8 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
 import { INTERACTIVES, createBook } from "@dd/dd-views";
-import { LessonStore, memoryStorage } from "@dd/lesson-runtime";
-import { termPattern } from "@dd/lesson-schema";
+import { LessonStore, memoryStorage } from "@platform/lesson-runtime";
+import { termPattern } from "@platform/lesson-schema";
 import { LESSONS } from "@dd/content";
 
 import { PREFACE_HREF, lessonHref } from "../route";

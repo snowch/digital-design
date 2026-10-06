@@ -9,7 +9,7 @@
 
 import type { ComponentType } from "react";
 
-import type { Artifact, Challenge, Interactive, Lesson, TimeModel } from "@dd/lesson-schema";
+import type { Artifact, Challenge, Interactive, Lesson, TimeModel } from "@platform/lesson-schema";
 
 import type { LessonStore } from "./state";
 
@@ -74,6 +74,6 @@ export interface Book {
   readonly interactives: Readonly<Record<string, ComponentType<InteractiveProps>>>;
   readonly ChallengeEditor: ComponentType<ChallengeEditorProps>;
   readonly grade: (challenge: Challenge, artifact: Artifact) => Verdict;
-  /** What each time model means in this book's words, for the note every lesson states. */
+  /** What each of the book's models means in its words, for the badge's note and the note every lesson states. */
   readonly timeModelNotes: Readonly<Partial<Record<TimeModel, string>>>;
 }

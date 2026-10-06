@@ -18,8 +18,8 @@ import {
   parseBits,
   type Bit,
 } from "@dd/dd-model";
-import type { Artifact, Challenge } from "@dd/lesson-schema";
-import type { ChallengeEditorProps, Verdict, VerdictFailure } from "@dd/lesson-runtime";
+import type { Artifact, Challenge } from "@platform/lesson-schema";
+import type { ChallengeEditorProps, Verdict, VerdictFailure } from "@platform/lesson-runtime";
 
 import { BitRow } from "./BitRow";
 import { DEFAULT_VIEW_STRINGS, format, type ViewStrings } from "./strings";

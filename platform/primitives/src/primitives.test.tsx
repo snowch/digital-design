@@ -43,6 +43,22 @@ describe("PredictionChallenge", () => {
     );
   }
 
+  it("offers no 'Predict again' when the figure keeps the commitment", async () => {
+    render(
+      <PredictionChallenge
+        name="kept"
+        options={OPTIONS}
+        committed="1"
+        onCommit={() => {}}
+        legend="Your prediction"
+        commitLabel="Check my prediction"
+      />,
+    );
+    expect(screen.getByRole("radio", { name: "One" })).toBeChecked();
+    expect(screen.getByRole("radio", { name: "One" })).toBeDisabled();
+    expect(screen.queryAllByRole("button")).toEqual([]);
+  });
+
   it("commits only once an option is chosen, then locks the options", async () => {
     render(<Harness />);
     const commit = screen.getByRole("button", { name: "Check my prediction" });
