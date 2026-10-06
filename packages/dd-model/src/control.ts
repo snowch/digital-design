@@ -516,22 +516,18 @@ export type ControlState = keyof typeof CONTROL_STATES;
  * result and flags.
  * The edge whose next state is FETCH ends the instruction.
  */
-export function controllerMachine(options: ControlOptions = {}): Machine {
-  const read: MachineRow[] = options.callThroughRegister
-    ? [
-        // The capstone's kind calls through a register: it needs the ALU for RA + c first.
-        { from: "READ", when: { CALL: 1, JUMP: 0 }, to: "WRITE", labelAt: [380, 236] },
-        { from: "READ", when: { CALL: 1, JUMP: 1 }, to: "ALU", labelAt: [160, 96] },
-        { from: "READ", when: { CALL: 0 }, to: "ALU" },
-      ]
-    : [
-        { from: "READ", when: { CALL: 1 }, to: "WRITE", labelAt: [372, 250] },
-        { from: "READ", when: { CALL: 0 }, to: "ALU", labelAt: [196, 112] },
-      ];
+export function controllerMachine(): Machine {
+  // The capstone's call through a register needs no row of its own: it sets CALL, so it takes the
+  // call's way, FETCH, READ, WRITE, and its WRITE edge takes the PC from the ALU, whose inputs, HA
+  // and the constant, are ready from READ on.
+  const read: MachineRow[] = [
+    { from: "READ", when: { CALL: 1 }, to: "WRITE", labelAt: [372, 250] },
+    { from: "READ", when: { CALL: 0 }, to: "ALU", labelAt: [196, 112] },
+  ];
   return {
-    id: options.callThroughRegister ? "controller-call-register" : "controller",
+    id: "controller",
     name: "controller",
-    inputs: ["CALL", ...(options.callThroughRegister ? ["JUMP"] : []), "MEM", "WRITEY"],
+    inputs: ["CALL", "MEM", "WRITEY"],
     outputs: ["FETCHING"],
     states: [
       { name: "FETCH", code: CONTROL_STATES.FETCH, outputs: { FETCHING: 1 }, at: [60, 470] },
@@ -557,8 +553,7 @@ export function controllerMachine(options: ControlOptions = {}): Machine {
 
 /** The states each kind passes through, from its fetch, one edge each (the table above). */
 export function stateSequence(kind: number, options: ControlOptions = {}): ControlState[] {
-  if (options.callThroughRegister && kind === CALL_REGISTER_KIND)
-    return ["FETCH", "READ", "ALU", "WRITE"];
+  if (options.callThroughRegister && kind === CALL_REGISTER_KIND) return ["FETCH", "READ", "WRITE"];
   const sequences: Readonly<Record<number, ControlState[]>> = {
     1: ["FETCH", "READ", "ALU", "WRITE"],
     2: ["FETCH", "READ", "ALU", "WRITE"],

@@ -412,7 +412,6 @@ export const DatapathFigure = withProps(
             sim={sim}
             past={past}
             stopped={stopped}
-            callThroughRegister={built.callThroughRegister ?? false}
           />
         )}
         {/* Before a prediction is committed the figure shows the circuit, not its values: the
@@ -589,7 +588,6 @@ function ControlPanes({
   sim,
   past,
   stopped,
-  callThroughRegister,
 }: {
   data: Data;
   circuit: Circuit;
@@ -597,12 +595,11 @@ function ControlPanes({
   sim: Simulator;
   past: { views: readonly EdgeView[]; ended: boolean };
   stopped: boolean;
-  callThroughRegister: boolean;
 }) {
   const strings = useViewStrings();
   const t = strings.control;
   const next = edgeView(circuit, values);
-  const machine = useMemo(() => controllerMachine({ callThroughRegister }), [callThroughRegister]);
+  const machine = useMemo(() => controllerMachine(), []);
   const inputs: Record<string, 0 | 1> = Object.fromEntries(
     machine.inputs.map((n) => [n, next.signals[n] === 1 ? 1 : 0]),
   );

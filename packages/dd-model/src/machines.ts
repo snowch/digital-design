@@ -122,7 +122,6 @@ export const MACHINES = {
   defrost: DEFROST,
   // Module 9: the controller of the machine of several edges an instruction (control.ts).
   controller: controllerMachine(),
-  "controller-call-register": controllerMachine({ callThroughRegister: true }),
 } as const satisfies Readonly<Record<string, Machine>>;
 
 export type MachineId = keyof typeof MACHINES;

@@ -118,12 +118,6 @@ export const READ_ARM = `      READ: begin
         else next = ALU;
       end`;
 
-/** The capstone's READ arm: a call through a register needs the ALU first. */
-export const READ_ARM_CALL_REGISTER = `      READ: begin
-        if (CALL & ~JUMP) next = WRITE;
-        else next = ALU;
-      end`;
-
 /** The controller's next-state logic, with READ's arm given. */
 export function nextStateBlock(readArm: string): string {
   return `  always_comb begin
@@ -171,12 +165,12 @@ export const EDGE_OUTPUTS = [
 ] as const;
 
 /** The whole controller's text, as the course writes it. */
-export function controllerText(callRegister = false): string {
+export function controllerText(): string {
   return `module controller(
   input logic CLK,
   input logic RST,
   input logic GO,
-  input logic CALL,${callRegister ? "\n  input logic JUMP," : ""}
+  input logic CALL,
   input logic MEM,
   input logic WRITEY,
   input logic LOAD,
@@ -191,7 +185,7 @@ ${EDGE_OUTPUTS.map((s) => `  output logic ${s},`).join("\n")}
     if (RST) state <= FETCH;
     else if (GO) state <= next;
   end
-${nextStateBlock(callRegister ? READ_ARM_CALL_REGISTER : READ_ARM)}
+${nextStateBlock(READ_ARM)}
 ${OUTPUT_BLOCK}
   assign S = state;
 endmodule
@@ -199,7 +193,7 @@ endmodule
 }
 
 /** The machine's top module, which uses the decoder, the controller and the course's modules. */
-export function machineTop(callRegister = false): string {
+export function machineTop(): string {
   return `module machine(
   input logic CLK,
   input logic RST,
@@ -246,7 +240,7 @@ export function machineTop(callRegister = false): string {
     .OP2(OP2), .OP1(OP1), .OP0(OP0), .BRANCH(BRANCH), .CALL(CALL), .JUMP(JUMP),
     .MEM(MEM), .STOP(STOP), .CAUSED(CAUSED));
 
-  controller ctl (.CLK(CLK), .RST(RST), .GO(GO), .CALL(CALL),${callRegister ? " .JUMP(JUMP)," : ""}
+  controller ctl (.CLK(CLK), .RST(RST), .GO(GO), .CALL(CALL),
     .MEM(MEM), .WRITEY(WRITEY), .LOAD(LOAD), .STORE(STORE), .FETCHING(FETCHING), .IREN(IREN),
     .CHECKING(CHECKING), .HOLDAB(HOLDAB), .HOLDR(HOLDR), .MLOAD(MLOAD),
     .MSTORE(MSTORE), .HOLDM(HOLDM), .WREG(WREG), .PCEN(PCEN), .S(S));
@@ -312,8 +306,8 @@ endmodule
 
 /** The whole machine as text: the top, the controller and the decoder. */
 export function machineText(callRegister = false): string {
-  return `${machineTop(callRegister)}
-${controllerText(callRegister)}
+  return `${machineTop()}
+${controllerText()}
 ${decoderText(callRegister)}`;
 }
 

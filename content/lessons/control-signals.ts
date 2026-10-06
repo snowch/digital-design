@@ -84,22 +84,7 @@ export const controlSignals: LessonInput = {
   introduces: ["control unit"],
   sections: [
     { kind: "question", title: LABELS.titles.question, prose: PROSE.question },
-    {
-      kind: "motivation",
-      title: LABELS.titles.motivation,
-      prose: PROSE.motivation,
-      interactives: [
-        {
-          id: "signals-table",
-          kind: "control-table",
-          timeModel: "settle",
-          caption: LABELS.captions.signalsTable,
-          lead: PROSE.signalsTableLead,
-          after: PROSE.signalsTableAfter,
-          props: {},
-        },
-      ],
-    },
+    { kind: "motivation", title: LABELS.titles.motivation, prose: PROSE.motivation },
     {
       kind: "prediction",
       title: LABELS.titles.prediction,
@@ -184,7 +169,22 @@ export const controlSignals: LessonInput = {
         },
       ],
     },
-    { kind: "explanation", title: LABELS.titles.explanation, prose: PROSE.explanation },
+    {
+      kind: "explanation",
+      title: LABELS.titles.explanation,
+      prose: PROSE.explanation,
+      interactives: [
+        {
+          id: "signals-table",
+          kind: "control-table",
+          timeModel: "settle",
+          caption: LABELS.captions.signalsTable,
+          lead: PROSE.signalsTableLead,
+          after: PROSE.signalsTableAfter,
+          props: {},
+        },
+      ],
+    },
     { kind: "generalisation", title: LABELS.titles.generalisation, prose: PROSE.generalisation },
     {
       kind: "challenge",
@@ -250,6 +250,6 @@ export const controlSignals: LessonInput = {
     textbookExample:
       "The single-cycle datapath's main control unit as a truth table of the opcode's six bits against the signals RegDst, ALUSrc, MemtoReg, RegWrite, MemRead, MemWrite, Branch and ALUOp, with a second, ALU control unit decoding the funct field (Patterson and Hennessy); Harris and Harris's main decoder and ALU decoder, the same split; Nand2Tetris's C-instruction, whose bits are the control signals with no decoder at all.",
     howThisDiffers:
-      "The decoder is Module 8's own, drawn closed there and opened here, with the course's signal names (WRITEY, BCONST, AZERO, LOAD, STORE, BYTE, BRANCH, CALL, JUMP and the ALU's code OP2 to OP0). It is built as Module 5 built next-state logic from a table: Module 3's 2-to-4 decoder twice gives one line per kind, a kind line that is a signal on its own carries the signal's name, and each other signal is an OR of the kinds that need it, with a job bit ANDed in where the job matters; there is no separate ALU decoder, since the job digit is the ALU's code. The table of signals is read off that circuit, kind by kind, and shows the job's bits where a signal follows them. The prediction asks about the jump's BCONST, which a learner who thinks a jump reads only a register gets wrong. The faults break one gate (a row of the table) and one kind's line (a column).",
+      "The decoder is Module 8's own, drawn closed there and opened here, with the course's signal names (WRITEY, BCONST, AZERO, LOAD, STORE, BYTE, BRANCH, CALL, JUMP and the ALU's code OP2 to OP0). It is built as Module 5 built next-state logic from a table: Module 3's 2-to-4 decoder twice gives one line per kind, a kind line that is a signal on its own carries the signal's name, and each other signal is an OR of the kinds that need it, with a job bit ANDed in where the job matters; there is no separate ALU decoder, since the job digit is the ALU's code. The table of signals is read off that circuit, kind by kind, after the learner has opened it, and shows the job's bits where a signal follows them. The prediction asks about the jump's BCONST, which a learner who thinks a jump reads only a register gets wrong. The faults break one gate (a row of the table) and one kind's line (a column).",
   },
 };

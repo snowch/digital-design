@@ -12,11 +12,12 @@ import {
   DECODER9_OUTPUTS,
   controllerMachine,
   decoderChecksCircuit,
+  stateSequence,
   decoderCircuit,
   decoderSignalsCircuit,
 } from "./control";
 import { DECODER_OUTPUTS, decoder } from "./datapath";
-import { machineProblems } from "./fsm";
+import { machineProblems, nextState } from "./fsm";
 import { MODULE_9, fieldsOf, isIllegal, resetMachine, step } from "./machine";
 import { assemble } from "./assemble";
 
@@ -147,10 +148,34 @@ describe("the reference as Module 9's machine", () => {
 
 describe("the controller", () => {
   it("is a state machine Module 5's checks accept, with the fetch at the all-zero code", () => {
+    const m = controllerMachine();
+    expect(machineProblems(m)).toEqual([]);
+    expect(m.states.find((s) => s.code === "000")?.name).toBe("FETCH");
+  });
+});
+
+describe("each kind's states", () => {
+  it("are the controller's table walked with the decoder's signals for the kind", () => {
     for (const options of [{}, { callThroughRegister: true }]) {
-      const m = controllerMachine(options);
-      expect(machineProblems(m)).toEqual([]);
-      expect(m.states.find((s) => s.code === "000")?.name).toBe("FETCH");
+      const sim = new Simulator(decoderCircuit(options));
+      const m = controllerMachine();
+      for (const k of [1, 2, 3, 4, 5, 6, 7, ...(options.callThroughRegister ? [9] : [])]) {
+        sim.setInput("K", word(4, k));
+        sim.setInput("J", word(4, 0));
+        sim.setInput("C", word(12, 0));
+        sim.settle();
+        const out = sim.outputs();
+        const inputs = Object.fromEntries(
+          m.inputs.map((n) => [n, out[n]?.value === 1n ? 1 : 0]),
+        ) as Record<string, 0 | 1>;
+        const walked: string[] = ["FETCH"];
+        for (let n = 0; n < 8; n++) {
+          const next = nextState(m, walked[walked.length - 1] as string, inputs);
+          if (next === undefined || next === "FETCH") break;
+          walked.push(next);
+        }
+        expect(walked, `kind ${k}`).toEqual(stateSequence(k, options));
+      }
     }
   });
 });

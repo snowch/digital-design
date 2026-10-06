@@ -4,8 +4,10 @@
 // register (docs/isa.md, "Left out on purpose"): RY ← PC + 4 and PC ← RA + c, at kind 9, the first
 // kind docs/isa.md leaves free. It needs no new part of the datapath (Module 8's call already
 // writes PC + 4 into Y, and its jump already takes the ALU's result into the PC), only control: a
-// decoder row, the checks taught that kind 9 job 0 is an instruction, and a sequence of edges, the
-// controller's READ arm sending it through the ALU. The learner makes the change in their own copy
+// decoder row and the checks taught that kind 9 job 0 is an instruction. Its sequence of edges is
+// the call's, FETCH, READ, WRITE, with no change to the controller: it sets CALL, and its WRITE
+// edge takes the PC from the ALU, whose inputs are ready from READ on. The learner makes the
+// change in their own copy
 // of the machine's text; docs/isa.md does not change.
 //
 // The structure is here; the words are in new-instruction.prose.ts and new-instruction.labels.ts.
@@ -406,6 +408,6 @@ export const newInstruction: LessonInput = {
     textbookExample:
       "Adding an instruction to a textbook multicycle processor as an exercise: jal or addi added to the finite-state control of Patterson and Hennessy's or Harris and Harris's multicycle MIPS, with new states and a new control-signal row; Nand2Tetris has no step of this kind; RISC-V's jalr, the jump and link through a register.",
     howThisDiffers:
-      "The instruction is the call through a register docs/isa.md leaves out on purpose, at kind 9, in the learner's own copy of the course machine's text: docs/isa.md does not change, and kinds A to F stay free for Module 10. It needs no datapath part, because Module 8's call and jump already made both of its transfers, so the work is control alone: a decoder row (the call's and the jump's signals together, with BCONST and the ALU's add), the checks taught that kind 9 job 0 is an instruction, and the controller's READ arm sending it through the ALU for its four edges. It is tested end to end by the simulator, edge by edge, against the reference told which machine it stands for. The program is the shop's: the office chooses at run time which room's reading to show, by the routine's address in R4. The faults are the decoder's ORs for CALL and JUMP made ANDs: the return address lost, and a call that calls itself.",
+      "The instruction is the call through a register docs/isa.md leaves out on purpose, at kind 9, in the learner's own copy of the course machine's text: docs/isa.md does not change, and kinds A to F stay free for Module 10. It needs no datapath part, because Module 8's call and jump already made both of its transfers, so the work is control alone: a decoder row (the call's and the jump's signals together, with BCONST and the ALU's add), the checks taught that kind 9 job 0 is an instruction, and no change to the controller: the instruction sets CALL, so it takes the call's three edges, and its WRITE edge takes the PC from the ALU, whose inputs, the held word of RA and the constant, are ready from READ on. It is tested end to end by the simulator, edge by edge, against the reference told which machine it stands for. The program is the shop's: the office chooses at run time which room's reading to show, by the routine's address in R4. The faults are the decoder's ORs for CALL and JUMP made ANDs: the return address lost, and a call that calls itself.",
   },
 };

@@ -703,7 +703,8 @@ function placedInside(sub: Circuit, circuit: Circuit, scope: string): Circuit {
   if (!at) return sub;
   // Module 9: a part that carries its own place (a fault's fixed value, given `at`) need not be
   // named in the drawing.
-  const own = (meta: Readonly<Record<string, unknown>> | undefined) => meta?.["layout"] !== undefined;
+  const own = (meta: Readonly<Record<string, unknown>> | undefined) =>
+    meta?.["layout"] !== undefined;
   const names = [
     ...sub.components.filter((c) => !c.path.includes("/") && !own(c.meta)).map((c) => c.path),
     ...sub.composites.filter((c) => !c.path.includes("/") && !own(c.meta)).map((c) => c.path),

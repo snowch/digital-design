@@ -210,7 +210,7 @@ export function kindSequences(
   callThroughRegister = false,
 ): { kind: number; states: ControlState[] }[] {
   const decoder = new Simulator(decoderCircuit({ callThroughRegister }));
-  const m = controllerMachine({ callThroughRegister });
+  const m = controllerMachine();
   const controller = new Simulator(machineCircuit(m));
   const names = Object.fromEntries(
     Object.entries(CONTROL_STATES).map(([name, code]) => [code, name as ControlState]),

@@ -59,10 +59,10 @@ describe("the machine with a part of its control broken", () => {
 describe("the capstone's machine: a call through a register", () => {
   const SOURCE =
     "R4 <= 20\nR5 <= 28\ncall R4, R15\ncall R5 + 0, R14\nstop\nR1 <= 7\ngoto R15\nR2 <= 9\ngoto R14";
-  it("runs as the reference with the instruction, in four edges", () => {
+  it("runs as the reference with the instruction, in the call's three edges", () => {
     const r = compareMulticycle(SOURCE, undefined, { callThroughRegister: true });
     expect(r.differences).toEqual([]);
-    expect(r.edges.filter((e) => e.kind === 9).map((e) => e.edges)).toEqual([4, 4]);
+    expect(r.edges.filter((e) => e.kind === 9).map((e) => e.edges)).toEqual([3, 3]);
   });
   it("still runs every program of the suite", () => {
     // Kind 9, job 0, is the new instruction now, not an illegal one.

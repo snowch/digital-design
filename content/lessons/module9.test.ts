@@ -45,6 +45,6 @@ describe("the machine's text", () => {
       machineFromText(machineText(true)),
     );
     expect(r.differences).toEqual([]);
-    expect(r.edges.filter((e) => e.kind === 9).map((e) => e.edges)).toEqual([4, 4]);
+    expect(r.edges.filter((e) => e.kind === 9).map((e) => e.edges)).toEqual([3, 3]);
   }, 60_000);
 });

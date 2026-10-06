@@ -84,22 +84,7 @@ export const illegalInstructions: LessonInput = {
   introduces: ["illegal instruction"],
   sections: [
     { kind: "question", title: LABELS.titles.question, prose: PROSE.question },
-    {
-      kind: "motivation",
-      title: LABELS.titles.motivation,
-      prose: PROSE.motivation,
-      interactives: [
-        {
-          id: "kind-map",
-          kind: "kind-map",
-          timeModel: "settle",
-          caption: LABELS.captions.kindMap,
-          lead: PROSE.kindMapLead,
-          after: PROSE.kindMapAfter,
-          props: {},
-        },
-      ],
-    },
+    { kind: "motivation", title: LABELS.titles.motivation, prose: PROSE.motivation },
     {
       kind: "prediction",
       title: LABELS.titles.prediction,
@@ -113,7 +98,7 @@ export const illegalInstructions: LessonInput = {
           props: {
             question: PROSE.p1Question,
             libraryId: "decoder",
-            run: [{ set: { K: 8, J: 2, C: 5 } }],
+            run: [{ set: { K: 8, J: 4, C: 5 } }],
             watch: "CAUSED",
             options: [
               { value: "00000000", label: LABELS.options.p1Stop },
@@ -193,7 +178,22 @@ export const illegalInstructions: LessonInput = {
         },
       ],
     },
-    { kind: "explanation", title: LABELS.titles.explanation, prose: PROSE.explanation },
+    {
+      kind: "explanation",
+      title: LABELS.titles.explanation,
+      prose: PROSE.explanation,
+      interactives: [
+        {
+          id: "kind-map",
+          kind: "kind-map",
+          timeModel: "settle",
+          caption: LABELS.captions.kindMap,
+          lead: PROSE.kindMapLead,
+          after: PROSE.kindMapAfter,
+          props: {},
+        },
+      ],
+    },
     { kind: "generalisation", title: LABELS.titles.generalisation, prose: PROSE.generalisation },
     {
       kind: "challenge",
@@ -254,6 +254,6 @@ export const illegalInstructions: LessonInput = {
     textbookExample:
       "An undefined opcode raising an exception in a pipeline's decode stage, with the exception program counter and cause register set and a jump to a fixed handler address (Patterson and Hennessy's exceptions section); LC-3's illegal opcode exception for its reserved opcode 1101; x86's UD2, an instruction defined to be undefined.",
     howThisDiffers:
-      "The illegal words are the course machine's own (docs/isa.md): kind 0, kinds 9 to F, a job its kind does not define, and a system job naming a control register outside 0 to 4, which needs the constant as one of the decoder's inputs, the wire Module 8 left out (docs/plan.md, 6 October 2026). The decoder's checks are three blocks a learner opens, read off the kind lines rather than K: no kind line at all, a bad job, a bad number. The map of every kind and job is the decoder's own circuit run on every pair, with the two cells that depend on the constant marked. The prediction is the instruction Module 8's machine stopped on as a job a later module builds, R0 ← C5, which Module 9's decoder now refuses. The machine stops and says why, with no handler until Module 12; the faults let an unknown kind through and let a bad number through.",
+      "The illegal words are the course machine's own (docs/isa.md): kind 0, kinds 9 to F, a job its kind does not define, and a system job naming a control register outside 0 to 4, which needs the constant as one of the decoder's inputs, the wire Module 8 left out (docs/plan.md, 6 October 2026). The decoder's checks are three blocks a learner opens, read off the kind lines rather than K: no kind line at all, a bad job, a bad number. The map of every kind and job, shown after the learner has opened the checks, is the decoder's own circuit run on every pair, with the two cells that depend on the constant marked. The lesson opens on the instruction Module 8's machine stopped on as a job a later module builds, R0 ← C5, which Module 9's decoder now refuses, and the prediction asks about a stop whose constant is 5, which names no control register and passes. The machine stops and says why, with no handler until Module 12; the faults let an unknown kind through and let a bad number through.",
   },
 };

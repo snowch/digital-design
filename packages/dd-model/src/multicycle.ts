@@ -130,23 +130,20 @@ export function controller(
     RST: NetId;
     GO: NetId;
     CALL: NetId;
-    JUMP?: NetId;
     MEM: NetId;
     LOAD: NetId;
     STORE: NetId;
     WRITEY: NetId;
   },
   given: Given = {},
-  options: ControlOptions = {},
 ): Record<EdgeSignal | "S", NetId> {
-  const m = controllerMachine(options);
+  const m = controllerMachine();
   const outs = Object.fromEntries(
     [...EDGE_SIGNALS, "S"].map((n) => [n, given.outs?.[n] ?? b.net(n, n === "S" ? 3 : 1)]),
   ) as Record<EdgeSignal | "S", NetId>;
   // The decoder's signals the next state reads.
   const decoderIns: Record<string, NetId> = {
     CALL: ins.CALL,
-    ...(options.callThroughRegister && ins.JUMP !== undefined ? { JUMP: ins.JUMP } : {}),
     MEM: ins.MEM,
     WRITEY: ins.WRITEY,
   };
@@ -470,14 +467,12 @@ export function multicycleCircuit(options: MulticycleOptions = {}): Circuit {
           RST: rst,
           GO: go,
           CALL: sig("CALL"),
-          ...(options.callThroughRegister ? { JUMP: sig("JUMP") } : {}),
           MEM: sig("MEM"),
           LOAD: sig("LOAD"),
           STORE: sig("STORE"),
           WRITEY: sig("WRITEY"),
         },
         { outs: edge },
-        options,
       );
       edgeStops(
         cb,
@@ -673,6 +668,6 @@ export function multicycleCircuit(options: MulticycleOptions = {}): Circuit {
 }
 
 /** The controller's machine, for a figure's diagram and table. */
-export function multicycleController(options: ControlOptions = {}): Machine {
-  return controllerMachine(options);
+export function multicycleController(): Machine {
+  return controllerMachine();
 }
