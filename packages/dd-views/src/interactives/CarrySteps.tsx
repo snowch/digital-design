@@ -12,6 +12,7 @@ import { z } from "zod";
 
 import { libraryCircuit } from "@dd/dd-model";
 import { Prose, useSlot, type InteractiveProps } from "@dd/lesson-runtime";
+import { PredictionChallenge, Stepper } from "@dd/primitives";
 import { Simulator, bitAt, parseWord, type Circuit, type Word } from "@dd/sim";
 
 import { valueLabel } from "../CircuitView";
@@ -103,7 +104,6 @@ export const CarrySteps = withProps(
       [circuit, data.cases],
     );
     const [stored, setStored] = useSlot<Stored>(store, interactive.id);
-    const [pick, setPick] = useState<string | undefined>();
     const [chosen, setChosen] = useState(0);
     const [step, setStep] = useState(0);
     const run = runs[chosen] ?? runs[0];
@@ -128,51 +128,30 @@ export const CarrySteps = withProps(
         {asking && (
           <div className="carry-question">
             <Prose markdown={data.question ?? ""} />
-            <fieldset className="prediction-options" disabled={stored?.choice !== undefined}>
-              <legend className="visually-hidden">{strings.prediction.legend}</legend>
-              {(data.options ?? []).map((o) => (
-                <label key={o.value} className="prediction-option">
-                  <input
-                    type="radio"
-                    name={`${interactive.id}-choice`}
-                    checked={(stored?.choice ?? pick) === o.value}
-                    onChange={() => setPick(o.value)}
-                  />
-                  <span>{o.label}</span>
-                </label>
-              ))}
-            </fieldset>
-            {stored?.choice === undefined ? (
-              <button
-                type="button"
-                className="button primary"
-                disabled={pick === undefined}
-                onClick={() => pick !== undefined && setStored({ choice: pick })}
-              >
-                {strings.prediction.commit}
-              </button>
-            ) : (
-              <>
-                <p
-                  role="status"
-                  className={stored.choice === answer ? "prediction-match" : "prediction-nomatch"}
-                >
-                  {format(strings.prediction.youSaid, { choice: optionLabel(stored.choice) })}{" "}
-                  {format(t.answer, { answer: optionLabel(answer) })}{" "}
-                  {stored.choice === answer ? strings.prediction.match : strings.prediction.noMatch}
-                </p>
-                <button
-                  type="button"
-                  className="button secondary"
-                  onClick={() => {
-                    setStored(undefined);
-                    setPick(undefined);
-                  }}
-                >
-                  {strings.prediction.again}
-                </button>
-              </>
-            )}
+            <PredictionChallenge
+              name={`${interactive.id}-choice`}
+              options={data.options ?? []}
+              committed={stored?.choice}
+              onCommit={(choice) => setStored({ choice })}
+              onAgain={() => setStored(undefined)}
+              legend={strings.prediction.legend}
+              commitLabel={strings.prediction.commit}
+              againLabel={strings.prediction.again}
+              verdict={
+                stored?.choice !== undefined && (
+                  <p
+                    role="status"
+                    className={stored.choice === answer ? "prediction-match" : "prediction-nomatch"}
+                  >
+                    {format(strings.prediction.youSaid, { choice: optionLabel(stored.choice) })}{" "}
+                    {format(t.answer, { answer: optionLabel(answer) })}{" "}
+                    {stored.choice === answer
+                      ? strings.prediction.match
+                      : strings.prediction.noMatch}
+                  </p>
+                )
+              }
+            />
           </div>
         )}
         {open && (
@@ -235,51 +214,20 @@ export const CarrySteps = withProps(
               ))}
               <p className="carry-key">{t.key}</p>
             </div>
-            <div className="explorer-steps">
-              <label>
-                <span>{strings.explorer.step}</span>
-                <input
-                  type="range"
-                  min={0}
-                  max={last}
-                  value={at}
-                  onChange={(e) => setStep(Number(e.target.value))}
-                />
-                <span className="explorer-step-of">
-                  {format(strings.explorer.stepOf, { k: at, n: last })}
-                </span>
-              </label>
-              <div className="explorer-actions">
-                <button
-                  type="button"
-                  className="button secondary"
-                  disabled={at === 0}
-                  onClick={() => setStep(Math.max(0, at - 1))}
-                >
-                  {t.back}
-                </button>
-                <button
-                  type="button"
-                  className="button secondary"
-                  disabled={at === last}
-                  onClick={() => setStep(Math.min(last, at + 1))}
-                >
-                  {t.next}
-                </button>
-                <button
-                  type="button"
-                  className="button secondary"
-                  disabled={at === last}
-                  onClick={() => setStep(last)}
-                >
-                  {t.end}
-                </button>
-              </div>
-              <p role="status">
-                {format(t.result, { y: y ? valueLabel(y) : "X" })}{" "}
-                {at === last ? format(t.settled, { n: last }) : ""}
-              </p>
-            </div>
+            <Stepper
+              step={at}
+              last={last}
+              onStep={setStep}
+              label={strings.explorer.step}
+              position={format(strings.explorer.stepOf, { k: at, n: last })}
+              buttons={{ back: t.back, next: t.next, end: t.end }}
+              status={
+                <>
+                  {format(t.result, { y: y ? valueLabel(y) : "X" })}{" "}
+                  {at === last ? format(t.settled, { n: last }) : ""}
+                </>
+              }
+            />
             {asking && data.explain && <Prose markdown={data.explain} />}
           </>
         )}

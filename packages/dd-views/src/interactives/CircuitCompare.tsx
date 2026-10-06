@@ -5,11 +5,12 @@
 // a prediction: the learner commits to "the same" or "different" before the counts and the table
 // are shown. The answer comes from the simulator, through `compareCircuits`.
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { z } from "zod";
 
 import { compareCircuits, depthOf, gatesOf, libraryCircuit } from "@dd/dd-model";
 import { Prose, useSlot, type InteractiveProps } from "@dd/lesson-runtime";
+import { PredictionChallenge } from "@dd/primitives";
 
 import { CircuitView } from "../CircuitView";
 import { format, useViewStrings } from "../strings";
@@ -51,7 +52,6 @@ export const CircuitCompare = withProps(
   }: InteractiveProps & { data: z.infer<typeof Props> }) {
     const strings = useViewStrings();
     const [stored, setStored] = useSlot<Stored>(store, interactive.id);
-    const [pick, setPick] = useState<string | undefined>();
     const sides = useMemo(
       () =>
         data.circuits.map((c) => {
@@ -100,42 +100,16 @@ export const CircuitCompare = withProps(
         {asks && (
           <>
             <Prose markdown={data.question as string} />
-            <fieldset className="prediction-options" disabled={stored !== undefined}>
-              <legend className="visually-hidden">{strings.prediction.legend}</legend>
-              {data.options?.map((o) => (
-                <label key={o.value} className="prediction-option">
-                  <input
-                    type="radio"
-                    name={name}
-                    value={o.value}
-                    checked={(stored?.choice ?? pick) === o.value}
-                    onChange={() => setPick(o.value)}
-                  />
-                  <span>{o.label}</span>
-                </label>
-              ))}
-            </fieldset>
-            {!stored ? (
-              <button
-                type="button"
-                className="button primary"
-                disabled={pick === undefined}
-                onClick={() => pick !== undefined && setStored({ choice: pick })}
-              >
-                {strings.prediction.commit}
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="button secondary"
-                onClick={() => {
-                  setStored(undefined);
-                  setPick(undefined);
-                }}
-              >
-                {strings.prediction.again}
-              </button>
-            )}
+            <PredictionChallenge
+              name={name}
+              options={data.options ?? []}
+              committed={stored?.choice}
+              onCommit={(choice) => setStored({ choice })}
+              onAgain={() => setStored(undefined)}
+              legend={strings.prediction.legend}
+              commitLabel={strings.prediction.commit}
+              againLabel={strings.prediction.again}
+            />
           </>
         )}
         {revealed && (

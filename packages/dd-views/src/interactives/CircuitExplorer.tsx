@@ -15,6 +15,7 @@ import {
   type TruthTable as RefTable,
 } from "@dd/dd-model";
 import type { InteractiveProps } from "@dd/lesson-runtime";
+import { Stepper } from "@dd/primitives";
 import { formatWord, type Circuit, type Word } from "@dd/sim";
 
 import { CircuitView } from "../CircuitView";
@@ -170,31 +171,20 @@ export const CircuitExplorer = withProps(
           </button>
         </div>
         {data.showSteps && (
-          <div className="explorer-steps">
-            <label>
-              <span>{strings.explorer.step}</span>
-              <input
-                type="range"
-                min={0}
-                max={history.length - 1}
-                value={Math.min(step, history.length - 1)}
-                onChange={(e) => setStep(Number(e.target.value))}
-              />
-              <span className="explorer-step-of">
-                {format(strings.explorer.stepOf, {
-                  k: Math.min(step, history.length - 1),
-                  n: history.length - 1,
-                })}
-              </span>
-            </label>
-            <p role="status">
-              {sim.converged
+          <Stepper
+            step={step}
+            last={last}
+            onStep={setStep}
+            label={strings.explorer.step}
+            position={format(strings.explorer.stepOf, { k: Math.min(step, last), n: last })}
+            status={
+              sim.converged
                 ? history.length === 2
                   ? strings.explorer.settledOne
-                  : format(strings.explorer.settled, { n: history.length - 1 })
-                : format(strings.explorer.notSettled, { nets: oscillating.join(", ") })}
-            </p>
-          </div>
+                  : format(strings.explorer.settled, { n: last })
+                : format(strings.explorer.notSettled, { nets: oscillating.join(", ") })
+            }
+          />
         )}
         {own && (
           <TruthTable

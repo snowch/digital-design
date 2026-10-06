@@ -106,6 +106,16 @@ step.
 
 ## Decisions since the brief
 
+### 6 October 2026: the first extraction of shared primitives
+
+The brief asks for the author's approval before the first extraction of shared primitives, at
+Slice 2, one approval for the batch. Module 5's note listed seven candidates; the author approved
+the six with consumers in two modules, and the seventh, the state machine's row of input buttons,
+waits for a second module. `PredictionChallenge`, `FaultInjector`, `Stepper`, `Timeline`,
+`StateInspector` and `DrillDown` now live in `packages/primitives`, and the figures in
+`dd-views` use them; every lesson renders as it did. `docs/platform.md` says what the platform
+shares and what is the course's own.
+
 ### 6 October 2026: the course machine (checkpoint 2)
 
 The author approved `docs/machine.md` and `docs/isa.md`, taking every recommendation the draft

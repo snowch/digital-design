@@ -21,6 +21,7 @@ import {
   type CaseGroup,
 } from "@dd/dd-model";
 import { Prose, useSlot, type InteractiveProps } from "@dd/lesson-runtime";
+import { FaultInjector, PredictionChallenge } from "@dd/primitives";
 import { Simulator, formatWord, word, type Circuit } from "@dd/sim";
 
 import { format, useViewStrings } from "../strings";
@@ -114,7 +115,6 @@ export const SuiteLab = withProps(
     const [stored, setStored] = useSlot<Stored>(store, interactive.id);
     const asking = data.question !== undefined && data.options !== undefined;
     const [chosen, setChosen] = useState(asking ? data.askFault : -1);
-    const [pick, setPick] = useState<string | undefined>();
     const [ran, setRan] = useState<readonly CaseOutcome[] | undefined>();
     const seed = stored?.seed ?? data.seed;
     const fault = faults[chosen];
@@ -144,79 +144,53 @@ export const SuiteLab = withProps(
         {asking && (
           <div className="carry-question">
             <Prose markdown={data.question ?? ""} />
-            <fieldset className="prediction-options" disabled={stored?.choice !== undefined}>
-              <legend className="visually-hidden">{strings.prediction.legend}</legend>
-              {(data.options ?? []).map((o) => (
-                <label key={o.value} className="prediction-option">
-                  <input
-                    type="radio"
-                    name={`${interactive.id}-choice`}
-                    checked={(stored?.choice ?? pick) === o.value}
-                    onChange={() => setPick(o.value)}
-                  />
-                  <span>{o.label}</span>
-                </label>
-              ))}
-            </fieldset>
-            {stored?.choice === undefined ? (
-              <button
-                type="button"
-                className="button primary"
-                disabled={pick === undefined}
-                onClick={() => {
-                  if (pick === undefined) return;
-                  setStored({ ...stored, choice: pick });
-                  setChosen(data.askFault);
-                  setRan(undefined);
-                }}
-              >
-                {strings.prediction.commit}
-              </button>
-            ) : (
-              <>
-                <p
-                  role="status"
-                  className={stored.choice === asked ? "prediction-match" : "prediction-nomatch"}
-                >
-                  {format(strings.prediction.youSaid, { choice: optionLabel(stored.choice) })}{" "}
-                  {format(t.answer, { answer: optionLabel(asked ?? "none") })}{" "}
-                  {stored.choice === asked ? strings.prediction.match : strings.prediction.noMatch}
-                </p>
-                <button
-                  type="button"
-                  className="button secondary"
-                  onClick={() => {
-                    setStored({ ...stored, choice: undefined });
-                    setPick(undefined);
-                    setRan(undefined);
-                  }}
-                >
-                  {strings.prediction.again}
-                </button>
-              </>
-            )}
+            <PredictionChallenge
+              name={`${interactive.id}-choice`}
+              options={data.options ?? []}
+              committed={stored?.choice}
+              onCommit={(choice) => {
+                setStored({ ...stored, choice });
+                setChosen(data.askFault);
+                setRan(undefined);
+              }}
+              onAgain={() => {
+                setStored({ ...stored, choice: undefined });
+                setRan(undefined);
+              }}
+              legend={strings.prediction.legend}
+              commitLabel={strings.prediction.commit}
+              againLabel={strings.prediction.again}
+              verdict={
+                stored?.choice !== undefined && (
+                  <p
+                    role="status"
+                    className={stored.choice === asked ? "prediction-match" : "prediction-nomatch"}
+                  >
+                    {format(strings.prediction.youSaid, { choice: optionLabel(stored.choice) })}{" "}
+                    {format(t.answer, { answer: optionLabel(asked ?? "none") })}{" "}
+                    {stored.choice === asked
+                      ? strings.prediction.match
+                      : strings.prediction.noMatch}
+                  </p>
+                )
+              }
+            />
           </div>
         )}
         {committed && (
           <>
             {faults.length > 0 && (
-              <fieldset className="fault-choices">
-                <legend>{strings.fault.choose}</legend>
-                {[-1, ...faults.map((_, i) => i)].map((i) => (
-                  <label key={i} className="fault-choice">
-                    <input
-                      type="radio"
-                      name={name}
-                      checked={chosen === i}
-                      onChange={() => {
-                        setChosen(i);
-                        setRan(undefined);
-                      }}
-                    />
-                    <span>{i < 0 ? strings.fault.healthy : faults[i]?.label}</span>
-                  </label>
-                ))}
-              </fieldset>
+              <FaultInjector
+                name={name}
+                legend={strings.fault.choose}
+                noneLabel={strings.fault.healthy}
+                faults={faults}
+                chosen={chosen}
+                onChoose={(i) => {
+                  setChosen(i);
+                  setRan(undefined);
+                }}
+              />
             )}
             <p className="suite-seed">{format(t.seed, { seed, width })}</p>
             <div className="explorer-actions">

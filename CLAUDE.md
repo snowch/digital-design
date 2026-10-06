@@ -11,16 +11,16 @@ inspect, predict, step, experiment, break, explain, drill down, replay.
 
 **Status.** The author approved the inventory's ten recommendations at Checkpoint 1. Which
 modules have lessons, the list of lessons on the site says: it is worked out from the lessons
-themselves. Slice 2, the retry controller, is Module 5's `state-machines` lesson. The course
-machine passed checkpoint 2 on 6 October 2026 (`docs/machine.md`, `docs/isa.md`). One decision
-waits on the author: the first extraction of shared primitives under the rule of two (the
-candidates are listed in `docs/notes/module-5-state-machines.md`). `docs/platform.md` is still
-to come.
+themselves. Slice 2, the retry controller, is Module 5's `state-machines` lesson. On 6 October
+2026 the course machine passed checkpoint 2 (`docs/machine.md`, `docs/isa.md`), and the first
+shared primitives were extracted under the rule of two (`packages/primitives`,
+`docs/platform.md`).
 
 Read `docs/plan.md` for the modules, their order and the decisions taken since the course brief,
-`docs/machine.md` and `docs/isa.md` for the course machine, `docs/inventory.md` for why things are
-as they are, `docs/simulator.md` for what the engine models, and `docs/authoring.md` for how a
-lesson is made. Edit every learner-facing string against `docs/style.md`.
+`docs/machine.md` and `docs/isa.md` for the course machine, `docs/platform.md` for what the
+platform shares and what is the course's own, `docs/inventory.md` for why things are as they are,
+`docs/simulator.md` for what the engine models, and `docs/authoring.md` for how a lesson is made.
+Edit every learner-facing string against `docs/style.md`.
 
 ## Where these rules came from
 

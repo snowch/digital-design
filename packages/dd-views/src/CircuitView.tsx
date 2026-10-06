@@ -8,6 +8,7 @@
 
 import { useId, useMemo, useState, type KeyboardEvent, type ReactNode } from "react";
 
+import { DrillDown, StateInspector, drillLevels } from "@dd/primitives";
 import { formatWord, type Circuit, type Word } from "@dd/sim";
 
 import { labelFor, nameRepeatsKind } from "./parts";
@@ -150,17 +151,10 @@ export function CircuitView({
   // The trail of opened blocks, each named by its instance name, or by its kind's label when the
   // name says no more (the `dff` block of the `dff` circuit). Two levels with one label collapse
   // into the deeper one, and the trail is drawn only when there is a block to open or to leave.
-  const crumbs = scope ? scope.split("/") : [];
-  const levels: { path: string; label: string }[] = [{ path: "", label: labelFor(circuit.name) }];
-  for (let i = 0; i < crumbs.length; i++) {
-    const path = crumbs.slice(0, i + 1).join("/");
+  const levels = drillLevels(scope, labelFor(circuit.name), (path, name) => {
     const block = circuit.composites.find((c) => c.path === path);
-    const name = crumbs[i] ?? "";
-    const label = block && nameRepeatsKind(name, block.kind) ? labelFor(block.kind) : name;
-    const last = levels[levels.length - 1];
-    if (last && last.label === label) levels[levels.length - 1] = { path, label };
-    else levels.push({ path, label });
-  }
+    return block && nameRepeatsKind(name, block.kind) ? labelFor(block.kind) : name;
+  });
   const canOpen = drawing.parts.some((part) =>
     sub.composites.some((c) => c.path === part.id && !SEALED.has(c.kind)),
   );
@@ -176,21 +170,13 @@ export function CircuitView({
   return (
     <div className="circuit-view">
       {showTrail && (
-        <nav className="circuit-crumbs" aria-label={strings.circuit.where}>
-          {levels.map((level, i) => (
-            <span key={level.path}>
-              {i > 0 && <span aria-hidden="true"> / </span>}
-              <button
-                type="button"
-                className="crumb"
-                onClick={() => onScope(level.path)}
-                disabled={level.path === scope}
-              >
-                {level.label}
-              </button>
-            </span>
-          ))}
-        </nav>
+        <DrillDown
+          className="circuit-crumbs"
+          label={strings.circuit.where}
+          levels={levels}
+          current={scope}
+          onGo={onScope}
+        />
       )}
       {overflows && <p className="scroll-note">{strings.circuit.scrollNote}</p>}
       <div className="circuit-scroll" ref={scrollRef}>
@@ -459,32 +445,24 @@ export function SignalTable({
     ...circuit.outputs.map((p) => ({ role: strings.circuit.output, ...p })),
   ];
   return (
-    <table className={`signal-table${readings.length ? " with-readings" : ""}`}>
-      <caption>{caption ?? strings.circuit.signals}</caption>
-      <thead>
-        <tr>
-          <th scope="col">{strings.circuit.signal}</th>
-          <th scope="col">{strings.circuit.role}</th>
-          <th scope="col">{strings.circuit.value}</th>
-          {readings.map((r) => (
-            <th scope="col" key={r}>
-              {strings.readings.names[r]}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((r) => (
-          <tr key={`${r.role}-${r.name}`}>
-            <th scope="row">{r.name}</th>
-            <td>{r.role}</td>
-            <td className={`value-${levelOf(values[r.net])}`}>{valueLabel(values[r.net])}</td>
-            {readings.map((k) => (
-              <td key={k}>{readingText(values[r.net], k)}</td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <StateInspector
+      className={`signal-table${readings.length ? " with-readings" : ""}`}
+      caption={caption ?? strings.circuit.signals}
+      headings={[
+        strings.circuit.signal,
+        strings.circuit.role,
+        strings.circuit.value,
+        ...readings.map((r) => strings.readings.names[r]),
+      ]}
+      rows={rows.map((r) => ({
+        key: `${r.role}-${r.name}`,
+        name: r.name,
+        cells: [
+          { text: r.role },
+          { text: valueLabel(values[r.net]), className: `value-${levelOf(values[r.net])}` },
+          ...readings.map((k) => ({ text: readingText(values[r.net], k) })),
+        ],
+      }))}
+    />
   );
 }

@@ -10,8 +10,8 @@ from the `main` branch by `.github/workflows/deploy.yml`; a branch not yet merge
 not on the site.
 
 **Status.** Which modules have lessons, the list of lessons on the site says: it is worked out
-from the lessons themselves. The course machine passed checkpoint 2 on 6 October 2026. Waiting
-on the author: the first extraction of shared primitives. `docs/platform.md` is still to come.
+from the lessons themselves. On 6 October 2026 the course machine passed checkpoint 2, and the
+first shared primitives were extracted.
 
 ## Read first
 
@@ -20,6 +20,8 @@ on the author: the first extraction of shared primitives. `docs/platform.md` is 
   decisions taken since the course brief.
 - [`docs/machine.md`](docs/machine.md) and [`docs/isa.md`](docs/isa.md): the course machine, its
   hardware and its instructions, approved at checkpoint 2.
+- [`docs/platform.md`](docs/platform.md): the packages, what the platform shares with any book
+  built the same way, and what is the course's own.
 - [`docs/inventory.md`](docs/inventory.md): the corpus as found, its tests run, every interaction
   catalogued, the layering and the decisions the author approved.
 - [`docs/simulator.md`](docs/simulator.md): what the engine models, its three time models, the

@@ -5,7 +5,7 @@
 // recording wrong, and what a word reads as one way. The answer is computed by the model, never
 // taken from the lesson's data.
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { z } from "zod";
 
 import {
@@ -18,6 +18,7 @@ import {
   type RecordingId,
 } from "@dd/dd-model";
 import { Prose, useSlot, type InteractiveProps } from "@dd/lesson-runtime";
+import { PredictionChallenge } from "@dd/primitives";
 
 import { BitRow } from "../BitRow";
 import { SignalPlot } from "../SignalPlot";
@@ -66,7 +67,6 @@ export const ReadingPrediction = withProps(
   function ReadingPrediction({ data, interactive, store }: InteractiveProps & { data: Data }) {
     const strings = useViewStrings();
     const [stored, setStored] = useSlot<Stored>(store, interactive.id);
-    const [pick, setPick] = useState<string | undefined>();
     const answer = useMemo(() => (stored ? answerOf(data.ask) : undefined), [stored, data.ask]);
     const label = (value: string) => data.options.find((o) => o.value === value)?.label ?? value;
     const name = `${interactive.id}-choice`;
@@ -86,42 +86,16 @@ export const ReadingPrediction = withProps(
         {/* Once committed, the outcome below draws the same thing with the answer on it. */}
         {!stored && <Before ask={data.ask} />}
         <Prose markdown={data.question} />
-        <fieldset className="prediction-options" disabled={stored !== undefined}>
-          <legend className="visually-hidden">{strings.prediction.legend}</legend>
-          {data.options.map((o) => (
-            <label key={o.value} className="prediction-option">
-              <input
-                type="radio"
-                name={name}
-                value={o.value}
-                checked={(stored?.choice ?? pick) === o.value}
-                onChange={() => setPick(o.value)}
-              />
-              <span>{o.label}</span>
-            </label>
-          ))}
-        </fieldset>
-        {!stored ? (
-          <button
-            type="button"
-            className="button primary"
-            disabled={pick === undefined}
-            onClick={() => pick !== undefined && setStored({ choice: pick })}
-          >
-            {strings.prediction.commit}
-          </button>
-        ) : (
-          <button
-            type="button"
-            className="button secondary"
-            onClick={() => {
-              setStored(undefined);
-              setPick(undefined);
-            }}
-          >
-            {strings.prediction.again}
-          </button>
-        )}
+        <PredictionChallenge
+          name={name}
+          options={data.options}
+          committed={stored?.choice}
+          onCommit={(choice) => setStored({ choice })}
+          onAgain={() => setStored(undefined)}
+          legend={strings.prediction.legend}
+          commitLabel={strings.prediction.commit}
+          againLabel={strings.prediction.again}
+        />
         {stored && answer !== undefined && (
           <div className="prediction-outcome">
             <p

@@ -17,6 +17,7 @@ import {
   type Fault,
 } from "@dd/dd-model";
 import { Prose, type InteractiveProps } from "@dd/lesson-runtime";
+import { FaultInjector } from "@dd/primitives";
 import { formatWord, runSuite, type Diagnosis, type SequenceStep } from "@dd/sim";
 
 import { CircuitView } from "../CircuitView";
@@ -114,35 +115,17 @@ export const FaultLab = withProps(
 
     return (
       <div className="fault-lab" data-interactive={interactive.id}>
-        <fieldset className="fault-choices">
-          <legend>{strings.fault.choose}</legend>
-          <label className="fault-choice">
-            <input
-              type="radio"
-              name={name}
-              checked={chosen === -1}
-              onChange={() => {
-                setChosen(-1);
-                setDiagnosis(undefined);
-              }}
-            />
-            <span>{strings.fault.healthy}</span>
-          </label>
-          {faults.map((f, i) => (
-            <label key={f.id} className="fault-choice">
-              <input
-                type="radio"
-                name={name}
-                checked={chosen === i}
-                onChange={() => {
-                  setChosen(i);
-                  setDiagnosis(undefined);
-                }}
-              />
-              <span>{f.label}</span>
-            </label>
-          ))}
-        </fieldset>
+        <FaultInjector
+          name={name}
+          legend={strings.fault.choose}
+          noneLabel={strings.fault.healthy}
+          faults={faults}
+          chosen={chosen}
+          onChoose={(i) => {
+            setChosen(i);
+            setDiagnosis(undefined);
+          }}
+        />
         {fault && <p className="fault-explanation">{fault.explanation}</p>}
         <CircuitView
           circuit={circuit}

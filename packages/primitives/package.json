@@ -4,7 +4,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "description": "Shared interaction primitives. Empty until Slice 2, by the rule of two (see README.md).",
+  "description": "Shared interaction primitives: the domain-free parts of the course's interactions, extracted at Slice 2 under the rule of two (see README.md).",
   "exports": {
     ".": "./src/index.ts"
   },
