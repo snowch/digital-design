@@ -318,7 +318,13 @@ ol {
   color: var(--hero-muted);
 }
 
-/* The path: five stages in reading order, a list down a phone and a row across a wide screen. */
+/* The path: five stages in reading order, a list down a phone and a row across a wide screen. A rule
+   across the page closes it, darker and longer than the lines between the modules below, so the
+   stages do not run on into the list (the author asked for a separator there). */
+.journey {
+  padding-bottom: var(--space-7);
+  border-bottom: 1px solid var(--border-strong);
+}
 .journey h2 {
   margin-top: var(--space-6);
 }
@@ -416,7 +422,7 @@ ol {
   }
 }
 .contents-heading {
-  margin-top: var(--space-7);
+  margin-top: var(--space-6);
 }
 /* Each module is one line until it is pressed: its name and its summary beside a chevron that turns
    when its lessons show (the author: the front page had grown long with every lesson shown). A

@@ -157,7 +157,8 @@ The same evening, with 32 lessons listed, the author found the page long and ask
 modules to be collapsed. Each module is now one line: its name, and a summary of its lessons and
 how many of their challenges are complete. Pressing the line shows its lessons. The module of the
 lesson the button names starts open, so a new reader sees Module 1's lessons and a returning one
-the module they are in; so does the module of a lesson the reader has just left.
+the module they are in; so does the module of a lesson the reader has just left. The author then
+found the five stages running on into the list, and a rule across the page now parts them.
 
 ### 6 October 2026: a calculator of the course's own, in Module 10
 
