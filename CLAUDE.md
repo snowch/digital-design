@@ -14,7 +14,8 @@ modules have lessons, the list of lessons on the site says: it is worked out fro
 themselves. Slice 2, the retry controller, is Module 5's `state-machines` lesson. On 6 October
 2026 the course machine passed checkpoint 2 (`docs/machine.md`, `docs/isa.md`), and the first
 shared primitives were extracted under the rule of two (`packages/primitives`,
-`docs/platform.md`).
+`docs/platform.md`). The same day the course passed checkpoint 3, one instruction added to the CPU
+end to end (`docs/checkpoints.md`).
 
 Read `docs/plan.md` for the modules, their order and the decisions taken since the course brief,
 `docs/machine.md` and `docs/isa.md` for the course machine, `docs/platform.md` for what the

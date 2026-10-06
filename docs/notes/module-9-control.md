@@ -320,6 +320,11 @@ What the drafts dropped, got wrong, or drifted on:
    many wires). They pass the course's rules for an inside, and every figure now opens at the
    decoder's top. Placing them by hand is listed under what I would change.
 
+Answered at checkpoint 3, on 6 October 2026: the author took every recommendation. The door is
+sampled once per instruction, at the edge that ends it (`docs/machine.md`); the capstone and its
+second challenge stay as they are; the decoder's insides are placed by hand before Module 10
+(`docs/plan.md`).
+
 ## Candidates for the shared primitives (listed, not extracted)
 
 - **A table read off a circuit**: the decoder's table, the map of kinds and jobs, and each kind's

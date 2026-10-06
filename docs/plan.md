@@ -106,6 +106,27 @@ step.
 
 ## Decisions since the brief
 
+### 6 October 2026: checkpoint 3, one instruction added end to end
+
+The author reviewed the course after Module 9 (`docs/checkpoints.md`, "Course checkpoint 3") and
+took every recommendation, asking for the best reader and learner experience:
+
+1. **The door is sampled once per instruction**, at the edge that ends it, as the timer counts
+   instructions, so the single-cycle machine and Module 9's see the same door at the same
+   instruction (`docs/machine.md`, "Devices").
+2. **The capstone stays a call through a register**, which needs only a column of the decoder and
+   two terms of its checks: the lesson's point is that an instruction whose transfers and edges
+   the machine already makes needs nothing more.
+3. **Its second challenge stays** as the run of the whole machine with the learner's change in it,
+   end to end.
+4. **The decoder's insides are placed by hand** before Module 10, as the machine's levels are.
+5. **The 11-pixel rule holds for the page as it loads.** A drawing the learner zooms out shows its
+   words smaller, down to 0.6 of their size, then hides them (`docs/notes/overview-strip.md`).
+
+The author also asked for the gaps the report listed for the learner to be closed: a wide word
+typed in "Try it" rather than set a bit at a time, a fault lab's outcomes shown one fault at a
+time, each once its fault has run, and a wide drawing opened at the part its words name.
+
 ### 6 October 2026: a cover at the top of the front page
 
 The author asked whether the course should have a cover page, and took the recommendation: the top

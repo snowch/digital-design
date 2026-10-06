@@ -124,9 +124,13 @@ The shop's devices, one word each, at the top of the memory. A device answers wo
   instruction finishes, while the count is not 0, and bit 0 of "waiting" is set when the count
   goes from 1 to 0. So the single-cycle machine and Module 9's machine, which takes several edges
   an instruction, reach the same interrupt at the same instruction. A write replaces the count.
-- **The door** sets bit 1 of "waiting" at an edge where DOOR is 1 and was 0 at the edge before.
+- **The door** sets bit 1 of "waiting" at the edge that ends an instruction, where DOOR is 1 and
+  was 0 at the edge that ended the instruction before, as the timer counts instructions. In the
+  single-cycle machine every edge ends an instruction. In Module 9's machine, which takes several
+  edges an instruction, a door opened and closed within one instruction's edges sets no bit, and
+  both machines see the same door at the same instruction (the author's decision at checkpoint 3).
   A reset counts the door as closed, as it makes every register 0, so a door already open at reset
-  sets the bit at the first edge after it.
+  sets the bit at the first edge after it that ends an instruction.
 - **A set and a clear of the same bit at one edge**: the set wins, so no event is lost.
 - **A byte access to a device traps** (`33`).
 - A device's word may change without a store, as Module 6's sensor's did.

@@ -314,3 +314,10 @@ word nothing read, and took the call's three edges instead.
 Module 10, the instruction set: why the instruction set is as it is, with the encoding explorer
 and the course's calculator built from the learner's ALU. Then Module 11, the assembler and the
 debugger, and checkpoint 4.
+
+### The author's answers
+
+The author took every recommendation the same day, asking for the best reader and learner
+experience, and asked for the gaps above that a learner meets to be closed: words typed in "Try
+it", a fault lab's outcomes one fault at a time, and a wide drawing opened at the part its words
+name. `docs/plan.md` records the decision.
