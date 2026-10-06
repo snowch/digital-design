@@ -61,8 +61,13 @@ class AssemblyError extends Error {
 const encode = (k: number, j: number, a: number, b: number, y: number, c: number) =>
   ((k << 28) | (j << 24) | (a << 20) | (b << 16) | (y << 12) | (c & 0xfff)) >>> 0;
 
+/** Module 9's capstone: the kind a call through a register is written at, `call R3 + 8, R15`. */
+export interface AssemblyOptions {
+  readonly callThroughRegister?: number;
+}
+
 /** Assembles a program. Labels may be used before they are defined. */
-export function assemble(source: string): Program {
+export function assemble(source: string, options: AssemblyOptions = {}): Program {
   const raw = source.split("\n");
   // First pass: addresses and labels.
   type Item =
@@ -123,7 +128,7 @@ export function assemble(source: string): Program {
       });
       continue;
     }
-    const word = instruction(item.text, item.address, labels, item.line);
+    const word = instruction(item.text, item.address, labels, item.line, options);
     for (let i = 0; i < 4; i++) rom[item.address + i] = (word >>> (8 * i)) & 0xff;
     lines.push({
       text: item.text,
@@ -194,6 +199,7 @@ function instruction(
   at: number,
   labels: Readonly<Record<string, number>>,
   line: number,
+  options: AssemblyOptions = {},
 ): number {
   const t = text.replace(/\s+/g, " ").trim();
   const offset = (target: string) => {
@@ -208,7 +214,22 @@ function instruction(
   if (t === "resume") return encode(8, 1, 0, 0, 0, 0);
   if (t.includes(">") && !t.includes(">=") && !t.includes("<="))
     throw new AssemblyError(line, "there is no `>`: swap the two registers and write `<`");
-  let m = /^call (\w+), ?(R\d{1,2})$/.exec(t);
+  let m = /^call (R\d{1,2})(?: ?([+-]) ?(.+))?, ?(R\d{1,2})$/.exec(t);
+  if (m) {
+    if (options.callThroughRegister === undefined)
+      throw new AssemblyError(line, "this machine has no call through a register");
+    const c = m[3] ? value(m[3], labels, line) * (m[2] === "-" ? -1 : 1) : 0;
+    const a = register(m[1] as string, line);
+    return encode(
+      options.callThroughRegister,
+      0,
+      a,
+      0,
+      register(m[4] as string, line),
+      constant(c, line),
+    );
+  }
+  m = /^call (\w+), ?(R\d{1,2})$/.exec(t);
   if (m) return encode(6, 0, 0, 0, register(m[2] as string, line), offset(m[1] as string));
   m = /^goto (R\d{1,2})(?: ?([+-]) ?(.+))?$/.exec(t);
   if (m) {

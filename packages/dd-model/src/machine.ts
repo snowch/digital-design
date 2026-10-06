@@ -166,8 +166,27 @@ export function branchTaken(
   return (chosen ^ (job & 1)) === 1;
 }
 
+/**
+ * Which machine the reference stands for. Module 8's decoder reads only the kind and job digits, so
+ * its machine stops on a system job 1 to 3 as one a later module builds, whatever the constant.
+ * Module 9's decoder takes the constant too and makes the check `docs/isa.md` gives on a control
+ * register's number (`docs/plan.md`, the decision of 6 October 2026). Module 9's capstone adds an
+ * instruction in the learner's own copy of the machine: a call through a register.
+ */
+export interface MachineOptions {
+  /** Module 9: a system job naming a control register outside 0 to 4 is illegal (cause 21). */
+  readonly registerCheck?: boolean;
+  /** Module 9's capstone: this kind, job 0, is a call through a register, `RY ← PC + 4` and `PC ← RA + c`. */
+  readonly callThroughRegister?: number;
+}
+
+/** Module 9's machine: the decoder checks a control register's number. */
+export const MODULE_9: MachineOptions = { registerCheck: true };
+
 /** Whether an instruction is illegal (cause 21), from its fields alone (docs/isa.md). */
-export function isIllegal(f: Fields): boolean {
+export function isIllegal(f: Fields, options: MachineOptions = {}): boolean {
+  if (options.callThroughRegister !== undefined && f.k === options.callThroughRegister)
+    return f.j !== 0;
   switch (f.k) {
     case 1:
     case 2:
@@ -278,6 +297,7 @@ function doorEvent(s: CpuState, inputs: MachineInputs): number {
 export function step(
   s: CpuState,
   inputs: MachineInputs = QUIET_INPUTS,
+  options: MachineOptions = {},
 ): { state: CpuState; record: StepRecord } {
   if (s.stopped) return { state: s, record: { pc: s.pc, nextPc: s.pc, stopped: s.stopped.reason } };
   const pc = s.pc;
@@ -303,8 +323,10 @@ export function step(
   const seen = { instruction, fields: f };
   // Module 8 builds no control registers, so its decoder does not check a control register's
   // number: a system job 1 to 3 stops the machine as one Module 12 builds, whatever its constant.
-  if (f.k === 8 && f.j >= 1 && f.j <= 3) return stop({ kind: "later" }, seen);
-  if (isIllegal(f)) return stop({ kind: "trap", cause: CAUSES.illegal }, seen);
+  // Module 9's decoder makes the check first (cause 21), and stops on the job only if it passes.
+  if (!options.registerCheck && f.k === 8 && f.j >= 1 && f.j <= 3)
+    return stop({ kind: "later" }, seen);
+  if (isIllegal(f, options)) return stop({ kind: "trap", cause: CAUSES.illegal }, seen);
   if (f.k === 8) {
     if (f.j === 0) return stop({ kind: "trap", cause: CAUSES.system }, seen);
     if (f.j === 4) return stop({ kind: "stop" }, seen);
@@ -397,6 +419,12 @@ export function step(
       if (ra === undefined) throw new Error("the reference does not jump to an unknown address");
       nextPc = (ra + c) & MASK64;
       break;
+    case options.callThroughRegister:
+      // Module 9's capstone: the call's return address and the jump's target, in one instruction.
+      if (ra === undefined) throw new Error("the reference does not jump to an unknown address");
+      write(f.y, pc4);
+      nextPc = (ra + c) & MASK64;
+      break;
   }
   // The timer counts instructions: down by one as each finishes, while its count is not 0. A
   // write replaces the count. Bit 0 of "waiting" is set as the count goes from 1 to 0.
@@ -439,11 +467,12 @@ export function run(
   s: CpuState,
   limit = 1000,
   inputs: MachineInputs = QUIET_INPUTS,
+  options: MachineOptions = {},
 ): { state: CpuState; records: StepRecord[] } {
   const records: StepRecord[] = [];
   let state = s;
   for (let i = 0; i < limit && !state.stopped; i++) {
-    const r = step(state, inputs);
+    const r = step(state, inputs, options);
     state = r.state;
     records.push(r.record);
   }

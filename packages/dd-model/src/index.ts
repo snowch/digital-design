@@ -33,3 +33,7 @@ export * from "./datapath-run";
 export * from "./datapath-figure";
 export * from "./machine-suite";
 export { DATAPATH_AT, placedDatapath } from "./library-datapath";
+// Module 9, control
+export * from "./control";
+export * from "./multicycle";
+export * from "./multicycle-run";

@@ -92,7 +92,7 @@ export const PARTS = {
  * A block's parts in a scope of their own (a closed block in a drawing), or, for a module the
  * course supplies to the SystemVerilog subset, at the level its use already made (Module 8).
  */
-function block<T>(
+export function block<T>(
   b: CircuitBuilder,
   scoped: boolean,
   name: string,
@@ -109,20 +109,27 @@ export interface Given {
   readonly scoped?: boolean;
 }
 
-function slicePart(b: CircuitBuilder, w: NetId, hi: number, lo: number, out: NetId, name: string) {
+export function slicePart(
+  b: CircuitBuilder,
+  w: NetId,
+  hi: number,
+  lo: number,
+  out: NetId,
+  name: string,
+) {
   if (hi === lo) b.component("bit", { a: w }, { y: out }, { name, params: { index: lo } });
   else b.component("slice", { a: w }, { y: out }, { name, params: { hi, lo } });
 }
 
 /** A fixed value as a part: `width` bits. */
-function constant(b: CircuitBuilder, name: string, width: number, value: bigint): NetId {
+export function constant(b: CircuitBuilder, name: string, width: number, value: bigint): NetId {
   const y = b.net(name, width);
   b.component("const", {}, { y }, { name, params: { width, value: value.toString() } });
   return y;
 }
 
 /** Words joined, the first lowest: the `join` primitive. */
-function joinParts(b: CircuitBuilder, parts: readonly NetId[], out: NetId, name = "join") {
+export function joinParts(b: CircuitBuilder, parts: readonly NetId[], out: NetId, name = "join") {
   b.component(
     "join",
     Object.fromEntries(parts.map((n, i) => [String.fromCharCode(97 + i), n])),
@@ -132,14 +139,27 @@ function joinParts(b: CircuitBuilder, parts: readonly NetId[], out: NetId, name 
 }
 
 /** A word-wide two-way choice inside a closed block: B while S is 1, A while it is 0. */
-function mux(b: CircuitBuilder, s: NetId, a: NetId, bIn: NetId, name: string, out?: NetId): NetId {
+export function mux(
+  b: CircuitBuilder,
+  s: NetId,
+  a: NetId,
+  bIn: NetId,
+  name: string,
+  out?: NetId,
+): NetId {
   const y = out ?? b.net(name, b.widthOf(a));
   b.component("mux2", { sel: s, a, b: bIn }, { y }, { name });
   return y;
 }
 
 /** A choice among 2^n words by an n-bit select word, as a tree of `mux2`: words[k] when S is k. */
-function muxTree(b: CircuitBuilder, s: NetId, words: readonly NetId[], name: string, out?: NetId) {
+export function muxTree(
+  b: CircuitBuilder,
+  s: NetId,
+  words: readonly NetId[],
+  name: string,
+  out?: NetId,
+) {
   const bits = b.widthOf(s);
   let level = [...words];
   for (let i = 0; i < bits; i++) {
@@ -165,7 +185,7 @@ function muxTree(b: CircuitBuilder, s: NetId, words: readonly NetId[], name: str
 }
 
 /** The instruction's digits: K J A B Y and the constant, as a closed block (`digits`). */
-function digits(b: CircuitBuilder, ir: NetId) {
+export function digits(b: CircuitBuilder, ir: NetId) {
   const out = {
     K: b.net("K", 4),
     J: b.net("J", 4),
@@ -264,7 +284,7 @@ export function registerFile64(
 }
 
 /** A 64-bit ripple adder as a closed block of kind `kind`: SUM = A + B, carry out dropped. */
-function wordAdder(
+export function wordAdder(
   b: CircuitBuilder,
   name: string,
   kind: string,
@@ -280,7 +300,7 @@ function wordAdder(
 }
 
 /** One full adder per bit, each one's carry out the next one's carry in (Module 3's). */
-function adderGates(b: CircuitBuilder, a: NetId, bIn: NetId, sum: NetId, carryIn?: NetId) {
+export function adderGates(b: CircuitBuilder, a: NetId, bIn: NetId, sum: NetId, carryIn?: NetId) {
   const width = b.widthOf(a);
   let carry = carryIn ?? constant(b, "zero", 1, 0n);
   const sums: NetId[] = [];
@@ -332,7 +352,7 @@ function wordRegister(
  * through one edge would show its PC and its devices' words change and change back before they
  * settle. Here every register of the datapath takes its new word at the edge's first step.
  */
-function edgeRegister(
+export function edgeRegister(
   b: CircuitBuilder,
   name: string,
   ins: { D: NetId; EN?: NetId; RST: NetId; CLK: NetId },
@@ -360,7 +380,7 @@ function edgeRegister(
 }
 
 /** An OR of every bit of a word, as one gate: 1 when any bit is 1. */
-function anyBit(b: CircuitBuilder, w: NetId, hi: number, lo: number, name: string): NetId {
+export function anyBit(b: CircuitBuilder, w: NetId, hi: number, lo: number, name: string): NetId {
   const bits = Array.from({ length: hi - lo + 1 }, (_, k) => {
     const n = b.net(`${name}${lo + k}`);
     slicePart(b, w, lo + k, lo + k, n, `${name}Bit${lo + k}`);
@@ -533,7 +553,7 @@ export function decoder(
  * does. A chain of selectors, from the last check to the first, each letting an earlier check's
  * number win.
  */
-function causeWord(
+export function causeWord(
   b: CircuitBuilder,
   checks: readonly (readonly [NetId, number])[],
   name: string,
@@ -638,7 +658,7 @@ function romParams(rom: Uint8Array | readonly number[] | undefined): string {
 }
 
 /** The fetch checks: no instruction at the PC (outside the ROM), and a PC not a multiple of 4. */
-function fetchCause(b: CircuitBuilder, pc: NetId, out: NetId): void {
+export function fetchCause(b: CircuitBuilder, pc: NetId, out: NetId): void {
   const outside = anyBit(b, pc, 63, 10, "outside");
   const not4 = b.or(
     [0, 1].map((i) => {
@@ -696,6 +716,14 @@ export interface MemoryPorts {
   readonly WARM: NetId;
   readonly SENSORA: NetId;
   readonly SENSORB: NetId;
+  /**
+   * Module 9's memory of one port: PC and ADDR are one address, the fetch checks count only
+   * while FETCHING is 1, and the timer and the door's register move only at an edge where ENDS
+   * is 1, the edge that ends an instruction (docs/machine.md, "Devices": the timer counts
+   * instructions). Absent, as in Module 8: the fetch checks always count, and every edge ends one.
+   */
+  readonly FETCHING?: NetId;
+  readonly ENDS?: NetId;
 }
 
 /**
@@ -821,7 +849,13 @@ export function machineMemory(
       );
       const romWord = bb.net("ROMWORD", 64);
       joinParts(bb, [romLow, romHigh], romWord, "joinRom");
-      fetchCause(bb, ins.PC, out.CAUSEF);
+      if (ins.FETCHING === undefined) fetchCause(bb, ins.PC, out.CAUSEF);
+      else {
+        // Module 9: one port, so the address is checked as a fetch only while it is one.
+        const raw = bb.net("FETCHCHECK", 8);
+        fetchCause(bb, ins.PC, raw);
+        mux(bb, ins.FETCHING, constant(bb, "noFetch", 8, 0n), raw, "fetchOnly", out.CAUSEF);
+      }
       // The RAM: eight banks of bytes; bank k holds the bytes whose address ends in k.
       // A store writes at the edge only if the machine goes on (GO): a trap changes nothing.
       const we = bb.and([ins.STORE, ins.GO], { name: "andStore", output: bb.net("WE") });
@@ -881,7 +915,7 @@ export function machineMemory(
       const writeTimer = writeDev(5);
       const counting = bb.net("COUNTING");
       const nonZero = anyBit(bb, count, 63, 0, "nonZero");
-      bb.and([ins.GO, nonZero], { name: "andCounting", output: counting });
+      bb.and([ins.ENDS ?? ins.GO, nonZero], { name: "andCounting", output: counting });
       const less = bb.net("LESS", 64);
       bb.scope(
         "minus1",
@@ -919,7 +953,7 @@ export function machineMemory(
       edgeRegister(
         bb,
         "doorBefore",
-        { D: ins.DOOR, EN: constant(bb, "always", 1, 1n), RST: ins.RST, CLK: ins.CLK },
+        { D: ins.DOOR, EN: ins.ENDS ?? constant(bb, "always", 1, 1n), RST: ins.RST, CLK: ins.CLK },
         before,
       );
       const opened = bb.and([ins.DOOR, bb.not(before, { name: "notBefore" })], {
@@ -939,7 +973,12 @@ export function machineMemory(
         edgeRegister(
           bb,
           `waiting${i}`,
-          { D: next, EN: constant(bb, `always${i}`, 1, 1n), RST: ins.RST, CLK: ins.CLK },
+          {
+            D: next,
+            EN: ins.ENDS ?? constant(bb, `always${i}`, 1, 1n),
+            RST: ins.RST,
+            CLK: ins.CLK,
+          },
           keep,
         );
         return keep;
@@ -975,24 +1014,52 @@ export function machineMemory(
       const memQ = mux(bb, ins.BYTE, memWord, byteWord, "memQ");
       mux(bb, devSel, memQ, devWord, "q", out.MQ);
     },
-    {
-      inputs: {
-        LOAD: ins.LOAD,
-        STORE: ins.STORE,
-        BYTE: ins.BYTE,
-        ADDR: ins.ADDR,
-        D: ins.D,
-        PC: ins.PC,
-        GO: ins.GO,
-        RST: ins.RST,
-        CLK: ins.CLK,
-        DOOR: ins.DOOR,
-        WARM: ins.WARM,
-        SENSORA: ins.SENSORA,
-        SENSORB: ins.SENSORB,
-      },
-      outputs: out,
-    },
+    ins.FETCHING === undefined
+      ? {
+          inputs: {
+            LOAD: ins.LOAD,
+            STORE: ins.STORE,
+            BYTE: ins.BYTE,
+            ADDR: ins.ADDR,
+            D: ins.D,
+            PC: ins.PC,
+            GO: ins.GO,
+            RST: ins.RST,
+            CLK: ins.CLK,
+            DOOR: ins.DOOR,
+            WARM: ins.WARM,
+            SENSORA: ins.SENSORA,
+            SENSORB: ins.SENSORB,
+          },
+          outputs: out,
+        }
+      : {
+          // Module 9: one address, and the instruction at it given as FETCHED for the IR to take.
+          inputs: {
+            ADDR: ins.ADDR,
+            FETCHING: ins.FETCHING,
+            LOAD: ins.LOAD,
+            STORE: ins.STORE,
+            BYTE: ins.BYTE,
+            D: ins.D,
+            GO: ins.GO,
+            ...(ins.ENDS !== undefined ? { ENDS: ins.ENDS } : {}),
+            RST: ins.RST,
+            CLK: ins.CLK,
+            DOOR: ins.DOOR,
+            WARM: ins.WARM,
+            SENSORA: ins.SENSORA,
+            SENSORB: ins.SENSORB,
+          },
+          outputs: {
+            FETCHED: out.IR,
+            CAUSEF: out.CAUSEF,
+            MQ: out.MQ,
+            CAUSEM: out.CAUSEM,
+            DISPLAY: out.DISPLAY,
+            LAMPS: out.LAMPS,
+          },
+        },
   );
   return out;
 }
@@ -1055,7 +1122,7 @@ export function branchCondition(
  * The ALU's A input: register A, or 0 while AZERO is 1, for an address the constant gives alone.
  * Module 6's word selector with a fixed 0 on its B input, closed (`pickA`).
  */
-function zeroOr(b: CircuitBuilder, a: NetId, azero: NetId): NetId {
+export function zeroOr(b: CircuitBuilder, a: NetId, azero: NetId): NetId {
   const y = b.net("ALUA", 64);
   b.scope(
     PARTS.pickA,
@@ -1073,7 +1140,7 @@ function zeroOr(b: CircuitBuilder, a: NetId, azero: NetId): NetId {
 }
 
 /** A word times 4: two 0s joined below its bits 61 to 0 (`times4`). */
-function timesFour(b: CircuitBuilder, w: NetId): NetId {
+export function timesFour(b: CircuitBuilder, w: NetId): NetId {
   const out = b.net("OFFSET", 64);
   b.scope(
     PARTS.times4,
@@ -1331,3 +1398,6 @@ export function nextPcParts(
 }
 
 export type { PortNets };
+
+// Module 9 builds its machine from these parts too, under names that do not clash with others'.
+export { widen as widenBlock, wordRegister as datapathRegister };
