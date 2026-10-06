@@ -68,3 +68,59 @@ wrote every learner-facing sentence from a brief of checked facts.
   moved: the decoder's table (9.1) and the map (9.2) were in the motivation, above predictions
   they answered, and are now in the explanation; 9.2's prediction became a stop whose constant is
   5, which passes, since the motivation states the rule on the number.
+
+## Why five lessons
+
+Module 8 ended on "how does the decoder work out those signals from K and J alone?", and the plan
+asks for the decoder opened, illegal instructions, several edges an instruction, the four views
+and a capstone. Each lesson answers the question the one before ends on, and each split falls
+where a new part of the machine raises a new question:
+
+1. `control-signals`: the decoder Module 8 drew closed, opened: one line per kind from Module 3's
+   2-to-4 decoder twice, and each signal an OR of the kinds that need it. Introduces **control
+   unit**. Ends: what should the machine do with a word that is no instruction?
+2. `illegal-instructions`: the decoder's checks, with the constant as an input for the check on a
+   control register's number (the decision of 6 October 2026). Introduces **illegal
+   instruction**. It is a lesson of its own because the checks are a second block with a second
+   input, and because the map of every kind and job needs its own room. Ends: what if the machine
+   had one memory reached by one address?
+3. `several-edges`: one memory port, the IR a register, the held words HA, HB, HR and HM, and the
+   controller as Module 5's state machine with its next-state logic. Introduces **instruction
+   register**. Ends: which signals make each edge do its work?
+4. `micro-operations`: the controller's output logic, and the four linked views of one run.
+   Introduces **micro-operation**. Lessons 3 and 4 split the controller as Module 5 split the
+   retry controller: its states and moves first, then what each state does. Ends on the call
+   through a register.
+5. `new-instruction`: the capstone, the call through a register, end to end. Introduces nothing.
+
+## Each kind's sequence of edges, and why
+
+The controller has five states, each named for what its edge does: FETCH (`000`, IR ← memory[PC]),
+READ (`001`, HA ← RA and HB ← RB; the decoder's checks count here), ALU (`010`, HR ← the ALU's
+result), MEMORY (`011`, HM ← the word a load reads, or the store's write), WRITE (`100`, RY ← HR,
+HM or PC + 4). The edge whose next state is FETCH ends the instruction: the PC takes the next PC
+there and only there (PCEN), so the PC keeps the instruction's address through all its edges.
+
+| Kind | States | Edges | Why |
+| --- | --- | --- | --- |
+| register job, constant job (1, 2) | FETCH READ ALU WRITE | 4 | the ALU's result is held in HR and written at its own edge |
+| load (3) | FETCH READ ALU MEMORY WRITE | 5 | the address is the ALU's result; the memory's word is held in HM, then written |
+| store (4) | FETCH READ ALU MEMORY | 4 | the address is the ALU's result; nothing to write |
+| branch (5) | FETCH READ ALU | 3 | the condition reads the ALU's flags at the ALU edge, where the PC takes the next PC |
+| call (6) | FETCH READ WRITE | 3 | no ALU work: the target comes from the next-PC block, and RY ← PC + 4 at WRITE |
+| jump (7) | FETCH READ ALU | 3 | the PC takes the ALU's result, RA + c, at the ALU edge |
+| call through a register (9, the capstone) | FETCH READ WRITE | 3 | the call's way: at WRITE the PC takes the ALU's result, which HA and c have fed since READ |
+| stop, or an illegal word | FETCH, then halts in READ | 2 | the decoder's checks count only in READ, where the stop logic halts the machine |
+
+Why READ for every kind, even a call or an absolute load that uses neither register: READ is
+where the decoder's checks count (in FETCH the IR still holds the last instruction, or 0 after a
+reset, and 0 is illegal), and where the controller reads CALL to choose its way. Why the PC waits:
+a call's WRITE edge writes PC + 4, a branch's target is PC + 4c, both from the PC of the
+instruction itself, and a stop leaves the PC on the stop, as Module 8's machine does. Why the
+fetch does not add 4 (as the textbooks' fetch states do): the next PC is Module 8's block, which
+already works out PC + 4, so the fetch needs no adder of its own.
+
+The timer and the door's register move only at an instruction's end (ENDS), so the timer counts
+instructions, as `docs/machine.md` requires, and both machines reach the same count at the same
+instruction. Every enable that writes is ANDed with GO, so the edge at which the machine halts
+writes nothing.

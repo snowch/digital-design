@@ -50,9 +50,9 @@ describe("facts for the illegal-instructions lesson", () => {
     });
   });
 
-  it("the challenges: 13 and 280 tests; the starts fail 3 and 105", () => {
+  it("the challenges: 13 and 287 tests; the starts fail 3 and 105", () => {
     expect(testCount(challenge("outside-text"))).toBe(13);
-    expect(testCount(challenge("checks-text"))).toBe(280);
+    expect(testCount(challenge("checks-text"))).toBe(287);
     const outside = challenge("outside-text");
     const checks = challenge("checks-text");
     expect(grade(outside, outside.initial!).failures).toHaveLength(3);

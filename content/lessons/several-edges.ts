@@ -225,6 +225,7 @@ export const severalEdges: LessonInput = {
             buses: ["IR", "ADDR"],
             devices: true,
             run: true,
+            states: true,
             faults: [
               {
                 kind: "stuck-at",

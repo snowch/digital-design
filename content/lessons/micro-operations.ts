@@ -49,7 +49,7 @@ const CONTROLLER_CONSTRUCTS = [
 ];
 
 /** The signals the four views list: the controller's for the edge, then GO. */
-const VIEW_SIGNALS = [...EDGE_OUTPUTS, "GO"];
+const VIEW_SIGNALS = [...EDGE_OUTPUTS, "GO", "AZERO", "BCONST"];
 
 const STATES = ["FETCH", "READ", "ALU", "MEMORY", "WRITE"] as const;
 const CODE = { FETCH: 0, READ: 1, ALU: 2, MEMORY: 3, WRITE: 4 } as const;
@@ -208,11 +208,14 @@ export const microOperations: LessonInput = {
             program: COLDER,
             inputs: SENSORS,
             shown: [2, 3],
+            buses: ["IR", "HR", "HM"],
             devices: true,
             run: true,
             microOps: true,
             signals: VIEW_SIGNALS,
             states: true,
+            // The whole drawing small above it, and zoom: Module 8's trial, on the four views.
+            overview: true,
             timing: ["IREN", "HOLDAB", "HOLDR", "HOLDM", "WREG", "PCEN"],
           },
         },

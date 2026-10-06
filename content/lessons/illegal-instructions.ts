@@ -59,6 +59,16 @@ const CHECK_VECTORS = decoderVectors(
         C: c,
       })),
     ),
+    // Words whose constant names no control register: the check on the number must not refuse them.
+    ...[0, 1, 4].flatMap((j) =>
+      [5, 0xfff].map((c) => ({
+        label: `K 8, J ${j}, C ${c.toString(16).toUpperCase().padStart(3, "0")}`,
+        K: 8,
+        J: j,
+        C: c,
+      })),
+    ),
+    { label: "K 1, J 2, C 005", K: 1, J: 2, C: 5 },
   ],
   ["K", "J", "C"],
   ["ILLEGAL"],
