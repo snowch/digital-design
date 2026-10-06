@@ -9,11 +9,13 @@ teaches from signals to a working CPU, built on a reusable interactive learning 
 interactive follows one loop, predict, build, run, break, explain, generalise, and one vocabulary,
 inspect, predict, step, experiment, break, explain, drill down, replay.
 
-**Status: Prompt A, Checkpoint 3.** The author approved the inventory's ten recommendations at
-Checkpoint 1. The platform packages (`lesson-schema`, `lesson-runtime`, `sim`, `dd-model`, `hdl`,
-`dd-views`), the course shell and the first lesson, `remember`, exist and pass `npm run check`.
-Slice 2 (the retry controller state machine), the extraction of shared primitives under the rule
-of two, and `docs/platform.md` are still to come.
+**Status.** The author approved the inventory's ten recommendations at Checkpoint 1. Which
+modules have lessons, the list of lessons on the site says: it is worked out from the lessons
+themselves. Slice 2, the retry controller, is Module 5's `state-machines` lesson. Two decisions
+wait on the author: the first extraction of shared primitives under the rule of two (the
+candidates are listed in `docs/notes/module-5-state-machines.md`), and checkpoint 2, the course
+machine drafted in `docs/machine.md` and `docs/isa.md`, before Module 8. `docs/platform.md` is
+still to come.
 
 Read `docs/plan.md` for the modules, their order and the decisions taken since the course brief,
 `docs/inventory.md` for why things are as they are, `docs/simulator.md` for what the engine

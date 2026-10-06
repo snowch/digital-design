@@ -9,9 +9,11 @@ reusable interactive learning platform.
 from the `main` branch by `.github/workflows/deploy.yml`; a branch not yet merged into `main` is
 not on the site.
 
-**Status: Prompt A, Checkpoint 3.** The platform packages, the course shell and the first lesson,
-*How does a circuit remember?*, exist and pass the full check. Slice 2 (a state machine lesson),
-the extraction of shared primitives, and `docs/platform.md` are still to come.
+**Status.** Which modules have lessons, the list of lessons on the site says: it is worked out
+from the lessons themselves. Waiting on the author: the first extraction of shared primitives,
+and the course machine, drafted in [`docs/machine.md`](docs/machine.md) and
+[`docs/isa.md`](docs/isa.md) for checkpoint 2, before Module 8. `docs/platform.md` is still to
+come.
 
 ## Read first
 
