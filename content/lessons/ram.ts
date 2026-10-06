@@ -7,7 +7,7 @@
 // around Module 5's registers. The numbers the prose states are pinned by ram.facts.test.ts, read
 // off the figures' own props.
 
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 
 import { LABELS } from "./ram.labels";
 import { PROSE } from "./ram.prose";

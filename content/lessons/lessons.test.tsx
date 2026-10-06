@@ -23,8 +23,8 @@ import {
   straighten,
   toFault,
 } from "@dd/dd-views";
-import { LessonView, memoryStorage } from "@dd/lesson-runtime";
-import { termProblems } from "@dd/lesson-schema";
+import { LessonView, memoryStorage } from "@platform/lesson-runtime";
+import { termProblems } from "@platform/lesson-schema";
 
 import { LESSONS } from "./index";
 

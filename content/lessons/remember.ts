@@ -6,7 +6,7 @@
 // file is a name a signal already has (A, B, LIGHT, D, EN, CLK, Q) or a label the shared brief
 // drafted.
 
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 
 import { PROSE } from "./remember.prose";
 import { LABELS } from "./remember.labels";

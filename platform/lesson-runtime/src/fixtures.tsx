@@ -5,7 +5,7 @@
 
 import type { ComponentType } from "react";
 
-import { SECTION_KINDS, parseLesson, type Lesson, type LessonInput } from "@dd/lesson-schema";
+import { SECTION_KINDS, parseLesson, type Lesson, type LessonInput } from "@platform/lesson-schema";
 
 import type { Book, ChallengeEditorProps, InteractiveProps, Verdict } from "./book";
 

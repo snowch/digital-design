@@ -9,7 +9,7 @@
 // pinned by memory-map.facts.test.ts.
 
 import { SHOP_TABLE_WORDS } from "@dd/dd-model";
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 
 import { LABELS } from "./memory-map.labels";
 import { PROSE } from "./memory-map.prose";

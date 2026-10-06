@@ -23,8 +23,13 @@ import {
   type Construct,
   type CourseModule,
 } from "@dd/hdl";
-import { limitCount, type Artifact, type Challenge, type Lesson } from "@dd/lesson-schema";
-import type { Book, ChallengeEditorProps, InteractiveProps, Verdict } from "@dd/lesson-runtime";
+import { limitCount, type Artifact, type Challenge, type Lesson } from "@platform/lesson-schema";
+import type {
+  Book,
+  ChallengeEditorProps,
+  InteractiveProps,
+  Verdict,
+} from "@platform/lesson-runtime";
 import { bitAt, parseWord, runSuite, type Circuit } from "@dd/sim";
 
 import { AnswerEditor, gradeAnswers } from "./AnswerEditor";

@@ -14,7 +14,7 @@ import {
   type EdgeQuestion,
   type GivenInstruction,
 } from "@dd/dd-model";
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 import type { Simulator } from "@dd/sim";
 
 import { toFault } from "@dd/dd-views";

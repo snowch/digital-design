@@ -18,7 +18,7 @@ import {
   volts,
   type RecordingId,
 } from "@dd/dd-model";
-import { useSlot, type InteractiveProps } from "@dd/lesson-runtime";
+import { useSlot, type InteractiveProps } from "@platform/lesson-runtime";
 
 import { SignalPlot } from "../SignalPlot";
 import { format, useViewStrings } from "../strings";

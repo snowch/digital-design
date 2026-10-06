@@ -17,8 +17,8 @@ import {
   volts,
   type RecordingId,
 } from "@dd/dd-model";
-import { Prose, useSlot, type InteractiveProps } from "@dd/lesson-runtime";
-import { PredictionChallenge } from "@dd/primitives";
+import { Prose, useSlot, type InteractiveProps } from "@platform/lesson-runtime";
+import { PredictionChallenge } from "@platform/primitives";
 
 import { BitRow } from "../BitRow";
 import { SignalPlot } from "../SignalPlot";

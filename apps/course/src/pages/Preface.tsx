@@ -4,7 +4,7 @@
 // learner can run on themselves, and how a lesson works. It ends at the first lesson, whichever
 // that is when the page is built.
 
-import { Prose, type Book } from "@dd/lesson-runtime";
+import { Prose, type Book } from "@platform/lesson-runtime";
 
 import { lessonHref } from "../route";
 import { STRINGS } from "../strings";

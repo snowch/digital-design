@@ -12,7 +12,7 @@
 import { useMemo, type ComponentType } from "react";
 import type { ZodType } from "zod";
 
-import type { InteractiveProps } from "@dd/lesson-runtime";
+import type { InteractiveProps } from "@platform/lesson-runtime";
 
 export function withProps<T>(
   schema: ZodType<T>,

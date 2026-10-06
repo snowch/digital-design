@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
 
 import { MACHINE_NETS, libraryCircuit, stateSequence } from "@dd/dd-model";
 import { figureSim, grade, kindSequences, type PrimeStep } from "@dd/dd-views";
-import { parseLesson, testCount } from "@dd/lesson-schema";
+import { parseLesson, testCount } from "@platform/lesson-schema";
 
 import { figureAnswer, runToStop, signed } from "./module8-facts";
 import { severalEdges } from "./several-edges";

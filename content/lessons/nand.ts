@@ -5,7 +5,7 @@
 // The structure is here; the words are in nand.prose.ts and nand.labels.ts. The circuits are the
 // model's (packages/dd-model/src/logic.ts); nand.facts.test.ts pins the numbers the prose states.
 
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 
 import { GATE_CONSTRUCTS } from "./gates";
 import { LABELS } from "./nand.labels";

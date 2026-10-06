@@ -40,7 +40,8 @@ npm run check     # exactly what CI runs: Prettier, tsc, Vitest, the build, Play
 ```
 
 The repository is an npm workspace: `apps/course` (the shell), `content/lessons` (the lessons as
-data), `packages/lesson-schema` and `packages/lesson-runtime` (the platform), `packages/sim`,
-`packages/dd-model`, `packages/hdl` and `packages/dd-views` (the digital-design domain), and
-`tests/educational` (Playwright). The companion repository `snowch/learning-platform` holds the
-cross-book regression job and, in time, the platform contract.
+data), `platform/` (the learning platform's schema, runtime and primitives, a checked copy from
+`snowch/learning-platform`; `docs/platform.md`), `packages/sim`, `packages/dd-model`,
+`packages/hdl` and `packages/dd-views` (the digital-design domain), and `tests/educational`
+(Playwright). `snowch/learning-platform` holds the platform's code, its contract and the
+cross-book regression job.

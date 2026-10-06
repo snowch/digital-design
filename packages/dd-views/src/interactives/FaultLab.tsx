@@ -16,8 +16,8 @@ import {
   wrongGate,
   type Fault,
 } from "@dd/dd-model";
-import { Prose, type InteractiveProps } from "@dd/lesson-runtime";
-import { FaultInjector } from "@dd/primitives";
+import { Prose, type InteractiveProps } from "@platform/lesson-runtime";
+import { FaultInjector } from "@platform/primitives";
 import { formatWord, runSuite, type Diagnosis, type SequenceStep } from "@dd/sim";
 
 import { CircuitView } from "../CircuitView";

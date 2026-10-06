@@ -9,7 +9,7 @@ import { assemble, figureState, instructionHex } from "@dd/dd-model";
 import { fetch, MARGIN } from "./fetch";
 import { figureAnswer, figureSim, runToStop, signed } from "./module8-facts";
 import { grade, valueLabel } from "@dd/dd-views";
-import { parseLesson } from "@dd/lesson-schema";
+import { parseLesson } from "@platform/lesson-schema";
 
 import { CHECKS_REFERENCE } from "./module8";
 import { testCountOf } from "./module3-facts";

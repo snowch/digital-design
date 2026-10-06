@@ -8,7 +8,7 @@
 // The structure is here; the words are in several-edges.prose.ts and several-edges.labels.ts. The
 // numbers the prose states are pinned by several-edges.facts.test.ts.
 
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 
 import { LABELS } from "./several-edges.labels";
 import { PROSE } from "./several-edges.prose";

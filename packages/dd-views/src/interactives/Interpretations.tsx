@@ -8,7 +8,7 @@ import { useMemo } from "react";
 import { z } from "zod";
 
 import { READINGS, parseBits, readingOf, termsOf, type Reading } from "@dd/dd-model";
-import { useSlot, type InteractiveProps } from "@dd/lesson-runtime";
+import { useSlot, type InteractiveProps } from "@platform/lesson-runtime";
 
 import { BitRow, SumLine } from "../BitRow";
 import { format, useViewStrings } from "../strings";

@@ -37,8 +37,8 @@ import {
   stopReasonOf,
   type DatapathState,
 } from "@dd/dd-model";
-import { Prose, useSlot, type InteractiveProps } from "@dd/lesson-runtime";
-import { FaultInjector, PredictionChallenge, Stepper } from "@dd/primitives";
+import { Prose, useSlot, type InteractiveProps } from "@platform/lesson-runtime";
+import { FaultInjector, PredictionChallenge, Stepper } from "@platform/primitives";
 import { type Circuit, type Simulator, type Word } from "@dd/sim";
 
 import { CircuitView, valueLabel } from "../CircuitView";

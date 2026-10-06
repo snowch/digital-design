@@ -2,7 +2,7 @@
 
 // The shared interaction primitives, extracted at Slice 2 under the rule of two (README.md):
 // each is the domain-free part of an interaction that two lessons' figures already shared.
-// Nothing here knows about circuits; the figures in `@dd/dd-views` supply that.
+// Nothing here knows about circuits; the figures of a book (`@dd/dd-views` in snowch/digital-design) supply that.
 
 export { DrillDown, drillLevels, type DrillDownProps, type DrillLevel } from "./DrillDown";
 export { FaultInjector, type FaultInjectorProps } from "./FaultInjector";

@@ -9,8 +9,8 @@ import { useMemo } from "react";
 import { z } from "zod";
 
 import { compareCircuits, depthOf, gatesOf, libraryCircuit } from "@dd/dd-model";
-import { Prose, useSlot, type InteractiveProps } from "@dd/lesson-runtime";
-import { PredictionChallenge } from "@dd/primitives";
+import { Prose, useSlot, type InteractiveProps } from "@platform/lesson-runtime";
+import { PredictionChallenge } from "@platform/primitives";
 
 import { CircuitView } from "../CircuitView";
 import { format, useViewStrings } from "../strings";

@@ -7,7 +7,7 @@
 
 import { useMemo } from "react";
 
-import { AXIS_H, LANE_H, StateInspector, Timeline } from "@dd/primitives";
+import { AXIS_H, LANE_H, StateInspector, Timeline } from "@platform/primitives";
 import { formatWord, type Circuit, type Trace, type Word } from "@dd/sim";
 
 import { levelOf, valueLabel } from "./CircuitView";

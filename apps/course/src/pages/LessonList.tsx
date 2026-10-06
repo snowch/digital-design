@@ -12,7 +12,7 @@ import { useMemo, useState, type ReactNode } from "react";
 
 import { libraryCircuit, placed } from "@dd/dd-model";
 import { CircuitView, useSettleSim } from "@dd/dd-views";
-import { LessonStore, verifyCompletion, type Book, type Storage } from "@dd/lesson-runtime";
+import { LessonStore, verifyCompletion, type Book, type Storage } from "@platform/lesson-runtime";
 
 import { PREFACE_HREF, lessonHref } from "../route";
 import { STRINGS } from "../strings";

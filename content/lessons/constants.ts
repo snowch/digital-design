@@ -6,7 +6,7 @@
 // The structure is here; the words are in constants.prose.ts and constants.labels.ts. The
 // numbers the prose states are pinned by constants.facts.test.ts, read off the figures' props.
 
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 
 import { LABELS } from "./constants.labels";
 import { PROSE } from "./constants.prose";

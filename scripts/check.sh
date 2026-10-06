@@ -17,6 +17,11 @@ echo "== copyright =="
 # `node scripts/copyright.mjs` adds the line.
 node scripts/copyright.mjs --check
 
+echo "== the platform copy is unedited =="
+# platform/ is the learning platform's packages at the commit platform/SOURCE.json records. A fix
+# to the platform is made in snowch/learning-platform and synced here, never made here.
+node scripts/sync-platform.mjs --check
+
 echo "== types =="
 # Strict TypeScript over every package, the content and the tests, with no emit: the build below
 # bundles only what the course imports, so this is the only stage that typechecks everything.

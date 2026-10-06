@@ -11,8 +11,8 @@ import { useMemo, useState } from "react";
 import { z } from "zod";
 
 import { libraryCircuit } from "@dd/dd-model";
-import { Prose, useSlot, type InteractiveProps } from "@dd/lesson-runtime";
-import { PredictionChallenge, Stepper } from "@dd/primitives";
+import { Prose, useSlot, type InteractiveProps } from "@platform/lesson-runtime";
+import { PredictionChallenge, Stepper } from "@platform/primitives";
 import { Simulator, bitAt, parseWord, type Circuit, type Word } from "@dd/sim";
 
 import { valueLabel } from "../CircuitView";

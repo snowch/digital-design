@@ -6,7 +6,7 @@
 import { describe, expect, it } from "vitest";
 
 import { grade, kindMap } from "@dd/dd-views";
-import { parseLesson, testCount } from "@dd/lesson-schema";
+import { parseLesson, testCount } from "@platform/lesson-schema";
 
 import { illegalInstructions } from "./illegal-instructions";
 import { LABELS } from "./illegal-instructions.labels";

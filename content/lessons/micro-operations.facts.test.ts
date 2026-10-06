@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
 
 import { edgeView } from "@dd/dd-model";
 import { DEFAULT_VIEW_STRINGS, edgeText, grade } from "@dd/dd-views";
-import { parseLesson, testCount } from "@dd/lesson-schema";
+import { parseLesson, testCount } from "@platform/lesson-schema";
 
 import { microOperations } from "./micro-operations";
 import { figureAnswer, figureSim, runToStop, signed } from "./module8-facts";

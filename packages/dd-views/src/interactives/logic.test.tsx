@@ -8,8 +8,8 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
-import { LessonStore, memoryStorage } from "@dd/lesson-runtime";
-import type { Interactive, Lesson } from "@dd/lesson-schema";
+import { LessonStore, memoryStorage } from "@platform/lesson-runtime";
+import type { Interactive, Lesson } from "@platform/lesson-schema";
 
 import { DEFAULT_VIEW_STRINGS as S, format } from "../strings";
 import { CircuitCompare, compareAnswer } from "./CircuitCompare";

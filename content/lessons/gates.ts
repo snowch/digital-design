@@ -6,7 +6,7 @@
 // the model's (packages/dd-model/src/logic.ts); the numbers the prose states are pinned by
 // gates.facts.test.ts, read off the figures' own props.
 
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 
 import { LABELS } from "./gates.labels";
 import { PROSE } from "./gates.prose";

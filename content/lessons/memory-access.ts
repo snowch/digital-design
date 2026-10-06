@@ -8,7 +8,7 @@
 // numbers the prose states are pinned by memory-access.facts.test.ts, read off the figures' props.
 
 import { MAP, memoryCheck } from "@dd/dd-model";
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 
 import { LABELS } from "./memory-access.labels";
 import { PROSE } from "./memory-access.prose";

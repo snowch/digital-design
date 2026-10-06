@@ -5,7 +5,7 @@
 
 import { applyFaults, libraryCircuit } from "@dd/dd-model";
 import { outputsPerStep, runScript, toFault } from "@dd/dd-views";
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 import { formatWord, runSuite, type SequenceStep } from "@dd/sim";
 
 type Run = Parameters<typeof runScript>[1];

@@ -1,13 +1,20 @@
 // Copyright © 2026 Christopher Snow
 
 // Checks a lesson beyond its shape: the ten sections in order, challenge ids unique and
-// referenced, hints complete, and the words each lesson is allowed to introduce.
+// referenced, hints complete, each challenge's tests consistent with what it grades, and the
+// words each lesson is allowed to introduce.
 //
 // Every check here is a sentence a test prints, so a lesson that fails says why in the words an
-// author needs. The runtime calls `parseLesson` once per lesson at startup and the content tests
-// call it for every lesson in the course.
+// author needs. The runtime calls `parseLesson` once per lesson at startup and a book's content
+// tests call it for every lesson in the book.
 
-import { Lesson, SECTION_KINDS, type Lesson as LessonType, type LessonInput } from "./schema";
+import {
+  Lesson,
+  NO_MODEL,
+  SECTION_KINDS,
+  type Lesson as LessonType,
+  type LessonInput,
+} from "./schema";
 
 export interface LessonProblem {
   readonly lesson: string;
@@ -34,6 +41,18 @@ export function parseLesson(input: LessonInput): LessonType {
   return parsed.data;
 }
 
+type ChallengeType = LessonType["challenges"][number];
+
+/** A reference that is a circuit: drawn, in the book's library, or as a hardware description. */
+function hasCircuitReference(c: ChallengeType): boolean {
+  return Boolean(c.reference.circuit || c.reference.hdl || c.reference.libraryId);
+}
+
+/** A reference that is text or structured data, which the book grades case by case. */
+function hasArtifactReference(c: ChallengeType): boolean {
+  return c.reference.text !== undefined || c.reference.data !== undefined;
+}
+
 /** The problems with a lesson whose shape is already right. Empty when none. */
 export function checkLesson(lesson: LessonType): LessonProblem[] {
   const problems: LessonProblem[] = [];
@@ -54,17 +73,25 @@ export function checkLesson(lesson: LessonType): LessonProblem[] {
       problems.push(...answerProblems(lesson.id, c));
       continue;
     }
-    if (c.tests.kind === "answers")
-      problem(`challenge ${c.id} has answer tests but grades a circuit`);
-    if (c.interface.outputs.length === 0)
-      problem(`challenge ${c.id} grades a circuit but its interface declares no output`);
-    if (!c.reference.circuit && !c.reference.hdl && !c.reference.libraryId) {
-      problem(
-        `challenge ${c.id} has no reference solution, so nothing can prove it is completable`,
-      );
+    // A drawn or written artifact. Case tests with a text or data reference are the book's to
+    // grade; anything else is a circuit, with a circuit's rules.
+    const caseGraded = c.tests.kind === "answers" && hasArtifactReference(c);
+    if (caseGraded) {
+      if (c.limits)
+        problem(`challenge ${c.id} is graded case by case but sets limits on a circuit`);
+    } else {
+      if (c.tests.kind === "answers")
+        problem(`challenge ${c.id} has answer tests but grades a circuit`);
+      if (c.interface.outputs.length === 0)
+        problem(`challenge ${c.id} grades a circuit but its interface declares no output`);
+      if (!hasCircuitReference(c)) {
+        problem(
+          `challenge ${c.id} has no reference solution, so nothing can prove it is completable`,
+        );
+      }
     }
     if (c.gradedDirection === "write" && c.allowedConstructs.length === 0) {
-      problem(`challenge ${c.id} grades the written text but allows no HDL constructs`);
+      problem(`challenge ${c.id} grades the written text but allows no constructs`);
     }
     const ports = new Set([...c.interface.inputs, ...c.interface.outputs].map((p) => p.name));
     const names = new Set<string>();
@@ -112,7 +139,7 @@ export function checkLesson(lesson: LessonType): LessonProblem[] {
 }
 
 /** An answers challenge needs fields, answer tests, and a reference that answers every field. */
-function answerProblems(lessonId: string, c: LessonType["challenges"][number]): LessonProblem[] {
+function answerProblems(lessonId: string, c: ChallengeType): LessonProblem[] {
   const out: string[] = [];
   if (c.tests.kind !== "answers")
     out.push(`challenge ${c.id} grades answers but its tests are not answer tests`);
@@ -123,23 +150,30 @@ function answerProblems(lessonId: string, c: LessonType["challenges"][number]): 
     ids.add(f.id);
     if (f.kind === "bits" && f.width === undefined)
       out.push(`challenge ${c.id}'s field ${f.id} is a row of bits with no width`);
+    if (f.kind === "choice" && !f.options)
+      out.push(`challenge ${c.id}'s field ${f.id} is a choice with no options`);
   }
   const answers = c.reference.answers;
   if (!answers) {
     out.push(`challenge ${c.id} has no reference answers, so nothing can prove it is completable`);
   } else {
-    for (const f of c.fields)
-      if (answers[f.id] === undefined)
-        out.push(`challenge ${c.id}'s reference does not answer ${f.id}`);
+    for (const f of c.fields) {
+      const given = answers[f.id];
+      if (given === undefined) out.push(`challenge ${c.id}'s reference does not answer ${f.id}`);
+      else if (f.kind === "choice" && f.options && !f.options.some((o) => o.value === given))
+        out.push(
+          `challenge ${c.id}'s reference answers ${f.id} with ${given}, which is not an option`,
+        );
+    }
   }
   return out.map((text) => ({ lesson: lessonId, text }));
 }
 
 /**
  * How many tests a challenge counts: rows, steps that expect something, or cases, and one more
- * for each limit it sets (Module 2's gate budget, depth and kinds of gate).
+ * for each limit it sets (the digital-design course's gate budget, depth and kinds of gate).
  */
-export function testCount(c: LessonType["challenges"][number]): number {
+export function testCount(c: ChallengeType): number {
   const t = c.tests;
   const suite =
     t.kind === "combinational"
@@ -151,16 +185,38 @@ export function testCount(c: LessonType["challenges"][number]): number {
 }
 
 /** How many limits a challenge sets: each is graded as one test. */
-export function limitCount(c: LessonType["challenges"][number]): number {
+export function limitCount(c: ChallengeType): number {
   const l = c.limits;
   if (!l) return 0;
   return (l.gates !== undefined ? 1 : 0) + (l.depth !== undefined ? 1 : 0) + (l.only ? 1 : 0);
 }
 
-/** The time models a lesson's interactives use, for the note every lesson states. */
+/** The models a lesson's interactives run, for the note every lesson states. */
 export function timeModelsUsed(lesson: LessonType): string[] {
   const models = new Set<string>();
   for (const s of lesson.sections)
-    for (const x of s.interactives) if (x.timeModel !== "none") models.add(x.timeModel);
+    for (const x of s.interactives) if (x.timeModel !== NO_MODEL) models.add(x.timeModel);
   return [...models];
+}
+
+/**
+ * Interactives that name a model the book does not have. `models` are the book's own names, the
+ * keys of its notes; `none` is always allowed. A book's content tests call this so a figure
+ * cannot name a model whose note nobody wrote.
+ */
+export function modelProblems(
+  lessons: readonly LessonType[],
+  models: readonly string[],
+): LessonProblem[] {
+  const allowed = new Set([NO_MODEL, ...models]);
+  const problems: LessonProblem[] = [];
+  for (const l of lessons)
+    for (const s of l.sections)
+      for (const x of s.interactives)
+        if (!allowed.has(x.timeModel))
+          problems.push({
+            lesson: l.id,
+            text: `interactive ${x.id} runs the model ${x.timeModel}, which the book does not have`,
+          });
+  return problems;
 }

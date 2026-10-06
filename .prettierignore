@@ -5,3 +5,5 @@ playwright-report/
 test-results/
 package-lock.json
 *.md
+# Written by scripts/sync-platform.mjs; its bytes are its hashes' input.
+platform/SOURCE.json

@@ -7,7 +7,7 @@
 // registers and decoder with a second selector. The numbers the prose states are pinned by
 // register-file.facts.test.ts.
 
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 
 import { LABELS } from "./register-file.labels";
 import { PROSE } from "./register-file.prose";

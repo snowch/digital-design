@@ -6,7 +6,8 @@ How a lesson is made, from the data format to the review. The first lesson,
 ## A lesson is data
 
 A lesson is one module in `content/lessons/` exporting a `LessonInput` (the type is
-`packages/lesson-schema`), listed in `content/lessons/index.ts`. It has:
+`@platform/lesson-schema`, in `platform/lesson-schema`), listed in `content/lessons/index.ts`. It
+has:
 
 - `id`: a lowercase slug, its identity everywhere; `title`; `module` and `order`.
 - `objectives`: what the learner can do afterwards, each starting with a verb.
@@ -133,7 +134,8 @@ you; CLAUDE.md states the rule and the division of labour. In practice, for one 
    touches, then read once more.
 
 The runtime's and the views' own labels went through the same process; they live in
-`packages/lesson-runtime/src/strings.ts` and `packages/dd-views/src/strings.ts`.
+`platform/lesson-runtime/src/strings.ts` (the platform's defaults) and
+`packages/dd-views/src/strings.ts`.
 
 ## What the tests hold a lesson to
 

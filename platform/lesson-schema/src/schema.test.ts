@@ -3,8 +3,8 @@
 import { describe, expect, it } from "vitest";
 
 import { lessonJsonSchema } from "./jsonSchema";
-import { SECTION_KINDS, type LessonInput } from "./schema";
-import { checkLesson, parseLesson, testCount, timeModelsUsed } from "./validate";
+import { NO_MODEL, SECTION_KINDS, type LessonInput } from "./schema";
+import { checkLesson, modelProblems, parseLesson, testCount, timeModelsUsed } from "./validate";
 import { termProblems } from "./vocabulary";
 
 /** The smallest lesson the schema accepts, to vary from. */
@@ -231,5 +231,126 @@ describe("the term gate", () => {
       "earlier-module",
     ]);
     expect(termProblems([first, laterModule])).toEqual([]);
+  });
+});
+
+// The second book (snowch/metadata-systems) needed three general shapes beside the first book's.
+describe("what a second book needs", () => {
+  it("takes a choice field and holds its reference to the options", () => {
+    const choice = {
+      id: "c1",
+      title: "Pick the source",
+      task: "Pick the table the figures come from.",
+      gradedDirection: "answer" as const,
+      fields: [
+        {
+          id: "source",
+          label: "Read from",
+          kind: "choice" as const,
+          options: [
+            { value: "orders", label: "orders" },
+            { value: "clean_orders", label: "clean_orders" },
+          ],
+        },
+      ],
+      tests: {
+        kind: "answers" as const,
+        grader: "reproduces",
+        cases: [{ label: "every day", expect: { rows: "same" } }],
+      },
+      hints: ["concept", "mistake", "smaller", "partial", "full"] as [
+        string,
+        string,
+        string,
+        string,
+        string,
+      ],
+      reference: { answers: { source: "clean_orders" } },
+    };
+    const lesson = parseLesson(minimalLesson({ challenges: [choice] }));
+    expect(lesson.challenges[0]?.fields[0]?.kind).toBe("choice");
+
+    const notAnOption = { ...lesson.challenges[0]!, reference: { answers: { source: "x" } } };
+    expect(checkLesson({ ...lesson, challenges: [notAnOption] }).map((p) => p.text)).toEqual([
+      "challenge c1's reference answers source with x, which is not an option",
+    ]);
+    const noOptions = {
+      ...lesson.challenges[0]!,
+      fields: [{ id: "source", label: "Read from", kind: "choice" as const }],
+    };
+    expect(checkLesson({ ...lesson, challenges: [noOptions] }).map((p) => p.text)).toEqual([
+      "challenge c1's field source is a choice with no options",
+    ]);
+  });
+
+  it("grades written text or built data case by case, with no circuit rules", () => {
+    const written = {
+      id: "c1",
+      title: "Write the record",
+      task: "Write the record for the table.",
+      gradedDirection: "write" as const,
+      allowedConstructs: ["name", "owner"],
+      initial: { text: "" },
+      tests: {
+        kind: "answers" as const,
+        grader: "record",
+        cases: [{ label: "names an owner", expect: { owner: "present" } }],
+      },
+      hints: ["concept", "mistake", "smaller", "partial", "full"] as [
+        string,
+        string,
+        string,
+        string,
+        string,
+      ],
+      reference: { text: "name: daily_sales\nowner: finance" },
+    };
+    const lesson = parseLesson(minimalLesson({ challenges: [written] }));
+    expect(lesson.challenges[0]?.reference.text).toContain("owner");
+    expect(testCount(lesson.challenges[0]!)).toBe(1);
+
+    const drawn = {
+      ...lesson.challenges[0]!,
+      gradedDirection: "draw" as const,
+      initial: { data: { nodes: [] } },
+      reference: { data: { nodes: ["a", "b"], edges: [["a", "b"]] } },
+    };
+    expect(checkLesson({ ...lesson, challenges: [drawn] })).toEqual([]);
+
+    const limited = { ...lesson.challenges[0]!, limits: { gates: 2 } };
+    expect(checkLesson({ ...lesson, challenges: [limited] }).map((p) => p.text)).toEqual([
+      "challenge c1 is graded case by case but sets limits on a circuit",
+    ]);
+    // Without a text or data reference, answer tests on a written challenge are still refused.
+    const noReference = { ...lesson.challenges[0]!, reference: {} };
+    expect(checkLesson({ ...lesson, challenges: [noReference] }).map((p) => p.text)).toEqual([
+      "challenge c1 has answer tests but grades a circuit",
+      "challenge c1 grades a circuit but its interface declares no output",
+      "challenge c1 has no reference solution, so nothing can prove it is completable",
+    ]);
+  });
+
+  it("lets a book name its own models, and holds its lessons to them", () => {
+    const own = minimalLesson();
+    const sections = own.sections as { interactives?: { timeModel: string }[] }[];
+    sections[8]!.interactives![0]!.timeModel = "lab";
+    const lesson = parseLesson(own);
+    expect(timeModelsUsed(lesson)).toEqual(["lab"]);
+    expect(modelProblems([lesson], ["lab", "replay"])).toEqual([]);
+    expect(modelProblems([lesson], ["settle"]).map((p) => p.text)).toEqual([
+      "interactive ch runs the model lab, which the book does not have",
+    ]);
+    // "none" is always allowed and names no model.
+    sections[8]!.interactives![0]!.timeModel = NO_MODEL;
+    const plain = parseLesson(own);
+    expect(timeModelsUsed(plain)).toEqual([]);
+    expect(modelProblems([plain], [])).toEqual([]);
+  });
+
+  it("refuses an empty model name", () => {
+    const own = minimalLesson();
+    const sections = own.sections as { interactives?: { timeModel: string }[] }[];
+    sections[8]!.interactives![0]!.timeModel = "";
+    expect(() => parseLesson(own)).toThrow(/timeModel/);
   });
 });

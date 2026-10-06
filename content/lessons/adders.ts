@@ -6,7 +6,7 @@
 // the model's (packages/dd-model: combinational.ts and library-combinational.ts); the numbers the
 // prose states are pinned by adders.facts.test.ts, read off the figures' own props.
 
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 
 import { LABELS } from "./adders.labels";
 import { PROSE } from "./adders.prose";

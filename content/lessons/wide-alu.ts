@@ -8,7 +8,7 @@
 // are pinned by wide-alu.facts.test.ts, read off the figures' own props.
 
 import { hexWord, opBits } from "@dd/dd-model";
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 
 import { LABELS } from "./wide-alu.labels";
 import { PROSE } from "./wide-alu.prose";

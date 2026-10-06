@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
 
 import { decoderCircuit } from "@dd/dd-model";
 import { grade, signalCell } from "@dd/dd-views";
-import { parseLesson, testCount } from "@dd/lesson-schema";
+import { parseLesson, testCount } from "@platform/lesson-schema";
 import { Simulator } from "@dd/sim";
 
 import { controlSignals } from "./control-signals";

@@ -20,8 +20,8 @@ import {
   type AluCase,
   type CaseGroup,
 } from "@dd/dd-model";
-import { Prose, useSlot, type InteractiveProps } from "@dd/lesson-runtime";
-import { FaultInjector, PredictionChallenge } from "@dd/primitives";
+import { Prose, useSlot, type InteractiveProps } from "@platform/lesson-runtime";
+import { FaultInjector, PredictionChallenge } from "@platform/primitives";
 import { Simulator, formatWord, word, type Circuit } from "@dd/sim";
 
 import { format, useViewStrings } from "../strings";

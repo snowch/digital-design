@@ -22,7 +22,7 @@ import {
   type RecordingId,
 } from "@dd/dd-model";
 import { answerOf, grade } from "@dd/dd-views";
-import { parseLesson } from "@dd/lesson-schema";
+import { parseLesson } from "@platform/lesson-schema";
 
 import { FREEZER_TENTHS, SENSOR_BITS, SENSOR_RANGE_TENTHS, signals } from "./signals";
 import { PROSE } from "./signals.prose";

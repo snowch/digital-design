@@ -7,7 +7,9 @@
 // React components opt into a DOM with a `// @vitest-environment jsdom` comment at the top of
 // the file. The educational tests (every exercise completable, rejects wrong answers,
 // deterministic, resets, cannot be bypassed) drive the built site in a browser and live under
-// tests/educational, run by Playwright, not here.
+// tests/educational, run by Playwright, not here. The learning platform's own tests run here too,
+// against this course's dependencies, so the copy in platform/ is proved to work in this
+// repository.
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
@@ -15,6 +17,8 @@ export default defineConfig({
     include: [
       "packages/**/*.test.ts",
       "packages/**/*.test.tsx",
+      "platform/**/*.test.ts",
+      "platform/**/*.test.tsx",
       "content/**/*.test.ts",
       "content/**/*.test.tsx",
       "apps/**/*.test.ts",

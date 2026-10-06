@@ -106,6 +106,17 @@ step.
 
 ## Decisions since the brief
 
+### 6 October 2026: the platform taken from snowch/learning-platform
+
+The schema, the runtime and the primitives moved to `snowch/learning-platform` when the
+metadata-systems course became their second consumer, as `docs/inventory.md`, section 5.7,
+planned; the author made that repository public and agreed that this course switch at once,
+because two copies of one runtime drift apart with every fix. This course now takes the packages
+as the metadata course does: a checked copy in `platform/` at the commit `platform/SOURCE.json`
+records, renamed from `@dd/` to `@platform/`, unedited (`npm run check` says so). The move changed
+nothing this course uses; "Predict again" became optional for a figure, and every figure here
+still passes it. `docs/platform.md` says how a fix to the platform reaches this course.
+
 ### 6 October 2026: checkpoint 3, one instruction added end to end
 
 The author reviewed the course after Module 9 (`docs/checkpoints.md`, "Course checkpoint 3") and

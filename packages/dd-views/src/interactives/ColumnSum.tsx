@@ -8,7 +8,7 @@ import { useMemo } from "react";
 import { z } from "zod";
 
 import { columnSum, parseBits } from "@dd/dd-model";
-import type { InteractiveProps } from "@dd/lesson-runtime";
+import type { InteractiveProps } from "@platform/lesson-runtime";
 
 import { withProps } from "./props";
 

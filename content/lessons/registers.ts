@@ -6,7 +6,7 @@
 // a learner reads in this file is a name a signal already has (D, EN, RST, CLK, Q, IN, Q0 to Q3)
 // or a label the shared brief drafted.
 
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 
 import { PROSE } from "./registers.prose";
 import { LABELS } from "./registers.labels";

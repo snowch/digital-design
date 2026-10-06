@@ -20,7 +20,7 @@ import {
   type EdgeView,
   type MicroOp,
 } from "@dd/dd-model";
-import type { InteractiveProps } from "@dd/lesson-runtime";
+import type { InteractiveProps } from "@platform/lesson-runtime";
 import { Simulator, word, type Circuit } from "@dd/sim";
 
 import { format, useViewStrings, type ControlStrings } from "../strings";

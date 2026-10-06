@@ -8,7 +8,7 @@ import { z } from "zod";
 
 import { libraryCircuit } from "@dd/dd-model";
 import { expressionModule, generate } from "@dd/hdl";
-import type { InteractiveProps } from "@dd/lesson-runtime";
+import type { InteractiveProps } from "@platform/lesson-runtime";
 
 import { CircuitView } from "../CircuitView";
 import { useViewStrings } from "../strings";

@@ -8,8 +8,8 @@ import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
-import { LessonStore, memoryStorage } from "@dd/lesson-runtime";
-import type { Interactive, Lesson } from "@dd/lesson-schema";
+import { LessonStore, memoryStorage } from "@platform/lesson-runtime";
+import type { Interactive, Lesson } from "@platform/lesson-schema";
 
 import { withProps } from "./props";
 

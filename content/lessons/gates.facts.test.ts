@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
 import { libraryCircuit, truthTableOf } from "@dd/dd-model";
 import { grade } from "@dd/dd-views";
 import { expressionModule } from "@dd/hdl";
-import { parseLesson, testCount } from "@dd/lesson-schema";
+import { parseLesson, testCount } from "@platform/lesson-schema";
 
 import { gates } from "./gates";
 import { faultChecks, figureOf, predictionAnswer } from "./module2.facts";

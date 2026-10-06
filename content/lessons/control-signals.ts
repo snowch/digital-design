@@ -8,7 +8,7 @@
 // The structure is here; the words are in control-signals.prose.ts and control-signals.labels.ts.
 // The numbers the prose states are pinned by control-signals.facts.test.ts.
 
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 
 import { LABELS } from "./control-signals.labels";
 import { PROSE } from "./control-signals.prose";

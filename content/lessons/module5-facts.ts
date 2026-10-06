@@ -7,7 +7,7 @@
 
 import { applyFaults, libraryCircuit } from "@dd/dd-model";
 import { outputsPerStep, runScript, toFault, type PrimeStep } from "@dd/dd-views";
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 import {
   Simulator,
   formatWord,

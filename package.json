@@ -11,6 +11,7 @@
   "workspaces": [
     "apps/*",
     "packages/*",
+    "platform/*",
     "content"
   ],
   "scripts": {
@@ -24,7 +25,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "./scripts/check.sh",
-    "schema": "vite-node scripts/export-schema.mts"
+    "schema": "vite-node scripts/export-schema.mts",
+    "sync-platform": "node scripts/sync-platform.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.56.1",

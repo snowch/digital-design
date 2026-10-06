@@ -3,7 +3,7 @@
 import { describe, expect, it } from "vitest";
 
 import { libraryCircuit } from "@dd/dd-model";
-import { parseLesson, type Challenge } from "@dd/lesson-schema";
+import { parseLesson, type Challenge } from "@platform/lesson-schema";
 
 import { circuitToDrawing, compileDrawing, emptyDrawing, type Drawing } from "./drawing";
 import { grade } from "./book";

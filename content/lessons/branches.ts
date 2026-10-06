@@ -9,7 +9,7 @@
 // the prose states are pinned by branches.facts.test.ts, read off the figures' props.
 
 import { alu64, assemble, branchTaken, resetMachine, run } from "@dd/dd-model";
-import type { LessonInput } from "@dd/lesson-schema";
+import type { LessonInput } from "@platform/lesson-schema";
 
 import { LABELS } from "./branches.labels";
 import { PROSE } from "./branches.prose";
