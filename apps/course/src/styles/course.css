@@ -2089,3 +2089,8 @@ button.bit {
   stroke: var(--bad);
   stroke-dasharray: 6 4;
 }
+/* A wire pressed with a mouse keeps its halo, not a focus box drawn through other parts; the
+   keyboard's focus ring stays. */
+.wire:focus:not(:focus-visible) {
+  outline: none;
+}

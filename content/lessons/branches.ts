@@ -181,16 +181,6 @@ export const branches: LessonInput = {
             overview: true,
           },
         },
-        {
-          id: "flow",
-          kind: "branch-targets",
-          timeModel: "none",
-          caption: LABELS.captions.flow,
-          lead: PROSE.flowLead,
-          props: {
-            programs: [{ label: LABELS.programs.sum, program: SUM }],
-          },
-        },
       ],
     },
     {
@@ -255,6 +245,16 @@ export const branches: LessonInput = {
       title: LABELS.titles.explanation,
       prose: PROSE.explanation,
       interactives: [
+        {
+          id: "flow",
+          kind: "branch-targets",
+          timeModel: "none",
+          caption: LABELS.captions.flow,
+          lead: PROSE.flowLead,
+          props: {
+            programs: [{ label: LABELS.programs.sum, program: SUM }],
+          },
+        },
         {
           id: "one-instruction",
           kind: "datapath",

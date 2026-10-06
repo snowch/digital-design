@@ -138,7 +138,8 @@ export const instructions: LessonInput = {
             libraryId: "datapath-jobs",
             focus: ["registers", "alu"],
             registers: ROOMS,
-            instructions: [JOBS[0]],
+            // The word alone: the transfer would answer the prediction.
+            instructions: [{ ...JOBS[0], label: "13123000" }],
             shown: [1, 2, 3],
             buses: ["QA", "QB", "RESULT"],
             question: PROSE.p1Question,
