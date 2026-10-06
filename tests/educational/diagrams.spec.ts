@@ -63,7 +63,8 @@ interface WireFault {
  * Every place a circuit drawing's wires look broken: a wire that meets a gate off the gate's
  * drawn body or off its output lead; a wire that steps up or down by less than a grid cell
  * (20 pixels) where it could run straight; a wire that passes through a part, which looks like a
- * connection that is not there; and a wire through a part's label or name, which strikes it out.
+ * connection that is not there; a wire through a part's label or name, which strikes it out; and
+ * a wire that leaves the drawing, which is cut off where it turns outside, so it seems to end.
  * Measured on the rendered page, in the drawing's own units, so it checks what a learner sees.
  */
 async function wireFaults(page: Page): Promise<WireFault[]> {
@@ -106,6 +107,10 @@ async function wireFaults(page: Page): Promise<WireFault[]> {
           if (a.x === b.x && step > 0 && step < 20)
             out.push({ figure, problem: `${w.net} steps ${step} px instead of running straight` });
         }
+      const box = svg.viewBox.baseVal;
+      for (const w of wires)
+        if (w.pts.some((p) => p.x < 0 || p.y < 0 || p.x > box.width || p.y > box.height))
+          out.push({ figure, problem: `${w.net} leaves the drawing` });
       // Each part's top-left corner, so a wire's end can be given to the part it reaches: the
       // nearest part at or above it in the same column.
       const parts = [...svg.querySelectorAll<SVGGElement>("g.part, g.pin")].map((g) => {

@@ -166,7 +166,8 @@ the Vite build, Playwright. Each line below is a check and the reason it exists.
   lands.
 - **No wire in a circuit drawing may mislead.** A wire may not enter a gate outside its drawn
   body or leave it off its output lead, step up or down by less than a grid cell where it could
-  run straight, pass through a part or a part's label or name, or run along another signal's wire
+  run straight, pass through a part or a part's label or name, run along another signal's wire,
+  or leave its drawing, where it is cut off and seems to end
   (`tests/educational/diagrams.spec.ts` in the browser; the content tests for every figure's
   circuit, under every fault, and inside every block a learner can open). A wire through a part
   reads as a connection that is not there; `docs/notes/straight-wires.md` says how the geometry

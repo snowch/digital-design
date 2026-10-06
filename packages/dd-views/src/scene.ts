@@ -564,7 +564,11 @@ export function sceneOf(drawing: Drawing): Scene {
   const written = (b: PartBox) =>
     b.part.kind === "output" ? 6 + Math.ceil((b.part.width ?? 1) / 4) * 7.5 + 8 : 0;
   const width = boxes.reduce((m, b) => Math.max(m, b.x + b.w + Math.max(40, written(b))), 0);
-  const height = floor + 22 + channels * GAP + 16;
+  // Module 8: a wire routed by hand may turn in a row below every channel, as the datapath's
+  // long wires do along its bottom; the drawing reaches as far below that row as below a channel,
+  // or it cuts the wire off where it turns, and the wire seems to end.
+  const lowest = wires.reduce((m, w) => Math.max(m, ...cornersOf(w.d).map((p) => p.y)), 0);
+  const height = Math.max(floor + 22 + channels * GAP + 16, lowest + GAP + 16);
   return { boxes, wires, width, height };
 }
 
@@ -574,13 +578,21 @@ export function sceneOf(drawing: Drawing): Scene {
  * name, which strikes it out; two signals drawn along one stretch of line, which look like one
  * signal; two signals closer than half a cell side by side, which read as one thick line; and two
  * wires that cross though they leave one column and enter another in the same order, which a
- * better order of turns would not. The router avoids all of these; a test holds it to that. The
- * last two are asked only of a roomy drawing: inside a dense block, laid out automatically, a
- * router that places one wire at a time cannot always keep half a cell (docs/notes/roomy-wires.md).
+ * better order of turns would not; and a wire that leaves the drawing, which is cut off where it
+ * turns outside, so it seems to end there. The router avoids all of these; a test holds it to
+ * that. The crowding and the crossing are asked only of a roomy drawing: inside a dense block,
+ * laid out automatically, a router that places one wire at a time cannot always keep half a cell
+ * (docs/notes/roomy-wires.md).
  */
 export function sceneProblems(scene: Scene, { roomy = true }: { roomy?: boolean } = {}): string[] {
   const found: string[] = [];
   const pieces = scene.wires.map((w) => segmentsOf(cornersOf(w.d)));
+  for (const w of scene.wires) {
+    const outside = cornersOf(w.d).some(
+      (p) => p.x < 0 || p.y < 0 || p.x > scene.width || p.y > scene.height,
+    );
+    if (outside) found.push(`${w.from.part} to ${w.to.part} leaves the drawing`);
+  }
   scene.wires.forEach((w, i) => {
     for (const [a, b] of pieces[i] ?? [])
       for (const box of scene.boxes) {
