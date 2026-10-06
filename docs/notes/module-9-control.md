@@ -8,7 +8,8 @@ wrote every learner-facing sentence from a brief of checked facts.
 ## Times
 
 - Started: 2026-10-06 10:31 UTC (first command in the session).
-- Finished: FINISH_TIME, at the last push.
+- Finished: 2026-10-06 14:27 UTC, at the last push, after the full check on the merged head (13:58 to
+  14:26: 544 passed; the ten screenshot tests below failed, as on clean `main` here).
 
 ## Log
 
