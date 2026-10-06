@@ -1,76 +1,121 @@
 // @vitest-environment jsdom
 // Copyright © 2026 Christopher Snow
 
-import { render, screen } from "@testing-library/react";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { INTERACTIVES, createBook } from "@dd/dd-views";
-import { memoryStorage } from "@dd/lesson-runtime";
+import { LessonStore, memoryStorage } from "@dd/lesson-runtime";
+import { termPattern } from "@dd/lesson-schema";
 import { LESSONS } from "@dd/content";
 
-import { PREFACE_HREF } from "../route";
-import { STRINGS, joinNumbers } from "../strings";
+import { PREFACE_HREF, lessonHref } from "../route";
+import { STRINGS } from "../strings";
 import { LessonList } from "./LessonList";
 
 const book = createBook(LESSONS, INTERACTIVES);
+const ordered = [...book.lessons].sort((a, b) => a.module - b.module || a.order - b.order);
+const first = ordered[0]!;
 
-describe("the lesson list", () => {
-  it("names the modules missing between its first and last lesson, computed from the lessons", () => {
-    // Only the course's first and last modules, so the gap is there whichever modules exist.
-    const all = book.lessons.map((l) => l.module);
-    const ends = [Math.min(...all), Math.max(...all)];
-    const endsOnly = { ...book, lessons: book.lessons.filter((l) => ends.includes(l.module)) };
-    const modules = [...new Set(endsOnly.lessons.map((l) => l.module))].sort((a, b) => a - b);
-    const first = modules[0]!;
-    const last = modules[modules.length - 1]!;
-    const missing: number[] = [];
-    for (let m = first; m <= last; m++) if (!modules.includes(m)) missing.push(m);
-    expect(missing.length).toBeGreaterThan(1);
-    render(<LessonList book={endsOnly} storage={memoryStorage()} />);
-    expect(screen.getByText(STRINGS.toWriteMany(missing))).toBeInTheDocument();
-    expect(screen.getByText(STRINGS.toWriteMany(missing))).toHaveTextContent(joinNumbers(missing));
+/** Stores a challenge's reference answer as the learner's work, so it passes when re-checked. */
+function pass(storage: ReturnType<typeof memoryStorage>, lessonId: string, count: number) {
+  const lesson = book.lessons.find((l) => l.id === lessonId)!;
+  const store = new LessonStore(storage, book.id, lessonId);
+  for (const c of lesson.challenges.slice(0, count))
+    store.setChallenge(c.id, (x) => ({ ...x, artifact: c.reference }));
+}
+
+describe("the course's front page: the cover", () => {
+  it("starts a new reader at the first lesson", () => {
+    render(<LessonList book={book} storage={memoryStorage()} />);
+    expect(
+      screen.getByRole("link", { name: STRINGS.preface.start(first.module, first.title) }),
+    ).toHaveAttribute("href", lessonHref(first.id));
   });
 
-  it("says nothing about missing modules when the modules run without a gap", () => {
-    const contiguous = {
-      ...book,
-      lessons: book.lessons.map((l, i) => ({ ...l, module: i + 1 })),
-    };
-    render(<LessonList book={contiguous} storage={memoryStorage()} />);
-    expect(screen.queryByText(/still to be written/)).not.toBeInTheDocument();
+  it("takes a reader who has passed a challenge to the first lesson not finished", () => {
+    const storage = memoryStorage();
+    pass(storage, first.id, 1);
+    const { unmount } = render(<LessonList book={book} storage={storage} />);
+    expect(
+      screen.getByRole("link", { name: STRINGS.cover.continueWith(first.module, first.title) }),
+    ).toHaveAttribute("href", lessonHref(first.id));
+    unmount();
+    // With the first lesson finished, the way on is the second.
+    pass(storage, first.id, first.challenges.length);
+    const second = ordered[1]!;
+    render(<LessonList book={book} storage={storage} />);
+    expect(
+      screen.getByRole("link", { name: STRINGS.cover.continueWith(second.module, second.title) }),
+    ).toHaveAttribute("href", lessonHref(second.id));
   });
 
-  it("uses the singular for one missing module", () => {
-    const [a, ...rest] = book.lessons;
-    const one = {
-      ...book,
-      lessons: [{ ...a!, module: 1 }, ...rest.map((l) => ({ ...l, module: 3 }))],
-    };
-    render(<LessonList book={one} storage={memoryStorage()} />);
-    expect(screen.getByText(STRINGS.toWriteOne(2))).toBeInTheDocument();
-  });
-});
-
-describe("the course's front page", () => {
-  it("says what the course takes as known before Module 1", () => {
+  it("says what the course takes as known, and links to the page before the first lesson", () => {
     render(<LessonList book={book} storage={memoryStorage()} />);
     expect(screen.getByText(STRINGS.assumes)).toBeInTheDocument();
-  });
-
-  it("links to the page before the first lesson", () => {
-    render(<LessonList book={book} storage={memoryStorage()} />);
     expect(screen.getByRole("link", { name: STRINGS.prefaceLink })).toHaveAttribute(
       "href",
       PREFACE_HREF,
     );
   });
+
+  it("uses no term that a lesson introduces, since a reader meets it before every lesson", () => {
+    const cover = [
+      STRINGS.cover.lead,
+      STRINGS.cover.machine,
+      STRINGS.cover.machineLabel,
+      STRINGS.cover.contents(STRINGS.moduleNames.length),
+      STRINGS.cover.toWrite,
+      ...STRINGS.moduleNames,
+    ];
+    const terms = [...new Set(LESSONS.flatMap((l) => l.introduces))];
+    expect(terms.length).toBeGreaterThan(50);
+    const used = terms.filter((t) => cover.some((text) => termPattern(t).test(text)));
+    expect(used).toEqual([]);
+  });
 });
 
-describe("joinNumbers", () => {
-  it("joins as prose does", () => {
-    expect(joinNumbers([])).toBe("");
-    expect(joinNumbers([2])).toBe("2");
-    expect(joinNumbers([2, 3])).toBe("2 and 3");
-    expect(joinNumbers([2, 3, 6])).toBe("2, 3 and 6");
+describe("the course's front page: every module of the plan", () => {
+  it("names each module the plan has, numbered from 0, as docs/plan.md's table does", () => {
+    // The check runs from the repository's root, as CI does.
+    const plan = readFileSync(resolve(process.cwd(), "docs/plan.md"), "utf8");
+    const rows = [...plan.matchAll(/^\| (\d+) [^|]+\|/gm)].map((m) => Number(m[1]));
+    expect(rows).toEqual(STRINGS.moduleNames.map((_, i) => i));
+  });
+
+  it("lists every module in order, with its lessons or a line saying it is still to be written", () => {
+    render(<LessonList book={book} storage={memoryStorage()} />);
+    const sections = screen.getAllByRole("region");
+    const withLessons = new Set(book.lessons.map((l) => l.module));
+    expect(sections).toHaveLength(STRINGS.moduleNames.length);
+    STRINGS.moduleNames.forEach((name, module) => {
+      const section = sections[module]!;
+      expect(within(section).getByRole("heading")).toHaveTextContent(
+        `${STRINGS.module(module)}: ${name}`,
+      );
+      if (withLessons.has(module)) {
+        for (const l of book.lessons.filter((x) => x.module === module))
+          expect(
+            within(section).getByRole("link", {
+              name: new RegExp(l.title.replace(/[?()]/g, "\\$&")),
+            }),
+          ).toHaveAttribute("href", lessonHref(l.id));
+        expect(within(section).queryByText(STRINGS.cover.toWrite)).not.toBeInTheDocument();
+      } else {
+        expect(within(section).getByText(STRINGS.cover.toWrite)).toBeInTheDocument();
+      }
+    });
+  });
+
+  it("shows each lesson's progress, recomputed from stored work", () => {
+    const storage = memoryStorage();
+    pass(storage, first.id, 1);
+    render(<LessonList book={book} storage={storage} />);
+    expect(
+      screen.getByRole("link", { name: new RegExp(`^${first.title.replace(/[?()]/g, "\\$&")}`) }),
+    ).toHaveTextContent(STRINGS.progress(1, first.challenges.length));
   });
 });

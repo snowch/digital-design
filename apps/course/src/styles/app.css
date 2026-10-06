@@ -191,6 +191,54 @@ ol {
   margin: 0 0 var(--space-4);
 }
 
+/* The cover, at the top of the front page: what the course is, the machine it builds drawn whole
+   and small, and the way in. A drawing still being built keeps its room, so nothing below jumps. */
+.cover {
+  max-width: var(--measure);
+}
+.cover-lead {
+  font-size: var(--text-md);
+}
+.cover-machine {
+  margin: var(--space-5) 0;
+}
+.cover-drawing {
+  background: var(--canvas);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+}
+.cover-drawing-waiting {
+  aspect-ratio: 2099 / 806;
+}
+.cover-drawing svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.cover-machine figcaption {
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
+}
+.cover-start {
+  margin: var(--space-5) 0 var(--space-4);
+}
+.cover-start .button {
+  text-align: left;
+  text-decoration: none;
+  padding: var(--space-2) var(--space-4);
+}
+.contents-heading {
+  margin-top: var(--space-7);
+}
+.module-to-write h3 {
+  color: var(--fg-muted);
+}
+.module-to-write .meta {
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+}
+
 .lesson-list {
   list-style: none;
   padding: 0;

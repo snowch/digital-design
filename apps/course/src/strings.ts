@@ -2,12 +2,6 @@
 
 // The shell's own words. Drafted by the prose process; see CLAUDE.md.
 
-/** Joins numbers as prose does: "2", "2 and 3", "2, 3 and 6". */
-export function joinNumbers(numbers: readonly number[]): string {
-  if (numbers.length <= 1) return numbers.map(String).join("");
-  return `${numbers.slice(0, -1).join(", ")} and ${numbers[numbers.length - 1]}`;
-}
-
 export const STRINGS = {
   skip: "Skip to content",
   lessons: "Lessons",
@@ -53,10 +47,42 @@ export const STRINGS = {
     score: (right: number, total: number) => `${right} of ${total} correct`,
   },
   module: (n: number) => `Module ${n}`,
-  // The modules missing between the first and the last lesson; the list reads "2 and 3".
-  toWriteOne: (n: number) => `Module ${n} is still to be written.`,
-  toWriteMany: (modules: readonly number[]) =>
-    `Modules ${joinNumbers(modules)} are still to be written.`,
+  /**
+   * The cover, at the top of the front page. A reader meets it before every lesson, so it uses no
+   * term a lesson introduces (a test holds it to the term gate).
+   */
+  cover: {
+    /** Under the course title: what the course is. */
+    lead: "You build a working computer from its parts, starting from two voltages on a wire, and for each circuit you predict what will happen, build it, run it, break it, and explain what happened. Everything runs in your browser, your work stays in your browser, and every simulation shows the real circuit, not an animation.",
+    /** Under the drawing of the whole machine. */
+    machine:
+      "This is the machine the course builds. Most of its parts are kinds of part that Modules 3 to 7 build: circuits that select one of several inputs, add numbers, keep individual values, manage collections of numbers, and perform arithmetic. Module 8 joins them into this machine.",
+    /** The drawing's name for a screen reader. */
+    machineLabel: "The circuit diagram of the complete computer the course builds.",
+    /** Above the list of every module the plan has. */
+    contents: (count: number) => `All ${count} modules`,
+    /** Under a module with no lessons yet. */
+    toWrite: "This module is still to be written.",
+    /** The way on for a reader who has passed a challenge: the first lesson not finished. */
+    continueWith: (module: number, title: string) => `Continue with Module ${module}: ${title}`,
+  },
+  /** Every module the plan has (`docs/plan.md`), by number from 0, in plain words. */
+  moduleNames: [
+    "What computers do",
+    "Voltage to numbers",
+    "Learning AND, OR, NOT",
+    "Selecting, comparing, adding",
+    "Memory and time",
+    "Counting and sequences",
+    "Accessing many numbers",
+    "Arithmetic and logic",
+    "Putting pieces together",
+    "Control and sequencing",
+    "The machine's vocabulary",
+    "Programming and debugging",
+    "Errors and responses",
+    "The whole machine",
+  ] as readonly string[],
   progress: (passed: number, total: number) => `${passed} of ${total} challenges complete`,
   missing: (path: string) => `There is no page at ${path}.`,
   noLesson: (id: string) => `There is no lesson called ${id}.`,
