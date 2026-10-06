@@ -39,14 +39,19 @@ The managing session's audit listed seven places. Read as each page's learner:
 
 ## Log
 
+The times in the first version of this log were estimated, not read, and ran up to an hour
+ahead of the clock; the managing session caught it. Each entry below was corrected against
+`git log --format='%h %cI %s'` (the commit that carries the work, and its time). From 11:29 on,
+each entry's time is read from `date -u` as it is written.
 
-- 10:46 to 10:59. Built the five figure kinds (`packages/dd-model/src/machine-figures.ts` for
+
+- 10:46 to 10:59 (5d12572 at 10:59:16). Built the five figure kinds (`packages/dd-model/src/machine-figures.ts` for
   the facts each reads off the reference machine or the simulator; `MachineFigures.tsx` for the
   views), placed them with provisional words, pinned their numbers in
   `content/lessons/module8-figures.facts.test.ts`. Committed and pushed.
-- 11:00. Briefs GA (instructions, constants, fetch), GB (memory-access, branches) and GV (the
+- 11:01 (`date -u`; the briefs are in 68645aa, 11:02:56). Briefs GA (instructions, constants, fetch), GB (memory-access, branches) and GV (the
   figures' own labels) written as lists of checked facts and sent to the drafting subagent.
-- 11:05. GA came back. Faults, each fixed by adding words, no sentence rewritten:
+- About 11:04 (placed in ea199f6, 11:05:18). GA came back. Faults, each fixed by adding words, no sentence rewritten:
   - the three captions had no full stop (the brief asked for one);
   - `fieldsLead` dropped "the same in every instruction";
   - `edgesAfter` said "The table shows five clock edges" (the diagram shows them; the table gives
@@ -57,7 +62,7 @@ The managing session's audit listed seven places. Read as each page's learner:
   - `edgesAfter` wrote "edges 1–4" with an en dash; became "1 to 4".
   It added which register each edge writes (R1 to R4), which is true (Y's digit of each word) and
   stays.
-- 11:09. GB came back. Faults, fixed by adding or swapping the fewest words:
+- By 11:05 (ea199f6, 11:05:18). GB came back. Faults, fixed by adding or swapping the fewest words:
   - `mapLead` called the last row "empty space" (it is the addresses with no memory) and a
     refusal "an error code" and "error 33" (the course's word is the cause that stops the
     machine); it dropped "in any part" from the misaligned word;
@@ -67,20 +72,20 @@ The managing session's audit listed seven places. Read as each page's learner:
     the run is already made, so the sentence was cut; "returns to `010`, after the call" became
     "the line after the call";
   - `callLead` dropped the program's purpose (a loop that adds 3 + 2 + 1, and returns); added back.
-- 11:13. GV came back. It dropped `addresses` and `parts.none` (the provisional "Addresses" and
+- By 11:07 (91addc1, 11:07:08). GV came back. It dropped `addresses` and `parts.none` (the provisional "Addresses" and
   "no memory" stand: both are what the brief asked) and, in `arrowsLabel`, "the table says the
   same" (added). The FIXED strings came back as given.
-- 11:20. Mechanical look at the six figures at 1280 px, 375 px and 375 px dark: no page scrolls
+- About 11:08 to 11:10 (26cef3a, 11:10:40). Mechanical look at the six figures at 1280 px, 375 px and 375 px dark: no page scrolls
   sideways; the timeline scrolls inside its box with the drawing's own notice. The widening lead
   says C stands under W's low 12 bits, but C's row was drawn above W's four rows; the row moved
   under W's bits 15 to 0, so each of C's bits stands under the bit it becomes.
-- 11:22. Five reviewers, one per lesson, given `module-8-figures/reviews/brief.md`.
-- 11:40. The five reviews came back (`module-8-figures/reviews/findings.md`); sent to the
+- About 11:08 (the brief is in 9441566, 11:09:42). Five reviewers, one per lesson, given `module-8-figures/reviews/brief.md`.
+- 11:10 to 11:12 (findings in 735e473 to de74e31, 11:10:58 to 11:11:42). The five reviews came back (`module-8-figures/reviews/findings.md`); sent to the
   sceptic. Meanwhile `main` had moved to 63d7ce4 (Module 10's plan, `docs/plan.md` only): merged
-  in. A clean `main` built in this container fails the same screenshot comparisons as this branch
+  in. The merge is bea1842, 11:13:27. A clean `main` built in this container fails the same screenshot comparisons as this branch
   (the figures-that-matter-most, signals, scenes and Module 2 pairs at both widths; registers and
   state machines on the phone): none of them names a Module 8 figure, so no baseline was touched.
-- 11:45 to 12:10. Acted on the verdicts that stand (`reviews/verdicts.md`). In code: the branch
+- About 11:15 to 11:24 (35d5275, 11:24:00). Acted on the verdicts that stand (`reviews/verdicts.md`). In code: the branch
   arrows take lanes by span, arrive at their own heights where two meet one line, and a lane is
   broken where another arrow's stub crosses it (5-1); a branch's way on to the next line is
   listed in "went to" (5-3); the loop figure moved into the investigation, after the program is
@@ -95,10 +100,10 @@ The managing session's audit listed seven places. Read as each page's learner:
   memory-access asks what the load brings, which is a sensor's reading, not a field). New facts
   pinned: those fields and C's signed values, and that bits 63 to 11 of W are worth -2048
   together. Words sent as briefs GC and GW.
-- 12:14. GW came back. `copyKey` dropped "Bit 11 is outlined" (added); `arrowsLabel` dropped
+- By 11:24 (40f0326, 11:24:51). GW came back. `copyKey` dropped "Bit 11 is outlined" (added); `arrowsLabel` dropped
   "when that was not the next line" (added) and used single quotes (now double). The rest stands:
   "Memory map", "Program flow", "Transfer".
-- 12:20. GC came back. Faults, fixed by adding the fewest words:
+- By 11:27 (1ba433a, 11:27:44). GC came back. Faults, fixed by adding the fewest words:
   - `instructions/fieldsLead` dropped "where that says more than the digits" and the four
     instructions to choose from;
   - `constants/wideningLead` dropped "of 16 bits" and "in both"; "Gaps every four bits show
@@ -115,7 +120,7 @@ The managing session's audit listed seven places. Read as each page's learner:
   - `memory-access/mapLead` dropped the devices' names, DOOR and WARM's bits, the timer and
     waiting as later modules' devices, the lower cause winning, 31 for every access, and the
     contrast with Module 6: sent back.
-- 12:26. `mapLead` came back with every fact but two: it wrote ranges with en dashes (now "to"),
+- By 11:28 (8630b8e, 11:28:00). `mapLead` came back with every fact but two: it wrote ranges with en dashes (now "to"),
   said only waiting is used later (both are), said a store byte "at a device or sensor" gives 33
   "not 34" (34 applies only at DOOR and WARM and the sensors: narrowed), dropped "for every
   access" and the Module 6 contrast (added).
