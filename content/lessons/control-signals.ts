@@ -208,6 +208,7 @@ export const controlSignals: LessonInput = {
       title: LABELS.challengeTitles.c1,
       task: PROSE.c1Task,
       gradedDirection: "write",
+      feedback: "words",
       interface: {
         inputs: [{ name: "K", width: 4 }],
         outputs: [{ name: "WRITEY" }, { name: "BCONST" }],
@@ -226,6 +227,7 @@ export const controlSignals: LessonInput = {
       title: LABELS.challengeTitles.c2,
       task: PROSE.c2Task,
       gradedDirection: "write",
+      feedback: "words",
       interface: {
         inputs: [
           { name: "K", width: 4 },

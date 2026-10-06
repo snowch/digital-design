@@ -226,6 +226,7 @@ export const illegalInstructions: LessonInput = {
       title: LABELS.challengeTitles.c1,
       task: PROSE.c1Task,
       gradedDirection: "write",
+      feedback: "words",
       interface: {
         inputs: [{ name: "C", width: 12 }],
         outputs: [{ name: "OUTSIDE" }],
@@ -241,6 +242,7 @@ export const illegalInstructions: LessonInput = {
       title: LABELS.challengeTitles.c2,
       task: PROSE.c2Task,
       gradedDirection: "write",
+      feedback: "words",
       interface: {
         inputs: [
           { name: "K", width: 4 },

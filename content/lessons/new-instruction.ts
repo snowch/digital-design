@@ -236,8 +236,8 @@ export const newInstruction: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.choose,
           lead: PROSE.chooseLead,
-          after: PROSE.chooseAfter,
           props: {
+            outcomes: PROSE.chooseAfter,
             libraryId: "machine-edges-call",
             program: CHOOSE,
             inputs: SENSORS,
@@ -277,7 +277,6 @@ export const newInstruction: LessonInput = {
           caption: LABELS.captions.callFaults,
           lead: PROSE.callFaultsLead,
           props: {
-            outcomes: PROSE.callFaultsOutcomes,
             libraryId: "machine-edges-call",
             program: CHOOSE,
             inputs: SENSORS,
@@ -291,12 +290,14 @@ export const newInstruction: LessonInput = {
                 path: "control/decoder/signals/orCall",
                 gate: "and",
                 label: LABELS.faults.callAnd,
+                outcome: PROSE.callFaultCall,
               },
               {
                 kind: "wrong-gate",
                 path: "control/decoder/signals/orJump",
                 gate: "and",
                 label: LABELS.faults.jumpAnd,
+                outcome: PROSE.callFaultJump,
               },
             ],
           },
@@ -356,6 +357,7 @@ export const newInstruction: LessonInput = {
       title: LABELS.challengeTitles.c1,
       task: PROSE.c1Task,
       gradedDirection: "write",
+      feedback: "words",
       interface: {
         inputs: [
           { name: "K", width: 4 },
@@ -376,6 +378,7 @@ export const newInstruction: LessonInput = {
       title: LABELS.challengeTitles.c2,
       task: PROSE.c2Task,
       gradedDirection: "write",
+      feedback: "words",
       interface: {
         inputs: [
           { name: "CLK" },

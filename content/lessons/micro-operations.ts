@@ -202,8 +202,8 @@ export const microOperations: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.fourViews,
           lead: PROSE.fourViewsLead,
-          after: PROSE.fourViewsAfter,
           props: {
+            outcomes: PROSE.fourViewsAfter,
             libraryId: "machine-edges",
             program: COLDER,
             inputs: SENSORS,
@@ -246,7 +246,6 @@ export const microOperations: LessonInput = {
           caption: LABELS.captions.signalFaults,
           lead: PROSE.signalFaultsLead,
           props: {
-            outcomes: PROSE.signalFaultsOutcomes,
             libraryId: "machine-edges",
             program: MARGIN,
             shown: [1, 2, 3],
@@ -260,6 +259,7 @@ export const microOperations: LessonInput = {
                 at: [28, 35],
                 value: 1,
                 label: LABELS.faults.pcenHigh,
+                outcome: PROSE.signalFaultPcen,
               },
               {
                 kind: "stuck-at",
@@ -267,6 +267,7 @@ export const microOperations: LessonInput = {
                 at: [28, 35],
                 value: 0,
                 label: LABELS.faults.mstoreLow,
+                outcome: PROSE.signalFaultMstore,
               },
             ],
           },
@@ -298,6 +299,7 @@ export const microOperations: LessonInput = {
       title: LABELS.challengeTitles.c1,
       task: PROSE.c1Task,
       gradedDirection: "write",
+      feedback: "words",
       interface: {
         inputs: [
           { name: "S", width: 3 },
@@ -321,6 +323,7 @@ export const microOperations: LessonInput = {
       title: LABELS.challengeTitles.c2,
       task: PROSE.c2Task,
       gradedDirection: "write",
+      feedback: "words",
       interface: {
         inputs: [
           { name: "CLK" },

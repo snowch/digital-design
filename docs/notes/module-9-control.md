@@ -370,3 +370,47 @@ touch (the registers, state machines and signals lessons' figures, the scenes, M
 and the figures that matter most). The same ten fail on a clean checkout of `main` built and run
 here (13:25), so they are this container's text rendering, as Module 8's note found. The baselines
 were not updated. Every other test of the check passes.
+
+## The managing session's read and merge
+
+The managing session read the five lessons against the decoder, the controller, the machine and
+`docs/isa.md` from 14:30 UTC, while the full check ran on `main` with the branch merged in (14:29
+to 14:54). Every number the prose states is pinned by a facts test, and the words agree with the
+circuits. Four places were corrected:
+
+- 9.2's reflection said "The control unit is the decoder of Module 8's machine. It reads K, J and
+  C", where its motivation says Module 8's decoder read K and J only. Redrafted from brief M1: the
+  decoder now reads K, J and C, where Module 8's read K and J only.
+- The second hint of 9.4's first challenge said that with GO left out of WREG "a halting edge in
+  WRITE still writes register Y". The stop logic halts the machine only at a FETCH, READ or MEMORY
+  edge, so no program can show that. Redrafted from brief M1: with GO left out, WREG is 1 in WRITE
+  while GO is 0, and those tests fail.
+- 9.4's explanation said the last challenge names the last edges ENDS; only its answer and its
+  fourth hint do. Two words were added: "the last challenge's answer".
+- 9.5's construction pointed to "9.1", a number the site never shows. It now says "lesson 1".
+
+In the draft from brief M1, "still" was dropped from the reflection and "those tests" became "the
+tests"; both were put back.
+
+The managing session's check, which renders text as CI does, passed the ten screenshot tests the
+building session's container failed, and failed one test that container could not see: on a
+phone, 9.3's state table for the
+controller was 4 pixels wider than its box, so its last column, the next state, scrolled out of
+view. The phone rule that narrows the gaps of a table marking the row the next edge applies now
+covers the state table too; Module 5's state tables, which fit before, keep their screenshot.
+
+Module 8's learner pass (`docs/notes/module-8-learner.md`) finished at 13:43 on its own branch,
+and was merged into `main` first, then this branch on top. Module 9's figures take its patterns,
+with no sentence changed:
+
+- the three datapath investigations (9.3's colder room, 9.4's four views, 9.5's choice of room)
+  show their results once the learner has made an edge, as Module 8's do, not from the start;
+- the three datapath fault figures carry each fault's outcome on the fault, shown once that fault
+  has run; their texts were split at the paragraph break between the two faults;
+- the ten challenges report a failed test in hexadecimal, without the elaborator's gate names
+  (`feedback: "words"`).
+
+The fault labs of 9.1 and 9.2 are `fault-lab` figures, which still show both outcomes after the
+first run, as every module's fault labs do. The merge also changed one stored screenshot: the
+first lesson's two-button figure on a phone no longer says the drawing is wider than the screen,
+which it is not (Module 8's pass made that note wait for more than an empty margin).

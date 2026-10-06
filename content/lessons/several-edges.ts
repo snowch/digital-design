@@ -176,8 +176,8 @@ export const severalEdges: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.colderEdges,
           lead: PROSE.colderEdgesLead,
-          after: PROSE.colderEdgesAfter,
           props: {
+            outcomes: PROSE.colderEdgesAfter,
             libraryId: "machine-edges",
             program: COLDER,
             inputs: SENSORS,
@@ -218,7 +218,6 @@ export const severalEdges: LessonInput = {
           caption: LABELS.captions.edgeFaults,
           lead: PROSE.edgeFaultsLead,
           props: {
-            outcomes: PROSE.edgeFaultsOutcomes,
             libraryId: "machine-edges",
             program: MARGIN,
             shown: [1, 2, 3],
@@ -233,12 +232,14 @@ export const severalEdges: LessonInput = {
                 at: [28, 35],
                 value: 1,
                 label: LABELS.faults.fetchingHigh,
+                outcome: PROSE.edgeFaultFetching,
               },
               {
                 kind: "stuck-at",
                 net: "control/controller/nextState/R4",
                 value: 0,
                 label: LABELS.faults.memoryRowLow,
+                outcome: PROSE.edgeFaultRow,
               },
             ],
           },
@@ -300,6 +301,7 @@ export const severalEdges: LessonInput = {
       title: LABELS.challengeTitles.c1,
       task: PROSE.c1Task,
       gradedDirection: "write",
+      feedback: "words",
       interface: {
         inputs: [
           { name: "CLK" },
@@ -327,6 +329,7 @@ export const severalEdges: LessonInput = {
       title: LABELS.challengeTitles.c2,
       task: PROSE.c2Task,
       gradedDirection: "write",
+      feedback: "words",
       interface: {
         inputs: [
           { name: "CLK" },

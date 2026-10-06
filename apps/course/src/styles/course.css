@@ -893,7 +893,9 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
     padding-right: var(--space-3);
   }
   .truth-table-wrap.edge-table th,
-  .truth-table-wrap.edge-table td {
+  .truth-table-wrap.edge-table td,
+  .truth-table.machine-table th,
+  .truth-table.machine-table td {
     padding-right: var(--space-2);
   }
   /* Module 9: the map of every kind and job has seventeen columns of one mark each. */
