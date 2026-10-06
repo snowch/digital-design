@@ -571,7 +571,16 @@ class Elaborator {
         const subject = this.expression(s.subject, subjectWidth);
         let fallEnv = new Map(env);
         if (s.defaultArm) this.exec(s.defaultArm, fallEnv, operator, held);
-        for (let i = s.arms.length - 1; i >= 0; i--) {
+        // A case whose labels name every value of its subject has no path past its arms, so
+        // its last arm stands in for a default: without this, a two-arm case on one bit was
+        // told it leaves its signals unassigned.
+        let last = s.arms.length - 1;
+        if (!s.defaultArm && last >= 0 && this.coversEvery(s.arms, subjectWidth)) {
+          const arm = s.arms[last] as (typeof s.arms)[number];
+          this.exec(arm.body, fallEnv, operator, held);
+          last -= 1;
+        }
+        for (let i = last; i >= 0; i--) {
           const arm = s.arms[i] as (typeof s.arms)[number];
           const matches = arm.labels.map((label) => {
             const value = this.expression(label, subjectWidth);
@@ -594,6 +603,27 @@ class Elaborator {
         return;
       }
     }
+  }
+
+  /** Whether a case's labels, all constants, name each of the 2^width values of its subject. */
+  private coversEvery(
+    arms: readonly { readonly labels: readonly Expression[] }[],
+    width: number,
+  ): boolean {
+    if (width > 12) return false;
+    const seen = new Set<bigint>();
+    for (const arm of arms)
+      for (const label of arm.labels) {
+        if (label.kind === "literal" && label.unknown !== 0n) return false;
+        if (label.kind !== "literal" && label.kind !== "identifier") return false;
+        try {
+          seen.add(this.constant(label));
+        } catch {
+          return false;
+        }
+      }
+    for (let v = 0n; v < 1n << BigInt(width); v++) if (!seen.has(v)) return false;
+    return true;
   }
 
   private merge(

@@ -18,3 +18,4 @@ read once more, and the full check runs on the pushed head.
 ## Log
 
 - 12:40. `main` (5598fdb: a cover on the front page; a trial overview strip and zoom on branches' `sum`) merged in as e23fa54; `docs/authoring.md`'s figure table kept both sides. Walk helper written; five walkers sent, one per lesson, with `module-8-learner/brief.md`.
+- 12:50. Walks in for memory-access and fetch (`module-8-learner/walks/`). Started on what needs no sceptic: the `memory-text` reference drew four false "latch" warnings because a `case` whose labels name every value of its subject was taken to leave a path out; it now counts as complete (`packages/hdl/src/elaborate.ts`, with a test that a short case is still warned about).
