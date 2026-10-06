@@ -325,6 +325,59 @@ export interface ViewStrings {
     /** In the row of the part the address names now. */
     readonly chosen: string;
   };
+  /** Module 8: the datapath figure. */
+  readonly datapath: DatapathStrings;
+}
+
+/** Module 8: the datapath figure's words. */
+export interface DatapathStrings {
+  /** The instructions a lesson offers for the IR bus, where the stage has no ROM. */
+  readonly instructions: string;
+  readonly clock: string;
+  readonly run: string;
+  readonly reset: string;
+  readonly registersCaption: string;
+  readonly register: string;
+  readonly word: string;
+  readonly signed: string;
+  readonly marks: string;
+  /** In a register's row: the last edge wrote it. */
+  readonly written: string;
+  readonly programCaption: string;
+  readonly address: string;
+  readonly instruction: string;
+  readonly transfer: string;
+  /** In the program's row the PC names. */
+  readonly atPc: string;
+  readonly busesCaption: string;
+  readonly bus: string;
+  readonly value: string;
+  readonly devicesCaption: string;
+  readonly device: string;
+  readonly display: string;
+  readonly lamps: string;
+  readonly ramCaption: string;
+  /** The status line while the machine runs: {pc}. */
+  readonly running: string;
+  /** While HALT is 1: the next edge stops the machine, {reason}. */
+  readonly halting: string;
+  /** After the edge that stopped it: {reason}. */
+  readonly stopped: string;
+  /** Why the machine stops, by cause; `stop` and `later` for CAUSE 00. */
+  readonly reasons: Readonly<Record<string, string>>;
+  /** The stepper over the last edge. */
+  readonly stepsHeading: string;
+  readonly stepsNone: string;
+  /** At a step: the buses that changed at it, {nets}. */
+  readonly stepChanged: string;
+  readonly stepNothing: string;
+  readonly back: string;
+  readonly next: string;
+  readonly end: string;
+  /** After a prediction: what the machine did, {answer}. */
+  readonly answer: string;
+  /** In a prediction of the registers an edge writes: none. */
+  readonly noRegister: string;
 }
 
 /** Module 5: the state-machine figure's words. */
@@ -671,6 +724,56 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     part: "Part",
     range: "{first} to {last}",
     chosen: "Chosen",
+  },
+  // Module 8: provisional words, to be drafted by the prose process
+  // (docs/notes/module-8-datapath.md).
+  datapath: {
+    instructions: "Instruction on IR",
+    clock: "Clock edge",
+    run: "Run until it stops",
+    reset: "Start again",
+    registersCaption: "Registers",
+    register: "Register",
+    word: "Word",
+    signed: "Signed",
+    marks: "Now",
+    written: "Written",
+    programCaption: "The program in the ROM",
+    address: "Address",
+    instruction: "Instruction",
+    transfer: "Transfer",
+    atPc: "PC",
+    busesCaption: "Buses",
+    bus: "Bus",
+    value: "Value",
+    devicesCaption: "Devices",
+    device: "Device",
+    display: "display",
+    lamps: "lamps",
+    ramCaption: "RAM",
+    running: "PC is {pc}.",
+    halting: "The next edge stops the machine: {reason}.",
+    stopped: "The machine has stopped: {reason}.",
+    reasons: {
+      "11": "fetch outside the ROM",
+      "12": "fetch not at a multiple of 4",
+      "21": "illegal instruction",
+      "31": "no memory at the address",
+      "33": "misaligned word or byte at a device",
+      "34": "store to the ROM or a read-only device",
+      "41": "call system",
+      stop: "stop",
+      later: "a system job",
+    },
+    stepsHeading: "The last edge, step by step",
+    stepsNone: "Press Clock edge first.",
+    stepChanged: "Changed at this step: {nets}.",
+    stepNothing: "Step 0: the clock has just risen.",
+    back: "Back a step",
+    next: "Next step",
+    end: "Last step",
+    answer: "The machine gave {answer}.",
+    noRegister: "none",
   },
   // Module 5: the state-machine figure. Drafted by the prose process (brief V,
   // docs/notes/module-5-state-machines/briefs/V.md).

@@ -29,6 +29,8 @@ import { MemoryExplorer } from "./MemoryExplorer";
 // Module 7, the ALU
 import { CarrySteps } from "./CarrySteps";
 import { SuiteLab } from "./SuiteLab";
+// Module 8, the datapath
+import { DatapathFigure } from "./DatapathFigure";
 
 /** The interactives lessons may name by kind. */
 export const INTERACTIVES: Readonly<Record<string, ComponentType<InteractiveProps>>> = {
@@ -57,6 +59,8 @@ export const INTERACTIVES: Readonly<Record<string, ComponentType<InteractiveProp
   // Module 7, the ALU
   "carry-steps": CarrySteps,
   "suite-lab": SuiteLab,
+  // Module 8, the datapath
+  datapath: DatapathFigure,
 };
 
 export {
@@ -79,6 +83,7 @@ export {
   MemoryExplorer,
   CarrySteps,
   SuiteLab,
+  DatapathFigure,
 };
 export { carryRun, carryAnswer } from "./CarrySteps";
 export { runAluSuite, firstCatch } from "./SuiteLab";

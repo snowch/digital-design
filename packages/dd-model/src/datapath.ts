@@ -1150,7 +1150,7 @@ export function datapathCircuit(options: DatapathOptions): Circuit {
   );
 
   if (!fetching) {
-    b.output("Y", result);
+    b.output("RESULT", result);
     return b.build();
   }
 

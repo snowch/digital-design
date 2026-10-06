@@ -51,7 +51,7 @@ export const DATAPATH_AT: Readonly<Record<Stage, At>> = {
     jobBits: [16, 2],
     registers: [16, 9.5],
     alu: [24, 1],
-    "out:Y": [33, 1],
+    "out:RESULT": [33, 1],
   },
   constants: {
     "in:IR": [3, 5],
@@ -64,7 +64,7 @@ export const DATAPATH_AT: Readonly<Record<Stage, At>> = {
     widen: [16, 18],
     pickB: [22, 12.5],
     alu: [28, 1],
-    "out:Y": [37, 1],
+    "out:RESULT": [37, 1],
   },
   fetch: {
     "in:RST": [0, 9],

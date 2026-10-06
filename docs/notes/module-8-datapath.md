@@ -70,3 +70,26 @@ wrote every learner-facing sentence from a brief of checked facts.
   changed a net that a part also drives, and the part was not worked out again. The first step now
   works out the drivers of those nets too; a test holds that case to a plain settle. Then 660
   tests passed.
+- 06:15 to 06:58 The datapath drawn at every stage. Hand placements for each stage's top level
+  (`library-datapath.ts`), and the router learnt hand routes: a wire may carry where it turns,
+  across then up or down, kept on the part it leaves. Several wires fed back from one column now
+  get trunks of their own, where they shared one x. The full stage needed most of the time: the
+  last five problems were the decoder's three outputs to the next-PC block (their U-shaped routes
+  must nest: the lowest port turns first, its band lowest, its rise rightmost) and two selector
+  outputs that ran within half a cell of the ALU's code wires. The circuit view gained
+  `writtenWidth`: a datapath's 64-bit buses are too many and too close to write on the drawing,
+  so their values are in the figure's table and in a press's readout.
+- 07:00 to 07:10 The datapath figure (`DatapathFigure.tsx`, kind `datapath`): the drawing, a list
+  of instructions for the IR bus where the stage has no ROM, Clock edge, Run until it stops and
+  Start again, the program with the PC's row marked, the registers with the ones the last edge
+  wrote, the buses a lesson names, the devices and the RAM; a prediction of the next edge whose
+  answer is read off a copy of the simulator after a real edge; faults; and the last edge step by
+  step. `datapath-figure.ts` builds a figure's datapath from lesson data. Written challenges can
+  now use the course's modules (`courseModules` on a challenge; the book passes the machine's
+  modules to the elaborator). The early stages' output is RESULT, not Y: the drawing would
+  otherwise use Y for the register digit and the ALU's word at once.
+- 07:10 to 07:12 Lesson 8.1, `instructions`: structure, challenges and facts test before any
+  prose. The term gate failed as planned on `remember`, `bytes` and `memory-map` ("instructions"
+  pointing ahead); each now lists the exemption.
+- 07:12 to 07:20 Briefs: a shared fact sheet (`briefs/00-module.md`) and, per lesson, three prose
+  briefs and one for labels. Lesson 8.2, `constants`, built while 8.1's drafts ran.

@@ -5,7 +5,7 @@
 
 import { useId, useMemo } from "react";
 
-import { elaborate, type Construct, type Message } from "@dd/hdl";
+import { elaborate, type Construct, type CourseModule, type Message } from "@dd/hdl";
 
 import { CircuitView } from "./CircuitView";
 import { format, useViewStrings } from "./strings";
@@ -20,6 +20,8 @@ export interface HdlPanelProps {
   readonly rows?: number;
   /** The starting text: while the text is still this, nothing has been written to judge. */
   readonly untouched?: string;
+  /** Module 8: modules the course supplies to the text. */
+  readonly modules?: Readonly<Record<string, CourseModule>>;
 }
 
 export function messageLine(m: Message): string {
@@ -34,12 +36,16 @@ export function HdlPanel({
   highlight,
   rows = 10,
   untouched,
+  modules,
 }: HdlPanelProps) {
   const strings = useViewStrings();
   const id = useId();
   const result = useMemo(
-    () => (text.trim() && text !== untouched ? elaborate(text, { allowed }) : undefined),
-    [text, allowed, untouched],
+    () =>
+      text.trim() && text !== untouched
+        ? elaborate(text, { allowed, ...(modules ? { modules } : {}) })
+        : undefined,
+    [text, allowed, untouched, modules],
   );
   const errors = result?.messages.filter((m) => m.severity !== "warning") ?? [];
   const warnings = result?.messages.filter((m) => m.severity === "warning") ?? [];

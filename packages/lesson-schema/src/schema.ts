@@ -264,6 +264,18 @@ export const Challenge = z.object({
   tryIt: z.enum(["drawing", "pins"]).default("drawing"),
   /** Module 2: a gate budget, a depth and the kinds of gate allowed, each graded as a test. */
   limits: Limits.optional(),
+  /**
+   * Module 8: modules the course supplies to a written text, by the set's name, and what they
+   * start with: the program in the ROM, in the machine's assembly, and the registers' first
+   * words by name. The book interprets the set's name.
+   */
+  courseModules: z
+    .object({
+      set: z.string().min(1),
+      program: z.string().optional(),
+      registers: z.record(z.string(), z.string()).optional(),
+    })
+    .optional(),
   hints: Hints,
   /** The reference solution: what the educational tests complete the challenge with, and what rung five offers. */
   reference: Artifact,

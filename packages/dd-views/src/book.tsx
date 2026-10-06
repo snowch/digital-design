@@ -6,8 +6,16 @@
 
 import { useMemo, useState, type ComponentType } from "react";
 
-import { chainSlices, depthOf, gatesNotOf, gatesOf, libraryCircuit } from "@dd/dd-model";
-import { elaborate, generate, type Construct } from "@dd/hdl";
+import {
+  assemble,
+  chainSlices,
+  depthOf,
+  gatesNotOf,
+  gatesOf,
+  libraryCircuit,
+  wordOf,
+} from "@dd/dd-model";
+import { elaborate, generate, machineModules, type Construct, type CourseModule } from "@dd/hdl";
 import { limitCount, type Artifact, type Challenge, type Lesson } from "@dd/lesson-schema";
 import type { Book, ChallengeEditorProps, InteractiveProps, Verdict } from "@dd/lesson-runtime";
 import { bitAt, parseWord, runSuite, type Circuit } from "@dd/sim";
@@ -50,6 +58,27 @@ export function portProblem(
   });
 }
 
+/** Module 8: the course's modules a challenge's text may use, built once per challenge. */
+const MODULES = new WeakMap<Challenge, Record<string, CourseModule>>();
+
+export function modulesOption(challenge: Challenge): { modules?: Record<string, CourseModule> } {
+  const given = challenge.courseModules;
+  if (!given || given.set !== "machine") return {};
+  let modules = MODULES.get(challenge);
+  if (!modules) {
+    const registers = Array.from({ length: 16 }, (_, k) => {
+      const v = given.registers?.[`R${k}`];
+      return v === undefined ? undefined : wordOf(v, 64).value;
+    });
+    modules = machineModules({
+      ...(given.program !== undefined ? { rom: assemble(given.program).rom } : {}),
+      registers,
+    });
+    MODULES.set(challenge, modules);
+  }
+  return { modules };
+}
+
 /**
  * The circuit an artifact holds for a challenge, or why there is none. Whatever form the artifact
  * takes is graded: a drawn circuit, a library id, or text elaborated under the challenge's
@@ -64,7 +93,10 @@ export function circuitOf(
   if (artifact.circuit) circuit = artifact.circuit as Circuit;
   else if (artifact.libraryId) circuit = libraryCircuit(artifact.libraryId);
   else if (artifact.hdl?.trim()) {
-    const result = elaborate(artifact.hdl, { allowed: challenge.allowedConstructs as Construct[] });
+    const result = elaborate(artifact.hdl, {
+      allowed: challenge.allowedConstructs as Construct[],
+      ...modulesOption(challenge),
+    });
     const errors = result.messages.filter((m) => m.severity !== "warning");
     if (errors.length || !result.circuit) {
       return {
@@ -186,6 +218,7 @@ function gradeWidths(challenge: Challenge, hdl: string, vectors: Vectors): Verdi
     const result = elaborate(hdl, {
       allowed: challenge.allowedConstructs as Construct[],
       parameters,
+      ...modulesOption(challenge),
     });
     const errors = result.messages.filter((m) => m.severity !== "warning");
     if (errors.length || !result.circuit)
@@ -366,7 +399,10 @@ function DrawEditor({ challenge, artifact, onChange, verdict }: ChallengeEditorP
   };
 
   const importFromText = () => {
-    const result = elaborate(importText, { allowed: challenge.allowedConstructs as Construct[] });
+    const result = elaborate(importText, {
+      allowed: challenge.allowedConstructs as Construct[],
+      ...modulesOption(challenge),
+    });
     const errors = result.messages.filter((m) => m.severity !== "warning");
     if (errors.length || !result.circuit) {
       setImportNote(errors.map((m) => (m.at ? `${m.text} (line ${m.at.line})` : m.text)));
@@ -453,6 +489,7 @@ function WriteEditor({ challenge, artifact, onChange, verdict }: ChallengeEditor
         text={text}
         onChange={(hdl) => onChange({ ...artifact, hdl })}
         allowed={challenge.allowedConstructs as Construct[]}
+        {...modulesOption(challenge)}
         title={strings.editor.writeTitle}
         highlight={marked}
         {...(challenge.initial.hdl !== undefined ? { untouched: challenge.initial.hdl } : {})}

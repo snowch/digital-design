@@ -33,6 +33,10 @@ import { aluJobs } from "./alu-jobs";
 import { flags } from "./flags";
 import { wideAlu } from "./wide-alu";
 import { aluTests } from "./alu-tests";
+// Module 8, the datapath
+import { instructions } from "./instructions";
+import { constants } from "./constants";
+import { fetch } from "./fetch";
 
 const INPUTS: readonly LessonInput[] = [
   signals,
@@ -62,6 +66,10 @@ const INPUTS: readonly LessonInput[] = [
   flags,
   wideAlu,
   aluTests,
+  // Module 8, the datapath
+  instructions,
+  constants,
+  fetch,
 ];
 
 export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(

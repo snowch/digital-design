@@ -54,6 +54,15 @@ export const remember: LessonInput = {
     "hold",
     "metastable",
   ],
+  // Module 8 rations "instruction" for the machine's instructions, introduced in the lesson
+  // instructions; this lesson points ahead to that machine before the word is taught.
+  termExemptions: [
+    {
+      term: "instruction",
+      reason:
+        "Points ahead, in a sentence, to the machine Module 8 builds, which follows a list of instructions; the lesson teaches nothing about one.",
+    },
+  ],
   sections: [
     { kind: "question", title: LABELS.titles.question, prose: PROSE.question },
     { kind: "motivation", title: LABELS.titles.motivation, prose: PROSE.motivation },
