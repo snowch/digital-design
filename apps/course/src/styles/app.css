@@ -191,8 +191,8 @@ ol {
   margin: 0 0 var(--space-4);
 }
 
-/* The cover, at the top of the front page: what the course is, the machine it builds drawn whole
-   and small, and the way in. A drawing still being built keeps its room, so nothing below jumps. */
+/* The cover, at the top of the front page: what the course is, how the machine it builds runs one
+   step of a program, part by part with the modules that build each, and the way in. */
 .cover {
   max-width: var(--measure);
 }
@@ -201,22 +201,79 @@ ol {
 }
 .cover-machine {
   margin: var(--space-5) 0;
-}
-.cover-drawing {
+  padding: var(--space-4);
   background: var(--canvas);
-  border-radius: var(--radius);
-  padding: var(--space-3);
+  border-radius: var(--radius-lg);
 }
-.cover-drawing-waiting {
-  aspect-ratio: 2099 / 806;
+.machine-flow {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--space-5);
+  justify-items: center;
 }
-.cover-drawing svg {
-  display: block;
+.machine-flow > li {
+  position: relative;
   width: 100%;
-  height: auto;
+  max-width: 22rem;
+}
+/* An arrow down between one step's parts, read in order. */
+.machine-flow > li + li::before {
+  content: "\2193" / "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  line-height: var(--space-5);
+  color: var(--fg-muted);
+}
+.flow-part {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-raised);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  text-align: center;
+}
+.flow-name {
+  font-weight: 600;
+}
+.flow-modules {
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
+}
+.machine-flow > .flow-group {
+  max-width: none;
+  padding: var(--space-3);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+}
+.flow-group-name {
+  display: block;
+  margin-bottom: var(--space-2);
+  text-align: center;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+.flow-group ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--space-2);
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+}
+.flow-back {
+  margin: var(--space-3) 0 0;
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
 }
 .cover-machine figcaption {
-  margin-top: var(--space-2);
+  margin-top: var(--space-3);
   font-size: var(--text-sm);
   color: var(--fg-muted);
 }
