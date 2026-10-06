@@ -90,9 +90,12 @@ export function autoLayout(
   const inner = parts.filter((p) => p.kind !== "input" && p.kind !== "output");
   const maxInner = inner.reduce((m, p) => Math.max(m, depth.get(p.id) ?? 0), 0);
   const columns = new Map<number, Part[]>();
-  // A fixed value is a source like an input, so it goes below the inputs: placed in the first
-  // column of gates, its kind label above it lands on the name under the gate above.
-  const isSource = (p: Part) => p.kind === "const" && (pred.get(p.id)?.size ?? 0) === 0;
+  const kept = only ? parts.filter((p) => !only.has(p.id)) : [];
+  // A fixed value is a source like an input, so in a drawing laid out whole it goes below the
+  // inputs: placed in the first column of gates, its kind label above it lands on the name under
+  // the gate above. A fault's value added to a placed drawing stays beside what it drives.
+  const isSource = (p: Part) =>
+    kept.length === 0 && p.kind === "const" && (pred.get(p.id)?.size ?? 0) === 0;
   const columnOf = (p: Part) =>
     p.kind === "input" || isSource(p)
       ? 0
@@ -108,7 +111,6 @@ export function autoLayout(
   const placed = new Map<string, { x: number; y: number }>();
   // Parts that keep their places (a hand-placed drawing with one part added, such as a fault's
   // fixed value) are left alone, and the new parts go in rows below them, so nothing lands on top.
-  const kept = only ? parts.filter((p) => !only.has(p.id)) : [];
   const below = kept.length ? Math.max(...kept.map((p) => p.y + rowsOf(p))) : 0;
   // Each column starts where the one before it ends, with room for the wires between them. With
   // no widths given, or beside parts placed by hand, columns are a fixed step apart.

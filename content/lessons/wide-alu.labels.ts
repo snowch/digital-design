@@ -1,17 +1,19 @@
+// Copyright © 2026 Chris Snow
+
 // Titles, objectives, captions and labels of the lesson wide-alu, drafted by the prose process from
 // a brief of facts (see CLAUDE.md and docs/notes/module-7-alu.md) and checked against the lesson.
 
 export const LABELS = {
   title: "How does the same ALU work at 64 bits?",
   objectives: [
-    "Say why a carry must pass through every slice.",
+    "Say how far a carry travels, and what it costs in steps.",
     "Open a 64-bit ALU, one level at a time.",
     "Write an adder whose width is a parameter, with a carry out.",
     "Write the adder's second word for the eight jobs, at any width.",
   ],
   titles: {
     question: "When 16 bits run out",
-    motivation: "Each slice waits for its carry",
+    motivation: "What width costs",
     prediction: "Two counts compared",
     investigation: "The carry, step by step",
     construction: "An adder of any width, written",

@@ -33,7 +33,11 @@ values of the step before, synchronously, until nothing changes. The order compo
 in does not affect the result, so a race the circuit cannot decide is not decided by the code.
 If the values repeat without settling (an odd loop of inverters, a latch released from both inputs
 at once), the nets that keep changing are set to X and the result says `converged: false`. The
-history of steps is kept, so a view can scrub through a settle.
+history of steps is kept, so a view can scrub through a settle. After the first step only the gates
+that read a net that changed are recomputed, and a repeat is found by a hash of the state kept up
+to date from the changed nets and confirmed against the stored state; both give exactly what
+recomputing every gate would (`packages/sim/src/settle-due.test.ts`), and a 64-bit ALU's settle is
+about twenty times faster for it (Module 7).
 
 **Delay.** Every gate has its own propagation delay (10 units unless the circuit says otherwise).
 A change on a net schedules the gates that read it to produce their outputs after their delays.
@@ -113,5 +117,6 @@ and a facts test holds the numbers they state.
 Real delays, which vary with temperature, voltage and manufacture; wire delay; drive strength
 and fan-out; the analogue middle voltages a latch passes through; power. The HDL subset is a
 subset: `always_ff` is a flip-flop or a register, `always_comb` is a mux tree, there is no
-instantiation, no arithmetic on signals, and no `initial`. Everything the subset refuses is
+instantiation, and no `initial`. Arithmetic is `+` and `-` only, worked out at the width
+SystemVerilog uses and built from the course's own ripple adder (Module 7). Everything the subset refuses is
 refused with a sentence that names the construct.

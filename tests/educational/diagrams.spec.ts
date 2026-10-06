@@ -430,6 +430,32 @@ test.describe("the diagrams", () => {
     }
   });
 
+  test("Module 7: no label overlaps another or leaves its drawing, before and after use", async ({
+    page,
+  }) => {
+    for (const lesson of ["alu-jobs", "flags", "wide-alu", "alu-tests"]) {
+      await openLesson(page, lesson);
+      expect(await textCollisions(page), lesson).toEqual([]);
+      for (const figure of await page
+        .locator("figure.interactive")
+        .filter({ has: page.getByRole("button", { name: V.prediction.commit }) })
+        .all()) {
+        await figure.getByRole("radio").nth(1).check();
+        await figure.getByRole("button", { name: V.prediction.commit }).click();
+      }
+      for (const faults of await page.locator(".fault-lab").all()) {
+        await faults.getByRole("radio").nth(2).check();
+        await faults.getByRole("button", { name: V.fault.run }).click();
+      }
+      for (const pins of await page.locator(".explorer").all())
+        await pins
+          .getByRole("button", { name: new RegExp(`${V.circuit.toggle}$`) })
+          .first()
+          .click();
+      expect(await textCollisions(page), `${lesson} after use`).toEqual([]);
+    }
+  });
+
   test("every wire meets its gate on the gate's body and runs straight or turns by a cell", async ({
     page,
   }) => {

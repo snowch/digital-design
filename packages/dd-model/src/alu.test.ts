@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 7's ALU against its reference in bigints: every job on every pair of 4-bit words, the
 // generated suite at 16 and 64 bits in both arrangements, the slice chained by the grader's own
 // chain, and the generator's groups.

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 7: the course's ALU. Eight jobs on two words, four flags, any width.
 //
 // The jobs keep Module 3's four and their codes, under a third select input, OP2:
@@ -158,7 +160,7 @@ export function carryInGates(
   ins: { OP2: NetId; OP1: NetId; OP0: NetId },
   out?: NetId,
 ): NetId {
-  const x = b.xor([ins.OP2, ins.OP0], { name: "xorC0", output: b.net("ADD1") });
+  const x = b.xor([ins.OP0, ins.OP2], { name: "xorC0", output: b.net("ADD1") });
   return b.and([ins.OP1, x], { name: "andC0", output: out ?? b.net("C0") });
 }
 

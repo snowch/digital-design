@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Facts the testing lesson's prose states, read off the suite the figures run.
 
 import { describe, expect, it } from "vitest";

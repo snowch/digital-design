@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 7: a generated test suite run against the ALU, healthy or with a fault put in on
 // purpose. The cases come from the generator in dd-model (normal, boundary, random with a recorded
 // seed, adversarial), every expected value is worked out in bigints, and the page counts, group by
@@ -285,6 +287,7 @@ export const SuiteLab = withProps(
                             })}
                           </li>
                         ))}
+                        {wrong.length > 3 && <li>{format(t.more, { n: wrong.length - 3 })}</li>}
                       </ul>
                     </div>
                   );

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Generated test cases for a circuit that works on two words: normal, boundary, random and
 // adversarial. Module 7 uses them to test the ALU at 16 and 64 bits; later modules can use the
 // word helpers with a reference function of their own.

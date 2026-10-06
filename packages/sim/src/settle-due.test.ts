@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The settle model works out only the gates whose inputs changed after its first step, and finds a
 // repeated state by a hash. Both are meant to change nothing: this test holds every step of the
 // history, the iteration count and the oscillating nets to a plain settle that works out every

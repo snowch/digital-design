@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 7's shared data: the words its figures start from and the test vectors its challenges
 // grade with, every expected value worked out in bigints by the ALU's reference (`aluResult` in
 // packages/dd-model/src/alu.ts), so a 64-bit word keeps every bit.

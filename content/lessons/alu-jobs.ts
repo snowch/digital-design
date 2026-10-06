@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Lesson: Module 7, lesson 1, the ALU's eight jobs and the three inputs that choose one.
 //
 // The structure is here; the words are in alu-jobs.prose.ts and alu-jobs.labels.ts. The circuits

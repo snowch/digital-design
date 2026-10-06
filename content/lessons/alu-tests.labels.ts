@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Titles, objectives, captions and labels of the lesson alu-tests, drafted by the prose process from
 // a brief of facts (see CLAUDE.md and docs/notes/module-7-alu.md) and checked against the lesson.
 
@@ -12,7 +14,7 @@ export const LABELS = {
   titles: {
     question: "Too many pairs to try",
     motivation: "Four kinds of test",
-    prediction: "A fault the normal tests miss",
+    prediction: "Which kind catches it first?",
     investigation: "The suite on a healthy ALU",
     construction: "Words that expose a fault",
     failureExperiment: "Faults put in on purpose",
@@ -37,7 +39,7 @@ export const LABELS = {
     normal: "Normal tests",
     boundary: "Boundary tests",
     random: "Random tests",
-    none: "None of them",
+    none: "None of these three",
   },
   faults: {
     overLow: "OVER stuck at 0",

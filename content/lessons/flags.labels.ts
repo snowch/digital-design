@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Titles, objectives, captions and labels of the lesson flags, drafted by the prose process from
 // a brief of facts (see CLAUDE.md and docs/notes/module-7-alu.md) and checked against the lesson.
 
@@ -6,13 +8,13 @@ export const LABELS = {
   objectives: [
     "Read ZERO, MINUS, COUT and OVER after any job.",
     "Build ZERO from slices, as the carry is built.",
-    "Say when MINUS is wrong about A - B, and why.",
+    "Say what MINUS and OVER tell you after A - B.",
     "Build a lamp that says whether one word reads less than another, signed.",
   ],
   titles: {
     question: "Yes-or-no questions",
     motivation: "What the flags answer",
-    prediction: "Seven minus minus eight",
+    prediction: "7 - (-8) in four bits",
     investigation: "Four flags on 3 - 5",
     construction: "The ZERO chain",
     failureExperiment: "Faults in the flags",

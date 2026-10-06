@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Lesson: Module 7, lesson 3, the same ALU at 64 bits: the carry stepped from slice to slice, the
 // circuit opened one level at a time, and the width written as a parameter in SystemVerilog.
 //
@@ -23,9 +25,11 @@ export const WIDE_CONSTRUCTS = [
   "parameter",
   "concat",
   "op-arith",
-  "select",
 ];
-/** The operand challenge also uses always_comb and case, which Module 5 teaches. */
+/**
+ * The operand challenge also uses always_comb and case, which its task explains. Module 5, built
+ * at the same time on its own branch, teaches them too.
+ */
 const CASE_CONSTRUCTS = [...WIDE_CONSTRUCTS, "always_comb", "case"];
 
 const ALL64 = (1n << 64n) - 1n;

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Lesson: Module 7, lesson 2, the flags: one-bit outputs that say something about the result.
 //
 // The structure is here; the words are in flags.prose.ts and flags.labels.ts. The circuits are
@@ -179,7 +181,7 @@ export const flags: LessonInput = {
             libraryId: "alu8-flags-4-block",
             canOpen: false,
             initial: { A: "0111", B: "1000", OP2: 0, OP1: 1, OP0: 1 },
-            readings: ["signed"],
+            readings: ["signed", "unsigned"],
           },
         },
       ],
@@ -199,7 +201,7 @@ export const flags: LessonInput = {
           props: {
             libraryId: "alu8-flags-16-block",
             canOpen: false,
-            initial: { A: "0xFF06", B: "0xFF48", OP2: 0, OP1: 1, OP0: 1 },
+            initial: { A: "0xFF48", B: "0xFF06", OP2: 0, OP1: 1, OP0: 1 },
             readings: ["signed"],
           },
         },

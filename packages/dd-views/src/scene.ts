@@ -526,7 +526,11 @@ export function sceneOf(drawing: Drawing): Scene {
     d: pathOf(routes.get(p) ?? []),
     junctions: junctions.get(p) ?? [],
   }));
-  const width = boxes.reduce((m, b) => Math.max(m, b.x + b.w), 0) + 40;
+  // An output's value is written to the right of its pin, in hexadecimal for a word: a 64-bit
+  // word's 16 digits run further than the margin, so the drawing makes room for them.
+  const written = (b: PartBox) =>
+    b.part.kind === "output" ? 6 + Math.ceil((b.part.width ?? 1) / 4) * 7.5 + 8 : 0;
+  const width = boxes.reduce((m, b) => Math.max(m, b.x + b.w + Math.max(40, written(b))), 0);
   const height = floor + 22 + channels * GAP + 16;
   return { boxes, wires, width, height };
 }

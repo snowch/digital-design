@@ -1,5 +1,7 @@
+// Copyright © 2026 Chris Snow
+
 // Lesson: Module 7, lesson 4, testing the ALU: a generated suite of normal, boundary, random and
-// adversarial cases, faults put in on purpose to see which cases catch them, and the capstone, the
+// adversarial tests, faults put in on purpose to see which tests catch them, and the capstone, the
 // whole ALU written at any width and graded by the suite at 16 and 64 bits.
 //
 // The structure is here; the words are in alu-tests.prose.ts and alu-tests.labels.ts. The suite
@@ -13,7 +15,8 @@ import { PROSE } from "./alu-tests.prose";
 import { SUITE_SEED, suiteVectors } from "./module7";
 import { OPERAND_REFERENCE, WIDE_CONSTRUCTS } from "./wide-alu";
 
-const CAPSTONE_CONSTRUCTS = [...WIDE_CONSTRUCTS, "always_comb", "case", "op-compare"];
+// Bit select (`Y[N-1]`) arrives here, where MINUS needs it.
+const CAPSTONE_CONSTRUCTS = [...WIDE_CONSTRUCTS, "always_comb", "case", "op-compare", "select"];
 
 /** The capstone's starting text: the header, and the adder's second word from the last lesson. */
 const operandLines = OPERAND_REFERENCE.split("\n").slice(8, 16).join("\n");
@@ -69,7 +72,7 @@ export const aluTests: LessonInput = {
   module: 7,
   order: 4,
   objectives: [...LABELS.objectives],
-  introduces: ["boundary case", "adversarial case"],
+  introduces: ["boundary test", "adversarial test"],
   sections: [
     { kind: "question", title: LABELS.titles.question, prose: PROSE.question },
     { kind: "motivation", title: LABELS.titles.motivation, prose: PROSE.motivation },
@@ -238,6 +241,6 @@ export const aluTests: LessonInput = {
     textbookExample:
       "Hardware testing as taught: an exhaustive testbench for a small adder, or a self-checking testbench with a handful of directed vectors and a few random ones (Harris and Harris's testbench chapter; Nand2Tetris's .tst and .cmp files with fixed rows); stuck-at fault models and test-pattern generation in a VLSI-testing text.",
     howThisDiffers:
-      "The lesson starts from the shop's count of how many cases a 16-bit ALU has, and builds the course's own generator in four named groups, with the random group's seed recorded so a run repeats. The learner predicts which group first catches a fault the normal cases miss, puts faults in on purpose and watches which groups catch each, then finds two words of their own that expose three lost carries at once: the adversarial idea done by hand before it is named. The capstone is the whole eight-job ALU with its four flags written once with a width parameter and graded by the generated suite at 16 and 64 bits, every expected value worked out in bigints.",
+      "The lesson starts from how many tests a 16-bit ALU would need to try every pair on every job, and introduces the course's own generator in four named kinds, with the random kind's seed recorded so a run repeats. The learner predicts which kind first catches a fault the normal tests miss, finds two words of their own that expose three lost carries at once, puts faults in on purpose and watches which kinds catch each, and runs the suite at 64 bits. The capstone is the whole eight-job ALU with its four flags written once with a width parameter and graded by the generated suite at 16 and 64 bits, every expected value worked out in bigints.",
   },
 };

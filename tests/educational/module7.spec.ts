@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 7's challenges and figures, driven through the page as the earlier modules' are: every
 // challenge completed with its reference through the page (drawn with the editor's own buttons,
 // written in its text box, or answered in its fields), a plausible wrong attempt rejected with

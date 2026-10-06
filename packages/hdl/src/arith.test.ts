@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 7's text: `+` and `-` on signals, a concatenation as an assignment's target, and a
 // parameter set from outside, each held to what SystemVerilog gives, worked out in bigints.
 

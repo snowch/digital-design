@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Titles, objectives, captions and labels of the lesson alu-jobs, drafted by the prose process from
 // a brief of facts (see CLAUDE.md and docs/notes/module-7-alu.md) and checked against the lesson.
 
@@ -7,7 +9,7 @@ export const LABELS = {
     "Choose any of the eight jobs using the select inputs OP2, OP1, OP0.",
     "Say which second word D the adder adds for each arithmetic job.",
     "Build the circuit for one bit of D.",
-    "Build one slice that does all eight jobs at any width.",
+    "Build one slice that does all eight jobs, and chain copies of it to any width.",
   ],
   titles: {
     question: "Four more jobs",

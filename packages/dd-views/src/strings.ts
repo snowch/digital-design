@@ -291,6 +291,7 @@ export interface ViewStrings {
     readonly groups: Readonly<Record<"normal" | "boundary" | "random" | "adversarial", string>>;
     readonly firstWrong: string;
     readonly failure: string;
+    readonly more: string;
     readonly answer: string;
   };
   readonly answers: {
@@ -543,23 +544,23 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     heading: "Input {name}",
     row: "The bits of input {name}. Press a bit to change it.",
   },
-  // Module 7 (placeholders until drafted)
+  // Module 7: drafted by the prose process (docs/notes/module-7-alu.md)
   carrySteps: {
     cases: "Which change to watch",
     caseSteps: "{label} ({n} steps)",
     gridLabel: "Each slice's carry out and its bit of Y at this step",
     rowLabel: "Bits {hi} to {lo}",
-    cellLabel: "Bit {k}: carry out {carry}, Y {y}",
+    cellLabel: "Bit {k}, carry out {carry}, Y {y}",
     key: "Top digit: the slice's carry out. Bottom digit: its bit of Y.",
     back: "Back a step",
     next: "Next step",
     end: "Last step",
     result: "Y is {y}.",
     settled: "Nothing changes after step {n}.",
-    answer: "The circuit's answer: {answer}.",
+    answer: "The simulator gives {answer}.",
   },
   suite: {
-    seed: "{width}-bit ALU. Random tests drawn with seed {seed}.",
+    seed: "{width}-bit ALU, random tests from seed {seed}.",
     run: "Run the suite",
     newSeed: "New random tests",
     allPass: "All {total} tests pass.",
@@ -574,8 +575,9 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       adversarial: "Adversarial",
     },
     firstWrong: "{group} tests that fail, the first few:",
-    failure: "{label}: gave {got}, should give {want}",
-    answer: "The first kind of test to catch it: {answer}.",
+    failure: "Test {label}: got {got}, expected {want}.",
+    more: "and {n} more",
+    answer: "First kind to catch the fault: {answer}.",
   },
   answers: {
     terms: {
