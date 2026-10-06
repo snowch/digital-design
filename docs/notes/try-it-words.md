@@ -82,3 +82,4 @@ word: Try it in Modules 8 and 9, and any figure whose inputs are wider than 16 b
   lesson. The browser tests expect `11` and `12`; Module 8's and the typed-word specs pass at both
   widths (56 tests).
 
+- 17:39. The full check on 0a5025d: 874 unit and integration tests pass; Playwright 550 passed, 34 skipped, 10 failed, the same 10 screenshot comparisons a clean `main` fails in this container (all in the look-of-the-page spec; none touches Try it).
