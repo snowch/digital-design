@@ -16,7 +16,7 @@
 // Every value is the simulator's: the views read nets and the memories' state nets, never the
 // reference.
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 
 import {
@@ -43,6 +43,8 @@ import { withProps } from "./props";
 
 /** How many edges "Run until it stops" makes before it gives up on a machine that never stops. */
 const RUN_LIMIT = 500;
+/** Edges a run makes between two redraws. */
+const RUN_SLICE = 20;
 
 const Inputs = z.record(z.string(), z.union([z.string(), z.number()]));
 
@@ -190,26 +192,47 @@ export const DatapathFigure = withProps(
       noteRun();
       bump();
     };
+    // A run goes in slices of edges with a redraw between them, so a machine that never stops
+    // shows its edges climbing instead of freezing the page; a new start cancels it.
+    const [running, setRunning] = useState<number | undefined>();
+    const runToken = useRef(0);
+    useEffect(() => () => void (runToken.current += 1), []);
     const run = () => {
-      let before = sim.snapshotValues();
-      let halted = false;
-      for (let k = 0; k < RUN_LIMIT; k++) {
-        before = sim.snapshotValues();
-        const halting = datapathState(circuit, before).halt === 1;
-        const { high } = sim.clockCycle("CLK");
-        setEdge({ before, history: high.history });
-        if (halting) {
-          setStopped(true);
-          halted = true;
-          break;
+      const token = (runToken.current += 1);
+      let k = 0;
+      const slice = () => {
+        if (token !== runToken.current) return;
+        let before = sim.snapshotValues();
+        for (const end = Math.min(k + RUN_SLICE, RUN_LIMIT); k < end; k++) {
+          before = sim.snapshotValues();
+          const halting = datapathState(circuit, before).halt === 1;
+          const { high } = sim.clockCycle("CLK");
+          if (halting) {
+            setEdge({ before, history: high.history });
+            setStopped(true);
+            finish(false);
+            return;
+          }
+          if (k + 1 === end) setEdge({ before, history: high.history });
         }
-      }
-      setGaveUp(!halted);
-      setStep(Number.POSITIVE_INFINITY);
-      noteRun();
-      bump();
+        if (k >= RUN_LIMIT) return finish(true);
+        setRunning(k);
+        bump();
+        window.setTimeout(slice, 0);
+      };
+      const finish = (gaveUp: boolean) => {
+        setRunning(undefined);
+        setGaveUp(gaveUp);
+        setStep(Number.POSITIVE_INFINITY);
+        noteRun();
+        bump();
+      };
+      setRunning(0);
+      slice();
     };
     const restart = (from: typeof built) => {
+      runToken.current += 1;
+      setRunning(undefined);
       setSim(start(from));
       setChosen(0);
       setEdge(undefined);
@@ -218,6 +241,8 @@ export const DatapathFigure = withProps(
       bump();
     };
     const reset = () => {
+      runToken.current += 1;
+      setRunning(undefined);
       setSim(start());
       setChosen(0);
       setEdge(undefined);
@@ -263,13 +288,15 @@ export const DatapathFigure = withProps(
     const reason = reasonKey(state);
     const status = stopped
       ? format(t.stopped, { reason: t.reasons[reason ?? ""] ?? "" })
-      : gaveUp
-        ? format(t.gaveUp, { edges: RUN_LIMIT, pc: hex3(state.pc ?? 0) })
-        : reason !== undefined
-          ? format(t.halting, { reason: t.reasons[reason] ?? reason })
-          : state.pc !== undefined
-            ? format(t.running, { pc: hex3(state.pc) })
-            : "";
+      : running !== undefined
+        ? format(t.runningEdges, { edges: running })
+        : gaveUp
+          ? format(t.gaveUp, { edges: RUN_LIMIT, pc: hex3(state.pc ?? 0) })
+          : reason !== undefined
+            ? format(t.halting, { reason: t.reasons[reason] ?? reason })
+            : state.pc !== undefined
+              ? format(t.running, { pc: hex3(state.pc) })
+              : "";
 
     return (
       <div className="explorer datapath-figure" data-interactive={interactive.id}>
@@ -351,11 +378,21 @@ export const DatapathFigure = withProps(
         )}
         {committed && (
           <div className="explorer-actions">
-            <button type="button" className="button" disabled={stopped} onClick={clock}>
+            <button
+              type="button"
+              className="button"
+              disabled={stopped || running !== undefined}
+              onClick={clock}
+            >
               {t.clock}
             </button>
             {data.run && (
-              <button type="button" className="button secondary" disabled={stopped} onClick={run}>
+              <button
+                type="button"
+                className="button secondary"
+                disabled={stopped || running !== undefined}
+                onClick={run}
+              >
                 {t.run}
               </button>
             )}

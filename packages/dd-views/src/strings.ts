@@ -438,6 +438,8 @@ export interface DatapathStrings {
   readonly stopped: string;
   /** After a run that reached {edges} edges without stopping, at {pc}. */
   readonly gaveUp: string;
+  /** While a run is going: {edges} made so far. */
+  readonly runningEdges: string;
   /** Why the machine stops, by cause; `stop` and `later` for CAUSE 00. */
   readonly reasons: Readonly<Record<string, string>>;
   /** The stepper over the last edge. */
@@ -889,6 +891,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     halting: "Stops at next edge: {reason}.",
     stopped: "Stopped: {reason}.",
     gaveUp: "Draft gave up after {edges} edges at {pc}.",
+    runningEdges: "Draft running: {edges} edges so far.",
     reasons: {
       "11": "instruction fetch outside the ROM",
       "12": "fetch at an address not a multiple of 4",
