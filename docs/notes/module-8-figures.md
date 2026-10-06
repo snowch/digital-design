@@ -67,3 +67,6 @@ The managing session's audit listed seven places. Read as each page's learner:
     the run is already made, so the sentence was cut; "returns to `010`, after the call" became
     "the line after the call";
   - `callLead` dropped the program's purpose (a loop that adds 3 + 2 + 1, and returns); added back.
+- 11:13. GV came back. It dropped `addresses` and `parts.none` (the provisional "Addresses" and
+  "no memory" stand: both are what the brief asked) and, in `arrowsLabel`, "the table says the
+  same" (added). The FIXED strings came back as given.

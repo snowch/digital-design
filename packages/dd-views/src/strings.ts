@@ -782,8 +782,8 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     range: "{first} to {last}",
     chosen: "Chosen",
   },
-  // Module 8's focused figures: provisional words, to be drafted by the prose process
-  // (docs/notes/module-8-figures.md).
+  // Module 8's focused figures. Drafted by the prose process (brief GV,
+  // docs/notes/module-8-figures/briefs/GV.md).
   machine8: {
     choose: "Choose",
     word: "The word {word}",
@@ -794,12 +794,12 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     constantRow: "C, 12 bits",
     wideRow: "W, 64 bits",
     bitRange: "bits {hi} to {lo}",
-    copyKey: "Shaded bits are copies of bit 11.",
+    copyKey: "The dashed bits are copies of bit 11.",
     readings: "C reads {c}; W reads {w}.",
-    bitLabel: "bit {n}: {bit}",
+    bitLabel: "bit {n}, its value {bit}",
     copied: "a copy of bit 11",
     timelineTitle: "Timing diagram",
-    mapCaption: "The memory map, and what the memory does with each access",
+    mapCaption: "The parts of memory and what the memory does with each access",
     addresses: "Addresses",
     part: "Part",
     accesses: {
@@ -829,7 +829,8 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     went: "Went to",
     wentTo: "{to} ({times}×)",
     notTaken: "{to} (never)",
-    arrowsLabel: "Arrows from each branch, call and jump to where it went",
+    arrowsLabel:
+      "Arrows from each branch, call and jump show where the run sent PC; the table says the same.",
   },
   // Module 8: the datapath figure. Drafted by the prose process (brief 6V,
   // docs/notes/module-8-datapath/briefs/6V.md).
