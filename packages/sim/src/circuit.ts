@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The netlist.
 //
 // A circuit is plain data: nets (named wires of a width), components (a kind, a name, a path in

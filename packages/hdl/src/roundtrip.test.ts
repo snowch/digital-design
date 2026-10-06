@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 import { dFlipFlopCircuit, glitchCircuit, registerCircuit, srLatchCircuit } from "@dd/dd-model";
 import { CircuitBuilder, runSuite, type Circuit, type TestSuite } from "@dd/sim";
 import { describe, expect, it } from "vitest";

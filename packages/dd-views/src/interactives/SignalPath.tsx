@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The scene the signals lesson starts from, drawn: the sensor in the freezer room, the cable that
 // runs past the compressor, and the display in the office with its receiver where the cable
 // ends; under it, the steps the sensor drives onto the cable. The steps, their two levels and the

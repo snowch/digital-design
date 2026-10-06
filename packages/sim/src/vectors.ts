@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Test vectors and the diagnosis a failed one produces.
 //
 // A lesson's tests are data: for a combinational circuit, rows of inputs and the outputs they

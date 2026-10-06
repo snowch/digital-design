@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 export type * from "./book";
 export * from "./state";
 export * from "./strings";

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The links at the bottom of a lesson: the lesson before it and the lesson after it, in the order
 // the list of lessons shows them. Before the first lesson comes the page before it; after the last
 // lesson written so far, the list of lessons, which says what is still to be written.

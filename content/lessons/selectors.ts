@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Lesson: Module 3, lesson 1, selectors.
 //
 // The structure is here; the words are in selectors.prose.ts and selectors.labels.ts. The circuits

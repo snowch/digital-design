@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 import { LessonStore, verifyCompletion, type Book, type Storage } from "@dd/lesson-runtime";
 
 import { PREFACE_HREF, lessonHref } from "../route";

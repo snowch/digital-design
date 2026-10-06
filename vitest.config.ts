@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Unit and integration tests, under Vitest.
 //
 // The engine, the domain model, the HDL subset and the lesson schema run under Node with no DOM:

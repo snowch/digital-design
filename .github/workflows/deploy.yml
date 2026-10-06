@@ -1,3 +1,5 @@
+# Copyright © 2026 Chris Snow
+
 name: Deploy the course to GitHub Pages
 
 on:

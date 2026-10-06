@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The readings of a word, the recordings, and the answer graders, held to hand-worked cases.
 
 import { describe, expect, it } from "vitest";

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 2: a combinational circuit's outputs, each as one expression in the subset's operators.
 //
 // `generate` writes one `assign` per gate, which is the text a drawing round-trips through. A

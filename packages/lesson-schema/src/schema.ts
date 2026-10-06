@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The lesson data format: the platform contract.
 //
 // A lesson is data, not a page. It declares what it teaches, the ten sections in the course's

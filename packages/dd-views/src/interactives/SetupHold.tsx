@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Move D across the clock edge and watch what the flip-flop captures. Inside the window where
 // the gate model's answer is not to be trusted, the overlay can draw what a real flip-flop might
 // do; every draw is recorded with its seed, and a replay with the same seed gives the same

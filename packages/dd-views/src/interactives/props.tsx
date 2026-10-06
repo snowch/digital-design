@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Interactive props arrive from lesson data as a plain record. Each interactive declares a zod
 // schema for its props; a lesson whose props do not fit gets a sentence on the page saying what
 // is wrong, where the figure would be, instead of a broken view.

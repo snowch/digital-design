@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The look of the page, held to rules a design review would apply and to screenshots of the
 // figures that matter most. The rules: no visible text smaller than 11 pixels, every control at
 // least 40 pixels tall on a phone, and no line of prose longer than about 80 characters. The

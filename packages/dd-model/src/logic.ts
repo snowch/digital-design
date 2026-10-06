@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 2's circuits: the freezer room's lamps, built from gates.
 //
 // The shop's office display has three bits besides the temperature: WARM (1 while the freezer

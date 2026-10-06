@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 2: a circuit's truth table read in pairs of rows. The learner picks an input; the
 // figure sets each row beside the row that differs from it in that input alone, and says whether
 // the output changed. Where it did not, that input makes no difference there, and the pair can be

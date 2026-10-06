@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Lesson: How does a circuit remember?  (module 4, lesson 1; the first lesson built)
 //
 // The structure is here; the words are in remember.prose.ts. Everything a learner reads in this

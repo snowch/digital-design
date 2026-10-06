@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Lesson: Module 3, lesson 3, adders and overflow.
 //
 // The structure is here; the words are in adders.prose.ts and adders.labels.ts. The circuits are

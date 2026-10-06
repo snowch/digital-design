@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The registers lesson's challenges and figures, driven through the page as the first lesson's
 // are in lesson.spec.ts: every challenge completable with its reference, a plausible wrong
 // attempt rejected with the step and the part where it went wrong, saved work graded again on

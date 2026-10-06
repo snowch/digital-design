@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // A truth table on its own: a reference table, or a small circuit enumerated by the simulator.
 
 import { useMemo } from "react";

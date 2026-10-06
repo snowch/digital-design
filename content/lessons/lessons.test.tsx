@@ -1,4 +1,6 @@
 // @vitest-environment jsdom
+// Copyright © 2026 Chris Snow
+
 // Every lesson in the course, checked as content: it parses, its challenges can be completed with
 // their reference solutions and not with their starting points, its rationed terms are in order,
 // every figure it names exists and takes the props it gives, and the whole page renders.
@@ -54,8 +56,12 @@ describe("the course's lessons", () => {
     const check = (name: string, circuit: ReturnType<typeof libraryCircuit>) => {
       for (const scope of ["", ...circuit.composites.map((c) => c.path)]) {
         const scene = sceneOf(straighten(drawingAt(circuit, scope).drawing));
+        // A figure as first drawn is held to half a cell between wires and no crossing a better
+        // order of turns would avoid; the inside of a block, to the rest.
         found.push(
-          ...sceneProblems(scene).map((p) => `${name}${scope ? ` (${scope})` : ""}: ${p}`),
+          ...sceneProblems(scene, { roomy: scope === "" }).map(
+            (p) => `${name}${scope ? ` (${scope})` : ""}: ${p}`,
+          ),
         );
       }
     };

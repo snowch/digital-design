@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Shared helpers for the educational tests: the lesson page, its challenges, and the words the
 // page uses, taken from the same modules the app renders from, so a wording change moves both.
 

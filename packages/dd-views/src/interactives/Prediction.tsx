@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Predict, then run. The circuit the question is about is drawn first, without values, so the
 // learner predicts from the wiring and not from a guess. The learner commits to what a signal
 // will be after a scripted run; the simulator then runs the script, and the page says what the

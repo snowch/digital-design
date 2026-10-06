@@ -1,3 +1,5 @@
+/* Copyright © 2026 Chris Snow */
+
 /* Base layout and typography for the course shell. Phone first; the page widens on a desk, the
    prose keeps its measure and the figures take the width. */
 
@@ -138,6 +140,12 @@ svg {
   font-size: var(--text-sm);
   border-top: 1px solid var(--border);
   text-align: center;
+}
+.shell-footer p {
+  margin: 0;
+}
+.shell-footer p + p {
+  margin-top: var(--space-1);
 }
 
 /* Headings are set in the display face, a little narrow and heavy, and balanced across lines. */

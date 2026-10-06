@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The words of the lesson on alu.
 //
 // Drafted by the course's prose process from briefs of checked facts (see CLAUDE.md and

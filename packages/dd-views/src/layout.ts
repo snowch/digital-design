@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Automatic placement for a drawing without positions: inputs on the left, outputs on the right,
 // everything else in columns by its distance from the inputs. Feedback (a loop) is broken at the
 // edge that closes it, so a latch lays out as two gates side by side with the cross wires going
@@ -12,8 +14,14 @@ export const ROW_STEP = 3;
 export type RowsOf = (part: Part) => number;
 export type ColsOf = (part: Part) => number;
 
-/** The room between one column's widest part and the next column: a cell for each few wires. */
+/**
+ * The room between one column's widest part and the next column, in cells: at least three, and
+ * otherwise two, for a value written past a port and a wire's turn into the next part, and half a
+ * cell for each signal crossing the gap, which may need a turn of its own half a cell from the
+ * others.
+ */
 const WIRE_ROOM = 3;
+const roomFor = (signals: number) => Math.max(WIRE_ROOM, Math.ceil(2 + signals / 2));
 
 /**
  * Places the parts in `only` (or every part when omitted), leaving the rest where they are. Each
@@ -98,12 +106,24 @@ export function autoLayout(
   // Each column starts where the one before it ends, with room for the wires between them. With
   // no widths given, or beside parts placed by hand, columns are a fixed step apart.
   const byWidth = colsOf !== undefined && kept.length === 0;
+  // The signals crossing the gap after column c: each port with a wire from c or before to a part
+  // after it.
+  const crossing = (c: number) => {
+    const ports = new Set<string>();
+    for (const w of drawing.wires) {
+      const from = byId.get(w.from.part);
+      const to = byId.get(w.to.part);
+      if (from && to && columnOf(from) <= c && columnOf(to) > c)
+        ports.add(`${w.from.part}.${w.from.port}`);
+    }
+    return ports.size;
+  };
   const xOf = new Map<number, number>();
   let x = 0;
   for (const c of [...columns.keys()].sort((a, b) => a - b)) {
     xOf.set(c, byWidth ? x : c * COLUMN_STEP);
     const widest = Math.max(...(columns.get(c) ?? []).map((p) => colsOf?.(p) ?? 0));
-    x += widest + WIRE_ROOM;
+    x += widest + roomFor(crossing(c));
   }
   for (const [c, list] of columns) {
     const moving = only ? list.filter((p) => only.has(p.id)) : list;

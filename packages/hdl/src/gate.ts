@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The construct gate: which parts of the language a lesson has met.
 //
 // The subset grows with the course. A lesson declares the constructs it allows; anything else in

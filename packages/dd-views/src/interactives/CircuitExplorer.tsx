@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // A library circuit, running: press its inputs, clock it, watch it settle step by step, and see
 // the reference table's row for the inputs now.
 

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // The syntax tree of the course's SystemVerilog subset.
 //
 // Small on purpose. The course teaches the synthesisable subset and grows it lesson by lesson

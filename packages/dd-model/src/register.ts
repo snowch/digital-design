@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // A register: one D flip-flop per bit, sharing a clock, so every bit changes at the same edge.
 //
 // The bus is split into bits in front of the flip-flops and joined again behind them, so a view can
