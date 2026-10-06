@@ -61,3 +61,16 @@ word: Try it in Modules 8 and 9, and any figure whose inputs are wider than 16 b
   "Number, read signed", the brief's words); single quotes round `{char}` (the course's double
   quotes); `notNumber` dropped that the minus sign makes a negative number (added). The browser
   tests (`tests/educational/try-it-words.spec.ts`) pass at both widths.
+- 16:53. The full check (`./scripts/check.sh`, started 16:25, on 30a3113's code; the
+  later commits change only this note): 874 unit and integration tests pass; Playwright 550
+  passed, 34 skipped, 10 failed. The 10 are the screenshot comparisons a clean `main` fails in
+  this container; none names a figure with a wide input, and no baseline was touched.
+
+## Left
+
+- The signal table under Try it still shows an 8-bit output such as CAUSEF in binary
+  (`00010001`): a word of 8 bits is shown as the lessons' tables show it today. Showing it in
+  hexadecimal too would be a change to every module's tables, for the author to choose.
+- A field takes a value when it is left as well as at Enter, so a learner who taps away from a
+  half-typed word sets it, or sees why not. Leaving a field without setting it would need Escape;
+  the walkers' complaint was the reverse, so the field errs on taking.
