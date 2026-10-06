@@ -59,5 +59,5 @@ export const PROSE = {
   fieldsLead:
     "In a load, Y names the register written. In a store, B names the register written out. With job 8, C is the address and A is unused. Choose the load or the store.",
   mapLead:
-    "Each row is a part of the memory: ROM, RAM, seven devices, and the addresses with no memory. The four columns show different accesses: load word, load byte, store word, store byte. Each cell is yes if the access works, or the cause that stops the machine. A word at an address not aligned to 8 gives cause 33 in any part. Each part's first address is checked.",
+    "The rows show the memory: ROM (`000` to `3FF`), RAM (`400` to `7BF`), seven devices at `7C0` (display), `7C8` (lamps), `7D0` (DOOR bit 0, WARM bit 1), `7D8` (sensor A), `7E0` (sensor B), `7E8` (timer), `7F0` (waiting); later modules use the timer and waiting. From `7F8` up, no memory gives cause 31 for every access. Columns show: load word, load byte, store word, store byte. Each cell says yes or the cause that stops the machine. Each part's first address, a multiple of 8, is checked. An unaligned word gives cause 33, or 31 if no memory. Where two causes apply, the lower wins: a store byte at DOOR and WARM or a sensor gives 33, not 34. Module 6's memory lost a write to its sensor; this machine stops with 34.",
 } as const;

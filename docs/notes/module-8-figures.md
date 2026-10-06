@@ -115,3 +115,7 @@ The managing session's audit listed seven places. Read as each page's learner:
   - `memory-access/mapLead` dropped the devices' names, DOOR and WARM's bits, the timer and
     waiting as later modules' devices, the lower cause winning, 31 for every access, and the
     contrast with Module 6: sent back.
+- 12:26. `mapLead` came back with every fact but two: it wrote ranges with en dashes (now "to"),
+  said only waiting is used later (both are), said a store byte "at a device or sensor" gives 33
+  "not 34" (34 applies only at DOOR and WARM and the sensors: narrowed), dropped "for every
+  access" and the Module 6 contrast (added).
