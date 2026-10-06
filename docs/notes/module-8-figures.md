@@ -39,3 +39,31 @@ The managing session's audit listed seven places. Read as each page's learner:
 
 ## Log
 
+
+- 10:46 to 10:59. Built the five figure kinds (`packages/dd-model/src/machine-figures.ts` for
+  the facts each reads off the reference machine or the simulator; `MachineFigures.tsx` for the
+  views), placed them with provisional words, pinned their numbers in
+  `content/lessons/module8-figures.facts.test.ts`. Committed and pushed.
+- 11:00. Briefs GA (instructions, constants, fetch), GB (memory-access, branches) and GV (the
+  figures' own labels) written as lists of checked facts and sent to the drafting subagent.
+- 11:05. GA came back. Faults, each fixed by adding words, no sentence rewritten:
+  - the three captions had no full stop (the brief asked for one);
+  - `fieldsLead` dropped "the same in every instruction";
+  - `edgesAfter` said "The table shows five clock edges" (the diagram shows them; the table gives
+    the cursor's values): "table" became "diagram";
+  - `edgesAfter` said "At each edge, PC steps on by 4", which the fifth edge contradicts; became
+    "At each of these edges";
+  - `edgesAfter` dropped "IR and RESULT change straight after it" and "nothing uses that RESULT";
+  - `edgesAfter` wrote "edges 1–4" with an en dash; became "1 to 4".
+  It added which register each edge writes (R1 to R4), which is true (Y's digit of each word) and
+  stays.
+- 11:09. GB came back. Faults, fixed by adding or swapping the fewest words:
+  - `mapLead` called the last row "empty space" (it is the addresses with no memory) and a
+    refusal "an error code" and "error 33" (the course's word is the cause that stops the
+    machine); it dropped "in any part" from the misaligned word;
+  - `flowLead` dropped "how many times" and "while R1 differs from R0"; its single quotes became
+    the course's double quotes;
+  - `callFlowLead` ended "Run the program to see where PC goes": this figure has no run button,
+    the run is already made, so the sentence was cut; "returns to `010`, after the call" became
+    "the line after the call";
+  - `callLead` dropped the program's purpose (a loop that adds 3 + 2 + 1, and returns); added back.

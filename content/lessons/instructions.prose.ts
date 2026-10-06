@@ -12,7 +12,7 @@ export const PROSE = {
   motivation:
     "The shop's office keeps room A's reading in R1 and room B's in R2: -184 and -250 tenths of a degree. Module 7's flags lesson subtracted them: -184 - (-250) = 66. The office will want many such jobs, one per edge, on different registers. The course's machine says what one edge does with an **instruction**: a 32-bit word. Its digits name the job and the registers.",
   prediction:
-    'The figure joins the register file and the ALU. An instruction has six fields: K, the kind; J, the job; A and B, the registers read; Y, the register written; and C, the last three digits, a constant this lesson does not use. The bus IR carries `13123000`: kind 1 (a register job), job 3 (subtract), A is R1, B is R2, Y is R3. R1 holds -184, R2 holds -250, and every other register is X. WRITEY is the register file\'s write enable, set to 1 by hand here: on the next edge, the ALU\'s result goes into the register Y names. Choose an answer and press "Check my prediction". The "Clock edge" button appears after.',
+    'The figure joins the register file and the ALU. The bus IR carries `13123000`: kind 1 (a register job), job 3 (subtract), A is R1, B is R2, Y is R3. R1 holds -184, R2 holds -250, and every other register is X. WRITEY is the register file\'s write enable, set to 1 by hand here: on the next edge, the ALU\'s result goes into the register Y names. Choose an answer and press "Check my prediction". The "Clock edge" button appears after.',
   p1Question:
     "`13123000` is on IR and WRITEY is 1. R1 holds -184 and R2 holds -250. After one rising edge of CLK, what does R3 hold?",
   p1Explain:
@@ -56,5 +56,6 @@ export const PROSE = {
     "The register file and the ALU, joined, make a datapath. An instruction's digits are wires to its parts. One edge does one instruction, and writes its result when WRITEY is 1.\n\nEvery instruction so far works on registers alone, and R1 and R2 started with words the lesson gave them. The shop needs numbers that no register holds yet: the limits it checks the rooms against, the number of seconds in a minute. How can an instruction carry a number of its own to the ALU?",
   modelVsReality:
     "The simulator shows a register no edge has written as X. The lesson set R1 and R2 for you. A real register file at power-on holds 0s and 1s nobody chose.\n\nIn this model the register file and the ALU settle in steps, and an edge takes no time. In a real datapath, the next edge must wait for the slowest path: the register file's read, the ALU's carry through 64 bits, and back to D, with the setup time (Module 4) before the edge.\n\nYou set WRITEY by hand here. In the course's machine, a block works it out from K and J; a later module builds that block's insides.",
-  fieldsLead: "Draft fields lead.",
+  fieldsLead:
+    "The figure cuts one instruction into its six fields, shown side by side, the same in every instruction. Each box shows the field's letter, bit range, hexadecimal digit(s), bits in binary, value (register as R1, R2...; constant read signed), and a short note. Above is the whole instruction word. Choose one of the four instructions to compare how the six fields split it.",
 } as const;

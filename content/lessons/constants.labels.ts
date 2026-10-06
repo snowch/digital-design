@@ -34,7 +34,7 @@ export const LABELS = {
     constantsFaults: "Choose a fault and an instruction, and clock it.",
     hour: "Build 3600 in two instructions.",
     writeConstants: "Write the selector and run the tests.",
-    widening: "Draft: the widening.",
+    widening: "Choose a constant and compare its 12 bits with the 64-bit word.",
   },
   options: {
     p1Negative: "-100",
@@ -56,9 +56,9 @@ export const LABELS = {
     bconstLow: "BCONST stuck at 0",
   },
   widenings: {
-    hundred: "Draft 064",
-    minusHundred: "Draft F9C",
-    largest: "Draft 7FF",
-    smallest: "Draft 800",
+    hundred: "064, which is 100",
+    minusHundred: "F9C, which is -100",
+    largest: "7FF, the largest, 2047",
+    smallest: "800, the smallest, -2048",
   },
 } as const;

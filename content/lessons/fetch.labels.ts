@@ -33,7 +33,7 @@ export const LABELS = {
     writePc: "Write the program counter and run the tests.",
     fetchFaults: "Choose a fault and run it.",
     writeChecks: "Write the checks and run the tests.",
-    edges: "Draft: the edges.",
+    edges: "Step through five edges of the margin program, one lane per bus.",
   },
   options: {
     p1On: "Runs on to address 00C",

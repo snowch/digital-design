@@ -56,5 +56,6 @@ export const PROSE = {
     "Loads and stores reach the RAM and the shop's devices at their addresses. The memory refuses what it does not hold.\n\nEvery program so far runs its instructions in order, from address `000` to the stop.\n\nThe office wants the lower of the two readings on the display. How can a program do one thing or another, depending on what it finds?",
   modelVsReality:
     "In this model, the memory answers a load within the edge, so a load takes one edge like any other instruction. A real memory is slower than the ALU, and a real machine often waits for it.\n\nThe model reads the instruction and the data from one memory at once. A real chip often keeps them apart, or adds small fast copies of memory close to the datapath.\n\nThe sensors here are words the figure sets. A real sensor's reading arrives on its own time, not in step with the clock. A real design takes the reading into a register at a clock edge, so the word stays the same while the machine uses it, as Module 6's note on the model explained.",
-  mapLead: "Draft map lead.",
+  mapLead:
+    "Each row is a part of the memory: ROM, RAM, seven devices, and the addresses with no memory. The four columns show different accesses: load word, load byte, store word, store byte. Each cell is yes if the access works, or the cause that stops the machine. A word at an address not aligned to 8 gives cause 33 in any part. Each part's first address is checked.",
 } as const;

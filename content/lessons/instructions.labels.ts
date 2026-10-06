@@ -33,7 +33,7 @@ export const LABELS = {
     writeDigits: "Write the digits module and run the tests.",
     jobsFaults: "Choose a fault and an instruction, then clock it.",
     writeJobs: "Write the datapath and run the tests.",
-    fields: "Draft: the fields.",
+    fields: "Choose an instruction and read its six fields.",
   },
   options: {
     p1Sum: "-434",
@@ -52,11 +52,11 @@ export const LABELS = {
     op0Low: "OP0 stuck at 0",
   },
   fieldNotes: {
-    K: "Draft K",
-    J: "Draft J",
-    A: "Draft A",
-    B: "Draft B",
-    Y: "Draft Y",
-    C: "Draft C",
+    K: "the kind; 1 is a register job",
+    J: "the job; bits 2 to 0 are the ALU code",
+    A: "read onto QA, the ALU's A",
+    B: "read onto QB, the ALU's B",
+    Y: "the register written",
+    C: "a constant; a register job does not use it",
   },
 } as const;

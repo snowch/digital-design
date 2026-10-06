@@ -38,7 +38,7 @@ export const PROSE = {
   constantsFaultsAfter:
     "**The copied bit stuck at 0:**\n\nWhen you run `25003F9C`, R3 holds 3996, which is the unsigned reading of `F9C`. When you run `22103064`, R3 still holds -84: because 100's bit 11 is 0, the fault changes nothing for this instruction. No constant from 0 to 2047 can show this fault, because all their bit 11s are 0.\n\n**BCONST stuck at 0:**\n\nBoth instructions write X into R3. The ALU's B input takes QB, the word output by the register the B digit selects. Both instructions have B digit 0, so QB is R0, which has never been written to. An X input gives an X output.",
   explanation:
-    "The selector carries out a choice that the instruction kind makes. A register job reads the ALU's B word from register B. A constant job reads it from the constant field. BCONST is a second control signal that you set by hand in this lesson to select which one.\n\nCopying bit 11 keeps the signed value correct. `FFF` and `FFFFFFFFFFFFFFFF` both read as -1. `7FF` and `00000000000007FF` both read as 2047.\n\nThe A input to the ALU still comes from register A. Only the B input path changes: it now has a selector that picks between register B and the widened constant.",
+    "The selector carries out a choice that the instruction kind makes. A register job reads the ALU's B word from register B. A constant job reads it from the constant field. BCONST is a second control signal that you set by hand in this lesson to select which one.\n\nCopying bit 11 keeps the number, and the figure shows it for four constants.\n\nThe A input to the ALU still comes from register A. Only the B input path changes: it now has a selector that picks between register B and the widened constant.",
   generalisation:
     "AND, XOR, add, subtract, OR and copy B use the constant from the instruction field. Count up and count down ignore it.\n\nThe 12-bit constant field holds a signed value from -2048 to 2047. A number outside -2048 to 2047 does not fit in one constant. The figure below builds 3600 in two instructions.",
   hourLead:
@@ -60,5 +60,6 @@ export const PROSE = {
     "A constant rides in the instruction's last three digits. The \"widen\" step makes it 64 bits by copying bit 11, and a selector set by BCONST gives it to the ALU's B input.\n\nSo far you put each instruction on IR by hand, and set WRITEY and BCONST yourself. The shop's machine must do its jobs one after another, on its own. Where does the machine keep its list of instructions, and how does it know which one comes next?",
   modelVsReality:
     "The widening is wires and no gates. In a chip, bit 11's wire drives its own bit and the 52 bits above it, and a wire with many inputs to drive takes longer to change.\n\nThe selector is 64 two-way selectors. The model settles them in steps; in a chip they add delay on the way to the ALU.\n\nYou set BCONST by hand here. In the course's machine, a block works it out from K, as it does WRITEY. A later module builds that block's insides.",
-  wideningLead: "Draft widening lead.",
+  wideningLead:
+    "The figure shows C, a 12-bit constant, and W, the 64-bit word it becomes, in four rows of 16 bits. C stands under W's low 12 bits. W's bits 63 to 12 are drawn dashed: each is a copy of C's bit 11. The line under both reads C and W as signed numbers.",
 } as const;

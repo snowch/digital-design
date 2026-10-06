@@ -54,6 +54,8 @@ export const PROSE = {
     "The machine now runs a program on its own. The PC names the next instruction. The ROM gives it on IR. The decoder sets the control signals. The stop logic stops the machine at `stop` or when the instruction cannot run.\n\nEvery instruction still works on registers and constants alone. It does not read or write memory.\n\nFrom Module 6: the shop's sensors provide words at their addresses; the display shows what is written to its address. How can a program read the sensors or write the display?",
   modelVsReality:
     "Here, every instruction takes one clock edge. Fetch and all the work fit between two rising edges. The clock must wait for the slowest path: from PC through the ROM, decoder, register file, and ALU, and back. Module 9 will split instructions over several edges.\n\nThe simulator stops the clock when the machine stops and shows you why. A real machine has no one to tell. Module 12 will let a program say what happens instead.\n\nThe model's ROM gives its word as soon as PC settles. A real ROM takes time to read the address and return the word.",
-  edgesLead: "Draft edges lead.",
-  edgesAfter: "Draft edges after.",
+  edgesLead:
+    "The timing diagram shows five clock edges of the margin program. Each lane represents one signal or bus: CLK with its rises and falls; PC in three hexadecimal digits; IR in eight digits; RESULT read signed; and WREG. Arrows mark the clock's rises and falls. A slider moves a cursor through time, and the table below gives each lane's value at the cursor.",
+  edgesAfter:
+    "The diagram shows five clock edges. At edges 1 to 4, WREG is 1: each edge writes RESULT into the register Y names: -184 into R1, -250 into R2, 66 into R3, 132 into R4. At each of these edges, PC steps on by 4, and IR and RESULT change straight after it. At edge 5, the instruction `84000000` is stop. HALT is 1, the edge writes nothing, and PC stays `010`. RESULT is X: the stop instruction reads R0, which nothing has written, and nothing uses it. Between edges the values settle. At the edge they are written and PC moves on.",
 } as const;
