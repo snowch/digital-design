@@ -54,19 +54,56 @@ export const STRINGS = {
   cover: {
     /** Under the course title: what the course is. */
     lead: "You build a working computer from its parts, starting from two voltages on a wire, and for each circuit you predict what will happen, build it, run it, break it, and explain what happened. Everything runs in your browser, your work stays in your browser, and every simulation shows the real circuit, not an animation.",
-    /** How the machine the course builds runs one step: its parts, read from the top. */
-    flow: {
-      next: "Next step",
-      program: "The program",
-      reading: "What to do",
-      doing: "Running the step",
-      numbers: "Sixteen stored numbers",
-      arithmetic: "Arithmetic and logic",
-      memory: "Memory, display, sensors and lamps",
-      back: "Then the machine goes back to the first box for the next step",
-    },
-    /** Under the flow of one step. */
-    machine: "The machine the course builds runs each step of a program this way.",
+    /** The way in, on two lines: the module, then its first lesson's question under it. */
+    startLine: (module: number) => `Start with Module ${module}`,
+    continueLine: (module: number) => `Continue with Module ${module}`,
+    /**
+     * Beside the opening words: Module 2's freezer-room alarm, live. Drafted by the prose process
+     * (brief C1, docs/notes/cover/briefs/C1.md).
+     */
+    heroTitle: "Freezer room alarm",
+    heroCaption:
+      "This real circuit from Module 2 lights a lamp when the room is warm and the door is shut. Press WARM and DOOR to see it change.",
+    /** The path through the course, in order: five stages, each over the modules it names. */
+    journeyHeading: "Signals to computer in five stages",
+    stages: [
+      {
+        name: "Signals",
+        about: "Voltages become numbers. Combine signals with AND, OR, NOT; choose, compare, add.",
+        from: 1,
+        to: 3,
+      },
+      {
+        name: "Memory",
+        about: "Circuits keep values. They count, step through sequences, store many numbers.",
+        from: 4,
+        to: 6,
+      },
+      {
+        name: "Machine",
+        about:
+          "Parts join into one machine. It performs arithmetic and logic. Control takes each step.",
+        from: 7,
+        to: 9,
+      },
+      {
+        name: "Programming",
+        about: "Learn the machine's vocabulary. Write programs and find their mistakes.",
+        from: 10,
+        to: 11,
+      },
+      {
+        name: "The whole machine",
+        about: "The whole machine responds to errors. Programs run from start to finish.",
+        from: 12,
+        to: 13,
+      },
+    ],
+    /** Under a stage: its modules, as the list below names them. */
+    stageModules: (from: number, to: number) =>
+      to === from + 1 ? `Modules ${from} and ${to}` : `Modules ${from} to ${to}`,
+    /** On a stage whose modules have no lessons yet. */
+    stageToWrite: "Still to be written",
     /** Above the list of every module the plan has. */
     contents: (count: number) => `All ${count} modules`,
     /** Under a module with no lessons yet. */
