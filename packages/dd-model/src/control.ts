@@ -47,8 +47,8 @@ export const CONTROL_SIGNALS = [
 ] as const;
 export type ControlSignal = (typeof CONTROL_SIGNALS)[number];
 
-/** The decoder's outputs: the decode step's cause, `stop`, and the control signals. */
-export const DECODER9_OUTPUTS = ["CAUSED", "STOP", ...CONTROL_SIGNALS] as const;
+/** The decoder's outputs: the control signals, then `stop` and the decode step's cause. */
+export const DECODER9_OUTPUTS = [...CONTROL_SIGNALS, "STOP", "CAUSED"] as const;
 
 /**
  * The name of each kind's line. A line that is a control signal on its own is named after the
@@ -147,10 +147,11 @@ type Bits = { readonly J3: NetId; readonly J2: NetId; readonly J1: NetId; readon
 
 /**
  * The control signals from the kind lines and the job's bits, as gates (`docs/machine.md`, "The
- * single-cycle datapath"): WRITEY for the kinds that write register Y; BCONST for those whose
- * ALU takes the constant as B; AZERO and BYTE from job bits 3 and 0 of a load or store; the ALU's
- * code from the job's low three bits for the two kinds of job, add for a load, store or jump, and
- * subtract for a branch. `outs` holds the nets for the signals that are not kind lines.
+ * single-cycle datapath"): JOBS for the two kinds of job and MEM for a load or a store; WRITEY for
+ * the kinds that write register Y; BCONST for those whose ALU takes the constant as B; AZERO and
+ * BYTE from job bits 3 and 0 of a load or store; the ALU's code from the job's low three bits for
+ * the two kinds of job, add for a load, store or jump, and subtract for a branch. `outs` holds the
+ * nets for the signals that are not kind lines.
  */
 export function signalGates(
   b: CircuitBuilder,
@@ -162,10 +163,10 @@ export function signalGates(
   const k = (n: number) => line[n] as NetId;
   const out = (name: string) => outs[name] as NetId;
   const extra = options.callThroughRegister ? [k(CALL_REGISTER_KIND)] : [];
-  b.or([k(1), k(2), k(3), k(6), ...extra], { name: "orWritey", output: out("WRITEY") });
-  b.or([k(2), k(3), k(4), k(7), ...extra], { name: "orBconst", output: out("BCONST") });
-  const mem = b.or([k(3), k(4)], { name: "orMem", output: b.net("MEM") });
   const jobs = b.or([k(1), k(2)], { name: "orJobs", output: b.net("JOBS") });
+  const mem = b.or([k(3), k(4)], { name: "orMem", output: b.net("MEM") });
+  b.or([jobs, k(3), k(6), ...extra], { name: "orWritey", output: out("WRITEY") });
+  b.or([k(2), mem, k(7), ...extra], { name: "orBconst", output: out("BCONST") });
   b.and([mem, j.J3], { name: "andAzero", output: out("AZERO") });
   b.and([mem, j.J0], { name: "andByte", output: out("BYTE") });
   b.and([jobs, j.J2], { name: "andOp2", output: out("OP2") });
@@ -180,11 +181,13 @@ export function signalGates(
 }
 
 /**
- * The decoder's checks, as gates: ILLEGAL when no kind line is 1 (kind 0, or a kind the machine
- * does not know), when the job is one its kind does not define, or when a system job names a
- * control register outside 0 to 4; SYSTEM for `call system`; STOP for system jobs 1 to 4, the
- * jobs that stop the machine until Module 12 builds what 1 to 3 do. CAUSED is the decode step's
- * cause: 21 for an illegal instruction, 41 for `call system`, 00 otherwise.
+ * The decoder's checks, each a block that opens to its gates: `kindCheck`, NOKIND when no kind
+ * line is 1 (kind 0, or a kind the machine does not know); `jobCheck`, BADJOB when the job is one
+ * its kind does not define; `numberCheck`, BADNUMBER when a system job names a control register
+ * outside 0 to 4 (the constant, read signed); ILLEGAL, any of the three. `systemJobs` gives SYSTEM
+ * for `call system` and STOP for system jobs 1 to 4, the jobs that stop the machine until Module 12
+ * builds what 1 to 3 do. CAUSED is the decode step's cause: 21 for an illegal instruction, 41 for
+ * `call system`, 00 otherwise.
  */
 export function checkGates(
   b: CircuitBuilder,
@@ -195,54 +198,127 @@ export function checkGates(
   options: ControlOptions = {},
 ): void {
   const k = (n: number) => line[n] as NetId;
-  const known = b.or(
-    knownKinds(options).map((n) => k(n)),
-    { name: "orKnown", output: b.net("KNOWN") },
+  const names = kindLineNames(options);
+  const known = knownKinds(options);
+  const lineIns = (kinds: readonly number[]) =>
+    Object.fromEntries(kinds.map((n) => [names[n] as string, k(n)]));
+  const noKind = b.net("NOKIND");
+  b.scope(
+    "kindCheck",
+    "kind-check",
+    (bb) => {
+      bb.nor(
+        known.map((n) => k(n)),
+        { name: "norKinds", output: noKind },
+      );
+    },
+    { inputs: lineIns(known), outputs: { NOKIND: noKind } },
   );
-  const noKind = b.not(known, { name: "notKnown", output: b.net("NOKIND") });
-  const anyJob = b.or([j.J3, j.J2, j.J1, j.J0], { name: "orAnyJob", output: b.net("ANYJOB") });
-  // Kinds 1, 2 and 5 have jobs 0 to 7: job bit 3 is never 1.
-  const eight = b.or([k(1), k(2), k(5)], { name: "orEight", output: b.net("EIGHTJOBS") });
-  const badEight = b.and([eight, j.J3], { name: "andBadEight", output: b.net("BADEIGHT") });
-  // Loads and stores have jobs 0, 1, 8 and 9: job bits 2 and 1 are never 1.
-  const mem = b.or([k(3), k(4)], { name: "orMemKinds", output: b.net("MEMKINDS") });
-  const twoOne = b.or([j.J2, j.J1], { name: "orJ2J1", output: b.net("J2ORJ1") });
-  const badMem = b.and([mem, twoOne], { name: "andBadMem", output: b.net("BADMEM") });
-  // A call and a jump have job 0 alone.
-  const one = b.or([k(6), k(7), ...(options.callThroughRegister ? [k(CALL_REGISTER_KIND)] : [])], {
-    name: "orOneJob",
-    output: b.net("ONEJOB"),
-  });
-  const badOne = b.and([one, anyJob], { name: "andBadOne", output: b.net("BADONE") });
-  // System jobs 0 to 4: 5 to F are J3, or J2 with J1 or J0.
-  const tail = b.or([j.J1, j.J0], { name: "orJ1J0", output: b.net("J1ORJ0") });
-  const fiveToSeven = b.and([j.J2, tail], { name: "andFiveToSeven", output: b.net("FIVETO7") });
-  const high = b.or([j.J3, fiveToSeven], { name: "orHighJob", output: b.net("JOB5UP") });
-  const badSystem = b.and([k(8), high], { name: "andBadSystem", output: b.net("BADSYSTEM") });
-  // Jobs 2 and 3 name a control register with the constant, read signed: 0 to 4 are the
-  // registers, so any of bits 11 to 3, or bit 2 with bit 1 or bit 0, is outside.
-  const cHigh = anyBit(b, c, 11, 3, "cHigh");
-  const c2 = b.net("C2");
-  const c1 = b.net("C1");
-  const c0 = b.net("C0");
-  slicePart(b, c, 2, 2, c2, "cBit2");
-  slicePart(b, c, 1, 1, c1, "cBit1");
-  slicePart(b, c, 0, 0, c0, "cBit0");
-  const cTail = b.or([c1, c0], { name: "orC1C0", output: b.net("C1ORC0") });
-  const fiveUp = b.and([c2, cTail], { name: "andC5to7", output: b.net("C5TO7") });
-  const outside = b.or([cHigh, fiveUp], { name: "orOutside", output: b.net("OUTSIDE") });
-  const notJ3 = b.not(j.J3, { name: "notJ3", output: b.net("NJ3") });
-  const notJ2 = b.not(j.J2, { name: "notJ2", output: b.net("NJ2") });
-  const names = b.and([k(8), notJ3, notJ2, j.J1], { name: "andNames", output: b.net("NAMESC") });
-  const badNumber = b.and([names, outside], { name: "andBadNumber", output: b.net("BADNUMBER") });
-  b.or([noKind, badEight, badMem, badOne, badSystem, badNumber], {
-    name: "orIllegal",
-    output: outs.ILLEGAL,
-  });
-  const noJob = b.not(anyJob, { name: "notAnyJob", output: b.net("JOB0") });
-  const system = b.and([k(8), noJob], { name: "andSystem", output: b.net("SYSTEM") });
-  const notHigh = b.not(high, { name: "notHighJob", output: b.net("JOB4DOWN") });
-  b.and([k(8), anyJob, notHigh], { name: "andStop", output: outs.STOP });
+  const badJob = b.net("BADJOB");
+  const jobKinds = [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    ...(options.callThroughRegister ? [CALL_REGISTER_KIND] : []),
+  ];
+  b.scope(
+    "jobCheck",
+    "job-check",
+    (bb) => {
+      const anyJob = bb.or([j.J3, j.J2, j.J1, j.J0], {
+        name: "orAnyJob",
+        output: bb.net("ANYJOB"),
+      });
+      // Kinds 1, 2 and 5 have jobs 0 to 7: job bit 3 is never 1.
+      const eight = bb.or([k(1), k(2), k(5)], { name: "orEight", output: bb.net("EIGHTJOBS") });
+      const badEight = bb.and([eight, j.J3], { name: "andBadEight", output: bb.net("BADEIGHT") });
+      // Loads and stores have jobs 0, 1, 8 and 9: job bits 2 and 1 are never 1.
+      const mem = bb.or([k(3), k(4)], { name: "orMemKinds", output: bb.net("MEMKINDS") });
+      const twoOne = bb.or([j.J2, j.J1], { name: "orJ2J1", output: bb.net("J2ORJ1") });
+      const badMem = bb.and([mem, twoOne], { name: "andBadMem", output: bb.net("BADMEM") });
+      // A call and a jump have job 0 alone.
+      const one = bb.or(
+        [k(6), k(7), ...(options.callThroughRegister ? [k(CALL_REGISTER_KIND)] : [])],
+        { name: "orOneJob", output: bb.net("ONEJOB") },
+      );
+      const badOne = bb.and([one, anyJob], { name: "andBadOne", output: bb.net("BADONE") });
+      // System jobs 0 to 4: 5 to F are J3, or J2 with J1 or J0.
+      const tail = bb.or([j.J1, j.J0], { name: "orJ1J0", output: bb.net("J1ORJ0") });
+      const five = bb.and([j.J2, tail], { name: "andFiveUp", output: bb.net("J5TO7") });
+      const high = bb.or([j.J3, five], { name: "orHighJob", output: bb.net("JOB5UP") });
+      const badSystem = bb.and([k(8), high], { name: "andBadSystem", output: bb.net("BADSYSTEM") });
+      bb.or([badEight, badMem, badOne, badSystem], { name: "orBadJob", output: badJob });
+    },
+    { inputs: { ...lineIns(jobKinds), ...j }, outputs: { BADJOB: badJob } },
+  );
+  const badNumber = b.net("BADNUMBER");
+  b.scope(
+    "numberCheck",
+    "number-check",
+    (bb) => {
+      // The constant's bits: any of 11 to 3, and 2, 1 and 0, as one closed block.
+      const cHigh = bb.net("CHIGH");
+      const c2 = bb.net("C2");
+      const c1 = bb.net("C1");
+      const c0 = bb.net("C0");
+      bb.scope(
+        "cBits",
+        "constant-bits",
+        (cb) => {
+          anyBit(cb, c, 11, 3, "high", cHigh);
+          slicePart(cb, c, 2, 2, c2, "bit2");
+          slicePart(cb, c, 1, 1, c1, "bit1");
+          slicePart(cb, c, 0, 0, c0, "bit0");
+        },
+        { inputs: { C: c }, outputs: { CHIGH: cHigh, C2: c2, C1: c1, C0: c0 } },
+      );
+      // Read signed, 0 to 4 are the registers: any of bits 11 to 3, or bit 2 with bit 1 or bit
+      // 0, is outside.
+      const cTail = bb.or([c1, c0], { name: "orC1C0", output: bb.net("C1ORC0") });
+      const fiveUp = bb.and([c2, cTail], { name: "andC5to7", output: bb.net("C5TO7") });
+      const outside = bb.or([cHigh, fiveUp], { name: "orOutside", output: bb.net("OUTSIDE") });
+      // Jobs 2 and 3 name a register: J3 and J2 0, J1 1.
+      const notJ3 = bb.not(j.J3, { name: "notJ3", output: bb.net("NJ3") });
+      const notJ2 = bb.not(j.J2, { name: "notJ2", output: bb.net("NJ2") });
+      const names2 = bb.and([notJ3, notJ2, j.J1, k(8)], {
+        name: "andNames",
+        output: bb.net("NAMESC"),
+      });
+      bb.and([outside, names2], { name: "andBadNumber", output: badNumber });
+    },
+    {
+      inputs: { [names[8] as string]: k(8), J3: j.J3, J2: j.J2, J1: j.J1, C: c },
+      outputs: { BADNUMBER: badNumber },
+    },
+  );
+  b.or([noKind, badJob, badNumber], { name: "orIllegal", output: outs.ILLEGAL });
+  const system = b.net("SYSTEM");
+  b.scope(
+    "systemJobs",
+    "system-jobs",
+    (bb) => {
+      const anyJob = bb.or([j.J3, j.J2, j.J1, j.J0], {
+        name: "orAnyJob",
+        output: bb.net("ANYJOB"),
+      });
+      const noJob = bb.not(anyJob, { name: "notAnyJob", output: bb.net("JOBZERO") });
+      bb.and([k(8), noJob], { name: "andSystem", output: system });
+      const tail = bb.or([j.J1, j.J0], { name: "orJ1J0", output: bb.net("J1ORJ0") });
+      const five = bb.and([j.J2, tail], { name: "andFiveUp", output: bb.net("J5TO7") });
+      const high = bb.or([j.J3, five], { name: "orHighJob", output: bb.net("JOB5UP") });
+      const notHigh = bb.not(high, { name: "notHighJob", output: bb.net("JOB4DOWN") });
+      bb.and([k(8), anyJob, notHigh], { name: "andStop", output: outs.STOP });
+    },
+    {
+      inputs: { [names[8] as string]: k(8), ...j },
+      outputs: { SYSTEM: system, STOP: outs.STOP },
+    },
+  );
   // The cause as a byte: a closed block of selectors, as every cause word in the machine is.
   b.scope(
     "causeWord",
@@ -291,9 +367,13 @@ export function controlDecoder(
       const lineIns = Object.fromEntries(
         Object.entries(lines).map(([n, line]) => [names[Number(n)] as string, line]),
       );
+      // Kind 8's line is the checks' alone.
+      const signalLines = Object.fromEntries(
+        Object.entries(lineIns).filter(([name]) => name !== names[8]),
+      );
       bb.scope(
         "signals",
-        "control-signals",
+        options.callThroughRegister ? "control-signals-call" : "control-signals",
         (sb) =>
           signalGates(
             sb,
@@ -303,7 +383,7 @@ export function controlDecoder(
             options,
           ),
         {
-          inputs: { ...lineIns, ...j },
+          inputs: { ...signalLines, ...j },
           outputs: Object.fromEntries(signalOuts.map((s) => [s, outs[s] as NetId])),
         },
       );

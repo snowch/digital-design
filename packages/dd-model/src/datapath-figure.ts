@@ -10,6 +10,7 @@ import { Simulator, parseWord, word, type Circuit, type Word } from "@dd/sim";
 import { assemble, type Program } from "./assemble";
 import { type Stage } from "./datapath";
 import { datapathState, registersOf, stopReasonOf, type DatapathState } from "./datapath-run";
+import { placedMachine } from "./library-control";
 import { placedDatapath } from "./library-datapath";
 
 /** The stage a library id draws. */
@@ -28,8 +29,18 @@ export interface DatapathSetup {
 
 export interface BuiltDatapath {
   readonly circuit: Circuit;
-  readonly stage: Stage;
+  /** Module 8's stage, or Module 9's machine of several edges an instruction. */
+  readonly stage: Stage | "edges";
   readonly program?: Program;
+  /** Module 9's capstone: the machine knows the call through a register. */
+  readonly callThroughRegister?: boolean;
+}
+
+/** Module 9: the machine of several edges, by library id, and whether it has the capstone's call. */
+export function machineOf(libraryId: string): { callThroughRegister: boolean } | undefined {
+  if (libraryId === "machine-edges") return { callThroughRegister: false };
+  if (libraryId === "machine-edges-call") return { callThroughRegister: true };
+  return undefined;
 }
 
 /** A value as a lesson writes it: a decimal number, signed, or what `parseWord` reads. */
@@ -50,6 +61,18 @@ function registerWords(given: Readonly<Record<string, string>> = {}): (bigint | 
 
 /** The figure's circuit: the library's drawing of the stage, with its program and registers. */
 export function buildDatapath(setup: DatapathSetup): BuiltDatapath {
+  const machine = machineOf(setup.libraryId);
+  if (machine) {
+    const assembly = machine.callThroughRegister ? { callThroughRegister: 9 } : {};
+    const program = setup.program === undefined ? undefined : assemble(setup.program, assembly);
+    const circuit = placedMachine({
+      name: "machine",
+      ...machine,
+      ...(program ? { rom: program.rom } : {}),
+      registers: registerWords(setup.registers),
+    });
+    return { circuit, stage: "edges", ...machine, ...(program ? { program } : {}) };
+  }
   const stage = stageOf(setup.libraryId);
   if (!stage) throw new RangeError(`${setup.libraryId} is not a datapath`);
   const program = setup.program === undefined ? undefined : assemble(setup.program);

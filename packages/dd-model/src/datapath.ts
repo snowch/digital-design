@@ -380,7 +380,14 @@ export function edgeRegister(
 }
 
 /** An OR of every bit of a word, as one gate: 1 when any bit is 1. */
-export function anyBit(b: CircuitBuilder, w: NetId, hi: number, lo: number, name: string): NetId {
+export function anyBit(
+  b: CircuitBuilder,
+  w: NetId,
+  hi: number,
+  lo: number,
+  name: string,
+  output?: NetId,
+): NetId {
   const bits = Array.from({ length: hi - lo + 1 }, (_, k) => {
     const n = b.net(`${name}${lo + k}`);
     slicePart(b, w, lo + k, lo + k, n, `${name}Bit${lo + k}`);
@@ -388,7 +395,7 @@ export function anyBit(b: CircuitBuilder, w: NetId, hi: number, lo: number, name
   });
   return bits.length === 1
     ? (bits[0] as NetId)
-    : b.or(bits, { name, output: b.net(name.toUpperCase()) });
+    : b.or(bits, { name, output: output ?? b.net(name.toUpperCase()) });
 }
 
 // ---- The decoder (closed until Module 9) ----------------------------------------------------
@@ -1037,11 +1044,11 @@ export function machineMemory(
           // Module 9: one address, and the instruction at it given as FETCHED for the IR to take.
           inputs: {
             ADDR: ins.ADDR,
+            D: ins.D,
             FETCHING: ins.FETCHING,
             LOAD: ins.LOAD,
             STORE: ins.STORE,
             BYTE: ins.BYTE,
-            D: ins.D,
             GO: ins.GO,
             ...(ins.ENDS !== undefined ? { ENDS: ins.ENDS } : {}),
             RST: ins.RST,

@@ -20,6 +20,7 @@ import { module5Library } from "./library-module5";
 // Module 6's circuits live in their own file too.
 import { MEMORY_INSIDE, memoryLibrary } from "./library-memory";
 import { DATAPATH_INSIDE, datapathLibrary } from "./library-datapath";
+import { CONTROL_INSIDE, controlLibrary } from "./library-control";
 
 /**
  * A loop of `n` inverters with a `kick` input ORed into it. While kick is 1 the loop is forced;
@@ -269,6 +270,8 @@ export const INSIDE: Readonly<Record<string, Readonly<Record<string, readonly [n
     ...ALU_INSIDE,
     // Module 8, the datapath
     ...DATAPATH_INSIDE,
+    // Module 9, control
+    ...CONTROL_INSIDE,
   };
 
 /**
@@ -442,6 +445,8 @@ export const LIBRARY: Readonly<Record<string, () => Circuit>> = {
   ...aluLibrary(placed),
   // Module 8, the datapath.
   ...datapathLibrary(placed),
+  // Module 9, control: the decoder opened, and the machine of several edges an instruction.
+  ...controlLibrary(placed),
 };
 
 export function libraryCircuit(id: string): Circuit {

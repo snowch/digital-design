@@ -129,6 +129,15 @@ const SEALED = new Set([
   "word-register-64",
   "word-register-3",
   "count-down",
+  // Module 9: the machine of several edges. Its held words are one-word memories, as the PC is;
+  // the constant's bits and the cause word hold slices and selectors.
+  "held-64",
+  "held-32",
+  "hold-ab",
+  "constant-bits",
+  "cause-word",
+  "split-control",
+  "join-control",
 ]);
 
 /** Whether a block of this kind is drawn closed for good, so a learner never sees inside it. */
