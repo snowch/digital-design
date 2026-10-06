@@ -34,6 +34,7 @@ export const signals: LessonInput = {
     "word",
     "unsigned",
     "signed",
+    "two's complement",
     "hexadecimal",
   ],
   // Module 3 rations "carry" for the adder's carry; this lesson uses the everyday verb.
