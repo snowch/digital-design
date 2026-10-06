@@ -8,6 +8,7 @@ wrote every learner-facing sentence from a brief of checked facts.
 ## Times
 
 - Started: 2026-10-06 10:31 UTC (first command in the session).
+- Finished: FINISH_TIME, at the last push.
 
 ## Log
 
@@ -68,6 +69,13 @@ wrote every learner-facing sentence from a brief of checked facts.
   moved: the decoder's table (9.1) and the map (9.2) were in the motivation, above predictions
   they answered, and are now in the explanation; 9.2's prediction became a stop whose constant is
   5, which passes, since the motivation states the rule on the number.
+
+- 12:36 to 13:32 Reviews and sceptics (saved in `reviews/`), the fix briefs and their drafts, the
+  second reading, two merges of `main` (Module 8's focused figures and the cover), and the browser
+  suites. The browser's checks of every figure as first drawn found the decoder's top and insides
+  and the machine's written values at fault (see "What the checks caught"); each was fixed and
+  the diagram checks pass at both widths.
+
 
 ## Why five lessons
 
@@ -339,3 +347,28 @@ What the drafts dropped, got wrong, or drifted on:
   same. A fault drawn on the wire after the block would read better.
 - Trim the unit tests' run of Module 8's suite through the machine's text (48 seconds), perhaps to
   a representative third, to win back check time.
+
+## The mechanical walk
+
+The five pages were walked in the built site at 1280 and 375 pixels and in the dark theme, with
+screenshots of each figure, every control pressed through the browser tests (challenges completed
+and rejected, figures clocked, run, faulted and predicted). Found and fixed: the map of kinds and
+jobs scrolled sideways on a phone; the closed decoder's outputs stepped half a cell; the decoder's
+eight-bit cause ran off its drawing; three written values in the machine's drawing touched wires;
+two of the controller's labels overlapped the MEMORY state on a phone. The state diagram scrolls
+sideways on a phone, as Module 5's do. Nothing else was found.
+
+## What the module added to the check's time
+
+The unit tests went from about 50 seconds (Module 8's figure) to 98 seconds, 850 tests: Module 8's
+suite of 37 programs runs through the drawn machine of several edges and through the machine's
+text, and the decoder is tested on every kind and job under ten constants. The browser suite
+gained 44 tests (22 at each width), MODULE9_TIME. The whole check took CHECK_TIME.
+
+## The screenshots in this environment
+
+`aesthetics.spec.ts`'s ten screenshot tests fail in this container for figures Module 9 does not
+touch (the registers, state machines and signals lessons' figures, the scenes, Module 2's pairs,
+and the figures that matter most). The same ten fail on a clean checkout of `main` built and run
+here (13:25), so they are this container's text rendering, as Module 8's note found. The baselines
+were not updated. Every other test of the check passes.
