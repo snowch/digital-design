@@ -13,7 +13,7 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
 import { libraryCircuit } from "@dd/dd-model";
-import { circuitToDrawing, labelFor, type Drawing } from "@dd/dd-views";
+import { circuitToDrawing, type Drawing } from "@dd/dd-views";
 import { testCount } from "@dd/lesson-schema";
 
 import {
@@ -21,6 +21,8 @@ import {
   V,
   challenge,
   challengeData,
+  draw,
+  escape,
   format,
   lessonData,
   openLesson,
@@ -31,44 +33,6 @@ import {
 } from "./helpers";
 
 const MODULE_6 = ["ram", "register-file", "bytes", "memory-map"] as const;
-
-const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-const PALETTE_KIND: Readonly<Record<string, string>> = {};
-
-function portName(drawing: Drawing, ids: Map<string, string>, ref: { part: string; port: string }) {
-  const part = drawing.parts.find((p) => p.id === ref.part)!;
-  if (part.kind === "input" || part.kind === "output") return part.name ?? part.id;
-  const outputs = drawing.wires.some((w) => w.from.part === ref.part && w.from.port === ref.port);
-  return `${ids.get(ref.part)} ${outputs ? V.builder.output : V.builder.input} ${ref.port}`;
-}
-
-/** Draws `drawing` in a challenge's editor the way a learner does, as module3.spec.ts does. */
-async function draw(section: Locator, drawing: Drawing): Promise<void> {
-  const ids = new Map<string, string>();
-  const counts = new Map<string, number>();
-  for (const part of drawing.parts) {
-    if (part.kind === "input" || part.kind === "output") continue;
-    const kind = PALETTE_KIND[part.kind] ?? part.kind;
-    const n = (counts.get(kind) ?? 0) + 1;
-    counts.set(kind, n);
-    ids.set(part.id, `${kind}${n}`);
-    await section
-      .getByRole("button", { name: format(V.builder.add, { label: labelFor(kind) }) })
-      .click();
-  }
-  for (const w of drawing.wires) {
-    for (const end of [w.from, w.to]) {
-      const name = portName(drawing, ids, end);
-      // By the keyboard, as the editor allows: a part placed over another's port would take a
-      // pointer's press, and the editor is held to working without one.
-      await section.getByRole("button", { name: new RegExp(`^${escape(name)}\\.`) }).press("Enter");
-    }
-  }
-  await expect(section.locator(".builder-status")).toContainText(
-    V.builder.connected.split(" ")[0]!,
-  );
-}
 
 function referenceDrawing(lessonId: string, challengeId: string): Drawing {
   const c = challengeData(challengeId, lessonData(lessonId));
@@ -101,7 +65,7 @@ async function complete(page: Page, lessonId: string, id: string): Promise<Locat
   if (c.gradedDirection === "write") await writeText(section, c.reference.hdl!);
   else if (c.gradedDirection === "answer")
     for (const f of c.fields) await answer(section, f.id, c.reference.answers![f.id]!);
-  else await draw(section, referenceDrawing(lessonId, id));
+  else await draw(section, referenceDrawing(lessonId, id), "keyboard");
   return section;
 }
 
@@ -141,7 +105,7 @@ test.describe("Module 6's wrong attempts are rejected with the failing test name
     let d = referenceDrawing("ram", "two-words");
     d = rewired(d, { part: "andW0", port: "b" }, { part: "notA", port: "y" });
     d = rewired(d, { part: "andW1", port: "b" }, { part: "input:A", port: "y" });
-    await draw(section, d);
+    await draw(section, d, "keyboard");
     await failsAt(section, "edge with WE 0");
   });
 
@@ -156,7 +120,7 @@ test.describe("Module 6's wrong attempts are rejected with the failing test name
       { part: "andWE", port: "b" },
       { part: "input:WE", port: "y" },
     );
-    await draw(section, d);
+    await draw(section, d, "keyboard");
     await failsAt(section, "A2 falls while the clock is high");
   });
 
@@ -171,7 +135,7 @@ test.describe("Module 6's wrong attempts are rejected with the failing test name
       { part: "selectB", port: "S" },
       { part: "input:RA", port: "y" },
     );
-    await draw(section, d);
+    await draw(section, d, "keyboard");
     await failsAt(section, "edge: write at 0");
   });
 
@@ -193,7 +157,7 @@ test.describe("Module 6's wrong attempts are rejected with the failing test name
       { part: "andOddWE", port: "b" },
       { part: "input:A0", port: "y" },
     );
-    await draw(section, d);
+    await draw(section, d, "keyboard");
     await failsAt(section, "WE 1, WORD 1, A0 0");
   });
 
@@ -229,7 +193,7 @@ test.describe("Module 6's wrong attempts are rejected with the failing test name
       { part: "andDisplay", port: "a" },
       { part: "input:WE", port: "y" },
     );
-    await draw(section, d);
+    await draw(section, d, "keyboard");
     await failsAt(section, "A5 rises while the clock is high");
   });
 });

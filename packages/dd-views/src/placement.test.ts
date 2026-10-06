@@ -8,8 +8,18 @@ import { describe, expect, it } from "vitest";
 
 import { LIBRARY, applyFaults, brokenWire, libraryCircuit, stuckAt, wrongGate } from "@dd/dd-model";
 
+import { LABEL_ROWS, circuitToDrawing, colsOf, rowsOf } from "./drawing";
+import { autoLayout } from "./layout";
 import { nameRepeatsKind } from "./parts";
-import { drawingAt, partBox, sceneOf, type PartBox, type WirePath } from "./scene";
+import {
+  drawingAt,
+  obstaclesOf,
+  partBox,
+  sceneOf,
+  type Obstacle,
+  type PartBox,
+  type WirePath,
+} from "./scene";
 import { netOfWire } from "./scene";
 import { straighten } from "./straighten";
 import { isShaped } from "./symbols";
@@ -164,5 +174,33 @@ describe("the hand-placed drawings", () => {
   it("draws a register block with its label alone, not the library's short name for it", () => {
     expect(nameRepeatsKind("reg", "register")).toBe(true);
     expect(nameRepeatsKind("ff0", "dff")).toBe(false);
+  });
+});
+
+describe("tidying a drawing", () => {
+  const overlap = (a: Obstacle, b: Obstacle) =>
+    a.x1 < b.x2 && b.x1 < a.x2 && a.y1 < b.y2 && b.y1 < a.y2;
+
+  it("keeps a block's label off the gate above it, and the outputs after the parts", () => {
+    // The shop's memory, tidied before any wire is drawn, as a learner may: every part in one
+    // column. An AND gate's name and the label "memory of bytes" landed on each other here.
+    const shop = circuitToDrawing(libraryCircuit("shop-parts"));
+    const tidied = autoLayout({ ...shop, wires: [] }, undefined, rowsOf, colsOf, LABEL_ROWS);
+    const boxes = tidied.parts.map(partBox);
+    const clashes: string[] = [];
+    for (const a of boxes) {
+      const [, ...words] = obstaclesOf(a);
+      for (const b of boxes) {
+        if (b === a) continue;
+        for (const w of words)
+          if (obstaclesOf(b).some((o) => overlap(w, o)))
+            clashes.push(`${a.part.id}'s words on ${b.part.id}`);
+      }
+    }
+    expect(clashes).toEqual([]);
+    const isPin = (b: PartBox) => b.part.kind === "input" || b.part.kind === "output";
+    const right = Math.max(...boxes.filter((b) => !isPin(b)).map((b) => b.x + b.w));
+    for (const b of boxes.filter((b) => b.part.kind === "output"))
+      expect(b.x).toBeGreaterThan(right);
   });
 });

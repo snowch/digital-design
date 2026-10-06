@@ -6,7 +6,10 @@
 
 import { expect, test, type Page } from "@playwright/test";
 
-import { LESSONS, V, format, openLesson } from "./helpers";
+import { libraryCircuit } from "@dd/dd-model";
+import { circuitToDrawing, labelFor } from "@dd/dd-views";
+
+import { LESSONS, V, challenge, format, openLesson } from "./helpers";
 
 interface Collision {
   readonly figure: string;
@@ -483,6 +486,24 @@ test.describe("the diagrams", () => {
           .click();
       expect(await textCollisions(page), `${lesson} after use`).toEqual([]);
     }
+  });
+
+  test("the drawing editor: parts tidied before any wire is drawn keep their words apart", async ({
+    page,
+  }) => {
+    // The memory-map lesson's capstone with every part placed and no wire yet, then tidied, as a
+    // learner may do: the parts stack in one column, a gate's name above a block's label.
+    await openLesson(page, "memory-map");
+    const section = challenge(page, "shop-memory");
+    await section.scrollIntoViewIfNeeded();
+    for (const part of circuitToDrawing(libraryCircuit("shop-parts")).parts) {
+      if (part.kind === "input" || part.kind === "output") continue;
+      await section
+        .getByRole("button", { name: format(V.builder.add, { label: labelFor(part.kind) }) })
+        .click();
+    }
+    await section.getByRole("button", { name: V.builder.tidy }).click();
+    expect(await textCollisions(page)).toEqual([]);
   });
 
   test("every wire meets its gate on the gate's body and runs straight or turns by a cell", async ({

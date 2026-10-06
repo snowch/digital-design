@@ -6,10 +6,10 @@
 // the failing test named, saved work graded again on load, a reset that clears the work, hints one
 // rung at a time, and the module's new figures used as a learner uses them.
 
-import { expect, test, type Locator } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 import { libraryCircuit } from "@dd/dd-model";
-import { circuitToDrawing, compileDrawing, grade, labelFor, type Drawing } from "@dd/dd-views";
+import { circuitToDrawing, compileDrawing, grade, type Drawing } from "@dd/dd-views";
 import { testCount } from "@dd/lesson-schema";
 
 import {
@@ -17,6 +17,7 @@ import {
   V,
   challenge,
   challengeData,
+  draw,
   format,
   lessonData,
   openLesson,
@@ -27,39 +28,6 @@ import {
 } from "./helpers";
 
 const MODULE_7 = ["alu-jobs", "flags", "wide-alu", "alu-tests"] as const;
-
-const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-function portName(drawing: Drawing, ids: Map<string, string>, ref: { part: string; port: string }) {
-  const part = drawing.parts.find((p) => p.id === ref.part)!;
-  if (part.kind === "input" || part.kind === "output") return part.name ?? part.id;
-  const outputs = drawing.wires.some((w) => w.from.part === ref.part && w.from.port === ref.port);
-  return `${ids.get(ref.part)} ${outputs ? V.builder.output : V.builder.input} ${ref.port}`;
-}
-
-/** Draws `drawing` with the editor's part buttons and port buttons, as a learner does. */
-async function draw(section: Locator, drawing: Drawing): Promise<void> {
-  const ids = new Map<string, string>();
-  const counts = new Map<string, number>();
-  for (const part of drawing.parts) {
-    if (part.kind === "input" || part.kind === "output") continue;
-    const n = (counts.get(part.kind) ?? 0) + 1;
-    counts.set(part.kind, n);
-    ids.set(part.id, `${part.kind}${n}`);
-    await section
-      .getByRole("button", { name: format(V.builder.add, { label: labelFor(part.kind) }) })
-      .click();
-  }
-  for (const w of drawing.wires) {
-    for (const end of [w.from, w.to]) {
-      const name = portName(drawing, ids, end);
-      await section.getByRole("button", { name: new RegExp(`^${escape(name)}\\.`) }).click();
-    }
-  }
-  await expect(section.locator(".builder-status")).toContainText(
-    V.builder.connected.split(" ")[0]!,
-  );
-}
 
 function referenceDrawing(lessonId: string, challengeId: string): Drawing {
   const c = challengeData(challengeId, lessonData(lessonId));

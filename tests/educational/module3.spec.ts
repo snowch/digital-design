@@ -6,7 +6,7 @@
 // plausible wrong attempt rejected with the failing test named, saved work graded again on load,
 // a reset that clears the work, and hints one rung at a time. Each runs at desktop and phone widths.
 
-import { expect, test, type Locator } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 import { libraryCircuit } from "@dd/dd-model";
 import { circuitToDrawing, labelFor, type Drawing } from "@dd/dd-views";
@@ -17,6 +17,7 @@ import {
   V,
   challenge,
   challengeData,
+  draw,
   format,
   lessonData,
   openLesson,
@@ -26,44 +27,6 @@ import {
 } from "./helpers";
 
 const MODULE_3 = ["selectors", "decoders", "adders", "alu"] as const;
-
-const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-/** The name the editor gives a port in its accessible label: a pin's name, or "part input a". */
-function portName(drawing: Drawing, ids: Map<string, string>, ref: { part: string; port: string }) {
-  const part = drawing.parts.find((p) => p.id === ref.part)!;
-  if (part.kind === "input" || part.kind === "output") return part.name ?? part.id;
-  const outputs = drawing.wires.some((w) => w.from.part === ref.part && w.from.port === ref.port);
-  return `${ids.get(ref.part)} ${outputs ? V.builder.output : V.builder.input} ${ref.port}`;
-}
-
-/**
- * Draws `drawing` in a challenge's editor the way a learner does: one press of a part button per
- * part, then one press on each end of every wire. The editor names a new part by its kind and a
- * number (and1, and2), so the drawing's own names are mapped to the editor's in order.
- */
-async function draw(section: Locator, drawing: Drawing): Promise<void> {
-  const ids = new Map<string, string>();
-  const counts = new Map<string, number>();
-  for (const part of drawing.parts) {
-    if (part.kind === "input" || part.kind === "output") continue;
-    const n = (counts.get(part.kind) ?? 0) + 1;
-    counts.set(part.kind, n);
-    ids.set(part.id, `${part.kind}${n}`);
-    await section
-      .getByRole("button", { name: format(V.builder.add, { label: labelFor(part.kind) }) })
-      .click();
-  }
-  for (const w of drawing.wires) {
-    for (const end of [w.from, w.to]) {
-      const name = portName(drawing, ids, end);
-      await section.getByRole("button", { name: new RegExp(`^${escape(name)}\\.`) }).click();
-    }
-  }
-  await expect(section.locator(".builder-status")).toContainText(
-    V.builder.connected.split(" ")[0]!,
-  );
-}
 
 /** The reference solution as the drawing a learner would make. */
 function referenceDrawing(lessonId: string, challengeId: string): Drawing {

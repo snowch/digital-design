@@ -84,7 +84,7 @@ export function portPoint(boxes: ReadonlyMap<string, PartBox>, ref: PortRef): Po
 }
 
 /** A part's outline, a pixel inside its edge: no wire may pass through it. */
-interface Obstacle {
+export interface Obstacle {
   readonly x1: number;
   readonly y1: number;
   readonly x2: number;
@@ -148,9 +148,9 @@ function crowds([a, b]: Segment, [c, d]: Segment): boolean {
 /**
  * What a wire may not pass through at a part: the part itself, and the words a drawing writes
  * beside it, a block's label above it and a part's name below it (CircuitView places both; about
- * 7.2 pixels a character in the drawing's 12-pixel mono face).
+ * 7.2 pixels a character in the drawing's 12-pixel mono face). The body comes first.
  */
-function obstaclesOf(b: PartBox): Obstacle[] {
+export function obstaclesOf(b: PartBox): Obstacle[] {
   const isPin = b.part.kind === "input" || b.part.kind === "output";
   const around = (text: string, y1: number, y2: number) => {
     const half = (text.length * 7.2) / 2 + 2;

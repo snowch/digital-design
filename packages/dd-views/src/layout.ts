@@ -13,6 +13,15 @@ export const ROW_STEP = 3;
 /** How many grid rows a part takes in its column, or columns across. */
 export type RowsOf = (part: Part) => number;
 export type ColsOf = (part: Part) => number;
+/**
+ * Where the labels go in a column: the rows a part's label takes above it, and the whole rows a
+ * part leaves free at its foot, under its body and its name, where the label of the part below it
+ * may go.
+ */
+export interface LabelRows {
+  readonly above: (part: Part) => number;
+  readonly foot: (part: Part) => number;
+}
 
 /**
  * The room between one column's widest part and the next column, in cells: at least three, and
@@ -25,13 +34,15 @@ const roomFor = (signals: number) => Math.max(WIRE_ROOM, Math.ceil(2 + signals /
 
 /**
  * Places the parts in `only` (or every part when omitted), leaving the rest where they are. Each
- * column is stacked by `rowsOf`, so a tall block takes the rows it needs and nothing overlaps.
+ * column is stacked by `rowsOf`, so a tall block takes the rows it needs and nothing overlaps, and
+ * by `labelRows`, so a block's label has its rows free.
  */
 export function autoLayout(
   drawing: Drawing,
   only?: ReadonlySet<string>,
   rowsOf: RowsOf = () => ROW_STEP,
   colsOf?: ColsOf,
+  labelRows?: LabelRows,
 ): Drawing {
   const parts = drawing.parts;
   const byId = new Map(parts.map((p) => [p.id, p]));
@@ -87,8 +98,6 @@ export function autoLayout(
     return d;
   };
   for (const p of parts) visit(p.id);
-  const inner = parts.filter((p) => p.kind !== "input" && p.kind !== "output");
-  const maxInner = inner.reduce((m, p) => Math.max(m, depth.get(p.id) ?? 0), 0);
   const columns = new Map<number, Part[]>();
   const kept = only ? parts.filter((p) => !only.has(p.id)) : [];
   // A fixed value is a source like an input, so in a drawing laid out whole it goes below the
@@ -96,12 +105,13 @@ export function autoLayout(
   // the gate above. A fault's value added to a placed drawing stays beside what it drives.
   const isSource = (p: Part) =>
     kept.length === 0 && p.kind === "const" && (pred.get(p.id)?.size ?? 0) === 0;
+  const innerColumn = (p: Part) => (isSource(p) ? 0 : Math.max(1, depth.get(p.id) ?? 1));
+  // The outputs go after every other part's column, even where no wire gives a part a depth: a
+  // drawing tidied before any wire is drawn has its parts in one column and its outputs after it.
+  const inner = parts.filter((p) => p.kind !== "input" && p.kind !== "output");
+  const maxInner = inner.reduce((m, p) => Math.max(m, innerColumn(p)), 0);
   const columnOf = (p: Part) =>
-    p.kind === "input" || isSource(p)
-      ? 0
-      : p.kind === "output"
-        ? maxInner + 1
-        : Math.max(1, depth.get(p.id) ?? 1);
+    p.kind === "input" ? 0 : p.kind === "output" ? maxInner + 1 : innerColumn(p);
   for (const p of parts) {
     const c = columnOf(p);
     const list = columns.get(c) ?? [];
@@ -147,9 +157,17 @@ export function autoLayout(
         p.id.localeCompare(q.id),
     );
     let y = below + 1;
+    // A block's label is drawn in the row above it. The column's first part has a row above it,
+    // and a block or a pin leaves one at its foot, but a two-input gate leaves none: its name is
+    // written under it, so a block after it starts a row lower. Before, an AND gate's name and the
+    // label "memory of bytes" landed on each other when the shop's memory was tidied before any
+    // wire was drawn.
+    let room = 1;
     for (const p of moving) {
+      if (labelRows) y += Math.max(0, labelRows.above(p) - room);
       placed.set(p.id, { x: xOf.get(c) ?? c * COLUMN_STEP, y });
       y += rowsOf(p);
+      room = labelRows?.foot(p) ?? 0;
     }
   }
   return {

@@ -17,6 +17,7 @@ import {
 
 import { autoLayout } from "./layout";
 import {
+  LABEL_ROWS,
   drawingWarnings,
   refWidth,
   colsOf,
@@ -29,7 +30,7 @@ import {
 import { partBox, sceneOf, type PartBox } from "./scene";
 import { CELL, GateSymbol, isShaped } from "./symbols";
 import { format, useViewStrings } from "./strings";
-import { nameRepeatsKind, partSpec } from "./parts";
+import { nameRepeatsKind, partName, partSpec } from "./parts";
 
 export interface BuilderProps {
   readonly drawing: Drawing;
@@ -54,7 +55,7 @@ function isSource(drawing: Drawing, ref: PortRef): boolean | undefined {
 
 function nextId(drawing: Drawing, kind: string): string {
   const taken = new Set(drawing.parts.map((p) => p.id));
-  for (let n = 1; ; n++) if (!taken.has(`${kind}${n}`)) return `${kind}${n}`;
+  for (let n = 1; ; n++) if (!taken.has(partName(kind, n))) return partName(kind, n);
 }
 
 /**
@@ -320,7 +321,7 @@ export function Builder({ drawing, onChange, palette, highlight = [], title }: B
         <button
           type="button"
           className="button secondary"
-          onClick={() => onChange(autoLayout(drawing, undefined, rowsOf, colsOf))}
+          onClick={() => onChange(autoLayout(drawing, undefined, rowsOf, colsOf, LABEL_ROWS))}
         >
           {strings.builder.tidy}
         </button>
