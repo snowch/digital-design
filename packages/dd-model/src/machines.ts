@@ -9,6 +9,7 @@
 // return and reset. The same table appears with three other encodings, one of which a reset
 // cannot start (all-zero is no state) and one of which a reset starts in the wrong state.
 
+import { controllerMachine } from "./control";
 import type { Machine, MachineRow, MachineState } from "./fsm";
 
 /** The retry controller's table, the same in every encoding. */
@@ -119,6 +120,8 @@ export const MACHINES = {
   ),
   "retry-late-ok": RETRY_LATE_OK,
   defrost: DEFROST,
+  // Module 9: the controller of the machine of several edges an instruction (control.ts).
+  controller: controllerMachine(),
 } as const satisfies Readonly<Record<string, Machine>>;
 
 export type MachineId = keyof typeof MACHINES;

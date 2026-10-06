@@ -39,7 +39,7 @@ const need = (nets: Readonly<Record<string, NetId>>, name: string) => {
   return n;
 };
 
-const MEMORY_INPUTS: Record<keyof MemoryPorts, number> = {
+const MEMORY_INPUTS: Record<Exclude<keyof MemoryPorts, "FETCHING" | "ENDS">, number> = {
   PC: 64,
   ADDR: 64,
   D: 64,

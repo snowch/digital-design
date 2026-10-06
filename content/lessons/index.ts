@@ -39,6 +39,11 @@ import { constants } from "./constants";
 import { fetch } from "./fetch";
 import { memoryAccess } from "./memory-access";
 import { branches } from "./branches";
+import { controlSignals } from "./control-signals";
+import { illegalInstructions } from "./illegal-instructions";
+import { severalEdges } from "./several-edges";
+import { microOperations } from "./micro-operations";
+import { newInstruction } from "./new-instruction";
 
 const INPUTS: readonly LessonInput[] = [
   signals,
@@ -74,6 +79,12 @@ const INPUTS: readonly LessonInput[] = [
   fetch,
   memoryAccess,
   branches,
+  // Module 9, control
+  controlSignals,
+  illegalInstructions,
+  severalEdges,
+  microOperations,
+  newInstruction,
 ];
 
 export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(

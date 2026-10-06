@@ -896,6 +896,13 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
   .truth-table-wrap.edge-table td {
     padding-right: var(--space-2);
   }
+  /* Module 9: the map of every kind and job has seventeen columns of one mark each. */
+  .truth-table.kind-map-table th,
+  .truth-table.kind-map-table td {
+    padding-left: 0;
+    padding-right: 0;
+    text-align: center;
+  }
 }
 .truth-table-note {
   color: var(--fg-muted);

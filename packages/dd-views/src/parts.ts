@@ -150,6 +150,33 @@ const COMPOSITE_LABELS: Readonly<Record<string, string>> = {
   condition: "condition",
   next: "next PC",
   yWord: "word for Y",
+  // Module 9: the decoder opened and the machine of several edges an instruction. Drafted by the
+  // prose process (brief 6V, docs/notes/module-9-control/briefs/6V.md).
+  "control-unit": "control unit",
+  "datapath-edges": "datapath",
+  "memory-port": "memory port",
+  "control-decoder": "decoder",
+  controller: "controller",
+  "kind-lines": "kind lines",
+  "control-signals": "control signals",
+  "control-signals-call": "control signals",
+  "decode-checks": "checks",
+  "kind-check": "kind check",
+  "job-check": "job check",
+  "number-check": "number check",
+  "system-jobs": "system jobs",
+  "constant-bits": "bits of c",
+  "cause-word": "cause",
+  "state-lines": "state lines",
+  "controller-next": "next-state logic",
+  "controller-outputs": "output logic",
+  "word-register-3": "register",
+  "held-64": "held word",
+  "held-32": "register",
+  "word-register-32": "register",
+  "hold-ab": "operand hold",
+  "split-control": "control split",
+  "join-control": "control join",
 };
 
 const COMPOSITE_DESCRIPTIONS: Readonly<Record<string, string>> = {

@@ -20,8 +20,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 
 import {
+  CONTROL_STATES,
   applyFaults,
   buildDatapath,
+  controllerMachine,
+  edgeView,
+  rowFor,
+  type EdgeView,
   datapathRamWord,
   datapathState,
   edgeAnswer,
@@ -34,9 +39,12 @@ import {
 } from "@dd/dd-model";
 import { Prose, useSlot, type InteractiveProps } from "@dd/lesson-runtime";
 import { FaultInjector, PredictionChallenge, Stepper } from "@dd/primitives";
-import { type Simulator, type Word } from "@dd/sim";
+import { type Circuit, type Simulator, type Word } from "@dd/sim";
 
 import { CircuitView, valueLabel } from "../CircuitView";
+import { TimingDiagram } from "../TimingDiagram";
+import { MicroOps, SignalsTable } from "./ControlViews";
+import { StateDiagram } from "./StateMachine";
 import { format, useViewStrings } from "../strings";
 import { FaultSpec, toFault } from "./FaultLab";
 import { withProps } from "./props";
@@ -87,9 +95,18 @@ const Props = z.object({
   question: z.string().optional(),
   options: z.array(z.object({ value: z.string(), label: z.string() })).optional(),
   explain: z.string().default(""),
-  ask: z.enum(["changed", "pc", "stop", "value"]).default("changed"),
+  ask: z.enum(["changed", "pc", "stop", "value", "edges", "took"]).default("changed"),
   /** For `value`: the register asked about. */
   register: z.number().int().min(0).max(15).default(0),
+  /**
+   * Module 9, for the machine of several edges: the instruction's micro-operations, edge by edge;
+   * the control signals at the next edge, by name; the controller's state diagram with its state
+   * marked; and a timing diagram of the run, by net name.
+   */
+  microOps: z.boolean().default(false),
+  signals: z.array(z.string()).default([]),
+  states: z.boolean().default(false),
+  timing: z.array(z.string()).default([]),
 });
 type Data = z.infer<typeof Props>;
 
@@ -158,6 +175,17 @@ export const DatapathFigure = withProps(
     const [gaveUp, setGaveUp] = useState(false);
     const [step, setStep] = useState(Number.POSITIVE_INFINITY);
     const [scope, setScope] = useState("");
+    // Module 9: the edges of the instruction in progress, as their views read them before each.
+    const edges = built.stage === "edges";
+    const [past, setPast] = useState<{ views: EdgeView[]; ended: boolean }>({
+      views: [],
+      ended: false,
+    });
+    const record = (before: readonly Word[], from: typeof past) => {
+      if (!edges) return from;
+      const v = edgeView(circuit, before);
+      return { views: from.ended ? [v] : [...from.views, v], ended: v.ends };
+    };
     const [stored, setStored] = useSlot<Stored>(store, interactive.id);
     const live = useMemo(() => sim.snapshotValues(), [sim, generation]);
     const state = datapathState(circuit, live);
@@ -191,6 +219,7 @@ export const DatapathFigure = withProps(
       const halting = datapathState(circuit, before).halt === 1;
       const { high } = sim.clockCycle("CLK");
       setEdge({ before, history: high.history });
+      setPast(record(before, past));
       setStep(Number.POSITIVE_INFINITY);
       if (halting) setStopped(true);
       noteRun();
@@ -204,6 +233,8 @@ export const DatapathFigure = withProps(
     const run = () => {
       const token = (runToken.current += 1);
       let k = 0;
+      // Module 9: each edge's views, kept across the slices, as a single edge keeps them.
+      let kept = past;
       const slice = () => {
         if (token !== runToken.current) return;
         let before = sim.snapshotValues();
@@ -211,6 +242,7 @@ export const DatapathFigure = withProps(
           before = sim.snapshotValues();
           const halting = datapathState(circuit, before).halt === 1;
           const { high } = sim.clockCycle("CLK");
+          kept = record(before, kept);
           if (halting) {
             setEdge({ before, history: high.history });
             setStopped(true);
@@ -220,11 +252,13 @@ export const DatapathFigure = withProps(
           if (k + 1 === end) setEdge({ before, history: high.history });
         }
         if (k >= RUN_LIMIT) return finish(true);
+        setPast(kept);
         setRunning(k);
         bump();
         window.setTimeout(slice, 0);
       };
       const finish = (gaveUp: boolean) => {
+        setPast(kept);
         setRunning(undefined);
         setGaveUp(gaveUp);
         setStep(Number.POSITIVE_INFINITY);
@@ -238,6 +272,7 @@ export const DatapathFigure = withProps(
       runToken.current += 1;
       setRunning(undefined);
       setSim(start(from));
+      setPast({ views: [], ended: false });
       setChosen(0);
       setEdge(undefined);
       setStopped(false);
@@ -248,6 +283,7 @@ export const DatapathFigure = withProps(
       runToken.current += 1;
       setRunning(undefined);
       setSim(start());
+      setPast({ views: [], ended: false });
       setChosen(0);
       setEdge(undefined);
       setStopped(false);
@@ -295,7 +331,11 @@ export const DatapathFigure = withProps(
     const before = edge ? registerWords(circuit, edge.before) : [];
     const shown = data.shown ?? Array.from({ length: 16 }, (_, k) => k);
     const netValue = (name: string) => {
-      const id = circuit.nets.find((n) => n.name === name)?.id;
+      // Module 9: a word inside a block of the machine, by its own name (HR is datapath/HR).
+      const id = (
+        circuit.nets.find((n) => n.name === name) ??
+        circuit.nets.find((n) => n.name.endsWith(`/${name}`))
+      )?.id;
       return id === undefined ? undefined : values[id];
     };
     const changedAt = (k: number): string[] => {
@@ -452,6 +492,16 @@ export const DatapathFigure = withProps(
               <p>{t.stepsNone}</p>
             )}
           </section>
+        )}
+        {edges && committed && (
+          <ControlPanes
+            data={data}
+            circuit={circuit}
+            values={live}
+            sim={sim}
+            past={past}
+            stopped={stopped}
+          />
         )}
         {/* Before a prediction is committed the figure shows the circuit, not its values: the
             tables and the drawing's values would answer the question. */}
@@ -624,3 +674,71 @@ export const DatapathFigure = withProps(
     );
   },
 );
+
+/**
+ * Module 9: the views of the machine of several edges beside its drawing, all read from the same
+ * simulator: the instruction's edges and their micro-operations, the control signals at the next
+ * edge, the controller's state diagram with the state it is in and the move the next edge makes,
+ * and a timing diagram of the run so far.
+ */
+function ControlPanes({
+  data,
+  circuit,
+  values,
+  sim,
+  past,
+  stopped,
+}: {
+  data: Data;
+  circuit: Circuit;
+  values: readonly Word[];
+  sim: Simulator;
+  past: { views: readonly EdgeView[]; ended: boolean };
+  stopped: boolean;
+}) {
+  const strings = useViewStrings();
+  const t = strings.control;
+  const next = edgeView(circuit, values);
+  const machine = useMemo(() => controllerMachine(), []);
+  const inputs: Record<string, 0 | 1> = Object.fromEntries(
+    machine.inputs.map((n) => [n, next.signals[n] === 1 ? 1 : 0]),
+  );
+  const applies = next.state && !stopped ? rowFor(machine, next.state, inputs) : undefined;
+  const names = Object.fromEntries(
+    Object.entries(CONTROL_STATES).map(([name, code]) => [code, name]),
+  );
+  // A signal's net by its name: the control unit names its own inside it (control/PCEN).
+  const inside = (n: string) => (circuit.nets.some((x) => x.name === n) ? n : `control/${n}`);
+  return (
+    <div className="control-panes">
+      {data.microOps && (
+        <MicroOps past={past.ended ? [] : past.views} {...(stopped ? {} : { next })} />
+      )}
+      {data.signals.length > 0 && <SignalsTable view={next} signals={data.signals} />}
+      {data.states && (
+        <figure className="control-states">
+          <figcaption>{t.statesTitle}</figcaption>
+          <StateDiagram
+            machine={machine}
+            {...(next.state ? { current: next.state } : {})}
+            {...(applies ? { nextRow: applies.index } : {})}
+          />
+        </figure>
+      )}
+      {data.timing.length > 0 && (
+        <TimingDiagram
+          circuit={circuit}
+          trace={sim.trace}
+          title={t.timingTitle}
+          signals={[
+            "CLK",
+            { net: inside("S"), label: "S", names },
+            ...data.timing
+              .filter((n) => n !== "S" && n !== "CLK")
+              .map((n) => ({ net: inside(n), label: n })),
+          ]}
+        />
+      )}
+    </div>
+  );
+}

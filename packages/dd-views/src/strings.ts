@@ -341,6 +341,8 @@ export interface ViewStrings {
   readonly datapath: DatapathStrings;
   /** Module 8: the focused figures of the machine's ideas. */
   readonly machine8: MachineFigureStrings;
+  /** Module 9: the decoder's table and map, each kind's edges, and the views of an edge. */
+  readonly control: ControlStrings;
 }
 
 /** Module 8: the words of the instruction-fields, widening, edges, memory-map and branches figures. */
@@ -457,6 +459,79 @@ export interface DatapathStrings {
   readonly answer: string;
   /** In a prediction of the registers an edge writes: none. */
   readonly noRegister: string;
+}
+
+/** Module 9: the words of the control figures and of the views of one edge. */
+export interface ControlStrings {
+  /** The decoder's table: its caption, the first column's heading, and a kind's column heading. */
+  readonly tableCaption: string;
+  readonly signal: string;
+  /** A column's heading: kind {kind}. */
+  readonly kindHeading: string;
+  /** In a cell: the signal is the job digit's bit {bit}. */
+  readonly jobBit: string;
+  /** Under the table: what each kind is, one line each, by kind. */
+  readonly kinds: Readonly<Record<string, string>>;
+  /** Under the table: what a cell such as J2 means. */
+  readonly jobBitNote: string;
+  /** The map of kinds and jobs. */
+  readonly mapCaption: string;
+  readonly mapCorner: string;
+  /** In a cell: an instruction; not one; one only for some constants. */
+  readonly legal: string;
+  readonly illegal: string;
+  readonly depends: string;
+  /** What a screen reader is told of a cell: K {k}, J {j}, then the cell's meaning. */
+  readonly cellLabel: string;
+  readonly legalMeaning: string;
+  readonly illegalMeaning: string;
+  readonly dependsMeaning: string;
+  /** Under the map: the three marks. */
+  readonly legend: string;
+  /** Each kind's edges: caption and headings. */
+  readonly edgesCaption: string;
+  readonly kind: string;
+  readonly states: string;
+  readonly edges: string;
+  /** Between two states in a sequence. */
+  readonly then: string;
+  /** The micro-operations of the instruction in progress. */
+  readonly opsCaption: string;
+  readonly edge: string;
+  readonly state: string;
+  readonly ops: string;
+  /** In the row of the edge still to come. */
+  readonly nextMark: string;
+  /** Before any edge of the instruction. */
+  readonly opsNone: string;
+  /** Each register transfer: {address} for a fetch, {a} {b} {y} for registers, {job} {left} {right}. */
+  readonly opFetch: string;
+  readonly opRead: string;
+  readonly opAlu: string;
+  readonly opAluCopy: string;
+  readonly opAluUp: string;
+  readonly opAluDown: string;
+  readonly opLoadWord: string;
+  readonly opLoadByte: string;
+  readonly opStoreWord: string;
+  readonly opStoreByte: string;
+  readonly opWrite: string;
+  readonly opPc: string;
+  /** What PC or register Y takes, by its source. */
+  readonly sources: Readonly<Record<string, string>>;
+  /** The ALU's jobs by code, as an operator between two words. */
+  readonly jobs: Readonly<Record<string, string>>;
+  /** An edge with no transfer: the machine stops at it. */
+  readonly opNone: string;
+  /** Joins two transfers of one edge. */
+  readonly opJoin: string;
+  /** The control signals at the next edge. */
+  readonly signalsCaption: string;
+  readonly value: string;
+  /** The controller's states, with the one it is in marked. */
+  readonly statesTitle: string;
+  /** The timing diagram of the run so far. */
+  readonly timingTitle: string;
 }
 
 /** Module 5: the state-machine figure's words. */
@@ -939,6 +1014,66 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     circuitTitle: "Circuit diagram",
     traceTitle: "Timing diagram",
     textLabel: "SystemVerilog text",
+  },
+  // Module 9. Drafted by the prose process (brief 6V, docs/notes/module-9-control/briefs/6V.md).
+  control: {
+    tableCaption: "The decoder's control signals",
+    signal: "Signal",
+    kindHeading: "{kind}",
+    jobBit: "J{bit}",
+    kinds: {
+      "1": "1 register job",
+      "2": "2 constant job",
+      "3": "3 load",
+      "4": "4 store",
+      "5": "5 branch",
+      "6": "6 call",
+      "7": "7 jump",
+      "8": "8 system job",
+      "9": "9 call through a register",
+    },
+    jobBitNote: "J2 means bit 2 of the job digit.",
+    mapCaption: "Which kinds and jobs are instructions",
+    mapCorner: "K\\J",
+    legal: "✓",
+    illegal: "·",
+    depends: "c",
+    cellLabel: "K {k}, J {j}: {meaning}",
+    legalMeaning: "instruction",
+    illegalMeaning: "not an instruction",
+    dependsMeaning: "instruction when the constant is 0 to 4",
+    legend: "✓ instruction, · not an instruction, c depends on the constant",
+    edgesCaption: "Edges each kind takes",
+    kind: "Kind",
+    states: "States",
+    edges: "Edges",
+    then: " → ",
+    opsCaption: "The instruction's edges",
+    edge: "Edge",
+    state: "State",
+    ops: "Transfers",
+    nextMark: "next",
+    opsNone: "No register transfers yet.",
+    opFetch: "IR ← memory[PC]",
+    opRead: "HA ← R{a}, HB ← R{b}",
+    opAlu: "HR ← {left} {job} {right}",
+    opAluCopy: "HR ← {right}",
+    opAluUp: "HR ← {left} + 1",
+    opAluDown: "HR ← {left} - 1",
+    opLoadWord: "HM ← word[HR]",
+    opLoadByte: "HM ← byte[HR]",
+    opStoreWord: "word[HR] ← HB",
+    opStoreByte: "byte[HR] ← HB",
+    opWrite: "R{y} ← {from}",
+    opPc: "PC ← {to}",
+    sources: { HR: "HR", HM: "HM", PC4: "PC + 4", TARGET: "PC + 4c", RESULT: "HA + c" },
+    jobs: { "0": "AND", "1": "XOR", "2": "+", "3": "-", "4": "OR" },
+    opNone: "nothing: the machine stops",
+    opJoin: "; ",
+    signalsCaption: "Control signals at the next edge",
+    value: "Value",
+    statesTitle: "Controller states",
+    timingTitle: "Edges so far",
   },
 };
 
