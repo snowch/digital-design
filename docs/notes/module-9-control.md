@@ -46,3 +46,25 @@ wrote every learner-facing sentence from a brief of checked facts.
   name (the outer block is now `port`). Module 5's figure draws the controller's circuit with 55
   problems (its layout was made for two-bit states), so lesson 9.3 shows the controller there as
   its diagram, table, trace and text, and its circuit inside the machine's drawing.
+- 11:27 to 11:37 The figures of their own: the decoder's rows as a table (`control-table`), the
+  map of every kind and job (`kind-map`), each kind's edges (`kind-edges`), all three read off the
+  circuits as the page renders them; and the views of one edge beside the drawing (the
+  instruction's edges and their transfers, the signals at the next edge, the controller's state
+  diagram with its state marked, a timing diagram of the edges so far).
+- 11:37 to 12:02 The five lessons' structure, their challenges and tests, with every word a
+  placeholder. Faults first tried on IREN, MEM and PCEN gave unknowns everywhere (the IR held X
+  after a reset); the IR now resets to 0, which the checks see as illegal only in READ. A stuck
+  value on a net of the control bus drew its part at the wrong level; the control unit's nets are
+  named `control/X` and each such fault is placed by the lesson (`at`).
+- 12:02 to 12:33 The briefs (`docs/notes/module-9-control/briefs/`), the drafts, the checks, and
+  the facts tests. Writing brief 5A, the managing model worked the capstone's edges out again and
+  found the ALU edge it had given the call through a register was not needed: the instruction
+  sets CALL, so the controller takes it from READ to WRITE, and at that edge the PC takes the
+  ALU's result, which HA and the constant have fed since READ. With the extra edge, HR took a
+  word nothing read. The capstone now takes the call's three edges, and the controller does not
+  change: the reference's sequence, the drawn controller, the text, the tests and the lesson were
+  changed together, and a unit test now walks the controller's table with the decoder's signals
+  for every kind and compares the walk with the sequence the lessons state. Two lessons' figures
+  moved: the decoder's table (9.1) and the map (9.2) were in the motivation, above predictions
+  they answered, and are now in the explanation; 9.2's prediction became a stop whose constant is
+  5, which passes, since the motivation states the rule on the number.
