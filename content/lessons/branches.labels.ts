@@ -35,13 +35,16 @@ export const LABELS = {
     oneInstruction: "Clock one edge and step through it.",
     call: "Run the call and the jump back.",
     writeNext: "Complete the text and run the tests.",
+    flow: "Where the loop's branch sent PC, both ways.",
+    callFlow: "Where the call, the branch and the jump sent PC.",
   },
   options: {
-    p1Next: "PC is `00C`, not taken.",
-    p1Target: "PC is `010`, taken.",
+    p1Next: "PC is 00C, not taken.",
+    p1Target: "PC is 010, taken.",
   },
   faults: {
     metHigh: "MET stuck at 1",
     metLow: "MET stuck at 0",
   },
+  programs: { sum: "The loop, 5 + 4 + 3 + 2 + 1", call: "The call and the jump back" },
 } as const;

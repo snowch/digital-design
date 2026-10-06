@@ -32,6 +32,11 @@ export interface TimingDiagramProps {
         readonly label: string;
         /** Module 5: a name for some values of a word, such as a state's name for its code. */
         readonly names?: Readonly<Record<string, string>>;
+        /**
+         * Module 8: the text written for some values of a word in place of its digits, such as a
+         * 64-bit word read signed; written only where it fits its stretch of the lane.
+         */
+        readonly labels?: Readonly<Record<string, string>>;
       }
   )[];
   readonly from?: number;
@@ -75,16 +80,31 @@ export function TimingDiagram({
     .map((w) =>
       typeof w === "string"
         ? { name: w, net: resolveNet(circuit, w) }
-        : { name: w.label, net: resolveNet(circuit, w.net), names: w.names },
+        : {
+            name: w.label,
+            net: resolveNet(circuit, w.net),
+            names: w.names,
+            labels: "labels" in w ? w.labels : undefined,
+          },
     )
     .filter(
       (
         l,
-      ): l is { name: string; net: number; names: Readonly<Record<string, string>> | undefined } =>
-        l.net !== undefined,
+      ): l is {
+        name: string;
+        net: number;
+        names: Readonly<Record<string, string>> | undefined;
+        labels: Readonly<Record<string, string>> | undefined;
+      } => l.net !== undefined,
     );
   // Module 5: a word written with its name where the lane gives one: `TRY 01`.
-  const laneValue = (names: Readonly<Record<string, string>> | undefined, v: Word | undefined) => {
+  const laneValue = (
+    names: Readonly<Record<string, string>> | undefined,
+    v: Word | undefined,
+    labels?: Readonly<Record<string, string>>,
+  ) => {
+    const label = v && labels ? labels[formatWord(v)] : undefined;
+    if (label !== undefined) return label;
     const named = v && names ? names[formatWord(v)] : undefined;
     return named ? `${named} ${valueLabel(v)}` : valueLabel(v);
   };
@@ -173,11 +193,11 @@ export function TimingDiagram({
                       height={LANE_H - 8}
                     />
                     {/* A named value is written only where it fits its stretch of the lane. */}
-                    {(!lane.names ||
-                      laneValue(lane.names, s.value).length * 7.5 + 8 <=
+                    {((!lane.names && !lane.labels) ||
+                      laneValue(lane.names, s.value, lane.labels).length * 7.5 + 8 <=
                         (s.to - s.from) * unit) && (
                       <text x={x(s.from) + 4} y={top + LANE_H / 2 + 4} className="bus-value">
-                        {laneValue(lane.names, s.value)}
+                        {laneValue(lane.names, s.value, lane.labels)}
                       </text>
                     )}
                   </g>
@@ -213,7 +233,9 @@ export function TimingDiagram({
             return {
               key: lane.name,
               name: lane.name,
-              cells: [{ text: laneValue(lane.names, v), className: `value-${levelOf(v)}` }],
+              cells: [
+                { text: laneValue(lane.names, v, lane.labels), className: `value-${levelOf(v)}` },
+              ],
             };
           })}
         />

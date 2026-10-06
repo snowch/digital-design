@@ -4,7 +4,9 @@
 // challenge completed with its reference written in its text box, a plausible wrong attempt
 // rejected with the failing test named, saved work graded again on load, and the datapath figure
 // used as a learner uses it: an instruction chosen, an edge clocked, a program run to its stop, a
-// fault put in, a prediction committed and answered by the simulator, and one edge stepped.
+// fault put in, a prediction committed and answered by the simulator, and one edge stepped; and
+// the focused figures: a field read, a constant widened, a run drawn edge by edge, the map's
+// verdicts and a loop's arrows.
 
 import { expect, test, type Locator } from "@playwright/test";
 
@@ -243,5 +245,56 @@ test.describe("Module 8's datapath figure", () => {
     await figure.getByRole("button", { name: V.datapath.back }).click();
     await expect(figure.locator(".explorer-steps")).toContainText(V.datapath.stepNothing);
     await expect(row(figure, V.datapath.registersCaption, "R3")).toContainText("XXXXXXXXXXXXXXXX");
+  });
+});
+
+test.describe("Module 8's focused figures", () => {
+  test("an instruction's fields: C read signed in the fields of a load", async ({ page }) => {
+    await openLesson(page, "instructions");
+    const figure = page.locator("#ix-fields");
+    await figure.scrollIntoViewIfNeeded();
+    await expect(figure.locator(".fields-word")).toContainText("13123000");
+    await expect(figure.locator("ol.fields > li")).toHaveCount(6);
+  });
+
+  test("a negative constant widens with 1s and keeps its value", async ({ page }) => {
+    await openLesson(page, "constants");
+    const figure = page.locator("#ix-widening");
+    await figure.scrollIntoViewIfNeeded();
+    await expect(figure.locator(".wide-readings")).toContainText("-100");
+    await figure.getByRole("radio").nth(1).check();
+    await expect(figure.locator(".wide-readings")).not.toContainText("-100");
+    await expect(figure.locator(".wide-bit.copied")).toHaveCount(52);
+  });
+
+  test("the run's timeline shows PC at each edge", async ({ page }) => {
+    await openLesson(page, "fetch");
+    const figure = page.locator("#ix-edges");
+    await figure.scrollIntoViewIfNeeded();
+    await expect(figure.locator("svg").first()).toBeVisible();
+    await expect(figure).toContainText("010");
+    await expect(figure).toContainText(format(V.machine8.edgeMark, { n: 5 }));
+    // The cursor opens just before the first edge, on the values that edge writes.
+    await expect(figure.locator("table")).toContainText("-184");
+  });
+
+  test("the map refuses a store at a sensor and allows one at the display", async ({ page }) => {
+    await openLesson(page, "memory-access");
+    const figure = page.locator("#ix-map");
+    await figure.scrollIntoViewIfNeeded();
+    const sensor = figure.locator("tr.map-sensorA td");
+    await expect(sensor.nth(0)).toHaveText(V.machine8.allowed);
+    await expect(sensor.nth(2)).toHaveText(format(V.machine8.refused, { cause: "34" }));
+    await expect(figure.locator("tr.map-display td").nth(2)).toHaveText(V.machine8.allowed);
+  });
+
+  test("the call and the jump back are drawn with the run's counts", async ({ page }) => {
+    await openLesson(page, "branches");
+    const figure = page.locator("#ix-call-flow");
+    await figure.scrollIntoViewIfNeeded();
+    const row = figure.locator("tr").filter({ has: page.locator("th", { hasText: /^020$/ }) });
+    await expect(row).toContainText(format(V.machine8.wentTo, { to: "018", times: 2 }));
+    await expect(row).toContainText(format(V.machine8.wentTo, { to: "024", times: 1 }));
+    await expect(figure.locator("g.flow-arrow").first()).toBeAttached();
   });
 });
