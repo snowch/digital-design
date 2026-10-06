@@ -310,10 +310,11 @@ export const DatapathFigure = withProps(
 
     const words = registerWords(circuit, values);
     // The register the last edge wrote, read off the register file's write enable and write
-    // address just before it: a write of the value a register already held is still a write.
+    // address just before it: a write of the value a register already held is still a write. The
+    // file is found by its kind, as Module 9's machine holds it inside its datapath block.
     const writtenAt = useMemo(() => {
       if (!edge) return undefined;
-      const file = circuit.composites.find((c) => c.path === "registers");
+      const file = circuit.composites.find((c) => c.kind === "registers");
       const we = file?.inputs["WE"];
       const wa = file?.inputs["WA"];
       if (we === undefined || wa === undefined) return undefined;

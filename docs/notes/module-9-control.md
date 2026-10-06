@@ -396,7 +396,11 @@ A look at the built pages on a phone found one more: 9.3's controller figure ope
 state register nothing had reset, while its lead says to set the decoder's signals and press
 Clock CLK, which from XXX moves nothing. It now starts after a reset, in FETCH, as Module 5's
 machines start in theirs, and a facts test runs the figure's own start (`figureSim`, exported for
-it) and requires FETCH; without the reset, the test fails.
+it) and requires FETCH; without the reset, the test fails. And Module 8's "Written" mark, which reads
+the register file's write enable and address, looked the file up at the top level, where Module 9's
+machine does not hold it, so a register given the word it already held went unmarked (R15 at each
+pass of 9.5's orJump fault). It now finds the file by its kind, and a browser test runs that fault
+to its second pass.
 
 The managing session's check, which renders text as CI does, passed the ten screenshot tests the
 building session's container failed, and failed one test that container could not see: on a

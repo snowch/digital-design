@@ -241,3 +241,29 @@ test.describe("Module 9's figures", () => {
     );
   });
 });
+
+test.describe("Module 9's machine figures", () => {
+  // The register file sits inside the machine's datapath block; a write is read off its enable
+  // and address, so a register given the word it already held is still marked written.
+  test("a register written with the word it held is marked written", async ({ page }) => {
+    await openLesson(page, "new-instruction");
+    const figure = page.locator("#ix-call-faults");
+    await figure.scrollIntoViewIfNeeded();
+    const faults = lessonData("new-instruction")
+      .sections.flatMap((s) => s.interactives)
+      .find((i) => i.id === "call-faults")?.props["faults"] as { label: string }[];
+    // orJump made an AND: the call through R4 calls itself, R15 ← 008 at every pass.
+    await figure.getByLabel(faults[1]!.label).check();
+    const clock = figure.getByRole("button", { name: V.datapath.clock });
+    const r15 = row(figure, V.datapath.registersCaption, "R15");
+    for (let edge = 1; edge <= 7; edge++) await clock.click();
+    await expect(r15).toContainText(V.datapath.written);
+    await clock.click();
+    await expect(r15).not.toContainText(V.datapath.written);
+    await clock.click();
+    await clock.click();
+    // The second pass's WRITE edge: the same word, 008, written again.
+    await expect(r15).toContainText("0000000000000008");
+    await expect(r15).toContainText(V.datapath.written);
+  });
+});
