@@ -281,7 +281,7 @@ test.describe("Module 8's focused figures", () => {
     await figure.scrollIntoViewIfNeeded();
     const sensor = figure.locator("tr.map-sensorA td");
     await expect(sensor.nth(0)).toHaveText(V.machine8.allowed);
-    await expect(sensor.nth(2)).toHaveText(format(V.machine8.refused, { cause: "22" }));
+    await expect(sensor.nth(2)).toHaveText(format(V.machine8.refused, { cause: "34" }));
     await expect(figure.locator("tr.map-display td").nth(2)).toHaveText(V.machine8.allowed);
   });
 
