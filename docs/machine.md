@@ -1,9 +1,10 @@
 # The course machine
 
-**Status: a draft for checkpoint 2.** The author approves this file and `docs/isa.md` before
-Module 8 is built (`docs/plan.md`, checkpoint 2). Until then nothing in it is fixed, and no lesson
-may state any of it. The questions the author is asked to decide are at the end; each says what
-this draft recommends and why.
+**Status: approved at checkpoint 2, on 6 October 2026.** The author approved this file and
+`docs/isa.md` before Module 8, taking every recommendation the draft made; the decisions are
+listed at the end, each with its reason, and recorded in `docs/plan.md`. From Module 8 on, a
+lesson may state what these two files fix. A change to them is the author's, and is recorded in
+`docs/plan.md` the same way.
 
 This file is the hardware: the registers, the memory and its map, the devices, the datapath, the
 control and the traps. `docs/isa.md` is the programmer's side: the instructions, their encoding,
@@ -102,7 +103,7 @@ Why a ROM for the program: it is Module 6's capstone, which the learner built (a
 devices, chosen by a decoder on the address); a stray store cannot overwrite the program, which
 keeps Module 11's bugs where they happen; and Module 6's last reflection already tells the
 learner that the machine "will read words it needs from a ROM" and "keep the data it works on in
-the RAM". The cost: the machine cannot load a program into RAM and run it (question 3).
+the RAM". The cost: the machine cannot load a program into RAM and run it (decision 3).
 
 ## Devices
 
@@ -270,7 +271,7 @@ check to fail in the order the steps run.
 - **Nesting**: a trap turns interrupts off, so a handler runs with interrupts off until it turns
   them on. A fault inside a handler overwrites C1 and C2; that is the failure Module 12 shows.
 - **One handler address.** Every trap goes to C4, and the handler reads C3. Module 12's list
-  names vectors; a table of handler addresses by cause is question 6.
+  names vectors; decision 6 keeps one address, and gives the word "vector" to C4.
 
 At reset the machine is in system mode with no handler, so Modules 8 to 11 run every program with
 full access, and a trap stops the machine with its cause. Module 12 sets a handler and drops to
@@ -306,14 +307,14 @@ kept on purpose. What this design shares with known machines:
   words), its field order (the two registers that go in, then the one the result goes to, as data
   flows through the ALU in the course's drawings), its job digit (Module 7's ALU codes), a
   constant in every instruction, byte addressing, a ROM and a RAM, compare-and-branch, traps and
-  privilege. Question 2 asks whether to keep the hexadecimal layout.
+  privilege. Decision 2 keeps the hexadecimal layout.
 - **Hack (Nand2Tetris).** Hack has two registers, A and D, two instruction types in 16 bits, a ROM
   in an address space of its own, and an ALU driven by six control bits. Its jump field gives
   eight conditions, never and always among them, read from the flags of the same instruction's
   ALU result, and nothing keeps the flags. This machine's branches share that last pattern:
   eight conditions with never and always, from the flags of the branch's own subtraction, none
   kept. It also shares a program in ROM and devices at addresses (as do most small
-  microcontrollers), and an assignment-like assembly language (question 1). It differs in its
+  microcontrollers), and an assignment-like assembly language (decision 1). It differs in its
   sixteen registers, one 32-bit layout, one byte-addressed memory, two-register comparisons read
   signed or unsigned, traps and privilege.
 - **RISC-V.** Its six branches compare two registers (equal, not equal, less and not less, signed
@@ -336,40 +337,40 @@ kept on purpose. What this design shares with known machines:
   memory, user programs reach them through trap routines, and its third edition refuses them in
   user mode. This machine does the same. LC-3 has eight registers, 16-bit instructions, condition
   codes N, Z and P set whenever a register is written, and a table of trap vectors in memory; this
-  machine keeps no flags and has one handler address (question 6).
+  machine keeps no flags and has one handler address (decision 6).
 - **Analog Devices' Blackfin** writes its assembly as assignments (`R0 = R1 + R2;`,
-  `R0 = [P1 + 8];`, `IF CC JUMP loop;`), as `docs/isa.md` proposes (question 1).
+  `R0 = [P1 + 8];`, `IF CC JUMP loop;`), as `docs/isa.md` does (decision 1).
 
-## Questions for the author
+## Decisions at checkpoint 2
 
-1. **The assembly language: register transfers or words?** Recommended: register transfers, in
-   Module 5's text form (`R3 <= R1 + R2`, `if R1 < R2 signed goto loop`, `R4 <= word[R1 + 8]`). An
-   instruction then reads as what it does at its edge, with the arrow the learner already has.
-   Hack (`D=D+A`) and Blackfin (`R0 = R1 + R2;`) write assignments too, on other machines. The
-   alternative is words of the course's own, which every commercial machine's `add`, `or` and
-   `xor` crowd.
-2. **The hexadecimal layout.** Recommended: keep it, for transparency, with the differences from
-   TOY listed above. The alternative is a binary layout, whose fields a learner cannot read off a
-   hexadecimal instruction.
-3. **The program in a ROM, or in the RAM?** Recommended: a ROM, for the reasons under "Memory".
-   The alternative, one RAM for program and data, lets a program be loaded and changed while the
-   machine runs, and lets a stray store change the program.
-4. **The memory's size.** Recommended: 1 KB of ROM, 960 bytes of RAM and eight device words, so
-   every address fits in one instruction's constant: room for a program of a few hundred
-   instructions and a hundred words of data and stack. A larger memory needs addresses built from
-   two instructions.
-5. **Branches without kept flags?** Recommended: yes, for the reasons under "Branches". The
-   alternative is a flags register that every job loads (Module 7's `flags` lesson's model note
-   says many processors keep their flags), with branches that read it; it saves an instruction in
-   some loops and adds state that every trap must save.
-6. **One handler address, or vectors?** Recommended: one address, C4, with the cause in C3; the
-   word "vector" can name C4 when Module 12 teaches it. The alternative is a table of handler
-   addresses by cause, as LC-3 has, which Module 12's list of topics names.
-7. **A store to the ROM traps?** Recommended: yes, so the bug shows at the store. Module 6's shop
-   memory ignored writes to its read-only parts; the machine is stricter, as Module 6's guard was.
-8. **Little-endian**, as Module 6 built it and its `bytes` lesson says the machine will keep?
-   Recommended: yes.
+The draft put eight questions to the author, each with a recommendation; the author took every
+recommendation, on 6 October 2026.
 
-Once the author has decided, two lessons on `main` are checked against the decision: `bytes`
-says the machine keeps the low byte at the lower address, and `memory-map`'s reflection says the
-machine will read words from a ROM and keep its data in the RAM.
+1. **The assembly language is register transfers**, in Module 5's text form (`R3 <= R1 + R2`,
+   `if R1 < R2 signed goto loop`, `R4 <= word[R1 + 8]`). An instruction reads as what it does at
+   its edge, with the arrow the learner already has. Hack (`D=D+A`) and Blackfin
+   (`R0 = R1 + R2;`) write assignments too, on other machines. Not taken: words of the course's
+   own, which every commercial machine's `add`, `or` and `xor` crowd.
+2. **The layout stays hexadecimal**, for transparency, with the differences from TOY listed
+   above. Not taken: a binary layout, whose fields a learner cannot read off an instruction.
+3. **The program is in a ROM**, for the reasons under "Memory". Not taken: one RAM for program
+   and data, which lets a program be loaded and changed while the machine runs, and lets a stray
+   store change the program.
+4. **The memory is 2 KB:** 1 KB of ROM, 960 bytes of RAM and eight device words, so every address
+   fits in one instruction's constant: room for a program of a few hundred instructions and a
+   hundred words of data and stack. Not taken: a larger memory, whose addresses need two
+   instructions to build.
+5. **Branches keep no flags**, for the reasons under "Branches". Not taken: a flags register that
+   every job loads (Module 7's `flags` lesson's model note says many processors keep their
+   flags), with branches that read it, which saves an instruction in some loops and adds state
+   that every trap must save.
+6. **One handler address**, C4, with the cause in C3; when Module 12 teaches vectors, "vector"
+   names C4. Not taken: a table of handler addresses by cause, as LC-3 has.
+7. **A store to the ROM traps**, so the bug shows at the store. Module 6's shop memory ignored
+   writes to its read-only parts; the machine is stricter, as Module 6's guard was.
+8. **The memory is little-endian**, as Module 6 built it.
+
+Two lessons on `main` said something about the machine before it was decided, and both agree with
+the decisions: `bytes` says the machine keeps the low byte at the lower address (decision 8), and
+`memory-map`'s reflection says the machine will read words it needs from a ROM and keep its data
+in the RAM (decision 3). Neither changes.

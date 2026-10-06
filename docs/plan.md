@@ -106,6 +106,18 @@ step.
 
 ## Decisions since the brief
 
+### 6 October 2026: the course machine (checkpoint 2)
+
+The author approved `docs/machine.md` and `docs/isa.md`, taking every recommendation the draft
+made. In short: sixteen registers alike, 32-bit instructions in one layout of hexadecimal digits,
+Module 7's ALU with no kept flags and branches that compare two registers, a 2 KB memory (a ROM
+for the program, a RAM, the shop's devices) in which every address fits in an instruction,
+little-endian words of 64 bits, traps through five control registers and one handler address,
+and an assembly language of register transfers in Module 5's text form. `docs/machine.md` gives
+each decision with its reason and the alternative not taken. Module 8 may now start, and from it
+on a lesson may state what the two files fix. The two lessons that spoke of the machine before
+it was decided, `bytes` and `memory-map`, agree with it.
+
 ### 5 October 2026: the compiler and the kernel become optional chapters at the end
 
 The brief deferred them without giving a reason: "Module 12 (teaching compiler) and Module 14

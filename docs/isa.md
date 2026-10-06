@@ -1,8 +1,10 @@
 # The course machine's instructions
 
-**Status: a draft for checkpoint 2**, with `docs/machine.md`, which holds the questions for the
-author. Nothing here is fixed until the author approves both files, and no lesson may state any
-of it before then.
+**Status: approved at checkpoint 2, on 6 October 2026**, with `docs/machine.md`, which lists the
+decisions. The instruction set is fixed: the layout, the kinds, the jobs, the conditions, the
+illegal instructions and the traps. The sections marked as proposals (the assembly language's
+details, the calling convention and the system calls) are where Modules 11 and 12 start; those
+modules refine them, and say so in their notes.
 
 This file is the programmer's side of the machine: the layout of an instruction, what each one
 does, which are illegal, the assembly language, and the calling convention. `docs/machine.md` is
@@ -152,7 +154,7 @@ address and why it was refused.
 
 One line is one instruction, written as the transfer it makes, with Module 5's arrow as text:
 `<=`, which the `register-transfer` lesson calls "the transfer arrow written as text"
-(question 1 in `docs/machine.md`).
+(decision 1 in `docs/machine.md`).
 
 | Instruction | Written |
 | --- | --- |
