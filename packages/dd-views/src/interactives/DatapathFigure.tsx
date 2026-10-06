@@ -70,8 +70,8 @@ const Props = z.object({
   /** The last edge, step by step. */
   steps: z.boolean().default(false),
   canOpen: z.boolean().default(true),
-  /** The whole drawing small above it, and zoom, when it is wider than its box (a trial). */
-  overview: z.boolean().default(false),
+  /** The whole drawing small above it, and zoom: a large drawing has them unless this is false. */
+  overview: z.boolean().optional(),
   /** Faults the learner may put in, one at a time; the figure starts again with each. */
   faults: z.array(FaultSpec).default([]),
   /** Shown once the learner has made an edge, so the results do not answer the lead's question. */

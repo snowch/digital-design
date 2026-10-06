@@ -11,7 +11,7 @@ import { useCallback, useId, useMemo, useState, type KeyboardEvent, type ReactNo
 import { DrillDown, StateInspector, drillLevels } from "@dd/primitives";
 import { formatWord, type Circuit, type Word } from "@dd/sim";
 
-import { BOX_PADDING, OverviewStrip, useZoom } from "./Overview";
+import { BOX_PADDING, LARGE_DRAWING, OverviewStrip, useZoom } from "./Overview";
 import { labelFor, nameRepeatsKind } from "./parts";
 import { drawingAt, netOfWire, sceneOf, type PartBox } from "./scene";
 import { straighten } from "./straighten";
@@ -44,8 +44,9 @@ export interface CircuitViewProps {
    */
   readonly writtenWidth?: number;
   /**
-   * Module 8: when the drawing is wider than its box, the whole of it small above it, with a frame
-   * on the part on screen, and zoom (`Overview.tsx`). Tried first on one figure.
+   * Module 8: the whole of the drawing small above it, with a frame on the part on screen, and
+   * zoom (`Overview.tsx`), when the drawing is wider than its box. A large drawing has them unless
+   * this is false; true gives them to any drawing wider than its box.
    */
   readonly overview?: boolean;
 }
@@ -158,7 +159,7 @@ export function CircuitView({
   readings = [],
   children,
   writtenWidth,
-  overview = false,
+  overview,
 }: CircuitViewProps) {
   const written = (v: Word | undefined) =>
     v !== undefined && (writtenWidth === undefined || v.width <= writtenWidth);
@@ -189,7 +190,8 @@ export function CircuitView({
     },
     [scrollRef, widthRef],
   );
-  const large = overview && boxWidth > 0 && scene.width > boxWidth - BOX_PADDING;
+  const wanted = overview ?? scene.width >= LARGE_DRAWING;
+  const large = wanted && boxWidth > 0 && scene.width > boxWidth - BOX_PADDING;
   const zoom = useZoom(large ? box : null, scene.width, scene.height, boxWidth - BOX_PADDING);
   // The trail of opened blocks, each named by its instance name, or by its kind's label when the
   // name says no more (the `dff` block of the `dff` circuit). Two levels with one label collapse

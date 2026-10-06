@@ -26,6 +26,13 @@ import { format, useViewStrings } from "./strings";
 /** The drawing's box has a padding of 1rem on each side (`.circuit-scroll`). */
 export const BOX_PADDING = 32;
 
+/**
+ * A drawing at least this wide, in pixels at its own size, is large: three phone screens across,
+ * and wider than the page on a desktop. Of the course's drawings, those of Module 7's ALU and of
+ * Module 8's datapath from the fetch stage on; the next widest, 932, scrolls in under three.
+ */
+export const LARGE_DRAWING = 1000;
+
 /** The strip's greatest height, in pixels; a wide screen gets a strip narrower than the card. */
 const STRIP_HEIGHT = 150;
 

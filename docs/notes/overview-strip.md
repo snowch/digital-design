@@ -1,4 +1,4 @@
-# The overview strip and zoom: a trial on one drawing
+# The overview strip and zoom: tried on one drawing, then on every large one
 
 On a phone the author found that Module 8's whole datapath, 2,099 pixels wide in `branches`, shows
 about a sixth of its width in its box, and that the browser's pinch zoom only enlarges the page
@@ -54,3 +54,21 @@ wider than its box: on a phone and on a desktop alike for this drawing.
 - **Cost.** The copy is taken after every render of the drawing, at each edge and each wire
   pointed at. It is quick for the datapath on a desktop; a slow phone should be tried.
 - **Opening a block** gives a new drawing, which starts at its own size.
+
+## On every large drawing
+
+On 6 October 2026, after trying it, the author asked for the strip and the zoom on every large
+drawing. Large means at least 1,000 pixels wide at the drawing's own size (`LARGE_DRAWING` in
+`Overview.tsx`): three phone screens across, and wider than the page on a desktop. The measure of
+the 139 figures that draw a circuit put the line there. Above it are 15 figures, all in Module 7
+(the ALU in `alu-jobs`, `flags` and `wide-alu`) and Module 8 (the datapath in `fetch`,
+`memory-access` and `branches`). Below it the widest are 932 pixels (Module 8's `constants`), 864
+(Module 3's adder that subtracts) and 852 (Module 8's `instructions`), then drawings of 500 to 824
+that scroll comfortably and would only gain clutter. Eight more figures name a circuit wider than
+the line but never draw it: Module 7's test suites and carry steppers, and `fetch`'s timeline.
+
+`CircuitView` decides for every figure that draws a circuit: a large drawing that is wider than its
+box has the strip and the zoom, unless the figure sets `overview` to false. A figure can also set it
+to true, to give them to a smaller drawing wider than its box; none does. The per-figure trial
+setting on `branches` went. `tests/educational/overview.spec.ts` checks the rule across a lesson
+under the line and two over it, and drives the strip and the zoom on `branches`' loop.

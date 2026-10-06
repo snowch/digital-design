@@ -1,10 +1,13 @@
 // Copyright © 2026 Christopher Snow
 
-// A drawing much wider than its box, tried first on the branches lesson's loop: the whole drawing
-// small above it, which moves the drawing from a press, a drag or the keys, and a zoom from fitting
-// the box to twice its size, from the buttons, from two fingers and from a trackpad's pinch.
+// A large drawing wider than its box (LARGE_DRAWING, 1,000 pixels: Module 7's ALU and Module 8's
+// datapath from the fetch stage on): the whole drawing small above it, which moves the drawing from
+// a press, a drag or the keys, and a zoom from fitting the box to twice its size, from the buttons,
+// from two fingers and from a trackpad's pinch. The branches lesson's loop stands for them all.
 
 import { expect, test, type Page } from "@playwright/test";
+
+import { LARGE_DRAWING } from "@dd/dd-views";
 
 import { V, openLesson } from "./helpers";
 
@@ -26,9 +29,33 @@ async function boxAt(page: Page, y: number) {
 }
 
 test.describe("a drawing much wider than its box", () => {
-  test("has the strip and the zoom, on the one figure that asks for them", async ({ page }) => {
+  test("every large drawing wider than its box has the strip and the zoom, and no other does", async ({
+    page,
+  }) => {
+    // A lesson whose drawings are all under the line, and two with drawings over it.
+    for (const lesson of ["instructions", "fetch", "alu-jobs"]) {
+      await openLesson(page, lesson);
+      const views = await page.evaluate(() =>
+        [...document.querySelectorAll(".circuit-view")].map((v) => {
+          const scroll = v.querySelector<HTMLElement>(".circuit-scroll");
+          const svg = scroll?.querySelector<SVGSVGElement>(":scope > svg.circuit");
+          return {
+            width: svg?.viewBox.baseVal.width ?? 0,
+            room: (scroll?.clientWidth ?? 0) - 32,
+            strip: v.querySelector('[role="slider"]') !== null,
+          };
+        }),
+      );
+      expect(views.length, lesson).toBeGreaterThan(0);
+      for (const v of views)
+        expect(v.strip, `${lesson}: a drawing ${v.width} wide in ${v.room}`).toBe(
+          v.width >= LARGE_DRAWING && v.width > v.room,
+        );
+    }
+  });
+
+  test("has the strip and the zoom on the branches lesson's loop", async ({ page }) => {
     await openLesson(page, "branches");
-    await expect(page.getByRole("slider", { name: V.circuit.overviewName })).toHaveCount(1);
     const f = figure(page);
     await expect(f.getByRole("slider", { name: V.circuit.overviewName })).toBeVisible();
     await expect(f.getByRole("button", { name: V.circuit.zoomOut })).toBeVisible();
