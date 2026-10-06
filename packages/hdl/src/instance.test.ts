@@ -136,7 +136,7 @@ endmodule`,
     });
     expect(gated.circuit).toBeUndefined();
     expect(gated.messages.map((m) => m.text).join(" ")).toMatch(
-      /This challenge does not use one module used inside another/,
+      /This challenge does not use a module used inside another/,
     );
     const two = elaborate(
       `${HALF}\nmodule other(input logic A, output logic Y); assign Y = A; endmodule`,

@@ -87,7 +87,7 @@ const EXPLAIN: Record<Construct, string> = {
   array: "arrays to declare memories, like `logic [7:0] mem [0:15]`",
   "array-init": "array initialisation like `= '{...}`",
   // Module 8: drafted by the prose process (docs/notes/module-8-datapath.md).
-  instance: "one module used inside another, like `alu a1 (.A(QA), .B(QB), .Y(R));`",
+  instance: "a module used inside another, such as `alu alu1 (.A(QA), .B(QB), .Y(R));`",
 };
 
 /** What to write instead, where there is something. */

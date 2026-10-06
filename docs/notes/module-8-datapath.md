@@ -99,7 +99,7 @@ wrote every learner-facing sentence from a brief of checked facts.
   stuck-at fault), and each Module 8 fault has a place checked with the scene's own problems.
   The term gate failed on `register-transfer` ("a branch" of an `if` chain) once 8.5 rationed
   "branch", as planned; it lists the exemption.
-- 07:35 to 07:50 Lesson 8.5 (`branches`), with the capstone. Stepping one edge of the whole
+- 07:35 to 07:44 Lesson 8.5 (`branches`), with the capstone. Stepping one edge of the whole
   datapath showed PC going to 000 and back, and IR to the program's first instruction and back,
   before settling: the PC and the devices' words were Module 5's registers of gate-level
   flip-flops, whose latches pass values on through the settle model's steps. They are now one

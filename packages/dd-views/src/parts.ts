@@ -136,7 +136,7 @@ const COMPOSITE_LABELS: Readonly<Record<string, string>> = {
   "alu8-flags-4": "4-bit ALU",
   "alu8-flags-64": "64-bit ALU",
   "operand-carry": "second word and carry in",
-  // Module 8: the datapath's blocks. Provisional labels, to be drafted by the prose process.
+  // Module 8: the datapath's blocks. Drafted by the prose process (brief 6V, docs/notes/module-8-datapath/briefs/6V.md).
   digits: "digits",
   decoder: "decoder",
   registers: "register file",
