@@ -95,3 +95,6 @@ The managing session's audit listed seven places. Read as each page's learner:
   memory-access asks what the load brings, which is a sensor's reading, not a field). New facts
   pinned: those fields and C's signed values, and that bits 63 to 11 of W are worth -2048
   together. Words sent as briefs GC and GW.
+- 12:14. GW came back. `copyKey` dropped "Bit 11 is outlined" (added); `arrowsLabel` dropped
+  "when that was not the next line" (added) and used single quotes (now double). The rest stands:
+  "Memory map", "Program flow", "Transfer".
