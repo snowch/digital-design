@@ -32,7 +32,27 @@ const SIGNAL_GATES: At = {
 };
 
 export const CONTROL_AT: Readonly<Record<string, At>> = {
-  decoder: {},
+  decoder: {
+    "in:K": [0, 5],
+    "in:J": [0, 8],
+    "in:C": [0, 11],
+    decoder: [6, 1],
+    "out:WRITEY": [13, 1],
+    "out:LOAD": [18, 2],
+    "out:STORE": [13, 3],
+    "out:BYTE": [18, 4],
+    "out:AZERO": [13, 5],
+    "out:BCONST": [18, 6],
+    "out:OP2": [13, 7],
+    "out:OP1": [18, 8],
+    "out:OP0": [13, 9],
+    "out:BRANCH": [18, 10],
+    "out:CALL": [13, 11],
+    "out:JUMP": [18, 12],
+    "out:MEM": [13, 13],
+    "out:STOP": [18, 14],
+    "out:CAUSED": [13, 15],
+  },
   machine: {
     "in:CLK": [0, 18],
     "in:RST": [0, 20],
@@ -52,6 +72,11 @@ export const CONTROL_AT: Readonly<Record<string, At>> = {
 
 /** Hand routes inside a block a learner opens, by the block's path in the machine. */
 export const CONTROL_INSIDE_ROUTES: Readonly<Record<string, Routes>> = {
+  control: {
+    // GO from the stop logic up beside the bus, into the bus and over to the controller.
+    "stops.GO>bus.GO": [28],
+    "stops.GO>controller.GO": [28, 13.1, 19.75],
+  },
   datapath: {
     // The held result back along the top to the memory's address selector.
     "heldR.Q>pickAddr.A": [58.5, 1, 16.5],
@@ -157,6 +182,7 @@ export const CONTROL_INSIDE: Readonly<Record<string, At>> = {
     "out:BYTE": [35, 15],
     "out:CALL": [35, 20],
     "out:JUMP": [35, 23],
+    "out:MEM": [35, 25],
   },
   "controller-outputs": {
     "in:FETCH": [0, 4],
@@ -241,6 +267,7 @@ export const CONTROL_INSIDE: Readonly<Record<string, At>> = {
     "out:OP0": [34, 14],
     "out:AZERO": [34, 17],
     "out:BYTE": [34, 19],
+    "out:MEM": [34, 21],
   },
   "memory-port": {
     "in:CONTROL": [0, 5.5],

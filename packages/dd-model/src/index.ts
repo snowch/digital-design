@@ -37,3 +37,4 @@ export { DATAPATH_AT, placedDatapath } from "./library-datapath";
 export * from "./control";
 export * from "./multicycle";
 export * from "./multicycle-run";
+export * from "./multicycle-view";

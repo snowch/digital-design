@@ -47,8 +47,11 @@ export const CONTROL_SIGNALS = [
 ] as const;
 export type ControlSignal = (typeof CONTROL_SIGNALS)[number];
 
-/** The decoder's outputs: the control signals, then `stop` and the decode step's cause. */
-export const DECODER9_OUTPUTS = [...CONTROL_SIGNALS, "STOP", "CAUSED"] as const;
+/**
+ * The decoder's outputs: the control signals, MEM for the controller (a load or a store, which
+ * uses the memory), then `stop` and the decode step's cause.
+ */
+export const DECODER9_OUTPUTS = [...CONTROL_SIGNALS, "MEM", "STOP", "CAUSED"] as const;
 
 /**
  * The name of each kind's line. A line that is a control signal on its own is named after the
@@ -164,7 +167,7 @@ export function signalGates(
   const out = (name: string) => outs[name] as NetId;
   const extra = options.callThroughRegister ? [k(CALL_REGISTER_KIND)] : [];
   const jobs = b.or([k(1), k(2)], { name: "orJobs", output: b.net("JOBS") });
-  const mem = b.or([k(3), k(4)], { name: "orMem", output: b.net("MEM") });
+  const mem = b.or([k(3), k(4)], { name: "orMem", output: outs["MEM"] ?? b.net("MEM") });
   b.or([jobs, k(3), k(6), ...extra], { name: "orWritey", output: out("WRITEY") });
   b.or([k(2), mem, k(7), ...extra], { name: "orBconst", output: out("BCONST") });
   b.and([mem, j.J3], { name: "andAzero", output: out("AZERO") });
@@ -363,7 +366,10 @@ export function controlDecoder(
       );
       kindLines(bb, ins.K, lines);
       const j = jobBits(bb, ins.J);
-      const signalOuts = CONTROL_SIGNALS.filter((s) => !Object.values(names).includes(s));
+      const signalOuts = [
+        ...CONTROL_SIGNALS.filter((s) => !Object.values(names).includes(s)),
+        "MEM",
+      ];
       const lineIns = Object.fromEntries(
         Object.entries(lines).map(([n, line]) => [names[Number(n)] as string, line]),
       );
@@ -493,49 +499,49 @@ export const CONTROL_STATES = {
 export type ControlState = keyof typeof CONTROL_STATES;
 
 /**
- * The controller as Module 5's state machine, as data: its next state from the state and four of
- * the decoder's signals. Every instruction is fetched and then read; a call goes straight to
- * writing; a load or a store uses the memory; a job, a load and a call write register Y; a branch
- * and a jump end at the ALU, where their next PC is worked out from the ALU's result and flags.
+ * The controller as Module 5's state machine, as data: its next state from the state and three of
+ * the decoder's signals. Every instruction is fetched and then read; a call (CALL) goes straight to
+ * writing; a load or a store (MEM) uses the memory; a job, a load and a call write register Y
+ * (WRITEY); a branch and a jump end at the ALU, where their next PC is worked out from the ALU's
+ * result and flags.
  * The edge whose next state is FETCH ends the instruction.
  */
 export function controllerMachine(options: ControlOptions = {}): Machine {
   const read: MachineRow[] = options.callThroughRegister
     ? [
         // The capstone's kind calls through a register: it needs the ALU for RA + c first.
-        { from: "READ", when: { CALL: 1, JUMP: 0 }, to: "WRITE" },
-        { from: "READ", when: { CALL: 1, JUMP: 1 }, to: "ALU" },
+        { from: "READ", when: { CALL: 1, JUMP: 0 }, to: "WRITE", labelAt: [380, 236] },
+        { from: "READ", when: { CALL: 1, JUMP: 1 }, to: "ALU", labelAt: [160, 96] },
         { from: "READ", when: { CALL: 0 }, to: "ALU" },
       ]
     : [
-        { from: "READ", when: { CALL: 1 }, to: "WRITE" },
-        { from: "READ", when: { CALL: 0 }, to: "ALU" },
+        { from: "READ", when: { CALL: 1 }, to: "WRITE", labelAt: [372, 250] },
+        { from: "READ", when: { CALL: 0 }, to: "ALU", labelAt: [196, 112] },
       ];
   return {
     id: options.callThroughRegister ? "controller-call-register" : "controller",
     name: "controller",
-    inputs: ["CALL", ...(options.callThroughRegister ? ["JUMP"] : []), "LOAD", "STORE", "WRITEY"],
+    inputs: ["CALL", ...(options.callThroughRegister ? ["JUMP"] : []), "MEM", "WRITEY"],
     outputs: ["FETCHING"],
     states: [
-      { name: "FETCH", code: CONTROL_STATES.FETCH, outputs: { FETCHING: 1 }, at: [80, 70] },
-      { name: "READ", code: CONTROL_STATES.READ, at: [300, 70] },
-      { name: "ALU", code: CONTROL_STATES.ALU, at: [300, 240] },
-      { name: "MEMORY", code: CONTROL_STATES.MEMORY, at: [300, 410] },
-      { name: "WRITE", code: CONTROL_STATES.WRITE, at: [80, 410] },
+      { name: "FETCH", code: CONTROL_STATES.FETCH, outputs: { FETCHING: 1 }, at: [60, 470] },
+      { name: "READ", code: CONTROL_STATES.READ, at: [235, 40] },
+      { name: "ALU", code: CONTROL_STATES.ALU, at: [235, 180] },
+      { name: "MEMORY", code: CONTROL_STATES.MEMORY, at: [235, 330] },
+      { name: "WRITE", code: CONTROL_STATES.WRITE, at: [410, 470] },
     ],
     rows: [
-      { from: "FETCH", when: {}, to: "READ" },
+      { from: "FETCH", when: {}, to: "READ", labelAt: [105, 250] },
       ...read,
-      { from: "ALU", when: { LOAD: 1 }, to: "MEMORY" },
-      { from: "ALU", when: { LOAD: 0, STORE: 1 }, to: "MEMORY" },
-      { from: "ALU", when: { LOAD: 0, STORE: 0, WRITEY: 1 }, to: "WRITE" },
-      { from: "ALU", when: { LOAD: 0, STORE: 0, WRITEY: 0 }, to: "FETCH" },
-      { from: "MEMORY", when: { LOAD: 1 }, to: "WRITE" },
-      { from: "MEMORY", when: { LOAD: 0 }, to: "FETCH" },
-      { from: "WRITE", when: {}, to: "FETCH" },
+      { from: "ALU", when: { MEM: 1 }, to: "MEMORY", labelAt: [210, 262] },
+      { from: "ALU", when: { MEM: 0, WRITEY: 1 }, to: "WRITE", labelAt: [312, 302] },
+      { from: "ALU", when: { MEM: 0, WRITEY: 0 }, to: "FETCH", labelAt: [158, 302] },
+      { from: "MEMORY", when: { WRITEY: 1 }, to: "WRITE", labelAt: [330, 430] },
+      { from: "MEMORY", when: { WRITEY: 0 }, to: "FETCH", labelAt: [140, 430] },
+      { from: "WRITE", when: {}, to: "FETCH", labelAt: [235, 498] },
     ],
     decode: "full",
-    size: [400, 480],
+    size: [470, 510],
   };
 }
 

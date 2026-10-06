@@ -20,6 +20,7 @@ const SIGNALS = [
   "BRANCH",
   "CALL",
   "JUMP",
+  "MEM",
 ] as const;
 
 /** The decoder's ports, which every text of it shares. */
@@ -36,8 +37,8 @@ ${SIGNALS.map((s) => `  output logic ${s},`).join("\n")}
 export const SIGNAL_ARMS: Readonly<Record<number, string>> = {
   1: "4'h1: begin WRITEY = 1'b1; OP2 = J[2]; OP1 = J[1]; OP0 = J[0]; end",
   2: "4'h2: begin WRITEY = 1'b1; BCONST = 1'b1; OP2 = J[2]; OP1 = J[1]; OP0 = J[0]; end",
-  3: "4'h3: begin WRITEY = 1'b1; LOAD = 1'b1; BCONST = 1'b1; OP1 = 1'b1; AZERO = J[3]; BYTE = J[0]; end",
-  4: "4'h4: begin STORE = 1'b1; BCONST = 1'b1; OP1 = 1'b1; AZERO = J[3]; BYTE = J[0]; end",
+  3: "4'h3: begin WRITEY = 1'b1; LOAD = 1'b1; MEM = 1'b1; BCONST = 1'b1; OP1 = 1'b1; AZERO = J[3]; BYTE = J[0]; end",
+  4: "4'h4: begin STORE = 1'b1; MEM = 1'b1; BCONST = 1'b1; OP1 = 1'b1; AZERO = J[3]; BYTE = J[0]; end",
   5: "4'h5: begin BRANCH = 1'b1; OP1 = 1'b1; OP0 = 1'b1; end",
   6: "4'h6: begin WRITEY = 1'b1; CALL = 1'b1; end",
   7: "4'h7: begin JUMP = 1'b1; BCONST = 1'b1; OP1 = 1'b1; end",
@@ -127,12 +128,12 @@ export function nextStateBlock(readArm: string): string {
       FETCH: next = READ;
 ${readArm}
       ALU: begin
-        if (LOAD | STORE) next = MEMORY;
+        if (MEM) next = MEMORY;
         else if (WRITEY) next = WRITE;
         else next = FETCH;
       end
       MEMORY: begin
-        if (LOAD) next = WRITE;
+        if (WRITEY) next = WRITE;
         else next = FETCH;
       end
       default: next = FETCH;
@@ -173,9 +174,10 @@ export function controllerText(callRegister = false): string {
   input logic RST,
   input logic GO,
   input logic CALL,${callRegister ? "\n  input logic JUMP," : ""}
+  input logic MEM,
+  input logic WRITEY,
   input logic LOAD,
   input logic STORE,
-  input logic WRITEY,
 ${EDGE_OUTPUTS.map((s) => `  output logic ${s},`).join("\n")}
   output logic [2:0] S
 );
@@ -211,7 +213,7 @@ export function machineTop(callRegister = false): string {
 );
   logic [31:0] IR, FETCHED;
   logic [63:0] ADDR, QA, QB, HA, HB, HR, HM, WIDE, ALUA, ALUB, RESULT, MQ, YIN, PC4, NEXT, TARGET;
-  logic WRITEY, LOAD, STORE, BYTE, AZERO, BCONST, OP2, OP1, OP0, BRANCH, CALL, JUMP, STOP;
+  logic WRITEY, LOAD, STORE, BYTE, AZERO, BCONST, OP2, OP1, OP0, BRANCH, CALL, JUMP, MEM, STOP;
   logic FETCHING, IREN, CHECKING, HOLDAB, HOLDR, MLOAD, MSTORE, HOLDM, WREG, PCEN, GO;
   logic ZERO, MINUS, COUT, OVER, MET;
   logic [7:0] CAUSED, CAUSEF, CAUSEM;
@@ -238,10 +240,10 @@ export function machineTop(callRegister = false): string {
   decoder dec (.K(IR[31:28]), .J(IR[27:24]), .C(IR[11:0]), .WRITEY(WRITEY),
     .LOAD(LOAD), .STORE(STORE), .BYTE(BYTE), .AZERO(AZERO), .BCONST(BCONST),
     .OP2(OP2), .OP1(OP1), .OP0(OP0), .BRANCH(BRANCH), .CALL(CALL), .JUMP(JUMP),
-    .STOP(STOP), .CAUSED(CAUSED));
+    .MEM(MEM), .STOP(STOP), .CAUSED(CAUSED));
 
   controller ctl (.CLK(CLK), .RST(RST), .GO(GO), .CALL(CALL),${callRegister ? " .JUMP(JUMP)," : ""}
-    .LOAD(LOAD), .STORE(STORE), .WRITEY(WRITEY), .FETCHING(FETCHING), .IREN(IREN),
+    .MEM(MEM), .WRITEY(WRITEY), .LOAD(LOAD), .STORE(STORE), .FETCHING(FETCHING), .IREN(IREN),
     .CHECKING(CHECKING), .HOLDAB(HOLDAB), .HOLDR(HOLDR), .MLOAD(MLOAD),
     .MSTORE(MSTORE), .HOLDM(HOLDM), .WREG(WREG), .PCEN(PCEN), .S(S));
 

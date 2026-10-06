@@ -11,6 +11,7 @@ import { assemble, type Program } from "./assemble";
 import { type Stage } from "./datapath";
 import { datapathState, registersOf, stopReasonOf, type DatapathState } from "./datapath-run";
 import { placedMachine } from "./library-control";
+import { edgesLeft, registersTaken } from "./multicycle-view";
 import { placedDatapath } from "./library-datapath";
 
 /** The stage a library id draws. */
@@ -152,7 +153,7 @@ export function startDatapath(
 }
 
 /** What a prediction asks about the next edge. */
-export type EdgeQuestion = "changed" | "pc" | "stop" | "value";
+export type EdgeQuestion = "changed" | "pc" | "stop" | "value" | "edges" | "took";
 
 const signed64 = (v: bigint) => (v >= 1n << 63n ? v - (1n << 64n) : v);
 
@@ -164,6 +165,9 @@ const signed64 = (v: bigint) => (v >= 1n << 63n ? v - (1n << 64n) : v);
  */
 export function edgeAnswer(sim: Simulator, ask: EdgeQuestion, register = 0): string {
   const circuit = sim.circuit;
+  // Module 9: how many edges the instruction has left, and which registers the next edge writes.
+  if (ask === "edges") return String(edgesLeft(sim));
+  if (ask === "took") return registersTaken(sim);
   const before = datapathState(circuit, sim.snapshotValues());
   const saved = sim.snapshot();
   sim.clockCycle("CLK");

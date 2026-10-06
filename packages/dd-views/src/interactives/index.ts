@@ -31,6 +31,8 @@ import { CarrySteps } from "./CarrySteps";
 import { SuiteLab } from "./SuiteLab";
 // Module 8, the datapath
 import { DatapathFigure } from "./DatapathFigure";
+// Module 9, control
+import { ControlTable, KindEdges, KindMap } from "./ControlViews";
 
 /** The interactives lessons may name by kind. */
 export const INTERACTIVES: Readonly<Record<string, ComponentType<InteractiveProps>>> = {
@@ -61,6 +63,10 @@ export const INTERACTIVES: Readonly<Record<string, ComponentType<InteractiveProp
   "suite-lab": SuiteLab,
   // Module 8, the datapath
   datapath: DatapathFigure,
+  // Module 9, control
+  "control-table": ControlTable,
+  "kind-map": KindMap,
+  "kind-edges": KindEdges,
 };
 
 export {
@@ -84,7 +90,11 @@ export {
   CarrySteps,
   SuiteLab,
   DatapathFigure,
+  ControlTable,
+  KindMap,
+  KindEdges,
 };
+export { kindMap, kindSequences, signalCell, opText, edgeText } from "./ControlViews";
 export { carryRun, carryAnswer } from "./CarrySteps";
 export { runAluSuite, firstCatch } from "./SuiteLab";
 export { compareAnswer } from "./CircuitCompare";

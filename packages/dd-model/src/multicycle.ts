@@ -130,6 +130,7 @@ export function controller(
     GO: NetId;
     CALL: NetId;
     JUMP?: NetId;
+    MEM: NetId;
     LOAD: NetId;
     STORE: NetId;
     WRITEY: NetId;
@@ -141,11 +142,11 @@ export function controller(
   const outs = Object.fromEntries(
     [...EDGE_SIGNALS, "S"].map((n) => [n, given.outs?.[n] ?? b.net(n, n === "S" ? 3 : 1)]),
   ) as Record<EdgeSignal | "S", NetId>;
+  // The decoder's signals the next state reads.
   const decoderIns: Record<string, NetId> = {
     CALL: ins.CALL,
     ...(options.callThroughRegister && ins.JUMP !== undefined ? { JUMP: ins.JUMP } : {}),
-    LOAD: ins.LOAD,
-    STORE: ins.STORE,
+    MEM: ins.MEM,
     WRITEY: ins.WRITEY,
   };
   block(
@@ -280,7 +281,14 @@ export function controller(
       );
     },
     {
-      inputs: { ...decoderIns, GO: ins.GO, RST: ins.RST, CLK: ins.CLK },
+      inputs: {
+        ...decoderIns,
+        LOAD: ins.LOAD,
+        STORE: ins.STORE,
+        GO: ins.GO,
+        RST: ins.RST,
+        CLK: ins.CLK,
+      },
       // The state first, then CHECKING, then the signals in the control bus's order.
       outputs: Object.fromEntries(["S", ...EDGE_SIGNALS].map((n) => [n, outs[n as EdgeSignal]])),
     },
@@ -436,6 +444,7 @@ export function multicycleCircuit(options: MulticycleOptions = {}): Circuit {
       "BRANCH",
       "CALL",
       "JUMP",
+      "MEM",
     ].map((n) => [n, b.net(n, n === "CAUSED" ? 8 : 1)]),
   );
   const sig = (n: string) => signals[n] as NetId;
@@ -459,6 +468,7 @@ export function multicycleCircuit(options: MulticycleOptions = {}): Circuit {
           GO: go,
           CALL: sig("CALL"),
           ...(options.callThroughRegister ? { JUMP: sig("JUMP") } : {}),
+          MEM: sig("MEM"),
           LOAD: sig("LOAD"),
           STORE: sig("STORE"),
           WRITEY: sig("WRITEY"),
