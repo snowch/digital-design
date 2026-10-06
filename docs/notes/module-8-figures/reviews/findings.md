@@ -30,3 +30,21 @@ Each finding condensed, with its quotation. The screenshots the reviewers saw we
 - 2-6. The motivation decodes kind 2's `22103064` in words only; an instruction-fields figure
   would show where the constant sits.
 - 2-7. The figure opens on `064`, where every copy is 0, which looks like zero filling.
+
+## memory-access (`map`)
+
+- 4-1. Lead: "A word at an address not aligned to 8 gives cause 33 in any part." False for no
+  memory (31 wins, `memoryCheck`); and no cell shows a misaligned access.
+- 4-2. Rows "timer", "waiting", "signals" name devices no lesson has introduced; "waiting" does
+  not read as a noun.
+- 4-3. "no memory 7F8 to 7FF": everything from `7F8` up (bits 63 to 11) has no memory; the row
+  reads as if addresses stop at `7FF`.
+- 4-4. The cells where two causes meet (store byte at a read-only device gives 33; at no memory
+  31) teach the priority rule but nothing points at them.
+- 4-5. A store to a sensor stops the machine (34); Module 6 said "A write to the sensor is lost."
+  The page never contrasts the two.
+- 4-6. The load `380027D8` and store `48040400` are decoded in words only; the store's register is
+  in B, the load's in Y; an instruction-fields figure would show it.
+- 4-7. The map gives ranges in hex; the challenge works in address bits.
+- 4-8. Two captions, one under the other, say the same thing.
+- 4-9. "The four columns" (the table has five, the first is Part).
