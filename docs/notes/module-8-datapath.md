@@ -8,6 +8,7 @@ wrote every learner-facing sentence from a brief of checked facts.
 ## Times
 
 - Started: 2026-10-06 05:39 UTC (first command in the session).
+- Finished: 2026-10-06 09:08 UTC, after the last full check. About 3 hours 30 minutes.
 
 ## Log
 
@@ -134,6 +135,14 @@ wrote every learner-facing sentence from a brief of checked facts.
   `main` moved twice (the editor's part names; the browser tests wait for the typefaces); merged
   with no conflict, and the 705 unit tests passed after the merge.
 - 08:15 to 08:18 Five fix briefs (`briefs/F1.md` to `F5.md`), drafted, checked and placed.
+- 08:18 to 08:38 The full check: 19 browser tests failed. Real, and fixed: on a phone, three
+  Module 8 pages were 583 pixels wide (a 64-bit word input's bits each wrote their worth in the
+  number, up to 19 digits; such a row now shows each bit's worth inside its group and the group's
+  digit), the program table was 2 pixels too wide (its transfers now wrap), and the capstone's own
+  browser test still expected the old edge. The other ten are screenshot comparisons, below.
+- 08:45 to 09:05 The full check again: every stage passed but ten screenshot comparisons, none of
+  them a Module 8 figure. The same ten fail on a clean copy of `main` built in this container, so
+  they are this environment's text rendering (question 4).
 
 ## Briefs and drafts
 
@@ -252,8 +261,16 @@ CAUSE (the one the stop logic passes on). None of P&H's or H&H's names are used.
    "stuck at", and every Module 8 fault now says "stuck at".
 4. **Screenshots in this environment.** `aesthetics.spec.ts`'s screenshot tests fail here for
    figures and pages Module 8 does not touch (the remember lesson's header among them), by 4 to 7
-   per cent of pixels: the text is drawn a pixel or so apart. The rule tests in the same file pass,
-   and so does every Module 8 page in `diagrams.spec.ts`. The baselines were not updated.
+   per cent of pixels: the text is drawn a pixel or so apart. The same ten fail on a clean copy of
+   `main` built here. The rule tests in the same file pass, and so does every Module 8 page in
+   `diagrams.spec.ts`. The baselines were not updated; CI's Chromium is the judge.
+
+## What the module added to the check's time
+
+The unit tests went from 660 to 706 and from about 40 to about 50 seconds: the 37 programs run
+through the drawn datapath (21 s) and through the text (18 s) in parallel with the rest, and the
+content tests check every Module 8 figure's circuit under every fault. The browser suite gained 42
+tests (21 at each width) and about 1.5 minutes; the whole check took 17 to 19 minutes.
 
 ## Candidates for the shared primitives (listed, not extracted)
 
