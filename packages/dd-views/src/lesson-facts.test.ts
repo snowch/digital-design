@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Facts the first lesson's prose will state, checked against the simulator before they are
 // briefed. Each assertion is one sentence the lesson will make.

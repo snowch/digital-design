@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Lesson: Module 6, lesson 3, bytes: a memory whose every address names eight bits, and the
 // 16-bit words it keeps as two of them, the low byte at the lower address.

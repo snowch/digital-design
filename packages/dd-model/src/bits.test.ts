@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // The readings of a word, the recordings, and the answer graders, held to hand-worked cases.
 

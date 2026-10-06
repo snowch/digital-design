@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Reading a trace: the value of a net at a time, and the segments of a lane for drawing.
 

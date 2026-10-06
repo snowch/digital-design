@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Predict, then see. The same shape as the circuit prediction: what the question is about is
 // drawn above it, and the learner commits to an answer before the model gives its own. Two kinds of question: which of two thresholds reads more of a

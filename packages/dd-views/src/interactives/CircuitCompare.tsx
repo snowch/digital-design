@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Module 2: two circuits side by side, and their outputs row by row. Each drawing can carry its
 // gate count and depth; the table marks every row where the two disagree. With a question, it is

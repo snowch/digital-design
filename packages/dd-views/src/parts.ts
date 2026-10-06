@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // The parts a learner can place: gates, the pins of the circuit's interface, and the composites
 // of the course's library, each with its ports in drawing order.

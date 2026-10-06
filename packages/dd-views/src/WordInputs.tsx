@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // The inputs of a circuit that carry a word, as rows of bits to press (Module 3). A word's pin in
 // a drawing is not a button: flipping it between 0 and 1 means nothing for four bits. Each bit

@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Module 5: enumerated types, the construct a state machine's states are written with.
 

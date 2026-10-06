@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 import { bit0, bit1, formatWord, hierarchy, runSuite, Simulator, type Circuit } from "@dd/sim";
 import { describe, expect, it } from "vitest";

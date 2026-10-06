@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // The look of the page, held to rules a design review would apply and to screenshots of the
 // figures that matter most. The rules: no visible text smaller than 11 pixels, every control at

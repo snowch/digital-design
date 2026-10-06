@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // A recording from a sensor line, read against a threshold the learner moves. Below the plot:
 // how many samples read wrong, and how near the threshold the nearest sample of each kind came.

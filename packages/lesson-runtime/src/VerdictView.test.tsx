@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Module 2: a failure that is not about one row (a gate budget, a depth) shows the book's
 // sentence in place of the inputs and values, which it does not have.

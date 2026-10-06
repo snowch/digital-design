@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // A settle-model simulator held for a view: inputs start at 0, every change settles, and the
 // values are read back for the drawing and the table. The simulator is the only source of values.

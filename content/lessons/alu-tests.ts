@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Lesson: Module 7, lesson 4, testing the ALU: a generated suite of normal, boundary, random and
 // adversarial tests, faults put in on purpose to see which tests catch them, and the capstone, the

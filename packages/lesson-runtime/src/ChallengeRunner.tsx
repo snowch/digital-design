@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // A challenge on the page: the task, the book's editor, the run button, the verdict, the hints.
 //

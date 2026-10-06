@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // The scene the signals lesson starts from, drawn: the sensor in the freezer room, the cable that
 // runs past the compressor, and the display in the office with its receiver where the cable

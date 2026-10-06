@@ -1,6 +1,6 @@
 # Digital Design: From Bits to a Working Computer
 
-Copyright © 2026 Chris Snow.
+Copyright © 2026 Christopher Snow.
 
 An interactive, browser-based course that teaches from signals to a working CPU, built on a
 reusable interactive learning platform.

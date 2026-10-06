@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Module 5's circuits after the registers lesson: counters, registers passing words to each
 // other, and state machines. Each is a function, so every caller gets a fresh netlist. The

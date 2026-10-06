@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Titles, objectives, captions and labels of the lesson "Can you build every gate from NAND alone?", drafted by the prose process
 // from a brief of facts (brief E, docs/notes/module-2-boolean-logic.md) and checked against the

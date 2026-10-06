@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Two words added as a person adds on paper: the words in columns, the sum under a rule, and each
 // carry written small above the column it goes into, with an arrow from the column it came from.

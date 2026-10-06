@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Module 6's circuits, by the id a lesson names them with. The blocks are in memory.ts; here they
 // are wired into the circuits the lessons' figures show and the challenges' reference solutions.

@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // The graders for challenges whose artifact is the learner's settings or answers.
 //

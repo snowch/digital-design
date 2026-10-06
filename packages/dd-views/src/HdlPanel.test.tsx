@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";

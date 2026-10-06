@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // One word, read one way at a time. The learner picks a word (when there are several) and a
 // way to read it, and sees the reading and the rule that produced it. The bits never change

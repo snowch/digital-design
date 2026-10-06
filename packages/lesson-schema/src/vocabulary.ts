@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // The term gate: a rationed word may appear only in the lesson that introduces it and after.
 //

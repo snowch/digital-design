@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // The signals lesson's challenges and figures, driven through the page: each answers challenge
 // completable with its reference, plausible wrong attempts rejected with the failing case, what

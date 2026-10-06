@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 export * from "./ast";
 export { tokenize, type Token } from "./lexer";

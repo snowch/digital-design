@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Elaboration: from the syntax tree to a circuit the engine runs.
 //

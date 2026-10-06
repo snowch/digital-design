@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // A row of copies of one circuit: the way a test reaches a width the learner never drew.
 //

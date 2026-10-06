@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Facts the signals lesson's prose states, read off the figures that show them: each test runs a
 // figure's own props through the model the figure runs (dd-model: signals, bits, graders), so a

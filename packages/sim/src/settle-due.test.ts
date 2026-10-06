@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // The settle model works out only the gates whose inputs changed after its first step, and finds a
 // repeated state by a hash. Both are meant to change nothing: this test holds every step of the

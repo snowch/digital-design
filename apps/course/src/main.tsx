@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";

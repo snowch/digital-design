@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 import { LessonStore, verifyCompletion, type Book, type Storage } from "@dd/lesson-runtime";
 

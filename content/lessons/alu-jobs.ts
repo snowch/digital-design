@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Lesson: Module 7, lesson 1, the ALU's eight jobs and the three inputs that choose one.
 //

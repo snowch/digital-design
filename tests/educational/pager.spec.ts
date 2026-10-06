@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // The links at the bottom of a lesson, in the browser, at both widths: from the keyboard they lead
 // on to the next lesson and back again, each opening at its top; the first lesson leads back to

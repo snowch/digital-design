@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Module 7: a generated test suite run against the ALU, healthy or with a fault put in on
 // purpose. The cases come from the generator in dd-model (normal, boundary, random with a recorded

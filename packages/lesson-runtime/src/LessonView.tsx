@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // A lesson, rendered from its data: the header, the ten sections with their interactives, the
 // model note and the model-versus-reality note. Interactives come from the book's registry by

@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // A small seeded random number generator, for the one place the engine is not deterministic by
 // design: the metastability overlay. Its draws are recorded in the trace, so a replay reproduces

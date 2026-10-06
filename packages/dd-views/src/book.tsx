@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // The digital-design book: the grader and the challenge editor the runtime calls, and the
 // registry of interactives the lessons name. The grader is the engine's test runner behind a

@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Lesson: How does a circuit work through a list of jobs?  (module 5, lesson 4; Slice 2)
 //

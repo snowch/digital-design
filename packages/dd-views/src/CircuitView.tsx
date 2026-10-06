@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // A circuit, drawn. Values on the wires come from a simulator; the view never computes one.
 // A composite is a closed box until opened, and opening it shows its own gates in place of the

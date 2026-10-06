@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Markdown prose, rendered the same way everywhere: GitHub tables and lists, maths through KaTeX.
 // The app imports KaTeX's stylesheet once; this component only produces the markup.

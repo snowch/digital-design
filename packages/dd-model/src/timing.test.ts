@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 import { applyMetastabilityOverlay, bit0, bit1, formatWord, Simulator } from "@dd/sim";
 import { describe, expect, it } from "vitest";

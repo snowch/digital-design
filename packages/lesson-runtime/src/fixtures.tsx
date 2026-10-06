@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Fixtures for the runtime's own tests: a small lesson and a book whose grader is a string match.
 // Not exported from the package.

@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // A library circuit written out as text by the generator, beside its drawing: the abstraction
 // the text language offers for what the learner has just built out of gates.

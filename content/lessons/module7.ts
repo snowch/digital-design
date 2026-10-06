@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Module 7's shared data: the words its figures start from and the test vectors its challenges
 // grade with, every expected value worked out in bigints by the ALU's reference (`aluResult` in

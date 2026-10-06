@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // The course shell: header, routes, footer. Lessons render through the runtime with the
 // digital-design book; the shell itself knows nothing about circuits.

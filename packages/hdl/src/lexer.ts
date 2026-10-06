@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Tokens of the subset. Comments are skipped; positions are kept for messages.
 

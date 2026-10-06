@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Module 6: the memory explorer. A memory running in the simulator, drawn as a block that opens
 // one level at a time (the memory, its words, a word's flip-flops), with its address, data and

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";

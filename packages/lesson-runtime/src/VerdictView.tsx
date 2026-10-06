@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // What a run of the tests says, in the learner's terms: which tests failed, what the circuit
 // gave, what the test expected, and where the disagreement first appears.

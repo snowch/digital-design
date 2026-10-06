@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Facts the state-encoding lesson's prose states, read off the figures that show them.
 

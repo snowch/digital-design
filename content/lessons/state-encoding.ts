@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Lesson: Which codes should the states have, and how is a state machine written?
 // (module 5, lesson 5)

@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Module 2: a combinational circuit's truth table, worked out by the simulator, and the two
 // questions the module asks of tables: do two circuits agree in every row, and in which pairs of

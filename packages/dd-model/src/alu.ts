@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Module 7: the course's ALU. Eight jobs on two words, four flags, any width.
 //

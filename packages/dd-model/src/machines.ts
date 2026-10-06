@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Module 5's state machines, as data. fsm.ts turns each into a circuit and into text.
 //

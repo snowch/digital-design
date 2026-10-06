@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Lesson: How does a circuit hold a word?  (module 5, lesson 1)
 //

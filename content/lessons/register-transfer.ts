@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Lesson: How do registers pass words to each other?  (module 5, lesson 3)
 //

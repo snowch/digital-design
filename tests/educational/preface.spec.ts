@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // The page before the first lesson, in the browser: the front page leads to it, its self-check
 // marks each answer and shows the model's working under a wrong one, and it ends at the first

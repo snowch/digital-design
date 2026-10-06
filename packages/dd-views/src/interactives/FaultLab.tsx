@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Break it on purpose. A named fault is applied to a library circuit; the broken circuit runs
 // live, and a set of checks (the healthy circuit's own behaviour over a script) says which steps

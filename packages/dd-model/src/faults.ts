@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // The fault library: named ways to break a circuit, so a lesson can ask "what happens now?"
 //

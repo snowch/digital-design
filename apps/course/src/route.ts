@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Hash routes, so the site works from GitHub Pages without server rules: `#/` is the lesson
 // list, `#/start` the page before the first lesson and `#/lesson/<id>` a lesson.

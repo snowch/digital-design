@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // The D flip-flop: two D latches in series, opened on opposite halves of the clock.
 //

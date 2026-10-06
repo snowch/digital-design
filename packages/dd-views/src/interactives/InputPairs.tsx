@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Module 2: a circuit's truth table read in pairs of rows. The learner picks an input; the
 // figure sets each row beside the row that differs from it in that input alone, and says whether

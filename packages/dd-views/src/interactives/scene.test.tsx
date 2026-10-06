@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // The two drawings that state no number of their own: a lesson's scene, which places the
 // lesson's names, and a sum on paper, whose carries and digits are the model's.

@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Module 2: measures of a combinational circuit that a challenge can grade besides its truth
 // table: how many gates it has, how deep it is, and which kinds of gate it uses.

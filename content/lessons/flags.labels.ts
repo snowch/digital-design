@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Titles, objectives, captions and labels of the lesson flags, drafted by the prose process from
 // a brief of facts (see CLAUDE.md and docs/notes/module-7-alu.md) and checked against the lesson.

@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Inside a flip-flop, in time. A scripted run in the delay model; a cursor moves through it,
 // event by event or freely, and the drawing shows every net's value at that moment, the master

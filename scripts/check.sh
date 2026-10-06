@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright © 2026 Chris Snow
+# Copyright © 2026 Christopher Snow
 
 # Exactly what CI runs. Run it before pushing: `npm run check`.
 #

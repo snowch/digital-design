@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // The registers lesson's challenges and figures, driven through the page as the first lesson's
 // are in lesson.spec.ts: every challenge completable with its reference, a plausible wrong

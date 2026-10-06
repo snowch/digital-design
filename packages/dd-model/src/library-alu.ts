@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Module 7's circuits, by the id a lesson names them with. The ALU itself is in alu.ts; here it is
 // placed for the figures that draw it, and the challenges' references are listed.

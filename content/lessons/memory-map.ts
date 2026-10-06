@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Lesson: Module 6, lesson 4, the memory map: the shop's display and sensor at addresses, a ROM
 // filled from a list, and the module's capstone, a memory of the shape a small program needs.

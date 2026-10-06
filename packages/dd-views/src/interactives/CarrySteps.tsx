@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Module 7: the carry, stepped from slice to slice. A row of the ALU's slices, never drawn as
 // gates: the figure sets one pair of words, lets the circuit settle, changes them, and records

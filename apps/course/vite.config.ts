@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // The course app. One bundle, built under the base path GitHub Pages serves it from
 // (/digital-design/ on snowch.github.io, an origin the author's books share). BASE_PATH lets the

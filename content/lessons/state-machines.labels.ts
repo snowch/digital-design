@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Titles, objectives, captions and labels of the lesson on state machines, drafted by the
 // prose process from a brief of facts (docs/notes/module-5-state-machines/briefs/SE.md).

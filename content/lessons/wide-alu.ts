@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Lesson: Module 7, lesson 3, the same ALU at 64 bits: the carry stepped from slice to slice, the
 // circuit opened one level at a time, and the width written as a parameter in SystemVerilog.

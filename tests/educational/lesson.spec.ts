@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // The educational tests: every lesson renders whole; every challenge is completable through the
 // page with its reference solution and rejects a wrong attempt with a diagnosis; completion is

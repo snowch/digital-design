@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // The metastability overlay: the one place the deterministic engine steps aside.
 //

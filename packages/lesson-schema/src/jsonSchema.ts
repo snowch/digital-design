@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // The lesson format as JSON Schema, for a book whose toolchain is not TypeScript.
 

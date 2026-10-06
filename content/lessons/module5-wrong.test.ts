@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Plausible wrong attempts at Module 5's challenges fail, at the test a learner would expect.
 

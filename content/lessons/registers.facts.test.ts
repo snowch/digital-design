@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Facts the registers lesson's prose states, read off the figures that show them: each test runs
 // a figure's own props through the code the figure runs, so a change to the lesson's data or to

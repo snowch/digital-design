@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // The editor and the grade for a challenge whose artifact is the learner's settings or answers.
 //

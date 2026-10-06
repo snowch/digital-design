@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Module 3's challenges and figures, driven through the page as the earlier lessons' are: every
 // challenge built with its reference through the drawing editor itself (part buttons and ports,

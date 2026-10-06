@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Generated test cases for a circuit that works on two words: normal, boundary, random and
 // adversarial. Module 7 uses them to test the ALU at 16 and 64 bits; later modules can use the

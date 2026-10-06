@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // A truth table on its own: a reference table, or a small circuit enumerated by the simulator.
 

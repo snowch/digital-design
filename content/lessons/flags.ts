@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Lesson: Module 7, lesson 2, the flags: one-bit outputs that say something about the result.
 //

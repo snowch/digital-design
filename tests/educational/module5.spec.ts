@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Module 5 after the registers lesson: counters, register transfer and state machines, driven
 // through the page as the registers lesson's spec drives its own. Every challenge completable with

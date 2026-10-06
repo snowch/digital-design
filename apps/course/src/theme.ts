@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // The theme follows the system unless the learner picks one; the choice is kept in this browser.
 

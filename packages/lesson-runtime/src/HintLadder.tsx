@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Five hints, one at a time, in a fixed order. How many are shown is the learner's state.
 

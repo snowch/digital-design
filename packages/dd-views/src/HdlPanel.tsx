@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // The text side: an editor for the course's hardware description language, the gate's and the
 // elaborator's messages, and the circuit the text describes, drawn.

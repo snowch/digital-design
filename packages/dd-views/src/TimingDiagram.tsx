@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // A timing diagram from a trace: one lane per signal, levels drawn as steps, X as a hatched band
 // between the levels, bus values as text, clock edges marked on the axis. A cursor picks a time

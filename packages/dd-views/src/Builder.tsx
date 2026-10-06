@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // The drawing editor: place parts from a palette, wire output ports to input ports, move and
 // delete, all with a pointer or with the keyboard alone. The drawing is the learner's; this

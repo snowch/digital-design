@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Module 2: a combinational circuit's outputs, each as one expression in the subset's operators.
 //

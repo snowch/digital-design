@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Module 3's circuits, by the id a lesson names them with. Each is a function, so every caller
 // gets a fresh netlist. The blocks they are built from are in combinational.ts; here they are

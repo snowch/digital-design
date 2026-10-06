@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // The width an element has on the page, so a drawing can use one pixel per unit and keep its
 // text at the size the stylesheet sets, at any width. Falls back to `fallback` where nothing

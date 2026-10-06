@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Module 2's three lessons, driven through the page as the other lessons' are: every challenge
 // completable with its reference, plausible wrong attempts rejected with the row or the limit

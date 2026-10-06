@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Wires kept apart: how the router turns a fan of wires, and what sceneProblems says of two wires
 // too close together or crossing where a better order of turns would not.

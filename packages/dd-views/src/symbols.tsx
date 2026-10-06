@@ -1,4 +1,4 @@
-// Copyright © 2026 Chris Snow
+// Copyright © 2026 Christopher Snow
 
 // Gate symbols in SVG, drawn in a box 60 wide with the origin at the top left, as tall as the part:
 // a gate with more inputs is taller, and its body is drawn to span every one of them. The shapes
