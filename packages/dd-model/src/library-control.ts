@@ -16,21 +16,6 @@ type Place = (circuit: Circuit, at: At) => Circuit;
 type Routes = Readonly<Record<string, readonly number[]>>;
 
 /** Hand-placed drawings of Module 9's circuits' top levels, in grid cells. */
-/** The decoder's control-signal gates, as the lesson's figure and the decoder's inside draw them. */
-const SIGNAL_GATES: At = {
-  orJobs: [12, 1],
-  orMem: [12, 5],
-  andOp2: [19, 1],
-  andOp1: [19, 4],
-  andOp0: [19, 7],
-  andAzero: [19, 10],
-  andByte: [19, 13],
-  orWritey: [27, 1],
-  orBconst: [27, 5],
-  orOp1: [27, 9],
-  orOp0: [27, 14],
-};
-
 export const CONTROL_AT: Readonly<Record<string, At>> = {
   decoder: {
     "in:K": [0, 5],
@@ -131,6 +116,339 @@ function routedInside(circuit: Circuit, routes: Readonly<Record<string, Routes>>
   };
 }
 
+/**
+ * Wires from a block's pins into the parts inside it, each down a vertical of its own: `columns`
+ * gives each pin's column in grid cells, `feeds` the ports each part takes, named as the pins.
+ */
+function bus(
+  columns: Readonly<Record<string, number>>,
+  feeds: Readonly<Record<string, readonly string[]>>,
+): Routes {
+  const out: Record<string, readonly number[]> = {};
+  for (const [part, ports] of Object.entries(feeds))
+    for (const port of ports) {
+      const x = columns[port];
+      if (x !== undefined) out[`input:${port}.y>${part}.${port}`] = [x];
+    }
+  return out;
+}
+
+const CHECK_KINDS = ["KIND1", "KIND2", "LOAD", "STORE", "BRANCH", "CALL", "JUMP", "KIND8"];
+const CHECK_KINDS_CALL = [
+  "KIND1",
+  "KIND2",
+  "LOAD",
+  "STORE",
+  "BRANCH",
+  "KIND6",
+  "KIND7",
+  "KIND8",
+  "KIND9",
+];
+const JOB_BITS = ["J3", "J2", "J1", "J0"];
+
+/**
+ * A column for each of a block's pins, the top pin's furthest right, half a cell apart, ending a
+ * cell before `x`: every wire runs down to the parts below its pin, so none crosses another that
+ * keeps its order.
+ */
+function columns(pins: readonly string[], x: number): Record<string, number> {
+  return Object.fromEntries(pins.map((p, i) => [p, x - 1 - i / 2]));
+}
+
+/** Hand routes inside every block of a kind a learner opens, by the block's kind. */
+/** The decoder's lines down a bus into its control signals and its checks. */
+const DECODER_BUS: Routes = {
+  "kinds.KIND1>signals.KIND1": [14],
+  "kinds.KIND1>checks.KIND1": [14],
+  "kinds.KIND2>signals.KIND2": [13.5],
+  "kinds.KIND2>checks.KIND2": [13.5],
+  "kinds.KIND3>signals.LOAD": [13],
+  "kinds.KIND3>checks.LOAD": [13],
+  "kinds.KIND4>signals.STORE": [12.5],
+  "kinds.KIND4>checks.STORE": [12.5],
+  "kinds.KIND5>signals.BRANCH": [12],
+  "kinds.KIND5>checks.BRANCH": [12],
+  "kinds.KIND6>signals.CALL": [11.5],
+  "kinds.KIND6>checks.CALL": [11.5],
+  "kinds.KIND7>signals.JUMP": [11],
+  "kinds.KIND7>checks.JUMP": [11],
+  "kinds.KIND8>checks.KIND8": [10.5],
+  "jBits.b3>signals.J3": [10],
+  "jBits.b3>checks.J3": [10],
+  "jBits.b2>signals.J2": [9.5],
+  "jBits.b2>checks.J2": [9.5],
+  "jBits.b1>signals.J1": [9],
+  "jBits.b1>checks.J1": [9],
+  "jBits.b0>signals.J0": [8.5],
+  "jBits.b0>checks.J0": [8.5],
+  "input:C.y>checks.C": [8],
+};
+
+/** The job check's wires, the job's bits down a bus and its conditions up to their ANDs. */
+const JOB_CHECK_ROUTES: Routes = {
+  // The job's bits down a bus, the top bit's furthest right.
+  "input:J3.y>orAnyJob.a": [5.5],
+  "input:J2.y>orJ2J1.a": [5],
+  "input:J2.y>orAnyJob.b": [5],
+  "input:J1.y>orJ2J1.b": [4.5],
+  "input:J1.y>orAnyJob.c": [4.5],
+  "input:J1.y>orJ1J0.a": [4.5],
+  "input:J0.y>orAnyJob.d": [4],
+  "input:J0.y>orJ1J0.b": [4],
+  // J2 and J3 over the gates above them, down into the first input of their gates.
+  "input:J2.y>andFiveUp.a": [5, 35.1, 10.5],
+  "input:J3.y>orHighJob.a": [5.5, 34.6, 14.5],
+  // The job conditions up to their ANDs, nested: the top group's furthest left.
+  "input:J3.y>andBadEight.b": [19],
+  "orJ2J1.y>andBadMem.b": [19.5],
+  "orAnyJob.y>andBadOne.b": [20],
+  "orHighJob.y>andBadSystem.b": [20.5],
+  // The four ANDs into their OR, nested from above and below.
+  "andBadEight.y>orBadJob.a": [26.5],
+  "andBadMem.y>orBadJob.b": [25.5],
+  "andBadOne.y>orBadJob.c": [25.5],
+  "andBadSystem.y>orBadJob.d": [26.5],
+};
+
+export const CONTROL_KIND_ROUTES: Readonly<Record<string, Routes>> = {
+  // Down the bus, the line from higher up further right.
+  "control-decoder": DECODER_BUS,
+  "control-decoder-mem": DECODER_BUS,
+
+  // Down a column each, the line from higher up further right.
+  "kind-lines": {
+    "kBits.b1>low.S1": [11],
+    "kBits.b0>low.S0": [10.5],
+    "high.Y0>kind1.a": [20.5],
+    "low.Y1>kind1.b": [18.5],
+    "high.Y0>kind2.a": [20.5],
+    "low.Y2>kind2.b": [18],
+    "high.Y0>kind3.a": [20.5],
+    "low.Y3>kind3.b": [17.5],
+    "high.Y1>kind4.a": [20],
+    "low.Y0>kind4.b": [19],
+    "high.Y1>kind5.a": [20],
+    "low.Y1>kind5.b": [18.5],
+    "high.Y1>kind6.a": [20],
+    "low.Y2>kind6.b": [18],
+    "high.Y1>kind7.a": [20],
+    "low.Y3>kind7.b": [17.5],
+    "high.Y2>kind8.a": [19.5],
+    "low.Y0>kind8.b": [19],
+    "high.Y2>kind9.a": [19.5],
+    "low.Y1>kind9.b": [18.5],
+  },
+  "kind-check": {
+    "input:KIND1.y>norKinds.a": [6],
+    "input:KIND2.y>norKinds.b": [5],
+    "input:LOAD.y>norKinds.c": [4],
+    "input:BRANCH.y>norKinds.e": [4],
+    "input:CALL.y>norKinds.f": [5],
+    "input:JUMP.y>norKinds.g": [6],
+    "input:KIND8.y>norKinds.h": [7],
+  },
+  "job-check": JOB_CHECK_ROUTES,
+
+  "number-check": {
+    // C2 and C1 OR C0 down into their AND, nested; the bits above 2 down into the OR.
+    "cBits.C2>andC5to7.a": [15],
+    "orC1C0.y>andC5to7.b": [14.5],
+    "cBits.CHIGH>orOutside.a": [20],
+    "andNames.y>andBadNumber.b": [26],
+    // Up into the AND that names a register, the lowest furthest right.
+    "notJ2.y>andNames.b": [9],
+    "input:J1.y>andNames.c": [9.5],
+    "input:KIND8.y>andNames.d": [10],
+  },
+  "system-jobs": {
+    "input:J3.y>orAnyJob.a": [4.5],
+    "input:J2.y>orAnyJob.b": [4],
+    "input:J1.y>orAnyJob.c": [3.5],
+    "input:J1.y>orJ1J0.a": [3.5],
+    "input:J0.y>orAnyJob.d": [3],
+    "input:J0.y>orJ1J0.b": [3],
+    "input:J2.y>andFiveUp.a": [4, 16.1, 9.5],
+    "input:J3.y>orHighJob.a": [4.5, 15.6, 13.5],
+    "input:KIND8.y>andSystem.a": [13.5],
+    "input:KIND8.y>andStop.a": [23.5],
+    "orAnyJob.y>andStop.b": [9, 14.6, 23],
+  },
+  "control-signals": {
+    // Before the ORs of kind lines: KIND2 up into JOBS, STORE up into MEM, LOAD over MEM.
+    "input:KIND2.y>orJobs.b": [4],
+    "input:STORE.y>orMem.b": [4],
+    "input:LOAD.y>orWritey.b": [3.5, 5.6, 9],
+    // Down the bus, the higher line further right; up it, the lower line further right.
+    "orJobs.y>andOp2.a": [13.5],
+    "orJobs.y>andOp1.a": [13.5],
+    "orJobs.y>andOp0.a": [13.5],
+    "input:KIND2.y>orBconst.a": [13],
+    "orMem.y>andAzero.a": [12.5],
+    "orMem.y>orBconst.b": [12.5],
+    "orMem.y>orOp1.b": [12.5],
+    "orMem.y>output:MEM.a": [12.5],
+    "input:BRANCH.y>orOp1.c": [12],
+    "input:BRANCH.y>orOp0.b": [12],
+    "input:JUMP.y>orBconst.c": [11.5],
+    "input:JUMP.y>orOp1.d": [11.5],
+    "input:J1.y>andOp1.b": [11],
+    "input:J0.y>andOp0.b": [11],
+    "input:CALL.y>orWritey.c": [9.5],
+    "input:J3.y>andAzero.b": [10],
+    "input:J0.y>andByte.b": [10.5],
+    // Each job AND down into its OR.
+    "andOp1.y>orOp1.a": [18.5],
+    "andOp0.y>orOp0.a": [18.5],
+  },
+  "control-signals-call": {
+    "input:KIND2.y>orJobs.b": [4],
+    "input:STORE.y>orMem.b": [4],
+    "input:LOAD.y>orWritey.b": [3.5, 5.6, 8.5],
+    "orJobs.y>andOp2.a": [14.5],
+    "orJobs.y>andOp1.a": [14.5],
+    "orJobs.y>andOp0.a": [14.5],
+    "input:KIND2.y>orBconst.a": [14],
+    "orMem.y>andAzero.a": [13.5],
+    "orMem.y>orBconst.b": [13.5],
+    "orMem.y>orOp1.b": [13.5],
+    "orMem.y>output:MEM.a": [13.5],
+    "input:BRANCH.y>orOp1.c": [13],
+    "input:BRANCH.y>orOp0.b": [13],
+    "input:KIND6.y>orCall.a": [12.5],
+    "input:KIND7.y>orBconst.c": [12],
+    "input:KIND7.y>orOp1.d": [12],
+    "input:KIND7.y>orJump.a": [12],
+    "input:KIND9.y>orBconst.d": [11.5],
+    "input:KIND9.y>orOp1.e": [11.5],
+    "input:KIND9.y>orCall.b": [11.5],
+    "input:KIND9.y>orJump.b": [11.5],
+    "input:J1.y>andOp1.b": [11],
+    "input:J0.y>andOp0.b": [10.5],
+    "input:KIND6.y>orWritey.c": [9],
+    "input:KIND9.y>orWritey.d": [9.5],
+    "input:J3.y>andAzero.b": [10],
+    "input:J0.y>andByte.b": [10.5],
+    "andOp1.y>orOp1.a": [19.5],
+    "andOp0.y>orOp0.a": [19.5],
+  },
+  "control-decoder-call": {
+    "kinds.KIND1>signals.KIND1": [14.5],
+    "kinds.KIND1>checks.KIND1": [14.5],
+    "kinds.KIND2>signals.KIND2": [14],
+    "kinds.KIND2>checks.KIND2": [14],
+    "kinds.KIND3>signals.LOAD": [13.5],
+    "kinds.KIND3>checks.LOAD": [13.5],
+    "kinds.KIND4>signals.STORE": [13],
+    "kinds.KIND4>checks.STORE": [13],
+    "kinds.KIND5>signals.BRANCH": [12.5],
+    "kinds.KIND5>checks.BRANCH": [12.5],
+    "kinds.KIND6>signals.KIND6": [12],
+    "kinds.KIND6>checks.KIND6": [12],
+    "kinds.KIND7>signals.KIND7": [11.5],
+    "kinds.KIND7>checks.KIND7": [11.5],
+    "kinds.KIND8>checks.KIND8": [11],
+    "kinds.KIND9>signals.KIND9": [10.5],
+    "kinds.KIND9>checks.KIND9": [10.5],
+    "jBits.b3>signals.J3": [10],
+    "jBits.b3>checks.J3": [10],
+    "jBits.b2>signals.J2": [9.5],
+    "jBits.b2>checks.J2": [9.5],
+    "jBits.b1>signals.J1": [9],
+    "jBits.b1>checks.J1": [9],
+    "jBits.b0>signals.J0": [8.5],
+    "jBits.b0>checks.J0": [8.5],
+    "input:C.y>checks.C": [8],
+  },
+  "kind-check-call": {
+    "input:KIND1.y>norKinds.a": [7],
+    "input:KIND2.y>norKinds.b": [6],
+    "input:LOAD.y>norKinds.c": [5],
+    "input:STORE.y>norKinds.d": [4],
+    "input:KIND6.y>norKinds.f": [4],
+    "input:KIND7.y>norKinds.g": [5],
+    "input:KIND8.y>norKinds.h": [6],
+    "input:KIND9.y>norKinds.i": [7],
+  },
+  "job-check-call": {
+    ...JOB_CHECK_ROUTES,
+    "input:J2.y>andFiveUp.a": [5, 37.1, 10.5],
+    "input:J3.y>orHighJob.a": [5.5, 36.6, 14.5],
+  },
+  "decode-checks-call": {
+    ...bus(columns([...CHECK_KINDS_CALL, ...JOB_BITS, "C"], 12), {
+      kindCheck: CHECK_KINDS_CALL,
+      jobCheck: [...CHECK_KINDS_CALL, ...JOB_BITS],
+      numberCheck: ["KIND8", "J3", "J2", "J1", "C"],
+      systemJobs: ["KIND8", ...JOB_BITS],
+    }),
+    "kindCheck.NOKIND>orIllegal.a": [19],
+    "jobCheck.BADJOB>orIllegal.b": [19],
+    "numberCheck.BADNUMBER>orIllegal.c": [19],
+    "orIllegal.y>output:ILLEGAL.a": [23.5],
+    "orIllegal.y>causeWord.ILLEGAL": [23.5],
+    "systemJobs.SYSTEM>causeWord.SYSTEM": [23],
+    "systemJobs.STOP>output:STOP.a": [23],
+    "causeWord.CAUSED>output:CAUSED.a": [31.5],
+  },
+  "decode-checks": {
+    ...bus(columns([...CHECK_KINDS, ...JOB_BITS, "C"], 11), {
+      kindCheck: CHECK_KINDS,
+      jobCheck: [...CHECK_KINDS, ...JOB_BITS],
+      numberCheck: ["KIND8", "J3", "J2", "J1", "C"],
+      systemJobs: ["KIND8", ...JOB_BITS],
+    }),
+    "kindCheck.NOKIND>orIllegal.a": [18],
+    "jobCheck.BADJOB>orIllegal.b": [18],
+    "numberCheck.BADNUMBER>orIllegal.c": [18],
+    "orIllegal.y>output:ILLEGAL.a": [22.5],
+    "orIllegal.y>causeWord.ILLEGAL": [22.5],
+    "systemJobs.SYSTEM>causeWord.SYSTEM": [22],
+    "systemJobs.STOP>output:STOP.a": [22],
+    "causeWord.CAUSED>output:CAUSED.a": [30.5],
+  },
+};
+
+/** A circuit with hand routes inside every block whose kind `routes` names. */
+function routedByKind(circuit: Circuit, routes: Readonly<Record<string, Routes>>): Circuit {
+  const forParts = new Map<string, Record<string, readonly number[]>>();
+  const forNets = new Map<number, Record<string, readonly number[]>>();
+  for (const block of circuit.composites) {
+    const r = routes[block.kind];
+    if (!r) continue;
+    for (const [key, route] of Object.entries(r)) {
+      // A wire from a pin carries its route on the part it enters: the pin's net enters other
+      // blocks too, whose parts may share the names.
+      const source = key.slice(0, key.indexOf("."));
+      const target = key.slice(key.indexOf(">") + 1, key.lastIndexOf("."));
+      const holder = source.startsWith("input:") ? target : source;
+      if (holder.startsWith("output:")) {
+        const net = block.inputs[source.slice("input:".length)];
+        if (net !== undefined) forNets.set(net, { ...(forNets.get(net) ?? {}), [key]: route });
+      } else {
+        const path = `${block.path}/${holder}`;
+        forParts.set(path, { ...(forParts.get(path) ?? {}), [key]: route });
+      }
+    }
+  }
+  const withRoutes = <T extends { meta?: Readonly<Record<string, unknown>> }>(
+    x: T,
+    r: Record<string, readonly number[]> | undefined,
+  ): T =>
+    r
+      ? {
+          ...x,
+          meta: { ...(x.meta ?? {}), routes: { ...((x.meta?.["routes"] as object) ?? {}), ...r } },
+        }
+      : x;
+  return {
+    ...circuit,
+    components: circuit.components.map((c) => withRoutes(c, forParts.get(c.path))),
+    composites: circuit.composites.map((c) => withRoutes(c, forParts.get(c.path))),
+    nets: circuit.nets.map((n) => withRoutes(n, forNets.get(n.id))),
+  };
+}
+
 /** Hand routes, where the router alone cannot keep a drawing clear. */
 export const CONTROL_ROUTES: Readonly<Record<string, Routes>> = {
   machine: {
@@ -157,36 +475,44 @@ export const CONTROL_ROUTES: Readonly<Record<string, Routes>> = {
 /** Hand-placed insides of Module 9's blocks a learner opens, by kind. */
 export const CONTROL_INSIDE: Readonly<Record<string, At>> = {
   // The capstone's: kind 9's line joins WRITEY, BCONST and OP1, and CALL and JUMP are ORs.
+  // The capstone's, drawn as the decoder without it: kind 9's line joins WRITEY, BCONST and OP1,
+  // and CALL and JUMP are ORs below the rest.
   "control-signals-call": {
     "in:KIND1": [0, 1],
-    "in:KIND2": [0, 3],
-    "in:LOAD": [0, 5],
-    "in:STORE": [0, 7],
-    "in:BRANCH": [0, 9],
-    "in:KIND6": [0, 11],
-    "in:KIND7": [0, 13],
-    "in:J3": [0, 15],
-    "in:J2": [0, 17],
-    "in:J1": [0, 19],
-    "in:J0": [0, 21],
-    "in:KIND9": [0, 23],
-    ...SIGNAL_GATES,
-    orWritey: [27, 1],
-    orBconst: [27, 6],
-    orOp1: [27, 11],
-    orOp0: [27, 17],
-    orCall: [27, 20],
-    orJump: [27, 23],
-    "out:WRITEY": [35, 2],
-    "out:BCONST": [35, 7],
-    "out:OP2": [35, 4.5],
-    "out:OP1": [35, 13],
-    "out:OP0": [35, 17],
-    "out:AZERO": [35, 9.5],
-    "out:BYTE": [35, 15],
-    "out:CALL": [35, 20],
-    "out:JUMP": [35, 23],
-    "out:MEM": [35, 25],
+    "in:KIND2": [0, 4],
+    "in:LOAD": [0, 6],
+    "in:STORE": [0, 8],
+    "in:BRANCH": [0, 10],
+    "in:KIND6": [0, 12],
+    "in:KIND7": [0, 14],
+    "in:KIND9": [0, 16],
+    "in:J3": [0, 18],
+    "in:J2": [0, 20],
+    "in:J1": [0, 22],
+    "in:J0": [0, 24],
+    orJobs: [5, 1],
+    orMem: [5, 6],
+    andByte: [15.5, 6.5],
+    andAzero: [15.5, 10],
+    andOp2: [15.5, 19],
+    andOp1: [15.5, 22.5],
+    andOp0: [15.5, 31],
+    orWritey: [20.5, 1.5],
+    orBconst: [20.5, 13],
+    orOp1: [20.5, 25],
+    orOp0: [20.5, 33.5],
+    orCall: [20.5, 37],
+    orJump: [20.5, 40],
+    "out:WRITEY": [26, 3],
+    "out:BYTE": [26, 7],
+    "out:AZERO": [26, 10.5],
+    "out:BCONST": [26, 14.5],
+    "out:OP2": [26, 19.5],
+    "out:OP1": [26, 27],
+    "out:OP0": [26, 34],
+    "out:CALL": [26, 37.5],
+    "out:JUMP": [26, 40.5],
+    "out:MEM": [26, 43],
   },
   "controller-outputs": {
     "in:FETCH": [0, 4],
@@ -235,6 +561,259 @@ export const CONTROL_INSIDE: Readonly<Record<string, At>> = {
     "out:HALT": [30, 28],
     "out:CAUSE": [30, 30],
   },
+  // Module 9's decoder opened, for lesson 9.1 (without MEM) and for the machine (with it): K's
+  // kind lines and J's bits down a bus into the control signals and the checks below them, the
+  // higher line further right; the kind lines that are signals on their own straight out above.
+  "control-decoder": {
+    "in:K": [0, 4.5],
+    "in:J": [0, 13.5],
+    "in:C": [0, 17],
+    kinds: [4, 1],
+    jBits: [4, 12],
+    signals: [15, 9],
+    checks: [15, 23],
+    "out:LOAD": [23, 3],
+    "out:STORE": [27, 4],
+    "out:BRANCH": [23, 5],
+    "out:CALL": [27, 6],
+    "out:JUMP": [23, 7],
+    "out:WRITEY": [27, 11],
+    "out:BYTE": [23, 12],
+    "out:AZERO": [27, 13],
+    "out:BCONST": [23, 14],
+    "out:OP2": [27, 15],
+    "out:OP1": [23, 16],
+    "out:OP0": [27, 17],
+    "out:CAUSED": [23, 29],
+    "out:STOP": [27, 30],
+  },
+  "control-decoder-mem": {
+    "in:K": [0, 4.5],
+    "in:J": [0, 13.5],
+    "in:C": [0, 17],
+    kinds: [4, 1],
+    jBits: [4, 12],
+    signals: [15, 9],
+    checks: [15, 23],
+    "out:LOAD": [23, 3],
+    "out:STORE": [27, 4],
+    "out:BRANCH": [23, 5],
+    "out:CALL": [27, 6],
+    "out:JUMP": [23, 7],
+    "out:WRITEY": [27, 10.5],
+    "out:BYTE": [23, 11.5],
+    "out:AZERO": [27, 12.5],
+    "out:BCONST": [23, 13.5],
+    "out:OP2": [27, 14.5],
+    "out:OP1": [23, 15.5],
+    "out:OP0": [27, 16.5],
+    "out:MEM": [23, 17.5],
+    "out:CAUSED": [23, 29],
+    "out:STOP": [27, 30],
+  },
+  "control-decoder-call": {
+    "in:K": [0, 5],
+    "in:J": [0, 14.5],
+    "in:C": [0, 18],
+    kinds: [4, 1],
+    jBits: [4, 13],
+    signals: [15.5, 8],
+    checks: [15.5, 23],
+    "out:LOAD": [23.5, 3],
+    "out:STORE": [27.5, 4],
+    "out:BRANCH": [23.5, 5],
+    "out:WRITEY": [27.5, 9],
+    "out:BYTE": [23.5, 10],
+    "out:AZERO": [27.5, 11],
+    "out:BCONST": [23.5, 12],
+    "out:OP2": [27.5, 13],
+    "out:OP1": [23.5, 14],
+    "out:OP0": [27.5, 15],
+    "out:CALL": [23.5, 16],
+    "out:JUMP": [27.5, 17],
+    "out:MEM": [23.5, 18],
+    "out:CAUSED": [23.5, 29.5],
+    "out:STOP": [27.5, 30.5],
+  },
+  "decode-checks-call": {
+    "in:KIND1": [0, 1],
+    "in:KIND2": [0, 3],
+    "in:LOAD": [0, 5],
+    "in:STORE": [0, 7],
+    "in:BRANCH": [0, 9],
+    "in:KIND6": [0, 11],
+    "in:KIND7": [0, 13],
+    "in:KIND8": [0, 15],
+    "in:KIND9": [0, 17],
+    "in:J3": [0, 19],
+    "in:J2": [0, 21],
+    "in:J1": [0, 23],
+    "in:J0": [0, 25],
+    "in:C": [0, 27],
+    kindCheck: [12, 9],
+    jobCheck: [12, 20],
+    numberCheck: [12, 35],
+    systemJobs: [12, 42],
+    orIllegal: [20, 25],
+    causeWord: [24.5, 39],
+    "out:ILLEGAL": [33, 26],
+    "out:CAUSED": [31.5, 39.5],
+    "out:STOP": [33, 44.5],
+  },
+  "kind-check-call": {
+    "in:KIND1": [0, 1],
+    "in:KIND2": [0, 3],
+    "in:LOAD": [0, 5],
+    "in:STORE": [0, 7],
+    "in:BRANCH": [0, 9],
+    "in:KIND6": [0, 11],
+    "in:KIND7": [0, 13],
+    "in:KIND8": [0, 15],
+    "in:KIND9": [0, 17],
+    norKinds: [8, 5],
+    "out:NOKIND": [12, 9],
+  },
+  "job-check-call": {
+    "in:KIND1": [0, 1],
+    "in:KIND2": [0, 3],
+    "in:BRANCH": [0, 5],
+    "in:LOAD": [0, 7],
+    "in:STORE": [0, 9],
+    "in:KIND6": [0, 11],
+    "in:KIND7": [0, 13],
+    "in:KIND9": [0, 15],
+    "in:KIND8": [0, 17],
+    "in:J3": [0, 20],
+    "in:J2": [0, 22],
+    "in:J1": [0, 24],
+    "in:J0": [0, 26],
+    orEight: [4, 2],
+    orMemKinds: [4, 7],
+    orOneJob: [4, 11],
+    orJ2J1: [6.5, 28],
+    orAnyJob: [6.5, 31],
+    orJ1J0: [6.5, 38],
+    andFiveUp: [11, 37.5],
+    orHighJob: [15, 37],
+    andBadEight: [21.5, 3],
+    andBadMem: [21.5, 7.5],
+    andBadOne: [21.5, 12],
+    andBadSystem: [21.5, 17],
+    orBadJob: [27.5, 8.5],
+    "out:BADJOB": [31.5, 10],
+  },
+  // The checks in the order the lesson names them, the kind check, the job check and the number
+  // check, their OR beside them, then the system jobs and the cause.
+  "decode-checks": {
+    "in:KIND1": [0, 1],
+    "in:KIND2": [0, 3],
+    "in:LOAD": [0, 5],
+    "in:STORE": [0, 7],
+    "in:BRANCH": [0, 9],
+    "in:CALL": [0, 11],
+    "in:JUMP": [0, 13],
+    "in:KIND8": [0, 15],
+    "in:J3": [0, 17],
+    "in:J2": [0, 19],
+    "in:J1": [0, 21],
+    "in:J0": [0, 23],
+    "in:C": [0, 25],
+    kindCheck: [11, 8],
+    jobCheck: [11, 19],
+    numberCheck: [11, 33],
+    systemJobs: [11, 40],
+    orIllegal: [19, 23.5],
+    causeWord: [23.5, 37],
+    // CAUSED a cell and a half in from the others, so its eight bits fit inside the drawing.
+    "out:ILLEGAL": [32, 24.5],
+    "out:CAUSED": [30.5, 37.5],
+    "out:STOP": [32, 42.5],
+  },
+  // The decoder on K3 K2 above the one on K1 K0, then an AND per kind in order, below both, so
+  // every line runs down to its ANDs (kind 9's is the capstone's).
+  "kind-lines": {
+    "in:K": [0, 3.5],
+    kBits: [5, 2],
+    high: [13, 1],
+    low: [13, 8],
+    kind1: [22, 12],
+    kind2: [22, 15],
+    kind3: [22, 18],
+    kind4: [22, 21],
+    kind5: [22, 24],
+    kind6: [22, 27],
+    kind7: [22, 30],
+    kind8: [22, 33],
+    kind9: [22, 36],
+    "out:KIND1": [27, 12.5],
+    "out:KIND2": [27, 15.5],
+    "out:KIND3": [27, 18.5],
+    "out:KIND4": [27, 21.5],
+    "out:KIND5": [27, 24.5],
+    "out:KIND6": [27, 27.5],
+    "out:KIND7": [27, 30.5],
+    "out:KIND8": [27, 33.5],
+    "out:KIND9": [27, 36.5],
+  },
+  // Module 3's 2-to-4 decoder, opened inside the kind lines, drawn as Module 3's figure of its
+  // gates ("decoder-gates" in library-combinational.ts) draws them.
+  "decoder-2": {
+    "in:S1": [0, 3],
+    notS1: [5, 2.5],
+    "in:S0": [0, 7],
+    notS0: [5, 6.5],
+    and0: [12, 1],
+    and1: [12, 5],
+    and2: [12, 9],
+    and3: [12, 13],
+    "out:Y0": [17, 1],
+    "out:Y1": [17, 5],
+    "out:Y2": [17, 9],
+    "out:Y3": [17, 13],
+  },
+  // One NOR gate, its inputs fanned in from both sides of its middle.
+  "kind-check": {
+    "in:KIND1": [0, 1],
+    "in:KIND2": [0, 3],
+    "in:LOAD": [0, 5],
+    "in:STORE": [0, 7],
+    "in:BRANCH": [0, 9],
+    "in:CALL": [0, 11],
+    "in:JUMP": [0, 13],
+    "in:KIND8": [0, 15],
+    norKinds: [8, 4],
+    "out:NOKIND": [12, 7.5],
+  },
+  // The groups of kinds in the order the lesson names them, each OR beside the AND that takes
+  // its job condition; the job's bits below, the conditions worked out from them rising to the ANDs.
+  "job-check": {
+    "in:KIND1": [0, 1],
+    "in:KIND2": [0, 3],
+    "in:BRANCH": [0, 5],
+    "in:LOAD": [0, 7],
+    "in:STORE": [0, 9],
+    "in:CALL": [0, 11],
+    "in:JUMP": [0, 13],
+    "in:KIND8": [0, 15],
+    "in:J3": [0, 18],
+    "in:J2": [0, 20],
+    "in:J1": [0, 22],
+    "in:J0": [0, 24],
+    orEight: [4, 2],
+    orMemKinds: [4, 7],
+    orOneJob: [4, 11],
+    orJ2J1: [6.5, 26],
+    orAnyJob: [6.5, 29],
+    orJ1J0: [6.5, 36],
+    andFiveUp: [11, 35.5],
+    orHighJob: [15, 35],
+    andBadEight: [21.5, 3],
+    andBadMem: [21.5, 7.5],
+    andBadOne: [21.5, 11.5],
+    andBadSystem: [21.5, 15],
+    orBadJob: [27.5, 8],
+    "out:BADJOB": [31.5, 9.5],
+  },
   "number-check": {
     "in:C": [0, 2.5],
     "in:J3": [0, 7],
@@ -243,35 +822,65 @@ export const CONTROL_INSIDE: Readonly<Record<string, At>> = {
     "in:KIND8": [0, 14],
     cBits: [5, 1],
     orC1C0: [11, 3],
-    andC5to7: [16, 2],
-    orOutside: [21, 1],
+    andC5to7: [16, 4.5],
+    orOutside: [21, 4],
     notJ3: [5, 6.5],
     notJ2: [5, 9.5],
     andNames: [11, 7],
-    andBadNumber: [27, 1.5],
-    "out:BADNUMBER": [32, 2],
+    andBadNumber: [27, 4.5],
+    "out:BADNUMBER": [32, 5],
   },
+  // SYSTEM above STOP, as the lesson names them; the job's bits down a bus, as in the job check.
+  "system-jobs": {
+    "in:KIND8": [0, 1],
+    "in:J3": [0, 3],
+    "in:J2": [0, 5],
+    "in:J1": [0, 7],
+    "in:J0": [0, 9],
+    orAnyJob: [5.5, 10],
+    notAnyJob: [9.5, 11],
+    andSystem: [14, 10.5],
+    orJ1J0: [5.5, 17],
+    andFiveUp: [10, 16.5],
+    orHighJob: [14, 16],
+    notHighJob: [18, 16],
+    andStop: [24, 14.5],
+    "out:SYSTEM": [18.5, 11],
+    "out:STOP": [28, 15.5],
+  },
+  // JOBS and MEM first; then each signal in the order of the block's outputs, the ANDs that take a
+  // job bit beside the ORs, every line down or up a bus of its own between them.
   "control-signals": {
     "in:KIND1": [0, 1],
-    "in:KIND2": [0, 3],
-    "in:LOAD": [0, 5],
-    "in:STORE": [0, 7],
-    "in:BRANCH": [0, 9],
-    "in:CALL": [0, 11],
-    "in:JUMP": [0, 13],
-    "in:J3": [0, 15],
-    "in:J2": [0, 17],
-    "in:J1": [0, 19],
-    "in:J0": [0, 21],
-    ...SIGNAL_GATES,
-    "out:WRITEY": [34, 1],
-    "out:BCONST": [34, 5],
-    "out:OP2": [34, 9],
-    "out:OP1": [34, 11],
-    "out:OP0": [34, 14],
-    "out:AZERO": [34, 17],
-    "out:BYTE": [34, 19],
-    "out:MEM": [34, 21],
+    "in:KIND2": [0, 4],
+    "in:LOAD": [0, 6],
+    "in:STORE": [0, 8],
+    "in:BRANCH": [0, 10],
+    "in:CALL": [0, 12],
+    "in:JUMP": [0, 14],
+    "in:J3": [0, 16],
+    "in:J2": [0, 18],
+    "in:J1": [0, 20],
+    "in:J0": [0, 22],
+    orJobs: [5, 1],
+    orMem: [5, 6],
+    andByte: [14.5, 6.5],
+    andAzero: [14.5, 10],
+    andOp2: [14.5, 17],
+    andOp1: [14.5, 20.5],
+    andOp0: [14.5, 28],
+    orWritey: [19.5, 1.5],
+    orBconst: [19.5, 13],
+    orOp1: [19.5, 23],
+    orOp0: [19.5, 30.5],
+    "out:WRITEY": [25, 2.5],
+    "out:BYTE": [25, 7],
+    "out:AZERO": [25, 10.5],
+    "out:BCONST": [25, 14],
+    "out:OP2": [25, 17.5],
+    "out:OP1": [25, 24.5],
+    "out:OP0": [25, 31],
+    "out:MEM": [25, 34],
   },
   "memory-port": {
     "in:CONTROL": [0, 5.5],
@@ -334,14 +943,22 @@ function laid(circuit: Circuit, key: string): Circuit {
 
 /** The machine of several edges, placed as its figure draws it, with a program and registers. */
 export function placedMachine(options: MulticycleOptions): Circuit {
-  return routedInside(laid(multicycleCircuit(options), "machine"), CONTROL_INSIDE_ROUTES);
+  return routedByKind(
+    routedInside(laid(multicycleCircuit(options), "machine"), CONTROL_INSIDE_ROUTES),
+    CONTROL_KIND_ROUTES,
+  );
 }
 
 export function controlLibrary(place: Place): Readonly<Record<string, () => Circuit>> {
   placeFn = place;
   return {
-    decoder: () => laid(decoderCircuit({ mem: false }), "decoder"),
-    "decoder-call-register": () => laid(decoderCircuit({ callThroughRegister: true }), "decoder"),
+    decoder: () =>
+      routedByKind(laid(decoderCircuit({ mem: false }), "decoder"), CONTROL_KIND_ROUTES),
+    "decoder-call-register": () =>
+      routedByKind(
+        laid(decoderCircuit({ callThroughRegister: true }), "decoder"),
+        CONTROL_KIND_ROUTES,
+      ),
     "machine-edges": () => placedMachine({ name: "machine" }),
     "machine-edges-call": () => placedMachine({ name: "machine", callThroughRegister: true }),
   };

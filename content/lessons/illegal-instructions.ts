@@ -133,6 +133,8 @@ export const illegalInstructions: LessonInput = {
           after: PROSE.checksOpenAfter,
           props: {
             libraryId: "decoder",
+            // At the checks, the lesson's subject; K, J and C are set at the top of the trail.
+            scope: "decoder/checks",
             initial: { K: 8, J: 2, C: 5 },
           },
         },
@@ -166,17 +168,21 @@ export const illegalInstructions: LessonInput = {
           lead: PROSE.checkFaultsLead,
           props: {
             libraryId: "decoder",
+            // At the checks, where both faults are.
+            scope: "decoder/checks",
             faults: [
               {
                 kind: "stuck-at",
                 net: "decoder/checks/NOKIND",
                 value: 0,
+                at: [0, 30],
                 label: LABELS.faults.noKindLow,
               },
               {
                 kind: "stuck-at",
                 net: "decoder/checks/BADNUMBER",
                 value: 0,
+                at: [0, 30],
                 label: LABELS.faults.numberLow,
               },
             ],

@@ -218,7 +218,7 @@ export function checkGates(
   const noKind = b.net("NOKIND");
   b.scope(
     "kindCheck",
-    "kind-check",
+    options.callThroughRegister ? "kind-check-call" : "kind-check",
     (bb) => {
       bb.nor(
         known.map((n) => k(n)),
@@ -241,7 +241,7 @@ export function checkGates(
   ];
   b.scope(
     "jobCheck",
-    "job-check",
+    options.callThroughRegister ? "job-check-call" : "job-check",
     (bb) => {
       const anyJob = bb.or([j.J3, j.J2, j.J1, j.J0], {
         name: "orAnyJob",
@@ -368,7 +368,12 @@ export function controlDecoder(
     b,
     given.scoped ?? true,
     "decoder",
-    "control-decoder",
+    // Each variant has a kind of its own, since each is drawn by hand with its own ports.
+    options.callThroughRegister
+      ? "control-decoder-call"
+      : options.mem === false
+        ? "control-decoder"
+        : "control-decoder-mem",
     (bb) => {
       const names = kindLineNames(options);
       const lines: Record<number, NetId> = Object.fromEntries(
@@ -406,7 +411,7 @@ export function controlDecoder(
       const illegal = bb.net("ILLEGAL");
       bb.scope(
         "checks",
-        "decode-checks",
+        options.callThroughRegister ? "decode-checks-call" : "decode-checks",
         (cb) =>
           checkGates(
             cb,

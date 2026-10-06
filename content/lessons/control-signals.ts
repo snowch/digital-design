@@ -153,6 +153,8 @@ export const controlSignals: LessonInput = {
           lead: PROSE.decoderFaultsLead,
           props: {
             libraryId: "decoder",
+            // Inside the control signals, where the broken gate is and the LOAD line enters.
+            scope: "decoder/signals",
             faults: [
               {
                 kind: "wrong-gate",
@@ -160,7 +162,13 @@ export const controlSignals: LessonInput = {
                 gate: "and",
                 label: LABELS.faults.op0And,
               },
-              { kind: "stuck-at", net: "LOAD", value: 0, label: LABELS.faults.loadLow },
+              {
+                kind: "stuck-at",
+                net: "LOAD",
+                value: 0,
+                label: LABELS.faults.loadLow,
+                at: [0, 13],
+              },
             ],
             run: FAULT_RUN,
             outcomes: PROSE.decoderFaultsOutcomes,

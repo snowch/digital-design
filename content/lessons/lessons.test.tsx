@@ -56,7 +56,12 @@ describe("the course's lessons", () => {
     const found: string[] = [];
     // A figure that lets nobody open its blocks (Module 7: the slice is a later challenge's
     // answer) shows only its top level, so only that is a drawing a learner can see.
-    const check = (name: string, circuit: ReturnType<typeof libraryCircuit>, open = true) => {
+    const check = (
+      name: string,
+      circuit: ReturnType<typeof libraryCircuit>,
+      open = true,
+      first = "",
+    ) => {
       // Module 6: a sealed block (a word selector, a memory as a component) never opens, so
       // neither it nor anything inside it is a drawing a learner sees.
       const sealed = circuit.composites.filter((c) => isSealed(c.kind)).map((c) => c.path);
@@ -69,12 +74,14 @@ describe("the course's lessons", () => {
         kinds.add(c.kind);
         return true;
       });
-      for (const scope of ["", ...scopes.map((c) => c.path)]) {
+      for (const scope of new Set(["", first, ...scopes.map((c) => c.path)])) {
         const scene = sceneOf(straighten(drawingAt(circuit, scope).drawing));
         // A figure as first drawn is held to half a cell between wires and no crossing a better
-        // order of turns would avoid; the inside of a block, to the rest.
+        // order of turns would avoid; the inside of a block, to the rest. Module 9: a figure may
+        // first show a block opened (`scope`), which is then held to them too, as the browser
+        // holds it (`tests/educational/diagrams.spec.ts`).
         found.push(
-          ...sceneProblems(scene, { roomy: scope === "" }).map(
+          ...sceneProblems(scene, { roomy: scope === "" || scope === first }).map(
             (p) => `${name}${scope ? ` (${scope})` : ""}: ${p}`,
           ),
         );
@@ -86,6 +93,7 @@ describe("the course's lessons", () => {
           const p = x.props as {
             libraryId?: unknown;
             canOpen?: boolean;
+            scope?: string;
             circuits?: readonly { libraryId?: unknown }[];
             faults?: readonly Parameters<typeof toFault>[0][];
           };
@@ -95,7 +103,7 @@ describe("the course's lessons", () => {
           for (const id of ids) {
             if (typeof id !== "string") continue;
             const open = p.canOpen !== false && x.kind !== "prediction";
-            check(`${l.id} ${x.id}`, libraryCircuit(id), open);
+            check(`${l.id} ${x.id}`, libraryCircuit(id), open, p.scope);
             for (const f of p.faults ?? [])
               check(
                 `${l.id} ${x.id} with a fault`,
