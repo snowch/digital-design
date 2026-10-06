@@ -1,4 +1,4 @@
-# Review: register-transfer (reviewer subagent, returned as text, saved by the managing model)
+# Review: register-transfer (reviewer subagent, returned as text, saved by the managing model; one model name in F3 replaced with "the drafting subagent", as the task forbids model names in the repository)
 
 ## Review of `register-transfer` (Module 5, lesson 3)
 
@@ -14,7 +14,7 @@ It tells the learner before the prediction that something goes wrong, which narr
 - The sentence is garbled: "worked out from registers' values".
 - It uses lowercase "now", "prev" and "last" as if they were names. "last" only exists in the fixed circuit, and the paragraph never says so.
 - It then switches to "at an edge where STEP is 1", where the earlier circuit used SAVE.
-- This is the section that names the lesson's term, "register transfer", so it should be the clearest one. Direction: send it back to Haiku with a fact brief. State the rule once, say which circuit each line belongs to, and use one case for names.
+- This is the section that names the lesson's term, "register transfer", so it should be the clearest one. Direction: send it back to the drafting subagent with a fact brief. State the rule once, say which circuit each line belongs to, and use one case for names.
 
 **F4. Double meaning of NOW/PREV versus now/prev.** (double meaning, medium, sure)
 - The motivation says "Two registers, now and prev … The second register, prev, takes its input from now's output: NOW." The block name and the signal differ only in case.
