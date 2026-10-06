@@ -26,7 +26,12 @@ export type Construct =
   | "always_ff"
   | "if"
   | "case"
-  | "op-arith";
+  | "op-arith"
+  // Module 5: an enumerated type, such as a state machine's states.
+  | "enum"
+  // Module 6: a memory written as an array, and filled from a list of values.
+  | "array"
+  | "array-init";
 
 export const ALL_CONSTRUCTS: readonly Construct[] = [
   "module",
@@ -46,6 +51,11 @@ export const ALL_CONSTRUCTS: readonly Construct[] = [
   "if",
   "case",
   "op-arith",
+  // Module 5
+  "enum",
+  // Module 6
+  "array",
+  "array-init",
 ];
 
 /** What each construct is, in the words the gate uses when it refuses one. */
@@ -67,6 +77,11 @@ const EXPLAIN: Record<Construct, string> = {
   if: "`if` and `else`",
   case: "`case`",
   "op-arith": "arithmetic with `+` and `-`",
+  // Module 5
+  enum: "a list of names declared with `typedef enum`",
+  // Module 6: drafted by the prose process (docs/notes/module-6-memory.md).
+  array: "arrays to declare memories, like `logic [7:0] mem [0:15]`",
+  "array-init": "array initialisation like `= '{...}`",
 };
 
 /** What to write instead, where there is something. */
@@ -79,6 +94,10 @@ const INSTEAD: Partial<Record<Construct, string>> = {
   concat: "use one-bit signals",
   select: "use one-bit signals",
   "op-arith": "write the gates out; adders come in a later module",
+  // Module 5
+  enum: "write each value as a number, such as `2'b01`",
+  // Module 6
+  "array-init": "write every word with `always_ff`",
 };
 
 /** Every construct the text uses, in order of first appearance. */
@@ -88,12 +107,18 @@ export function constructsUsed(module: Module): Construct[] {
     if (!used.includes(c)) used.push(c);
   };
   add("module");
+  // Module 6: an index into an array is a read of a memory, not a bit select.
+  const arrays = new Set(module.declarations.filter((d) => d.array).map((d) => d.name));
   if (module.ports.length) add("ports");
   if (module.ports.some((p) => p.range)) add("vector");
   if (module.parameters.length) add("parameter");
+  // Module 5
+  if (module.enums?.length) add("enum");
   for (const d of module.declarations) {
     add("logic");
     if (d.range) add("vector");
+    if (d.array) add("array");
+    if (d.init) add("array-init");
   }
   const expression = (e: Expression): void => {
     switch (e.kind) {
@@ -119,8 +144,9 @@ export function constructsUsed(module: Module): Construct[] {
         expression(e.otherwise);
         return;
       case "index":
-        add("select");
+        add(e.subject.kind === "identifier" && arrays.has(e.subject.name) ? "array" : "select");
         expression(e.subject);
+        expression(e.hi);
         return;
       case "concat":
         add("concat");
@@ -134,7 +160,7 @@ export function constructsUsed(module: Module): Construct[] {
         s.statements.forEach(statement);
         return;
       case "assignment":
-        if (s.target.select) add("select");
+        if (s.target.select) add(arrays.has(s.target.name) ? "array" : "select");
         expression(s.value);
         return;
       case "if":

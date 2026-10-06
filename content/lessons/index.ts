@@ -18,6 +18,16 @@ import { signals } from "./signals";
 import { fewerGates } from "./fewer-gates";
 import { gates } from "./gates";
 import { nand } from "./nand";
+// Module 5 after the registers lesson: counters, register transfer and state machines.
+import { counters } from "./counters";
+import { registerTransfer } from "./register-transfer";
+import { stateMachines } from "./state-machines";
+import { stateEncoding } from "./state-encoding";
+// Module 6, memory.
+import { ram } from "./ram";
+import { registerFile } from "./register-file";
+import { bytes } from "./bytes";
+import { memoryMap } from "./memory-map";
 // Module 7, the ALU
 import { aluJobs } from "./alu-jobs";
 import { flags } from "./flags";
@@ -37,6 +47,16 @@ const INPUTS: readonly LessonInput[] = [
   alu,
   remember,
   registers,
+  // Module 5 after the registers lesson.
+  counters,
+  registerTransfer,
+  stateMachines,
+  stateEncoding,
+  // Module 6, memory.
+  ram,
+  registerFile,
+  bytes,
+  memoryMap,
   // Module 7, the ALU
   aluJobs,
   flags,

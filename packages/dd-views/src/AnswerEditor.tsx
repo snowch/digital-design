@@ -11,6 +11,7 @@ import type { ComponentType } from "react";
 
 import {
   ANSWER_GRADERS,
+  OF_THE_MEMORY,
   OF_YOUR_BITS,
   OTHER_THAN,
   isProblem,
@@ -50,9 +51,11 @@ export function gradeAnswers(
         term(k),
         v === OF_YOUR_BITS
           ? strings.answers.ofYourBits
-          : v.startsWith(OTHER_THAN)
-            ? format(strings.answers.otherThan, { value: v.slice(OTHER_THAN.length) })
-            : v,
+          : v === OF_THE_MEMORY
+            ? strings.answers.ofTheMemory
+            : v.startsWith(OTHER_THAN)
+              ? format(strings.answers.otherThan, { value: v.slice(OTHER_THAN.length) })
+              : v,
       ]),
     );
   const failures: VerdictFailure[] = [];

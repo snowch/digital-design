@@ -14,12 +14,13 @@
 // path (a latch would be inferred; the course leaves the missing path unknown).
 
 import { CircuitBuilder, driverOf, type Circuit, type NetId } from "@dd/sim";
-import { dFlipFlop, register, rippleAdder } from "@dd/dd-model";
+import { dFlipFlop, memoryBlock, register, rippleAdder, romBlock } from "@dd/dd-model";
 
 import {
   HdlError,
   type Assignment,
   type Expression,
+  type EnumType,
   type Identifier,
   type Literal,
   type LValue,
@@ -31,6 +32,7 @@ import {
 import { gateMessages, constructsUsed, type Construct } from "./gate";
 import { LOOP_NOTE } from "./generate";
 import { parse } from "./parser";
+import { arrayWrite, type ArrayMemory } from "./memory";
 
 export interface ElaborateOptions {
   /** The constructs the lesson has met. Omit to allow the whole subset. */
@@ -92,9 +94,14 @@ class Elaborator {
   private readonly b: CircuitBuilder;
   private readonly signals = new Map<string, Signal>();
   private readonly params = new Map<string, bigint>();
+  /** Module 5: each enumerated type's width, and each of its names with its value. */
+  private readonly enumTypes = new Map<string, number>();
+  private readonly enumConsts = new Map<string, { value: bigint; width: number }>();
   private readonly driven = new Map<NetId, Position>();
   private readonly warnings: Message[] = [];
   private readonly g: { delay?: number };
+  /** Module 6: the module's memories, written as arrays, by name. */
+  private readonly arrays = new Map<string, ArrayMemory>();
   private readonly overrides: Readonly<Record<string, number>>;
 
   constructor(
@@ -121,9 +128,20 @@ class Elaborator {
       if (port.direction === "input") this.driven.set(net, port.at);
       this.signals.set(port.name, { net, width, role: port.direction, at: port.at });
     }
+    for (const e of m.enums ?? []) this.enumType(e);
     for (const d of m.declarations) {
-      const width = d.range ? this.rangeWidth(d.range, d.at) : 1;
-      if (this.signals.has(d.name)) throw new HdlError(d.at, `${d.name} is declared twice`);
+      const width =
+        d.type !== undefined
+          ? (this.enumTypes.get(d.type) as number)
+          : d.range
+            ? this.rangeWidth(d.range, d.at)
+            : 1;
+      if (this.signals.has(d.name) || this.arrays.has(d.name))
+        throw new HdlError(d.at, `${d.name} is declared twice`);
+      if (d.array) {
+        this.declareArray(d.name, width, d.array, d.init, d.at);
+        continue;
+      }
       this.signals.set(d.name, { net: this.b.net(d.name, width), width, role: "logic", at: d.at });
     }
     for (const item of m.items) {
@@ -160,6 +178,18 @@ class Elaborator {
             throw new HdlError(item.at, `a clock is one bit; ${item.clock} is ${clock.width}`);
           const targets = new Set<string>();
           this.collectTargets(item.body, targets);
+          // Module 6: an always_ff that writes a memory writes that memory alone.
+          const array = [...targets].find((t) => this.arrays.has(t));
+          if (array !== undefined) {
+            this.writeArray(
+              this.arrays.get(array) as ArrayMemory,
+              targets,
+              item.body,
+              clock.net,
+              item.at,
+            );
+            break;
+          }
           // The shapes the generator writes for a flip-flop or register with a reset, an enable
           // or both come back as that block with those ports, not as selectors in front of it.
           const shape = targets.size === 1 ? registerShape(item.body) : undefined;
@@ -189,6 +219,7 @@ class Elaborator {
         }
       }
     }
+    for (const memory of this.arrays.values()) this.buildArray(memory);
     for (const [name, s] of this.signals) {
       if (s.role === "output") {
         this.b.output(name, s.net);
@@ -230,6 +261,39 @@ class Elaborator {
       });
   }
 
+  /** Module 5: an enumerated type's names become constants of the type's width. */
+  private enumType(e: EnumType): void {
+    if (!e.range)
+      throw new HdlError(
+        e.at,
+        `give the list a width, such as \`typedef enum logic [1:0] {...} ${e.name};\``,
+      );
+    const width = this.rangeWidth(e.range, e.at);
+    if (this.enumTypes.has(e.name)) throw new HdlError(e.at, `${e.name} is declared twice`);
+    this.enumTypes.set(e.name, width);
+    let next = 0n;
+    const seen = new Map<bigint, string>();
+    for (const member of e.members) {
+      if (this.enumConsts.has(member.name) || this.signals.has(member.name))
+        throw new HdlError(member.at, `${member.name} is declared twice`);
+      const value = member.value !== undefined ? this.constant(member.value) : next;
+      if (
+        member.value?.kind === "literal" &&
+        member.value.width !== undefined &&
+        member.value.width !== width
+      )
+        this.widthMismatch(member.value.at, member.value.width, width);
+      if (value < 0n || value >= 1n << BigInt(width))
+        throw new HdlError(member.at, `${member.name}'s value does not fit in ${width} bits`);
+      const earlier = seen.get(value);
+      if (earlier !== undefined)
+        throw new HdlError(member.at, `${member.name} has the same value as ${earlier}`);
+      seen.set(value, member.name);
+      this.enumConsts.set(member.name, { value, width });
+      next = value + 1n;
+    }
+  }
+
   private readonly used = new Map<string, number>();
 
   /** A part name not used before in this module: two selectors for one signal are two parts. */
@@ -240,6 +304,11 @@ class Elaborator {
   }
 
   private target(name: string, at: Position, selected: boolean): Signal {
+    if (this.arrays.has(name))
+      throw new HdlError(
+        at,
+        `${name} is a memory; write one word at a clock edge in an \`always_ff\` of its own, like \`if (WE) ${name}[A] <= D;\`.`,
+      );
     const s = this.signals.get(name);
     if (!s)
       throw new HdlError(at, `${name} is not declared; declare it as a port or with \`logic\``);
@@ -327,9 +396,16 @@ class Elaborator {
         if (s.defaultArm) this.exec(s.defaultArm, fallEnv, operator, held);
         for (let i = s.arms.length - 1; i >= 0; i--) {
           const arm = s.arms[i] as (typeof s.arms)[number];
-          const matches = arm.labels.map((label) =>
-            this.equal(subject, this.expression(label, subjectWidth), subjectWidth),
-          );
+          const matches = arm.labels.map((label) => {
+            const value = this.expression(label, subjectWidth);
+            // Module 5: a label of the wrong width is the learner's to be told about, with its line.
+            if (this.b.widthOf(value) !== subjectWidth)
+              throw new HdlError(
+                label.at,
+                `this label is ${this.b.widthOf(value)} bit${this.b.widthOf(value) === 1 ? "" : "s"} wide but the case compares a ${subjectWidth}-bit value`,
+              );
+            return this.equal(subject, value, subjectWidth);
+          });
           const cond = matches.length === 1 ? (matches[0] as NetId) : this.b.or(matches, this.g);
           const armEnv = new Map(env);
           this.exec(arm.body, armEnv, operator, held);
@@ -387,6 +463,10 @@ class Elaborator {
 
   /** Elaborates `e` so that its final gate drives `target`. */
   private into(e: Expression, target: NetId, width: number): void {
+    if (e.kind === "index" && e.subject.kind === "identifier" && this.arrays.has(e.subject.name)) {
+      this.readArray(this.arrays.get(e.subject.name) as ArrayMemory, e, target);
+      return;
+    }
     switch (e.kind) {
       case "identifier":
       case "literal":
@@ -416,6 +496,13 @@ class Elaborator {
       case "identifier": {
         const p = this.params.get(e.name);
         if (p !== undefined) return this.constant_(p, 0n, want ?? 32, e.at, output);
+        if (this.arrays.has(e.name))
+          throw new HdlError(
+            e.at,
+            `${e.name} is a memory; read one word by its address, like \`${e.name}[A]\`.`,
+          );
+        const named = this.enumConsts.get(e.name);
+        if (named) return this.constant_(named.value, 0n, named.width, e.at, output);
         const s = this.signals.get(e.name);
         if (!s) throw new HdlError(e.at, `${e.name} is not declared`);
         if (output !== undefined) {
@@ -532,6 +619,8 @@ class Elaborator {
         return y;
       }
       case "index": {
+        if (e.subject.kind === "identifier" && this.arrays.has(e.subject.name))
+          return this.readArray(this.arrays.get(e.subject.name) as ArrayMemory, e, output);
         const subject = this.expression(e.subject, undefined);
         const hi = Number(this.constant(e.hi));
         const lo = Number(this.constant(e.lo));
@@ -618,6 +707,7 @@ class Elaborator {
   private widthOf(e: Expression): number | undefined {
     switch (e.kind) {
       case "identifier":
+        if (this.enumConsts.has(e.name)) return this.enumConsts.get(e.name)?.width;
         return this.params.has(e.name) ? undefined : this.signals.get(e.name)?.width;
       case "literal":
         return e.width;
@@ -640,6 +730,8 @@ class Elaborator {
       case "ternary":
         return this.widthOf(e.then) ?? this.widthOf(e.otherwise);
       case "index":
+        if (e.subject.kind === "identifier" && this.arrays.has(e.subject.name))
+          return this.arrays.get(e.subject.name)?.width;
         return Number(this.constant(e.hi)) - Number(this.constant(e.lo)) + 1;
       case "concat": {
         let sum = 0;
@@ -659,6 +751,8 @@ class Elaborator {
       case "literal":
         return e.value;
       case "identifier": {
+        const named = this.enumConsts.get(e.name);
+        if (named) return named.value;
         const p = this.params.get(e.name);
         if (p === undefined)
           throw new HdlError(
@@ -714,6 +808,153 @@ class Elaborator {
     if (lo !== 0) throw new HdlError(at, `ranges in this course end at 0: write [${hi - lo}:0]`);
     if (hi < 0) throw new HdlError(at, "a range's high bit must be 0 or more");
     return hi - lo + 1;
+  }
+
+  // ---- Module 6: memories written as arrays ------------------------------------------------
+
+  /** An array's shape and list of values, checked: words from 0, every value fitting a word. */
+  private declareArray(
+    name: string,
+    width: number,
+    dims: { from: Expression; to?: Expression },
+    init: readonly Expression[] | undefined,
+    at: Position,
+  ): void {
+    const from = Number(this.constant(dims.from));
+    let words = from;
+    if (dims.to !== undefined) {
+      if (from !== 0)
+        throw new HdlError(
+          at,
+          `Arrays start at 0 in this course; write \`[0:${Number(this.constant(dims.to)) - from}]\` instead.`,
+        );
+      words = Number(this.constant(dims.to)) + 1;
+    }
+    if (!Number.isInteger(words) || words < 1)
+      throw new HdlError(at, `${name} needs at least one word`);
+    if (words * width + 1 > 1024)
+      throw new HdlError(
+        at,
+        `${name} is ${words} words of ${width} bits; the course's memories hold at most 1023 bits`,
+      );
+    let values: bigint[] | undefined;
+    if (init) {
+      if (init.length !== words)
+        throw new HdlError(
+          at,
+          `${name} has ${words} words, but the list has ${init.length} value${init.length === 1 ? "" : "s"}; give one value per word.`,
+        );
+      values = init.map((v) => {
+        const n = this.constant(v);
+        if (n < 0n || n >= 1n << BigInt(width))
+          throw new HdlError(
+            v.at,
+            `\`${v.kind === "literal" ? v.text : "this value"}\` does not fit in a word of ${width} bits.`,
+          );
+        if (v.kind === "literal" && v.width !== undefined && v.width !== width)
+          this.widthMismatch(v.at, v.width, width);
+        return n;
+      });
+    }
+    this.arrays.set(name, {
+      name,
+      width,
+      words,
+      ...(values ? { init: values } : {}),
+      reads: [],
+      at,
+    });
+  }
+
+  /** A read of one word: a read port on the memory, its output a fresh net. */
+  private readArray(
+    memory: ArrayMemory,
+    e: Extract<Expression, { kind: "index" }>,
+    output: NetId | undefined,
+  ): NetId {
+    if (e.hi !== e.lo)
+      throw new HdlError(
+        e.at,
+        `Read or write one word of ${memory.name} at a time, like \`${memory.name}[A]\`.`,
+      );
+    const address = this.expression(e.hi, undefined);
+    // The memory drives the signal the read is assigned to, as `assign Q = mem[A]` says.
+    if (output !== undefined && this.b.widthOf(output) !== memory.width)
+      this.widthMismatch(e.at, memory.width, this.b.widthOf(output));
+    const q = output ?? this.b.net(`${memory.name}_q${memory.reads.length}`, memory.width);
+    memory.reads.push({ address, q });
+    return q;
+  }
+
+  /** The always_ff that writes a memory: one word, at an address, while a condition holds. */
+  private writeArray(
+    memory: ArrayMemory,
+    targets: ReadonlySet<string>,
+    body: Statement,
+    clock: NetId,
+    at: Position,
+  ): void {
+    const shape = arrayWrite(body);
+    if (targets.size !== 1 || !shape || shape.target.name !== memory.name)
+      throw new HdlError(
+        at,
+        `Write ${memory.name} in an \`always_ff\` of its own, one word at a time: \`if (WE) ${memory.name}[A] <= D;\`.`,
+      );
+    if (memory.write)
+      throw new HdlError(
+        at,
+        `${memory.name} is written in two places; write it in one \`always_ff\`.`,
+      );
+    const select = shape.target.select as NonNullable<typeof shape.target.select>;
+    if (select.hi !== select.lo)
+      throw new HdlError(
+        at,
+        `Read or write one word of ${memory.name} at a time, like \`${memory.name}[A]\`.`,
+      );
+    const address = this.expression(select.hi, undefined);
+    const data = this.expression(shape.value, memory.width);
+    if (this.b.widthOf(data) !== memory.width)
+      this.widthMismatch(shape.value.at, this.b.widthOf(data), memory.width);
+    const enable = shape.enable ? this.expression(shape.enable, 1) : this.constant_(1n, 0n, 1, at);
+    if (this.b.widthOf(enable) !== 1)
+      throw new HdlError(at, "the condition that writes a memory must be one bit");
+    memory.write = { clock, enable, address, data };
+  }
+
+  /** The memory itself, once every read and the write are known. */
+  private buildArray(memory: ArrayMemory): void {
+    const outs = Object.fromEntries(memory.reads.map((r, i) => [`Q${i}`, r.q]));
+    if (memory.write) {
+      const w = memory.write;
+      memoryBlock(
+        this.b,
+        {
+          CLK: w.clock,
+          WE: w.enable,
+          WA: w.address,
+          D: w.data,
+          reads: memory.reads.map((r) => r.address),
+        },
+        {
+          name: memory.name,
+          words: memory.words,
+          width: memory.width,
+          ...(memory.init ? { init: memory.init } : {}),
+          outs,
+        },
+      );
+      return;
+    }
+    if (!memory.init)
+      throw new HdlError(
+        memory.at,
+        `${memory.name} is never written and has no list of values; every word would be unknown.`,
+      );
+    romBlock(
+      this.b,
+      { reads: memory.reads.map((r) => r.address) },
+      { name: memory.name, words: memory.words, width: memory.width, init: memory.init, outs },
+    );
   }
 
   /**
@@ -843,7 +1084,8 @@ class Elaborator {
     const insideFlipFlop = (path: string) =>
       circuit.composites.some(
         (c) =>
-          (c.kind === "dff" || c.kind === "register") &&
+          // Module 6: a memory's loop holds its words, as a flip-flop's holds its bit.
+          (c.kind === "dff" || c.kind === "register" || c.kind === "memory") &&
           (path === c.path || path.startsWith(`${c.path}/`)),
       );
     const gates = circuit.components.filter((c) => !insideFlipFlop(c.path));

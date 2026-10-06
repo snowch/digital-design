@@ -1,0 +1,57 @@
+explanation: At an edge, every register takes a word that the gates worked out from the values the registers had before that edge. In the NOW and PREV circuit, the NOW register takes IN and the PREV register takes NOW. In the save-once circuit, the flip-flop last also takes SAVE, and both registers take their word only at an edge where STEP is 1.
+
+Moving words into registers at an edge, each worked out from values before the edge, is called **register transfer**. It is written with an arrow, one line per register: NOW ← IN and PREV ← NOW.
+
+All the lines of one edge happen at once. Their order does not matter, because every right-hand side is read before the edge. The counter of the previous lesson is a register transfer too: Q ← Q + 1 at an edge where EN is 1.
+
+nowPrevAsTextLead: The figure draws NOW and PREV as blocks beside the text that describes them. Each register is one `always_ff` block. `PREV <= NOW` reads NOW's value from before the edge, as the wire does in the drawing. `<=` is the transfer arrow written as text.
+
+The order of the two blocks does not matter. You can write two `<=` lines inside one `always_ff`, under `if (SAVE) begin ... end`, and make the same circuit.
+
+nowPrevAsTextAfter: Words of any width work the same way. Module 1's readings are 16 bits. A register for them is declared `logic [15:0]`, and `16'h0000` is a 16-bit value written in hexadecimal.
+
+predictSwapLead: Two 4-bit registers, X and Y. The circuit has inputs A, B and LOAD. While LOAD is 1, X's D takes the input A and Y's D takes the input B. While LOAD is 0, X's D takes Y's Q and Y's D takes X's Q. Watch the circuit below.
+
+p3Question: The input A is `0011` and the input B is `0101` while LOAD is 1. At the first edge, X takes A and Y takes B. At the next edge, LOAD is 0. What is X after that?
+
+p3Explain: X is `0101` and Y is `0011`: the registers swapped their words at one edge. X ← Y and Y ← X both read the words from before the edge. In a program, swapping two variables needs a third to keep one of them; two registers need no third.
+
+writeReadingsLead: The freezer room's last two readings are 16 bits each. The office keeps them both and can undo a reading.
+
+c2Task: The module header is given: inputs IN (16 bits), NEW, UNDO, RST and CLK, and outputs NOW and PREV (16 bits each).
+
+At an edge where RST is 1, NOW and PREV become `16'h0000`. Otherwise at an edge where NEW is 1, NOW takes IN and PREV takes NOW's word. Otherwise at an edge where UNDO is 1, NOW takes PREV's word back and PREV keeps its word. At any other edge both keep their words.
+
+Write one `always_ff` with `if`, `else if`, `begin` and `end`. The tests use the readings `FF48`, `FF06` and `0012`, including an edge where NEW and UNDO are both 1, an edge where RST and NEW are both 1, and a test where NEW changes while CLK is 1.
+
+c2Hints.1: Each branch of the `if` chain describes one edge's transfers. Inside a branch, put one `<=` line per register that changes, between `begin` and `end`.
+
+c2Hints.2: Testing UNDO before NEW makes an edge with both at 1 undo instead of taking the new reading. The order of the `if` chain is the order of priority: RST, then NEW, then UNDO.
+
+c2Hints.3: With one register: `if (RST) A <= 4'b0000; else if (L) A <= D;` keeps A at every edge where RST and L are 0.
+
+c2Hints.4: The NEW branch is `else if (NEW) begin NOW <= IN; PREV <= NOW; end`.
+
+c2Hints.5: Write:
+
+```
+always_ff @(posedge CLK) begin
+  if (RST) begin
+    NOW <= 16'h0000;
+    PREV <= 16'h0000;
+  end
+  else if (NEW) begin
+    NOW <= IN;
+    PREV <= NOW;
+  end
+  else if (UNDO) NOW <= PREV;
+end
+```
+
+reflection: A register transfer moves words between registers at an edge, every one worked out from the values before it. Their order does not matter, and two registers can swap.
+
+A press longer than one edge needed a flip-flop that remembers the input from the edge before, so the circuit does one thing per press. The office's message to the manager must be sent, waited on, sent again, or given up. Each is a different job with different transfers. What decides which job the circuit does at the next edge?
+
+modelVsReality: In the model every flip-flop takes its D at the same instant. In hardware the clock reaches different flip-flops at slightly different times. PREV taking NOW's old word relies on NOW's flip-flops changing after the edge, later than PREV's flip-flops need their D steady: their hold time. The shift register of the registers lesson relied on the same.
+
+A real button's contacts open and close several times in the first few thousandths of a second when pressed. A real circuit waits for the button to settle before it believes a press. The model's button does not.

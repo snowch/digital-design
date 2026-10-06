@@ -659,7 +659,13 @@ export function netOfWire(circuit: Circuit, from: PortRef): NetId | undefined {
  * drawing names every part inside it. Otherwise the block is laid out automatically.
  */
 function placedInside(sub: Circuit, circuit: Circuit, scope: string): Circuit {
-  const kind = circuit.composites.find((c) => c.path === scope)?.kind;
+  const composite = circuit.composites.find((c) => c.path === scope);
+  // Module 5: a block may carry where its own pins sit inside it (`in:NAME`, `out:NAME`), when
+  // its parts carry their positions already.
+  const pins = composite?.meta?.["pins"] as
+    Readonly<Record<string, readonly [number, number]>> | undefined;
+  if (pins) return placed(sub, pins);
+  const kind = composite?.kind;
   const at = kind ? INSIDE[kind] : undefined;
   if (!at) return sub;
   const names = [

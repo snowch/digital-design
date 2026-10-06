@@ -10,7 +10,7 @@
 
 import { bitsText, hexOf, parseBits, signedOf, unsignedOf, type Bit } from "./bits";
 import { readBits, recording, RECORDING_IDS, volts, type RecordingId } from "./signals";
-import { Simulator, formatWord, word as wordOf } from "@dd/sim";
+import { Simulator, formatWord, parseWord, word as wordOf } from "@dd/sim";
 
 import { aluResult, hexWord, opBits } from "./alu";
 import { applyFaults, stuckAt } from "./faults";
@@ -154,6 +154,43 @@ function word(
   };
 }
 
+/**
+ * Module 6: stands for "the word the memory gives" where a test compares a typed word with what a
+ * memory reads out: printing it would hand over the answer.
+ */
+export const OF_THE_MEMORY = "\u0000of-the-memory";
+
+/**
+ * Module 6, reading a memory. Each case names a `field`, a library `circuit` and the inputs to set
+ * (every other input is 0); the simulator reads Q, and the learner's hexadecimal answer for the
+ * field must be the same number. The memory, not the lesson, says what the answer is.
+ */
+function memoryRead(
+  answers: Readonly<Record<string, string>>,
+  given: Readonly<Record<string, string | number>>,
+): AnswerResult | AnswerProblem {
+  const field = String(given["field"]);
+  const gone = missing(answers, [field]);
+  if (gone) return gone;
+  const h = parseHex(answers[field]);
+  if (h === undefined) return { invalid: field };
+  const circuit = libraryCircuit(String(given["circuit"]));
+  const sim = new Simulator(circuit);
+  for (const input of circuit.inputs) {
+    const width = circuit.nets[input.net]?.width ?? 1;
+    sim.setInput(input.net, parseWord(String(given[input.name] ?? 0), width));
+  }
+  sim.settle();
+  const q = sim.read(String(given["output"] ?? "Q"));
+  const known = q.known === (1n << BigInt(q.width)) - 1n;
+  return {
+    pass: known && BigInt(`0x${h}`) === q.value,
+    inputs: {},
+    actual: { [field]: h },
+    expected: { [field]: OF_THE_MEMORY },
+  };
+}
+
 // ---- Module 7 ------------------------------------------------------------------------------
 
 /**
@@ -209,4 +246,11 @@ function exposes(
 }
 
 /** The graders lessons may name in an answers challenge's tests. */
-export const ANSWER_GRADERS: Readonly<Record<string, AnswerGrader>> = { threshold, word, exposes };
+export const ANSWER_GRADERS: Readonly<Record<string, AnswerGrader>> = {
+  threshold,
+  word,
+  // Module 6
+  "memory-read": memoryRead,
+  // Module 7
+  exposes,
+};

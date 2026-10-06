@@ -14,7 +14,7 @@ import { bitAt, parseWord, runSuite, type Circuit } from "@dd/sim";
 
 import { AnswerEditor, gradeAnswers } from "./AnswerEditor";
 import { Builder } from "./Builder";
-import { CircuitView } from "./CircuitView";
+import { CircuitView, levelOf, SignalTable } from "./CircuitView";
 import { HdlPanel } from "./HdlPanel";
 import { GATE_IDS, labelFor } from "./parts";
 import {
@@ -273,26 +273,56 @@ export function TryIt({
   circuit,
   clockName,
   highlight,
+  pins = false,
 }: {
   circuit: Circuit;
   clockName?: string;
   highlight?: readonly string[];
+  /** Module 5: the inputs as buttons and the signals as a table, with no drawing. */
+  pins?: boolean;
 }) {
   const strings = useViewStrings();
   const sim = useSettleSim(circuit);
   const [scope, setScope] = useState("");
+  const bits = circuit.inputs.filter(
+    (i) => i.name !== clockName && (circuit.nets[i.net]?.width ?? 1) === 1,
+  );
   return (
     <div className="try-it">
-      <CircuitView
-        circuit={circuit}
-        values={sim.values}
-        title={strings.editor.tryItTitle}
-        onToggleInput={(name) => sim.toggle(name)}
-        scope={scope}
-        onScope={setScope}
-        {...(highlight ? { highlight } : {})}
-      />
-      {scope === "" && (
+      {pins ? (
+        <div className="try-it-pins">
+          <p className="hdl-label">{strings.editor.tryItTitle}</p>
+          <div className="machine-inputs" role="group" aria-label={strings.machine.inputsLabel}>
+            {bits.map((i) => {
+              const on = levelOf(sim.values[i.net]) === "high";
+              return (
+                <button
+                  key={i.name}
+                  type="button"
+                  className="button secondary"
+                  aria-pressed={on}
+                  onClick={() => sim.toggle(i.name)}
+                >
+                  {format(strings.machine.inputButton, { name: i.name, value: on ? 1 : 0 })}
+                </button>
+              );
+            })}
+          </div>
+          <WordInputs circuit={circuit} values={sim.values} onSet={(n, v) => sim.set(n, v)} />
+          <SignalTable circuit={circuit} values={sim.values} />
+        </div>
+      ) : (
+        <CircuitView
+          circuit={circuit}
+          values={sim.values}
+          title={strings.editor.tryItTitle}
+          onToggleInput={(name) => sim.toggle(name)}
+          scope={scope}
+          onScope={setScope}
+          {...(highlight ? { highlight } : {})}
+        />
+      )}
+      {!pins && scope === "" && (
         <WordInputs circuit={circuit} values={sim.values} onSet={(n, v) => sim.set(n, v)} />
       )}
       <div className="try-it-actions">
@@ -372,6 +402,7 @@ function DrawEditor({ challenge, artifact, onChange, verdict }: ChallengeEditorP
             circuit={compiled.circuit}
             {...(clockOf(challenge) ? { clockName: clockOf(challenge) as string } : {})}
             highlight={marked}
+            pins={challenge.tryIt === "pins"}
           />
         </details>
       )}
@@ -433,6 +464,7 @@ function WriteEditor({ challenge, artifact, onChange, verdict }: ChallengeEditor
             circuit={result.circuit}
             {...(clockOf(challenge) ? { clockName: clockOf(challenge) as string } : {})}
             highlight={marked}
+            pins={challenge.tryIt === "pins"}
           />
         </details>
       )}

@@ -1,0 +1,72 @@
+// Copyright © 2026 Chris Snow
+
+// Titles, objectives, captions and labels of the lesson on state machines, drafted by the
+// prose process from a brief of facts (docs/notes/module-5-state-machines/briefs/SE.md).
+
+export const LABELS = {
+  captions: {
+    buildNextOne: "Draw N1 from the table and run the tests.",
+    nextStateInside: "Press GO and Clock CLK and watch the row's gate light.",
+    predictGiveUp: "Predict the state after a late OK, then check.",
+    predictReset: "Predict the state after a reset in WAIT, then check.",
+    predictStay: "Predict the state after GO falls, then check.",
+    retryAsText: "Compare the state diagram with the controller as text.",
+    retryFaults: "Choose a fault and run the checks.",
+    retryMachine: "Set the inputs, press Clock CLK, and follow the state in every view.",
+    scene: "The controller must send, wait, send again or give up.",
+    writeLateOk: "Change WAIT's arm and run the tests.",
+  },
+  challengeTitles: {
+    c1: "Bit 1 of the next state, drawn",
+    c2: "An answer while waiting, as text",
+  },
+  faults: {
+    row4: "row4 gate output fixed at 0",
+    row5Or: "row5 AND gate changed to OR",
+    row8: "row8 gate output fixed at 0",
+  },
+  objectives: [
+    "Predict a state machine's next state from its diagram and inputs.",
+    "Read next-state logic off an encoded table, one gate per row.",
+    "Say which faults in next-state logic break which moves.",
+    "Change a state machine written as text with always_comb and case.",
+  ],
+  options: {
+    p1Idle: "IDLE (00)",
+    p1Try: "TRY (01)",
+    p1Wait: "WAIT (10)",
+    p2GiveUp: "GIVE_UP (11)",
+    p2Idle: "IDLE (00)",
+    p2Try: "TRY (01)",
+    p3Idle: "IDLE (00)",
+    p3Try: "TRY (01)",
+    p3Wait: "WAIT (10)",
+  },
+  scene: {
+    answers: "Phone",
+    circuit: "?",
+    clock: "Clock",
+    failed: "Failed",
+    go: "Alert",
+    office: "Office",
+    sender: "Sender",
+    siren: "Siren",
+    summary:
+      "In the office, a switch on wire GO, receivers on wires OK and FAIL, a timer on wire TICK and a clock on wire CLK go into a box marked with a question mark. Wire SEND goes to the sender and wire SIREN to a siren lamp.",
+    timer: "Timer",
+    title: "The retry controller",
+  },
+  title: "How does a circuit work through a list of jobs?",
+  titles: {
+    challenge: "The reset, and a late answer while waiting",
+    construction: "One bit of the next-state logic, drawn",
+    explanation: "The next state waiting at D",
+    failureExperiment: "Three faults in the next-state logic",
+    generalisation: "The controller as text",
+    investigation: "The controller in four views",
+    motivation: "Jobs as states in a register",
+    prediction: "GO falling and a late OK",
+    question: "The office's message to the manager",
+    reflection: "State machines and their codes",
+  },
+} as const;

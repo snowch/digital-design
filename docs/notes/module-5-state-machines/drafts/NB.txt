@@ -1,0 +1,35 @@
+zeroIdleMachineLead: Another code choice: three flip-flops, one each for TRY, WAIT and GIVE_UP. IDLE is the code where all three are 0: `000`. This figure gives TRY `001`, WAIT `010` and GIVE_UP `100`. A reset loads IDLE.
+
+Open the next-state logic. There is no decoder. Bit 0 is TRY's line, bit 1 WAIT's and bit 2 GIVE_UP's. A NOR gate makes IDLE's line: 1 only when all three bits are 0. Each next-state bit is an OR of the rows that lead to that state. The table is the same nine rows; only the codes changed. Press the inputs and press Clock CLK.
+
+zeroIdleMachineAfter: The cost is an extra flip-flop: three instead of two. A reset loads all zeros, and `000` is IDLE, so a reset leads to IDLE.
+
+construction: In this challenge, change the controller's codes. Use IDLE `000`, TRY `001`, WAIT `010` and GIVE_UP `100` instead of the last lesson's codes. The state register becomes 3 bits wide. The table does not change: it is still nine rows. Only four of the eight 3-bit patterns are states.
+
+writeZeroIdleLead: The text box starts with the last lesson's controller. Change its codes.
+
+c1Task: Change the controller's codes to IDLE `000`, TRY `001`, WAIT `010` and GIVE_UP `100`. The state register and output S become 3 bits wide: use `logic [2:0]` and `output logic [2:0] S`. Update every code in the text: the reset, the `case` labels, every `next` value and the outputs' comparisons. Send the unused 3-bit patterns to IDLE with a `default` arm. The tests run the controller through every state, including FAIL rising while CLK is 1 and a second reset.
+
+c1Hints.1: The table and the `case` arms stay the same. Only the codes change, from 2 bits to 3 bits.
+
+c1Hints.2: A 2-bit code left in a 3-bit place will not work. The text box tells you the width is wrong. Write every code as 3 bits, like `3'b001`.
+
+c1Hints.3: The reset line becomes `if (RST) state <= 3'b000;`.
+
+c1Hints.4: The case arms are labelled `3'b000`, `3'b001`, `3'b010` and `3'b100`. Add `default: next = 3'b000;` at the end to send every other pattern to IDLE.
+
+c1Hints.5: Change `logic [1:0]` to `logic [2:0]` for state, next and S. Write IDLE as `3'b000`, TRY as `3'b001`, WAIT as `3'b010` and GIVE_UP as `3'b100` everywhere: the reset, the case labels, each `next =` and each `(state == ...)`. Label GIVE_UP's arm `3'b100` instead of `default`, and add `default: next = 3'b000;`.
+
+predictOneHotResetLead: The investigation gave IDLE the code `000`, all zeros. What if IDLE had its own flip-flop instead? Then each state would have a single 1 in its own bit: IDLE `0001`, TRY `0010`, WAIT `0100` and GIVE_UP `1000`. Four flip-flops. The figure draws the circuit above its question.
+
+p2Question: The figure gives one edge with RST at 1, then GO at 1 for one edge. What is S, the state's code, after it?
+
+p2Explain: S is `0000`. A reset loaded all zeros, but `0000` is not a state: no state's line is 1. No row applies, so every next-state bit is 0, and the register stays `0000` at every edge. The controller never starts.
+
+Codes in which each state has a single 1, in its own bit, are called **one-hot**. One-hot codes need a reset that loads a state's code. The course's reset loads zeros, which is why the investigation gave IDLE `000`.
+
+predictShortOkLead: This figure shows a different failure. The manager's phone answers OK for a moment. It uses the last lesson's codes. After a reset and GO 1 for one edge, the state goes to TRY and sends. OK then rises to 1 and falls back to 0 between two edges. The figure draws the circuit above its question.
+
+p3Question: OK rose and fell between two edges. What is the state after the next edge?
+
+p3Explain: The state is TRY, `01`. The circuit reads OK only at edges, and at the edge OK was 0. In TRY, with OK, FAIL and TICK all 0, the controller stays in TRY. The manager answered and the office is still waiting.

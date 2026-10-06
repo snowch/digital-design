@@ -1,0 +1,45 @@
+title: How does a circuit count?
+objectives.1: Build a counter from a register and half adders and say why it counts.
+objectives.2: Say what happens after `1111` and why a counter needs a reset.
+objectives.3: Make a counter start again at a chosen number with a comparator.
+titles.question: Measuring a wait
+titles.motivation: Working out the next number
+titles.prediction: Wrapping and pausing
+titles.investigation: Running the counter
+titles.construction: Draw a 2-bit counter
+titles.failureExperiment: Three faults and no reset
+titles.explanation: How the carry spreads
+titles.generalisation: Counting to any number
+titles.challenge: Build a counter with TICK
+titles.reflection: What decides the next number
+challengeTitles.c1: A 2-bit counter
+challengeTitles.c2: A 4-bit counter with TICK
+captions.scene: Count edges while the switch is on.
+captions.predictWrap: Predict Q after 16 edges from 0000, then check.
+captions.predictPause: Predict Q when EN stops after two edges, then check.
+captions.counterExplorer: Press Clock CLK and watch Q go up by one.
+captions.buildCountTwo: Draw a 2-bit counter and run the tests.
+captions.counterFaults: Choose a fault and run the checks.
+captions.predictNoReset: Predict Q after three edges with no reset, then check.
+captions.addOne: Press EN and move the slider to see the carry pass along.
+captions.countToFive: Press Clock CLK and watch TICK light at 0101.
+captions.buildCountTick: Draw a 4-bit counter with TICK and run the tests.
+faults.carryCut: C2 forced to 0
+faults.enHigh: EN forced to 1
+faults.xorToOr: ha0's XOR gate changed to OR
+options.p1Zero: Q is 0000
+options.p1Stop: Q is 1111
+options.unknown: The simulator cannot know Q (XXXX)
+options.p2Kept: Q is 0010
+options.p2Counted: Q is 0101
+options.p2Zero: Q is 0000
+options.p3Three: Q is 0011
+options.p3Zero: Q is 0000
+scene.count: Count
+scene.reset: Reset
+scene.clock: Clock
+scene.circuit: ?
+scene.display: Display
+scene.tick: Lamp
+scene.title: Count edges
+scene.summary: A Count switch on wire EN, a Reset button on wire RST and a clock on wire CLK go into a box marked with a question mark. Four wires go to a display, and wire TICK goes to a lamp.

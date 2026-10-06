@@ -45,6 +45,8 @@ const Props = z.object({
   faults: z.array(FaultSpec).min(1),
   run: z.array(Step).min(1),
   scope: z.string().default(""),
+  /** Inputs as first drawn, where all zeros would show a figure unlike its neighbours'. */
+  initial: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
   /** Offer "Release all at once": only where two inputs pressed together are the experiment. */
   releaseAll: z.boolean().default(false),
   /**
@@ -91,7 +93,7 @@ export const FaultLab = withProps(
       () => (fault ? applyFaults(healthy, [fault]) : healthy),
       [healthy, fault],
     );
-    const sim = useSettleSim(circuit);
+    const sim = useSettleSim(circuit, data.initial);
     const [diagnosis, setDiagnosis] = useState<Diagnosis | undefined>();
     const [ran, setRan] = useState(false);
     const expectations = useMemo(() => outputsPerStep(healthy, data.run), [healthy, data.run]);

@@ -1,0 +1,49 @@
+counterExplorerLead: This circuit runs the register's output Q back to the register's input through an "add one" block. At each rising edge, the register takes Q plus one.
+
+At the start Q is `XXXX`: no edge has set it. Press RST to 1, then "Clock CLK": Q becomes `0000`. Press RST back to 0 and EN to 1. Each "Clock CLK" adds one to Q. Press EN to 0 and the count stays.
+
+Open the "add one" block. Inside are four half adders in a chain. The first adds bit 0 of Q and EN. Each later half adder adds its bit and the carry from the one before. A register whose D is its own Q plus one is a **counter**. It goes up by one at each rising edge where EN is 1.
+
+counterExplorerAfter: TICK is the last half adder's carry. It is 1 while Q is `1111` and EN is 1, so the next edge gives `0000`. To measure a wait of 16 edges, start the counter at `0000` and watch for TICK.
+
+construction: Build a 2-bit counter from "D flip-flop with reset" blocks and half adders. A "D flip-flop with reset" has an RST pin. At an edge where RST is 1, its Q becomes 0. The registers lesson built that reset from gates; this part has it inside. Each bit of the counter uses one flip-flop and one half adder. Bit 0's carry goes into bit 1's half adder.
+
+buildCountTwoLead: The parts are buttons above the drawing; press one port and then another to wire them.
+
+c1Task: Draw a circuit with inputs EN, RST and CLK and outputs Q1 and Q0.
+
+At a rising edge where RST is 1, Q1 and Q0 both become 0.
+
+At each rising edge where EN is 1, the two bits count up by one: `00`, `01`, `10`, `11`, then back to `00`.
+
+At a rising edge where EN is 0, they keep their current values.
+
+The tests check your outputs by changing inputs one at a time. One test changes EN while CLK is 1.
+
+c1Hints.1: Each flip-flop's D input must be the next number's bit: the flip-flop's own bit plus any carry into it. A half adder gives both the SUM and CARRY you need.
+
+c1Hints.2: If EN goes to both half adders, both bits change and the count jumps. Only bit 0 adds EN. Bit 1 adds bit 0's carry instead.
+
+c1Hints.3: Try one bit alone: put Q0 on half adder A and EN on its B. The SUM equals Q0 XOR EN, so at an edge where EN is 1, Q0 flips; where EN is 0, it stays.
+
+c1Hints.4: Half adder 1 adds Q1 and half adder 0's CARRY. Its SUM goes to Q1's flip-flop's D.
+
+c1Hints.5: Place two "D flip-flop with reset" blocks and two half adders. The first half adder adds Q0 and EN; its SUM goes to Q0's flip-flop D. The second half adder adds Q1 and the first's CARRY; its SUM goes to Q1's flip-flop D. Wire CLK and RST to both flip-flops.
+
+counterFaultsLead: This is the 4-bit counter with three faults to choose from. The first fault is C2 forced to 0: C2 is the wire carrying ha1's CARRY into ha2. The second fault is EN fixed at 1. The third fault is ha0's XOR gate made an OR gate. Press "Run checks" to run seven checks: a reset, then five rising edges with EN 1, then one edge with EN 0.
+
+A healthy counter gives `0000` after reset, then `0001`, `0010`, `0011`, `0100`, `0101` from the five edges, and stays `0101` with EN 0.
+
+Before running the checks, predict which will fail and what the faulty counter will do. Open the "add one" block to see where each fault acts. Then press "Run checks" and compare.
+
+counterFaultsOutcomes: **First fault:** bit 2 never gets the carry, so it never changes. The count goes `0000`, `0001`, `0010`, `0011`, then back to `0000`, `0001`, and stays at `0001`. Fails: "edge 4", "edge 5", "edge with EN 0". Total: 3 of 7.
+
+**Second fault:** EN is always 1, so every edge counts up. The edge with EN 0 should keep `0101` but gives `0110` instead. Fails: "edge with EN 0". Total: 1 of 7.
+
+**Third fault:** bit 0 becomes 1 at the first edge and never returns to 0. The count goes up by two each time: `0001`, `0011`, `0101`, `0111`, `1001`. Fails: "edge 2" to "edge 5" and "edge with EN 0". Total: 5 of 7.
+
+predictNoResetLead: What happens if the counter never gets reset? The circuit is drawn above the question.
+
+p3Question: EN is 1 from the start, and RST stays 0. The counter runs for three edges. What is Q after the third edge?
+
+p3Explain: Q is `XXXX` because no edge has set it yet. One plus an unknown is unknown: each half adder's SUM is X when its bit of Q is X. A counter needs a reset before it can count.

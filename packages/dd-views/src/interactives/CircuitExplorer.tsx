@@ -46,6 +46,15 @@ const Props = z.object({
   initial: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
   /** Module 3: each word in the signal table read as a number, these ways. */
   readings: z.array(z.enum(["unsigned", "signed"])).default([]),
+  /** Module 5: steps run before the figure first shows, and again at "Start again". */
+  prime: z
+    .array(
+      z.object({
+        set: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
+        clock: z.string().optional(),
+      }),
+    )
+    .default([]),
   /** Module 7: a row of bit boxes per word input; off for a 64-bit word, set by `initial`. */
   wordInputs: z.boolean().default(true),
 });
@@ -86,7 +95,7 @@ export const CircuitExplorer = withProps(
   }: InteractiveProps & { data: z.infer<typeof Props> }) {
     const strings = useViewStrings();
     const circuit = useMemo(() => libraryCircuit(data.libraryId), [data.libraryId]);
-    const sim = useSettleSim(circuit, data.initial);
+    const sim = useSettleSim(circuit, data.initial, data.prime);
     const [scope, setScope] = useState(data.scope);
     const history = sim.sim.lastSettle?.history ?? [sim.values];
     const [step, setStep] = useState(history.length - 1);

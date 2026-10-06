@@ -17,6 +17,7 @@ import {
   drawingAt,
   emptyDrawing,
   grade,
+  isSealed,
   sceneOf,
   sceneProblems,
   straighten,
@@ -56,10 +57,14 @@ describe("the course's lessons", () => {
     // A figure that lets nobody open its blocks (Module 7: the slice is a later challenge's
     // answer) shows only its top level, so only that is a drawing a learner can see.
     const check = (name: string, circuit: ReturnType<typeof libraryCircuit>, open = true) => {
+      // Module 6: a sealed block (a word selector, a memory as a component) never opens, so
+      // neither it nor anything inside it is a drawing a learner sees.
+      const sealed = circuit.composites.filter((c) => isSealed(c.kind)).map((c) => c.path);
       // Blocks of one kind are drawn alike inside, so each kind is drawn once: the 64-bit ALU
       // has hundreds of blocks of a handful of kinds (Module 7).
       const kinds = new Set<string>();
       const scopes = (open ? circuit.composites : []).filter((c) => {
+        if (sealed.some((s) => c.path === s || c.path.startsWith(`${s}/`))) return false;
         if (kinds.has(c.kind)) return false;
         kinds.add(c.kind);
         return true;

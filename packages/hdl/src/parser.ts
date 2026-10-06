@@ -11,6 +11,8 @@ import {
   type Case,
   type CaseArm,
   type Declaration,
+  type EnumMember,
+  type EnumType,
   type Expression,
   type If,
   type Item,
@@ -122,19 +124,61 @@ class Parser {
     this.expect(";");
     const declarations: Declaration[] = [];
     const items: Item[] = [];
+    const enums: EnumType[] = [];
     while (!this.is("endmodule")) {
       const t = this.peek();
       if (t.kind === "end") throw new HdlError(t.at, "the module never ends: add `endmodule`");
-      if (this.is("logic")) {
+      if (this.is("typedef")) {
+        // Module 5: `typedef enum logic [1:0] {A = 2'b00, B} name;`
+        this.next();
+        this.expect(
+          "enum",
+          "the course's `typedef` names an `enum`: `typedef enum logic [1:0] {A, B} name;`",
+        );
+        if (this.is("logic")) this.next();
+        const range = this.is("[") ? this.range() : undefined;
+        this.expect("{");
+        const members: EnumMember[] = [];
+        do {
+          const m = this.identifier("a name in the list");
+          if (this.is("=")) {
+            this.next();
+            members.push({ name: m.text, value: this.expression(), at: m.at });
+          } else members.push({ name: m.text, at: m.at });
+        } while (this.is(",") && this.next());
+        this.expect("}");
+        const name = this.identifier("the type's name");
+        this.expect(";");
+        enums.push(
+          range
+            ? { name: name.text, range, members, at: t.at }
+            : { name: name.text, members, at: t.at },
+        );
+      } else if (t.kind === "identifier" && enums.some((e) => e.name === t.text)) {
+        // A signal declared with an enumerated type: `state_t S, N;`
+        this.next();
+        do {
+          const d = this.identifier("a signal name");
+          declarations.push({ kind: "logic", name: d.text, type: t.text, at: d.at });
+        } while (this.is(",") && this.next());
+        this.expect(";");
+      } else if (this.is("logic")) {
         this.next();
         const range = this.is("[") ? this.range() : undefined;
         do {
           const d = this.identifier("a signal name");
-          declarations.push(
-            range
-              ? { kind: "logic", name: d.text, range, at: d.at }
-              : { kind: "logic", name: d.text, at: d.at },
-          );
+          // Module 6: a memory is an array of words, written after the name, and may be filled
+          // from a list of values.
+          const array = this.is("[") ? this.arrayDims() : undefined;
+          const init = array && this.is("=") ? this.valueList() : undefined;
+          declarations.push({
+            kind: "logic",
+            name: d.text,
+            ...(range ? { range } : {}),
+            ...(array ? { array } : {}),
+            ...(init ? { init } : {}),
+            at: d.at,
+          });
         } while (this.is(",") && this.next());
         this.expect(";");
       } else if (this.is("wire") || this.is("reg")) {
@@ -208,7 +252,42 @@ class Parser {
     if (this.peek().kind !== "end") {
       throw new HdlError(this.peek().at, "only one module per text in this course");
     }
-    return { kind: "module", name, parameters, ports, declarations, items, at: start };
+    return {
+      kind: "module",
+      name,
+      parameters,
+      ports,
+      declarations,
+      items,
+      ...(enums.length ? { enums } : {}),
+      at: start,
+    };
+  }
+
+  /** Module 6: an array's words after its name, `[0:15]` or `[16]`. */
+  private arrayDims(): { from: Expression; to?: Expression } {
+    this.expect("[");
+    const from = this.expression();
+    let to: Expression | undefined;
+    if (this.is(":")) {
+      this.next();
+      to = this.expression();
+    }
+    this.expect("]");
+    return to ? { from, to } : { from };
+  }
+
+  /** Module 6: `= '{a, b, c}`, the values an array is filled with, lowest address first. */
+  private valueList(): Expression[] {
+    this.expect("=");
+    this.expect("'{", "Fill an array with values written as `'{8'h12, 8'h34}`.");
+    const values: Expression[] = [this.expression()];
+    while (this.is(",")) {
+      this.next();
+      values.push(this.expression());
+    }
+    this.expect("}");
+    return values;
   }
 
   private range(): Range {

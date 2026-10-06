@@ -49,14 +49,25 @@ export function levelOf(value: Word | undefined): Level {
 /**
  * A value as the views write it: a bit as 0, 1 or X; a word of up to eight bits in binary, so each
  * bit can be read off against the flip-flop that holds it; a wider word in hexadecimal, written as
- * Module 1 writes it (`FF48`: capitals, a digit per four bits, no prefix). A wider word with an
- * unknown bit keeps the engine's form.
+ * Module 1 writes it (`FF48`: capitals, a digit per four bits, no prefix), with X for a digit
+ * any of whose bits is unknown.
  */
 export function valueLabel(value: Word | undefined): string {
   if (!value) return "";
   if (value.width <= 8) return formatWord(value);
   const full = (1n << BigInt(value.width)) - 1n;
-  if (value.known !== full) return formatWord(value, 16);
+  // Module 6: a wide word with unknown bits, a digit per four bits as well, X where any of the
+  // four is unknown, so an unknown 16-bit word is XXXX and fits beside its wire.
+  if (value.known !== full) {
+    const digits = Math.ceil(value.width / 4);
+    return Array.from({ length: digits }, (_, i) => {
+      const shift = BigInt((digits - 1 - i) * 4);
+      const nibble = (full >> shift) & 15n;
+      return ((value.known >> shift) & nibble) === nibble
+        ? ((value.value >> shift) & nibble).toString(16).toUpperCase()
+        : "X";
+    }).join("");
+  }
   return value.value
     .toString(16)
     .toUpperCase()
@@ -73,7 +84,36 @@ function constText(circuit: Circuit, path: string): string {
 }
 
 /** Blocks drawn closed for good: a split or a join holds no gates worth opening. */
-const SEALED = new Set(["split-4", "join-4", "word-piece", "word-join", "top-bit"]);
+const SEALED = new Set([
+  "split-4",
+  "join-4",
+  // Module 5: the state machines' words of two and three bits.
+  "split-2",
+  "split-3",
+  "join-2",
+  "join-3",
+  // Module 6: a word selector holds one Module 3 selector per bit, and a memory or a ROM built as
+  // a component holds only the simulator's primitive; a 16-bit register's sixteen flip-flops
+  // teach nothing the four-bit register did not.
+  "word-selector-2",
+  "word-selector-4",
+  "word-selector-16",
+  "memory",
+  "rom",
+  "word-register-16",
+  "split-address",
+  "split-bytes",
+  "join-bytes",
+  // Module 7: the bits of a word, a join and the top bit inside the ALU's groups.
+  "word-piece",
+  "word-join",
+  "top-bit",
+]);
+
+/** Whether a block of this kind is drawn closed for good, so a learner never sees inside it. */
+export function isSealed(kind: string): boolean {
+  return SEALED.has(kind);
+}
 
 function fullPath(scope: string, local: string): string {
   return scope ? `${scope}/${local}` : local;
