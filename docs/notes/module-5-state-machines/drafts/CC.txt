@@ -1,0 +1,35 @@
+explanation: At every edge, all four flip-flops take their D at once. D is NEXT, worked out by the half adders from Q as it was before the edge. Q changes. The half adders work out a new NEXT. Nothing more happens until the next edge.
+
+The carry passes along the chain, one half adder at a time. So NEXT does not change all at once. The figure below shows this.
+
+addOneLead: The figure shows the add one block alone, in the stepped model. Q is set to `0111` and EN to 0, so NEXT is `0111`. Press EN to 1. The status line says "Settled in 5 steps."
+
+Move the Step slider back to step 0 and forward one step at a time. Each step, the carry reaches one more half adder. NEXT passes through `0110`, `0100` and `0000` before it settles at `1000`. Press bits of Q to try other numbers, such as `1111`.
+
+addOneAfter: The register never takes `0110`, `0100` or `0000`. It takes D only at an edge. The adder settles between edges. Every flip-flop gets CLK itself, so all four bits change at the one edge, after the carries have settled. With Q `1111` and EN 1, NEXT is `0000` and COUT is 1. That is TICK.
+
+countToFiveLead: A wait of 16 edges is only one wait. To count 6 edges, the counter must go from `0101` back to `0000`. The figure adds Module 3's comparator. It compares Q with the fixed word `0101`. Its output, EQ, is 1 while Q is `0101`. EQ is the TICK here. EQ, ORed with RST, drives the register's RST. The edge after `0101` loads `0000`.
+
+The figure starts at `0000` after a reset, with EN at 1. Press "Clock CLK" and watch Q and TICK.
+
+countToFiveAfter: Q goes `0000`, `0001`, `0010`, `0011`, `0100`, `0101`, then `0000`. TICK is 1 while Q is `0101`: once every 6 edges. Changing the fixed word changes the wait. The gates in front of D decide the next number. Here they choose between the next number up and `0000`.
+
+buildCountTickLead: The shop's wait needs a 4-bit counter with TICK. Draw it from the same parts as the construction.
+
+c2Task: Draw a circuit with inputs EN, RST and CLK and outputs Q3, Q2, Q1, Q0 and TICK. At an edge where RST is 1, every bit becomes 0. Otherwise at an edge where EN is 1, the four bits count up by one, from `0000` to `1111` and then back to `0000`; where EN is 0, it keeps its value. TICK is 1 while the count is `1111` and EN is 1, and 0 otherwise. TICK changes as soon as EN or the count changes, not only at an edge. The tests count all the way up and include tests where EN changes while CLK is 1.
+
+c2Hints.1: Extend the 2-bit counter: each bit needs its own flip-flop and half adder, and each half adder after the first adds the CARRY of the one before.
+
+c2Hints.2: A TICK taken from an AND of the four Q outputs alone stays 1 at an edge where EN is 0, but the tests expect 0 then. TICK must also need EN.
+
+c2Hints.3: In the 2-bit counter, half adder 1's CARRY is Q1 AND Q0 AND EN: it is 1 only while the count is `11` and EN is 1.
+
+c2Hints.4: The last half adder's CARRY, from the half adder whose A is Q3, is 1 only while Q3, Q2, Q1, Q0 and EN are all 1. Wire it to TICK.
+
+c2Hints.5: Four D flip-flop with reset blocks and four half adders. Half adder 0 adds Q0 and EN; each next one adds its bit of Q and the CARRY before it; each SUM drives its bit's flip-flop's D. CLK and RST go to every flip-flop. The last CARRY drives TICK.
+
+reflection: A counter is a register whose D is its own Q plus one, from a chain of half adders. EN decides whether an edge counts. RST starts it at `0000`. TICK, the last carry, says the count is about to wrap round.
+
+The gates in front of D decide the next number. In the counter they always choose the next number up, or `0000`. The office's message needs a circuit that does one of several jobs: sending, waiting, giving up. It chooses its next job from what happened. What would the gates in front of D need then?
+
+modelVsReality: In the clocked model the circuit settles before every edge. In hardware the clock must be slow enough for the carry to pass along the whole chain of half adders before the next edge: the setup time of Module 4, for the slowest path. A longer counter needs a slower clock or a faster way to work out the carries. The model's gates each take one step; real gates take different times.

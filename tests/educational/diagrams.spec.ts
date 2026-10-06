@@ -16,7 +16,7 @@ async function textCollisions(page: Page): Promise<Collision[]> {
   return page.evaluate(() => {
     const out: { figure: string; problem: string }[] = [];
     const svgs = document.querySelectorAll<SVGSVGElement>(
-      "svg.timing-diagram, svg.timing-lanes, svg.circuit, svg.signal-plot, svg.signal-path, svg.scene, svg.column-sum",
+      "svg.timing-diagram, svg.timing-lanes, svg.circuit, svg.signal-plot, svg.signal-path, svg.scene, svg.column-sum, svg.state-diagram",
     );
     for (const svg of svgs) {
       const figure = svg.closest("figure")?.id ?? svg.className.baseVal;
@@ -283,6 +283,35 @@ test.describe("the diagrams", () => {
   });
 
   // Module 2
+  // Module 5: every prediction committed, and every state-machine figure clocked through its
+  // states, so the diagrams' marked arrows and the timing diagrams' named values are measured.
+  test("Module 5: no label overlaps another or leaves its drawing, before and after use", async ({
+    page,
+  }) => {
+    for (const lesson of ["counters", "register-transfer", "state-machines", "state-encoding"]) {
+      await openLesson(page, lesson);
+      expect(await textCollisions(page), lesson).toEqual([]);
+      for (const figure of await page.locator(".prediction").all()) {
+        await figure.getByRole("radio").nth(1).check();
+        await figure.getByRole("button", { name: V.prediction.commit }).click();
+      }
+      for (const figure of await page.locator(".state-machine").all()) {
+        for (const name of ["GO", "FAIL", "TICK"]) {
+          const button = figure.getByRole("button", {
+            name: format(V.machine.inputButton, { name, value: 0 }),
+            exact: true,
+          });
+          if ((await button.count()) === 0) continue;
+          await button.click();
+          await figure
+            .getByRole("button", { name: format(V.explorer.clock, { name: "CLK" }) })
+            .click();
+        }
+      }
+      expect(await textCollisions(page), `${lesson}, used`).toEqual([]);
+    }
+  });
+
   test("Module 2: no label overlaps another or leaves its drawing, before and after use", async ({
     page,
   }) => {

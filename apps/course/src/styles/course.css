@@ -1657,3 +1657,15 @@ button.bit {
 .machine-text {
   overflow-x: auto;
 }
+
+/* Module 5: a state machine's diagnosis names long paths inside its register; they wrap on a
+   phone instead of widening the page, and each path stands apart from the next. */
+.verdict-cone code {
+  display: inline-block;
+  margin-right: 0.4em;
+  overflow-wrap: anywhere;
+}
+.verdict-failure .values,
+.verdict-values dd {
+  overflow-wrap: anywhere;
+}

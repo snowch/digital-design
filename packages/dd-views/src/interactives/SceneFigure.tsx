@@ -70,7 +70,9 @@ const groupHeight = (g: Group) => (g.room ? HEAD : 0) + g.items.length * ROW + (
 
 /** What a wire needs written over or under it: its name, or its count if it is a bus. */
 const nameWidth = (w: { signal?: string | undefined; width: number }) =>
-  Math.max(textWidth(w.signal ?? ""), w.width > 1 ? textWidth(String(w.width)) + 12 : 0);
+  w.signal && w.width > 1
+    ? textWidth(w.signal) + 12 + textWidth(String(w.width))
+    : Math.max(textWidth(w.signal ?? ""), w.width > 1 ? textWidth(String(w.width)) + 12 : 0);
 
 const readoutWidth = (o: OutputItem) => Math.max(36, textWidth(o.value ?? o.label) + 14);
 
@@ -137,15 +139,23 @@ export const SceneFigure = withProps(
     const outputX = circuitX + circuitW + inner;
     const width = Math.ceil(outputX + outputsW + PAD);
 
-    const busMark = (x: number, yy: number, n: number) =>
+    // Module 5: a named bus writes its count above the wire, right of the slash, with its name
+    // left of it; a count below the wire would meet the name over the next row's wire.
+    const busMark = (x: number, yy: number, n: number, named = false) =>
       n > 1 ? (
         <g className="bus-mark">
           <line className="slash" x1={x - 4} x2={x + 4} y1={yy + 6} y2={yy - 6} />
-          <text className="bus-count" x={x + 6} y={yy + 16}>
+          <text className="bus-count" x={x + 6} y={named ? yy - 7 : yy + 16}>
             {n}
           </text>
         </g>
       ) : null;
+    // The slash moves so that the name, the slash and the count are centred on the wire together.
+    const slashX = (x: number, w: { signal?: string | undefined; width: number }) =>
+      w.signal && w.width > 1 ? x + (textWidth(w.signal) - textWidth(String(w.width))) / 2 : x;
+    const nameX = (x: number, w: { signal?: string | undefined; width: number }) =>
+      w.width > 1 ? slashX(x, w) - 6 : x;
+    const nameAnchor = (w: { width: number }) => (w.width > 1 ? "end" : "middle");
     const arrow = (x: number, yy: number) => (
       <polygon className="arrow" points={`${x},${yy} ${x - 8},${yy - 4.5} ${x - 8},${yy + 4.5}`} />
     );
@@ -202,14 +212,19 @@ export const SceneFigure = withProps(
                         {item.signal && (
                           <text
                             className="signal-name"
-                            x={(leftEdge + circuitX) / 2}
+                            x={nameX((leftEdge + circuitX) / 2, item)}
                             y={yy - 7}
-                            textAnchor="middle"
+                            textAnchor={nameAnchor(item)}
                           >
                             {item.signal}
                           </text>
                         )}
-                        {busMark((leftEdge + circuitX) / 2, yy, item.width)}
+                        {busMark(
+                          slashX((leftEdge + circuitX) / 2, item),
+                          yy,
+                          item.width,
+                          !!item.signal,
+                        )}
                       </g>
                     );
                   })}
@@ -245,11 +260,16 @@ export const SceneFigure = withProps(
                     />
                     {arrow(outputX, yy)}
                     {o.signal && (
-                      <text className="signal-name" x={wireMid} y={yy - 7} textAnchor="middle">
+                      <text
+                        className="signal-name"
+                        x={nameX(wireMid, o)}
+                        y={yy - 7}
+                        textAnchor={nameAnchor(o)}
+                      >
                         {o.signal}
                       </text>
                     )}
-                    {busMark(wireMid, yy, o.width)}
+                    {busMark(slashX(wireMid, o), yy, o.width, !!o.signal)}
                     {o.kind === "lamp" ? (
                       <>
                         <g className="lamp">

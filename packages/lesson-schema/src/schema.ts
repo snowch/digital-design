@@ -248,6 +248,12 @@ export const Challenge = z.object({
   allowedConstructs: z.array(z.string()).default([]),
   /** What the editor offers to build a drawn solution with, by id. The book interprets the ids. */
   palette: z.array(z.string()).default([]),
+  /**
+   * Module 5: what a written challenge's "Try it" shows. A written state machine elaborates to a
+   * tangle no drawing makes readable, so "pins" offers its inputs as buttons and its signals as a
+   * table, without the drawing.
+   */
+  tryIt: z.enum(["drawing", "pins"]).default("drawing"),
   /** Module 2: a gate budget, a depth and the kinds of gate allowed, each graded as a test. */
   limits: Limits.optional(),
   hints: Hints,

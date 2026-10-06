@@ -16,6 +16,11 @@ import { signals } from "./signals";
 import { fewerGates } from "./fewer-gates";
 import { gates } from "./gates";
 import { nand } from "./nand";
+// Module 5 after the registers lesson: counters, register transfer and state machines.
+import { counters } from "./counters";
+import { registerTransfer } from "./register-transfer";
+import { stateMachines } from "./state-machines";
+import { stateEncoding } from "./state-encoding";
 
 const INPUTS: readonly LessonInput[] = [
   signals,
@@ -30,6 +35,11 @@ const INPUTS: readonly LessonInput[] = [
   alu,
   remember,
   registers,
+  // Module 5 after the registers lesson.
+  counters,
+  registerTransfer,
+  stateMachines,
+  stateEncoding,
 ];
 
 export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(

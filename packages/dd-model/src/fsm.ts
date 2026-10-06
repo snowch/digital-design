@@ -383,7 +383,8 @@ export function machineCircuit(m: Machine, options: MachineCircuitOptions = {}):
           bb.not(ins.get(name) as NetId, {
             name: `not${name}`,
             output: bb.net(`N${name}`),
-            meta: cell(9, notY),
+            // Half a cell up: a NOT gate's input sits half a cell lower than a pin's centre.
+            meta: cell(9, notY - 0.5),
           }),
         );
         notY += 3;

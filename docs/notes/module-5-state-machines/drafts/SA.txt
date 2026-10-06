@@ -1,0 +1,21 @@
+question: The registers lesson asked what a circuit would need to work through a fixed list of jobs, one per edge. The counters lesson raised a new question: what if the gates in front of D chose the next job from what the inputs said?
+
+When GO is 1, the office sends the manager a message. The manager's phone answers OK when the manager has read it; the sender reports FAIL if the message did not get through. After a FAIL, the office waits for the next TICK, a slow pulse from a counter, then sends again. If a whole TICK passes with no answer, the office gives up: the siren sounds in the shop, SIREN, until someone resets the circuit with RST.
+
+A circuit needs to remember which job it is on: waiting for GO, sending and waiting for an answer, waiting for the next TICK, or giving up. How can a circuit store which job it is on and choose its next job from what happens?
+
+motivation: The circuit has four jobs: wait for GO, send and wait for an answer, wait for the next TICK, or give up. Give each a name and code: IDLE `00`, TRY `01`, WAIT `10`, GIVE_UP `11`. Which job the circuit is on is its **state**, one of these four, stored as a code in a 2-bit register.
+
+At a rising edge where RST is 1, the register becomes `00`, IDLE. Like the counter, gates before the register's D work out the next code, but from the state and the inputs together, not by adding one. A circuit made of a register that stores its state and gates that work out the next state from the state and the inputs is a **state machine**. Those gates are its **next-state logic**.
+
+The outputs SEND and SIREN depend on the state alone: SEND is 1 in TRY, SIREN in GIVE_UP.
+
+prediction: The two figures below run the circuit, each drawn as three blocks: next-state logic, a register, and output logic. S is the register's code; choose an answer and then press "Check my prediction".
+
+p1Question: The figure resets the circuit to IDLE, then sets GO to 1 for one edge. GO goes back to 0, and two more edges pass with OK, FAIL and TICK all 0. What is the state at the end?
+
+p1Explain: The state is TRY, `01`. GO took the circuit from IDLE to TRY. In TRY the circuit waits for an answer or a TICK, so GO going back to 0 changes nothing. TRY stays TRY at every edge until OK, FAIL or TICK.
+
+p2Question: After a reset, GO is 1 for one edge. Then GO is 0 and TICK is 1 for one edge, with no answer. Then TICK is 0 and OK is 1 for one more edge. What is the state at the end?
+
+p2Explain: The state is GIVE_UP, `11`. The TICK with no answer gave up. In GIVE_UP nothing but a reset changes the state, so an OK that arrives too late changes nothing and the siren keeps sounding.

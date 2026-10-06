@@ -109,6 +109,17 @@ test.describe("the look of the page", () => {
     });
   });
 
+  // Module 5: the state-machine figure, its diagram and its table, as the lesson first shows it.
+  test("the state machines lesson's main figure looks as designed", async ({ page }) => {
+    await openLesson(page, "state-machines");
+    const figure = page.locator("#ix-retry-machine");
+    await figure.scrollIntoViewIfNeeded();
+    await expect(figure).toHaveScreenshot("ix-retry-machine.png", {
+      maxDiffPixelRatio: 0.02,
+      animations: "disabled",
+    });
+  });
+
   test("the signals lesson's noisy-signal figure looks as designed", async ({ page }) => {
     await openLesson(page, "signals");
     const figure = page.locator("#ix-break-signal");

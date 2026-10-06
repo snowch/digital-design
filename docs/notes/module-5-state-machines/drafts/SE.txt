@@ -1,0 +1,50 @@
+title: How does a circuit work through a list of jobs?
+objectives.1: Predict a state machine's next state from its diagram and inputs.
+objectives.2: Read next-state logic off an encoded table, one gate per row.
+objectives.3: Say which faults in next-state logic break which moves.
+objectives.4: Change a state machine written as text with `always_comb` and `case`.
+titles.question: The office's message to the manager
+titles.motivation: Jobs as states in a register
+titles.prediction: Staying in TRY, and a late answer
+titles.investigation: The controller in four views
+titles.construction: One bit of the next-state logic, drawn
+titles.failureExperiment: Three faults in the next-state logic
+titles.explanation: The next state waiting at D
+titles.generalisation: The controller as text
+titles.challenge: The reset, and a late answer while waiting
+titles.reflection: State machines and their codes
+challengeTitles.c1: Bit 1 of the next state, drawn
+challengeTitles.c2: An answer while waiting, as text
+captions.scene: The controller must send, wait, send again or give up.
+captions.predictStay: Predict the state after GO falls, then check.
+captions.predictGiveUp: Predict the state after a late OK, then check.
+captions.retryMachine: Set the inputs, press Clock CLK, and follow the state in every view.
+captions.buildNextOne: Draw N1 from the table and run the tests.
+captions.retryFaults: Choose a fault and run the checks.
+captions.nextStateInside: Press GO and Clock CLK and watch the row's gate light.
+captions.retryAsText: Compare the state diagram with the controller as text.
+captions.predictReset: Predict the state after a reset in WAIT, then check.
+captions.writeLateOk: Change WAIT's arm and run the tests.
+faults.row4: row4 gate output fixed at 0
+faults.row8: row8 gate output fixed at 0
+faults.row5Or: row5 AND gate changed to OR
+options.p1Idle: IDLE (00)
+options.p1Try: TRY (01)
+options.p1Wait: WAIT (10)
+options.p2Idle: IDLE (00)
+options.p2GiveUp: GIVE_UP (11)
+options.p2Try: TRY (01)
+options.p3Idle: IDLE (00)
+options.p3Try: TRY (01)
+options.p3Wait: WAIT (10)
+scene.office: Office
+scene.go: Alert
+scene.answers: Phone
+scene.failed: Failed
+scene.timer: Timer
+scene.clock: Clock
+scene.circuit: ?
+scene.sender: Sender
+scene.siren: Siren
+scene.title: The retry controller
+scene.summary: In the office, a switch on wire GO, receivers on wires OK and FAIL, a timer on wire TICK and a clock on wire CLK go into a box marked with a question mark. Wire SEND goes to the sender and wire SIREN to a siren lamp.

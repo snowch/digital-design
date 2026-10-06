@@ -1,0 +1,67 @@
+explanation: Between edges, the next-state logic works out the code of the next state from the state and the inputs. That code waits at the register's D. At the edge the register takes it, and the next-state logic starts again from the new state.
+
+The gates in the next-state logic read off the table, one gate per row. Rows 2 and 3 lead to IDLE, `00`, and need no gate: when no row gives a bit a 1, the OR gives 0. Row 9 reads no input, so its term is GIVE_UP's line itself. The gates are row1, row4, row5, row6, row7, row8 and two OR gates.
+
+SEND and SIREN come from the output logic, which reads the state alone. An input that changes between edges cannot change them; only an edge can.
+
+nextStateInsideLead: The figure shows the controller opened at its next-state logic. After a reset it runs in IDLE and the decoder's Y0 is 1. With GO at 0, no row's gate gives a 1, so next is `00`.
+
+Press GO to 1: row1 gives 1, the OR gate for bit 0 gives 1, and next is `01`. Press "Clock CLK" and the state becomes `01`, TRY, and Y1 is 1.
+
+Try the inputs in TRY and watch which row's gate lights.
+
+nextStateInsideAfter: At any moment at most one row's gate gives 1, the row that applies. When the row leads to IDLE, none does. Each gate is a row of the table, and the table is the state diagram written out.
+
+retryAsTextLead: The figure shows the state diagram beside the controller as the course's text.
+
+The register is one `always_ff` block: `if (RST) state <= 2'b00; else state <= next;`. At a reset it takes `00`; otherwise at each edge it takes next.
+
+The next-state logic is one `always_comb` block. `always_comb` describes gates: its lines work out again whenever an input changes, not at an edge, and a value is given with `=`, not `<=`. Inside it, `case (state)` picks the arm whose label equals the state. Each arm is one state's rows in the table's order, as `if` and `else if`. `default` takes every other value, here `11`, GIVE_UP. `//` starts a comment, which the circuit ignores.
+
+`(state == 2'b01)` is 1 when the two sides are equal, as Module 3's comparator: SEND is 1 in TRY. `assign S = state;` gives the state's code to the output S.
+
+The text and the table say the same thing, row for row. You can press the inputs and clock here too.
+
+retryAsTextAfter: The state machine's form in text is always the same: the state in an `always_ff` with its reset, the next state in an `always_comb` with a `case` arm per state, and the outputs from the state alone.
+
+predictResetLead: One kind of move is left to predict: the reset. The figure draws the circuit above its question.
+
+p3Question: After a reset, GO becomes 1 for one edge, FAIL becomes 1 for one edge, and then RST and TICK both become 1 for one edge. What is the state?
+
+p3Explain: The state is IDLE, `00`. The table says WAIT with TICK 1 goes to TRY (row 7), but the reset wins: the register's reset acts before its D, as in the registers lesson.
+
+writeLateOkLead: The lab changes the controller. An OK that arrives while the controller waits means the manager has read the message after all.
+
+c2Task: The text box starts with the whole controller's text. Change the WAIT arm: if OK is 1, the next state is IDLE; otherwise if TICK is 1, TRY; otherwise WAIT. Nothing else changes. GIVE_UP still ignores OK.
+
+Inputs: GO, OK, FAIL, TICK, RST, CLK. Outputs: SEND, SIREN, S (the state's code).
+
+The tests run the controller through every state, including an edge in WAIT with OK 1, an edge in GIVE_UP with OK 1, one test where GO falls while CLK is 1, and one where OK rises while CLK is 1.
+
+c2Hints.1: Only the WAIT arm of the `case` changes. Write its rows in order: the row with OK first.
+
+c2Hints.2: Adding the OK row after the TICK row lets TICK win when both are 1, and the controller sends again though the manager has answered.
+
+c2Hints.3: TRY's arm already starts with `if (OK) next = 2'b00;`: an answer ends the job.
+
+c2Hints.4: WAIT's arm starts `if (OK) next = 2'b00;`.
+
+c2Hints.5: Replace WAIT's arm with:
+
+```
+2'b10: begin // WAIT
+  if (OK) next = 2'b00;
+  else if (~OK & TICK) next = 2'b01;
+  else next = 2'b10;
+end
+```
+
+reflection: A state machine is a register that stores its state and next-state logic that works out the next state from the state and the inputs. Here, the outputs come from the state alone.
+
+The next-state logic was read off the table, one gate per row. The text says the same table with `case`. The codes `00` to `11` were chosen without a reason given. A reset always loads `00`. Does it matter which state gets which code?
+
+modelVsReality: The model's inputs change only between edges. A real answer can arrive at any moment, even just before an edge, when metastability is the risk. The next lesson shows what an input that rises and falls between two edges does.
+
+The next-state logic settles before every edge in the model. A real one takes time through the decoder, an AND gate and an OR gate, and the clock must leave that time, as for the counter's carries.
+
+Real tools simplify the gates. The course builds them row by row so each gate matches a row of the table. Both give the same next state.

@@ -1,0 +1,29 @@
+nowPrevExplorerLead: Explore how the two registers work together. The circuit starts with NOW and PREV both at `0000`. Press bits of IN to set a number. Press SAVE to 1 and press Clock CLK: NOW takes your number, and PREV takes the word NOW had before the edge. Set a new number and clock again: both registers update at the same edge. Press SAVE to 0 and press Clock CLK: both keep their words. Press any register block to open it: the four flip-flops inside, like in the registers lesson.
+
+nowPrevExplorerAfter: One wire, from now's Q to prev's D, carries the word between registers. Nothing else is needed to make PREV wait one save behind NOW. The edge does it, since both registers take their D at the same moment.
+
+construction: This circuit uses two 4-bit register blocks, one for NOW and one for PREV. Data travels on wide wires carrying 4 bits each. Build the same circuit in the challenge below: two registers wired to work together.
+
+buildNowPrevLead: Build a circuit with two registers, NOW and PREV. Use the 4-bit register blocks offered.
+
+c1Task: Draw a circuit with inputs IN (4 bits), SAVE, RST and CLK, and outputs NOW and PREV (4 bits each). When an edge has RST at 1, both NOW and PREV become `0000`. Otherwise, when an edge has SAVE at 1, NOW takes IN and PREV takes the word NOW had before that edge. When SAVE is 0, both keep their words. The tests include edges where SAVE changes while CLK is 1.
+
+c1Hints.1: Each register takes its D when its EN is 1, at an edge. PREV's D must carry NOW's word.
+
+c1Hints.2: If you wire IN to both D inputs, PREV becomes the same as NOW after every save.
+
+c1Hints.3: In the registers lesson, a shift register's second flip-flop took the first one's Q at each edge. PREV is like that second flip-flop: it is the second register in a chain of two.
+
+c1Hints.4: The NOW register's D should come from IN. The PREV register's D should come from the NOW register's Q.
+
+c1Hints.5: Place two 4-bit register blocks. Wire IN to the first one's D, and wire its Q to NOW and to the second block's D. Wire the second block's Q to PREV. Wire SAVE to both EN pins, RST to both RST pins, and CLK to both CLK pins.
+
+predictLongPressLead: The circuit above has a flaw that the tests you ran did not catch. A person keeps Save pressed for far longer than one clock period. SAVE stays 1 for many edges, not just one. This figure saves `0011`, sets IN to `0101`, and then keeps SAVE pressed for three edges. Watch what happens to PREV.
+
+p2Question: A save of `0011` happened. Now IN is `0101` and SAVE is kept pressed for three edges. What is PREV after the third edge?
+
+p2Explain: PREV is `0101`. The first edge of the press: NOW took `0101`, PREV took `0011` (NOW's old value). The second edge: NOW took `0101` again, PREV took NOW, which was now `0101`. The number `0011` is lost. The clock does not wait for your finger.
+
+saveOnceLead: The fix saves once per press. A flip-flop, last, takes SAVE at every edge: its Q, OLD, is SAVE's value from the edge before. An AND gate and a NOT gate make STEP: SAVE AND NOT OLD. STEP is 1 only before the first edge of a press. After that edge, OLD is 1, so STEP is 0 for the rest of the press. STEP drives both registers' EN instead of SAVE. Try it: press SAVE to 1 and press Clock CLK three times. NOW takes `0101` and PREV takes `0011` at the first edge. The next two edges change nothing. Release SAVE and clock once. Then you can press again.
+
+saveOnceAfter: After the first edge of the press, NOW is `0101` and PREV is `0011`. The next two edges change nothing. A new press (SAVE to 1 again) saves again. The fix itself is a word passed from one flip-flop to the next: the last flip-flop keeps SAVE's value from one edge to the edge after.

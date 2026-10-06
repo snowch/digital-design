@@ -83,4 +83,23 @@ describe("enumerated types", () => {
     ]);
     expect(err(wrap("  typedef enum logic [1:0] {A = 3'b001} t;"))[0]).toContain("3 bits wide");
   });
+
+  it("refuses a case label of the wrong width with its line, not an internal message", () => {
+    const text = `module m(input logic CLK, output logic [2:0] S);
+  logic [2:0] state;
+  always_comb begin
+    case (state)
+      2'b01: S = 3'b001;
+      default: S = 3'b000;
+    endcase
+  end
+endmodule`;
+    expect(elaborate(text).messages).toEqual([
+      {
+        severity: "error",
+        text: "this label is 2 bits wide but the case compares a 3-bit value",
+        at: { line: 5, column: 7 },
+      },
+    ]);
+  });
 });

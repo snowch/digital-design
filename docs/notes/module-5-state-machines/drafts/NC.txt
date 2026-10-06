@@ -1,0 +1,47 @@
+explanation: Every flip-flop in this module takes its D at the same edge of one clock. Between edges, the gates work out each D from the flip-flops' Q and the inputs. The inputs count only as they are at an edge. A design that keeps this rule is called **synchronous**. This is why the timing diagrams can be read edge by edge, and why the registers lesson's AND gate in the clock's path broke things: it made an edge of its own.
+
+The rule has a price. An input must last until an edge to be seen. A short answer, the phone that says OK and then goes quiet, must be kept until the controller reads it. The sender can keep OK at 1 until SEND falls. Or a flip-flop can be set by OK and cleared once the controller has read it.
+
+The reset belongs to the rule too: it acts at an edge. So the codes decide where the reset leads. Give the all-zero code to the state the reset should reach.
+
+retryEnumLead: The figure shows the retry controller from the last lesson, written with its states named. The names replace the codes wherever they appear in the text.
+
+To name the states, you declare a list at the top of the text: `typedef enum logic [1:0] {IDLE = 2'b00, TRY = 2'b01, WAIT = 2'b10, GIVE_UP = 2'b11} state_t;`. This declares four names, each a 2-bit value, and calls the list `state_t`. Then `state_t state;` declares a signal that stores one of them.
+
+After that, the text uses the names everywhere: the reset reads `if (RST) state <= IDLE;`, the case arms are labelled `IDLE:`, `TRY:` and so on, and SEND is `(state == TRY)`. The codes are written once, in the enum list. Changing a code is one edit, and the reset still leads wherever the all-zero code is.
+
+A name with no `= value` takes the value after the one before it, starting from 0.
+
+retryEnumAfter: The names change nothing in the circuit. A text written with state names and one written with codes make the same gates and flip-flops. The names make the text say what the state diagram says.
+
+defrostMachineLead: A freezer's coils frost over and must be warmed now and then. This is the capstone: a defrost controller.
+
+The controller has three states. COOL is the normal state: the compressor runs and cools the room. DEFROST turns on the heater to melt the ice. DRAIN turns off both while the water runs away.
+
+Its inputs are TICK, a slow pulse from a counter; CLEAR, which is 1 when the coils have no ice left; and WARM, which is 1 while the room is warmer than it should be. From COOL, a TICK starts a defrost. In DEFROST, WARM sends the controller back to COOL at once; otherwise CLEAR moves it to DRAIN. From DRAIN, a TICK takes it back to COOL. A reset leads to COOL.
+
+The figure shows the state diagram running. Press the inputs and clock to see each move.
+
+writeDefrostLead: Write the defrost controller from the state diagram, using the state-machine form you have seen: state in `always_ff` with its reset, next state in `always_comb` with `case`, outputs from the state.
+
+c2Task: Your inputs are TICK, CLEAR, WARM, RST and CLK; your outputs are COMP, HEAT and S. Use codes COOL `00`, DEFROST `01` and DRAIN `10`, with RST leading to COOL.
+
+Follow the diagram: each arrow is a row. In DEFROST, WARM wins over CLEAR. COMP is 1 in COOL and HEAT is 1 in DEFROST, from the state alone. The code `11` is no state: send it to COOL. You may use `typedef enum` to name the states. The tests include TICK falling while CLK is 1, and an edge in DEFROST with both WARM and CLEAR at 1.
+
+c2Hints.1: Write the state in `always_ff` with its reset. Write the next state in `always_comb`: one `case` arm per state. COMP and HEAT come from the state.
+
+c2Hints.2: If you check CLEAR before WARM in DEFROST, a warm room goes to DRAIN when both are 1. WARM should win: check it first.
+
+c2Hints.3: COOL's arm reads one input: `COOL: if (TICK) next = DEFROST; else next = COOL;`.
+
+c2Hints.4: DEFROST's arm: `if (WARM) next = COOL; else if (CLEAR) next = DRAIN; else next = DEFROST;`.
+
+c2Hints.5: Declare `typedef enum logic [1:0] {COOL = 2'b00, DEFROST = 2'b01, DRAIN = 2'b10} state_t;`, then `state_t state;` and `state_t next;`. In `always_ff`: `if (RST) state <= COOL; else state <= next;`. In `always_comb`, `case (state)` with the arms for COOL, DEFROST and DRAIN as the diagram says, and `default: next = COOL;`. Then `assign COMP = (state == COOL);`, `assign HEAT = (state == DEFROST);` and `assign S = state;`.
+
+reflection: The codes you assign are a choice. Give the all-zero code to the state a reset reaches. One flip-flop per state needs no decoder but costs more. Synchronous design reads inputs at edges only. An input must last until an edge to be seen. A state machine in text is state in `always_ff`, next state in `always_comb` with `case`, outputs from the state, and `typedef enum` to name them.
+
+This module has built counters for measuring waits, registers that pass words, and state machines that choose the next job. A computer needs far more than a few registers. How does a circuit store many words and pick one?
+
+modelVsReality: An input from outside the clock, such as a phone's answer, can change shortly before an edge. The flip-flop can go metastable. Real designs pass such inputs through two flip-flops in a row: the second almost never sees the first undecided. This model's inputs change only between edges, so it never shows this.
+
+Tools that turn text to gates may choose codes from an enumerated type; this course keeps them written in the list. Real flip-flops power up as 0 or 1, not X. Without a reset, a machine with one flip-flop per state can start with some bits at 1. This model shows X instead.

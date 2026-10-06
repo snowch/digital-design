@@ -356,9 +356,16 @@ class Elaborator {
         if (s.defaultArm) this.exec(s.defaultArm, fallEnv, operator, held);
         for (let i = s.arms.length - 1; i >= 0; i--) {
           const arm = s.arms[i] as (typeof s.arms)[number];
-          const matches = arm.labels.map((label) =>
-            this.equal(subject, this.expression(label, subjectWidth), subjectWidth),
-          );
+          const matches = arm.labels.map((label) => {
+            const value = this.expression(label, subjectWidth);
+            // Module 5: a label of the wrong width is the learner's to be told about, with its line.
+            if (this.b.widthOf(value) !== subjectWidth)
+              throw new HdlError(
+                label.at,
+                `this label is ${this.b.widthOf(value)} bit${this.b.widthOf(value) === 1 ? "" : "s"} wide but the case compares a ${subjectWidth}-bit value`,
+              );
+            return this.equal(subject, value, subjectWidth);
+          });
           const cond = matches.length === 1 ? (matches[0] as NetId) : this.b.or(matches, this.g);
           const armEnv = new Map(env);
           this.exec(arm.body, armEnv, operator, held);

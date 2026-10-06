@@ -1,0 +1,15 @@
+question: The registers lesson's display shows the switches' number when Save is pressed. Staff want to see what changed: the office is adding a second display, PREV, that shows the number saved before the latest one. The first display is NOW.
+
+When Save is pressed, NOW takes the switches' new number and PREV takes the number NOW showed until then. Both change at one clock edge. On power-up, a reset makes both `0000`.
+
+How can one register take its word from another register at the same edge as that register takes a new one?
+
+motivation: Two registers, now and prev, each have a reset and a load enable. SAVE is both EN signals. The first register, now, takes its input from the switches: IN. The second register, prev, takes its input from now's output: NOW.
+
+At a clock edge where SAVE is 1, both registers take their inputs at the same instant. The prediction asks: which value does prev take: the word NOW had before the edge, or the new value now is taking?
+
+prediction: The figure below draws the circuit above a question. Choose your answer, then press "Check my prediction".
+
+p1Question: The figure resets both NOW and PREV to `0000`. With SAVE at 1, IN is `0011` for the first clock edge, then `0101` for the second edge. What is PREV after the second edge?
+
+p1Explain: PREV is `0011`. At the second edge, NOW took `0101` and PREV took `0011`, the word NOW had before the edge. Every flip-flop takes its D at the same edge, and D is worked out from Q before the edge. The shift register of the registers lesson moved bits the same way. In a program, line order decides; here no register sees another's new value until after the edge.

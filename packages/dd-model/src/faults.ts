@@ -20,6 +20,17 @@ function netId(circuit: Circuit, name: string): NetId {
   return net.id;
 }
 
+/**
+ * Where a fault's added part sits: beside the wire it acts on. Module 5: a wire inside a block
+ * (`next-state-logic/R4`) gets its part inside that block, so the block, opened, shows it.
+ */
+function faultPath(netName: string, kind: string): string {
+  const cut = netName.lastIndexOf("/");
+  const scope = cut < 0 ? "" : `${netName.slice(0, cut)}/`;
+  const local = cut < 0 ? netName : netName.slice(cut + 1);
+  return `${scope}fault/${kind}_${local.replace(/[^A-Za-z0-9]/g, "_")}`;
+}
+
 /** Moves the driver of `net` onto a fresh, dangling net and returns the driver's new form. */
 function detach(circuit: Circuit, net: NetId): { components: Component[]; nets: Circuit["nets"] } {
   const original = circuit.nets[net];
@@ -47,7 +58,7 @@ export function brokenWire(netName: string): Fault {
         id: components.length,
         kind: "open",
         name: `open_${netName.replace(/[^A-Za-z0-9]/g, "_")}`,
-        path: `fault/open_${netName.replace(/[^A-Za-z0-9]/g, "_")}`,
+        path: faultPath(netName, "open"),
         inputs: {},
         outputs: { y: net },
         params: { width: circuit.nets[net]?.width ?? 1 },
@@ -72,7 +83,7 @@ export function invertedSignal(netName: string): Fault {
         id: components.length,
         kind: "not",
         name: "fault_not",
-        path: `fault/not_${netName.replace(/[^A-Za-z0-9]/g, "_")}`,
+        path: faultPath(netName, "not"),
         inputs: { a: cut },
         outputs: { y: net },
       };
@@ -95,7 +106,7 @@ export function stuckAt(netName: string, value: 0 | 1): Fault {
         id: components.length,
         kind: "const",
         name: `stuck_${value}`,
-        path: `fault/stuck_${netName.replace(/[^A-Za-z0-9]/g, "_")}`,
+        path: faultPath(netName, "stuck"),
         inputs: {},
         outputs: { y: net },
         params: { width: circuit.nets[net]?.width ?? 1, value: String(value) },

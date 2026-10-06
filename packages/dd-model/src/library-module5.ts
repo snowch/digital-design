@@ -12,7 +12,7 @@ import {
   type PortNets,
 } from "./combinational";
 import { dFlipFlop } from "./flipflop";
-import { machineCircuit, type Machine } from "./fsm";
+import { joinWord, machineCircuit, splitWord, type Machine } from "./fsm";
 import { MACHINES } from "./machines";
 import { register } from "./register";
 
@@ -36,19 +36,22 @@ export function addOne(b: CircuitBuilder, ins: PortNets, options: BlockOptions =
   const width = b.widthOf(q);
   const next = options.outs?.["NEXT"] ?? b.net("NEXT", width);
   const cout = options.outs?.["COUT"] ?? b.net("COUT");
+  // Placed as a staircase: each half adder one step right of and below the one before, so its
+  // carry runs straight down into the next one's B. The word is split above them and joined after.
+  const at = (x: number, y: number) => ({ layout: { x, y } });
   b.scope(
     options.name ?? "add-one",
     "add-one",
     (bb) => {
+      const qs = Array.from({ length: width }, (_, i) => bb.net(`Q${i}`));
+      splitWord(bb, q, { name: "split", outs: [...qs].reverse(), meta: at(4, 1) });
       let carry = en;
       const sums: NetId[] = [];
       for (let i = 0; i < width; i++) {
-        const qi = bb.net(`Q${i}`);
-        bb.component("bit", { a: q }, { y: qi }, { name: `bitQ${i}`, params: { index: i } });
         const last = i === width - 1;
         const ha = halfAdder(
           bb,
-          { A: qi, B: carry },
+          { A: qs[i] as NetId, B: carry },
           {
             name: `ha${i}`,
             outs: { SUM: bb.net(`N${i}`), CARRY: last ? cout : bb.net(`C${i + 1}`) },
@@ -57,16 +60,39 @@ export function addOne(b: CircuitBuilder, ins: PortNets, options: BlockOptions =
         sums.push(ha.SUM);
         carry = ha.CARRY;
       }
-      bb.component(
-        "join",
-        Object.fromEntries(sums.map((n, i) => [String.fromCharCode(97 + i), n])),
-        { y: next },
-        { name: "join", params: { width } },
-      );
+      joinWord(bb, [...sums].reverse(), next, { name: "join", meta: at(12 + 7 * width, 1) });
     },
-    { inputs: { Q: q, EN: en }, outputs: { NEXT: next, COUT: cout } },
+    {
+      inputs: { Q: q, EN: en },
+      outputs: { NEXT: next, COUT: cout },
+      meta: {
+        pins: {
+          "in:Q": [0, 1],
+          "in:EN": [0, 7],
+          "out:NEXT": [18 + 7 * width, 1],
+          "out:COUT": [18 + 7 * width, 3 + 4 * width],
+        },
+      },
+    },
   );
   return { NEXT: next, COUT: cout };
+}
+
+/**
+ * The half adders of an add-one block, placed as a staircase by path: each one 7 cells right of
+ * and 4 below the one before, under the split, so its carry runs down into the next one's B.
+ * The block's builder cannot place Module 3's half adders itself (they take no position).
+ */
+function staircase(circuit: Circuit, block: string, width: number): Circuit {
+  const at = new Map(
+    Array.from({ length: width }, (_, i) => [`${block}/ha${i}`, { x: 9 + 7 * i, y: 6 + 4 * i }]),
+  );
+  return {
+    ...circuit,
+    composites: circuit.composites.map((c) =>
+      at.has(c.path) ? { ...c, meta: { ...(c.meta ?? {}), layout: at.get(c.path) } } : c,
+    ),
+  };
 }
 
 /**
@@ -86,7 +112,7 @@ export function counterCircuit(width = 4): Circuit {
   register(b, next, clk, { name: "count", width, reset: rst, q });
   b.output("Q", q);
   b.output("TICK", tick);
-  return b.build();
+  return staircase(b.build(), "add", width);
 }
 
 /** The next-number-up block on its own: set Q and EN, read NEXT and COUT. */
@@ -101,7 +127,7 @@ export function addOneCircuit(width = 4): Circuit {
   );
   b.output("NEXT", outs.NEXT);
   b.output("COUT", outs.COUT);
-  return b.build();
+  return staircase(b.build(), "add-one", width);
 }
 
 /**
@@ -133,7 +159,7 @@ export function counterToCircuit(last: number, width = 4): Circuit {
   register(b, next, clk, { name: "count", width, reset: clear, q });
   b.output("Q", q);
   b.output("TICK", tick);
-  return b.build();
+  return staircase(b.build(), "add", width);
 }
 
 /** A word of selectors: Y is A while S is 0 and B while S is 1, bit by bit. */
@@ -255,8 +281,8 @@ export function module5Library(place: Place): Readonly<Record<string, () => Circ
     "counter-4": () =>
       place(counterCircuit(4), {
         "in:EN": [0, 1],
-        "in:RST": [0, 8],
-        "in:CLK": [0, 11],
+        "in:CLK": [0, 7],
+        "in:RST": [0, 10],
         add: [5, 1],
         count: [12, 6],
         "out:Q": [19, 6],
@@ -271,7 +297,8 @@ export function module5Library(place: Place): Readonly<Record<string, () => Circ
         "in:RST": [0, 4],
         "in:CLK": [0, 10],
         now: [6, 1],
-        prev: [14, 1],
+        // prev a cell and a half lower, so now's Q meets its D in a straight line.
+        prev: [14, 2.5],
         "out:NOW": [21, 12],
         "out:PREV": [21, 1],
       }),
