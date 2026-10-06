@@ -176,3 +176,10 @@ Five reviewers, one per lesson, each with `reviews/brief.md`; findings condensed
 `reviews/findings.md`; one sceptic's verdicts in `reviews/verdicts.md`: 5 stood (one already
 fixed), 21 stood as minor, 11 were overcalled, none wrong. Every finding that stood was acted on, in code first, then
 in words through briefs GC and GW, except those listed under "left out".
+- 11:49. The first full check (`./scripts/check.sh`, started 11:28, 17.1 minutes of
+  Playwright) failed 11 tests: the 10 screenshot comparisons a clean `main` also fails here, and
+  one real catch: on a phone, branches' "Program flow" table was 29 and 43 pixels too wide, once
+  "went to" listed a branch's both ways. Rows are now 40 pixels, room for two lines, and "went
+  to" wraps between its entries, each kept whole; the legibility rule and the figures' page tests
+  pass at both widths. `main` has moved to f66f810 (the hand-routed wires kept inside the
+  datapath drawing): merging, then the full check on the merged head.

@@ -1922,14 +1922,22 @@ button.bit {
   vertical-align: top;
 }
 .flow-table tr {
-  height: 30px;
+  height: 40px;
 }
 .flow-table td,
 .flow-table th {
   white-space: nowrap;
-  height: 30px;
+  height: 40px;
   padding: 0 var(--space-2) 0 0;
   line-height: 1.2;
+}
+/* "Went to" wraps only between its entries, each entry kept whole. */
+.flow-table td.flow-went {
+  white-space: normal;
+}
+.flow-went span {
+  display: inline-block;
+  white-space: nowrap;
 }
 .flow-arrows {
   display: block;

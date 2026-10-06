@@ -371,7 +371,8 @@ const FlowProps = z.object({
     .min(1),
 });
 
-const ROW_H = 30;
+/** A row's height: room for two lines of "went to", which wraps between its entries on a phone. */
+const ROW_H = 40;
 const LANE_W = 8;
 /** How far apart two arrows arriving at one line run, and the break a crossing leaves. */
 const ARRIVE_STEP = 10;
@@ -499,7 +500,7 @@ export const BranchTargets = withProps(
         .map((w) => format(t.wentTo, { to: hex3(w.to), times: w.times }));
       if (l.target !== undefined && !l.went.some((w) => w.to === l.target))
         out.push(format(t.notTaken, { to: hex3(l.target) }));
-      return out.join(", ");
+      return out;
     };
     return (
       <div className="machine-figure branch-targets" data-interactive={interactive.id}>
@@ -545,7 +546,14 @@ export const BranchTargets = withProps(
                     {hex3(l.address)}
                   </th>
                   <td className="memory-word">{l.text}</td>
-                  <td className="memory-word">{went(l)}</td>
+                  <td className="memory-word flow-went">
+                    {went(l).map((w, k, all) => (
+                      <span key={w}>
+                        {w}
+                        {k < all.length - 1 ? ", " : ""}
+                      </span>
+                    ))}
+                  </td>
                 </tr>
               ))}
             </tbody>
