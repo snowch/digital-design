@@ -9,6 +9,9 @@ subagent" wrote every learner-facing sentence from a brief of checked facts.
 ## Times
 
 - Started: 2026-10-05 22:33 UTC (first command in the session).
+- Finished: 2026-10-06 00:58 UTC (the push of the last commit, after `scripts/check.sh` passed on it).
+- About two hours: the platform and the lessons in the first hour, the words, the reviews and
+  their fixes, and the merge of `main`'s new wire rules in the second.
 
 ## Log
 
@@ -295,6 +298,32 @@ failed three of this module's drawings: the counter to five, NOW and PREV, and t
 PREV and the swap were placed by searching placements against `sceneProblems` in a throwaway
 test, since every hand guess failed the crossing rule (the swap's feedback wire from regY ran
 through selY's name in every stacked arrangement; moving selY two cells right clears it).
+
+The full check then failed in the browser only, on the two figures that open inside the
+controller's next-state logic (the fault lab and the explorer): the browser holds a figure's
+first drawing to the new rules even when that drawing is inside a block, where the content tests
+use the older ones. Trunks 4 and 8 pixels apart, two same-order crossings, and TICK's wire on its
+pin's written value. A throwaway scan over the block's layout (the NOT gates' column, the rows
+between inputs, the order of the inverted inputs, where the row gates start) against
+`sceneProblems` and a copy of the browser's value rule found the cause of the last one: the
+state word's split block stood across GO's way up to row 1's gate, so the router had no room for
+the column's trunks and fell back to packing them half a cell from the pins, TICK's on its value.
+Starting the row gates at row 3, so GO runs straight into row 1, and four rows between inputs
+clear every rule (`NEXT_LAYOUT` in `fsm.ts`). The save-once drawing's SAVE wire passed beside
+notOld's written value; notOld moved a cell left.
+
+## The mechanical half
+
+Walked at 1280 and 375 pixels and in the dark theme, with every control pressed, every slider at
+both ends, and every challenge run with its starting point, the wrong attempts in
+`tests/educational/module5-wrong.ts` and the reference, by the browser suites and by scripts kept
+in the session (screenshots of every figure, a scan for elements that widen a phone's page).
+Found, beyond the checks' findings above: the state diagram cut off on a phone (two reviewers
+found it too), the add-one block wider than a desktop page, the save-once drawing's labels not
+matching the prose, the status line naming a table row where no table is shown, and the long
+diagnosis paths. All fixed as described. After the fixes the walk was repeated: no console
+errors (one favicon 404 from the preview server), no page wider than a phone, every diagram
+inside its frame or in its own sideways scroller with the scroll note.
 
 ## What the checks caught
 
