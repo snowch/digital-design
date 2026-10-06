@@ -210,9 +210,10 @@ change was tested:
   `machine9` and `machine9-call`.
 - **The drawing**: `placedInside` accepts parts with a placement of their own (a fault's `at`), and
   eight block kinds are drawn closed.
-- Module 8's overview strip and zoom (a trial on `main`) was turned on for the four views, then
-  off again at the managing session's word (12:52): the trial stays on one figure until the author
-  has tried it. The four views are where it would help most.
+- Module 8's overview strip and zoom was turned on for the four views as a trial, then off again
+  at the managing session's word (12:52). At 13:56 the author asked for it on every large drawing,
+  and `main` now gives it to any drawing at least 1,000 pixels wide that does not fit its box; the
+  merge at 13:59 brought it to Module 9's machine drawings, the four views among them.
 
 ## Reviews
 
@@ -314,9 +315,7 @@ What the drafts dropped, got wrong, or drifted on:
 3. **The capstone's second challenge** repeats the first's decoder edits inside the whole machine's
    text; it is the end-to-end run, but a learner who finished the first copies across. Keep it, or
    give it a task of its own (for example, a second program that uses the new kind)?
-4. **The overview strip** would help most on the four views (9.4), the module's widest drawing,
-   seen at every edge. It is off, as the managing session asked, until the trial is decided.
-5. **The decoder's insides** are laid out automatically and are dense (the checks block crosses
+4. **The decoder's insides** are laid out automatically and are dense (the checks block crosses
    many wires). They pass the course's rules for an inside, and every figure now opens at the
    decoder's top. Placing them by hand is listed under what I would change.
 
@@ -339,8 +338,6 @@ What the drafts dropped, got wrong, or drifted on:
 ## What I would change
 
 - Place the decoder's insides by hand, as the machine's are, so its blocks can be first drawings.
-- The machine's drawing is wide and scrolls on a phone; with the overview strip the
-  phone could see it whole.
 - Give the capstone's run a choice made by the program itself (a sensor's reading or the door
   deciding R4), so "chooses" is what the figure shows.
 - A stuck value on a block's output net still draws the block connected; Module 8's figures do the
@@ -360,10 +357,10 @@ sideways on a phone, as Module 5's do. Nothing else was found.
 
 ## What the module added to the check's time
 
-The unit tests went from about 50 seconds (Module 8's figure) to 98 seconds, 850 tests: Module 8's
+The unit tests went from about 50 seconds (Module 8's figure) to about 96 seconds, 860 tests: Module 8's
 suite of 37 programs runs through the drawn machine of several edges and through the machine's
 text, and the decoder is tested on every kind and job under ten constants. The browser suite
-gained 44 tests (22 at each width), MODULE9_TIME. The whole check took CHECK_TIME.
+gained 44 tests (22 at each width), 107 seconds of their own. The whole check took 26 minutes (13:32 to 13:58), against 17 to 19 before Module 9 and Module 8's figures.
 
 ## The screenshots in this environment
 
