@@ -161,8 +161,8 @@ export const constants: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.constantsFaults,
           lead: PROSE.constantsFaultsLead,
-          after: PROSE.constantsFaultsAfter,
           props: {
+            outcomes: PROSE.constantsFaultsAfter,
             libraryId: "datapath-constants",
             registers: ROOMS,
             instructions: [CONSTANT_JOBS[0], CONSTANT_JOBS[1]],

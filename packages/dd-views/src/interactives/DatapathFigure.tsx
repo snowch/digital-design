@@ -72,6 +72,8 @@ const Props = z.object({
   canOpen: z.boolean().default(true),
   /** Faults the learner may put in, one at a time; the figure starts again with each. */
   faults: z.array(FaultSpec).default([]),
+  /** Shown once the learner has made an edge, so the results do not answer the lead's question. */
+  outcomes: z.string().optional(),
   /** A prediction of the next edge, asked before the clock can be pressed. */
   question: z.string().optional(),
   options: z.array(z.object({ value: z.string(), label: z.string() })).optional(),
@@ -140,6 +142,7 @@ export const DatapathFigure = withProps(
     const [chosen, setChosen] = useState(0);
     const [edge, setEdge] = useState<Edge | undefined>();
     const [stopped, setStopped] = useState(false);
+    const [ran, setRan] = useState(false);
     const [step, setStep] = useState(Number.POSITIVE_INFINITY);
     const [scope, setScope] = useState("");
     const [stored, setStored] = useSlot<Stored>(store, interactive.id);
@@ -171,6 +174,7 @@ export const DatapathFigure = withProps(
       setEdge({ before, history: high.history });
       setStep(Number.POSITIVE_INFINITY);
       if (halting) setStopped(true);
+      if (faults.length === 0 || faultAt >= 0) setRan(true);
       bump();
     };
     const run = () => {
@@ -186,6 +190,7 @@ export const DatapathFigure = withProps(
         }
       }
       setStep(Number.POSITIVE_INFINITY);
+      if (faults.length === 0 || faultAt >= 0) setRan(true);
       bump();
     };
     const restart = (from: typeof built) => {
@@ -309,7 +314,7 @@ export const DatapathFigure = withProps(
         )}
         <CircuitView
           circuit={circuit}
-          values={values}
+          {...(committed ? { values } : {})}
           title={strings.explorer.title}
           onToggleInput={toggle}
           scope={scope}
@@ -317,7 +322,7 @@ export const DatapathFigure = withProps(
           writtenWidth={4}
           {...(data.canOpen ? { onScope: setScope } : {})}
         />
-        {status && (
+        {committed && status && (
           <p role="status" className="datapath-status">
             {status}
           </p>
@@ -338,6 +343,7 @@ export const DatapathFigure = withProps(
           </div>
         )}
         {asking && committed && data.explain && <Prose markdown={data.explain} />}
+        {ran && data.outcomes && <Prose markdown={data.outcomes} />}
         {data.steps && (
           <section className="datapath-steps" aria-label={t.stepsHeading}>
             <p className="datapath-steps-heading">{t.stepsHeading}</p>
@@ -360,7 +366,9 @@ export const DatapathFigure = withProps(
             )}
           </section>
         )}
-        <div className="datapath-tables">
+        {/* Before a prediction is committed the figure shows the circuit, not its values: the
+            tables and the drawing's values would answer the question. */}
+        <div className="datapath-tables" hidden={!committed}>
           {program && (
             <div className="truth-table-wrap">
               <table className="truth-table datapath-table">
@@ -502,7 +510,9 @@ export const DatapathFigure = withProps(
                             : v.toString(16).toUpperCase().padStart(16, "0")}
                         </td>
                         <td className="memory-word">
-                          {v === undefined ? "X" : (v >= 1n << 63n ? v - (1n << 64n) : v).toString()}
+                          {v === undefined
+                            ? "X"
+                            : (v >= 1n << 63n ? v - (1n << 64n) : v).toString()}
                         </td>
                       </tr>
                     );

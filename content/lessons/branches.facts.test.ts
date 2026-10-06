@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { alu64, assemble, instructionHex, registersOf } from "@dd/dd-model";
+import { alu64, assemble, figureState, instructionHex, registersOf } from "@dd/dd-model";
 import { valueLabel } from "@dd/dd-views";
 
 import { branches, CALL, COLDER, SUM } from "./branches";
@@ -63,26 +63,39 @@ describe("facts for the branches lesson", () => {
     ]);
   });
 
-  it("one edge, stepped: R2 at step 1, PC at 2, IR at 4, HALT settles at 0 by 42, 79 steps", () => {
+  it("one edge, stepped into the branch: R3 at 1, PC at 2, IR at 4, QA and QB at 7, BRANCH at 9; RESULT settles to 66 at 137, MINUS at 138, MET at 144, NEXT at 154, of 155", () => {
     const sim = figureSim(branches, "one-instruction");
     const c = sim.circuit;
+    expect(figureState(sim).pc).toBe(4n);
     const { high } = sim.clockCycle("CLK");
     const net = (n: string) => c.nets.find((x) => x.name === n)!.id;
-    const last = (n: string) => {
-      let k = 0;
-      high.history.forEach((h, i) => {
-        if (i && valueLabel(h[net(n)]) !== valueLabel(high.history[i - 1]![net(n)])) k = i;
-      });
-      return k;
-    };
-    expect(high.history.length - 1).toBe(79);
-    expect(high.history.slice(0, 2).map((h) => signed(registersOf(c, h)[2]))).toEqual([
-      "-184",
+    const at = (n: string, k: number) => valueLabel(high.history[k]![net(n)]);
+    const changes = (n: string) =>
+      high.history.flatMap((h, i) =>
+        i && valueLabel(h[net(n)]) !== valueLabel(high.history[i - 1]![net(n)]) ? [i] : [],
+      );
+    const first = (n: string) => changes(n)[0];
+    const last = (n: string) => changes(n).at(-1);
+    expect(high.history.length - 1).toBe(155);
+    expect(high.history.slice(0, 2).map((h) => signed(registersOf(c, h)[3]))).toEqual([
+      "X",
       "-250",
     ]);
-    expect([last("PC"), last("IR"), last("HALT"), last("GO")]).toEqual([2, 4, 42, 43]);
-    expect(high.history.some((h) => valueLabel(h[net("HALT")]) === "1")).toBe(true);
-    expect(last("DISPLAY")).toBe(0);
+    expect([first("PC"), first("IR"), first("QA"), first("QB"), first("BRANCH")]).toEqual([
+      2, 4, 7, 7, 9,
+    ]);
+    expect(at("IR", 4)).toBe("56230002");
+    expect([first("RESULT"), last("RESULT"), last("MINUS"), last("MET"), last("NEXT")]).toEqual([
+      18, 137, 138, 144, 154,
+    ]);
+    expect([at("RESULT", 155), at("MET", 155), at("NEXT", 155)]).toEqual([
+      "0000000000000042",
+      "0",
+      "000000000000000C",
+    ]);
+    expect(changes("MET").length).toBeGreaterThan(10);
+    expect([at("HALT", 13), at("HALT", 14)]).toEqual(["1", "0"]);
+    expect(last("DISPLAY")).toBeUndefined();
   });
 
   it("the call: 6 on the display, R15 holding 010, after 16 edges", () => {

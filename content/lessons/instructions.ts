@@ -178,8 +178,8 @@ export const instructions: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.jobsFaults,
           lead: PROSE.jobsFaultsLead,
-          after: PROSE.jobsFaultsAfter,
           props: {
+            outcomes: PROSE.jobsFaultsAfter,
             libraryId: "datapath-jobs",
             registers: ROOMS,
             instructions: [JOBS[0], JOBS[1]],

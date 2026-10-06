@@ -204,8 +204,8 @@ export const memoryAccess: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.memoryFaults,
           lead: PROSE.memoryFaultsLead,
-          after: PROSE.memoryFaultsAfter,
           props: {
+            outcomes: PROSE.memoryFaultsAfter,
             libraryId: "datapath-memory",
             program: SHOW_MARGIN,
             inputs: SENSORS,

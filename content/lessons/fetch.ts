@@ -133,6 +133,7 @@ export const fetch: LessonInput = {
             shown: [1, 2, 3, 4],
             buses: ["PC", "PC4", "IR", "RESULT"],
             run: true,
+            steps: true,
           },
         },
       ],
@@ -163,8 +164,8 @@ export const fetch: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.fetchFaults,
           lead: PROSE.fetchFaultsLead,
-          after: PROSE.fetchFaultsAfter,
           props: {
+            outcomes: PROSE.fetchFaultsAfter,
             libraryId: "datapath-fetch",
             program: MARGIN,
             shown: [1, 2, 3, 4],
