@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Plausible wrong attempts at Module 5's challenges fail, at the test a learner would expect.
 
 import { describe, expect, it } from "vitest";

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 5: a state machine as data, and the circuit and the text made from it.
 //
 // A machine is a list of states, each with a code (the bits its state register holds) and the
@@ -165,6 +167,16 @@ export const MACHINE_NETS = {
 } as const;
 
 /** A position in a drawing, in grid cells, kept in a part's metadata as the library's are. */
+/**
+ * The next-state logic's inside, in cells: the rows between inverted inputs (and their NOT
+ * gates), and the columns of the NOT gates, the row gates, the OR gates and the join. The gap
+ * before the row gates holds a trunk for every line and inverted input, half a cell apart at
+ * least; four rows between inputs keep their wires from crossing on the way to the row gates;
+ * the row gates start at row 3, so a first row's input level with an input's pin runs straight
+ * instead of turning beside the state word's split.
+ */
+const NEXT_LAYOUT = { pitch: 4, nots: 9, top: 3, rows: 19, ors: 27, join: 33 } as const;
+
 type Cell = { readonly layout: { readonly x: number; readonly y: number } };
 const cell = (x: number, y: number): Cell => ({ layout: { x, y } });
 
@@ -316,7 +328,7 @@ function nextStatePins(m: Machine): Record<string, readonly [number, number]> {
   let y = start;
   for (const name of inverted) {
     pins[`in:${name}`] = [0, y];
-    y += 3;
+    y += NEXT_LAYOUT.pitch;
   }
   // An input read only at 1 goes above the NOT gates where there is room, so its wire runs
   // along the top to its gates and crosses none of theirs lengthwise.
@@ -326,10 +338,10 @@ function nextStatePins(m: Machine): Record<string, readonly [number, number]> {
       if (i === 0 && start - 3 >= 4) pins[`in:${name}`] = [0, start - 3];
       else {
         pins[`in:${name}`] = [0, y];
-        y += 3;
+        y += NEXT_LAYOUT.pitch;
       }
     });
-  pins["out:next"] = [36, 1];
+  pins["out:next"] = [NEXT_LAYOUT.join + 5, 1];
   return pins;
 }
 
@@ -384,16 +396,16 @@ export function machineCircuit(m: Machine, options: MachineCircuitOptions = {}):
             name: `not${name}`,
             output: bb.net(`N${name}`),
             // Half a cell up: a NOT gate's input sits half a cell lower than a pin's centre.
-            meta: cell(9, notY - 0.5),
+            meta: cell(NEXT_LAYOUT.nots, notY - 0.5),
           }),
         );
-        notY += 3;
+        notY += NEXT_LAYOUT.pitch;
       }
       const literal = (name: string, v: Bit) =>
         v === 1 ? (ins.get(name) as NetId) : (inverted.get(name) as NetId);
       // One term per row, numbered as the table numbers its rows. A row whose next state is
       // all zeros needs no gate: a 0 is what every bit gets when no row gives it a 1.
-      let rowY = 1;
+      let rowY = NEXT_LAYOUT.top;
       const terms = m.rows.map((row, i) => {
         if (!stateNamed(m, row.to).code.includes("1")) return undefined;
         const line = lines.get(row.from) as NetId;
@@ -402,7 +414,7 @@ export function machineCircuit(m: Machine, options: MachineCircuitOptions = {}):
         const net = bb.and([line, ...reads], {
           name: `row${i + 1}`,
           output: bb.net(`R${i + 1}`),
-          meta: cell(17, rowY),
+          meta: cell(NEXT_LAYOUT.rows, rowY),
         });
         rowY += reads.length + 2;
         return net;
@@ -422,17 +434,25 @@ export function machineCircuit(m: Machine, options: MachineCircuitOptions = {}):
             "const",
             {},
             { y: net },
-            { name: `zeroN${k}`, params: { width: 1, value: "0" }, meta: cell(25, orY) },
+            {
+              name: `zeroN${k}`,
+              params: { width: 1, value: "0" },
+              meta: cell(NEXT_LAYOUT.ors, orY),
+            },
           );
           orY += 3;
         } else if (unique.length === 1) net = unique[0] as NetId;
         else {
-          net = bb.or(unique, { name: `orN${k}`, output: bb.net(`N${k}`), meta: cell(25, orY) });
+          net = bb.or(unique, {
+            name: `orN${k}`,
+            output: bb.net(`N${k}`),
+            meta: cell(NEXT_LAYOUT.ors, orY),
+          });
           orY += unique.length + 2;
         }
         nextBits.push(net);
       }
-      joinWord(bb, nextBits, nextWord, { name: `join-${bits}`, meta: cell(31, 1) });
+      joinWord(bb, nextBits, nextWord, { name: `join-${bits}`, meta: cell(NEXT_LAYOUT.join, 1) });
     },
     {
       inputs: { ...Object.fromEntries(ins), state: s },

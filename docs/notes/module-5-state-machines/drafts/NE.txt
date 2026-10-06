@@ -1,35 +1,69 @@
 title: Which codes for each state, and how do you write a state machine?
+
 objectives.1: Predict where a reset leads for a given set of codes.
+
 objectives.2: Build a state machine with one flip-flop per state and explain what it costs and saves.
+
 objectives.3: Explain why an input that changes between two edges can be missed.
+
 objectives.4: Write a state machine from its state diagram and give each state a name.
+
 titles.question: Different codes, same table
+
 titles.motivation: What the codes decide
-titles.prediction: A reset to TRY
-titles.investigation: One flip-flop per state, IDLE at zero
+
+titles.prediction: When TRY has code `00`
+
+titles.investigation: Three flip-flops for four states, IDLE at zero
+
 titles.construction: Changing the codes
-titles.failureExperiment: No state at zero, answers between edges
+
+titles.failureExperiment: One flip-flop per state, answers between edges
+
 titles.explanation: Synchronous design
+
 titles.generalisation: States named in the text
+
 titles.challenge: The defrost controller
+
 titles.reflection: What the module built
+
 challengeTitles.c1: The controller with IDLE at zero
+
 challengeTitles.c2: The defrost controller
+
 captions.tryZeroTable: The table is the same, but TRY has code `00`.
+
 captions.predictTryZero: Predict what SEND does after a reset, then check.
+
 captions.zeroIdleMachine: Open the next-state logic and clock the controller.
+
 captions.writeZeroIdle: Change the codes as shown and run the tests.
+
 captions.predictOneHotReset: Predict the state's code after a reset, then check.
+
 captions.predictShortOk: Predict the state after a short OK, then check.
+
 captions.retryEnum: Compare the state diagram with the text that names the states.
+
 captions.defrostMachine: Press the inputs and clock the controller.
+
 captions.writeDefrost: Write the defrost controller and run the tests.
+
 options.p1Zero: SEND is 0
+
 options.p1One: SEND is 1
+
 options.p1X: The simulator cannot know SEND (X)
+
 options.p2Try: TRY (`0010`)
+
 options.p2Idle: IDLE (`0001`)
-options.p2None: `0000`, no state
+
+options.p2None: 0000
+
 options.p3Idle: IDLE (`00`)
+
 options.p3Try: TRY (`01`)
+
 options.p3Wait: WAIT (`10`)

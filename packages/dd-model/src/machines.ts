@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 5's state machines, as data. fsm.ts turns each into a circuit and into text.
 //
 // The retry controller is Slice 2's example, approved at Checkpoint 1: the shop's office sends the

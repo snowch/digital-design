@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 5's helpers for the facts tests (lessons 2 to 5): each runs a figure's own props through
 // the code the figure runs, so a change to a lesson's data or to the model that moves a number
 // the prose states fails a facts test first. Module 3's helpers drop the clock from a fault lab's

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Lesson: How does a circuit work through a list of jobs?  (module 5, lesson 4; Slice 2)
 //
 // The structure is here; the words are in state-machines.prose.ts and state-machines.labels.ts.
@@ -460,6 +462,6 @@ export const stateMachines: LessonInput = {
     textbookExample:
       "A Moore machine introduced with a traffic-light controller or a sequence detector for two consecutive 1s (or a vending machine), its state diagram, a state table, a binary encoding, Karnaugh maps for each next-state bit, minimised equations, and the circuit of D flip-flops; the FSM tutorial's toggle, detector, traffic light, counter and arbiter.",
     howThisDiffers:
-      "The machine is the retry controller approved at Checkpoint 1, carried into the shop's story: the office's message to the manager, retried after each failure at the next TICK, given up with a siren when a whole TICK passes without an answer. Its inputs come from earlier lessons' parts (TICK from a counter, RST from the registers lesson's reset). The next-state logic is read off the encoded table row by row, one AND gate per row and one OR gate per bit, with no minimisation, and the learner draws one bit of it from Module 3's decoder. The live figure ties the diagram, the table, the circuit and the trace to one simulator, and marks the row the next edge will apply from the next-state logic's own output. The four kinds of move (stay, advance, return, reset) are each predicted before the table is shown, and the written lab changes the controller rather than writing a new one.",
+      "The machine is the retry controller approved at Checkpoint 1, carried into the shop's story: the office's message to the manager, retried after each failure at the next TICK, given up with a siren when a whole TICK passes without an answer. Its inputs come from earlier lessons' parts (TICK from a counter, RST from the registers lesson's reset). The next-state logic is read off the encoded table row by row, one AND gate per row and one OR gate per bit, with no minimisation, and the learner draws one bit of it from Module 3's decoder. The live figure ties the diagram, the table, the circuit and the trace to one simulator, and marks the row the next edge will apply from the next-state logic's own output. Two moves are predicted before the table is shown (a stay in TRY, and TRY to GIVE_UP followed by a late OK that GIVE_UP ignores) and the reset after it; the live figure lets the learner try every kind of move; and the written lab changes the controller rather than writing a new one.",
   },
 };

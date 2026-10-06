@@ -221,3 +221,126 @@ wrong, and what was done, by brief:
 The profile CLAUDE.md predicts held: facts dropped (six times), facts wrong (four), meaning
 drifted (twice), and every one of my own fact sheet's slips ("holds", five places) copied
 faithfully.
+
+## Reviews
+
+Both halves, as CLAUDE.md describes. Reviewers and sceptics ran on a model other than the one
+that built the module (`docs/checkpoints.md`), each with a written brief
+(`module-5-state-machines/reviews/reviewer-brief.md`, `sceptic-brief.md`), each on its own preview
+port. Subagents cannot write files: every report came back as text and was saved, as returned,
+before anything read it (`reviews/<lesson>-review.md`, `reviews/<lesson>-sceptic.md`).
+
+| lesson | findings | upheld | in part | rejected | found by the sceptic |
+| --- | --- | --- | --- | --- | --- |
+| counters | 17 | 2 | 8 | 6 (and 1 noted, no action) | 2, and 1 that did not reproduce |
+| register-transfer | 18 | 7 | 8 | 3 | 3 |
+| state-machines | 18 | 5 | 6 | 7 | 2 |
+| state-encoding | 15 | 4 | 8 | 3 | 2 |
+
+The findings that mattered most were about my own work, as CLAUDE.md warns:
+
+- **A hint I wrote the facts for was wrong.** The state-machines lab's second hint said row 5
+  without NOT FAIL "would also be 1 in row 4's case", as if that were a mistake the tests catch.
+  Row 4 is 1 there too, so N1 does not change and no test can fail it. The wrong attempt in the
+  browser suite that "proved" the hint dropped NOT TICK from row 8 as well, and failed for that
+  reason. Confirmed by hand before the sceptic ruled. The hint now names the row 8 mistake; the
+  wrong attempts are split in two, and a test pins that the NOT FAIL one passes.
+- **The capstone lab did not test what its task demands** (found by the state-machines sceptic):
+  no test put OK and TICK at 1 together in WAIT, so a TICK-first arm passed all thirteen. The
+  test now does, and a TICK-first wrong attempt fails at it.
+- **"One-hot" was defined on a figure it does not fit.** The term arrived on the codes IDLE
+  `000`, TRY `001`, WAIT `010`, GIVE_UP `100`: three flip-flops for four states, IDLE with no 1.
+  My own fact sheet called them "one flip-flop per state". The term now arrives after the second
+  prediction, on the four-flip-flop codes that are one-hot, and the investigation's codes are
+  described as what they are.
+- **Titles, leads and option labels gave answers away**: "A reset to TRY", "0000, no state", a
+  lead asking "what if no state has the all-zero code?", "Staying in TRY", the motivation's "the
+  state whose code is all zeros is where you land" before the TRY-at-`00` prediction; and in
+  counters and register transfer the right option sat first in most predictions.
+- **The state diagram and the add-one block were cut off**: the diagram on a phone, the add-one
+  block at both widths.
+
+What was done, code first:
+
+- Code: the late-answer lab's test of OK and TICK together; the two next-one wrong attempts; the
+  status line without a row number when no table is shown (`machine.statusNoTable`, drafted); the
+  state diagram closes up sideways on a narrow page down to 62% of its width, text and boxes kept
+  at size, with two arrow labels placed by hand so nothing collides at either width; the add-one
+  staircase five cells per step instead of seven (fits a desktop page); the save-once circuit
+  shows OLD and STEP as outputs, by the names the prose uses, and is placed by hand; the
+  prediction options reordered; the originality note's claim that every kind of move is predicted
+  before the table corrected.
+- Words: 19 messages (briefs and send-backs) to the subagents that drafted the keys concerned, each a list of facts per
+  finding (`briefs/review-round.md`). Four drafts came back with something to send back: hints
+  merged into one key with "just" in it (twice, from two subagents), "You see SAVE light up" (the
+  pin shows 1), "This figure demonstrates the issue" and another "just", and "the now register"
+  where the rest of the lesson now says "the NOW register". Cuts made by me, no new words: a
+  repeated "The figure below shows this.", a repeated sentence about STEP in the register-transfer
+  explanation, and the give-away sentence in the encoding lesson's motivation.
+- Rejected and left: the counters "TICK described three ways" (one role, three places), the
+  state-machines F4 (the story does answer the predictions), F7 and F11 (taught in earlier
+  lessons), the encoding lesson's `default` (taught in the state-machines lesson), and matters of
+  taste the course's rules do not decide.
+- Left, with a reason: the next-state logic opened in full is still dense; the swap and save-once
+  drawings have long feedback wires. Each passes every wire and label check.
+
+Then each lesson was read once more, start to finish, from the built page.
+
+## Main moved twice
+
+`main` moved to `c7a4094` (the router keeps wires half a cell apart and checks crossings that a
+better order of turns would avoid) and then `1ae4fea` (a copyright line in every source file, and
+a check for it). Merged both; ran `scripts/copyright.mjs` over the new files. The new wire rules
+failed three of this module's drawings: the counter to five, NOW and PREV, and the swap. NOW and
+PREV and the swap were placed by searching placements against `sceneProblems` in a throwaway
+test, since every hand guess failed the crossing rule (the swap's feedback wire from regY ran
+through selY's name in every stacked arrangement; moving selY two cells right clears it).
+
+## What the checks caught
+
+- The content tests: three wrong test counts in my facts tests, a stuck-at fault drawn outside
+  its block, the output block's ports bound before its nets existed, a `case` label of the wrong
+  width giving an internal error, and (after `main` moved) three drawings that broke the new wire
+  rules.
+- The diagram checks in the browser: the counter scene's bus count on the TICK wire's name, the
+  register-transfer scene's two the same way, half-cell steps in the NOW wire and at every NOT
+  gate inside the next-state logic, the elaborated text drawn in "Try it" (unreadable and failing
+  the wire checks), and the squeezed state diagrams' arrow labels.
+- The phone-width test: a failed test's diagnosis widening the page to 1,265 pixels.
+- Not caught by any check, caught by the reviews: the wrong hint, the untested OK-and-TICK case,
+  the misplaced term, the answers given away. A check could catch the first two: a test that the
+  mistake each hint names fails a test, and that each sentence of a task's "the tests include"
+  list names a test that exists.
+
+## Shared-code candidates (for the managing session to put to the author)
+
+Under the rule of two; none extracted (`packages/primitives` stays empty). Each has its two
+consumers, Slice 1 (the `remember` lesson) and Slice 2 (this module), and what would move.
+
+| candidate | Slice 1 consumer | Slice 2 consumer | what would move to `packages/primitives` |
+| --- | --- | --- | --- |
+| Stepper | `remember`'s stepped figures (`CircuitExplorer` with `showSteps`, `LatchInternals`) | `counters`' add-one figure (`showSteps`) and the state-machine figure's edge-by-edge clocking | the step state, the slider and its "Settled in n steps" line, now inside `CircuitExplorer` and `useSim` |
+| Timeline | `remember`'s predictions' timing diagrams | the state-machine figure's trace, with named values in a lane | lanes over a time axis with a cursor; the waveform drawing (levels, edges, hatching) stays in `dd-views/TimingDiagram` |
+| StateInspector | `remember`'s latch state (`LatchInternals`) | the state-machine figure's status line: state, code, row, "no state's code" | one selection's readings as a panel, fed by a function the figure supplies |
+| DrillDown | the flip-flop opened to latches to gates (`CircuitView` scope and trail) | the controller opened to its next-state logic, to the decoder, and the add-one block to its half adders | the scope, the trail and the block-opening, now in `CircuitView` |
+| PredictionChallenge | `remember`'s three predictions | the twelve predictions of this module, with named values | the choose, commit, reveal and "Predict again" shell of `Prediction.tsx`; what is predicted stays a prop |
+| FaultInjector | `remember`'s fault lab | the counter's and the controller's fault labs, with faults inside blocks | the fault list, "Run checks", the outcome line and the restore of `FaultLab.tsx`; `faults.ts` stays in `dd-model` |
+| InputPanel (new) | (none in Slice 1) | the state-machine figure's input buttons and "Try it" without a drawing (`tryIt: "pins"`) | the row of "{name} = {value}" buttons with `aria-pressed`; one consumer short of the rule of two in Slice 1, two inside this module |
+
+## What I would change
+
+- **Scan my own fact sheets for the banned words before any brief goes out.** Five of eleven
+  "hold"s, and the "one flip-flop per state" that misplaced a term, were mine; the drafts copied
+  them faithfully.
+- **Test the mistake each hint names.** The wrong hint passed every check because nothing tied a
+  hint's claim to the tests. Hints that name a mistake could carry it as a wrong attempt, and the
+  content tests could require it to fail.
+- **Place drawings against the wire checks from the start.** The placement search used to fix
+  the swap and NOW and PREV belongs in the repository as a helper, not a throwaway test.
+- **Ask for changed keys only, from the first send-back.** Whole-key returns let unchanged
+  text drift between rounds.
+- **Give the state diagram a phone layout of its own** rather than squeezing the desktop one; it
+  fits today because the labels were moved by hand for both widths.
+- **The next-state logic opened in full is still dense.** A figure that shows one row's gate at a
+  time, lit from the table, would teach the row-to-gate correspondence better than the whole
+  block.

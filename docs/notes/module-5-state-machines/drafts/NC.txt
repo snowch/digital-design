@@ -1,8 +1,6 @@
 explanation: Every flip-flop in this module takes its D at the same edge of one clock. Between edges, the gates work out each D from the flip-flops' Q and the inputs. The inputs count only as they are at an edge. A design that keeps this rule is called **synchronous**. This is why the timing diagrams can be read edge by edge, and why the registers lesson's AND gate in the clock's path broke things: it made an edge of its own.
 
-The rule has a price. An input must last until an edge to be seen. A short answer, the phone that says OK and then goes quiet, must be kept until the controller reads it. The sender can keep OK at 1 until SEND falls. Or a flip-flop can be set by OK and cleared once the controller has read it.
-
-The reset belongs to the rule too: it acts at an edge. So the codes decide where the reset leads. Give the all-zero code to the state the reset should reach.
+The rule has a price. An input must last until an edge to be seen. A short answer, the phone that says OK and then goes quiet, must be kept until the controller reads it. The manager's phone can keep OK at 1 until SEND falls. Or a flip-flop can be used: it becomes 1 at an edge where OK is 1 and goes back to 0 once the controller has read it.
 
 retryEnumLead: The figure shows the retry controller from the last lesson, written with its states named. The names replace the codes wherever they appear in the text.
 
@@ -24,13 +22,13 @@ The figure shows the state diagram running. Press the inputs and clock to see ea
 
 writeDefrostLead: Write the defrost controller from the state diagram, using the state-machine form you have seen: state in `always_ff` with its reset, next state in `always_comb` with `case`, outputs from the state.
 
-c2Task: Your inputs are TICK, CLEAR, WARM, RST and CLK; your outputs are COMP, HEAT and S. Use codes COOL `00`, DEFROST `01` and DRAIN `10`, with RST leading to COOL.
+c2Task: Your inputs are TICK, CLEAR, WARM, RST and CLK; your outputs are COMP, HEAT and S, the state's 2-bit code. Use codes COOL `00`, DEFROST `01` and DRAIN `10`, with RST leading to COOL.
 
-Follow the diagram: each arrow is a row. In DEFROST, WARM wins over CLEAR. COMP is 1 in COOL and HEAT is 1 in DEFROST, from the state alone. The code `11` is no state: send it to COOL. You may use `typedef enum` to name the states. The tests include TICK falling while CLK is 1, and an edge in DEFROST with both WARM and CLEAR at 1.
+Follow the diagram: each arrow is a move, labelled with the inputs that make it. In DEFROST, WARM wins over CLEAR. COMP is 1 in COOL and HEAT is 1 in DEFROST, from the state alone. The code `11` is no state: send it to COOL. You may use `typedef enum` to name the states. The tests include TICK falling while CLK is 1, and an edge in DEFROST with both WARM and CLEAR at 1.
 
 c2Hints.1: Write the state in `always_ff` with its reset. Write the next state in `always_comb`: one `case` arm per state. COMP and HEAT come from the state.
 
-c2Hints.2: If you check CLEAR before WARM in DEFROST, a warm room goes to DRAIN when both are 1. WARM should win: check it first.
+c2Hints.2: The defrost controller has the same shape as the retry controller's text: an `always_ff` for the state register with its reset, an `always_comb` with a `case` for the next state, and `assign` for the outputs.
 
 c2Hints.3: COOL's arm reads one input: `COOL: if (TICK) next = DEFROST; else next = COOL;`.
 
@@ -38,10 +36,10 @@ c2Hints.4: DEFROST's arm: `if (WARM) next = COOL; else if (CLEAR) next = DRAIN; 
 
 c2Hints.5: Declare `typedef enum logic [1:0] {COOL = 2'b00, DEFROST = 2'b01, DRAIN = 2'b10} state_t;`, then `state_t state;` and `state_t next;`. In `always_ff`: `if (RST) state <= COOL; else state <= next;`. In `always_comb`, `case (state)` with the arms for COOL, DEFROST and DRAIN as the diagram says, and `default: next = COOL;`. Then `assign COMP = (state == COOL);`, `assign HEAT = (state == DEFROST);` and `assign S = state;`.
 
-reflection: The codes you assign are a choice. Give the all-zero code to the state a reset reaches. One flip-flop per state needs no decoder but costs more. Synchronous design reads inputs at edges only. An input must last until an edge to be seen. A state machine in text is state in `always_ff`, next state in `always_comb` with `case`, outputs from the state, and `typedef enum` to name them.
+reflection: The codes you assign are a choice. Give the all-zero code to the state a reset reaches. In the investigation, the codes need no decoder for TRY, WAIT and GIVE_UP and a NOR gate for IDLE, using three flip-flops. Synchronous design reads inputs at edges only; an input must last until an edge to be seen. A state machine in text is state in `always_ff`, next state in `always_comb` with `case`, and outputs from the state.
 
-This module has built counters for measuring waits, registers that pass words, and state machines that choose the next job. A computer needs far more than a few registers. How does a circuit store many words and pick one?
+This module has built counters for measuring waits, registers that pass words, and state machines. A computer needs far more than registers. How does a circuit store many words and pick one?
 
-modelVsReality: An input from outside the clock, such as a phone's answer, can change shortly before an edge. The flip-flop can go metastable. Real designs pass such inputs through two flip-flops in a row: the second almost never sees the first undecided. This model's inputs change only between edges, so it never shows this.
+modelVsReality: An input from outside the clock, such as a phone's answer, can change shortly before an edge. The flip-flop can go metastable. Real designs pass such inputs through two flip-flops in a row: the second almost never sees the first undecided. This model never shows this.
 
-Tools that turn text to gates may choose codes from an enumerated type; this course keeps them written in the list. Real flip-flops power up as 0 or 1, not X. Without a reset, a machine with one flip-flop per state can start with some bits at 1. This model shows X instead.
+When the text uses an enumerated type, tools that turn text to gates may choose codes themselves, such as binary or one-hot. This course writes every code, so the codes on the page are the codes in the circuit. Real flip-flops power up as 0 or 1, not X. Without reset, a one-flip-flop-per-state machine starts with some bits at 1. This model shows X.

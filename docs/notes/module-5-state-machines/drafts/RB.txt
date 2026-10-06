@@ -1,4 +1,4 @@
-nowPrevExplorerLead: Explore how the two registers work together. The circuit starts with NOW and PREV both at `0000`. Press bits of IN to set a number. Press SAVE to 1 and press Clock CLK: NOW takes your number, and PREV takes the word NOW had before the edge. Set a new number and clock again: both registers update at the same edge. Press SAVE to 0 and press Clock CLK: both keep their words. Press any register block to open it: the four flip-flops inside, like in the registers lesson.
+nowPrevExplorerLead: Explore the circuit with two registers, starting with NOW and PREV both at `0000`. Press bits of IN to set a number. You see the value in IN change. Press SAVE to 1. SAVE's pin shows 1. Press Clock CLK. The NOW register takes IN, and the PREV register takes NOW's old word. Set a new number and press Clock CLK again. Both registers update at that edge. Press SAVE to 0 and press Clock CLK. Both registers keep their words. Press the NOW register block. It opens to show the four flip-flops inside, one for each bit, like in the registers lesson.
 
 nowPrevExplorerAfter: One wire, from the NOW register's Q to the PREV register's D, carries the word between them. Nothing else is needed to make PREV wait one save behind NOW. The edge does it, since both registers take their D at the same moment.
 
@@ -18,7 +18,7 @@ c1Hints.4: The PREV register's D must come from the NOW register's Q.
 
 c1Hints.5: Place two 4-bit register blocks. Wire IN to the first one's D, and wire its Q to NOW and to the second block's D. Wire the second block's Q to PREV. Wire SAVE to both EN pins, RST to both RST pins, and CLK to both CLK pins.
 
-predictLongPressLead: The circuit above has a flaw that the tests you ran did not catch. A person keeps Save pressed for far longer than one clock period. SAVE stays 1 for many edges, not just one. This figure saves `0011`, sets IN to `0101`, and then keeps SAVE pressed for three edges. Watch what happens to PREV.
+predictLongPressLead: What if someone keeps the Save button pressed for much longer than one clock period? The button stays pressed, so SAVE stays 1 for many edges. This figure saves `0011`, then sets IN to `0101`, then keeps SAVE at 1 for three edges. Watch what happens to PREV.
 
 p2Question: A save of `0011` happened. Then IN is `0101` and SAVE is kept pressed for three edges. What is PREV after the third edge?
 

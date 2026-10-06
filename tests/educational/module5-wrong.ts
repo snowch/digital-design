@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Plausible wrong attempts at Module 5's challenges after the registers lesson, shared by the
 // content test (which checks where each fails) and the browser spec (which checks the page says
 // so).

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Titles, objectives, captions and labels of the lesson on state encoding, drafted by the
 // prose process from a brief of facts (docs/notes/module-5-state-machines/briefs/NE.md).
 
@@ -28,7 +30,7 @@ export const LABELS = {
     p1X: "The simulator cannot know SEND (X)",
     p1Zero: "SEND is 0",
     p2Idle: "IDLE (0001)",
-    p2None: "0000, no state",
+    p2None: "0000",
     p2Try: "TRY (0010)",
     p3Idle: "IDLE (00)",
     p3Try: "TRY (01)",
@@ -39,11 +41,11 @@ export const LABELS = {
     challenge: "The defrost controller",
     construction: "Changing the codes",
     explanation: "Synchronous design",
-    failureExperiment: "No state at zero, answers between edges",
+    failureExperiment: "One flip-flop per state, answers between edges",
     generalisation: "States named in the text",
-    investigation: "One flip-flop per state, IDLE at zero",
+    investigation: "Three flip-flops for four states, IDLE at zero",
     motivation: "What the codes decide",
-    prediction: "A reset to TRY",
+    prediction: "When TRY has code 00",
     question: "Different codes, same table",
     reflection: "What the module built",
   },

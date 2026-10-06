@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Titles, objectives, captions and labels of the lesson on register transfer, drafted by the
 // prose process from a brief of facts (docs/notes/module-5-state-machines/briefs/RE.md).
 
@@ -55,6 +57,6 @@ export const LABELS = {
     motivation: "One register's value from another",
     prediction: "Which word does PREV take?",
     question: "A new display",
-    reflection: "Moving on",
+    reflection: "Deciding the job",
   },
 } as const;

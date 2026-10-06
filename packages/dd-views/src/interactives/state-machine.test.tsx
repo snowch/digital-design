@@ -1,4 +1,6 @@
 // @vitest-environment jsdom
+// Copyright © 2026 Chris Snow
+
 // Module 5: the state-machine figure moves every view together from one simulator.
 
 import { render, screen, within } from "@testing-library/react";

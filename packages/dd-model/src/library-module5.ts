@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 5's circuits after the registers lesson: counters, registers passing words to each
 // other, and state machines. Each is a function, so every caller gets a fresh netlist. The
 // state machines are data (machines.ts) turned into circuits by fsm.ts.
@@ -299,16 +301,30 @@ export function module5Library(place: Place): Readonly<Record<string, () => Circ
         "out:TICK": [19, 2],
       }),
     "add-one-4": () => addOneCircuit(4),
-    "counter-to-5": () => counterToCircuit(5),
+    "counter-to-5": () =>
+      place(counterToCircuit(5), {
+        "in:EN": [0, 1],
+        "in:CLK": [0, 12],
+        "in:RST": [0, 16],
+        add: [5, 1],
+        last: [5, 19],
+        orClear: [12, 15],
+        count: [17, 9],
+        comparator: [24, 17],
+        "out:Q": [31, 9],
+        "out:TICK": [31, 19],
+      }),
     "now-prev": () =>
       place(nowPrevCircuit(4), {
+        // The inputs in the order of the registers' pins (D, CLK, RST, EN), so no two cross.
         "in:IN": [0, 1],
-        "in:SAVE": [0, 7],
-        "in:RST": [0, 4],
-        "in:CLK": [0, 10],
-        now: [6, 1],
-        // prev a cell and a half lower, so now's Q meets its D in a straight line.
-        prev: [14, 2.5],
+        "in:CLK": [0, 4],
+        "in:RST": [0, 7],
+        "in:SAVE": [0, 10],
+        now: [6, 2],
+        // prev lower than now, so now's Q runs down into its D and the inputs' wires to prev
+        // turn below now's.
+        prev: [13, 4.5],
         "out:NOW": [21, 12],
         "out:PREV": [21, 1],
       }),
@@ -319,7 +335,7 @@ export function module5Library(place: Place): Readonly<Record<string, () => Circ
         "in:CLK": [0, 8],
         "in:IN": [0, 13],
         last: [5, 1],
-        notOld: [11, 1],
+        notOld: [10, 1],
         andStep: [15, 0],
         now: [20, 12],
         prev: [28, 13.5],
@@ -328,7 +344,21 @@ export function module5Library(place: Place): Readonly<Record<string, () => Circ
         "out:PREV": [36, 9],
         "out:NOW": [36, 19],
       }),
-    swap: () => swapCircuit(4),
+    swap: () =>
+      place(swapCircuit(4), {
+        // selY a little right of selX, so the wire fed back from regY to selX passes left of
+        // selY's name instead of through it.
+        "in:A": [0, 1],
+        "in:B": [0, 12],
+        "in:LOAD": [0, 15],
+        "in:CLK": [0, 18],
+        selX: [7, 1],
+        selY: [9, 10],
+        regX: [14, 1],
+        regY: [14, 11],
+        "out:X": [21, 1],
+        "out:Y": [21, 11],
+      }),
     ...machines,
   };
 }

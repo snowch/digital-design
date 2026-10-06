@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 5: a state machine, running, shown as the chain the course teaches in one figure. The
 // state diagram, the encoded table, the circuit (next-state logic, the state register's
 // flip-flops, the output logic), the timing trace and the text are views of one simulator. The

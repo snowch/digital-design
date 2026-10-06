@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Titles, objectives, captions and labels of the lesson on state machines, drafted by the
 // prose process from a brief of facts (docs/notes/module-5-state-machines/briefs/SE.md).
 
@@ -63,7 +65,7 @@ export const LABELS = {
     generalisation: "The controller as text",
     investigation: "The controller in four views",
     motivation: "Jobs as states in a register",
-    prediction: "Staying in TRY, and a late answer",
+    prediction: "GO falling and a late OK",
     question: "The office's message to the manager",
     reflection: "State machines and their codes",
   },

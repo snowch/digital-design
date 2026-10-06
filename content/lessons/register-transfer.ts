@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Lesson: How do registers pass words to each other?  (module 5, lesson 3)
 //
 // The structure is here; the words are in register-transfer.prose.ts and

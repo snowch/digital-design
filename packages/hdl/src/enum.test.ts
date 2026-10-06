@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 5: enumerated types, the construct a state machine's states are written with.
 
 import { describe, expect, it } from "vitest";

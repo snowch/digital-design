@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Titles, objectives, captions and labels of the lesson on counters, drafted by the prose
 // process from a brief of facts (docs/notes/module-5-state-machines/briefs/CE.md).
 

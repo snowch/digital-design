@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Facts the register-transfer lesson's prose states, read off the figures that show them.
 
 import { describe, expect, it } from "vitest";

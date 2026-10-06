@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Lesson: How does a circuit count?  (module 5, lesson 2)
 //
 // The structure is here; the words are in counters.prose.ts and counters.labels.ts. A counter is

@@ -1,6 +1,6 @@
 explanation: At an edge, every register takes a word that the gates worked out from the values the registers had before that edge. In the NOW and PREV circuit, the NOW register takes IN and the PREV register takes NOW. In the save-once circuit, the flip-flop last also takes SAVE, and both registers take their word only at an edge where STEP is 1.
 
-Moving words into registers at an edge, each worked out from values before the edge, is called **register transfer**. It is written with an arrow, one line per register: NOW ← IN and PREV ← NOW. In the save-once circuit, both registers take their word at an edge where STEP is 1.
+Moving words into registers at an edge, each worked out from values before the edge, is called **register transfer**. It is written with an arrow, one line per register: NOW ← IN and PREV ← NOW.
 
 All the lines of one edge happen at once. Their order does not matter, because every right-hand side is read before the edge. The counter of the previous lesson is a register transfer too: Q ← Q + 1 at an edge where EN is 1.
 

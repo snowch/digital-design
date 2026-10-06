@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 5 after the registers lesson: counters, register transfer and state machines, driven
 // through the page as the registers lesson's spec drives its own. Every challenge completable with
 // its reference, a plausible wrong attempt rejected at the test a learner would look at, saved
