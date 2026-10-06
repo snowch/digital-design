@@ -274,3 +274,109 @@ export const CHECKS_START = `${CHECKS_HEADER}
   assign CAUSEF = 8'h00;
 endmodule
 `;
+
+// Lesson 8.4: the memory checks as a module, and the datapath with its memory, written as text.
+
+const MEMCHECK_HEADER = `module memcheck(
+  input logic [63:0] ADDR,
+  input logic LOAD,
+  input logic STORE,
+  input logic BYTE,
+  output logic [7:0] CAUSEM
+);`;
+
+export const MEMCHECK_REFERENCE = `${MEMCHECK_HEADER}
+  always_comb begin
+    CAUSEM = 8'h00;
+    if (STORE & (ADDR[10] == 1'b0)) CAUSEM = 8'h34;
+    if (STORE & ((ADDR[10:3] == 8'hFA) | (ADDR[10:3] == 8'hFB) | (ADDR[10:3] == 8'hFC)))
+      CAUSEM = 8'h34;
+    if (BYTE & (ADDR[10:6] == 5'b11111)) CAUSEM = 8'h33;
+    if (~BYTE & (ADDR[2:0] != 3'b000)) CAUSEM = 8'h33;
+    if ((ADDR[63:11] != 53'h0) | (ADDR[10:3] == 8'hFF)) CAUSEM = 8'h31;
+    if (~(LOAD | STORE)) CAUSEM = 8'h00;
+  end
+endmodule
+`;
+
+export const MEMCHECK_START = `${MEMCHECK_HEADER}
+  always_comb begin
+    CAUSEM = 8'h00;
+    if ((ADDR[63:11] != 53'h0) | (ADDR[10:3] == 8'hFF)) CAUSEM = 8'h31;
+    if (~(LOAD | STORE)) CAUSEM = 8'h00;
+  end
+endmodule
+`;
+
+/** The datapath of lesson 8.4, loads and stores but no branches, with `CHOICES` to complete. */
+function memoryText(choices: string): string {
+  return `module machine(
+  input logic CLK,
+  input logic RST,
+  input logic [63:0] SENSORA,
+  input logic [63:0] SENSORB,
+  output logic [63:0] PC,
+  output logic HALT,
+  output logic [7:0] CAUSE,
+  output logic [63:0] DISPLAY,
+  output logic [2:0] LAMPS
+);
+  logic [31:0] IR;
+  logic [63:0] PC4, WIDE, QA, QB, ALUA, ALUB, RESULT, MQ, YIN;
+  logic OP2, OP1, OP0, AZERO, BCONST, WRITEY, LOAD, STORE, BYTE, STOP, GO, WREG;
+  logic [7:0] CAUSEF, CAUSED, CAUSEM;
+
+  always_ff @(posedge CLK)
+    if (RST) PC <= 64'h0;
+    else if (GO) PC <= PC4;
+  assign PC4 = PC + 64'h4;
+
+  memory mem (.PC(PC), .ADDR(RESULT), .D(QB), .LOAD(LOAD), .STORE(STORE),
+    .BYTE(BYTE), .GO(GO), .RST(RST), .CLK(CLK), .DOOR(1'b0), .WARM(1'b0),
+    .SENSORA(SENSORA), .SENSORB(SENSORB), .IR(IR), .CAUSEF(CAUSEF), .MQ(MQ),
+    .CAUSEM(CAUSEM), .DISPLAY(DISPLAY), .LAMPS(LAMPS));
+
+  decoder dec (.K(IR[31:28]), .J(IR[27:24]), .OP2(OP2), .OP1(OP1), .OP0(OP0),
+    .AZERO(AZERO), .BCONST(BCONST), .WRITEY(WRITEY), .LOAD(LOAD), .STORE(STORE),
+    .BYTE(BYTE), .STOP(STOP), .CAUSED(CAUSED));
+
+  registers regs (.RA(IR[23:20]), .RB(IR[19:16]), .WA(IR[15:12]), .D(YIN),
+    .WE(WREG), .CLK(CLK), .QA(QA), .QB(QB));
+
+  always_comb
+    case (IR[11])
+      1'b0: WIDE = {52'h0, IR[11:0]};
+      1'b1: WIDE = {52'hFFFFFFFFFFFFF, IR[11:0]};
+    endcase
+
+  always_comb
+    case (BCONST)
+      1'b0: ALUB = QB;
+      1'b1: ALUB = WIDE;
+    endcase
+
+${choices}
+  alu alu1 (.A(ALUA), .B(ALUB), .OP2(OP2), .OP1(OP1), .OP0(OP0), .Y(RESULT));
+
+  stops st (.CAUSEF(CAUSEF), .CAUSED(CAUSED), .CAUSEM(CAUSEM), .STOP(STOP),
+    .WRITEY(WRITEY), .HALT(HALT), .CAUSE(CAUSE), .WREG(WREG), .GO(GO));
+endmodule
+`;
+}
+
+export const MEMORY_REFERENCE = memoryText(`  always_comb
+    case (AZERO)
+      1'b0: ALUA = QA;
+      1'b1: ALUA = 64'h0;
+    endcase
+
+  always_comb
+    case (LOAD)
+      1'b0: YIN = RESULT;
+      1'b1: YIN = MQ;
+    endcase
+`);
+
+export const MEMORY_START = memoryText(`  assign ALUA = QA;
+  assign YIN = RESULT;
+`);

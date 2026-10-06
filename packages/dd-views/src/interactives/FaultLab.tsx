@@ -36,6 +36,8 @@ export const FaultSpec = z.discriminatedUnion("kind", [
     kind: z.literal("stuck-at"),
     net: z.string(),
     value: z.union([z.literal(0), z.literal(1)]),
+    /** Module 8: where the fixed value is drawn, in grid cells, in a hand-placed drawing. */
+    at: z.tuple([z.number(), z.number()]).optional(),
     ...label,
   }),
   z.object({ kind: z.literal("wrong-gate"), path: z.string(), gate: z.string(), ...label }),
@@ -75,7 +77,7 @@ function baseFault(spec: z.infer<typeof FaultSpec>): Fault {
     case "inverted":
       return invertedSignal(spec.net);
     case "stuck-at":
-      return stuckAt(spec.net, spec.value);
+      return stuckAt(spec.net, spec.value, spec.at);
     case "wrong-gate":
       return wrongGate(spec.path, spec.gate);
   }

@@ -95,7 +95,11 @@ export function invertedSignal(netName: string): Fault {
 }
 
 /** The wire named `net` is held at a fixed value whatever drives it. */
-export function stuckAt(netName: string, value: 0 | 1): Fault {
+export function stuckAt(
+  netName: string,
+  value: 0 | 1,
+  at?: readonly [number, number],
+): Fault {
   return {
     id: `stuck:${netName}:${value}`,
     label: `Hold ${netName} at ${value}`,
@@ -112,6 +116,8 @@ export function stuckAt(netName: string, value: 0 | 1): Fault {
         inputs: {},
         outputs: { y: net },
         params: { width: circuit.nets[net]?.width ?? 1, value: String(value) },
+        // Module 8: a place the lesson chose, where the drawing is placed by hand.
+        ...(at ? { meta: { layout: { x: at[0], y: at[1] } } } : {}),
       };
       return { ...circuit, nets, components: [...components, constant] };
     },

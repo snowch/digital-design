@@ -4,10 +4,10 @@
 
 import { describe, expect, it } from "vitest";
 
-import { assemble, instructionHex } from "@dd/dd-model";
+import { assemble, figureState, instructionHex } from "@dd/dd-model";
 
 import { fetch, MARGIN } from "./fetch";
-import { figureAnswer, runToStop, signed } from "./module8-facts";
+import { figureAnswer, figureSim, runToStop, signed } from "./module8-facts";
 import { testCountOf } from "./module3-facts";
 
 describe("facts for the fetch lesson", () => {
@@ -27,6 +27,9 @@ describe("facts for the fetch lesson", () => {
 
   it("the prediction: the edge at 008, an all-zero word, stops the machine with cause 21", () => {
     expect(figureAnswer(fetch, "predict-end")).toBe("21");
+    const state = figureState(figureSim(fetch, "predict-end"));
+    expect([state.pc, signed(state.regs[1]), state.ir]).toEqual([8n, "6", 0]);
+    expect(instructionHex(assemble("R1 <= 5").lines[0]!.instruction ?? 0)).toBe("25001005");
   });
 
   it("the margin program: 66 and 132, stopped by stop after 5 edges with the PC at 010", () => {

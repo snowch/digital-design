@@ -171,8 +171,14 @@ export const fetch: LessonInput = {
             buses: ["PC", "PC4", "IR"],
             run: true,
             faults: [
-              { kind: "stuck-at", net: "PC4", value: 0, label: LABELS.faults.pc4Low },
-              { kind: "stuck-at", net: "STOP", value: 0, label: LABELS.faults.stopLow },
+              { kind: "stuck-at", net: "PC4", value: 0, at: [4, 6], label: LABELS.faults.pc4Low },
+              {
+                kind: "stuck-at",
+                net: "STOP",
+                value: 0,
+                at: [29, 2],
+                label: LABELS.faults.stopLow,
+              },
             ],
           },
         },
