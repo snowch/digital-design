@@ -100,7 +100,24 @@ export const instructions: LessonInput = {
   introduces: ["instruction", "datapath"],
   sections: [
     { kind: "question", title: LABELS.titles.question, prose: PROSE.question },
-    { kind: "motivation", title: LABELS.titles.motivation, prose: PROSE.motivation },
+    {
+      kind: "motivation",
+      title: LABELS.titles.motivation,
+      prose: PROSE.motivation,
+      interactives: [
+        {
+          id: "fields",
+          kind: "instruction-fields",
+          timeModel: "none",
+          caption: LABELS.captions.fields,
+          lead: PROSE.fieldsLead,
+          props: {
+            instructions: JOBS.slice(0, 4).map((j) => ({ label: j.label, text: j.text })),
+            notes: LABELS.fieldNotes,
+          },
+        },
+      ],
+    },
     {
       kind: "prediction",
       title: LABELS.titles.prediction,

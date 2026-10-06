@@ -28,12 +28,23 @@ export const LABELS = {
     c2: "Datapath, complete",
   },
   captions: {
+    fields: "A load and a store, field by field.",
     predictLoad: "Predict what R2 holds after the next edge, then check.",
     showMargin: "Run the program and watch the memory.",
     writeMemcheck: "Write the checks and run the tests.",
     memoryFaults: "Choose a fault and run the program.",
     writeMemory: "Complete the text and run the tests.",
+    map: "What each part of the memory accepts and refuses.",
   },
+  fieldNotes: {
+    K: "the kind; 3 is a load, 4 a store",
+    J: "8: a word at c alone",
+    A: "unused when the address is c alone",
+    B: "the register a store writes out",
+    Y: "the register a load fills",
+    C: "the address, read signed",
+  },
+  fieldsChoices: { load: "380027D8: R2 ← memory[7D8]", store: "48040400: memory[400] ← R4" },
   options: {
     p1Reading: "-184",
     p1Address: "2008",

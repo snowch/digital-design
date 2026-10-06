@@ -33,6 +33,7 @@ export const LABELS = {
     writeDigits: "Write the digits module and run the tests.",
     jobsFaults: "Choose a fault and an instruction, then clock it.",
     writeJobs: "Write the datapath and run the tests.",
+    fields: "Choose an instruction and read its six fields.",
   },
   options: {
     p1Sum: "-434",
@@ -40,14 +41,22 @@ export const LABELS = {
     p1Other: "-66",
   },
   instructions: {
-    subtract: "`13123000`: R3 ← R1 - R2",
-    add: "`12123000`: R3 ← R1 + R2",
-    copy: "`15024000`: R4 ← R2",
-    countUp: "`16101000`: R1 ← R1 + 1",
-    noWrite: "`13123000`: R3 ← R1 - R2. WRITEY is 0, so nothing is written.",
+    subtract: "13123000: R3 ← R1 - R2",
+    add: "12123000: R3 ← R1 + R2",
+    copy: "15024000: R4 ← R2",
+    countUp: "16101000: R1 ← R1 + 1",
+    noWrite: "13123000: R3 ← R1 - R2. WRITEY is 0, so nothing is written.",
   },
   faults: {
     yLow: "The Y digit stuck at 0",
     op0Low: "OP0 stuck at 0",
+  },
+  fieldNotes: {
+    K: "the kind; 1 is a register job",
+    J: "the job; bits 2 to 0 are the ALU code",
+    A: "read onto QA, the ALU's A",
+    B: "read onto QB, the ALU's B",
+    Y: "the register written",
+    C: "a constant; a register job does not use it",
   },
 } as const;

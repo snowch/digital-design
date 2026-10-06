@@ -226,6 +226,14 @@ function widen(b: CircuitBuilder, c: NetId): NetId {
   return w;
 }
 
+/** The widening block alone, C in and W out: what a figure simulates to show the widening. */
+export function widenCircuit(): Circuit {
+  const b = new CircuitBuilder("widen");
+  const c = b.input("C", 12);
+  b.output("W", widen(b, c));
+  return b.build();
+}
+
 /**
  * Module 8's register file: 16 registers of 64 bits, two reads (RA, RB onto QA, QB) and one write
  * (WA, D, WE at a rising edge of CLK), as two banks of the simulator's memory, the low 32 bits of

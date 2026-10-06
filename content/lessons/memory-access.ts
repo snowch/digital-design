@@ -123,7 +123,27 @@ export const memoryAccess: LessonInput = {
   introduces: [],
   sections: [
     { kind: "question", title: LABELS.titles.question, prose: PROSE.question },
-    { kind: "motivation", title: LABELS.titles.motivation, prose: PROSE.motivation },
+    {
+      kind: "motivation",
+      title: LABELS.titles.motivation,
+      prose: PROSE.motivation,
+      interactives: [
+        {
+          id: "fields",
+          kind: "instruction-fields",
+          timeModel: "none",
+          caption: LABELS.captions.fields,
+          lead: PROSE.fieldsLead,
+          props: {
+            instructions: [
+              { label: LABELS.fieldsChoices.load, text: "0x380027D8" },
+              { label: LABELS.fieldsChoices.store, text: "0x48040400" },
+            ],
+            notes: LABELS.fieldNotes,
+          },
+        },
+      ],
+    },
     {
       kind: "prediction",
       title: LABELS.titles.prediction,
@@ -183,6 +203,14 @@ export const memoryAccess: LessonInput = {
       title: LABELS.titles.construction,
       prose: PROSE.construction,
       interactives: [
+        {
+          id: "map",
+          kind: "memory-map",
+          timeModel: "none",
+          caption: LABELS.captions.map,
+          lead: PROSE.mapLead,
+          props: {},
+        },
         {
           id: "write-memcheck",
           kind: "challenge",

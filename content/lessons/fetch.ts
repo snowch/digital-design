@@ -193,7 +193,33 @@ export const fetch: LessonInput = {
         },
       ],
     },
-    { kind: "explanation", title: LABELS.titles.explanation, prose: PROSE.explanation },
+    {
+      kind: "explanation",
+      title: LABELS.titles.explanation,
+      prose: PROSE.explanation,
+      interactives: [
+        {
+          id: "edges",
+          kind: "edge-timeline",
+          timeModel: "settle",
+          caption: LABELS.captions.edges,
+          lead: PROSE.edgesLead,
+          after: PROSE.edgesAfter,
+          props: {
+            libraryId: "datapath-fetch",
+            program: MARGIN,
+            edges: 5,
+            signals: [
+              { net: "CLK" },
+              { net: "PC", show: "address" },
+              { net: "IR", show: "word" },
+              { net: "RESULT", show: "signed" },
+              { net: "WREG" },
+            ],
+          },
+        },
+      ],
+    },
     { kind: "generalisation", title: LABELS.titles.generalisation, prose: PROSE.generalisation },
     {
       kind: "challenge",

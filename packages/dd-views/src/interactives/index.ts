@@ -31,6 +31,13 @@ import { CarrySteps } from "./CarrySteps";
 import { SuiteLab } from "./SuiteLab";
 // Module 8, the datapath
 import { DatapathFigure } from "./DatapathFigure";
+import {
+  BranchTargets,
+  EdgeTimeline,
+  InstructionFieldsFigure,
+  MemoryMapFigure,
+  WideningFigure,
+} from "./MachineFigures";
 // Module 9, control
 import { ControlTable, KindEdges, KindMap } from "./ControlViews";
 
@@ -63,6 +70,12 @@ export const INTERACTIVES: Readonly<Record<string, ComponentType<InteractiveProp
   "suite-lab": SuiteLab,
   // Module 8, the datapath
   datapath: DatapathFigure,
+  // Module 8's focused figures, for Module 9 too.
+  "instruction-fields": InstructionFieldsFigure,
+  widening: WideningFigure,
+  "edge-timeline": EdgeTimeline,
+  "memory-map": MemoryMapFigure,
+  "branch-targets": BranchTargets,
   // Module 9, control
   "control-table": ControlTable,
   "kind-map": KindMap,
@@ -90,6 +103,11 @@ export {
   CarrySteps,
   SuiteLab,
   DatapathFigure,
+  InstructionFieldsFigure,
+  WideningFigure,
+  EdgeTimeline,
+  MemoryMapFigure,
+  BranchTargets,
   ControlTable,
   KindMap,
   KindEdges,
