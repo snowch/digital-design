@@ -53,7 +53,16 @@ function MachineFlow() {
   );
 }
 
-export function LessonList({ book, storage }: { book: Book; storage: Storage }) {
+export function LessonList({
+  book,
+  storage,
+  from,
+}: {
+  book: Book;
+  storage: Storage;
+  /** The lesson the reader has just left, whose module opens too. */
+  from?: string;
+}) {
   const ordered = [...book.lessons].sort((a, b) => a.module - b.module || a.order - b.order);
   const completion = new Map(
     ordered.map((l) => [
@@ -70,8 +79,12 @@ export function LessonList({ book, storage }: { book: Book; storage: Storage }) 
   });
   const next: Lesson | undefined = started ? (unfinished ?? ordered[0]) : ordered[0];
   // The page lists every module, each one line until it is pressed; the module of the lesson the
-  // button above names starts open (the author: the page had grown long with every lesson shown).
-  const [open, setOpen] = useState<ReadonlySet<number>>(() => new Set(next ? [next.module] : []));
+  // button above names starts open, and so does the module of the lesson the reader has just left
+  // (the author: the page had grown long with every lesson shown).
+  const [open, setOpen] = useState<ReadonlySet<number>>(() => {
+    const left = book.lessons.find((l) => l.id === from)?.module;
+    return new Set([next?.module, left].filter((m): m is number => m !== undefined));
+  });
   const toggle = (module: number) =>
     setOpen((was) => {
       const now = new Set(was);

@@ -162,6 +162,19 @@ describe("the course's front page: every module of the plan", () => {
     }
   });
 
+  it("opens the module of the lesson the reader has just left, as well as the way in's", () => {
+    const last = ordered[ordered.length - 1]!;
+    expect(last.module).not.toBe(first.module);
+    render(<LessonList book={book} storage={memoryStorage()} from={last.id} />);
+    for (const module of [first.module, last.module])
+      expect(
+        screen.getByRole("button", { name: new RegExp(`^${STRINGS.module(module)}: `) }),
+      ).toHaveAttribute("aria-expanded", "true");
+    expect(
+      screen.getByRole("link", { name: new RegExp(last.title.replace(/[?()]/g, "\\$&")) }),
+    ).toHaveAttribute("href", lessonHref(last.id));
+  });
+
   it("shows and hides a module's lessons when its line is pressed", async () => {
     const user = userEvent.setup();
     render(<LessonList book={book} storage={memoryStorage()} />);

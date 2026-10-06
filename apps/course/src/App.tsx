@@ -3,7 +3,7 @@
 // The course shell: header, routes, footer. Lessons render through the runtime with the
 // digital-design book; the shell itself knows nothing about circuits.
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { createBook, INTERACTIVES } from "@dd/dd-views";
 import { LESSONS } from "@dd/content";
@@ -21,9 +21,17 @@ export function App() {
   const [theme, setTheme] = useTheme();
   const storage = useMemo(() => browserStorage(), []);
   const book = useMemo(() => createBook(LESSONS, INTERACTIVES), []);
+  // The lesson last shown, so a reader who comes back to the list finds that lesson's module open.
+  const [lastLesson, setLastLesson] = useState<string | undefined>();
+  useEffect(() => {
+    if (route.kind === "lesson") setLastLesson(route.id);
+  }, [route]);
 
   let page: React.ReactNode;
-  if (route.kind === "list") page = <LessonList book={book} storage={storage} />;
+  if (route.kind === "list")
+    page = (
+      <LessonList book={book} storage={storage} {...(lastLesson ? { from: lastLesson } : {})} />
+    );
   else if (route.kind === "preface") page = <Preface book={book} />;
   else if (route.kind === "lesson") {
     const lesson = book.lessons.find((l) => l.id === route.id);
