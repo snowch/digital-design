@@ -145,6 +145,14 @@ each part the modules that build it, and came before the button; a reader then m
 and 8" first and asked where Module 1 was and where to start. The button now comes first, and the
 parts name no modules: the list gives the order to read them in.
 
+Then the author sketched a cover of their own: a band with the title, the button and a picture,
+and the path through the course in reading order beneath it. The cover follows its structure in
+the course's own faces and colours. The way in comes first; beside it, the freezer-room alarm from
+Module 2, a real circuit the reader can press; under it, the path in five stages, Signals, Memory,
+Machine, Programming and The whole machine, each with its modules in order and a line for a stage
+still to be written. The flow of the machine's parts went, and with it the last module numbers out
+of reading order.
+
 The same evening, with 32 lessons listed, the author found the page long and asked for the
 modules to be collapsed. Each module is now one line: its name, and a summary of its lessons and
 how many of their challenges are complete. Pressing the line shows its lessons. The module of the

@@ -191,108 +191,229 @@ ol {
   margin: 0 0 var(--space-4);
 }
 
-/* The cover, at the top of the front page: what the course is, the way in, and how the machine it
-   builds runs one step of a program, part by part. */
-.cover {
-  max-width: var(--measure);
-}
-.cover-lead {
-  font-size: var(--text-md);
-}
-.cover-machine {
-  margin: var(--space-5) 0;
-  padding: var(--space-4);
-  background: var(--canvas);
-  border-radius: var(--radius-lg);
-}
-.machine-flow {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  gap: var(--space-5);
-  justify-items: center;
-}
-.machine-flow > li {
+/* The cover, at the top of the front page: a band in the accent's blue with what the course is, the
+   way in and a real circuit to press, then the path through the course in reading order. */
+.cover-hero {
   position: relative;
-  width: 100%;
-  max-width: 22rem;
-}
-/* An arrow down between one step's parts, read in order. */
-.machine-flow > li + li::before {
-  content: "\2193" / "";
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  line-height: var(--space-5);
-  color: var(--fg-muted);
-}
-.flow-part {
+  overflow: hidden;
   display: grid;
-  align-content: center;
-  gap: 2px;
-  padding: var(--space-2) var(--space-3);
-  background: var(--bg-raised);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius);
-  text-align: center;
-}
-.flow-name {
-  font-weight: 600;
-}
-.machine-flow > .flow-group {
-  max-width: none;
-  padding: var(--space-3);
-  border: 1px dashed var(--border-strong);
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: center;
+  padding: var(--space-6) var(--space-4);
   border-radius: var(--radius-lg);
+  background: linear-gradient(140deg, var(--hero-bg-1), var(--hero-bg-2));
+  color: var(--hero-fg);
 }
-.flow-group-name {
-  display: block;
-  margin-bottom: var(--space-2);
-  text-align: center;
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--fg-muted);
-}
-/* Two to a row on a phone, the last across the row; three to a row where there is room. */
-.flow-group ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  gap: var(--space-2);
-  grid-template-columns: 1fr 1fr;
-}
-.flow-group ul > li:last-child {
-  grid-column: 1 / -1;
-}
-@media (min-width: 40rem) {
-  .flow-group ul {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  .flow-group ul > li:last-child {
-    grid-column: auto;
+@media (min-width: 56rem) {
+  .cover-hero {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    padding: var(--space-7) var(--space-6);
   }
 }
-.flow-back {
-  margin: var(--space-3) 0 0;
-  text-align: center;
-  font-size: var(--text-sm);
-  color: var(--fg-muted);
+.hero-traces {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: var(--hero-trace);
+  stroke-width: 2;
+  pointer-events: none;
 }
-.cover-machine figcaption {
+.hero-text,
+.hero-circuit {
+  position: relative;
+}
+.cover-hero h1 {
+  color: var(--hero-fg);
   margin-bottom: var(--space-4);
-  font-size: var(--text-sm);
-  color: var(--fg-muted);
+}
+.hero-title-sub {
+  display: block;
+  color: var(--hero-sub);
+}
+.cover-hero .cover-lead {
+  font-size: var(--text-md);
+  color: var(--hero-muted);
+  max-width: var(--measure);
 }
 .cover-start {
   margin: var(--space-5) 0 var(--space-4);
 }
-.cover-start .button {
-  text-align: left;
+.hero-start {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 48px;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--hero-action);
+  color: var(--hero-action-fg);
   text-decoration: none;
-  padding: var(--space-2) var(--space-4);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+  transition: transform var(--motion);
+}
+.hero-start:hover {
+  transform: translateY(-1px);
+}
+.hero-start:focus-visible {
+  outline: 3px solid var(--hero-sub);
+  outline-offset: 3px;
+}
+.hero-start-arrow {
+  font-size: var(--text-xl);
+  line-height: 1;
+}
+.hero-start-text strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+}
+.hero-start-text span {
+  display: block;
+  font-size: var(--text-sm);
+}
+.cover-hero .course-assumes {
+  color: var(--hero-muted);
+  font-size: var(--text-sm);
+  margin: 0 0 var(--space-2);
+}
+.cover-hero .course-start {
+  margin: 0;
+}
+.cover-hero .course-start a {
+  color: var(--hero-fg);
+}
+.hero-circuit {
+  margin: 0;
+}
+/* On a phone the band runs to the screen's edges, and the drawing's panel to the band's, so the
+   whole circuit, lamp and all, fits at its own size: its words stay at the page's size. */
+@media (max-width: 56rem) {
+  .cover-hero {
+    margin-inline: calc(-1 * var(--gutter));
+    border-radius: 0;
+  }
+  .hero-circuit {
+    margin-inline: calc(-1 * var(--space-4));
+  }
+  .hero-circuit .circuit-scroll {
+    padding-inline: var(--space-2);
+    border-radius: 0;
+  }
+  .hero-circuit figcaption {
+    padding-inline: var(--space-4);
+  }
+}
+.hero-circuit .circuit-view {
+  margin: 0;
+}
+.hero-circuit .scroll-note {
+  color: var(--hero-muted);
+}
+.hero-circuit figcaption {
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--hero-muted);
+}
+
+/* The path: five stages in reading order, a list down a phone and a row across a wide screen. */
+.journey h2 {
+  margin-top: var(--space-6);
+}
+.journey-stages {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--space-4);
+}
+.journey-stage {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+  align-content: start;
+}
+.stage-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+.stage-icon svg {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.stage-1 {
+  color: var(--stage-1);
+}
+.stage-2 {
+  color: var(--stage-2);
+}
+.stage-3 {
+  color: var(--stage-3);
+}
+.stage-4 {
+  color: var(--stage-4);
+}
+.stage-5 {
+  color: var(--stage-5);
+}
+.stage-text {
+  display: grid;
+  gap: 2px;
+}
+.stage-name {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 650;
+}
+.stage-modules {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
+}
+.stage-about {
+  color: var(--fg);
+}
+.stage-status {
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
+  font-style: italic;
+}
+.stage-to-write .stage-icon {
+  border-style: dashed;
+}
+@media (min-width: 56rem) {
+  .journey-stages {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: var(--space-5);
+  }
+  .journey-stage {
+    position: relative;
+    grid-template-columns: none;
+    justify-items: center;
+    text-align: center;
+  }
+  /* An arrow from each stage to the next, read across. */
+  .journey-stage + .journey-stage::before {
+    content: "\2192" / "";
+    position: absolute;
+    top: 12px;
+    left: calc(-1 * var(--space-5) / 2);
+    transform: translateX(-50%);
+    color: var(--fg-muted);
+  }
 }
 .contents-heading {
   margin-top: var(--space-7);

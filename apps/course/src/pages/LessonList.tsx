@@ -1,14 +1,17 @@
 // Copyright © 2026 Christopher Snow
 
-// The course's front page: the cover (what the course is, where to start or go on, and how the
-// machine it builds runs a step), then every module the plan has, in order, each with its lessons
-// or the line that says it is still to be written. The way in comes before the machine: the
-// machine's parts are built across the modules out of reading order, and a reader who meets them
-// first asks where to start (the author, 6 October 2026). Each module's lessons show when its line
-// is pressed, the module of the lesson the way in names already open.
+// The course's front page: the cover, then every module the plan has, in order, each with its
+// lessons or the line that says it is still to be written. The cover says what the course is and
+// where to start or go on, beside a real circuit from Module 2 that the reader can press, and then
+// shows the path through the course in reading order, so the way in is never a puzzle (the author,
+// 6 October 2026: a reader who met the machine's parts by module asked where Module 1 was).
+// Each module's lessons show when its line is pressed, the module of the lesson the way in names,
+// and of the lesson just left, already open (the author: the page had grown long).
 
-import { useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 
+import { libraryCircuit, placed } from "@dd/dd-model";
+import { CircuitView, useSettleSim } from "@dd/dd-views";
 import { LessonStore, verifyCompletion, type Book, type Storage } from "@dd/lesson-runtime";
 
 import { PREFACE_HREF, lessonHref } from "../route";
@@ -17,39 +20,80 @@ import { STRINGS } from "../strings";
 type Lesson = Book["lessons"][number];
 
 /**
- * The machine the course builds, as the flow of one step of a program, part by part
- * (`docs/machine.md`): the PC and the next step's choice, the ROM, the decoder, then the register
- * file, the ALU, and the RAM with the devices. No part names its modules: the list below gives the
- * order to read them in.
+ * Module 2's freezer-room alarm, live: warm with the door shut, so the lamp is lit at first. Placed
+ * closer than the gates lesson places it, so the whole circuit, lamp and all, fits a phone without
+ * shrinking its words.
  */
-type FlowPart = "next" | "program" | "reading" | "numbers" | "arithmetic" | "memory";
-
-function MachineFlow() {
-  const words = STRINGS.cover.flow;
-  const part = (key: FlowPart) => (
-    <li className="flow-part" key={key}>
-      <span className="flow-name">{words[key]}</span>
-    </li>
+function HeroCircuit() {
+  const circuit = useMemo(
+    () =>
+      placed(libraryCircuit("alarm"), {
+        "in:WARM": [0, 1],
+        "in:DOOR": [0, 5],
+        notDoor: [4, 5],
+        andAlarm: [8, 1],
+        "out:ALARM": [12, 1],
+      }),
+    [],
   );
+  const sim = useSettleSim(circuit, { WARM: 1, DOOR: 0 });
   return (
-    <figure className="cover-machine">
-      {/* Above the boxes, as a lesson's captions are: what the picture is, before it is read. */}
-      <figcaption>{STRINGS.cover.machine}</figcaption>
-      <ol className="machine-flow">
-        {part("next")}
-        {part("program")}
-        {part("reading")}
-        <li className="flow-group">
-          <span className="flow-group-name">{words.doing}</span>
-          <ul>
-            {part("numbers")}
-            {part("arithmetic")}
-            {part("memory")}
-          </ul>
-        </li>
-      </ol>
-      <p className="flow-back">{words.back}</p>
+    <figure className="hero-circuit">
+      <CircuitView
+        circuit={circuit}
+        values={sim.values}
+        title={STRINGS.cover.heroTitle}
+        onToggleInput={(name) => sim.toggle(name)}
+        table={false}
+      />
+      <figcaption>{STRINGS.cover.heroCaption}</figcaption>
     </figure>
+  );
+}
+
+/** A small mark for each stage of the path, drawn in the stage's colour. */
+const STAGE_ICONS: readonly ReactNode[] = [
+  // Signals: an AND symbol with its two inputs and its output.
+  <path key="s" d="M3 9h3M3 15h3M6 6h5a6 6 0 0 1 0 12H6zM17 12h4" />,
+  // Memory: three stored words, one above another.
+  <path key="m" d="M5 4h14v4H5zM5 10h14v4H5zM5 16h14v4H5z" />,
+  // The machine: a part with pins on every side.
+  <path key="c" d="M7 7h10v10H7zM10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4" />,
+  // Programs: lines of text.
+  <path key="p" d="M8 7l-4 5 4 5M16 7l4 5-4 5M13.5 5l-3 14" />,
+  // The whole machine: a screen on its stand.
+  <path key="w" d="M3 4h18v12H3zM8 20h8M12 16v4" />,
+];
+
+function Journey({ written }: { written: (module: number) => boolean }) {
+  return (
+    <section className="journey" aria-labelledby="journey-heading">
+      <h2 id="journey-heading">{STRINGS.cover.journeyHeading}</h2>
+      <ol className="journey-stages">
+        {STRINGS.cover.stages.map((stage, i) => {
+          const modules = Array.from(
+            { length: stage.to - stage.from + 1 },
+            (_, k) => stage.from + k,
+          );
+          const toWrite = !modules.some(written);
+          return (
+            <li key={stage.name} className={`journey-stage${toWrite ? " stage-to-write" : ""}`}>
+              <span className={`stage-icon stage-${i + 1}`} aria-hidden="true">
+                <svg viewBox="0 0 24 24">{STAGE_ICONS[i]}</svg>
+              </span>
+              <span className="stage-text">
+                <span className="stage-name">{stage.name}</span>
+                <span className="stage-modules">
+                  {STRINGS.cover.stageModules(stage.from, stage.to)}
+                </span>
+                <span className="stage-about">{stage.about}</span>
+                {toWrite && <span className="stage-status">{STRINGS.cover.stageToWrite}</span>}
+              </span>
+            </li>
+          );
+        })}
+      </ol>
+    </section>
   );
 }
 
@@ -97,26 +141,63 @@ export function LessonList({
   const modules = [...new Set([...STRINGS.moduleNames.keys(), ...byModule.keys()])].sort(
     (a, b) => a - b,
   );
+  // "Digital Design: From Bits to a Working Computer", set as a name and a line under it.
+  const [titleMain, titleSub] = book.title.includes(": ")
+    ? [
+        `${book.title.slice(0, book.title.indexOf(": ") + 1)}`,
+        book.title.slice(book.title.indexOf(": ") + 2),
+      ]
+    : [book.title, ""];
   return (
     <>
-      <div className="cover">
-        <h1>{book.title}</h1>
-        <p className="cover-lead">{STRINGS.cover.lead}</p>
-        {next && (
-          <p className="cover-start">
-            <a className="button primary" href={lessonHref(next.id)}>
-              {started && unfinished
-                ? STRINGS.cover.continueWith(next.module, next.title)
-                : STRINGS.preface.start(next.module, next.title)}
-            </a>
+      <section className="cover-hero" aria-labelledby="course-title">
+        <svg
+          className="hero-traces"
+          viewBox="0 0 600 300"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <path d="M380 0v60h80v70h140M440 300v-90h-60v-50h-90M600 40h-70v60h-60M520 300v-40h80" />
+        </svg>
+        <div className="hero-text">
+          <h1 id="course-title">
+            {titleMain}
+            {titleSub && <span className="hero-title-sub">{titleSub}</span>}
+          </h1>
+          <p className="cover-lead">{STRINGS.cover.lead}</p>
+          {next && (
+            <p className="cover-start">
+              <a
+                className="hero-start"
+                href={lessonHref(next.id)}
+                aria-label={
+                  started && unfinished
+                    ? STRINGS.cover.continueWith(next.module, next.title)
+                    : STRINGS.preface.start(next.module, next.title)
+                }
+              >
+                <span className="hero-start-arrow" aria-hidden="true">
+                  {"\u2192"}
+                </span>
+                <span className="hero-start-text">
+                  <strong>
+                    {started && unfinished
+                      ? STRINGS.cover.continueLine(next.module)
+                      : STRINGS.cover.startLine(next.module)}
+                  </strong>
+                  <span>{next.title}</span>
+                </span>
+              </a>
+            </p>
+          )}
+          <p className="course-assumes">{STRINGS.assumes}</p>
+          <p className="course-start">
+            <a href={PREFACE_HREF}>{STRINGS.prefaceLink}</a>
           </p>
-        )}
-        <p className="course-assumes">{STRINGS.assumes}</p>
-        <p className="course-start">
-          <a href={PREFACE_HREF}>{STRINGS.prefaceLink}</a>
-        </p>
-        <MachineFlow />
-      </div>
+        </div>
+        <HeroCircuit />
+      </section>
+      <Journey written={(m) => byModule.has(m)} />
       {book.lessons.length === 0 && <p>{STRINGS.noLessons}</p>}
       <h2 className="contents-heading">{STRINGS.cover.contents(modules.length)}</h2>
       {modules.map((module) => {

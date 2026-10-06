@@ -54,15 +54,29 @@ describe("the course's front page: the cover", () => {
     ).toHaveAttribute("href", lessonHref(second.id));
   });
 
-  it("shows the way in before the machine, so a reader knows where to start", () => {
+  it("shows the way in before the path, so a reader knows where to start", () => {
     render(<LessonList book={book} storage={memoryStorage()} />);
     const start = screen.getByRole("link", {
       name: STRINGS.preface.start(first.module, first.title),
     });
-    // The machine's parts are built across the modules out of reading order.
-    const figure = screen.getByRole("figure");
-    expect(start.compareDocumentPosition(figure) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    // The link reads as the module, then the first lesson's question under it.
+    expect(start).toHaveTextContent(STRINGS.cover.startLine(first.module));
+    expect(start).toHaveTextContent(first.title);
+    const path = screen.getByRole("heading", { name: STRINGS.cover.journeyHeading });
+    expect(start.compareDocumentPosition(path) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(first.module).toBe(1);
+  });
+
+  it("puts a real circuit beside the opening words, which the reader can press", () => {
+    render(<LessonList book={book} storage={memoryStorage()} />);
+    const figure = screen.getByRole("figure");
+    expect(within(figure).getByText(STRINGS.cover.heroCaption)).toBeInTheDocument();
+    // Module 2's alarm, warm with the door shut: the lamp is lit at first.
+    const svg = figure.querySelector("svg.circuit");
+    expect(svg).not.toBeNull();
+    expect(figure.textContent).toMatch(/WARM/);
+    expect(figure.textContent).toMatch(/DOOR/);
+    expect(figure.textContent).toMatch(/ALARM/);
   });
 
   it("says what the course takes as known, and links to the page before the first lesson", () => {
@@ -77,8 +91,11 @@ describe("the course's front page: the cover", () => {
   it("uses no term that a lesson introduces, since a reader meets it before every lesson", () => {
     const cover = [
       STRINGS.cover.lead,
-      STRINGS.cover.machine,
-      ...Object.values(STRINGS.cover.flow),
+      STRINGS.cover.heroTitle,
+      STRINGS.cover.heroCaption,
+      STRINGS.cover.journeyHeading,
+      ...STRINGS.cover.stages.flatMap((s) => [s.name, s.about]),
+      STRINGS.cover.stageToWrite,
       STRINGS.cover.contents(STRINGS.moduleNames.length),
       STRINGS.cover.toWrite,
       STRINGS.cover.moduleSummary(5, 3, 12),
@@ -93,22 +110,37 @@ describe("the course's front page: the cover", () => {
   });
 });
 
-describe("the course's front page: the machine, one step at a time", () => {
-  it("shows each part of the machine in the order a step meets it, and no module numbers", () => {
+describe("the course's front page: the path through the course", () => {
+  it("gives every module from 1 to 13 to one stage, in reading order, with no gap", () => {
+    const covered = STRINGS.cover.stages.flatMap((s) =>
+      Array.from({ length: s.to - s.from + 1 }, (_, k) => s.from + k),
+    );
+    expect(covered).toEqual(Array.from({ length: 13 }, (_, k) => k + 1));
+    expect(STRINGS.moduleNames.length - 1).toBe(13);
+  });
+
+  it("names each stage's modules, and marks a stage with no lessons yet", () => {
     render(<LessonList book={book} storage={memoryStorage()} />);
-    const figure = screen.getByRole("figure");
-    const words = STRINGS.cover.flow;
-    const parts = within(figure)
-      .getAllByRole("listitem")
-      .filter((li) => li.classList.contains("flow-part"))
-      .map((li) => li.textContent);
-    const order = ["next", "program", "reading", "numbers", "arithmetic", "memory"] as const;
-    expect(parts).toEqual(order.map((k) => words[k]));
-    expect(within(figure).getByText(words.doing)).toBeInTheDocument();
-    expect(within(figure).getByText(words.back)).toBeInTheDocument();
-    expect(within(figure).getByText(STRINGS.cover.machine)).toBeInTheDocument();
-    // The list of modules gives the order to read them in; the machine names none.
-    expect(figure.textContent).not.toMatch(/Module/);
+    const path = screen.getByRole("heading", { name: STRINGS.cover.journeyHeading })
+      .parentElement as HTMLElement;
+    const stages = within(path).getAllByRole("listitem");
+    expect(stages).toHaveLength(STRINGS.cover.stages.length);
+    const withLessons = new Set(book.lessons.map((l) => l.module));
+    STRINGS.cover.stages.forEach((s, i) => {
+      const li = stages[i] as HTMLElement;
+      expect(li).toHaveTextContent(s.name);
+      expect(li).toHaveTextContent(STRINGS.cover.stageModules(s.from, s.to));
+      const written = Array.from({ length: s.to - s.from + 1 }, (_, k) => s.from + k).some((m) =>
+        withLessons.has(m),
+      );
+      if (written) expect(li).not.toHaveTextContent(STRINGS.cover.stageToWrite);
+      else expect(li).toHaveTextContent(STRINGS.cover.stageToWrite);
+    });
+  });
+
+  it("writes a stage's modules as the course writes a run of numbers", () => {
+    expect(STRINGS.cover.stageModules(1, 3)).toBe("Modules 1 to 3");
+    expect(STRINGS.cover.stageModules(10, 11)).toBe("Modules 10 and 11");
   });
 });
 
@@ -122,7 +154,8 @@ describe("the course's front page: every module of the plan", () => {
 
   it("lists every module in order, with its lessons or a line saying it is still to be written", () => {
     render(<LessonList book={book} storage={memoryStorage()} />);
-    const sections = screen.getAllByRole("region");
+    // The module list's regions: the cover's band and its path are regions of their own.
+    const sections = screen.getAllByRole("region").filter((r) => r.classList.contains("module"));
     const withLessons = new Set(book.lessons.map((l) => l.module));
     expect(sections).toHaveLength(STRINGS.moduleNames.length);
     STRINGS.moduleNames.forEach((name, module) => {
