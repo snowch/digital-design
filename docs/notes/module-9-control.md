@@ -267,3 +267,75 @@ What the drafts dropped, got wrong, or drifted on:
   2L's headings "Write numbers as text" and "Memory reused" and caption "Try other words to test"
   (put back to the brief's words); the 6V labels "result hold" for HR and HM (kept "held word") and
   "ops" for the column of transfers (kept "Transfers").
+
+## What the checks caught
+
+- **The content tests** caught, during the build: the drawn machine's tangle at its top level (45
+  wire problems before the machine became three blocks), the clock and reset routes applied to the
+  inner memory part of the same name, and every fault figure whose stuck net drew at the wrong
+  level. The term gate passed every lesson with one exemption, on `fetch`.
+- **The unit tests** caught one wrong test (STOP expected 0 on an illegal word) and the capstone's
+  test program's wrong addresses; after the capstone's change, the edge counts pinned at 4.
+- **The facts tests** pin every number the prose states: test counts, edge counts, displays,
+  registers, the map's counts, each fault's run and the starts' failures. Writing them found the
+  capstone's run choosing showB needed a test of its own (it shows -250).
+- **The browser** caught what the unit tests could not: `checks-text` (9.2) let an answer that
+  ORs the check on the number in alone pass all 280 tests (fixed with seven tests, 287); the closed
+  decoder's outputs stepped half a cell, and the decoder's insides, laid out automatically, crowded
+  and crossed where three figures first drew them (the figures now open at the decoder's top,
+  placed by hand); and the map of kinds and jobs was 87 pixels too wide on a phone (its cells lose
+  their padding there).
+- **The reviews** caught what no check could: a challenge given away in its lesson's construction,
+  "checks" in two senses on one page, a gate's role misstated, a definition that did not fit its
+  example, the PC's pulse claimed at the stop, a term counted two ways, and the capstone's run
+  claimed to choose at run time.
+
+## Questions for the author
+
+1. **The door between instructions.** `docs/machine.md` says the door sets its event "at an edge
+   where DOOR is 1 and was 0 at the edge before", and the timer counts instructions. The machine
+   of several edges moves the timer and the door's register only at an instruction's last edge,
+   so the timer counts as Module 8's machine counts. The door is sampled once per instruction too:
+   a door that opens and closes within one instruction's edges raises no event. Is that the meaning wanted, or should
+   the door's register sample at every edge in Module 9's machine?
+2. **The capstone's size.** The call through a register needed only a decoder row and two terms
+   of the checks: its edges are the call's. That is the plan's "only new control" taken to its
+   end, and the lesson says so. If the capstone should also change the controller, "set if less"
+   (`RY ← 1` if `RA < RB`) would need a new source for register Y (the flags), and a shift a new
+   part beside the ALU. Is the smaller capstone what is wanted?
+3. **The capstone's second challenge** repeats the first's decoder edits inside the whole machine's
+   text; it is the end-to-end run, but a learner who finished the first copies across. Keep it, or
+   give it a task of its own (for example, a second program that uses the new kind)?
+4. **The overview strip** would help most on the four views (9.4), the module's widest drawing,
+   seen at every edge. It is off, as the managing session asked, until the trial is decided.
+5. **The decoder's insides** are laid out automatically and are dense (the checks block crosses
+   many wires). They pass the course's rules for an inside, and every figure now opens at the
+   decoder's top. Placing them by hand is listed under what I would change.
+
+## Candidates for the shared primitives (listed, not extracted)
+
+- **A table read off a circuit**: the decoder's table, the map of kinds and jobs, and each kind's
+  edges run a circuit and tabulate it, as Module 2's truth tables and Module 5's state tables do.
+  Three consumers here; the shared piece is "run these inputs, read these outputs, mark each cell".
+- **A timing diagram of a run**: the datapath figure's `timing` pane (9.3, 9.4) and Module 8's
+  `edge-timeline` (on `main` since 12:52) draw a real run over edges. Two consumers now.
+- **The prediction gate**: the datapath figure hides its tables and panes until the learner
+  commits; Module 9's views of an edge are a third set of values behind it.
+- **Outcomes after a run**: the fault lab and the datapath figure; Module 9 adds three figures that
+  use it.
+- **The prose process's tools**: a script that renders a lesson as text for its reviewers, and one
+  that places drafts in the prose files with the checked fixes in a table, were written for this
+  module in the scratchpad. Module 8 had its own. A shared pair in `scripts/` would let the next
+  module keep the table of fixes in the repository.
+
+## What I would change
+
+- Place the decoder's insides by hand, as the machine's are, so its blocks can be first drawings.
+- The machine's drawing is wide and scrolls on a phone; with the overview strip the
+  phone could see it whole.
+- Give the capstone's run a choice made by the program itself (a sensor's reading or the door
+  deciding R4), so "chooses" is what the figure shows.
+- A stuck value on a block's output net still draws the block connected; Module 8's figures do the
+  same. A fault drawn on the wire after the block would read better.
+- Trim the unit tests' run of Module 8's suite through the machine's text (48 seconds), perhaps to
+  a representative third, to win back check time.
