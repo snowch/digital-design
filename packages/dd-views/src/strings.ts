@@ -21,6 +21,18 @@ export interface ViewStrings {
     readonly showWire: string;
     /** Above a drawing wider than its box, which scrolls sideways (a phone). */
     readonly scrollNote: string;
+    // Module 8: a drawing much wider than its box, with the whole of it small above it, and zoom
+    // (`Overview.tsx`; tried first on the branches lesson's loop).
+    /** The heading over the strip that shows the whole drawing small. */
+    readonly overviewLabel: string;
+    /** The strip's accessible name, as a control. */
+    readonly overviewName: string;
+    /** A screen reader's reading of the strip: {from} and {to}, percentages across the drawing. */
+    readonly overviewValue: string;
+    readonly zoomOut: string;
+    readonly zoomIn: string;
+    /** Above such a drawing, in place of the scroll note. */
+    readonly zoomNote: string;
   };
   readonly builder: {
     readonly palette: string;
@@ -504,6 +516,13 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     output: "Output",
     showWire: "Press to show the wire's name and value under the drawing.",
     scrollNote: "The drawing is wider than the screen. Scroll sideways to see the rest.",
+    overviewLabel: "Overview",
+    overviewName: "Drawing overview",
+    overviewValue: "Showing {from} to {to} percent of the drawing width",
+    zoomOut: "Make smaller",
+    zoomIn: "Make larger",
+    zoomNote:
+      "The drawing is wider than the screen. Press Make smaller to zoom out, move the frame in the overview, or scroll sideways; on a touch screen, pinch to zoom.",
   },
   builder: {
     palette: "Parts palette",

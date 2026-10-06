@@ -6,16 +6,17 @@
 // level in a label at its source, unknown wires are dashed, and the signal table beside the
 // drawing says the same in text.
 
-import { useId, useMemo, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useCallback, useId, useMemo, useState, type KeyboardEvent, type ReactNode } from "react";
 
 import { DrillDown, StateInspector, drillLevels } from "@dd/primitives";
 import { formatWord, type Circuit, type Word } from "@dd/sim";
 
+import { BOX_PADDING, OverviewStrip, useZoom } from "./Overview";
 import { labelFor, nameRepeatsKind } from "./parts";
 import { drawingAt, netOfWire, sceneOf, type PartBox } from "./scene";
 import { straighten } from "./straighten";
 import { GateSymbol, isShaped } from "./symbols";
-import { useOverflows } from "./useWidth";
+import { useOverflows, useWidth } from "./useWidth";
 import { useViewStrings } from "./strings";
 import { readingText } from "./WordInputs";
 
@@ -42,6 +43,11 @@ export interface CircuitViewProps {
    * the readout a press or a tap gives; every narrower value is written as before.
    */
   readonly writtenWidth?: number;
+  /**
+   * Module 8: when the drawing is wider than its box, the whole of it small above it, with a frame
+   * on the part on screen, and zoom (`Overview.tsx`). Tried first on one figure.
+   */
+  readonly overview?: boolean;
 }
 
 type Level = "high" | "low" | "unknown" | "none";
@@ -162,6 +168,7 @@ export function CircuitView({
   readings = [],
   children,
   writtenWidth,
+  overview = false,
 }: CircuitViewProps) {
   const written = (v: Word | undefined) =>
     v !== undefined && (writtenWidth === undefined || v.width <= writtenWidth);
@@ -181,6 +188,19 @@ export function CircuitView({
   const [pressed, setPressed] = useState<number | undefined>();
   const hot = hovered ?? pressed;
   const [scrollRef, overflows] = useOverflows<HTMLDivElement>();
+  // Module 8: the box's width, for a drawing too wide for it, which gets the strip and zoom.
+  const [widthRef, boxWidth] = useWidth<HTMLDivElement>(0);
+  const [box, setBox] = useState<HTMLDivElement | null>(null);
+  const boxRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      scrollRef(el);
+      widthRef(el);
+      setBox(el);
+    },
+    [scrollRef, widthRef],
+  );
+  const large = overview && boxWidth > 0 && scene.width > boxWidth - BOX_PADDING;
+  const zoom = useZoom(large ? box : null, scene.width, scene.height, boxWidth - BOX_PADDING);
   // The trail of opened blocks, each named by its instance name, or by its kind's label when the
   // name says no more (the `dff` block of the `dff` circuit). Two levels with one label collapse
   // into the deeper one, and the trail is drawn only when there is a block to open or to leave.
@@ -211,19 +231,33 @@ export function CircuitView({
           onGo={onScope}
         />
       )}
-      {overflows && <p className="scroll-note">{strings.circuit.scrollNote}</p>}
-      <div className="circuit-scroll" ref={scrollRef}>
+      {large && <OverviewStrip box={box} width={scene.width} height={scene.height} zoom={zoom} />}
+      {large ? (
+        <p className="scroll-note">{strings.circuit.zoomNote}</p>
+      ) : (
+        overflows && <p className="scroll-note">{strings.circuit.scrollNote}</p>
+      )}
+      <div className={`circuit-scroll${large ? " zoomable" : ""}`} ref={boxRef}>
         <svg
           className="circuit"
           viewBox={`0 0 ${scene.width} ${scene.height}`}
           role="img"
           aria-labelledby={`${id}-title`}
-          style={{
-            // At its own size, or up to a quarter larger where the panel has room; never smaller.
-            width: `min(100%, ${scene.width * 1.25}px)`,
-            minWidth: `${scene.width}px`,
-            height: "auto",
-          }}
+          style={
+            large
+              ? {
+                  // Zoomed by `--zoom` on its box, set without a render (`Overview.tsx`).
+                  width: `calc(var(--zoom, 1) * ${scene.width}px)`,
+                  height: `calc(var(--zoom, 1) * ${scene.height}px)`,
+                }
+              : {
+                  // At its own size, or up to a quarter larger where the panel has room; never
+                  // smaller.
+                  width: `min(100%, ${scene.width * 1.25}px)`,
+                  minWidth: `${scene.width}px`,
+                  height: "auto",
+                }
+          }
         >
           <title id={`${id}-title`}>{title}</title>
           <g className="wires">

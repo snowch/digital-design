@@ -41,8 +41,11 @@ function stringsIn(value: unknown): string[] {
   return [];
 }
 
-/** A word's forms: the stem followed by letters, so "latch" also catches "latches" and "latched". */
-function pattern(term: string): RegExp {
+/**
+ * A word's forms: the stem followed by letters, so "latch" also catches "latches" and "latched".
+ * Exported so a page that comes before every lesson (the course's cover) can be held to the gate.
+ */
+export function termPattern(term: string): RegExp {
   const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return new RegExp(`\\b${escaped}\\w*`, "i");
 }
@@ -63,7 +66,7 @@ export function termProblems(lessons: readonly Lesson[]): TermProblem[] {
       if (homeId === l.id) continue;
       if (exempt.has(term.toLowerCase())) continue;
       if ((position.get(l.id) ?? 0) >= (position.get(homeId) ?? 0)) continue;
-      const re = pattern(term);
+      const re = termPattern(term);
       for (const text of learnerText(l)) {
         const m = re.exec(text);
         if (m) {
