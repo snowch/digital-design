@@ -314,7 +314,7 @@ export const DatapathFigure = withProps(
           onToggleInput={toggle}
           scope={scope}
           table={false}
-          writtenWidth={8}
+          writtenWidth={4}
           {...(data.canOpen ? { onScope: setScope } : {})}
         />
         {status && (

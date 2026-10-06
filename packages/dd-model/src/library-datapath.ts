@@ -174,16 +174,16 @@ export const DATAPATH_ROUTES: Readonly<Record<Stage, Routes>> = {
     "pickLoad.Y>registers.D": [77, 33, 24.5],
     "memory.IR>digits.IR": [68.5, 33.5, 18],
     // The reset and the clock along the bottom to the memory and the register file.
-    "input:RST.y>memory.RST": [3.5, 34, 57],
-    "input:CLK.y>memory.CLK": [3, 34.5, 57.5],
-    "input:CLK.y>registers.CLK": [3, 34.5, 25.5],
+    "input:RST.y>memory.RST": [4, 34, 57],
+    "input:CLK.y>memory.CLK": [3.5, 34.5, 57.5],
+    "input:CLK.y>registers.CLK": [3.5, 34.5, 25.5],
   },
   full: {
     // The PC along the top: to the next-PC block, and down into the memory's fetch port.
     "pc.Q>memory.PC": [10.5, 5, 73],
     "pc.Q>next.PC": [10.5, 5, 56],
     // The next PC back along the bottom into the PC's D.
-    "next.NEXT>pc.D": [63, 38, 4],
+    "next.NEXT>pc.D": [63, 38, 5],
     // The job digit over the decoder to the branch condition.
     "digits.J>condition.J": [23, 5.5, 48.5],
     // The decoder's stop signals up to the stop logic, and its signals for the ALU's inputs.
@@ -229,9 +229,9 @@ export const DATAPATH_ROUTES: Readonly<Record<Stage, Routes>> = {
     "stops.GO>pc.EN": [91.5, 37, 4.5],
     "memory.IR>digits.IR": [81, 37.5, 18],
     // The reset and the clock along the bottom to the memory and the register file.
-    "input:RST.y>memory.RST": [3.5, 38.5, 66],
-    "input:CLK.y>memory.CLK": [3, 39, 66.5],
-    "input:CLK.y>registers.CLK": [3, 39, 25.5],
+    "input:RST.y>memory.RST": [4, 38.5, 66],
+    "input:CLK.y>memory.CLK": [3.5, 39, 66.5],
+    "input:CLK.y>registers.CLK": [3.5, 39, 25.5],
   },
 };
 

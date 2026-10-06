@@ -58,7 +58,11 @@ const DIGITS_VECTORS = [
 const h64 = (v: bigint) => `0x${BigInt.asUintN(64, v).toString(16).toUpperCase()}`;
 
 /** The register jobs' tests: R1 is -184 and R2 is -250 at the start. */
-const JOBS_STEPS: { label: string; set: Record<string, string | number>; expect: Record<string, string> }[] = [
+const JOBS_STEPS: {
+  label: string;
+  set: Record<string, string | number>;
+  expect: Record<string, string>;
+}[] = [
   {
     label: "R3 <= R1 - R2, WRITEY 1, clock low",
     set: { CLK: 0, IR: "0x13123000", WRITEY: 1 },
@@ -224,6 +228,7 @@ export const instructions: LessonInput = {
           { name: "C", width: 12 },
         ],
       },
+      tryIt: "pins",
       allowedConstructs: DIGITS_CONSTRUCTS,
       initial: { hdl: DIGITS_START },
       tests: { kind: "combinational", vectors: DIGITS_VECTORS },

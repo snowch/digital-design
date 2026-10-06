@@ -11,12 +11,7 @@ import type { LessonInput } from "@dd/lesson-schema";
 import { LABELS } from "./constants.labels";
 import { PROSE } from "./constants.prose";
 import { ROOMS } from "./instructions";
-import {
-  CONSTANTS_REFERENCE,
-  CONSTANTS_START,
-  WIDEN_REFERENCE,
-  WIDEN_START,
-} from "./module8";
+import { CONSTANTS_REFERENCE, CONSTANTS_START, WIDEN_REFERENCE, WIDEN_START } from "./module8";
 
 /** What the widening challenge may use: the digits challenge's constructs, with Module 7's. */
 const WIDEN_CONSTRUCTS = [
@@ -198,8 +193,16 @@ export const constants: LessonInput = {
             libraryId: "datapath-constants",
             registers: {},
             instructions: [
-              { label: LABELS.instructions.half, text: "R6 <= 1800", set: { WRITEY: 1, BCONST: 1 } },
-              { label: LABELS.instructions.double, text: "R6 <= R6 + R6", set: { WRITEY: 1, BCONST: 0 } },
+              {
+                label: LABELS.instructions.half,
+                text: "R6 <= 1800",
+                set: { WRITEY: 1, BCONST: 1 },
+              },
+              {
+                label: LABELS.instructions.double,
+                text: "R6 <= R6 + R6",
+                set: { WRITEY: 1, BCONST: 0 },
+              },
             ],
             shown: [6],
           },
@@ -233,6 +236,7 @@ export const constants: LessonInput = {
         inputs: [{ name: "C", width: 12 }],
         outputs: [{ name: "W", width: 64 }],
       },
+      tryIt: "pins",
       allowedConstructs: WIDEN_CONSTRUCTS,
       initial: { hdl: WIDEN_START },
       tests: { kind: "combinational", vectors: WIDEN_VECTORS },
