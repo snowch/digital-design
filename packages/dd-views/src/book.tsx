@@ -15,7 +15,14 @@ import {
   libraryCircuit,
   wordOf,
 } from "@dd/dd-model";
-import { elaborate, generate, machineModules, type Construct, type CourseModule } from "@dd/hdl";
+import {
+  elaborate,
+  generate,
+  machine9Modules,
+  machineModules,
+  type Construct,
+  type CourseModule,
+} from "@dd/hdl";
 import { limitCount, type Artifact, type Challenge, type Lesson } from "@dd/lesson-schema";
 import type { Book, ChallengeEditorProps, InteractiveProps, Verdict } from "@dd/lesson-runtime";
 import { bitAt, parseWord, runSuite, type Circuit } from "@dd/sim";
@@ -63,17 +70,23 @@ const MODULES = new WeakMap<Challenge, Record<string, CourseModule>>();
 
 export function modulesOption(challenge: Challenge): { modules?: Record<string, CourseModule> } {
   const given = challenge.courseModules;
-  if (!given || given.set !== "machine") return {};
+  // Module 9: "machine9" is the machine of several edges an instruction, whose memory has one
+  // port; "machine9-call" is the same with the capstone's call through a register, which the
+  // program is assembled with.
+  const sets = ["machine", "machine9", "machine9-call"];
+  if (!given || !sets.includes(given.set)) return {};
   let modules = MODULES.get(challenge);
   if (!modules) {
     const registers = Array.from({ length: 16 }, (_, k) => {
       const v = given.registers?.[`R${k}`];
       return v === undefined ? undefined : wordOf(v, 64).value;
     });
-    modules = machineModules({
-      ...(given.program !== undefined ? { rom: assemble(given.program).rom } : {}),
+    const assembly = given.set === "machine9-call" ? { callThroughRegister: 9 } : {};
+    const context = {
+      ...(given.program !== undefined ? { rom: assemble(given.program, assembly).rom } : {}),
       registers,
-    });
+    };
+    modules = given.set === "machine" ? machineModules(context) : machine9Modules(context);
     MODULES.set(challenge, modules);
   }
   return { modules };

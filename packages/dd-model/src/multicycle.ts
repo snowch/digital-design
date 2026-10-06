@@ -265,8 +265,11 @@ export function edgeStops(
   b: CircuitBuilder,
   ins: { CAUSEF: NetId; CAUSED: NetId; CAUSEM: NetId; STOP: NetId; CHECKING: NetId },
   outs: { HALT: NetId; CAUSE: NetId; GO: NetId },
+  scoped = true,
 ): void {
-  b.scope(
+  block(
+    b,
+    scoped,
     "stops",
     "stops",
     (bb) => {
