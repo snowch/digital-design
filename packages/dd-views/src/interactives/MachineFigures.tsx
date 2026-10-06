@@ -177,12 +177,6 @@ export const WideningFigure = withProps(
           chosen={chosen}
           onChoose={setChosen}
         />
-        <p className="wide-row-label">{t.constantRow}</p>
-        <ol className="wide-bits wide-c">
-          {Array.from({ length: 12 }, (_, i) => 11 - i).map((n) =>
-            cell(bit(BigInt(result.c), n), n, false, n === 11),
-          )}
-        </ol>
         <p className="wide-row-label">{t.wideRow}</p>
         {rows.map((hi) => (
           <div key={hi}>
@@ -194,6 +188,12 @@ export const WideningFigure = withProps(
             </ol>
           </div>
         ))}
+        <p className="wide-row-label">{t.constantRow}</p>
+        <ol className="wide-bits wide-c">
+          {Array.from({ length: 12 }, (_, i) => 11 - i).map((n) =>
+            cell(bit(BigInt(result.c), n), n, false, n === 11),
+          )}
+        </ol>
         <p className="wide-key">{t.copyKey}</p>
         <p role="status" className="wide-readings">
           {format(t.readings, { c: result.cSigned, w: result.wSigned.toString() })}
