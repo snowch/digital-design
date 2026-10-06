@@ -19,3 +19,9 @@ learner-facing sentence from a brief of checked facts.
   field in `WordInputs.tsx`; looked at in fetch's `checks-text` Try it at 1280 and 375 px:
   `7D8` sets PC and reads back as 2008, `7G8` is refused and the word keeps its value. Brief GT
   sent to the drafting subagent.
+- 16:21. GT came back. Faults, fixed by the fewest words: ranges written with a
+  hyphen, "0-9" and "A-F" (the style has no dashes: "0 to 9", "A to F"); the number field's
+  caption narrowed to "Signed number", though the field takes an unsigned reading too (now
+  "Number, read signed", the brief's words); single quotes round `{char}` (the course's double
+  quotes); `notNumber` dropped that the minus sign makes a negative number (added). The browser
+  tests (`tests/educational/try-it-words.spec.ts`) pass at both widths.
