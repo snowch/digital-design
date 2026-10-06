@@ -31,6 +31,23 @@ Each finding condensed, with its quotation. The screenshots the reviewers saw we
   would show where the constant sits.
 - 2-7. The figure opens on `064`, where every copy is 0, which looks like zero filling.
 
+## fetch (`edges`)
+
+- 3-1. "At edges 1 to 4, WREG is 1: each edge writes RESULT ... -184 into R1": with the cursor on a
+  rise, the table gives the values after it (opens on PC 004, RESULT -250); WREG falls at the
+  fourth rise. The value written is the one just left of the rise; nothing says so.
+- 3-2. "At edge 5": the figure numbers no edge; the slider says "Time 4" (simulator time), a
+  third count beside the margin figure's "step".
+- 3-3. "IR and RESULT change straight after it", "Between edges the values settle": the drawing
+  shows every lane changing at the rise; no settle is visible.
+- 3-4. "Arrows mark the clock's rises and falls": 5 up and 6 down; the first and last down
+  arrows match nothing drawn in CLK.
+- 3-5. Caption "Step through five edges ... one lane per bus": the slider moves by half periods;
+  CLK and WREG are not buses.
+- 3-6. Lead and after-text both open "The ... diagram shows five clock edges".
+- 3-7. Words only: BCONST/WRITEY/STOP per kind; the PC checks' address ranges; byte order.
+- 3-8. Phone opens on edges 1 and 2; the stop the after-text ends on is off-screen.
+
 ## memory-access (`map`)
 
 - 4-1. Lead: "A word at an address not aligned to 8 gives cause 33 in any part." False for no
