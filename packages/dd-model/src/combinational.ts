@@ -13,6 +13,7 @@
 
 import type { CircuitBuilder, NetId } from "@dd/sim";
 
+import { register } from "./register";
 import { byteMemoryPart, ram4, tableRom, wideRegister, wordRegister, wordSelector } from "./memory";
 
 /** Nets for a block's ports, by port name. */
@@ -425,6 +426,23 @@ export const BLOCKS: Readonly<Record<string, BlockDef>> = {
   "full-adder": def("full-adder", ["A", "B", "CIN"], ["SUM", "COUT"], fullAdder),
   "split-4": def("split-4", ["W"], ["b3", "b2", "b1", "b0"], split4, { W: 4 }),
   "join-4": def("join-4", ["b3", "b2", "b1", "b0"], ["W"], join4, { W: 4 }),
+  // Module 5: a 4-bit register with a reset and a load enable, as the registers lesson built it.
+  "register-4-reset-enable": def(
+    "register-4-reset-enable",
+    ["D", "CLK", "RST", "EN"],
+    ["Q"],
+    (b, ins, options = {}) => {
+      const q = register(b, need(ins, "D"), need(ins, "CLK"), {
+        name: options.name ?? "register",
+        width: 4,
+        reset: need(ins, "RST"),
+        enable: need(ins, "EN"),
+        ...(options.outs?.["Q"] !== undefined ? { q: options.outs["Q"] } : {}),
+      }).q;
+      return { Q: q };
+    },
+    { D: 4, Q: 4 },
+  ),
   // Module 6: the memory lessons' blocks (memory.ts). Each builder is called through an arrow, so
   // the import cycle between the two files is never followed while either is being loaded.
   // A register read back from a learner's drawing is a `register` composite, so the block is

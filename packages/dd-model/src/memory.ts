@@ -89,8 +89,11 @@ export function wordSelector(
 export function wordRegister(b: CircuitBuilder, ins: PortNets, options: BlockOptions = {}) {
   const d = need(ins, "D");
   const q = options.outs?.["Q"] ?? b.net("Q", b.widthOf(d));
+  // The same block serves a register read back from a drawing (Module 5's), which keeps the
+  // reset and the enable it was built with: each is wired only if the drawing gives it.
   register(b, d, need(ins, "CLK"), {
-    enable: need(ins, "EN"),
+    ...(ins["EN"] !== undefined ? { enable: ins["EN"] } : {}),
+    ...(ins["RST"] !== undefined ? { reset: ins["RST"] } : {}),
     name: options.name ?? "register",
     q,
   });

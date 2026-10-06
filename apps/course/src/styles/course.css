@@ -1576,3 +1576,98 @@ button.bit {
   stroke: var(--fg);
   stroke-width: 1.5;
 }
+
+/* Module 5: the state-machine figure. The diagram is drawn one unit per pixel, as the circuit
+   drawings are, so its 12-pixel words keep their size; on a phone it scrolls sideways. */
+.state-diagram-wrap {
+  overflow-x: auto;
+  max-width: 100%;
+  background: var(--canvas);
+  border-radius: var(--radius);
+  margin: var(--space-3) 0;
+}
+.state-diagram {
+  display: block;
+  margin: 0 auto;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.state-diagram text {
+  fill: var(--fg);
+}
+.state-node rect {
+  fill: var(--gate-fill);
+  stroke: var(--gate-stroke);
+  stroke-width: 2;
+}
+.state-node-current rect {
+  fill: var(--accent-soft);
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+.state-name {
+  font-weight: 700;
+}
+.state-code {
+  fill: var(--fg-muted);
+}
+.state-arrow line,
+.state-arrow path {
+  stroke: var(--wire);
+  stroke-width: 2;
+}
+.state-arrowhead {
+  fill: var(--wire);
+}
+.state-arrow-next line,
+.state-arrow-next path {
+  stroke: var(--focus);
+  stroke-width: 3;
+}
+.state-arrow-next .state-arrow-label {
+  fill: var(--focus);
+  font-weight: 700;
+}
+.machine-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+.machine-input-button {
+  font-family: var(--font-mono);
+}
+.machine-input-button.on {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+.machine-status {
+  font-weight: 600;
+}
+.machine-table .machine-row-state {
+  background: var(--bg-sunken);
+}
+.machine-table .machine-input {
+  font-family: var(--font-mono);
+  text-align: center;
+}
+.machine-table-note {
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
+  margin-top: 0;
+}
+.machine-text {
+  overflow-x: auto;
+}
+
+/* Module 5: a state machine's diagnosis names long paths inside its register; they wrap on a
+   phone instead of widening the page, and each path stands apart from the next. */
+.verdict-cone code {
+  display: inline-block;
+  margin-right: 0.4em;
+  overflow-wrap: anywhere;
+}
+.verdict-failure .values,
+.verdict-values dd {
+  overflow-wrap: anywhere;
+}

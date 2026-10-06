@@ -77,6 +77,28 @@ const COMPOSITE_LABELS: Readonly<Record<string, string>> = {
   "columns-alone": "half adder columns",
   "full-adder-parts": "full adder internals",
   "addsub-4": "4-bit add/subtract",
+  // Module 5: parts and the circuits named in the trail above their drawings. Drafted by the
+  // prose process (brief V, docs/notes/module-5-state-machines/briefs/V.md).
+  "register-4-reset-enable": "4-bit register",
+  "add-one": "add one",
+  "next-state-logic": "next-state logic",
+  "output-logic": "output logic",
+  "split-2": "split",
+  "split-3": "split",
+  "join-2": "join",
+  "join-3": "join",
+  "counter-4": "4-bit count",
+  "counter-to-5": "Counter to 5",
+  "add-one-4": "Add one",
+  "now-prev": "NOW and PREV",
+  "now-prev-once": "Save once per press",
+  swap: "Swap values",
+  retry: "Retry controller",
+  "retry-try-zero": "Retry controller with TRY at 00",
+  "retry-one-hot": "Retry controller, one flip-flop per state",
+  "retry-zero-idle": "Retry controller, one flip-flop per state, IDLE at 000",
+  "retry-late-ok": "Retry controller with late OK",
+  defrost: "Defrost controller",
   // Module 6: the memory lessons' blocks. Drafted by the prose process
   // (docs/notes/module-6-memory.md).
   "word-selector-2": "word selector",
@@ -121,6 +143,9 @@ const COMPOSITE_DESCRIPTIONS: Readonly<Record<string, string>> = {
   "full-adder": "Adds A, B and CIN: SUM is the total's low bit, COUT its high bit.",
   "split-4": "Splits the 4-bit word W into its bits b3 (top) to b0.",
   "join-4": "Joins the bits b3 (top) to b0 into the 4-bit word W.",
+  // Module 5. Drafted by the prose process (brief V).
+  "register-4-reset-enable":
+    "Four D flip-flops sharing one clock; at an edge where RST is 1, Q becomes 0000; otherwise where EN is 1, Q takes D.",
   // Module 6. Drafted by the prose process.
   register: "Copies D to Q at a rising edge of CLK while EN is 1; keeps its word while EN is 0.",
   "word-selector-2": "Y is the word on A while S is 0 and the word on B while S is 1.",

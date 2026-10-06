@@ -20,6 +20,7 @@ import {
   HdlError,
   type Assignment,
   type Expression,
+  type EnumType,
   type Identifier,
   type Literal,
   type Message,
@@ -90,6 +91,9 @@ class Elaborator {
   private readonly b: CircuitBuilder;
   private readonly signals = new Map<string, Signal>();
   private readonly params = new Map<string, bigint>();
+  /** Module 5: each enumerated type's width, and each of its names with its value. */
+  private readonly enumTypes = new Map<string, number>();
+  private readonly enumConsts = new Map<string, { value: bigint; width: number }>();
   private readonly driven = new Map<NetId, Position>();
   private readonly warnings: Message[] = [];
   private readonly g: { delay?: number };
@@ -116,8 +120,14 @@ class Elaborator {
       if (port.direction === "input") this.driven.set(net, port.at);
       this.signals.set(port.name, { net, width, role: port.direction, at: port.at });
     }
+    for (const e of m.enums ?? []) this.enumType(e);
     for (const d of m.declarations) {
-      const width = d.range ? this.rangeWidth(d.range, d.at) : 1;
+      const width =
+        d.type !== undefined
+          ? (this.enumTypes.get(d.type) as number)
+          : d.range
+            ? this.rangeWidth(d.range, d.at)
+            : 1;
       if (this.signals.has(d.name) || this.arrays.has(d.name))
         throw new HdlError(d.at, `${d.name} is declared twice`);
       if (d.array) {
@@ -239,6 +249,39 @@ class Elaborator {
       });
   }
 
+  /** Module 5: an enumerated type's names become constants of the type's width. */
+  private enumType(e: EnumType): void {
+    if (!e.range)
+      throw new HdlError(
+        e.at,
+        `give the list a width, such as \`typedef enum logic [1:0] {...} ${e.name};\``,
+      );
+    const width = this.rangeWidth(e.range, e.at);
+    if (this.enumTypes.has(e.name)) throw new HdlError(e.at, `${e.name} is declared twice`);
+    this.enumTypes.set(e.name, width);
+    let next = 0n;
+    const seen = new Map<bigint, string>();
+    for (const member of e.members) {
+      if (this.enumConsts.has(member.name) || this.signals.has(member.name))
+        throw new HdlError(member.at, `${member.name} is declared twice`);
+      const value = member.value !== undefined ? this.constant(member.value) : next;
+      if (
+        member.value?.kind === "literal" &&
+        member.value.width !== undefined &&
+        member.value.width !== width
+      )
+        this.widthMismatch(member.value.at, member.value.width, width);
+      if (value < 0n || value >= 1n << BigInt(width))
+        throw new HdlError(member.at, `${member.name}'s value does not fit in ${width} bits`);
+      const earlier = seen.get(value);
+      if (earlier !== undefined)
+        throw new HdlError(member.at, `${member.name} has the same value as ${earlier}`);
+      seen.set(value, member.name);
+      this.enumConsts.set(member.name, { value, width });
+      next = value + 1n;
+    }
+  }
+
   private readonly used = new Map<string, number>();
 
   /** A part name not used before in this module: two selectors for one signal are two parts. */
@@ -341,9 +384,16 @@ class Elaborator {
         if (s.defaultArm) this.exec(s.defaultArm, fallEnv, operator, held);
         for (let i = s.arms.length - 1; i >= 0; i--) {
           const arm = s.arms[i] as (typeof s.arms)[number];
-          const matches = arm.labels.map((label) =>
-            this.equal(subject, this.expression(label, subjectWidth), subjectWidth),
-          );
+          const matches = arm.labels.map((label) => {
+            const value = this.expression(label, subjectWidth);
+            // Module 5: a label of the wrong width is the learner's to be told about, with its line.
+            if (this.b.widthOf(value) !== subjectWidth)
+              throw new HdlError(
+                label.at,
+                `this label is ${this.b.widthOf(value)} bit${this.b.widthOf(value) === 1 ? "" : "s"} wide but the case compares a ${subjectWidth}-bit value`,
+              );
+            return this.equal(subject, value, subjectWidth);
+          });
           const cond = matches.length === 1 ? (matches[0] as NetId) : this.b.or(matches, this.g);
           const armEnv = new Map(env);
           this.exec(arm.body, armEnv, operator, held);
@@ -439,6 +489,8 @@ class Elaborator {
             e.at,
             `${e.name} is a memory; read one word by its address, like \`${e.name}[A]\`.`,
           );
+        const named = this.enumConsts.get(e.name);
+        if (named) return this.constant_(named.value, 0n, named.width, e.at, output);
         const s = this.signals.get(e.name);
         if (!s) throw new HdlError(e.at, `${e.name} is not declared`);
         if (output !== undefined) {
@@ -635,6 +687,7 @@ class Elaborator {
   private widthOf(e: Expression): number | undefined {
     switch (e.kind) {
       case "identifier":
+        if (this.enumConsts.has(e.name)) return this.enumConsts.get(e.name)?.width;
         return this.params.has(e.name) ? undefined : this.signals.get(e.name)?.width;
       case "literal":
         return e.width;
@@ -673,6 +726,8 @@ class Elaborator {
       case "literal":
         return e.value;
       case "identifier": {
+        const named = this.enumConsts.get(e.name);
+        if (named) return named.value;
         const p = this.params.get(e.name);
         if (p === undefined)
           throw new HdlError(

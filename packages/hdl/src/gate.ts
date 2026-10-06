@@ -27,6 +27,8 @@ export type Construct =
   | "if"
   | "case"
   | "op-arith"
+  // Module 5: an enumerated type, such as a state machine's states.
+  | "enum"
   // Module 6: a memory written as an array, and filled from a list of values.
   | "array"
   | "array-init";
@@ -49,6 +51,8 @@ export const ALL_CONSTRUCTS: readonly Construct[] = [
   "if",
   "case",
   "op-arith",
+  // Module 5
+  "enum",
   // Module 6
   "array",
   "array-init",
@@ -73,7 +77,8 @@ const EXPLAIN: Record<Construct, string> = {
   if: "`if` and `else`",
   case: "`case`",
   "op-arith": "arithmetic with `+` and `-`",
-  // Module 6
+  // Module 5
+  enum: "a list of names declared with `typedef enum`",
   // Module 6: drafted by the prose process (docs/notes/module-6-memory.md).
   array: "arrays to declare memories, like `logic [7:0] mem [0:15]`",
   "array-init": "array initialisation like `= '{...}`",
@@ -89,6 +94,8 @@ const INSTEAD: Partial<Record<Construct, string>> = {
   concat: "use one-bit signals",
   select: "use one-bit signals",
   "op-arith": "write the gates out; adders come in a later module",
+  // Module 5
+  enum: "write each value as a number, such as `2'b01`",
   // Module 6
   "array-init": "write every word with `always_ff`",
 };
@@ -105,6 +112,8 @@ export function constructsUsed(module: Module): Construct[] {
   if (module.ports.length) add("ports");
   if (module.ports.some((p) => p.range)) add("vector");
   if (module.parameters.length) add("parameter");
+  // Module 5
+  if (module.enums?.length) add("enum");
   for (const d of module.declarations) {
     add("logic");
     if (d.range) add("vector");

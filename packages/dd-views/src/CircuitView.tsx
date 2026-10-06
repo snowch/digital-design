@@ -87,6 +87,11 @@ function constText(circuit: Circuit, path: string): string {
 const SEALED = new Set([
   "split-4",
   "join-4",
+  // Module 5: the state machines' words of two and three bits.
+  "split-2",
+  "split-3",
+  "join-2",
+  "join-3",
   // Module 6: a word selector holds one Module 3 selector per bit, and a memory or a ROM built as
   // a component holds only the simulator's primitive; a 16-bit register's sixteen flip-flops
   // teach nothing the four-bit register did not.

@@ -263,6 +263,8 @@ export interface ViewStrings {
     /** The accessible name of the row of bits. */
     readonly row: string;
   };
+  // Module 5
+  readonly machine: MachineStrings;
   readonly answers: {
     readonly terms: Readonly<Record<string, string>>;
     readonly unanswered: string;
@@ -290,6 +292,41 @@ export interface ViewStrings {
     /** In the row of the part the address names now. */
     readonly chosen: string;
   };
+}
+
+/** Module 5: the state-machine figure's words. */
+export interface MachineStrings {
+  /** One input's value in a condition: {name} {value}. */
+  readonly literal: string;
+  /** A row that needs no input. */
+  readonly always: string;
+  /** Between two rows' conditions on one arrow. */
+  readonly or: string;
+  /** What a screen reader is told of the diagram: {states}. */
+  readonly diagramLabel: string;
+  readonly tableCaption: string;
+  readonly row: string;
+  readonly state: string;
+  readonly next: string;
+  /** In an input's column: the row does not read this input. */
+  readonly any: string;
+  readonly anyNote: string;
+  readonly inputsLabel: string;
+  /** An input's button: {name} = {value}. */
+  readonly inputButton: string;
+  /** The status line: {state} {code} now, row {row} applies, {next} {nextCode} at the next edge. */
+  readonly status: string;
+  /** The status line with no table on show, so no row to name: {state} {code}, {next} {nextCode}. */
+  readonly statusNoTable: string;
+  /** The status line while RST is 1. */
+  readonly resetting: string;
+  /** The status line when the register holds no state's code: {code}. */
+  readonly noState: string;
+  /** In place of a state's name, for a code no state has. */
+  readonly noName: string;
+  readonly circuitTitle: string;
+  readonly traceTitle: string;
+  readonly textLabel: string;
 }
 
 export const DEFAULT_VIEW_STRINGS: ViewStrings = {
@@ -562,6 +599,30 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     part: "Part",
     range: "{first} to {last}",
     chosen: "Chosen",
+  },
+  // Module 5: the state-machine figure. Drafted by the prose process (brief V,
+  // docs/notes/module-5-state-machines/briefs/V.md).
+  machine: {
+    literal: "{name} {value}",
+    always: "always",
+    or: "or",
+    diagramLabel: "State diagram with the states {states}",
+    tableCaption: "Encoded state table",
+    row: "Row",
+    state: "State",
+    next: "Next state",
+    any: "–",
+    anyNote: "A dash means the row does not read that input.",
+    inputsLabel: "Inputs",
+    inputButton: "{name} = {value}",
+    status: "Now {state} ({code}). Row {row} applies: the next edge gives {next} ({nextCode}).",
+    statusNoTable: "Now {state} ({code}). The next edge gives {next} ({nextCode}).",
+    resetting: "Now {state} ({code}). RST is 1: the next edge gives {next} ({nextCode}).",
+    noState: "The register stores {code}, which is no state's code.",
+    noName: "No state",
+    circuitTitle: "Circuit diagram",
+    traceTitle: "Timing diagram",
+    textLabel: "SystemVerilog text",
   },
 };
 

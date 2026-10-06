@@ -22,6 +22,8 @@ import { InputPairs } from "./InputPairs";
 // Scenes and sums on paper, for any lesson
 import { ColumnSum } from "./ColumnSum";
 import { SceneFigure } from "./SceneFigure";
+// Module 5: a state machine shown as diagram, table, circuit, trace and text at once.
+import { StateMachine } from "./StateMachine";
 // Module 6
 import { MemoryExplorer } from "./MemoryExplorer";
 
@@ -45,6 +47,8 @@ export const INTERACTIVES: Readonly<Record<string, ComponentType<InteractiveProp
   // Scenes and sums on paper, for any lesson
   scene: SceneFigure,
   "column-sum": ColumnSum,
+  // Module 5
+  "state-machine": StateMachine,
   // Module 6
   "memory-explorer": MemoryExplorer,
 };
@@ -73,3 +77,4 @@ export { experiment, type Draw } from "./SetupHold";
 export { runScript, outputsPerStep, Step } from "./script";
 export { toFault } from "./FaultLab";
 export { answerOf } from "./ReadingPrediction";
+export { StateMachine, StateDiagram, MachineTable, conditionText } from "./StateMachine";
