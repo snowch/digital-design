@@ -274,6 +274,23 @@ export interface ViewStrings {
     readonly heading: string;
     /** The accessible name of the row of bits. */
     readonly row: string;
+    /** A word wider than 16 bits, typed. The fields' accessible names: {name}. */
+    readonly hexLabel: string;
+    readonly numberLabel: string;
+    /** The fields' visible captions. */
+    readonly hexCaption: string;
+    readonly numberCaption: string;
+    /** The button that takes what was typed, and its accessible name: {name}. */
+    readonly set: string;
+    readonly setLabel: string;
+    /** What is wrong with a typed word: {char}; {name}, {width}, {digits}; {min}, {max}. */
+    readonly empty: string;
+    readonly notHex: string;
+    readonly hexTooLong: string;
+    readonly notNumber: string;
+    readonly numberRange: string;
+    /** The folded row of the word's bits: {name}. */
+    readonly bitsSummary: string;
   };
   // Module 5
   readonly machine: MachineStrings;
@@ -815,6 +832,19 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
   words: {
     heading: "Input {name}",
     row: "The bits of input {name}. Press a bit to change it.",
+    hexLabel: "{name} in hexadecimal",
+    numberLabel: "{name} as a number, read signed",
+    hexCaption: "Hexadecimal",
+    numberCaption: "Number, read signed",
+    set: "Set",
+    setLabel: "Set {name}",
+    empty: "Enter a value.",
+    notHex: '"{char}" is not a hexadecimal digit; use 0 to 9 and A to F.',
+    hexTooLong: "{name} is {width} bits, at most {digits} hexadecimal digits.",
+    notNumber:
+      '"{char}" is not part of a number. Type the digits 0 to 9, with a minus sign in front for a negative number.',
+    numberRange: "{name} is {width} bits, so a number from {min} to {max}.",
+    bitsSummary: "{name}'s bits, one at a time",
   },
   // Module 7: drafted by the prose process (docs/notes/module-7-alu.md)
   carrySteps: {
