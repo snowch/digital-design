@@ -485,7 +485,7 @@ export const TIME_MODEL_NOTES: Book["timeModelNotes"] = {
   settle:
     "Every gate takes one step. After you change an input, the circuit is recomputed step by step until nothing changes. A signal that keeps changing is shown as X. Nothing here is real time.",
   clocked:
-    'Inputs change only while CLK is 0. Pressing "Clock CLK" raises CLK and then lowers it. The circuit settles before each rising edge, after it, and after CLK falls.',
+    'In figures marked "Clocked", you change an input only while CLK is 0. Pressing "Clock CLK" raises CLK and then lowers it. The circuit settles before each rising edge, after it, and after CLK falls. A challenge\'s tests work differently: they set CLK themselves, step by step, and some steps change an input while CLK is 1.',
   delay:
     "Each gate has its own propagation delay. Changes are worked through in time order. Two changes can race, and which arrives first decides the result. This is the model in which setup and hold times can be seen.",
 };
