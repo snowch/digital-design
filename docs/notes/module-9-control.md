@@ -392,22 +392,24 @@ circuits. Four places were corrected:
 In the draft from brief M1, "still" was dropped from the reflection and "those tests" became "the
 tests"; both were put back.
 
-A look at the built pages on a phone found one more: 9.3's controller figure opened on XXX, a
-state register nothing had reset, while its lead says to set the decoder's signals and press
-Clock CLK, which from XXX moves nothing. It now starts after a reset, in FETCH, as Module 5's
-machines start in theirs, and a facts test runs the figure's own start (`figureSim`, exported for
-it) and requires FETCH; without the reset, the test fails. And Module 8's "Written" mark, which reads
-the register file's write enable and address, looked the file up at the top level, where Module 9's
-machine does not hold it, so a register given the word it already held went unmarked (R15 at each
-pass of 9.5's orJump fault). It now finds the file by its kind, and a browser test runs that fault
-to its second pass.
-
 The managing session's check, which renders text as CI does, passed the ten screenshot tests the
 building session's container failed, and failed one test that container could not see: on a
-phone, 9.3's state table for the
-controller was 4 pixels wider than its box, so its last column, the next state, scrolled out of
-view. The phone rule that narrows the gaps of a table marking the row the next edge applies now
-covers the state table too; Module 5's state tables, which fit before, keep their screenshot.
+phone, 9.3's state table for the controller was 4 pixels wider than its box, so its last column,
+the next state, scrolled out of view. The phone rule that narrows the gaps of a table marking the
+row the next edge applies now covers the state table too; Module 5's state tables, which fit
+before, keep their screenshot.
+
+A look at the built pages on a phone found one more fault: 9.3's controller figure opened on XXX,
+a state register nothing had reset, while its lead says to set the decoder's signals and press
+Clock CLK, which from XXX moves nothing. It now starts after a reset, in FETCH, as Module 5's
+machines start in theirs, and a facts test runs the figure's own start (`figureSim`, exported for
+it) and requires FETCH; without the reset, the test fails.
+
+Reading the code the two merges join found another: Module 8's "Written" mark, which reads the
+register file's write enable and address, looked the file up at the top level, where Module 9's
+machine does not hold it, so a register given the word it already held went unmarked (R15 at each
+pass of 9.5's orJump fault). It now finds the file by its kind, and a browser test runs that fault
+to its second pass; without the change, the test fails.
 
 Module 8's learner pass (`docs/notes/module-8-learner.md`) finished at 13:43 on its own branch,
 and was merged into `main` first, then this branch on top. Module 9's figures take its patterns,

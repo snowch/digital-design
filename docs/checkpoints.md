@@ -1,7 +1,8 @@
 # Checkpoints
 
 The reports written for the author at each checkpoint of Prompt A, kept so Prompt B can read
-what was decided and why.
+what was decided and why, and from the course plan's third checkpoint on, the plan's own
+(`docs/plan.md`; its second checkpoint is recorded there, as a decision).
 
 ## Checkpoint 1: the inventory
 
@@ -197,3 +198,119 @@ lesson by both models, was not run.
 **The fix queue.** Every upheld finding on either lesson is work: code first, then fact briefs
 per finding to the drafting subagent, then the whole lesson read once more. The eight code
 defects are listed at the end of `docs/notes/comparison/verdicts-1.md`.
+
+## Course checkpoint 3: one instruction added to the CPU end to end
+
+The plan's third checkpoint (`docs/plan.md`, "When a module is done, and the checkpoints") comes
+after Module 9, once one instruction has been added to the CPU end to end. The managing session
+wrote this report on 6 October 2026, after merging Module 9.
+
+### What exists since checkpoint 2
+
+Checkpoint 2 approved `docs/machine.md` and `docs/isa.md` at 04:33 UTC. Since then:
+
+- **Module 8, the datapath** (`instructions`, `constants`, `fetch`, `memory-access`, `branches`):
+  the course machine running one instruction an edge, built from the learner's own parts, with
+  figures for an instruction's fields, a constant's widening, events across edges, the memory map
+  and a program's branches.
+- **A pass over Module 8 for its learner.** A walker drove each lesson's built page as a learner
+  does, at both widths and in the dark theme, and a sceptic attacked each of the 73 findings
+  (`docs/notes/module-8-learner.md`). Most fixes are in code every module shares: no prediction
+  answered before the learner commits, results and fault outcomes shown only after the run that
+  makes them, a long run that redraws instead of freezing the page, failed tests reported in
+  hexadecimal, and a stuck value drawn on its wire.
+- **Module 9, control** (`control-signals`, `illegal-instructions`, `several-edges`,
+  `micro-operations`, `new-instruction`): the decoder opened, its checks, and a second machine
+  that runs the same instructions over several edges each, with one memory port, an instruction
+  register, four held words and a controller built as Module 5's state machine. It matches the
+  reference after every instruction of Module 8's 37 programs, drawn and as text.
+- **The platform**: six shared primitives in `packages/primitives` (`docs/platform.md`); a cover
+  at the top of the front page with every module of the plan; wires routed by hand kept inside
+  their drawing; and, on every drawing at least 1,000 pixels wide that does not fit its box, a
+  strip with the whole drawing small and a zoom from half to twice its size, by two fingers, a
+  trackpad's pinch or two buttons (`docs/notes/overview-strip.md`).
+- **A decision**: the course's calculator is designed once, in Module 10's encoding explorer, from
+  the learner's ALU (`docs/plan.md`).
+
+The course has 32 lessons in Modules 1 to 9. Module 0 is still to be written.
+
+### The instruction added end to end
+
+The capstone is `docs/isa.md`'s call through a register, `RY ← PC + 4` and `PC ← RA + c`, at
+kind 9, job 0, in the learner's own copy of the machine's text. `docs/isa.md` does not change, and
+the course's machine still refuses kind 9 with cause `21`, so kinds 9 to F stay free for Module 10.
+What changed, and how each change is tested (`docs/notes/module-9-control.md`, "The capstone"):
+
+| Part | Change | Tested by |
+| --- | --- | --- |
+| The decoder, drawn | a line for kind 9; CALL and JUMP become OR gates of two lines; kind 9 joins WRITEY, BCONST and OP1; the kind and job checks learn kind 9 | against the reference, every kind and job under ten constants |
+| The decoder, as text | one `case` arm and two terms of ILLEGAL | the capstone's first challenge: 263 tests, its start fails 17 |
+| The controller | none: the instruction sets CALL, so it takes a call's three edges | a walk of the controller's table for every kind |
+| The datapath | none: "word for Y" already gives PC + 4 for CALL, and the next PC already takes the ALU's result for JUMP | the machine end to end, below |
+| The whole machine | the decoder above, inside it | the drawn machine and its text against the reference after every instruction of Module 8's 37 programs and a program of two such calls; the capstone's second challenge, 23 tests, run edge by edge |
+
+The plan recommended this instruction because it needs only new control. It turned out to need
+less: the build first gave it an edge of its own at the ALU, then found that edge wrote a held
+word nothing read, and took the call's three edges instead.
+
+### What the managing session checked before merging
+
+- **The words.** The five Module 9 lessons, read as their learner against the decoder, the
+  controller, the machine and `docs/isa.md`. Every number the prose states is pinned by a facts
+  test; four places were corrected (`docs/notes/module-9-control.md`, "The managing session's read
+  and merge"). The new words of Module 8's pass were read against the machine too.
+- **The order.** Module 8's pass was merged first and Module 9 on top, and Module 9's figures and
+  challenges took the pass's patterns, so a learner meets the same behaviour in both modules.
+- **The check.** The full check on the merged head, in a container that renders text as CI does:
+  869 unit and integration tests and 556 browser tests passed, 34 were skipped, and none failed.
+  It found one fault Module 9's own container could not see, a state table 4 pixels
+  wider than a phone, now fixed. A look at the built pages, and at the code the two merges join,
+  found two more that no test drove: lesson 9.3's controller figure opened on an unknown state,
+  where its first step moved nothing, and the register table's "Written" missed a register given
+  the word it already held. Both are fixed, and a test holds each.
+- **CI and the deploy on `main`**: the same check runs in CI on every push, and the site deploys
+  from `main`.
+
+### What the author should look at
+
+1. The five Module 9 lessons on the site, as a learner:
+   <https://snowch.github.io/digital-design/#/lesson/control-signals>, then `illegal-instructions`,
+   `several-edges`, `micro-operations` and `new-instruction`. Lesson 9.3 carries the most new
+   ideas at once; lesson 9.5 is the checkpoint's instruction.
+2. Four questions Module 9 leaves for you, each with a recommendation:
+   - **The door between instructions.** The machine of several edges samples the door only at an
+     instruction's last edge, as the timer counts, so both machines see the same door at the same
+     instruction; a door opened and closed within one instruction's three to five edges raises no
+     event. Recommendation: keep it, and say so in `docs/machine.md`'s line on the door.
+   - **The capstone's size**: a decoder column and two terms of its checks. Recommendation: keep
+     it. The lesson's point is that a new instruction can need four things (a column, a place in
+     the checks, its states, new parts) and this one needed two; "set if less", the alternative,
+     needs a new source for register Y, which is datapath work.
+   - **The capstone's second challenge** repeats the first's decoder edits inside the whole
+     machine's text. Recommendation: keep it as the end-to-end run, which is what this checkpoint
+     asks for, and later let a challenge start from the learner's own answer to an earlier one.
+   - **The decoder's insides** are laid out automatically and are dense; lesson 9.2 asks you to
+     open its checks. Recommendation: place them by hand before Module 10.
+3. A rule of yours, changed with the zoom: on the page as it loads, no text is under 11 pixels, as
+   before, but a drawing you zoom out shows its words smaller, down to 0.6 of their size, then
+   hides them. The alternative is to stop the zoom where words reach 11 pixels.
+4. The zoom on a real phone. Two-finger zoom is tested through Chromium's touch input; Safari on
+   iOS is not tested.
+
+### Costs and known gaps
+
+- The full check takes about 22 minutes, against 18 to 19 this morning. Module 9's
+  machine runs Module 8's suite through its drawing and its text; running a third of the suite
+  through the text would win back some of it.
+- The fault labs of every module still show every fault's outcome after the first run; Module 8's
+  pass gave the datapath figures one outcome per fault, and the same change would serve the fault
+  labs.
+- A 64-bit word in "Try it" is still entered as 64 separate bit buttons, in every module.
+- Eleven branches from finished work, all merged into `main`, remain on GitHub for you to delete
+  if you want them gone; the managing session cannot delete a branch.
+
+### What comes next
+
+Module 10, the instruction set: why the instruction set is as it is, with the encoding explorer
+and the course's calculator built from the learner's ALU. Then Module 11, the assembler and the
+debugger, and checkpoint 4.
