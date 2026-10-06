@@ -179,8 +179,9 @@ export const memoryMap: LessonInput = {
           timeModel: "clocked",
           caption: LABELS.captions.faults,
           lead: PROSE.faultsLead,
-          after: PROSE.faultsAfter,
           props: {
+            // Shown once the checks have run, so the lead's prediction is not answered first.
+            outcomes: PROSE.faultsAfter,
             libraryId: "shop-memory-block",
             scope: "shop",
             initial: { SENSOR, WORD: 1 },

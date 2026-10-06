@@ -172,8 +172,9 @@ export const remember: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.faultLab,
           lead: PROSE.faultLabLead,
-          after: PROSE.faultLabAfter,
           props: {
+            // Shown once the checks have run, so the lead's prediction is not answered first.
+            outcomes: PROSE.faultLabAfter,
             libraryId: "two-buttons",
             faults: [
               { kind: "broken-wire", net: "DARK", label: LABELS.faults.cut },

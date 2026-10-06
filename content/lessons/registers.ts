@@ -188,8 +188,9 @@ export const registers: LessonInput = {
           timeModel: "clocked",
           caption: LABELS.captions.keepFaults,
           lead: PROSE.keepFaultsLead,
-          after: PROSE.keepFaultsAfter,
           props: {
+            // Shown once the checks have run, so the lead's prediction is not answered first.
+            outcomes: PROSE.keepFaultsAfter,
             libraryId: "keep-bit",
             faults: [
               { kind: "stuck-at", net: "KEEP", value: 0, label: LABELS.faults.keepCut },

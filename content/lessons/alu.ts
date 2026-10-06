@@ -169,8 +169,9 @@ export const alu: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.addsubFaults,
           lead: PROSE.addsubFaultsLead,
-          after: PROSE.addsubFaultsAfter,
           props: {
+            // Shown once the checks have run, so the lead's prediction is not answered first.
+            outcomes: PROSE.addsubFaultsAfter,
             libraryId: "addsub-4",
             faults: [
               { kind: "stuck-at", net: "C0", value: 0, label: LABELS.faults.c0Low },

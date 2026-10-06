@@ -179,8 +179,9 @@ export const adders: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.fullAdderFaults,
           lead: PROSE.fullAdderFaultsLead,
-          after: PROSE.fullAdderFaultsAfter,
           props: {
+            // Shown once the checks have run, so the lead's prediction is not answered first.
+            outcomes: PROSE.fullAdderFaultsAfter,
             libraryId: "full-adder-parts",
             faults: [
               { kind: "wrong-gate", path: "orCarry", gate: "xor", label: LABELS.faults.orToXor },

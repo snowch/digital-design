@@ -182,8 +182,9 @@ export const selectors: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.selectorFaults,
           lead: PROSE.selectorFaultsLead,
-          after: PROSE.selectorFaultsAfter,
           props: {
+            // Shown once the checks have run, so the lead's prediction is not answered first.
+            outcomes: PROSE.selectorFaultsAfter,
             libraryId: "selector-2-gates",
             faults: [
               { kind: "wrong-gate", path: "notS", gate: "buf", label: LABELS.faults.noNot },

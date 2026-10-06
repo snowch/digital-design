@@ -150,8 +150,9 @@ export const decoders: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.decoderFaults,
           lead: PROSE.decoderFaultsLead,
-          after: PROSE.decoderFaultsAfter,
           props: {
+            // Shown once the checks have run, so the lead's prediction is not answered first.
+            outcomes: PROSE.decoderFaultsAfter,
             libraryId: "decoder-gates",
             faults: [
               { kind: "stuck-at", net: "NS0", value: 1, label: LABELS.faults.ns0High },
