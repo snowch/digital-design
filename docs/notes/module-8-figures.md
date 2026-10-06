@@ -98,3 +98,20 @@ The managing session's audit listed seven places. Read as each page's learner:
 - 12:14. GW came back. `copyKey` dropped "Bit 11 is outlined" (added); `arrowsLabel` dropped
   "when that was not the next line" (added) and used single quotes (now double). The rest stands:
   "Memory map", "Program flow", "Transfer".
+- 12:20. GC came back. Faults, fixed by adding the fewest words:
+  - `instructions/fieldsLead` dropped "where that says more than the digits" and the four
+    instructions to choose from;
+  - `constants/wideningLead` dropped "of 16 bits" and "in both"; "Gaps every four bits show
+    hexadecimal" became "group them into hexadecimal digits";
+  - `fetch/edgesLead` opened with the sentence the brief said not to open with (cut: a repeat of
+    the after-text's subject), and dropped "half a clock period at a time" and the opening just
+    before ↑1;
+  - `fetch/edgesAfter` dropped PC moving on and IR and RESULT changing at ↑1 to ↑4, and WREG 0
+    before ↑5;
+  - `memory-access/fieldsChoices` put backticks in radio labels (removed);
+  - `branches/flowLead` said "went to" leaves out the next line, false for a branch now (added
+    "and both ways of a branch"), and dropped the counts (4 times, then `018` once) and "of the
+    loop above"; `callFlowLead` dropped every count;
+  - `memory-access/mapLead` dropped the devices' names, DOOR and WARM's bits, the timer and
+    waiting as later modules' devices, the lower cause winning, 31 for every access, and the
+    contrast with Module 6: sent back.

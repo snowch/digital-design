@@ -35,8 +35,8 @@ export const LABELS = {
     oneInstruction: "Clock one edge and step through it.",
     call: "Run the call and the jump back.",
     writeNext: "Complete the text and run the tests.",
-    flow: "Where the loop's branch sent PC.",
-    callFlow: "Where the call, the loop and the jump sent PC.",
+    flow: "Where the loop's branch sent PC, both ways.",
+    callFlow: "Where the call, the branch and the jump sent PC.",
   },
   options: {
     p1Next: "PC is 00C, not taken.",
