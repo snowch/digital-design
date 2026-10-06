@@ -38,19 +38,19 @@ test.describe("a wide word, typed in Try it", () => {
     await expect(signal(tryIt, "PC")).toHaveText("00000000000007D8");
     await expect(hex).toHaveValue("00000000000007D8");
     await expect(number).toHaveValue("2008");
-    await expect(signal(tryIt, "CAUSEF")).toHaveText("00010001");
+    await expect(signal(tryIt, "CAUSEF")).toHaveText("11");
 
     // Not a multiple of 4, typed as a number: CAUSEF 12.
     await number.fill("2");
     await number.press("Enter");
     await expect(hex).toHaveValue("0000000000000002");
-    await expect(signal(tryIt, "CAUSEF")).toHaveText("00010010");
+    await expect(signal(tryIt, "CAUSEF")).toHaveText("12");
 
     // A negative number is the signed reading of its word.
     await number.fill("-8");
     await tryIt.getByRole("button", { name: format(V.words.setLabel, { name: "PC" }) }).click();
     await expect(hex).toHaveValue("FFFFFFFFFFFFFFF8");
-    await expect(signal(tryIt, "CAUSEF")).toHaveText("00010001");
+    await expect(signal(tryIt, "CAUSEF")).toHaveText("11");
 
     // What the field cannot take is refused, and the word keeps its value.
     await hex.fill("7G8");

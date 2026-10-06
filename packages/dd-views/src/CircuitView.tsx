@@ -16,6 +16,7 @@ import {
   type ReactNode,
 } from "react";
 
+import { hexOfWord } from "@dd/dd-model";
 import { DrillDown, StateInspector, drillLevels } from "@dd/primitives";
 import { formatWord, type Circuit, type Word } from "@dd/sim";
 
@@ -79,6 +80,11 @@ export function levelOf(value: Word | undefined): Level {
  * Module 1 writes it (`FF48`: capitals, a digit per four bits, no prefix), with X for a digit
  * any of whose bits is unknown.
  */
+/** A value as a signal table shows it: with `words`, an 8-bit word too in hexadecimal. */
+export function shownWord(value: Word | undefined, words: boolean): string {
+  return words && value && value.width === 8 ? hexOfWord(value) : valueLabel(value);
+}
+
 export function valueLabel(value: Word | undefined): string {
   if (!value) return "";
   if (value.width <= 8) return formatWord(value);
@@ -556,11 +562,17 @@ export function SignalTable({
   values,
   caption,
   readings = [],
+  words = false,
 }: {
   circuit: Circuit;
   values: readonly Word[];
   caption?: string;
   readings?: readonly ("unsigned" | "signed")[];
+  /**
+   * Module 8: a word of 8 bits or more in hexadecimal, as a lesson that writes its causes and
+   * words in hexadecimal (`11`, not `00010001`) and its tests' messages write them.
+   */
+  words?: boolean;
 }) {
   const strings = useViewStrings();
   const rows = [
@@ -582,7 +594,10 @@ export function SignalTable({
         name: r.name,
         cells: [
           { text: r.role },
-          { text: valueLabel(values[r.net]), className: `value-${levelOf(values[r.net])}` },
+          {
+            text: shownWord(values[r.net], words),
+            className: `value-${levelOf(values[r.net])}`,
+          },
           ...readings.map((k) => ({ text: readingText(values[r.net], k) })),
         ],
       }))}

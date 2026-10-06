@@ -320,12 +320,15 @@ export function TryIt({
   clockName,
   highlight,
   pins = false,
+  words = false,
 }: {
   circuit: Circuit;
   clockName?: string;
   highlight?: readonly string[];
   /** Module 5: the inputs as buttons and the signals as a table, with no drawing. */
   pins?: boolean;
+  /** Module 8: words written as the challenge's lesson writes them (`feedback: "words"`). */
+  words?: boolean;
 }) {
   const strings = useViewStrings();
   const sim = useSettleSim(circuit);
@@ -355,7 +358,7 @@ export function TryIt({
             })}
           </div>
           <WordInputs circuit={circuit} values={sim.values} onSet={(n, v) => sim.set(n, v)} />
-          <SignalTable circuit={circuit} values={sim.values} />
+          <SignalTable circuit={circuit} values={sim.values} words={words} />
         </div>
       ) : (
         <CircuitView
@@ -452,6 +455,7 @@ function DrawEditor({ challenge, artifact, onChange, verdict }: ChallengeEditorP
             {...(clockOf(challenge) ? { clockName: clockOf(challenge) as string } : {})}
             highlight={marked}
             pins={challenge.tryIt === "pins"}
+            words={challenge.feedback === "words"}
           />
         </details>
       )}
@@ -518,6 +522,7 @@ function WriteEditor({ challenge, artifact, onChange, verdict }: ChallengeEditor
             {...(clockOf(challenge) ? { clockName: clockOf(challenge) as string } : {})}
             highlight={marked}
             pins={challenge.tryIt === "pins"}
+            words={challenge.feedback === "words"}
           />
         </details>
       )}

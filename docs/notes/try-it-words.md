@@ -68,9 +68,17 @@ word: Try it in Modules 8 and 9, and any figure whose inputs are wider than 16 b
 
 ## Left
 
-- The signal table under Try it still shows an 8-bit output such as CAUSEF in binary
-  (`00010001`): a word of 8 bits is shown as the lessons' tables show it today. Showing it in
-  hexadecimal too would be a change to every module's tables, for the author to choose.
 - A field takes a value when it is left as well as at Enter, so a learner who taps away from a
   half-typed word sets it, or sees why not. Leaving a field without setting it would need Escape;
   the walkers' complaint was the reverse, so the field errs on taking.
+
+## After the author's answer
+
+- 17:10. Left above for the author: Try it's table showed an 8-bit output such as CAUSEF in binary
+  (`00010001`), while the lesson and its test messages call it cause `11`. The author said to do
+  the right thing for the learner. A challenge with `feedback: "words"` (Modules 8 and 9) now
+  shows an 8-bit word in its Try it table in hexadecimal too, so the table, the task and the
+  failure message all say `11`. The earlier modules' tables keep binary, where the bits are the
+  lesson. The browser tests expect `11` and `12`; Module 8's and the typed-word specs pass at both
+  widths (56 tests).
+
