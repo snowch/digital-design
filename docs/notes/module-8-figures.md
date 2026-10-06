@@ -119,3 +119,55 @@ The managing session's audit listed seven places. Read as each page's learner:
   said only waiting is used later (both are), said a store byte "at a device or sensor" gives 33
   "not 34" (34 applies only at DOOR and WARM and the sensors: narrowed), dropped "for every
   access" and the Module 6 contrast (added).
+
+## What was added, where, and why
+
+| Lesson | Section | Figure (kind) | What it shows |
+| --- | --- | --- | --- |
+| `instructions` | motivation | `fields` (`instruction-fields`) | four register jobs cut into K, J, A, B, Y and C: each field's bits, digits, binary, value and what it does |
+| `constants` | motivation | `fields` (`instruction-fields`) | `22103064`: where the constant sits in a constant job, read signed |
+| `constants` | explanation | `widening` (`widening`) | the `widen` block's simulated 64-bit output for `F9C`, `064`, `7FF` and `800`, bit 11 outlined, its 52 copies dashed, C under the bits it becomes, both read signed |
+| `fetch` | explanation | `edges` (`edge-timeline`) | a real run of the margin program over five rising edges, ↑1 to ↑5: CLK, PC, IR, RESULT and WREG, read at a cursor that opens just before ↑1 |
+| `memory-access` | motivation | `fields` (`instruction-fields`) | the load `380027D8` and the store `48040400`: a load's register in Y, a store's in B, C the address |
+| `memory-access` | construction, before the challenge | `map` (`memory-map`) | every part of the map with its addresses, and the reference machine's verdict on each kind of access at its first address |
+| `branches` | investigation, after the loop runs | `flow` (`branch-targets`) | the loop's lines with an arrow for each jump away, and where the run went from each branch, both ways, with counts |
+| `branches` | generalisation | `call-flow` (`branch-targets`) | the same for the call program: the call, the branch and the jump back |
+
+Every figure is a view of the implementation: the fields from `instructionFields`, the split the
+`digits` block and the reference read; the widening from simulating `widenCircuit()`; the
+timeline from `buildDatapath` and `startDatapath` clocked five times; the map from `MAP`,
+`DEVICES` and `memoryCheck`; the arrows and counts from the reference machine's own run. The
+numbers the prose states are pinned in `content/lessons/module8-figures.facts.test.ts`, and each
+figure is driven through the page in `tests/educational/module8.spec.ts`.
+
+## The figure kinds Module 9 can reuse
+
+| Kind | Props |
+| --- | --- |
+| `instruction-fields` | `instructions` (each a `label` and `text`: assembly, or `0x` and eight digits), `notes?` (K, J, A, B, Y, C) |
+| `widening` | `constants` (each a `label` and C as three hex digits) |
+| `edge-timeline` | `libraryId` (a datapath stage), `program`, `inputs?`, `edges` (1 to 12), `signals` (each `net`, `label?`, `show`: `address`, `word`, `signed` or `level`) |
+| `memory-map` | `accesses?` (any of `load-word`, `load-byte`, `store-word`, `store-byte`) |
+| `branch-targets` | `programs` (each a `label`, `program` and `inputs?`) |
+
+`TimingDiagram` gained `labels` on a signal (text for a value in place of its digits), which the
+timeline uses for addresses, words and signed readings.
+
+## What was left out, and why
+
+- `state-encoding`'s short pulse, `bytes`' four banks and the full stage on a phone (see the
+  audit above).
+- A figure of the condition flags for each branch condition (finding 5-6): it would show part of
+  the condition challenge's answer.
+- Figures for the fetch lesson's control signals per kind, the PC checks' address ranges and the
+  byte order (3-7): short facts; a figure would teach no more.
+- Address bits in the memory map (4-7): the challenge's task already turns the ranges into bits.
+- Edge numbers in place of the slider's "Time": the slider is the shared timing diagram's, and
+  its time is the simulator's; the numbered rises now carry the edge count.
+
+## The reviews
+
+Five reviewers, one per lesson, each with `reviews/brief.md`; findings condensed in
+`reviews/findings.md`; one sceptic's verdicts in `reviews/verdicts.md`: 5 stood (one already
+fixed), 21 stood as minor, 11 were overcalled, none wrong. Every finding that stood was acted on, in code first, then
+in words through briefs GC and GW, except those listed under "left out".
