@@ -176,6 +176,8 @@ export const branches: LessonInput = {
             buses: ["RESULT", "PC4", "NEXT"],
             devices: true,
             run: true,
+            // The first figure with the whole drawing small above it, and zoom: a trial.
+            overview: true,
           },
         },
         {

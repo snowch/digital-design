@@ -106,6 +106,18 @@ step.
 
 ## Decisions since the brief
 
+### 6 October 2026: a cover at the top of the front page
+
+The author asked whether the course should have a cover page, and took the recommendation: the top
+of the front page becomes the cover, rather than a page a reader clicks past on every visit. It
+says what the course is, shows the whole machine the course builds (Module 8's last drawing, drawn
+small and without words), and leads in with one button: "Start with Module 1" for a new reader,
+or "Continue with" the first lesson not finished for a reader who has passed a challenge. Below
+it, one list gives every module the plan has, from 0 to 13, each with a name in plain words and
+its lessons, or a line saying it is still to be written. A reader meets the cover before every
+lesson, so its words use no term a lesson introduces; a test holds it to the term gate, and
+another checks its list of modules against the table above.
+
 ### 6 October 2026: a calculator of the course's own, in Module 10
 
 The author asked whether to bundle their programmer's calculator, `snowch/programmer-calculator`,
