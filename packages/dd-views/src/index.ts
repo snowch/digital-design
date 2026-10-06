@@ -9,6 +9,7 @@ export * from "./strings";
 export * from "./useSim";
 export * from "./traces";
 export * from "./CircuitView";
+export { LARGE_DRAWING } from "./Overview";
 export * from "./TimingDiagram";
 export * from "./TruthTable";
 export * from "./Builder";

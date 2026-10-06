@@ -1,4 +1,4 @@
-# The overview strip and zoom: a trial on one drawing
+# The overview strip and zoom: tried on one drawing, then on every large one
 
 On a phone the author found that Module 8's whole datapath, 2,099 pixels wide in `branches`, shows
 about a sixth of its width in its box, and that the browser's pinch zoom only enlarges the page
@@ -17,14 +17,18 @@ wider than its box: on a phone and on a desktop alike for this drawing.
   moves the drawing there. From a keyboard the strip is one slider: the arrow keys move the
   drawing half a box, Home and End go to the ends. The strip stays at the top of the window while
   the drawing is on screen, which matters because the drawing is taller than a phone's screen.
-- **The zoom**: from fitting the box (about 0.13 on a 375-pixel phone) to twice the drawing's size.
-  Two fingers on the drawing zoom it, and one finger still scrolls it; a trackpad's pinch, which
-  the browser sends as the wheel with Ctrl held, zooms it too. The buttons Make smaller and Make
-  larger zoom by 1.5 a press: they are the one-pointer equal that WCAG 2.5.1 requires of a
-  gesture of two fingers, and a keyboard's way to zoom. Outside the drawing the browser's own zoom
-  works as before; inside it, two fingers zoom the drawing instead of the page.
-- **Below half size** the drawing's words are hidden, since they would be under 6 pixels high, and
-  its lines stay 1 to 2 pixels wide, as in the strip. A wire's touch target stays 14 pixels wide.
+- **The zoom**: from half the drawing's size (or fitting the box, where that is larger) to twice
+  its size. Two fingers on the drawing zoom it, and one finger still scrolls it; a trackpad's
+  pinch, which the browser sends as the wheel with Ctrl held, zooms it too. The buttons Make
+  smaller and Make larger step through half, three quarters, its own size, one and a half and
+  twice: they are the one-pointer equal that WCAG 2.5.1 requires of a gesture of two fingers, and
+  a keyboard's way to zoom. Outside the drawing the browser's own zoom works as before; inside it,
+  two fingers zoom the drawing instead of the page.
+- **Below 0.6 of its size** the drawing's words are hidden, since they would be under about
+  7 pixels high, and its lines stay 1 to 2 pixels wide, as in the strip. A wire's touch target
+  stays 14 pixels wide. Between 0.6 and 1 the words show smaller than the page's 11-pixel rule:
+  that rule holds for the page as it loads, and a learner who zooms a drawing out chooses smaller
+  words, as with the browser's own zoom.
 
 ## How it is built
 
@@ -54,3 +58,44 @@ wider than its box: on a phone and on a desktop alike for this drawing.
 - **Cost.** The copy is taken after every render of the drawing, at each edge and each wire
   pointed at. It is quick for the datapath on a desktop; a slow phone should be tried.
 - **Opening a block** gives a new drawing, which starts at its own size.
+
+## On every large drawing
+
+On 6 October 2026, after trying it, the author asked for the strip and the zoom on every large
+drawing. Large means at least 1,000 pixels wide at the drawing's own size (`LARGE_DRAWING` in
+`Overview.tsx`): three phone screens across, and wider than the page on a desktop. The measure of
+the 139 figures that draw a circuit put the line there. Above it are 15 figures, all in Module 7
+(the ALU in `alu-jobs`, `flags` and `wide-alu`) and Module 8 (the datapath in `fetch`,
+`memory-access` and `branches`). Below it the widest are 932 pixels (Module 8's `constants`), 864
+(Module 3's adder that subtracts) and 852 (Module 8's `instructions`), then drawings of 500 to 824
+that scroll comfortably and would only gain clutter. Eight more figures name a circuit wider than
+the line but never draw it: Module 7's test suites and carry steppers, and `fetch`'s timeline.
+
+`CircuitView` decides for every figure that draws a circuit: a large drawing that is wider than its
+box has the strip and the zoom, unless the figure sets `overview` to false. A figure can also set it
+to true, to give them to a smaller drawing wider than its box; none does. The per-figure trial
+setting on `branches` went. `tests/educational/overview.spec.ts` checks the rule across a lesson
+under the line and two over it, and drives the strip and the zoom on `branches`' loop.
+
+## What a learner's walk found, and what changed
+
+The session that built Module 8 walked `branches`' loop as a learner, at 1280 and 375 pixels,
+after the trial went live:
+
+1. A drag in the strip from its own place, before it was held at the top of the window, threw the
+   page down: about 16,000 pixels on a desktop, to the end of the page on a phone. Each move of a
+   drag scrolled the page to bring the pressed row on screen, which moved the strip under a still
+   finger, so the next move scrolled again. The tests had pressed and used the keys, never dragged.
+   Now only a press brings a row on screen; a drag moves the drawing across and never the page,
+   and a browser test drags from the strip's own place.
+2. Zoomed to fit, on a phone the drawing (285 pixels across) was smaller than the strip above it.
+   The zoom now stops at half the drawing's size.
+3. After zooming out, Make larger stepped by 1.5 from wherever the zoom was and never landed on
+   the drawing's own size again. The buttons now step through fixed sizes with 1 among them.
+4. At about 0.67 the words measured 10 pixels, under the page's 11-pixel rule; at about 0.69 on a
+   phone, with the strip, the walk found the best view of the lesson's branch logic. The words now
+   show down to 0.6 of their size, smaller than the rule by the learner's choice, and hide below.
+
+It also found every Module 8 lesson's words pointing at blocks that lie off the drawing's first
+view on a phone. The strip shows where they are; opening a figure at the part its words name is
+left for later.
