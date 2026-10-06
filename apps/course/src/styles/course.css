@@ -463,6 +463,114 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
   flex: none;
   margin-inline: auto;
 }
+/*
+ * Module 8: a drawing much wider than its box. The strip above it is the whole drawing, small and
+ * without its words, with a frame on the part on screen; it stays at the top of the window while
+ * the drawing is on screen. Two fingers on the drawing zoom it; one finger still scrolls it.
+ * Below half its size its words would be under 6 pixels, so they are hidden.
+ */
+.overview-bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--bg-raised);
+  padding-block: var(--space-2);
+}
+.overview-bar.stuck {
+  box-shadow: 0 6px 8px -8px var(--scroll-shadow);
+}
+.overview-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+.overview-label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+.overview-zoom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.overview {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  margin-inline: auto;
+  border-radius: var(--radius);
+  background: var(--canvas);
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.overview:active {
+  cursor: grabbing;
+}
+.overview:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+.overview-copy svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.overview-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 2px solid var(--accent);
+  border-radius: 2px;
+  box-shadow: 0 0 0 100vmax var(--overview-veil);
+  pointer-events: none;
+}
+/* The strip's copy, and the drawing itself below half its size: lines a pixel or two wide at any
+   size, where scaled they would thin to hairlines; a wire's touch target stays 14 pixels wide. */
+.circuit-overview .wire path,
+.circuit-overview .part .box,
+.circuit-overview .part path,
+.circuit-overview .pin rect,
+.circuit-scroll.words-hidden > .circuit .wire path,
+.circuit-scroll.words-hidden > .circuit .part .box,
+.circuit-scroll.words-hidden > .circuit .part path,
+.circuit-scroll.words-hidden > .circuit .pin rect {
+  vector-effect: non-scaling-stroke;
+}
+.circuit-overview .wire path:not(.wire-hit):not(.wire-halo),
+.circuit-scroll.words-hidden > .circuit .wire path:not(.wire-hit):not(.wire-halo) {
+  stroke-width: 1px;
+  shape-rendering: auto;
+}
+.circuit-overview .wire-high path:not(.wire-hit):not(.wire-halo),
+.circuit-scroll.words-hidden > .circuit .wire-high path:not(.wire-hit):not(.wire-halo) {
+  stroke-width: 1.6px;
+}
+.circuit-overview .wire-word path:not(.wire-hit):not(.wire-halo),
+.circuit-scroll.words-hidden > .circuit .wire-word path:not(.wire-hit):not(.wire-halo) {
+  stroke-width: 2.2px;
+}
+.circuit-overview .part .box,
+.circuit-overview .pin rect,
+.circuit-scroll.words-hidden > .circuit .part .box,
+.circuit-scroll.words-hidden > .circuit .pin rect {
+  stroke-width: 1px;
+}
+.circuit-overview .wire-hit,
+.circuit-overview .junction {
+  display: none;
+}
+.circuit-scroll.zoomable {
+  touch-action: pan-x pan-y;
+}
+.circuit-scroll.words-hidden > .circuit text {
+  visibility: hidden;
+}
 .circuit {
   display: block;
   font-family: var(--font-mono);

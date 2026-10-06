@@ -21,7 +21,7 @@ async function textCollisions(page: Page): Promise<Collision[]> {
   return page.evaluate(() => {
     const out: { figure: string; problem: string }[] = [];
     const svgs = document.querySelectorAll<SVGSVGElement>(
-      "svg.timing-diagram, svg.timing-lanes, svg.circuit, svg.signal-plot, svg.signal-path, svg.scene, svg.column-sum, svg.state-diagram",
+      "svg.timing-diagram, svg.timing-lanes, svg.circuit:not(.circuit-overview), svg.signal-plot, svg.signal-path, svg.scene, svg.column-sum, svg.state-diagram",
     );
     for (const svg of svgs) {
       const figure = svg.closest("figure")?.id ?? svg.className.baseVal;
@@ -88,7 +88,9 @@ async function wireFaults(page: Page): Promise<WireFault[]> {
       }
       return pts;
     };
-    for (const svg of document.querySelectorAll<SVGSVGElement>("svg.circuit")) {
+    for (const svg of document.querySelectorAll<SVGSVGElement>(
+      "svg.circuit:not(.circuit-overview)",
+    )) {
       const figure = svg.closest("figure")?.id ?? svg.closest("section")?.id ?? "drawing";
       const toSvg = svg.getScreenCTM()?.inverse();
       if (!toSvg) continue;
@@ -249,7 +251,9 @@ async function crowding(page: Page): Promise<WireFault[]> {
       v.a.x < Math.max(h.a.x, h.b.x) &&
       h.a.y > Math.min(v.a.y, v.b.y) &&
       h.a.y < Math.max(v.a.y, v.b.y);
-    for (const svg of document.querySelectorAll<SVGSVGElement>("svg.circuit")) {
+    for (const svg of document.querySelectorAll<SVGSVGElement>(
+      "svg.circuit:not(.circuit-overview)",
+    )) {
       const figure = svg.closest("figure")?.id ?? svg.closest("section")?.id ?? "drawing";
       const toSvg = svg.getScreenCTM()?.inverse();
       if (!toSvg) continue;
