@@ -60,9 +60,13 @@ const MEMCHECK_CASES: readonly [number | bigint, "load" | "store" | "none", bool
   [0x7c0, "store", true],
   [0x7d8, "load", false],
   [0x7d8, "store", false],
+  // Both 33 (a byte at a device) and 34 (a store to a sensor) apply: the order of the checks shows.
+  [0x7d8, "store", true],
   [0x7f8, "load", false],
   [0x800, "store", true],
   [0xfffffffffffffff8n, "load", false],
+  // Only bit 12 is 1: outside the memory, though bits 11 and 10 say nothing of it.
+  [0x1000, "load", false],
   [0x800, "none", false],
 ];
 const MEMCHECK_VECTORS = MEMCHECK_CASES.map(([address, access, byte]) => {

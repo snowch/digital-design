@@ -38,6 +38,9 @@ const CHECKS_VECTORS = (
     [0x402n, 0x11],
     [0x7c0n, 0x11],
     [0xfffffffffffffffcn, 0x11],
+    // Only one bit above bit 11 is 1: a check of bits 11 and 10 alone misses them.
+    [0x1000n, 0x11],
+    [0x8000000000000000n, 0x11],
   ] as const
 ).map(([pc, cause]) => ({
   label: `PC ${pc.toString(16).toUpperCase().padStart(3, "0")}`,

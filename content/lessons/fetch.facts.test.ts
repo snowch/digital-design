@@ -8,8 +8,10 @@ import { assemble, figureState, instructionHex } from "@dd/dd-model";
 
 import { fetch, MARGIN } from "./fetch";
 import { figureAnswer, figureSim, runToStop, signed } from "./module8-facts";
-import { valueLabel } from "@dd/dd-views";
+import { grade, valueLabel } from "@dd/dd-views";
+import { parseLesson } from "@dd/lesson-schema";
 
+import { CHECKS_REFERENCE } from "./module8";
 import { testCountOf } from "./module3-facts";
 
 describe("facts for the fetch lesson", () => {
@@ -68,6 +70,16 @@ describe("facts for the fetch lesson", () => {
   });
 
   it("the challenges' test counts", () => {
-    expect([testCountOf(fetch, "pc-text"), testCountOf(fetch, "checks-text")]).toEqual([10, 9]);
+    expect([testCountOf(fetch, "pc-text"), testCountOf(fetch, "checks-text")]).toEqual([10, 11]);
+  });
+
+  it("a check of PC's bits 11 and 10 alone fails at the addresses with one higher bit set", () => {
+    const c = parseLesson(fetch).challenges.find((x) => x.id === "checks-text");
+    const short = CHECKS_REFERENCE.replace("PC[63:10] != 54'h0", "PC[11:10] != 2'b00");
+    expect(short).not.toBe(CHECKS_REFERENCE);
+    expect(c && grade(c, { hdl: short }).failures.map((f) => f.label)).toEqual([
+      "PC 1000",
+      "PC 8000000000000000",
+    ]);
   });
 });
