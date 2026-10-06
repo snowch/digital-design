@@ -47,7 +47,7 @@ export const LABELS = {
     noWrite: "`13123000`: R3 ← R1 - R2. WRITEY is 0, so nothing is written.",
   },
   faults: {
-    yLow: "The Y digit held at 0",
-    op0Low: "OP0 held at 0",
+    yLow: "The Y digit stuck at 0",
+    op0Low: "OP0 stuck at 0",
   },
 } as const;

@@ -40,7 +40,7 @@ export const LABELS = {
     p1Unknown: "X",
   },
   faults: {
-    loadLow: "LOAD held at 0",
-    storeHigh: "STORE held at 1",
+    loadLow: "LOAD stuck at 0",
+    storeHigh: "STORE stuck at 1",
   },
 } as const;

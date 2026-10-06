@@ -40,7 +40,7 @@ export const LABELS = {
     p1Stop: "Stops at the end, cause 00",
   },
   faults: {
-    pc4Low: "PC4 held at 0",
-    stopLow: "STOP held at 0",
+    pc4Low: "PC4 stuck at 0",
+    stopLow: "STOP stuck at 0",
   },
 } as const;

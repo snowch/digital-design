@@ -17,7 +17,7 @@ export const LABELS = {
     prediction: "Which room is colder",
     investigation: "A loop that adds",
     construction: "The condition written as text",
-    failureExperiment: "MET held at 1 and at 0",
+    failureExperiment: "MET stuck at 1 and at 0",
     explanation: "One edge, step by step",
     generalisation: "Calls and jumps",
     challenge: "The next PC written as text",
@@ -41,7 +41,7 @@ export const LABELS = {
     p1Target: "PC is `010`, taken.",
   },
   faults: {
-    metHigh: "MET held at 1",
-    metLow: "MET held at 0",
+    metHigh: "MET stuck at 1",
+    metLow: "MET stuck at 0",
   },
 } as const;

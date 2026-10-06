@@ -14,7 +14,7 @@ export const LABELS = {
   titles: {
     question: "Numbers no register holds",
     motivation: "The constant job, 12 bits",
-    prediction: "What F06 becomes",
+    prediction: "What F9C becomes",
     investigation: "Constant jobs to clock",
     construction: "The widening written as text",
     failureExperiment: "Copied bit and BCONST at 0",
@@ -36,12 +36,12 @@ export const LABELS = {
     writeConstants: "Write the selector and run the tests.",
   },
   options: {
-    p1Negative: "-250",
-    p1Positive: "3846",
+    p1Negative: "-100",
+    p1Positive: "3996",
     p1Unknown: "X",
   },
   instructions: {
-    copy: "`25003F06`: R3 ← -250",
+    copy: "`25003F9C`: R3 ← -100",
     add: "`22103064`: R3 ← R1 + 100",
     and: "`201030FF`: R3 ← R1 AND `FF`",
     largest: "`250047FF`: R4 ← 2047",
@@ -51,7 +51,7 @@ export const LABELS = {
     double: "`12666000`: R6 ← R6 + R6",
   },
   faults: {
-    copyLow: "The copied bit held at 0",
-    bconstLow: "BCONST held at 0",
+    copyLow: "The copied bit stuck at 0",
+    bconstLow: "BCONST stuck at 0",
   },
 } as const;
