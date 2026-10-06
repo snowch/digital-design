@@ -252,6 +252,7 @@ export const instructions: LessonInput = {
       title: LABELS.challengeTitles.c1,
       task: PROSE.c1Task,
       gradedDirection: "write",
+      feedback: "words",
       interface: {
         inputs: [{ name: "IR", width: 32 }],
         outputs: [
@@ -275,6 +276,7 @@ export const instructions: LessonInput = {
       title: LABELS.challengeTitles.c2,
       task: PROSE.c2Task,
       gradedDirection: "write",
+      feedback: "words",
       interface: {
         inputs: [{ name: "CLK" }, { name: "IR", width: 32 }, { name: "WRITEY" }],
         outputs: [{ name: "RESULT", width: 64 }],

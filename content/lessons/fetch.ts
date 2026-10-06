@@ -246,6 +246,7 @@ export const fetch: LessonInput = {
       title: LABELS.challengeTitles.c1,
       task: PROSE.c1Task,
       gradedDirection: "write",
+      feedback: "words",
       interface: {
         inputs: [{ name: "CLK" }, { name: "RST" }, { name: "GO" }],
         outputs: [{ name: "PC", width: 64 }],
@@ -262,6 +263,7 @@ export const fetch: LessonInput = {
       title: LABELS.challengeTitles.c2,
       task: PROSE.c2Task,
       gradedDirection: "write",
+      feedback: "words",
       interface: {
         inputs: [{ name: "PC", width: 64 }],
         outputs: [{ name: "CAUSEF", width: 8 }],
