@@ -230,6 +230,7 @@ ol {
 }
 .flow-part {
   display: grid;
+  align-content: center;
   gap: 2px;
   padding: var(--space-2) var(--space-3);
   background: var(--bg-raised);
@@ -258,13 +259,25 @@ ol {
   font-weight: 600;
   color: var(--fg-muted);
 }
+/* Two to a row on a phone, the last across the row; three to a row where there is room. */
 .flow-group ul {
   list-style: none;
   padding: 0;
   margin: 0;
   display: grid;
   gap: var(--space-2);
-  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  grid-template-columns: 1fr 1fr;
+}
+.flow-group ul > li:last-child {
+  grid-column: 1 / -1;
+}
+@media (min-width: 40rem) {
+  .flow-group ul {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .flow-group ul > li:last-child {
+    grid-column: auto;
+  }
 }
 .flow-back {
   margin: var(--space-3) 0 0;
