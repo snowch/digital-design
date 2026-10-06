@@ -70,3 +70,8 @@ The managing session's audit listed seven places. Read as each page's learner:
 - 11:13. GV came back. It dropped `addresses` and `parts.none` (the provisional "Addresses" and
   "no memory" stand: both are what the brief asked) and, in `arrowsLabel`, "the table says the
   same" (added). The FIXED strings came back as given.
+- 11:20. Mechanical look at the six figures at 1280 px, 375 px and 375 px dark: no page scrolls
+  sideways; the timeline scrolls inside its box with the drawing's own notice. The widening lead
+  says C stands under W's low 12 bits, but C's row was drawn above W's four rows; the row moved
+  under W's bits 15 to 0, so each of C's bits stands under the bit it becomes.
+- 11:22. Five reviewers, one per lesson, given `module-8-figures/reviews/brief.md`.
