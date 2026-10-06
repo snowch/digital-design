@@ -128,23 +128,7 @@ export const branches: LessonInput = {
   introduces: ["branch"],
   sections: [
     { kind: "question", title: LABELS.titles.question, prose: PROSE.question },
-    {
-      kind: "motivation",
-      title: LABELS.titles.motivation,
-      prose: PROSE.motivation,
-      interactives: [
-        {
-          id: "flow",
-          kind: "branch-targets",
-          timeModel: "none",
-          caption: LABELS.captions.flow,
-          lead: PROSE.flowLead,
-          props: {
-            programs: [{ label: LABELS.programs.sum, program: SUM }],
-          },
-        },
-      ],
-    },
+    { kind: "motivation", title: LABELS.titles.motivation, prose: PROSE.motivation },
     {
       kind: "prediction",
       title: LABELS.titles.prediction,
@@ -192,6 +176,16 @@ export const branches: LessonInput = {
             buses: ["RESULT", "PC4", "NEXT"],
             devices: true,
             run: true,
+          },
+        },
+        {
+          id: "flow",
+          kind: "branch-targets",
+          timeModel: "none",
+          caption: LABELS.captions.flow,
+          lead: PROSE.flowLead,
+          props: {
+            programs: [{ label: LABELS.programs.sum, program: SUM }],
           },
         },
       ],

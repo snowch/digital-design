@@ -83,7 +83,24 @@ export const constants: LessonInput = {
   introduces: [],
   sections: [
     { kind: "question", title: LABELS.titles.question, prose: PROSE.question },
-    { kind: "motivation", title: LABELS.titles.motivation, prose: PROSE.motivation },
+    {
+      kind: "motivation",
+      title: LABELS.titles.motivation,
+      prose: PROSE.motivation,
+      interactives: [
+        {
+          id: "fields",
+          kind: "instruction-fields",
+          timeModel: "none",
+          caption: LABELS.captions.fields,
+          lead: PROSE.fieldsLead,
+          props: {
+            instructions: [{ label: LABELS.fieldsChoice, text: "0x22103064" }],
+            notes: LABELS.fieldNotes,
+          },
+        },
+      ],
+    },
     {
       kind: "prediction",
       title: LABELS.titles.prediction,
@@ -189,8 +206,8 @@ export const constants: LessonInput = {
           lead: PROSE.wideningLead,
           props: {
             constants: [
-              { label: LABELS.widenings.hundred, c: "064" },
               { label: LABELS.widenings.minusHundred, c: "F9C" },
+              { label: LABELS.widenings.hundred, c: "064" },
               { label: LABELS.widenings.largest, c: "7FF" },
               { label: LABELS.widenings.smallest, c: "800" },
             ],

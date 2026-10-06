@@ -75,3 +75,23 @@ The managing session's audit listed seven places. Read as each page's learner:
   says C stands under W's low 12 bits, but C's row was drawn above W's four rows; the row moved
   under W's bits 15 to 0, so each of C's bits stands under the bit it becomes.
 - 11:22. Five reviewers, one per lesson, given `module-8-figures/reviews/brief.md`.
+- 11:40. The five reviews came back (`module-8-figures/reviews/findings.md`); sent to the
+  sceptic. Meanwhile `main` had moved to 63d7ce4 (Module 10's plan, `docs/plan.md` only): merged
+  in. A clean `main` built in this container fails the same screenshot comparisons as this branch
+  (the figures-that-matter-most, signals, scenes and Module 2 pairs at both widths; registers and
+  state machines on the phone): none of them names a Module 8 figure, so no baseline was touched.
+- 11:45 to 12:10. Acted on the verdicts that stand (`reviews/verdicts.md`). In code: the branch
+  arrows take lanes by span, arrive at their own heights where two meet one line, and a lane is
+  broken where another arrow's stub crosses it (5-1); a branch's way on to the next line is
+  listed in "went to" (5-3); the loop figure moved into the investigation, after the program is
+  listed (5-5); the timeline marks only the rises, numbered ↑1 to ↑5, keeps an unnamed mark at
+  every other time so the axis shows no third count, and opens just before ↑1 (3-1, 3-2, 3-4);
+  the fields figure is one field to a row on a phone, groups bits in fours, and leaves out a value
+  that says no more than its digits (1-3, 1-4, 1-5); the widening groups bits in fours and opens
+  on `F9C` (2-5, 2-7); the map's last row reads "`7F8` and above" and `7D0` is named "DOOR and
+  WARM", the names Module 2 gave its bits (4-2, 4-3). The fields figure, already a general kind,
+  is placed in the constants motivation (`22103064`) and the memory-access motivation (the load
+  and the store) (2-6, 4-6): neither answers its lesson's prediction (constants asks about `F9C`;
+  memory-access asks what the load brings, which is a sensor's reading, not a field). New facts
+  pinned: those fields and C's signed values, and that bits 63 to 11 of W are worth -2048
+  together. Words sent as briefs GC and GW.

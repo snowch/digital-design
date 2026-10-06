@@ -28,6 +28,7 @@ export const LABELS = {
     c2: "Datapath, complete",
   },
   captions: {
+    fields: "Draft: the fields.",
     predictLoad: "Predict what R2 holds after the next edge, then check.",
     showMargin: "Run the program and watch the memory.",
     writeMemcheck: "Write the checks and run the tests.",
@@ -35,6 +36,15 @@ export const LABELS = {
     writeMemory: "Complete the text and run the tests.",
     map: "What each part of the memory accepts and refuses.",
   },
+  fieldNotes: {
+    K: "Draft K",
+    J: "Draft J",
+    A: "Draft A",
+    B: "Draft B",
+    Y: "Draft Y",
+    C: "Draft C",
+  },
+  fieldsChoices: { load: "Draft load", store: "Draft store" },
   options: {
     p1Reading: "-184",
     p1Address: "2008",

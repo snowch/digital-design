@@ -31,6 +31,7 @@ import {
   programFlow,
   startDatapath,
   widening,
+  type InstructionField,
   type ProgramLine,
 } from "@dd/dd-model";
 import type { InteractiveProps } from "@dd/lesson-runtime";
@@ -99,6 +100,13 @@ export const InstructionFieldsFigure = withProps(
     const given = data.instructions[chosen] ?? data.instructions[0];
     const word = useMemo(() => (given ? instructionWord(given.text) : 0), [given]);
     const fields = instructionFields(word);
+    // A field's value, unless it says no more than the field's digits.
+    const value = (f: InstructionField) =>
+      f.name === "A" || f.name === "B" || f.name === "Y"
+        ? format(t.register, { n: f.value })
+        : f.name === "C"
+          ? format(t.signedValue, { value: f.signed ?? f.value })
+          : String(f.value);
     return (
       <div className="machine-figure instruction-fields" data-interactive={interactive.id}>
         <Chooser
@@ -116,14 +124,8 @@ export const InstructionFieldsFigure = withProps(
                 <span className="field-name">{f.name}</span>
                 <span className="field-bits-range">{format(t.bits, { hi: f.hi, lo: f.lo })}</span>
                 <span className="field-digits">{f.digits}</span>
-                <span className="field-bits">{f.bits}</span>
-                <span className="field-value">
-                  {f.name === "A" || f.name === "B" || f.name === "Y"
-                    ? format(t.register, { n: f.value })
-                    : f.name === "C"
-                      ? format(t.signedValue, { value: f.signed ?? f.value })
-                      : f.value}
-                </span>
+                <span className="field-bits">{f.bits.replace(/(.{4})(?=.)/g, "$1 ")}</span>
+                {value(f) !== f.digits && <span className="field-value">{value(f)}</span>}
                 {note && <span className="field-note">{note}</span>}
               </li>
             );
@@ -157,7 +159,7 @@ export const WideningFigure = withProps(
     const cell = (value: string, n: number, copied: boolean, top: boolean) => (
       <li
         key={n}
-        className={`wide-bit${copied ? " copied" : ""}${top ? " top" : ""}`}
+        className={`wide-bit${copied ? " copied" : ""}${top ? " top" : ""}${n % 4 === 0 && n % 16 !== 0 ? " digit-end" : ""}`}
         aria-label={`${format(t.bitLabel, { n, bit: value })}${copied ? `, ${t.copied}` : ""}`}
       >
         <span className="wide-bit-n" aria-hidden="true">
@@ -240,8 +242,22 @@ export const EdgeTimeline = withProps(
       for (let k = 0; k < data.edges; k++) sim.clockCycle("CLK");
       return { circuit: built.circuit, trace: sim.trace, from, to: sim.time };
     }, [data.libraryId, data.program, data.inputs, data.edges]);
-    // The cursor starts on the first edge, so a phone's scrolled drawing opens at the start.
-    const [cursor, setCursor] = useState(run.from + 2);
+    // Only the rising edges are named, each with its number from the reset: an edge here is a
+    // rise, and a fall at either end of the window would match nothing drawn in CLK's lane. Every
+    // other time keeps an unnamed mark, so the axis counts no third thing beside edges and steps.
+    const trace = useMemo(() => {
+      const rises = new Set(
+        run.trace.marks.filter((m) => m.label === "↑" && m.time > run.from).map((m) => m.time),
+      );
+      let n = 0;
+      const marks = Array.from({ length: run.to - run.from + 1 }, (_, i) => run.from + i).map(
+        (time) => ({ time, label: rises.has(time) ? format(t.edgeMark, { n: ++n }) : "" }),
+      );
+      return { ...run.trace, marks };
+    }, [run, t.edgeMark]);
+    // The cursor starts just before the first edge, on the values that edge writes, so a phone's
+    // scrolled drawing opens at the start.
+    const [cursor, setCursor] = useState(run.from + 1);
     // Each word's values in the run, written as the lesson asks: short enough for its lane.
     const signals = data.signals.map((s) => {
       if (s.show === "level") return s.label ? { net: s.net, label: s.label } : s.net;
@@ -267,7 +283,7 @@ export const EdgeTimeline = withProps(
       <div className="machine-figure edge-timeline" data-interactive={interactive.id}>
         <TimingDiagram
           circuit={run.circuit}
-          trace={run.trace}
+          trace={trace}
           signals={signals}
           from={run.from}
           to={run.to}
@@ -317,7 +333,9 @@ export const MemoryMapFigure = withProps(
                   <th scope="row">
                     {t.parts[p.part] ?? p.part}
                     <span className="map-range">
-                      {format(t.range, { first: hex3(p.first), last: hex3(p.last) })}
+                      {p.part === "none"
+                        ? format(t.rangeAbove, { first: hex3(p.first) })
+                        : format(t.range, { first: hex3(p.first), last: hex3(p.last) })}
                     </span>
                   </th>
                   {accesses.map((a) => {
@@ -355,27 +373,43 @@ const FlowProps = z.object({
 
 const ROW_H = 30;
 const LANE_W = 8;
+/** How far apart two arrows arriving at one line run, and the break a crossing leaves. */
+const ARRIVE_STEP = 10;
+const GAP = 3;
 
-/** The arrows a program's run drew: from a line to anywhere but the next one, and targets never taken. */
+/**
+ * The arrows a program's run drew: from a line to anywhere but the next one, and targets never
+ * taken. The shortest span takes the lane nearest the listing, so nested arrows never cross; where
+ * arrows meet one line, each arrives at its own height, the one from higher up arriving higher.
+ */
 function arrowsOf(lines: readonly ProgramLine[]) {
   const row = new Map(lines.map((l, i) => [l.address, i]));
-  const arrows: { from: number; to: number; taken: boolean; times: number }[] = [];
+  const found: { from: number; to: number; taken: boolean; r1: number; r2: number }[] = [];
+  const add = (from: number, to: number, taken: boolean) =>
+    found.push({ from, to, taken, r1: row.get(from) ?? 0, r2: row.get(to) ?? 0 });
   for (const l of lines) {
-    for (const w of l.went)
-      if (w.to !== l.address + 4 && row.has(w.to))
-        arrows.push({ from: l.address, to: w.to, taken: true, times: w.times });
+    for (const w of l.went) if (w.to !== l.address + 4 && row.has(w.to)) add(l.address, w.to, true);
     if (l.target !== undefined && !l.went.some((w) => w.to === l.target) && row.has(l.target))
-      arrows.push({ from: l.address, to: l.target, taken: false, times: 0 });
+      add(l.address, l.target, false);
   }
-  return arrows.map((a, lane) => ({
-    ...a,
-    lane,
-    r1: row.get(a.from) ?? 0,
-    r2: row.get(a.to) ?? 0,
-  }));
+  const span = (a: { r1: number; r2: number }) => Math.abs(a.r1 - a.r2);
+  const laned = [...found]
+    .sort((x, y) => span(x) - span(y) || x.r1 - y.r1)
+    .map((a, lane) => ({ ...a, lane, arrive: ROW_H / 2 }));
+  for (const r of new Set(laned.map((a) => a.r2))) {
+    const meeting = laned.filter((a) => a.r2 === r).sort((x, y) => x.r1 - y.r1);
+    meeting.forEach((a, i) => {
+      a.arrive = ROW_H / 2 + (i - (meeting.length - 1) / 2) * ARRIVE_STEP;
+    });
+  }
+  return laned;
 }
 
-/** One row's slice of the arrows: the lanes passing it, and the stubs that leave or reach it. */
+/**
+ * One row's slice of the arrows: the lanes passing it, and the stubs that leave or reach it. A
+ * lane that another arrow's stub crosses is broken where it crosses, so a crossing never reads as
+ * a junction.
+ */
 function ArrowSlice({
   arrows,
   row,
@@ -388,22 +422,40 @@ function ArrowSlice({
   head: string;
 }) {
   const mid = ROW_H / 2;
+  const laneX = (lane: number) => width - 6 - (lane + 1) * LANE_W;
+  const stubs = arrows.flatMap((a) => [
+    ...(a.r1 === row ? [{ y: mid, lane: a.lane }] : []),
+    ...(a.r2 === row ? [{ y: a.arrive, lane: a.lane }] : []),
+  ]);
   return (
     <svg className="flow-arrows" width={width} height={ROW_H} aria-hidden="true">
       {arrows.map((a) => {
-        const x = width - 6 - (a.lane + 1) * LANE_W;
+        const x = laneX(a.lane);
         const top = Math.min(a.r1, a.r2);
         const bottom = Math.max(a.r1, a.r2);
         if (row < top || row > bottom) return null;
         const cls = a.taken ? "flow-arrow" : "flow-arrow never";
-        const y1 = row === top ? mid : 0;
-        const y2 = row === bottom ? mid : ROW_H;
+        const end = (r: number) => (r === a.r1 ? mid : a.arrive);
+        const y1 = row === top ? end(top) : 0;
+        const y2 = row === bottom ? end(bottom) : ROW_H;
+        const pieces: [number, number][] = [];
+        let from = y1;
+        for (const g of stubs
+          .filter((st) => st.lane > a.lane && st.y > y1 + GAP && st.y < y2 - GAP)
+          .map((st) => st.y)
+          .sort((p, q) => p - q)) {
+          pieces.push([from, g - GAP]);
+          from = g + GAP;
+        }
+        pieces.push([from, y2]);
         return (
           <g key={`${a.from}-${a.to}`} className={cls}>
-            <path d={`M ${x} ${y1} V ${y2}`} />
+            {pieces.map(([p, q]) => (
+              <path key={p} d={`M ${x} ${p} V ${q}`} />
+            ))}
             {row === a.r1 && <path d={`M ${width} ${mid} H ${x}`} />}
             {row === a.r2 && (
-              <path d={`M ${x} ${mid} H ${width - 1}`} markerEnd={`url(#${head})`} />
+              <path d={`M ${x} ${a.arrive} H ${width - 1}`} markerEnd={`url(#${head})`} />
             )}
           </g>
         );
@@ -442,7 +494,8 @@ export const BranchTargets = withProps(
     const head = `${interactive.id}-head`;
     const went = (l: ProgramLine) => {
       const out = l.went
-        .filter((w) => w.to !== l.address + 4)
+        // A branch's way on to the next line is shown too: it is one of its two outcomes.
+        .filter((w) => w.to !== l.address + 4 || l.target !== undefined)
         .map((w) => format(t.wentTo, { to: hex3(w.to), times: w.times }));
       if (l.target !== undefined && !l.went.some((w) => w.to === l.target))
         out.push(format(t.notTaken, { to: hex3(l.target) }));

@@ -34,6 +34,20 @@ describe("facts for Module 8's focused figures", () => {
     ]);
   });
 
+  it("the fields of a constant job, a load and a store, with C read signed", () => {
+    const f = (w: number) =>
+      instructionFields(w).map((x) => (x.name === "C" ? `${x.digits} ${x.signed}` : x.value));
+    expect(f(0x22103064)).toEqual([2, 2, 1, 0, 3, "064 100"]);
+    expect(f(0x380027d8)).toEqual([3, 8, 0, 0, 2, "7D8 2008"]);
+    expect(f(0x48040400)).toEqual([4, 8, 0, 4, 0, "400 1024"]);
+  });
+
+  it("the bits that copy bit 11 add up to bit 11's own weight, -2048", () => {
+    let sum = -(1n << 63n);
+    for (let k = 11n; k <= 62n; k++) sum += 1n << k;
+    expect(sum).toBe(-2048n);
+  });
+
   it("the widening, simulated: 064 is 100, F9C is -100, 7FF is 2047, 800 is -2048", () => {
     const w = (c: number) => widening(c);
     expect([w(0x064).w, w(0x064).wSigned]).toEqual([0x64n, 100n]);

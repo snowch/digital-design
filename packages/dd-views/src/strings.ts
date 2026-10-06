@@ -359,6 +359,8 @@ export interface MachineFigureStrings {
   readonly copied: string;
   /** The edges figure's title, for a screen reader. */
   readonly timelineTitle: string;
+  /** The mark above a rising edge in a run's timing diagram: `{n}`, its number from the reset. */
+  readonly edgeMark: string;
   /** The memory map's table. */
   readonly mapCaption: string;
   readonly addresses: string;
@@ -373,6 +375,8 @@ export interface MachineFigureStrings {
   readonly parts: Readonly<Record<string, string>>;
   /** An address range: {first} and {last}. */
   readonly range: string;
+  /** An open range, to the end of the addresses: {first}. */
+  readonly rangeAbove: string;
   /** The branches figure's table. */
   readonly flowCaption: string;
   readonly address: string;
@@ -799,6 +803,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     bitLabel: "bit {n}, its value {bit}",
     copied: "a copy of bit 11",
     timelineTitle: "Timing diagram",
+    edgeMark: "↑{n}",
     mapCaption: "The parts of memory and what the memory does with each access",
     addresses: "Addresses",
     part: "Part",
@@ -815,7 +820,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       ram: "RAM",
       display: "display",
       lamps: "lamps",
-      signals: "signals",
+      signals: "DOOR and WARM",
       sensorA: "sensor A",
       sensorB: "sensor B",
       timer: "timer",
@@ -823,6 +828,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       none: "no memory",
     },
     range: "{first} to {last}",
+    rangeAbove: "{first} and above",
     flowCaption: "Where each instruction sent PC",
     address: "Address",
     instruction: "Instruction",

@@ -261,9 +261,9 @@ test.describe("Module 8's focused figures", () => {
     await openLesson(page, "constants");
     const figure = page.locator("#ix-widening");
     await figure.scrollIntoViewIfNeeded();
-    await expect(figure.locator(".wide-readings")).toContainText("100");
-    await figure.getByRole("radio").nth(1).check();
     await expect(figure.locator(".wide-readings")).toContainText("-100");
+    await figure.getByRole("radio").nth(1).check();
+    await expect(figure.locator(".wide-readings")).not.toContainText("-100");
     await expect(figure.locator(".wide-bit.copied")).toHaveCount(52);
   });
 
@@ -273,6 +273,9 @@ test.describe("Module 8's focused figures", () => {
     await figure.scrollIntoViewIfNeeded();
     await expect(figure.locator("svg").first()).toBeVisible();
     await expect(figure).toContainText("010");
+    await expect(figure).toContainText(format(V.machine8.edgeMark, { n: 5 }));
+    // The cursor opens just before the first edge, on the values that edge writes.
+    await expect(figure.locator("table")).toContainText("-184");
   });
 
   test("the map refuses a store at a sensor and allows one at the display", async ({ page }) => {
@@ -291,6 +294,7 @@ test.describe("Module 8's focused figures", () => {
     await figure.scrollIntoViewIfNeeded();
     const row = figure.locator("tr").filter({ has: page.locator("th", { hasText: /^020$/ }) });
     await expect(row).toContainText(format(V.machine8.wentTo, { to: "018", times: 2 }));
+    await expect(row).toContainText(format(V.machine8.wentTo, { to: "024", times: 1 }));
     await expect(figure.locator("g.flow-arrow").first()).toBeAttached();
   });
 });

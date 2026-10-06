@@ -28,6 +28,7 @@ export const LABELS = {
     c2: "Selector, written",
   },
   captions: {
+    fields: "Draft: the fields.",
     predictConstant: "Predict what R3 holds, then check.",
     constants: "Choose a constant job and clock the datapath.",
     writeWiden: "Write the widening and run the tests.",
@@ -36,6 +37,15 @@ export const LABELS = {
     writeConstants: "Write the selector and run the tests.",
     widening: "Choose a constant and compare its 12 bits with the 64-bit word.",
   },
+  fieldNotes: {
+    K: "Draft K",
+    J: "Draft J",
+    A: "Draft A",
+    B: "Draft B",
+    Y: "Draft Y",
+    C: "Draft C",
+  },
+  fieldsChoice: "Draft choice",
   options: {
     p1Negative: "-100",
     p1Positive: "3996",
