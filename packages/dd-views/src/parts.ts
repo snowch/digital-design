@@ -277,6 +277,15 @@ export function labelFor(kind: string): string {
 }
 
 /**
+ * The name the drawing editor gives the nth part of a kind it places: the kind and the count, with
+ * an underscore between them where the kind ends in a digit, so a 4-way selector's first part is
+ * `selector-4_1`, not `selector-41`, and an AND gate's is still `and1`.
+ */
+export function partName(kind: string, n: number): string {
+  return /\d$/.test(kind) ? `${kind}_${n}` : `${kind}${n}`;
+}
+
+/**
  * Whether an instance name says no more than the kind does (`dff` on a D flip-flop, `d-latch`
  * on a D latch), so the drawing leaves it out. `norDark`, `not1` and `master` are kept.
  */

@@ -16,10 +16,10 @@ import {
 } from "@dd/dd-model";
 import { CircuitBuilder, type Circuit, type NetId } from "@dd/sim";
 
-import { ROW_STEP, autoLayout } from "./layout";
+import { ROW_STEP, autoLayout, type LabelRows } from "./layout";
 import { DEFAULT_VIEW_STRINGS, format } from "./strings";
 import { labelFor, partSpec, type PartSpec } from "./parts";
-import { CELL, isShaped, partHeight, partWidth, pinWidth } from "./symbols";
+import { CELL, PIN_H, isShaped, partHeight, partWidth, pinWidth } from "./symbols";
 
 /** The two-button memory as a block: an SR latch whose only output is the light. */
 function twoButtons(b: CircuitBuilder, a: NetId, bPress: NetId, options: LatchOptions): void {
@@ -131,11 +131,27 @@ export function specOf(part: Part): PartSpec | undefined {
  */
 export function rowsOf(part: Part): number {
   if (part.kind === "input" || part.kind === "output") return ROW_STEP;
-  const spec = specOf(part);
-  const body = partHeight(Math.max(spec?.inputs.length ?? 1, spec?.outputs.length ?? 1));
-  const label = isShaped(part.kind) ? 0 : 20;
-  return Math.max(ROW_STEP, Math.ceil((body + 16 + label) / CELL));
+  return Math.max(ROW_STEP, Math.ceil((usedBy(part) + labelAbove(part) * CELL) / CELL));
 }
+
+/** The pixels a part's body and the name under it take: a pin writes its name inside it. */
+function usedBy(part: Part): number {
+  if (part.kind === "input" || part.kind === "output") return PIN_H;
+  const spec = specOf(part);
+  return partHeight(Math.max(spec?.inputs.length ?? 1, spec?.outputs.length ?? 1)) + 16;
+}
+
+/** The grid rows a part's label takes above it: a block's one, and none for a gate or a pin. */
+function labelAbove(part: Part): number {
+  if (part.kind === "input" || part.kind === "output") return 0;
+  return isShaped(part.kind) ? 0 : 1;
+}
+
+/** Where the labels go in a column of parts stacked by `rowsOf`, for `autoLayout`. */
+export const LABEL_ROWS: LabelRows = {
+  above: labelAbove,
+  foot: (part) => Math.floor((rowsOf(part) * CELL - usedBy(part)) / CELL),
+};
 
 /** How many grid columns a part's body takes. */
 export function colsOf(part: Part): number {
@@ -508,6 +524,6 @@ export function circuitToDrawing(circuit: Circuit): Drawing {
   for (const input of circuit.inputs) gather(circuit.nets[input.net]?.meta);
   const drawing: Drawing = Object.keys(routes).length ? { parts, wires, routes } : { parts, wires };
   return unplaced.length
-    ? autoLayout(drawing, new Set(unplaced.map((p) => p.id)), rowsOf, colsOf)
+    ? autoLayout(drawing, new Set(unplaced.map((p) => p.id)), rowsOf, colsOf, LABEL_ROWS)
     : drawing;
 }

@@ -10,11 +10,18 @@ import { runSuite } from "@dd/sim";
 
 import { Builder } from "./Builder";
 import { compileDrawing, emptyDrawing, type Drawing } from "./drawing";
+import { labelFor } from "./parts";
 import { DEFAULT_VIEW_STRINGS as S, format } from "./strings";
 
 const IFACE = { inputs: [{ name: "S" }, { name: "R" }], outputs: [{ name: "Q" }] };
 
-function Harness({ onDrawing }: { onDrawing: (d: Drawing) => void }) {
+function Harness({
+  onDrawing,
+  palette = ["nor", "not"],
+}: {
+  onDrawing: (d: Drawing) => void;
+  palette?: readonly string[];
+}) {
   const [drawing, setDrawing] = useState<Drawing>(() => emptyDrawing(IFACE));
   return (
     <Builder
@@ -23,13 +30,27 @@ function Harness({ onDrawing }: { onDrawing: (d: Drawing) => void }) {
         setDrawing(d);
         onDrawing(d);
       }}
-      palette={["nor", "not"]}
+      palette={palette}
       title="Your drawing"
     />
   );
 }
 
 describe("Builder", () => {
+  it("names a new part by its kind and a count, set apart where the kind ends in a digit", async () => {
+    const user = userEvent.setup();
+    let latest: Drawing | undefined;
+    render(<Harness onDrawing={(d) => (latest = d)} palette={["selector-4", "not"]} />);
+    const add = (kind: string) =>
+      screen.getByRole("button", { name: format(S.builder.add, { label: labelFor(kind) }) });
+    await user.click(add("selector-4"));
+    await user.click(add("selector-4"));
+    await user.click(add("not"));
+    expect(screen.getByRole("status")).toHaveTextContent(format(S.builder.added, { id: "not1" }));
+    const placed = latest?.parts.filter((p) => p.kind !== "input" && p.kind !== "output");
+    expect(placed?.map((p) => p.id)).toEqual(["selector-4_1", "selector-4_2", "not1"]);
+  });
+
   it("builds a working SR latch with the keyboard alone", async () => {
     const user = userEvent.setup();
     let latest: Drawing | undefined;
