@@ -164,13 +164,18 @@ test.describe("a drawing much wider than its box", () => {
     await page.evaluate(() => window.scrollBy(0, -120));
     const r = (await strip.boundingBox())!;
     const y = r.y + r.height - 4;
+    const scrolled = () => box(page).evaluate((el) => el.scrollLeft);
+    // The loop opens on its branch's blocks, well along the drawing.
+    const opened = await scrolled();
     await page.mouse.move(r.x + 10, y);
     await page.mouse.down();
     const pressed = await page.evaluate(() => window.scrollY);
+    const atPress = await scrolled();
+    expect(atPress).toBeLessThan(opened);
     for (let x = 20; x < r.width - 10; x += 20) await page.mouse.move(r.x + x, y);
     await page.mouse.up();
     expect(await page.evaluate(() => window.scrollY)).toBe(pressed);
-    expect(await box(page).evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+    expect(await scrolled()).toBeGreaterThan(atPress);
   });
 
   test("zooms with two fingers on a touch screen", async ({ page }, testInfo) => {
@@ -262,7 +267,7 @@ test.describe("a wide drawing opens on what its words name", () => {
 
   test("a fault chosen far along the drawing comes into view, held wire and all", async ({
     page,
-  }) => {
+  }, testInfo) => {
     await openLesson(page, "alu-jobs");
     const f = page.locator('[data-interactive="job-faults"]');
     await f.scrollIntoViewIfNeeded();
@@ -275,15 +280,31 @@ test.describe("a wide drawing opens on what its words name", () => {
       expect(await inBox(scroll, scroll.locator(`svg.circuit [data-path="${name}"]`)), name).toBe(
         true,
       );
-    // A datapath figure brings its fault first, then its own parts as far as they fit.
-    await openLesson(page, "memory-access");
-    const m = page.locator('[data-interactive="memory-faults"]');
-    await m.scrollIntoViewIfNeeded();
-    await m.getByRole("radio", { name: "LOAD stuck at 0" }).check();
-    const mScroll = m.locator(".circuit-scroll");
-    for (const name of ["memory", "pickLoad"])
-      await expect
-        .poll(() => inBox(mScroll, mScroll.locator(`svg.circuit [data-path="${name}"]`)), name)
-        .toBe(true);
+    // A datapath figure brings its fault first, then its own parts as far as they fit: on a phone
+    // fetch's faults open on plus4, and "STOP stuck at 0" brings the decoder's STOP and stops.
+    await openLesson(page, "fetch");
+    const f2 = page.locator('[data-interactive="fetch-faults"]');
+    await f2.scrollIntoViewIfNeeded();
+    const s2 = f2.locator(".circuit-scroll");
+    const stops = s2.locator('svg.circuit [data-path="stops"]');
+    if (testInfo.project.name === "phone") expect(await inBox(s2, stops)).toBe(false);
+    await f2.getByRole("radio", { name: "STOP stuck at 0" }).check();
+    await expect.poll(() => inBox(s2, stops)).toBe(true);
+    const stop = s2.locator('svg.circuit .wire-held[data-net="STOP"]').first();
+    expect(await inBox(s2, stop)).toBe(true);
+  });
+
+  test("keeps the drawing where the learner moved it when the page renders again", async ({
+    page,
+  }) => {
+    await openLesson(page, "branches");
+    await figure(page).scrollIntoViewIfNeeded();
+    await box(page).evaluate((el) => {
+      el.scrollLeft = 0;
+    });
+    // Opening the figure's note renders the figure again, around a drawing it must not rebuild.
+    await page.locator("#ix-sum .time-model-toggle").click();
+    await expect(page.locator("#ix-sum .time-model-note")).toBeVisible();
+    expect(await box(page).evaluate((el) => el.scrollLeft)).toBe(0);
   });
 });

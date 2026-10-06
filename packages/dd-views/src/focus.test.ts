@@ -46,6 +46,11 @@ describe("where a wide drawing opens", () => {
     // C0 is found at bit0, its reader. Unheld, it runs from andC0 to bit0.
     expect(at(alu, "", ["C0"])).toEqual({ left: 300, right: 340 });
     expect(at(applyFaults(alu, [stuckAt("C0", 0)]), "", ["C0"])).toEqual({ left: 340, right: 420 });
+    // OP2 held: read by xorC0 and every slice, it is found at xorC0, its first reader from the left.
+    expect(at(applyFaults(alu, [stuckAt("OP2", 0)]), "", ["OP2"])).toEqual({
+      left: 160,
+      right: 220,
+    });
   });
 
   it("finds a name from deeper in by the block that holds it, and by itself once opened", () => {

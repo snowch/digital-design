@@ -123,17 +123,27 @@ strip's frame follows.
   outside is the halo round a word: a phone 375 pixels wide holds the memory and `pickLoad`, 318
   pixels as drawn, in 317.
 - **A fault the learner chooses.** Its wire or its gate comes first, then the figure's own names as
-  far as they fit. A fault on a wire is found by the wire, from its driver to its nearest reader;
-  at that reader instead when the wire is longer than the box, or when it starts at the fault's
-  own fixed value, which the layout places wherever there is room (in `constants`, "BCONST stuck
-  at 0" draws its value at the far left, and acts at `pickB`). A wire is tried before a pin of the
-  same name, which the fault cuts off. A wrong gate is found by the gate, or by the block that
-  holds it, so a fault inside Module 9's control unit opens on the control unit. On a phone, Module
-  7's "C2 stuck at 0" was about 300 pixels past the first view; it now opens in the middle of the
-  box, with the two slices it joins.
+  far as they fit. A fault on a wire is found by the wire, from its driver to its nearest reader; at
+  that reader instead when the wire is longer than the box. A wire that starts at the fault's own
+  fixed value, which the layout places wherever there is room, is found at its first reader from the
+  left (in `constants`, "BCONST stuck at 0" draws its value at the far left, and acts at `pickB`). A
+  wire is tried before a pin of the same name, which the fault cuts off. A wrong gate is found by
+  the gate, or by the block that holds it, so a fault inside Module 9's control unit opens on the
+  control unit. On a phone, Module 7's "C2 stuck at 0" was about 300 pixels past the first view; it
+  now opens in the middle of the box, with the two slices it joins.
 - **Two figures name their parts.** `wide-alu`'s 64-bit ALU opens on g0 and g1, as its lead asks the
   learner to press a group; `branches`' loop on `condition` and `next`, which make NEXT, the bus its
   lead says to watch.
 
 `focus.test.ts` holds the rule. `tests/educational/overview.spec.ts` checks the loop, the 64-bit
-ALU, and a fault in Module 7's ALU and in `memory-access`, at both widths.
+ALU, and a fault in Module 7's ALU and in `fetch`, at both widths.
+
+An independent review of the change found that a figure's props were parsed again on every
+render: each parse made new objects, so a figure rebuilt its circuit whenever the page around it
+rendered, and a wide drawing jumped back to its named parts when a learner opened the figure's
+note or changed the theme. The props are now parsed once per lesson record (`props.tsx`), which
+also stops Module 8's figures building the whole datapath again each time. A browser test moves
+the loop's drawing, opens its note, and checks the drawing stays. The review also found two tests
+that passed with the behaviour broken: the drag test, now checked against where the press left the
+drawing, and a fault test whose figure already opened on the fault's parts, now `fetch`'s "STOP
+stuck at 0", which on a phone opens off screen.

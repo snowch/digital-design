@@ -28,8 +28,8 @@ const width = (s: Span) => s.right - s.left;
 
 /**
  * Where one name lies, best first: a signal, by its net's name, from its driver to its nearest
- * reader, or, where that is too long to show or the driver is a fault's own fixed value, at that
- * reader; a part, by its name or its path; a name inside a block (a gate, a signal), at that
+ * reader, or at that reader where the stretch is too long to show (at its first reader from the
+ * left where the driver is a fault's own fixed value); a part, by its name or its path; a name inside a block (a gate, a signal), at that
  * block, so a fault deep in the control unit finds the control unit. A signal comes before a pin
  * of the same name, which a fault on it cuts off. None when the drawing does not hold the name.
  */
@@ -44,16 +44,19 @@ function placesOf(
   const first = wires[0];
   if (first) {
     const from = first.start.x;
+    const at = (w: typeof first) => {
+      const reader = scene.boxes.find((b) => b.part.id === w.to.part);
+      return reader ? measure(reader) : { left: w.end.x, right: w.end.x };
+    };
+    // A wire a fault's own fixed value drives starts wherever the layout put that value, which
+    // says nothing: the fault acts where the wire is read, the first reader from the left.
+    if (first.from.part.includes("fault/"))
+      return [at(wires.reduce((a, b) => (b.end.x < a.end.x ? b : a)))];
     const nearest = wires.reduce((a, b) =>
       Math.abs(b.end.x - from) < Math.abs(a.end.x - from) ? b : a,
     );
-    const reader = scene.boxes.find((b) => b.part.id === nearest.to.part);
     const end = nearest.end.x;
-    const atReader = reader ? measure(reader) : { left: end, right: end };
-    // A wire a fault's own fixed value drives starts wherever the layout put that value, which
-    // says nothing: the fault acts where the wire is read.
-    if (first.from.part.includes("fault/")) return [atReader];
-    return [{ left: Math.min(from, end), right: Math.max(from, end) }, atReader];
+    return [{ left: Math.min(from, end), right: Math.max(from, end) }, at(nearest)];
   }
   // A name outside the block on show has no part here.
   const local =
