@@ -112,7 +112,13 @@ export const instructions: LessonInput = {
           caption: LABELS.captions.fields,
           lead: PROSE.fieldsLead,
           props: {
-            instructions: JOBS.slice(0, 4).map((j) => ({ label: j.label, text: j.text })),
+            instructions: JOBS.slice(0, 4).map((j, k) => ({
+              label: j.label,
+              text: j.text,
+              // Copy B reads A and count up reads B, and each ignores what it reads.
+              ...(k === 2 ? { notes: { A: LABELS.fieldIgnored.copyA } } : {}),
+              ...(k === 3 ? { notes: { B: LABELS.fieldIgnored.countUpB } } : {}),
+            })),
             notes: LABELS.fieldNotes,
           },
         },

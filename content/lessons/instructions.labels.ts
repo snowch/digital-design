@@ -51,6 +51,7 @@ export const LABELS = {
     yLow: "The Y digit stuck at 0",
     op0Low: "OP0 stuck at 0",
   },
+  fieldIgnored: { copyA: "Draft copy A", countUpB: "Draft count B" },
   fieldNotes: {
     K: "the kind; 1 is a register job",
     J: "the job; bits 2 to 0 are the ALU code",

@@ -73,20 +73,27 @@ function Chooser({
 
 // ---------------------------------------------------------------------------------------------
 
+/** A note for each field, in the lesson's words; a field without a note shows none. */
+const FieldNotes = z.object({
+  K: z.string().optional(),
+  J: z.string().optional(),
+  A: z.string().optional(),
+  B: z.string().optional(),
+  Y: z.string().optional(),
+  C: z.string().optional(),
+});
+
 const FieldsProps = z.object({
-  /** The instructions, as lines of assembly or eight hexadecimal digits after `0x`. */
-  instructions: z.array(z.object({ label: z.string(), text: z.string() })).min(1),
-  /** Where each field goes, in the lesson's words; a field without a note shows none. */
-  notes: z
-    .object({
-      K: z.string().optional(),
-      J: z.string().optional(),
-      A: z.string().optional(),
-      B: z.string().optional(),
-      Y: z.string().optional(),
-      C: z.string().optional(),
-    })
-    .default({}),
+  /**
+   * The instructions, as lines of assembly or eight hexadecimal digits after `0x`; an
+   * instruction's own notes replace the figure's for the fields they name, such as a field its
+   * job reads but ignores.
+   */
+  instructions: z
+    .array(z.object({ label: z.string(), text: z.string(), notes: FieldNotes.optional() }))
+    .min(1),
+  /** Where each field goes, for every instruction. */
+  notes: FieldNotes.default({}),
 });
 
 export const InstructionFieldsFigure = withProps(
@@ -118,7 +125,7 @@ export const InstructionFieldsFigure = withProps(
         <p className="fields-word">{format(t.word, { word: hex8(word) })}</p>
         <ol className="fields" aria-label={t.fieldsLabel}>
           {fields.map((f) => {
-            const note = data.notes[f.name];
+            const note = given?.notes?.[f.name] ?? data.notes[f.name];
             return (
               <li key={f.name} className={`field field-${f.name}`}>
                 <span className="field-name">{f.name}</span>
