@@ -48,3 +48,18 @@ Each finding condensed, with its quotation. The screenshots the reviewers saw we
 - 4-7. The map gives ranges in hex; the challenge works in address bits.
 - 4-8. Two captions, one under the other, say the same thing.
 - 4-9. "The four columns" (the table has five, the first is Part).
+
+## branches (`flow`, `call-flow`)
+
+- 5-1. call-flow: the call's arrow from `00C` runs through the jump's arrowhead stub at `010` with
+  no gap, reading as "the call goes to 010" (its return address); at `018` the call and the
+  branch share one stub and head.
+- 5-2. Column "Instruction" over assembly text; the datapath figure's program table on the same
+  page uses "Instruction" for the hex word and "Transfer" for the text.
+- 5-3. "Where the loop's branch sent PC": the fifth, not-taken, time (to `018`) is filtered out;
+  the figure shows one of a branch's two next PCs.
+- 5-4. "A run of the program fills in the "went to" column": there is no control; reads as an
+  instruction.
+- 5-5. The figure is in the motivation, but "the loop program" is introduced in the
+  investigation; c = -2 is not on the figure; the program is listed twice.
+- 5-6. The conditions' flags (ZERO, COUT, MINUS XOR OVER) are stated in words only.
