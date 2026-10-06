@@ -14,7 +14,7 @@ import { LESSONS } from "@dd/content";
 
 import { PREFACE_HREF, lessonHref } from "../route";
 import { STRINGS } from "../strings";
-import { LessonList } from "./LessonList";
+import { LessonList, MACHINE_PARTS } from "./LessonList";
 
 const book = createBook(LESSONS, INTERACTIVES);
 const ordered = [...book.lessons].sort((a, b) => a.module - b.module || a.order - b.order);
@@ -66,7 +66,7 @@ describe("the course's front page: the cover", () => {
     const cover = [
       STRINGS.cover.lead,
       STRINGS.cover.machine,
-      STRINGS.cover.machineLabel,
+      ...Object.values(STRINGS.cover.flow),
       STRINGS.cover.contents(STRINGS.moduleNames.length),
       STRINGS.cover.toWrite,
       ...STRINGS.moduleNames,
@@ -75,6 +75,36 @@ describe("the course's front page: the cover", () => {
     expect(terms.length).toBeGreaterThan(50);
     const used = terms.filter((t) => cover.some((text) => termPattern(t).test(text)));
     expect(used).toEqual([]);
+  });
+});
+
+describe("the course's front page: the machine, one step at a time", () => {
+  it("shows each part of the machine in the order a step meets it, with the modules that build it", () => {
+    render(<LessonList book={book} storage={memoryStorage()} />);
+    const figure = screen.getByRole("figure");
+    const words = STRINGS.cover.flow;
+    const parts = within(figure)
+      .getAllByRole("listitem")
+      .filter((li) => li.classList.contains("flow-part"))
+      .map((li) => li.textContent);
+    const order = ["next", "program", "reading", "numbers", "arithmetic", "memory"] as const;
+    expect(parts).toEqual(
+      order.map((k) => `${words[k]}${STRINGS.cover.builtIn(MACHINE_PARTS[k])}`),
+    );
+    expect(within(figure).getByText(words.doing)).toBeInTheDocument();
+    expect(within(figure).getByText(words.back)).toBeInTheDocument();
+    expect(within(figure).getByText(STRINGS.cover.machine)).toBeInTheDocument();
+  });
+
+  it("names a part's modules as the course writes a list of numbers", () => {
+    expect(STRINGS.cover.builtIn([6])).toBe("Module 6");
+    expect(STRINGS.cover.builtIn([3, 7])).toBe("Modules 3 and 7");
+    expect(STRINGS.cover.builtIn([2, 3, 6])).toBe("Modules 2, 3 and 6");
+  });
+
+  it("names only modules the plan has", () => {
+    for (const modules of Object.values(MACHINE_PARTS))
+      for (const m of modules) expect(STRINGS.moduleNames[m]).toBeDefined();
   });
 });
 

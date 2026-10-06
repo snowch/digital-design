@@ -1,44 +1,60 @@
 // Copyright © 2026 Christopher Snow
 
-// The course's front page: the cover (what the course is, the machine it builds, where to start or
-// go on), then every module the plan has, in order, each with its lessons or the line that says it
+// The course's front page: the cover (what the course is, how the machine it builds runs a step,
+// where to start or go on), then every module the plan has, in order, each with its lessons or the line that says it
 // is still to be written.
 
-import { useEffect, useState } from "react";
-
-import { libraryCircuit } from "@dd/dd-model";
-import { CircuitThumbnail } from "@dd/dd-views";
 import { LessonStore, verifyCompletion, type Book, type Storage } from "@dd/lesson-runtime";
-import type { Circuit } from "@dd/sim";
 
 import { PREFACE_HREF, lessonHref } from "../route";
 import { STRINGS } from "../strings";
 
 type Lesson = Book["lessons"][number];
 
-/** The drawing on the cover: the whole machine, as the last lesson of Module 8 draws it. */
-export const COVER_MACHINE = "datapath-full";
-
 /**
- * The whole machine, drawn small without its words. Building it takes a moment on a phone, so the
- * page's words come first and the drawing follows, in room kept for it.
+ * The machine the course builds, as the flow of one step of a program: each part, and under it the
+ * modules that build it (`docs/machine.md`; the term each part's lesson introduces is in brackets).
  */
-function CoverMachine() {
-  const [circuit, setCircuit] = useState<Circuit | undefined>();
-  useEffect(() => {
-    const build = () => setCircuit(libraryCircuit(COVER_MACHINE));
-    if (typeof requestIdleCallback === "function") {
-      const id = requestIdleCallback(build, { timeout: 500 });
-      return () => cancelIdleCallback(id);
-    }
-    const id = setTimeout(build, 0);
-    return () => clearTimeout(id);
-  }, []);
+export const MACHINE_PARTS = {
+  // The program counter (Module 8, fetch) is a register (Module 5); the next step's choice is
+  // Module 8's (branches).
+  next: [5, 8],
+  // The ROM (Module 6, memory-map).
+  program: [6],
+  // The decoder Module 8 draws closed and Module 9 opens.
+  reading: [9],
+  // The register file (Module 6).
+  numbers: [6],
+  // The ALU (Module 3, alu; Module 7).
+  arithmetic: [3, 7],
+  // The RAM and the devices at addresses (Module 6, ram and memory-map).
+  memory: [6],
+} as const;
+
+function MachineFlow() {
+  const words = STRINGS.cover.flow;
+  const part = (key: keyof typeof MACHINE_PARTS) => (
+    <li className="flow-part" key={key}>
+      <span className="flow-name">{words[key]}</span>
+      <span className="flow-modules">{STRINGS.cover.builtIn(MACHINE_PARTS[key])}</span>
+    </li>
+  );
   return (
     <figure className="cover-machine">
-      <div className={`cover-drawing${circuit ? "" : " cover-drawing-waiting"}`}>
-        {circuit && <CircuitThumbnail circuit={circuit} label={STRINGS.cover.machineLabel} />}
-      </div>
+      <ol className="machine-flow">
+        {part("next")}
+        {part("program")}
+        {part("reading")}
+        <li className="flow-group">
+          <span className="flow-group-name">{words.doing}</span>
+          <ul>
+            {part("numbers")}
+            {part("arithmetic")}
+            {part("memory")}
+          </ul>
+        </li>
+      </ol>
+      <p className="flow-back">{words.back}</p>
       <figcaption>{STRINGS.cover.machine}</figcaption>
     </figure>
   );
@@ -71,7 +87,7 @@ export function LessonList({ book, storage }: { book: Book; storage: Storage }) 
       <div className="cover">
         <h1>{book.title}</h1>
         <p className="cover-lead">{STRINGS.cover.lead}</p>
-        <CoverMachine />
+        <MachineFlow />
         {next && (
           <p className="cover-start">
             <a className="button primary" href={lessonHref(next.id)}>

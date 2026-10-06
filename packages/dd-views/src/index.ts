@@ -9,7 +9,6 @@ export * from "./strings";
 export * from "./useSim";
 export * from "./traces";
 export * from "./CircuitView";
-export * from "./CircuitThumbnail";
 export * from "./TimingDiagram";
 export * from "./TruthTable";
 export * from "./Builder";
