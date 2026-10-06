@@ -93,6 +93,13 @@ export const SceneFigure = withProps(
     const [ref, available] = useWidth<HTMLDivElement>(640);
     const { sources, outputs } = data;
     const items = sources.flatMap((g) => g.items);
+    // A count under one wire would meet what is written over the next row's wire, a name or
+    // another count, so in a column where any wire is named, every bus writes its count over its
+    // wire (Module 6's shop scene: an unnamed address above the named data bus D).
+    const countsOver = {
+      sources: items.some((i) => i.signal),
+      outputs: outputs.some((o) => o.signal),
+    };
 
     // The left column: as wide as its widest room or item.
     const left =
@@ -143,11 +150,11 @@ export const SceneFigure = withProps(
 
     // Module 5: a named bus writes its count above the wire, right of the slash, with its name
     // left of it; a count below the wire would meet the name over the next row's wire.
-    const busMark = (x: number, yy: number, n: number, named = false) =>
+    const busMark = (x: number, yy: number, n: number, over = false) =>
       n > 1 ? (
         <g className="bus-mark">
           <line className="slash" x1={x - 4} x2={x + 4} y1={yy + 6} y2={yy - 6} />
-          <text className="bus-count" x={x + 6} y={named ? yy - 7 : yy + 16}>
+          <text className="bus-count" x={x + 6} y={over ? yy - 7 : yy + 16}>
             {n}
           </text>
         </g>
@@ -162,14 +169,18 @@ export const SceneFigure = withProps(
       <polygon className="arrow" points={`${x},${yy} ${x - 8},${yy - 4.5} ${x - 8},${yy + 4.5}`} />
     );
 
+    // A drawing a little wider than its card, as on a phone, is drawn a little smaller, never so
+    // small that its 12-pixel text falls under the course's 11 pixels; a wider one still scrolls.
+    const scale = width > available && available / width >= 11 / 12 ? available / width : 1;
+
     return (
       // The outer element is the figure's card; the inner one is measured, inside its padding.
       <div className="scene-figure" data-interactive={interactive.id}>
         <div className="scene-wrap" ref={ref}>
           <svg
             className="scene"
-            width={width}
-            height={height}
+            width={width * scale}
+            height={height * scale}
             viewBox={`0 0 ${width} ${height}`}
             role="img"
             aria-label={`${data.labels.title}. ${data.labels.summary}`}
@@ -225,7 +236,7 @@ export const SceneFigure = withProps(
                           slashX((leftEdge + circuitX) / 2, item),
                           yy,
                           item.width,
-                          !!item.signal,
+                          !!item.signal || countsOver.sources,
                         )}
                       </g>
                     );
@@ -271,7 +282,7 @@ export const SceneFigure = withProps(
                         {o.signal}
                       </text>
                     )}
-                    {busMark(slashX(wireMid, o), yy, o.width, !!o.signal)}
+                    {busMark(slashX(wireMid, o), yy, o.width, !!o.signal || countsOver.outputs)}
                     {o.kind === "lamp" ? (
                       <>
                         <g className="lamp">
