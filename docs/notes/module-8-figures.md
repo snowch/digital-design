@@ -9,6 +9,7 @@ sentence from a brief of checked facts.
 ## Times
 
 - Started: 2026-10-06 10:46 UTC (the branch moved to `main`).
+- Finished: 2026-10-06 12:09 UTC, after the full check on the pushed head. About 1 hour 25 minutes.
 
 ## The audit, as found after reading the pages
 
@@ -183,3 +184,36 @@ in words through briefs GC and GW, except those listed under "left out".
   to" wraps between its entries, each kept whole; the legibility rule and the figures' page tests
   pass at both widths. `main` has moved to f66f810 (the hand-routed wires kept inside the
   datapath drawing): merging, then the full check on the merged head.
+- 11:50. The second reading found one name doing two jobs: the construction called `7D0` the
+  "signals word" while the map names it "DOOR and WARM"; the construction now says the same.
+  A first check on the merged head was stopped mid-run because this edit landed under it.
+- 11:50 to 12:09. The full check on the pushed head ee63950 (`main` at f66f810 merged in): 713 unit
+  and integration tests pass; Playwright 471 passed, 27 skipped, 10 failed. The 10 are the
+  screenshot comparisons a clean `main` fails in this container (the figures-that-matter-most,
+  signals, scenes and Module 2 pairs at both widths; registers and state machines on the phone);
+  none names a Module 8 figure, so no baseline was touched.
+
+## What the checks caught
+
+- The page test's map cause: the test expected `22`, the decimal reading of cause 34; the page
+  writes causes as the machine does. The test was wrong, not the figure.
+- The phone's legibility rule: the branch table 29 and 43 pixels too wide once a branch listed
+  both ways (fixed by wrapping "went to" between entries).
+- Earlier, while the figures were built (before this log): the branch table 3 pixels too wide,
+  and the map too wide until its range moved under the part's name.
+
+## Time added to the check
+
+The ten new page tests (five figures, two widths) take 0.8 to 1.6 seconds each, about 11 seconds
+in all; the seven facts tests run in well under a second. The whole check took 16.9 minutes of
+Playwright, inside the 17 to 19 minutes Module 8's own note recorded.
+
+## What I would change
+
+- The fields figure's notes are fixed per lesson, so a field a job ignores (A for copy B) still
+  says where it goes; a later version could take a note per instruction.
+- The timeline's slider counts the simulator's time beside the numbered edges; a timing diagram
+  that could step edge by edge would remove that third count.
+- The reviewers saw screenshots; a reviewer who could press the page would have caught the phone
+  table's width before the check did.
+
