@@ -107,6 +107,74 @@ wrote every learner-facing sentence from a brief of checked facts.
   and the 37 programs still pass on the drawing and the text. The decoder's and the ALU's own
   passing values remain, as the gates make them: HALT passes through 1 on the way to 0, and the
   lesson says so.
+- 07:44 to 07:52 Lesson 8.5's briefs and drafts; the figure's own words (brief 6V). The browser
+  suite for the module (`tests/educational/module8.spec.ts`): every challenge completed with its
+  reference through the page, five wrong texts rejected naming the failing test, saved work graded
+  again on load, and the figure used as a learner uses it. Two of its tests were wrong, not the
+  page: a row found by "R2" also matched the program's "R2 <= word[sensorA]", and a range input
+  does not answer `fill`; both now find what they mean.
+- 07:52 to 08:00 The browser's diagram checks caught three things the content tests could not: a
+  written challenge's try-it drawing (the digits module, elaborated to slices and constants) ran
+  its values off the drawing, so the module's text challenges try out on pins; the fetch stage's
+  CAUSE value ran off the drawing's right edge, so the figure writes values of up to 4 bits and the
+  tables carry the rest; and in the memory and full stages the clock's trunk turned beside the
+  CLK pin's written value. The trunks moved half a cell, and the full stage's next-PC wire moved
+  out of their way.
+- 08:00 to 08:05 The second pass read the fault figures' results printed under them before the
+  learner runs anything (Module 7's review had caught the same). They are now `outcomes`, shown
+  once the learner has run the figure with a fault in. The mechanical walk (each page at 1280 and
+  375 pixels and in the dark theme, every datapath control pressed): no page wider than the
+  screen, no console error from the figures (one 404 for a resource on the first desktop load), and
+  the drawing's trail named the circuit `datapath-fetch`; it now says "datapath".
+- 08:05 to 08:15 The reading half: five reviewers, one per lesson, with the same written brief
+  (`briefs/R-brief.md`), then one sceptic over all their findings (`reviews/findings.md`). Fixes
+  to code first: a prediction's values hidden until the learner commits; the capstone moved onto
+  the branch; the fetch figure steps its edges; the shop's numbers no longer collide (8.2's
+  prediction constant is -100, which no register holds; 8.3's program keeps lesson 1's rooms).
+  `main` moved twice (the editor's part names; the browser tests wait for the typefaces); merged
+  with no conflict, and the 705 unit tests passed after the merge.
+- 08:15 to 08:18 Five fix briefs (`briefs/F1.md` to `F5.md`), drafted, checked and placed.
+
+## Briefs and drafts
+
+A shared fact sheet (`briefs/00-module.md`), then per lesson three prose briefs and one for
+labels (`1A` to `5L`), one for the figure's words (`6V`), and five fix briefs after the reviews
+(`F1` to `F5`): 31 briefs, every learner-facing string drafted by the drafting subagent and checked
+for facts by the managing model. The drafts' faults, as found and fixed:
+
+- **Facts dropped**: the register file's read and write ports (1A); the constant 52 bits of 1
+  (2B); "the limit" (2A); "(Module 4)" and the modules' identities in a task (1C). Each put back
+  with the fewest words.
+- **Facts wrong**: "Last lesson you subtracted them" for Module 7's flags lesson (1A); "the edge
+  writes no register" turned into "no edge writes" (1A); "To load a larger constant ... add,
+  subtract or shift" (2B; the machine has no shift); "After 500 edges, the simulation stops" for
+  a machine that never stops (5B); the fix brief's own instruction "once only" copied into a
+  sentence (F5).
+- **Voice**: em dashes and "your shop's machine" throughout one draft (3A, sent back); headings
+  that copied the brief's descriptions in lower case and a title that was not a question (2L, sent
+  back); "operation code", near the rationed "opcode" (1B); "unrecognized" (6V).
+- **Not given**: two drafts described their keys instead of writing them (4A, 4B, asked again);
+  one lead described the circuit instead of the task (1C, sent back).
+- **Repeats**: a reflection that kept the old paragraph beside the new one (F4); "jump" used for
+  "go to" in a lesson that introduces the jump (5A). Cut or replaced.
+
+## Reviews
+
+| Lesson | Findings | Upheld | In part | Rejected |
+|---|---|---|---|---|
+| `instructions` | 9 | 1 | 7 | 1 |
+| `constants` | 10 | 4 | 4 | 2 |
+| `fetch` | 11 | 4 | 4 | 3 |
+| `memory-access` | 8 | 1 | 5 | 2 |
+| `branches` | 10 | 5 | 4 | 1 |
+
+What the reviews changed, beyond wording: every prediction's answer was readable in the figure
+before the learner committed (the buses table, the status line, the drawing's values), in all
+five lessons; the capstone stepped a register copy under a section about the branch; 8.2's
+prediction asked for -250 while a register on screen held -250; the fault figures' results were
+printed before a run; "held at" where Module 7 says "stuck at". Not acted on: the learner cannot
+record a failure experiment's prediction (the course's convention, as Module 7); byte loads are
+stated and not run (Module 6 showed bytes; noted in the lesson).
 
 ## Why five lessons
 
