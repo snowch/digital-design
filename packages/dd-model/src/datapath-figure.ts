@@ -55,6 +55,7 @@ export function buildDatapath(setup: DatapathSetup): BuiltDatapath {
   const program = setup.program === undefined ? undefined : assemble(setup.program);
   const circuit = placedDatapath({
     stage,
+    name: "datapath",
     ...(program ? { rom: program.rom } : {}),
     registers: registerWords(setup.registers),
   });

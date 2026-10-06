@@ -46,9 +46,9 @@ const CHECKS_VECTORS = (
 }));
 
 /** The office's margin: how far room A is above the limit, and twice that. */
-export const MARGIN = `R1 <= -250
-R2 <= -184
-R3 <= R2 - R1
+export const MARGIN = `R1 <= -184
+R2 <= -250
+R3 <= R1 - R2
 R4 <= R3 + R3
 stop`;
 

@@ -11,9 +11,10 @@ import { afterInstruction, figureAnswer, figureSim, signed } from "./module8-fac
 import { figureOf, testCountOf } from "./module3-facts";
 
 describe("facts for the constant jobs lesson", () => {
-  it("the instructions' words; -250 is F06 in 12 bits, 3846 read unsigned", () => {
+  it("the instructions' words; -100 is F9C in 12 bits, 3996 read unsigned; -250 is F06, 3846", () => {
     const hex = (t: string) => instructionWord(t).toString(16).toUpperCase().padStart(8, "0");
-    expect(hex("R3 <= -250")).toBe("25003F06");
+    expect(hex("R3 <= -100")).toBe("25003F9C");
+    expect(0xf9c).toBe(3996);
     expect(hex("R3 <= R1 + 100")).toBe("22103064");
     expect(hex("R3 <= R1 & 0xFF")).toBe("201030FF");
     expect(hex("R4 <= 2047")).toBe("250047FF");
@@ -22,13 +23,13 @@ describe("facts for the constant jobs lesson", () => {
     expect(hex("R6 <= 1800")).toBe("25006708");
   });
 
-  it("the prediction: R3 takes -250", () => {
-    expect(figureAnswer(constants, "predict-constant")).toBe("-250");
+  it("the prediction: R3 takes -100, which no register holds", () => {
+    expect(figureAnswer(constants, "predict-constant")).toBe("-100");
   });
 
   it("the investigation: each instruction's edge from R1 -184 and R2 -250", () => {
     const after = (k: number) => afterInstruction(constants, "constants", k);
-    expect(after(0)).toMatchObject({ R3: "-250" });
+    expect(after(0)).toMatchObject({ R3: "-100" });
     expect(after(1)).toMatchObject({ R3: "-84" });
     expect(after(2)).toMatchObject({ R3: "72" });
     expect(after(3)).toMatchObject({ R4: "2047" });
@@ -36,9 +37,9 @@ describe("facts for the constant jobs lesson", () => {
     expect(after(5)).toMatchObject({ R3: "-434" });
   });
 
-  it("the faults: the copied bit at 0 makes -250 3846; BCONST at 0 reads R0, which is X", () => {
+  it("the faults: the copied bit at 0 makes -100 3996; BCONST at 0 reads R0, which is X", () => {
     const after = (k: number, f: number) => afterInstruction(constants, "constants-faults", k, f);
-    expect(after(0, 0)).toMatchObject({ R3: "3846" });
+    expect(after(0, 0)).toMatchObject({ R3: "3996" });
     expect(after(1, 0)).toMatchObject({ R3: "-84" });
     expect(after(0, 1)).toMatchObject({ R3: "X" });
     expect(after(1, 1)).toMatchObject({ R3: "X" });

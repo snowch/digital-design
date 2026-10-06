@@ -95,11 +95,7 @@ export function invertedSignal(netName: string): Fault {
 }
 
 /** The wire named `net` is held at a fixed value whatever drives it. */
-export function stuckAt(
-  netName: string,
-  value: 0 | 1,
-  at?: readonly [number, number],
-): Fault {
+export function stuckAt(netName: string, value: 0 | 1, at?: readonly [number, number]): Fault {
   return {
     id: `stuck:${netName}:${value}`,
     label: `Hold ${netName} at ${value}`,

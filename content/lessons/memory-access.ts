@@ -99,7 +99,7 @@ const MEMORY_STEPS: {
     const pc = 4 * (k + 1);
     return [
       {
-        label: `edge ${k + 1}: PC is ${pc.toString(16).toUpperCase().padStart(3, "0")}`,
+        label: `edge ${k + 1}: PC is ${pc.toString(16).toUpperCase().padStart(3, "0")}${k + 1 >= 7 ? ", the display 66, the lamps 101" : k + 1 >= 5 ? ", the display 66" : ""}`,
         set: { CLK: 1 },
         expect: {
           PC: h64(BigInt(pc)),

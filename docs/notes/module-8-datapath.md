@@ -107,3 +107,102 @@ wrote every learner-facing sentence from a brief of checked facts.
   and the 37 programs still pass on the drawing and the text. The decoder's and the ALU's own
   passing values remain, as the gates make them: HALT passes through 1 on the way to 0, and the
   lesson says so.
+
+## Why five lessons
+
+Module 7 ended on "where do A and B come from, and where do Y and the flags go?", so the module
+builds outwards from the ALU, one question a lesson, each with its own stage of the datapath drawn
+and running:
+
+1. `instructions`: the register file and the ALU joined, and a 32-bit word whose digits say which
+   registers and which job (kind 1). Introduces **instruction** and **datapath**.
+2. `constants`: the last three digits widened to 64 bits and a selector for the ALU's B (kind 2).
+3. `fetch`: the program in the ROM, the program counter, the decoder the course supplies closed,
+   and the stop logic with the checks on a fetch and an illegal instruction. Introduces
+   **program counter** and **fetch**.
+4. `memory-access`: loads and stores, the memory map whole with the shop's devices, and the memory's
+   checks (kinds 3 and 4).
+5. `branches`: the condition from the flags, the next PC, the call and the jump (kinds 5 to 7), and
+   the capstone: one edge of the whole datapath stepped through every change it makes. Introduces
+   **branch**.
+
+The split falls where a new part of the drawing raises a new question; each lesson's drawing is
+the last one plus what that question needs. Control signals are set by hand in the first two
+lessons (WRITEY, BCONST), where the lesson teaches what each does; from lesson 3 the decoder sets
+them, drawn closed until Module 9.
+
+## Terms
+
+Rationed: instruction and datapath (`instructions`), program counter and fetch (`fetch`), branch
+(`branches`). Not rationed, as the plan says: program, machine, processor, control signal,
+decode. Exemptions added to lessons on `main`, each with its reason: "instruction" on `remember`,
+`bytes` and `memory-map` (each points ahead to the machine in one sentence); "branch" on
+`register-transfer` (an arm of an `if` chain). No other lesson on `main` was edited.
+
+## The control signals' names
+
+The course's own, each named for what it does: WRITEY (write register Y), BCONST (B is the
+constant), AZERO (A is 0), LOAD, STORE, BYTE, STOP, BRANCH, CALL, JUMP; and the stop logic's GO
+(the edge goes ahead: PC's enable and the memory's writes) and WREG (WRITEY AND GO, the register
+file's write enable). The cause buses are CAUSEF (fetch), CAUSED (decoder), CAUSEM (memory) and
+CAUSE (the one the stop logic passes on). None of P&H's or H&H's names are used.
+
+## What the platform gained
+
+- The settle is faster (lazy history, the first step after a quiet settle works out only the
+  readers and drivers of the inputs set since, a full-width hash), and the circuit builder's name
+  check is linear: a clock edge of the whole datapath went from about 100 ms to about 50 ms.
+- `memory` takes `x` in its list of first words: a register that starts unknown.
+- The machine (`packages/dd-model`): `machine.ts`, the instruction-level reference; `assemble.ts`,
+  the authors' assembler; `datapath.ts`, the datapath at five stages; `datapath-run.ts`, its
+  state read off the nets and compared with the reference; `machine-suite.ts`, the suite in
+  Module 7's manner; `datapath-figure.ts`, a figure's datapath from lesson data and what one edge
+  does; `library-datapath.ts`, the stages placed and routed by hand.
+- Registers that change only at an edge (`edgeRegister`): one word of the `memory` primitive. The
+  PC and the devices' words use it, so a stepped edge shows no latch passing values.
+- The SystemVerilog subset: module instances (`instance` in the gate), a text of several modules,
+  and modules the course supplies (`CourseModule`; `machine-modules.ts`). A challenge names them
+  with `courseModules`.
+- The drawing: hand routes on a part (`meta.routes`), several fed-back nets from one column on
+  trunks of their own, `writtenWidth` on the circuit view, and a fault's fixed value placed where a
+  lesson says (`at`).
+- The datapath figure (`datapath`), with an `outcomes` text shown only after a run and a
+  prediction's values hidden until the learner commits.
+
+## Questions for the author
+
+1. **The door's first edge.** `docs/machine.md` says the door raises its event "when DOOR rises".
+   At reset nothing says what DOOR was before, so the build takes "no edge before the first one"
+   (the door's last level is kept inverted, and a reset makes it 0), and the reference agrees. A
+   door already open at reset therefore raises no event. Say if it should.
+2. **Kind 8, jobs 1 to 3 in Module 8.** With no control registers until Module 12, `resume`,
+   `RY ← Cc` and `Cc ← RA` stop the machine as "a system job a later module builds", whatever the
+   constant; the decoder does not check the control-register number until Module 12 adds the
+   registers. `docs/isa.md` makes a number outside 0 to 4 illegal (21); Module 8 reports such an
+   instruction as the later system job instead. The reference and the datapath agree.
+3. **"Stuck at" or "held at".** The drafts said "held at 0"; the reviews found Module 7 says
+   "stuck at", and every Module 8 fault now says "stuck at".
+4. **Screenshots in this environment.** `aesthetics.spec.ts`'s screenshot tests fail here for
+   figures and pages Module 8 does not touch (the remember lesson's header among them), by 4 to 7
+   per cent of pixels: the text is drawn a pixel or so apart. The rule tests in the same file pass,
+   and so does every Module 8 page in `diagrams.spec.ts`. The baselines were not updated.
+
+## Candidates for the shared primitives (listed, not extracted)
+
+- **A prediction gate** that hides a figure's values until the learner commits: the datapath
+  figure does it by hand; the carry steps and the suite lab hide their whole body instead. Two
+  consumers today (datapath, carry steps).
+- **Outcomes after a run**: `outcomes` in the fault lab, the suite lab and now the datapath figure.
+- **A table of named words** (registers, buses, devices, RAM) beside a drawing: the memory
+  explorer's words table and the datapath figure's four tables.
+
+## What I would change
+
+- The datapath drawings are wide (the full stage is about 2000 pixels) and scroll on a phone; a
+  phone layout that stacks the memory and the stop logic below would read better, at the price of
+  a second set of hand routes.
+- The decoder's and ALU's passing values make the capstone's middle steps busy (MET changes many
+  times while the carry runs). The lesson says so; a filter that names only the buses whose value
+  is final at that step would let a learner follow the instruction's order more easily.
+- A challenge on the whole datapath elaborates about ten thousand parts on every keystroke; a
+  pause before elaborating would keep the editor quick on a slow phone.

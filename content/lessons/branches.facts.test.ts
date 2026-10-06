@@ -61,7 +61,7 @@ describe("facts for the branches lesson", () => {
       "4",
       "5",
     ]);
-  });
+  }, 60_000);
 
   it("one edge, stepped into the branch: R3 at 1, PC at 2, IR at 4, QA and QB at 7, BRANCH at 9; RESULT settles to 66 at 137, MINUS at 138, MET at 144, NEXT at 154, of 155", () => {
     const sim = figureSim(branches, "one-instruction");

@@ -757,7 +757,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     reasons: {
       "11": "instruction fetch outside the ROM",
       "12": "fetch at an address not a multiple of 4",
-      "21": "unrecognised instruction",
+      "21": "an illegal instruction",
       "31": "no memory at the address",
       "33": "word at an unaligned address, or byte at device",
       "34": "write to ROM or read-only device",

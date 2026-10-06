@@ -8,6 +8,8 @@ import { assemble, figureState, instructionHex } from "@dd/dd-model";
 
 import { fetch, MARGIN } from "./fetch";
 import { figureAnswer, figureSim, runToStop, signed } from "./module8-facts";
+import { valueLabel } from "@dd/dd-views";
+
 import { testCountOf } from "./module3-facts";
 
 describe("facts for the fetch lesson", () => {
@@ -17,9 +19,9 @@ describe("facts for the fetch lesson", () => {
       instructionHex(l.instruction ?? 0),
     ]);
     expect(lines).toEqual([
-      ["000", "25001F06"],
-      ["004", "25002F48"],
-      ["008", "13213000"],
+      ["000", "25001F48"],
+      ["004", "25002F06"],
+      ["008", "13123000"],
       ["00C", "12334000"],
       ["010", "84000000"],
     ]);
@@ -37,18 +39,32 @@ describe("facts for the fetch lesson", () => {
     expect(r.reason).toBe("stop");
     expect(r.edges).toBe(5);
     expect(r.state.pc).toBe(0x10n);
-    expect(r.state.regs.slice(1, 5).map(signed)).toEqual(["-250", "-184", "66", "132"]);
+    expect(r.state.regs.slice(1, 5).map(signed)).toEqual(["-184", "-250", "66", "132"]);
   });
 
   it("the faults: PC4 at 0 runs 000 for ever; STOP at 0 runs on to 014 and stops with 21", () => {
     const stuck = runToStop(fetch, "fetch-faults", 0, 20);
     expect(stuck.reason).toBe("go");
     expect(stuck.state.pc).toBe(0n);
-    expect(stuck.state.regs.slice(1, 3).map(signed)).toEqual(["-250", "X"]);
+    expect(stuck.state.regs.slice(1, 3).map(signed)).toEqual(["-184", "X"]);
     const runsOn = runToStop(fetch, "fetch-faults", 1);
     expect(runsOn.reason).toBe("21");
     expect(runsOn.state.pc).toBe(0x14n);
     expect(runsOn.edges).toBe(6);
+  });
+
+  it("stepped: at each edge PC changes at step 2 and IR at step 4", () => {
+    const sim = figureSim(fetch, "margin");
+    const c = sim.circuit;
+    const net = (n: string) => c.nets.find((x) => x.name === n)!.id;
+    for (let e = 0; e < 3; e++) {
+      const { high } = sim.clockCycle("CLK");
+      const changes = (n: string) =>
+        high.history.flatMap((h, i) =>
+          i && valueLabel(h[net(n)]) !== valueLabel(high.history[i - 1]![net(n)]) ? [i] : [],
+        );
+      expect([changes("PC"), changes("IR")]).toEqual([[2], [4]]);
+    }
   });
 
   it("the challenges' test counts", () => {

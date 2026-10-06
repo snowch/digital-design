@@ -29,7 +29,7 @@ const CONSTANTS_CONSTRUCTS = [...WIDEN_CONSTRUCTS, "instance"];
 
 /** The instructions the investigation offers, each with WRITEY and BCONST set by hand. */
 const CONSTANT_JOBS = [
-  { label: LABELS.instructions.copy, text: "R3 <= -250", set: { WRITEY: 1, BCONST: 1 } },
+  { label: LABELS.instructions.copy, text: "R3 <= -100", set: { WRITEY: 1, BCONST: 1 } },
   { label: LABELS.instructions.add, text: "R3 <= R1 + 100", set: { WRITEY: 1, BCONST: 1 } },
   { label: LABELS.instructions.and, text: "R3 <= R1 & 0xFF", set: { WRITEY: 1, BCONST: 1 } },
   { label: LABELS.instructions.largest, text: "R4 <= 2047", set: { WRITEY: 1, BCONST: 1 } },
@@ -102,8 +102,8 @@ export const constants: LessonInput = {
             buses: ["WIDE", "ALUB", "RESULT"],
             question: PROSE.p1Question,
             options: [
-              { value: "-250", label: LABELS.options.p1Negative },
-              { value: "3846", label: LABELS.options.p1Positive },
+              { value: "-100", label: LABELS.options.p1Negative },
+              { value: "3996", label: LABELS.options.p1Positive },
               { value: "X", label: LABELS.options.p1Unknown },
             ],
             ask: "value",

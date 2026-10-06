@@ -35,6 +35,11 @@ A lesson is one module in `content/lessons/` exporting a `LessonInput` (the type
   most this many gates on any path from an input to an output) and `only` (gate kinds allowed).
   Each limit is one more test, counted after the suite's; a failed one names what the circuit
   has (the count, the longest path, the gates of another kind) and marks those parts.
+  A written challenge may set `courseModules` (Module 8): `set: "machine"` lets its text use the
+  machine's modules (`registers`, `alu`, `memory`, `decoder`, `stops`, `condition`;
+  `packages/hdl/src/machine-modules.ts`) with one module used inside another, and `program` and
+  `registers` give what the ROM and the registers start with. Such a text elaborates to thousands
+  of parts, so it sets `tryIt: "pins"`.
   An `answer` challenge has no circuit: it declares `fields` (a number with a unit, a row of bits,
   a short text), tests of kind `answers` that name a grader the book supplies
   (`ANSWER_GRADERS` in `packages/dd-model/src/graders.ts`) and list cases (`label`, `given`,
@@ -76,6 +81,7 @@ zod schema and shows a sentence in its place when they do not fit. Library ids a
 | `column-sum` | `a`, `b` (two words of one width), `labels` (the carries row's name, and what a screen reader is told) | two words added on paper: each carry from the model, written above the column it goes into with an arc from the column that made it, and the sum under a rule |
 | `carry-steps` | `libraryId` (an ALU of one row of slices), `cases` (each a label and the inputs `from` and `to`), `question?`, `options?`, `explain?` | the carry stepped slice by slice after A changes: each slice a cell with its carry out and its bit of Y, a slider over the settle's steps; with a question, the learner commits first (Module 7) |
 | `suite-lab` | `libraryId` (an ALU with flags), `faults?`, `seed?`, `randomPerJob?`, `question?`, `options?`, `explain?`, `askFault?`, `outcomes?` | the generated test suite run against the ALU, healthy or with a fault: tests and failures by kind, the first failures of each, new random tests from the next seed (Module 7) |
+| `datapath` | `libraryId` (`datapath-jobs`, `-constants`, `-fetch`, `-memory` or `-full`), `program?` (lines of `docs/isa.md` assembly for the ROM), `registers?` (first words by name, others X), `inputs?` (the shop's inputs), `instructions?` (choices for the IR bus before the ROM, each with control signals set by hand), `edges?`, `shown?`, `buses?`, `ram?`, `devices?`, `run?`, `steps?`, `faults?` (a stuck-at may give `at`, its place in cells), `outcomes?`, `question?`, `options?`, `explain?`, `ask?` (`changed`, `pc`, `stop`, `value`), `register?` | the machine's datapath at one stage, clocked an edge at a time or run to its stop: the program with the PC's row marked, the registers with the ones the last edge wrote, the buses a lesson names, the devices and the RAM; a prediction of the next edge answered by a real edge on a copy, its values hidden until the learner commits; the last edge stepped through the settle (Module 8) |
 | `challenge` | `challengeId` | the runtime's challenge runner with the book's editor |
 
 A figure is a view of the simulator. If a lesson needs a figure that shows something the
