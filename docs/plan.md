@@ -29,7 +29,7 @@ generalise. Modules 12 and 13 were numbered 13 and 15 in the brief: see the deci
 | 7 The ALU | arithmetic, logic, flags, operation select, width, slicing to 64 bits, overflow | operation select, carry stepping, fault injection | ALU passing a generated test suite (normal, boundary, adversarial) | Module 3 slice |
 | 8 CPU datapath | PC, fetch, IR, register file, operand select, ALU, write-back, data memory, branching | every bus and control signal inspectable; next-state prediction | execute one instruction by stepping every transition | Modules 5–7 |
 | 9 Control | control signals, decoding, combinational and FSM control, micro-ops, multi-cycle, illegal instructions | views: instruction / micro-op / control-signal / circuit | add a new instruction to the CPU | Module 5 FSM, Module 8 |
-| 10 ISA | why an ISA, encoding, operands, immediates, loads/stores, branches, calls, invalid instructions, architectural state | encoding explorer; ISA vs microarchitecture split | design, justify and implement one new instruction | Module 9 |
+| 10 ISA | why an ISA, encoding, operands, immediates, loads/stores, branches, calls, invalid instructions, architectural state | encoding explorer, with a calculator built from the learner's ALU; ISA vs microarchitecture split | design, justify and implement one new instruction | Module 9 |
 | 11 Assembly | registers, arithmetic, memory, loops, conditionals, arrays, functions, stack, calling convention, recursion, debugging | assembler, debugger, breakpoints, watch, stack view | a useful program in the course assembly | Modules 8–10 |
 | 12 Traps and interrupts | synchronous exceptions, interrupts, cause, state save, vectors, privilege, return, nesting, system calls | trap timeline pausable at every hardware transition | minimal system-call mechanism | Module 5 FSM, Module 9 control |
 | 13 Final machine | all milestones from logic primitives to traps | partially completed machine spec | the machine runs a small program and the learner traces it to logic | everything |
@@ -105,6 +105,37 @@ ALU/memory → register write → PC update → next instruction, pausable and i
 step.
 
 ## Decisions since the brief
+
+### 6 October 2026: a calculator of the course's own, in Module 10
+
+The author asked whether to bundle their programmer's calculator, `snowch/programmer-calculator`,
+with the course, and took the recommendation below.
+
+1. **The app is not bundled.** It stays a product of its own, for its own readers. Inside the
+   course it would teach a second vocabulary and answer the course's predictions:
+   - its flags are the processor letters C, V, Z and N, where Module 7 names ZERO, MINUS, COUT
+     and OVER;
+   - its text names commercial instruction sets (RISC-V, x86, ARM) and C's types and constants,
+     and none of it went through the drafting process;
+   - its exercises include textbook examples that the originality notes of `decoders` and
+     `state-encoding` name as what those lessons do not do: a 3-to-8 decoder, a 7-segment display,
+     Gray code;
+   - it shows at once a word in hexadecimal and its signed reading, which Module 1's predictions
+     ask the learner to work out;
+   - it fills a word with 0s when the width grows, where the machine's widening copies the top bit
+     (Module 8, `constants`).
+2. **The course gets its own calculator, designed once as part of Module 10's encoding explorer.**
+   It runs the learner's ALU in the simulator, as every figure in the course is a view of the
+   circuit:
+   - the eight jobs (Module 7), at 16 or 64 bits;
+   - the word as bits and in hexadecimal, read unsigned and signed (Module 1);
+   - the four flags, under Module 7's names;
+   - an instruction's fields, with the constant widened as the machine widens it.
+3. **It appears from Module 10 on.** From Module 8 the learner works with constants, addresses and
+   branches in hexadecimal (a branch's constant `FFE` is -2: two instructions back), arithmetic
+   they have already done by hand. So Module 10's build may also offer the calculator on Module
+   8's and 9's pages, but only on a page whose predictions it cannot answer. Its strings go
+   through the drafting process like every other string.
 
 ### 6 October 2026: two details of the machine, decided for the reader
 
