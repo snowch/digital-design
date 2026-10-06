@@ -7,6 +7,7 @@ export * from "./reference";
 export * from "./faults";
 export * from "./library";
 export * from "./bits";
+export * from "./word-entry";
 export * from "./signals";
 export * from "./graders";
 export * from "./measure";

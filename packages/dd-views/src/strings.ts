@@ -274,6 +274,23 @@ export interface ViewStrings {
     readonly heading: string;
     /** The accessible name of the row of bits. */
     readonly row: string;
+    /** A word wider than 16 bits, typed. The fields' accessible names: {name}. */
+    readonly hexLabel: string;
+    readonly numberLabel: string;
+    /** The fields' visible captions. */
+    readonly hexCaption: string;
+    readonly numberCaption: string;
+    /** The button that takes what was typed, and its accessible name: {name}. */
+    readonly set: string;
+    readonly setLabel: string;
+    /** What is wrong with a typed word: {char}; {name}, {width}, {digits}; {min}, {max}. */
+    readonly empty: string;
+    readonly notHex: string;
+    readonly hexTooLong: string;
+    readonly notNumber: string;
+    readonly numberRange: string;
+    /** The folded row of the word's bits: {name}. */
+    readonly bitsSummary: string;
   };
   // Module 5
   readonly machine: MachineStrings;
@@ -815,6 +832,18 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
   words: {
     heading: "Input {name}",
     row: "The bits of input {name}. Press a bit to change it.",
+    hexLabel: "Draft {name} in hexadecimal",
+    numberLabel: "Draft {name} as a number",
+    hexCaption: "Draft hexadecimal",
+    numberCaption: "Draft number",
+    set: "Draft set",
+    setLabel: "Draft set {name}",
+    empty: "Draft empty",
+    notHex: "Draft not hex {char}",
+    hexTooLong: "Draft too long {name} {width} {digits}",
+    notNumber: "Draft not number {char}",
+    numberRange: "Draft range {name} {width} {min} {max}",
+    bitsSummary: "Draft bits of {name}",
   },
   // Module 7: drafted by the prose process (docs/notes/module-7-alu.md)
   carrySteps: {
