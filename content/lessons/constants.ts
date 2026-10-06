@@ -113,6 +113,7 @@ export const constants: LessonInput = {
           caption: LABELS.captions.predictConstant,
           props: {
             libraryId: "datapath-constants",
+            focus: ["widen", "pickB"],
             registers: ROOMS,
             instructions: [CONSTANT_JOBS[0]],
             shown: [1, 2, 3],
@@ -144,6 +145,7 @@ export const constants: LessonInput = {
           props: {
             outcomes: PROSE.constantsAfter,
             libraryId: "datapath-constants",
+            focus: ["widen", "pickB"],
             registers: ROOMS,
             instructions: CONSTANT_JOBS,
             shown: [1, 2, 3, 4],
@@ -180,6 +182,7 @@ export const constants: LessonInput = {
           lead: PROSE.constantsFaultsLead,
           props: {
             libraryId: "datapath-constants",
+            focus: ["widen", "pickB"],
             registers: ROOMS,
             instructions: [CONSTANT_JOBS[0], CONSTANT_JOBS[1]],
             shown: [1, 2, 3],
@@ -240,6 +243,7 @@ export const constants: LessonInput = {
           props: {
             outcomes: PROSE.hourAfter,
             libraryId: "datapath-constants",
+            focus: ["widen", "pickB"],
             registers: {},
             instructions: [
               {

@@ -136,6 +136,7 @@ export const instructions: LessonInput = {
           caption: LABELS.captions.predictDifference,
           props: {
             libraryId: "datapath-jobs",
+            focus: ["registers", "alu"],
             registers: ROOMS,
             instructions: [JOBS[0]],
             shown: [1, 2, 3],
@@ -167,6 +168,7 @@ export const instructions: LessonInput = {
           props: {
             outcomes: PROSE.jobsAfter,
             libraryId: "datapath-jobs",
+            focus: ["registers", "alu"],
             registers: ROOMS,
             instructions: JOBS,
             shown: [1, 2, 3, 4],
@@ -204,6 +206,7 @@ export const instructions: LessonInput = {
           props: {
             outcomes: PROSE.jobsFaultsAfter,
             libraryId: "datapath-jobs",
+            focus: ["registers", "alu"],
             registers: ROOMS,
             instructions: [JOBS[0], JOBS[1]],
             shown: [0, 1, 2, 3],

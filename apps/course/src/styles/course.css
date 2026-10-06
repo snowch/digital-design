@@ -2081,3 +2081,8 @@ button.bit {
 .wide-bit.digit-end {
   margin-right: 4px;
 }
+/* Module 8: a wire a stuck-at fault holds, drawn from its old driver, dashed in the fault colour. */
+.wire.wire-held > path:not(.wire-hit):not(.wire-halo) {
+  stroke: var(--bad);
+  stroke-dasharray: 6 4;
+}

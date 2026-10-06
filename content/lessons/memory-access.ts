@@ -160,6 +160,7 @@ export const memoryAccess: LessonInput = {
           caption: LABELS.captions.predictLoad,
           props: {
             libraryId: "datapath-memory",
+            focus: ["pickA", "memory", "pickLoad"],
             program: SHOW_MARGIN,
             inputs: SENSORS,
             shown: [2, 3],
@@ -191,6 +192,7 @@ export const memoryAccess: LessonInput = {
           props: {
             outcomes: PROSE.showMarginAfter,
             libraryId: "datapath-memory",
+            focus: ["pickA", "memory", "pickLoad"],
             program: SHOW_MARGIN,
             inputs: SENSORS,
             shown: [2, 3, 4, 5],
@@ -239,10 +241,11 @@ export const memoryAccess: LessonInput = {
           props: {
             outcomes: PROSE.memoryFaultsAfter,
             libraryId: "datapath-memory",
+            focus: ["memory", "pickLoad"],
             program: SHOW_MARGIN,
             inputs: SENSORS,
             shown: [2, 3, 4],
-            buses: ["RESULT", "MQ", "YIN"],
+            buses: ["RESULT", "MQ", "YIN", "CAUSE"],
             devices: true,
             run: true,
             faults: [

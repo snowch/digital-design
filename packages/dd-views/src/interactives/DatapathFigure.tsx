@@ -273,6 +273,25 @@ export const DatapathFigure = withProps(
     };
 
     const words = registerWords(circuit, values);
+    // The register the last edge wrote, read off the register file's write enable and write
+    // address just before it: a write of the value a register already held is still a write.
+    const writtenAt = useMemo(() => {
+      if (!edge) return undefined;
+      const file = circuit.composites.find((c) => c.path === "registers");
+      const we = file?.inputs["WE"];
+      const wa = file?.inputs["WA"];
+      if (we === undefined || wa === undefined) return undefined;
+      const enable = edge.before[we];
+      const address = edge.before[wa];
+      if (
+        !enable ||
+        !address ||
+        enable.known !== 1n ||
+        address.known !== (1n << BigInt(address.width)) - 1n
+      )
+        return undefined;
+      return enable.value === 1n ? Number(address.value) : -1;
+    }, [edge, circuit]);
     const before = edge ? registerWords(circuit, edge.before) : [];
     const shown = data.shown ?? Array.from({ length: 16 }, (_, k) => k);
     const netValue = (name: string) => {
@@ -487,7 +506,10 @@ export const DatapathFigure = withProps(
                   const w = words[k];
                   if (!w) return null;
                   const was = before[k];
-                  const written = was !== undefined && valueLabel(was) !== valueLabel(w);
+                  const written =
+                    writtenAt !== undefined
+                      ? writtenAt === k
+                      : was !== undefined && valueLabel(was) !== valueLabel(w);
                   return (
                     <tr key={k} className={written ? "row-current" : ""}>
                       <th scope="row">{`R${k}`}</th>

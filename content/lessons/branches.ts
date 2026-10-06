@@ -141,6 +141,7 @@ export const branches: LessonInput = {
           caption: LABELS.captions.predictBranch,
           props: {
             libraryId: "datapath-full",
+            focus: ["condition", "next"],
             program: COLDER,
             inputs: SENSORS,
             edges: 2,
@@ -221,6 +222,7 @@ export const branches: LessonInput = {
           props: {
             outcomes: PROSE.branchFaultsAfter,
             libraryId: "datapath-full",
+            focus: ["condition", "next"],
             program: SUM,
             shown: [0, 1, 2],
             buses: ["RESULT", "NEXT"],
@@ -262,11 +264,12 @@ export const branches: LessonInput = {
           props: {
             outcomes: PROSE.oneInstructionAfter,
             libraryId: "datapath-full",
+            focus: ["alu", "condition", "next"],
             program: COLDER,
             inputs: SENSORS,
             edges: 1,
             shown: [2, 3],
-            buses: ["QA", "QB", "RESULT", "PC4", "NEXT"],
+            buses: ["QA", "QB", "RESULT", "PC4", "NEXT", "IR"],
             steps: true,
           },
         },
@@ -294,6 +297,7 @@ export const branches: LessonInput = {
           props: {
             outcomes: PROSE.callAfter,
             libraryId: "datapath-full",
+            focus: ["yWord", "next"],
             program: CALL,
             shown: [1, 2, 15],
             buses: ["RESULT", "PC4", "NEXT", "YIN"],

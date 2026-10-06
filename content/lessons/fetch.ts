@@ -102,6 +102,7 @@ export const fetch: LessonInput = {
           caption: LABELS.captions.predictEnd,
           props: {
             libraryId: "datapath-fetch",
+            focus: ["decoder", "stops"],
             program: RUNS_OFF,
             edges: 2,
             shown: [1],
@@ -132,6 +133,7 @@ export const fetch: LessonInput = {
           props: {
             outcomes: PROSE.marginAfter,
             libraryId: "datapath-fetch",
+            focus: ["rom", "pc", "plus4"],
             program: MARGIN,
             shown: [1, 2, 3, 4],
             buses: ["PC", "PC4", "IR", "RESULT"],
@@ -169,9 +171,10 @@ export const fetch: LessonInput = {
           lead: PROSE.fetchFaultsLead,
           props: {
             libraryId: "datapath-fetch",
+            focus: ["plus4", "decoder"],
             program: MARGIN,
             shown: [1, 2, 3, 4],
-            buses: ["PC", "PC4", "IR"],
+            buses: ["PC", "PC4", "IR", "CAUSE"],
             run: true,
             faults: [
               {

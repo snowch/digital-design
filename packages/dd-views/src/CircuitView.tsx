@@ -185,6 +185,25 @@ export function CircuitView({
   }, [circuit, scope]);
   const scene = useMemo(() => sceneOf(drawing), [drawing]);
   const highlighted = new Set(highlight);
+  // The nets a stuck-at fault holds, and the nets it cut from their old drivers, each mapped to
+  // the net it now holds; and the fault's own parts, which a drawing placed by hand may leave
+  // unwired.
+  const { heldNets, heldParts } = useMemo(() => {
+    const held = new Map<number, number>();
+    const parts = new Set<string>();
+    for (const c of sub.components) {
+      if (c.kind !== "const" || !c.path.includes("fault/stuck")) continue;
+      parts.add(c.path);
+      for (const base of Object.values(c.outputs)) {
+        held.set(base, base);
+        const name = sub.nets[base]?.name;
+        const cut = sub.nets.find((n) => n.name === `${name}.cut`);
+        if (cut) held.set(cut.id, base);
+      }
+    }
+    return { heldNets: held, heldParts: parts };
+  }, [sub]);
+  const wired = useMemo(() => new Set(scene.wires.map((w) => w.from.part)), [scene]);
   // The net under the pointer, focused, or last pressed: every wire of it lights up together.
   // A wire's name and value show while it is pointed at or focused, and stay after a press or a
   // tap until another wire is pressed, so a phone, which has no pointing, shows them too.
@@ -280,7 +299,11 @@ export function CircuitView({
           <title id={`${id}-title`}>{title}</title>
           <g className="wires">
             {scene.wires.map((w, i) => {
-              const net = netOfWire(sub, w.from);
+              const drawn = netOfWire(sub, w.from);
+              // Module 8: in a drawing placed by hand, a wire whose net a fault holds still runs
+              // from its old driver. It carries the held value, and is drawn as held.
+              const heldBy = drawn !== undefined ? heldNets.get(drawn) : undefined;
+              const net = heldBy ?? drawn;
               const value = net !== undefined ? values?.[net] : undefined;
               const level = levelOf(value);
               const name = net !== undefined ? (sub.nets[net]?.name ?? "") : "";
@@ -289,7 +312,7 @@ export function CircuitView({
               return (
                 <g
                   key={i}
-                  className={`wire wire-${level}${wide ? " wire-word" : ""}${isHot ? " wire-hot" : ""}`}
+                  className={`wire wire-${level}${wide ? " wire-word" : ""}${isHot ? " wire-hot" : ""}${heldBy !== undefined ? " wire-held" : ""}`}
                   data-net={name}
                   role="button"
                   tabIndex={0}
@@ -321,6 +344,8 @@ export function CircuitView({
           <g className="parts">
             {scene.boxes.map((box) => {
               const { part } = box;
+              // A fault's part no wire joins says nothing the held wire does not: it is left out.
+              if (heldParts.has(part.id) && !wired.has(part.id)) return null;
               const isPin = part.kind === "input" || part.kind === "output";
               const path = fullPath(scope, part.id);
               const marked = highlighted.has(path);
