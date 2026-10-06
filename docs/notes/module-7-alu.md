@@ -111,6 +111,16 @@ subagent that wrote every learner-facing sentence from a brief of checked facts.
 - 23:55 to 00:00 Fixes to code from the reviews (below), then five briefs to the drafting
   subagent: one per lesson for the upheld findings, one for the strings inside the two new figures.
 - 00:00 to 00:03 Drafts checked and placed, one sent back; each lesson read again whole.
+- 00:03 to 00:30 The full check (the mechanical half in the browser, at desktop and phone widths)
+  found three more things, each fixed and seen to pass:
+  - in the first lesson's fault lab the C0 wire turned through the value written beside andC0,
+    and in the flags lab the Z0 wire through the constant's "1": each gate moved a cell left;
+  - a 64-bit value written above its pin, centred, ran about 90 pixels past the pin, across the
+    wires turning there. A value wider than its pin now ends at the pin's right edge, and the
+    64-bit drawings have five cells of room on the left for it;
+  - on a phone, a failed 64-bit test in the adder challenge widened the page to 629 pixels: the
+    line "Signal SUM was ..." writes 64 binary digits with no break, and the narrow layout's value
+    grid was a plain `1fr` column. A failure now wraps anywhere, and that column can shrink.
 
 ## Why four lessons
 

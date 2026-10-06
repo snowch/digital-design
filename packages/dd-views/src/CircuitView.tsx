@@ -252,8 +252,15 @@ export function CircuitView({
                     {pinValue &&
                       (part.kind === "input" && pinValue.width > 1 ? (
                         // A word's wire is wide and turns close to its pin, so the word's value
-                        // sits above the pin rather than across the wire (Module 3).
-                        <text x={box.w / 2} y={-5} textAnchor="middle" className="value-label">
+                        // sits above the pin rather than across the wire (Module 3). A value wider
+                        // than its pin (64 bits, Module 7) ends at the pin's right edge, so the
+                        // wires turning just past the pin stay clear of it.
+                        <text
+                          x={valueLabel(pinValue).length * 7.5 > box.w ? box.w : box.w / 2}
+                          y={-5}
+                          textAnchor={valueLabel(pinValue).length * 7.5 > box.w ? "end" : "middle"}
+                          className="value-label"
+                        >
                           {valueLabel(pinValue)}
                         </text>
                       ) : (

@@ -17,8 +17,9 @@ type At = Readonly<Record<string, readonly [number, number]>>;
 type Place = (circuit: Circuit, at: At) => Circuit;
 
 /**
- * A drawing moved right by `dx` cells: a 64-bit word's value, written above its pin, is wider than
- * the pin, and needs room on the left to stay inside the drawing.
+ * A drawing moved right by `dx` cells: a 64-bit word's value, written above its pin and ending at
+ * the pin's right edge, is wider than the pin, and needs room on the left to stay inside the
+ * drawing.
  */
 function shifted(at: At, dx: number, dy = 0): At {
   return Object.fromEntries(
@@ -91,7 +92,7 @@ export function aluLibrary(place: Place): Readonly<Record<string, () => Circuit>
         "in:OP1": [0, 39],
         "in:OP0": [0, 42],
         xorC0: [8, 45],
-        andC0: [13, 44.5],
+        andC0: [12, 44.5],
         "out:Y": [58, 29],
         "out:COUT": [58, 11],
       }),
@@ -112,7 +113,7 @@ export function aluLibrary(place: Place): Readonly<Record<string, () => Circuit>
             "in:OP0": [0, 49],
             xorC0: [9, 52],
             andC0: [14, 51.5],
-            one: [13, 42],
+            one: [12, 42],
             topBit: [63, 32],
             "out:Y": [68, 33.5],
             "out:MINUS": [68, 29],
@@ -138,7 +139,7 @@ export function aluLibrary(place: Place): Readonly<Record<string, () => Circuit>
             "in:OP0": [0, 46],
             xorC0: [6, 50],
             andC0: [10, 49.5],
-            one: [9, 37],
+            one: [8, 37],
             g0: [14, 30],
             g1: [23, 21],
             g2: [32, 12],
@@ -151,7 +152,7 @@ export function aluLibrary(place: Place): Readonly<Record<string, () => Circuit>
             "out:COUT": [61, 7],
             "out:OVER": [61, 10],
           },
-          3,
+          5,
         ),
       ),
     // Never drawn: every slice at one level, for the carry-stepping figure and the graders.
@@ -262,6 +263,6 @@ export const ALU_INSIDE: Readonly<Record<string, At>> = {
       "out:ZOUT": [44, 7],
       "out:OVER": [44, 10],
     },
-    3,
+    5,
   ),
 };

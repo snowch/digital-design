@@ -297,6 +297,8 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
   padding: 0;
 }
 .verdict-failure {
+  /* A 64-bit test's name and values (Module 7) wrap rather than widening a phone's page. */
+  overflow-wrap: anywhere;
   border-left: 4px solid var(--bad);
   background: var(--bad-bg);
   padding: var(--space-3) var(--space-4);
@@ -994,7 +996,7 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
 
 @media (max-width: 40rem) {
   .verdict-values {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .theme-picker {
     margin-left: 0;
