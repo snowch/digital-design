@@ -11,7 +11,11 @@ read the way the lesson's words describe it.
 
 - Started: 2026-10-06 17:33 UTC.
 - Layout finished: 18:10 UTC. Words drafted and checked: 18:13 UTC.
-- Full check: RESULT_PLACEHOLDER
+- Full check (`./scripts/check.sh`), 18:25 to 18:49 UTC: Prettier, types and the build clean;
+  Vitest 868 passed; Playwright 546 passed, 34 skipped, and 10 failed, the ten screenshot tests
+  (`aesthetics.spec.ts`, six at the phone's width and four at the desktop's) that fail on a clean
+  `main` in this container too. `diagrams.spec.ts` passed at both widths.
+- Finished: at the push after this check.
 
 ## What was placed, and why
 
