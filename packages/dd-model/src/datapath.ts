@@ -912,20 +912,20 @@ export function machineMemory(
           output: bb.net("REACH"),
         },
       );
-      // The door's last level, kept inverted so a reset (to 0) means "no edge before".
-      const quiet = bb.net("QUIET");
+      // DOOR's level at the edge before. A reset makes it 0, as it makes every register 0, so the
+      // machine starts with the door counted as closed: a door already open at reset raises the
+      // event at the first edge after it, and a freezer that starts with its door open alarms.
+      const before = bb.net("BEFORE");
       edgeRegister(
         bb,
         "doorBefore",
-        {
-          D: bb.not(ins.DOOR, { name: "notDoor" }),
-          EN: constant(bb, "always", 1, 1n),
-          RST: ins.RST,
-          CLK: ins.CLK,
-        },
-        quiet,
+        { D: ins.DOOR, EN: constant(bb, "always", 1, 1n), RST: ins.RST, CLK: ins.CLK },
+        before,
       );
-      const opened = bb.and([ins.DOOR, quiet], { name: "opened", output: bb.net("OPENED") });
+      const opened = bb.and([ins.DOOR, bb.not(before, { name: "notBefore" })], {
+        name: "opened",
+        output: bb.net("OPENED"),
+      });
       const writeWaiting = writeDev(6);
       const waitingBits = [reach, opened].map((set, i) => {
         const keep = bb.net(`W${i}`);

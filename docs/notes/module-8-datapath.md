@@ -256,11 +256,17 @@ JUMP are named, as LOAD, STORE and CALL are, after the kind of instruction that 
    At reset nothing says what DOOR was before, so the build takes "no edge before the first one"
    (the door's last level is kept inverted, and a reset makes it 0), and the reference agrees. A
    door already open at reset therefore raises no event. Say if it should.
+   **Answered (6 October 2026):** it should. The register holds DOOR's level and a reset makes it
+   0, so an open door raises the event at the first edge (`docs/plan.md`, the decision of that
+   date).
 2. **Kind 8, jobs 1 to 3 in Module 8.** With no control registers until Module 12, `resume`,
    `RY ← Cc` and `Cc ← RA` stop the machine as "a system job a later module builds", whatever the
    constant; the decoder does not check the control-register number until Module 12 adds the
    registers. `docs/isa.md` makes a number outside 0 to 4 illegal (21); Module 8 reports such an
    instruction as the later system job instead. The reference and the datapath agree.
+   **Answered (6 October 2026):** it stays so in Module 8. Module 9, which opens the decoder and
+   teaches illegal instructions, adds the constant as the decoder's input and the check
+   (`docs/plan.md`).
 3. **"Stuck at" or "held at".** The drafts said "held at 0"; the reviews found Module 7 says
    "stuck at", and every Module 8 fault now says "stuck at".
 4. **Screenshots in this environment.** `aesthetics.spec.ts`'s screenshot tests fail here for
@@ -268,6 +274,7 @@ JUMP are named, as LOAD, STORE and CALL are, after the kind of instruction that 
    per cent of pixels: the text is drawn a pixel or so apart. The same ten fail on a clean copy of
    `main` built here. The rule tests in the same file pass, and so does every Module 8 page in
    `diagrams.spec.ts`. The baselines were not updated; CI's Chromium is the judge.
+   **Answered:** they pass in the managing session's container (see "At the merge").
 
 ## What the module added to the check's time
 

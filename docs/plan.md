@@ -106,6 +106,24 @@ step.
 
 ## Decisions since the brief
 
+### 6 October 2026: two details of the machine, decided for the reader
+
+Module 8's build asked two questions about `docs/machine.md` and `docs/isa.md`, and the author
+asked for whatever serves the reader's learning.
+
+1. **A door already open at reset raises its event at the first edge.** The door's event comes
+   from a register that holds DOOR's level at the edge before, and a reset makes it 0, as it makes
+   every register 0 since Module 5. So the machine starts with the door counted as closed. It is
+   the plainest circuit for a learner to open in Module 12, and a freezer that starts with its door
+   open alarms. Module 8 had kept the level inverted, so that an open door raised nothing.
+   `docs/machine.md` says so under "Devices".
+2. **The check on a control register's number waits for Module 9.** `docs/isa.md` makes a system
+   job that names a control register outside 0 to 4 illegal (cause 21). The check needs the
+   constant as one of the decoder's inputs: a new wire, in three lessons' drawings, into a block
+   Module 8 draws closed and could not explain. Module 9 opens the decoder and teaches illegal
+   instructions, so it adds the input and the check there. Until then the machine stops on any of
+   system jobs 1 to 3 as a job a later module builds.
+
 ### 6 October 2026: the first extraction of shared primitives
 
 The brief asks for the author's approval before the first extraction of shared primitives, at

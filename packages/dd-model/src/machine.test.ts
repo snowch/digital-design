@@ -184,14 +184,14 @@ stop`);
     s = step(s, { door: 0, warm: 0, sensorA: 0n, sensorB: 0n }).state;
     s = step(s, { door: 1, warm: 0, sensorA: 0n, sensorB: 0n }).state;
     expect(s.waiting).toBe(2);
-    // No event at the first edge after reset, though DOOR is 1.
+    // A reset counts the door as closed, so a door already open sets the bit at the first edge.
     const first = step(resetMachine(assemble("stop").rom), {
       door: 1,
       warm: 0,
       sensorA: 0n,
       sensorB: 0n,
     });
-    expect(first.state.waiting).toBe(0);
+    expect(first.state.waiting).toBe(2);
   });
 
   it("calls and jumps back", () => {

@@ -85,7 +85,7 @@ export interface CpuState {
   readonly timer: bigint;
   /** Bit 0: the timer has reached 0; bit 1: the door has opened. */
   readonly waiting: number;
-  /** DOOR as it was at the edge before; at reset there was no edge before, so 1: no event. */
+  /** DOOR as it was at the edge before; a reset counts the door as closed, 0. */
   readonly doorBefore: 0 | 1;
   /** Set once the machine has stopped, with the reason and the PC of the instruction. */
   readonly stopped?: { readonly reason: StopReason; readonly pc: bigint };
@@ -104,7 +104,7 @@ export function resetMachine(rom: Uint8Array | readonly number[]): CpuState {
     lamps: 0,
     timer: 0n,
     waiting: 0,
-    doorBefore: 1,
+    doorBefore: 0,
   };
 }
 
