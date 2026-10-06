@@ -9,7 +9,7 @@ subagent that wrote every learner-facing sentence from a brief of checked facts.
 ## Times
 
 - Started: 2026-10-05 22:33 UTC (first command in the session).
-- Finished: see the last line of the log.
+- Finished: 2026-10-06 00:36 UTC, about two hours after the start.
 
 ## Log
 
@@ -321,7 +321,10 @@ table beside them carries every value); the operand drawing's inputs are ordered
 
 ## Checks
 
-See the end of the log for the last `./scripts/check.sh` run on the pushed head.
+The last `./scripts/check.sh` before the final push: Prettier, `tsc`, the copyright check, Vitest
+(53 files, 439 tests), the Vite build and Playwright (302 tests at desktop and phone widths): all
+passed, exit 0. The commit after it changes only this note. `main` had not moved since the merge
+(`1ae4fea`).
 
 ## What I would change
 
