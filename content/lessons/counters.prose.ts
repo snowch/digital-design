@@ -23,7 +23,7 @@ export const PROSE = {
     "Place two \"D flip-flop with reset\" blocks and two half adders. The first half adder adds Q0 and EN; its SUM goes to Q0's flip-flop D. The second half adder adds Q1 and the first's CARRY; its SUM goes to Q1's flip-flop D. Wire CLK and RST to both flip-flops.",
   ],
   c1Task:
-    "Draw a circuit with inputs EN, RST and CLK and outputs Q1 and Q0.\n\nAt a rising edge where RST is 1, Q1 and Q0 both become 0.\n\nAt each rising edge where EN is 1, the two bits count up by one: `00`, `01`, `10`, `11`, then back to `00`.\n\nAt a rising edge where EN is 0, they keep their current values.\n\nThe tests check your outputs by changing inputs one at a time. One test changes EN while CLK is 1.",
+    "Draw a circuit with inputs EN, RST and CLK and outputs Q1 and Q0.\n\nAt a rising edge where RST is 1, Q1 and Q0 both become 0.\n\nAt each rising edge where EN is 1, the two bits count up by one: `00`, `01`, `10`, `11`, then back to `00`.\n\nAt a rising edge where EN is 0, they keep their current values.\n\nThe tests set EN, RST and CLK step by step and check Q1 and Q0 as they go. They include a step where EN changes while CLK is 1.",
   c2Hints: [
     "Extend the 2-bit counter: each bit needs its own flip-flop and half adder, and each half adder after the first adds the CARRY of the one before.",
     "TICK is not another flip-flop. It is a wire from somewhere in your circuit. Unlike a flip-flop, a wire changes right away when something changes, not only at an edge.",

@@ -32,7 +32,7 @@ export const PROSE = {
   buildKeepBitLead:
     "Draw one bit of the register with its load enable. You have a D flip-flop block and AND, OR and NOT gates.",
   c1Task:
-    "Draw a circuit with inputs D, EN and CLK and output Q.\n\nAt a rising edge of CLK where EN is 1, Q takes D. At a rising edge where EN is 0, Q keeps its value. Between edges, Q does not change, whatever D and EN do.\n\nThe tests change D, EN and CLK one at a time and check Q after each change, including one where EN changes while CLK is 1.",
+    "Draw a circuit with inputs D, EN and CLK and output Q.\n\nAt a rising edge of CLK where EN is 1, Q takes D. At a rising edge where EN is 0, Q keeps its value. Between edges, Q does not change, whatever D and EN do.\n\nThe tests set D, EN and CLK step by step and check Q as they go. They include a step where EN changes while CLK is 1.",
   keepFaultsLead:
     'The figure shows these parts:\n\n- notEn (NOT of EN)\n- andLoad (D AND EN, output LOAD)\n- andKeep (Q AND NOT EN, output KEEP)\n- orChoice (LOAD OR KEEP, output CHOICE)\n- flip-flop ff\n\nCHOICE drives the flip-flop\'s D pin. The path from the flip-flop\'s Q through andKeep and orChoice back to its D pin is the **keep path**. Without it, the bit cannot keep a value.\n\n"Run checks" makes four checks. Each ends at a rising edge the figure makes itself, with no "Clock CLK" button. Each compares the faulty bit\'s Q with a healthy bit\'s:\n\n- "load 1" (D 1, EN 1)\n- "edge with EN 0" (D 0, EN 0)\n- "another edge with EN 0"\n- "load 0" (EN 1, D still 0)\n\nThe wires are not labelled in the drawing. Press a wire to see its name and value underneath.\n\nChoose each fault in turn and run the checks. Before you run them, say which checks you expect to fail.',
   gatedClockLead:
