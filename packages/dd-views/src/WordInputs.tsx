@@ -9,7 +9,7 @@
 // stay one press away, folded: 64 buttons on a phone are four screens to scroll for one address.
 // Up to 16 bits the row of bits is the input, as the earlier modules teach the bits with it.
 
-import { useState, type KeyboardEvent } from "react";
+import { useId, useState, type KeyboardEvent } from "react";
 
 import {
   hexOfWord,
@@ -84,6 +84,8 @@ function TypedWord({
   const t = strings.words;
   const [draft, setDraft] = useState<{ field: "hex" | "number"; text: string } | undefined>();
   const [problem, setProblem] = useState<string | undefined>();
+  // Two Try it panels on one page may each have an input of the same name.
+  const problemId = `${useId()}-problem`;
   const shown = {
     hex: value ? hexOfWord(value) : "",
     number: value ? signedOfWord(value) : "",
@@ -110,7 +112,6 @@ function TypedWord({
       setProblem(undefined);
     }
   };
-  const problemId = `word-${name}-problem`;
   const field = (which: "hex" | "number", label: string, caption: string) => (
     <label className="word-field">
       <span className="word-field-caption">{caption}</span>

@@ -83,11 +83,6 @@ export function levelOf(value: Word | undefined): Level {
  * Module 1 writes it (`FF48`: capitals, a digit per four bits, no prefix), with X for a digit
  * any of whose bits is unknown.
  */
-/** A value as a signal table shows it: with `words`, an 8-bit word too in hexadecimal. */
-export function shownWord(value: Word | undefined, words: boolean): string {
-  return words && value && value.width === 8 ? hexOfWord(value) : valueLabel(value);
-}
-
 export function valueLabel(value: Word | undefined): string {
   if (!value) return "";
   if (value.width <= 8) return formatWord(value);
@@ -108,6 +103,11 @@ export function valueLabel(value: Word | undefined): string {
     .toString(16)
     .toUpperCase()
     .padStart(Math.ceil(value.width / 4), "0");
+}
+
+/** A value as a signal table shows it: with `words`, an 8-bit word too in hexadecimal. */
+export function shownWord(value: Word | undefined, words: boolean): string {
+  return words && value && value.width === 8 ? hexOfWord(value) : valueLabel(value);
 }
 
 /** A constant part's value in binary, as its params give it. */
