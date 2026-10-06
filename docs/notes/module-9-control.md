@@ -124,3 +124,145 @@ The timer and the door's register move only at an instruction's end (ENDS), so t
 instructions, as `docs/machine.md` requires, and both machines reach the same count at the same
 instruction. Every enable that writes is ANDed with GO, so the edge at which the machine halts
 writes nothing.
+
+## Terms
+
+Rationed, each introduced where the lesson's circuit first raises the question it answers:
+**control unit** (`control-signals`), **illegal instruction** (`illegal-instructions`),
+**instruction register** (`several-edges`), **micro-operation** (`micro-operations`). The capstone
+introduces none. Not rationed, as the plan says: step, decode and decoding, controller, program,
+machine, control signal. "Cycle" appears in no Module 9 lesson; the brief forbade it, and every
+lesson says "edge". "Step" is kept for the settle model's steps; the stages of an instruction
+are its edges, named by the controller's state.
+
+One `termExemptions` entry was added to a lesson on `main`, and no other lesson on `main` was
+edited: `fetch` (8.3) names cause 21 as "an illegal instruction", the decoder's own words for
+the cause, where the machine stops on a word of 0s. Its reason, in the lesson: "Names cause 21 in
+quotation marks, as the decoder's output says it, where the machine stops on a word of 0s; lesson
+9.2 teaches which words are illegal and why." Module 8's figure strings say "an illegal
+instruction" for cause 21 too; strings are not held to the gate, and the term is the course's
+name for that cause.
+
+## The capstone: a call through a register
+
+The instruction is `docs/isa.md`'s "call through a register", `RY ← PC + 4` and `PC ← RA + c`,
+at kind 9, job 0, in the learner's own copy of the machine's text. `docs/isa.md` does not change,
+and the course's machine still refuses kind 9 with cause `21`. Every part it changed, and how each
+change was tested:
+
+- **The reference** (`packages/dd-model/src/machine.ts`): `MachineOptions.callThroughRegister`
+  names the kind; `step` runs it as the transfer says. Tested in `control.test.ts` against
+  hand-worked results, and by the suite below.
+- **The authors' assembler** (`assemble.ts`): `call R4 + c, R15` writes kind 9 only when told the
+  kind, and refuses with "this machine has no call through a register" otherwise. Tested in
+  `control.test.ts`.
+- **The drawn decoder** (`control.ts`, option `callThroughRegister`): a line KIND9; CALL and JUMP
+  become OR gates (orCall of KIND6 and KIND9, orJump of KIND7 and KIND9), and KIND9 joins the ORs of
+  WRITEY, BCONST and OP1; the kind check and the job check learn kind 9. Tested against the
+  reference for every kind and job under ten constants (`control.test.ts`); the drawing's
+  problems checked under every fault by the content tests.
+- **The decoder's text** (`content/lessons/module9.ts`, `decoderText(true)`): one `case` arm and
+  two changed terms of ILLEGAL. Tested as the capstone's first challenge (263 tests), whose
+  reference passes and whose start fails 17.
+- **The controller: no change.** The instruction sets CALL, so the controller takes the call's
+  way, FETCH, READ, WRITE, and at the WRITE edge the PC takes the ALU's result, which HA and the
+  constant have fed since READ. The build first gave it an ALU edge and a controller row of its
+  own; working the edges out again for the lesson's brief showed that HR took a word nothing
+  read, and the row went. `control.test.ts` walks the controller's table with the decoder's
+  signals for every kind, the capstone's included, and compares the walk with `stateSequence`.
+- **The datapath: no change.** "word for Y" already gives PC + 4 when CALL is 1, and the next PC
+  already takes the ALU's result when JUMP is 1, last, so JUMP wins over CALL's target.
+- **The machine, end to end**: the drawn machine with the capstone's decoder matches the
+  reference after every instruction on Module 8's suite and on a program of two such calls,
+  each in 3 edges (`multicycle.test.ts`); the machine's text does the same
+  (`content/lessons/module9.test.ts`); the capstone's second challenge runs the shop's program
+  through the learner's text edge by edge (23 tests, a reset raised and dropped while the clock
+  is high among them), and its start fails 17, first at the call's READ edge.
+
+## What the platform gained, and why
+
+- **The machine of several edges** (`packages/dd-model`): `control.ts` (the decoder opened, with
+  the constant as an input, as gates; the controller as Module 5's machine; each kind's states),
+  `multicycle.ts` (the machine built from Module 8's parts and Module 5's state machine, one
+  memory port, as three blocks joined by a control bus), `multicycle-run.ts` (its comparison with
+  the reference, instruction by instruction, with each kind's edge count checked),
+  `multicycle-view.ts` (each edge's state, signals and register transfers, read off the nets),
+  `library-control.ts` (the drawings, placed and routed by hand). Module 8's datapath stages and
+  decoder are untouched; `datapath.ts` exports helpers it had kept private, and its memory ports
+  take FETCHING and ENDS for a memory of one port.
+- **The reference keeps the effect** and takes `MachineOptions` (`MODULE_9` for the check on a
+  control register's number, and the capstone's kind). Module 8's stages are compared with the
+  reference without the options, so their comparisons are unchanged.
+- **Figures**: `control-table`, `kind-map` and `kind-edges` (`ControlViews.tsx`), each read off the
+  circuits as the page renders it; the datapath figure's views of one edge (`microOps`, `signals`,
+  `states`, `timing`), and two new questions it can ask (`edges`, `took`). Their words are in
+  `strings.ts` under `control`, drafted from brief 6V.
+- **The SystemVerilog subset**: the course's modules for Module 9 (`machine9-modules.ts`: a memory
+  of one port and the stop logic, with the register file, the ALU and the condition), sets
+  `machine9` and `machine9-call`.
+- **The drawing**: `placedInside` accepts parts with a placement of their own (a fault's `at`), and
+  eight block kinds are drawn closed.
+- Module 8's overview strip and zoom (a trial on `main`) is turned on for one Module 9 figure, the
+  four views, the module's widest drawing seen most; see the questions.
+
+## Reviews
+
+Each lesson had a reviewer subagent with `briefs/R-brief.md`, reading the lesson as text, and a
+sceptic subagent with `briefs/S-brief.md`, ruling on every finding. Both reports are saved in
+`docs/notes/module-9-control/reviews/`. Most findings stood or stood in part; those that
+fell include 9.3's "the prediction can be read off the motivation",
+9.5's "the ALU is gates gives the wrong reason", the test counts that differ from the listed
+labels (the page counts only steps that check something), and 9.1's "the fault lab's cause comes
+from outside the drawing".
+
+Fixes, code first:
+
+- `checks-text` (9.2) let an answer that ORs the check on the number in alone pass all 280 tests,
+  the mistake its own hint names; the browser's wrong-attempt test found the same. Seven tests
+  were added (287): jobs 0, 1 and 4 of kind 8 with 5 and with -1, and an add with 5.
+- The four views (9.4) show AZERO and BCONST among the signals and IR, HR and HM as buses, which
+  its text reads; the fault figure of 9.3 shows the controller's states, so the skipped MEMORY
+  edge can be seen.
+- Then the words, from five fix briefs (`briefs/F1.md` to `F5.md`) to the drafting subagent:
+  "checks" kept for the decoder's block and the fault lab's runs called the instructions or words;
+  the gates' roles in 9.1's explanation; a control register explained in 9.2, its third reason held
+  back until after the prediction; IR set against Module 8's bus in 9.3, PCEN's exception at the
+  stop, the branch's MET; the rule for enables stated only for the signals that let a register
+  take a word (9.4); CALL and JUMP named as OR gates before the capstone's faults (9.5); the
+  claim of a choice "at run time" softened to what the figure shows; repeats cut.
+
+## Briefs and drafts
+
+Every learner-facing string was drafted by the drafting subagent from a brief of checked facts
+(`docs/notes/module-9-control/briefs/`, with `00-module.md` the shared sheet and `docs/style.md`
+attached), one brief per part of a lesson (A, B, C), one for its labels (L), one for the figures'
+words and the blocks' labels (6V), and one per lesson for the review's fixes (F1 to F5). The drafts
+as returned are in `drafts/`, with each redraft after the note that sent it back. The managing
+model checked facts only, added the fewest words where a fact was missing, and cut repeats; the
+fixes it made itself are listed in the placing script's table, reproduced here.
+
+What the drafts dropped, got wrong, or drifted on:
+
+- **Dropped**: the earlier lesson's closing question at the head of 3A, 4A and 5A's fix (each
+  restored: 3A and 4A sent back, 5A's by adding the sentence); Module 8's machine stopping at
+  `82000005`, and Module 12 building the control registers (2A, words added); "the machine stops"
+  after cause `21` (2A, added); the reason Module 9's decoder reads C (2A, added); "3" in "the start
+  fails 3" (2B, added); the word `25001F48` and the tables appearing after the prediction (4A, sent
+  back); the margin program's change (4A and 4B's fix, added); the checks block learning a new kind
+  (F1, added); the text of 4B, whose first reply described the text instead of giving it (sent
+  back).
+- **Wrong**: "the control unit sets MEM" and "the control unit transitions" where the decoder and
+  the controller do (3B, sent back); "At the start, FETCHING and IREN are 1" (4B, corrected to
+  "written"); "It sets CALL" read as the controller (5B, sent back); "a word whose kind and job the
+  decoder knows" as the definition of an illegal instruction (F2, sent back); "the decoder's checks
+  block" for the control signals block (F1, corrected); "Both keep one memory port" (F5,
+  corrected); "An **illegal instruction** is one the decoder does not recognise" replacing the
+  reason the checks wait for READ (3C, sent back).
+- **Drifted**: "control unit" and "instruction register" bolded again in later lessons (3A, 3B, 3C,
+  1C; bold removed or sent back); "jobs 1 to 3 are handled by a later module" for "stop the
+  machine" (2A, corrected); "needs no new hardware" for "no new signal" (4C, later rewritten by F4);
+  "both in one edge" in 2C's closing question (sent back); invented facts in 4A ("at the left",
+  "the second program from Module 8", sent back); headings ending in full stops (4L, stripped);
+  2L's headings "Write numbers as text" and "Memory reused" and caption "Try other words to test"
+  (put back to the brief's words); the 6V labels "result hold" for HR and HM (kept "held word") and
+  "ops" for the column of transfers (kept "Transfers").
