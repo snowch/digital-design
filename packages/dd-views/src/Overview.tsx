@@ -268,6 +268,15 @@ export function OverviewStrip({
     c.querySelectorAll("[tabindex], [role], [aria-label], [id]").forEach((n) => {
       for (const a of ["tabindex", "role", "aria-label", "id"]) n.removeAttribute(a);
     });
+    // The copy is a picture: nothing in it answers a query meant for the drawing (a part's path or
+    // kind, a wire's net, an input to press), so a figure's blocks are counted once.
+    c.querySelectorAll("[data-path], [data-net], [data-port]").forEach((n) => {
+      for (const a of ["data-path", "data-net", "data-port"]) n.removeAttribute(a);
+    });
+    c.querySelectorAll("[class]").forEach((n) => {
+      const kept = [...n.classList].filter((k) => !/^part-|^pin-button$|^selected$/.test(k));
+      n.setAttribute("class", kept.join(" "));
+    });
     copy.current.replaceChildren(c);
     paint();
   });

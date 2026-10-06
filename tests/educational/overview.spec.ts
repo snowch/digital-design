@@ -65,6 +65,12 @@ test.describe("a drawing much wider than its box", () => {
     await expect(f.locator(".overview-copy svg")).toHaveCount(1);
     await expect(f.locator(".overview-copy text")).toHaveCount(0);
     await expect(f.locator(".overview-copy [tabindex], .overview-copy [role]")).toHaveCount(0);
+    // Nor does it answer a query meant for the drawing: a part's path or kind, a wire's net.
+    await expect(
+      f.locator(
+        ".overview-copy [data-path], .overview-copy [data-net], .overview-copy .part-composite",
+      ),
+    ).toHaveCount(0);
     expect(await drawnWidth(page)).toBeCloseTo(WIDTH, 0);
   });
 
