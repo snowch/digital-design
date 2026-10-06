@@ -145,6 +145,12 @@ each part the modules that build it, and came before the button; a reader then m
 and 8" first and asked where Module 1 was and where to start. The button now comes first, and the
 parts name no modules: the list gives the order to read them in.
 
+The same evening, with 32 lessons listed, the author found the page long and asked for the
+modules to be collapsed. Each module is now one line: its name, and a summary of its lessons and
+how many of their challenges are complete. Pressing the line shows its lessons. The module of the
+lesson the button names starts open, so a new reader sees Module 1's lessons and a returning one
+the module they are in.
+
 ### 6 October 2026: a calculator of the course's own, in Module 10
 
 The author asked whether to bundle their programmer's calculator, `snowch/programmer-calculator`,

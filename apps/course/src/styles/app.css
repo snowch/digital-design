@@ -297,12 +297,73 @@ ol {
 .contents-heading {
   margin-top: var(--space-7);
 }
+/* Each module is one line until it is pressed: its name and its summary beside a chevron that turns
+   when its lessons show (the author: the front page had grown long with every lesson shown). A
+   module still to be written is the same line with no chevron and nothing to open. */
+.module {
+  max-width: var(--measure);
+  border-bottom: 1px solid var(--border);
+  --chevron: 0.55rem;
+}
+.module h3 {
+  margin: 0;
+}
+.module-toggle {
+  display: grid;
+  grid-template-columns: var(--chevron) minmax(0, 1fr);
+  column-gap: var(--space-3);
+  align-items: center;
+  width: 100%;
+  min-height: 48px;
+  padding: var(--space-3) var(--space-2);
+  border: 0;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.module-toggle:hover .module-name {
+  color: var(--accent-strong);
+}
+.module-chevron {
+  grid-row: 1;
+  align-self: start;
+  /* On the name's first line, however many lines the name takes. */
+  margin-top: 0.45em;
+  width: var(--chevron);
+  height: var(--chevron);
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform var(--motion);
+}
+.module-toggle[aria-expanded="true"] .module-chevron {
+  transform: rotate(45deg);
+}
+.module-name,
+.module-toggle .meta {
+  grid-column: 2;
+}
+.module .meta {
+  display: block;
+  color: var(--fg-muted);
+  font-family: var(--font-text);
+  font-size: var(--text-sm);
+  font-weight: 400;
+  letter-spacing: normal;
+  margin: var(--space-1) 0 0;
+}
+.module-to-write {
+  padding: var(--space-3) var(--space-2) var(--space-3)
+    calc(var(--space-2) + var(--chevron) + var(--space-3));
+}
 .module-to-write h3 {
   color: var(--fg-muted);
 }
-.module-to-write .meta {
-  color: var(--fg-muted);
-  font-size: var(--text-sm);
+.module .lesson-list {
+  margin: var(--space-1) 0 var(--space-4);
+  padding-left: calc(var(--space-2) + var(--chevron) + var(--space-3));
 }
 
 .lesson-list {

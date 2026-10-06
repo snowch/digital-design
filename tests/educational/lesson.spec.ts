@@ -34,6 +34,13 @@ function watchConsole(page: Page): string[] {
   return errors;
 }
 
+/** Opens a module's line on the front page, where each module's lessons are hidden until pressed. */
+async function openModule(page: Page, module: number) {
+  const line = page.getByRole("button", { name: new RegExp(`^Module ${module}: `) });
+  if ((await line.getAttribute("aria-expanded")) !== "true") await line.click();
+  await expect(line).toHaveAttribute("aria-expanded", "true");
+}
+
 test.describe("the lesson pages", () => {
   for (const lesson of LESSONS) {
     test(`${lesson.id} renders its ten sections and every figure, with no errors`, async ({
@@ -106,6 +113,7 @@ test.describe("the lesson pages", () => {
 
   test("the lesson list shows progress recomputed from stored work", async ({ page }) => {
     await page.goto("#/");
+    await openModule(page, LESSON.module);
     await expect(page.getByRole("link", { name: LESSON.title })).toBeVisible();
     await expect(page.getByRole("link", { name: LESSON.title }).locator(".meta")).toContainText(
       `0 of ${LESSON.challenges.length}`,
@@ -208,6 +216,7 @@ endmodule`,
     );
     await expect(page.getByRole("link", { name: "Lessons" })).toBeVisible();
     await page.goto("#/");
+    await openModule(page, LESSON.module);
     await expect(page.getByRole("link", { name: LESSON.title }).locator(".meta")).toContainText(
       `0 of ${LESSON.challenges.length}`,
     );

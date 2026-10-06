@@ -71,6 +71,11 @@ export const STRINGS = {
     contents: (count: number) => `All ${count} modules`,
     /** Under a module with no lessons yet. */
     toWrite: "This module is still to be written.",
+    /** Under a module's name, open or closed: its lessons and its challenges complete (brief C2). */
+    moduleSummary: (lessons: number, passed: number, total: number) => {
+      const count = lessons === 1 ? "1 lesson" : `${lessons} lessons`;
+      return total > 0 ? `${count}, ${passed} of ${total} challenges complete` : count;
+    },
     /** The way on for a reader who has passed a challenge: the first lesson not finished. */
     continueWith: (module: number, title: string) => `Continue with Module ${module}: ${title}`,
   },

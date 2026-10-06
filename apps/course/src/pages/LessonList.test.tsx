@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
 import { INTERACTIVES, createBook } from "@dd/dd-views";
@@ -80,6 +81,9 @@ describe("the course's front page: the cover", () => {
       ...Object.values(STRINGS.cover.flow),
       STRINGS.cover.contents(STRINGS.moduleNames.length),
       STRINGS.cover.toWrite,
+      STRINGS.cover.moduleSummary(5, 3, 12),
+      STRINGS.cover.moduleSummary(1, 0, 2),
+      STRINGS.cover.moduleSummary(3, 0, 0),
       ...STRINGS.moduleNames,
     ];
     const terms = [...new Set(LESSONS.flatMap((l) => l.introduces))];
@@ -123,29 +127,70 @@ describe("the course's front page: every module of the plan", () => {
     expect(sections).toHaveLength(STRINGS.moduleNames.length);
     STRINGS.moduleNames.forEach((name, module) => {
       const section = sections[module]!;
-      expect(within(section).getByRole("heading")).toHaveTextContent(
-        `${STRINGS.module(module)}: ${name}`,
-      );
+      expect(section).toHaveAccessibleName(`${STRINGS.module(module)}: ${name}`);
       if (withLessons.has(module)) {
+        // Shown or not, each lesson is listed under its module, with its link.
         for (const l of book.lessons.filter((x) => x.module === module))
           expect(
             within(section).getByRole("link", {
               name: new RegExp(l.title.replace(/[?()]/g, "\\$&")),
+              hidden: true,
             }),
           ).toHaveAttribute("href", lessonHref(l.id));
         expect(within(section).queryByText(STRINGS.cover.toWrite)).not.toBeInTheDocument();
       } else {
         expect(within(section).getByText(STRINGS.cover.toWrite)).toBeInTheDocument();
+        expect(within(section).queryByRole("button")).not.toBeInTheDocument();
       }
     });
   });
 
-  it("shows each lesson's progress, recomputed from stored work", () => {
+  it("shows one line for each module, with only the module of the way in open", () => {
+    render(<LessonList book={book} storage={memoryStorage()} />);
+    for (const module of new Set(book.lessons.map((l) => l.module))) {
+      const lessons = book.lessons.filter((l) => l.module === module);
+      const total = lessons.reduce((n, l) => n + l.challenges.length, 0);
+      const line = screen.getByRole("button", {
+        name: new RegExp(`^${STRINGS.module(module)}: `),
+      });
+      expect(line).toHaveTextContent(STRINGS.cover.moduleSummary(lessons.length, 0, total));
+      expect(line).toHaveAttribute("aria-expanded", String(module === first.module));
+      const shown = screen.queryAllByRole("link", {
+        name: new RegExp(lessons[0]!.title.replace(/[?()]/g, "\\$&")),
+      });
+      expect(shown.length > 0, `Module ${module}`).toBe(module === first.module);
+    }
+  });
+
+  it("shows and hides a module's lessons when its line is pressed", async () => {
+    const user = userEvent.setup();
+    render(<LessonList book={book} storage={memoryStorage()} />);
+    const later = ordered.find((l) => l.module !== first.module)!;
+    const line = screen.getByRole("button", {
+      name: new RegExp(`^${STRINGS.module(later.module)}: `),
+    });
+    const link = () =>
+      screen.queryByRole("link", { name: new RegExp(later.title.replace(/[?()]/g, "\\$&")) });
+    expect(link()).not.toBeInTheDocument();
+    await user.click(line);
+    expect(line).toHaveAttribute("aria-expanded", "true");
+    expect(link()).toHaveAttribute("href", lessonHref(later.id));
+    await user.click(line);
+    expect(line).toHaveAttribute("aria-expanded", "false");
+    expect(link()).not.toBeInTheDocument();
+  });
+
+  it("shows each lesson's progress, and its module's, recomputed from stored work", () => {
     const storage = memoryStorage();
     pass(storage, first.id, 1);
     render(<LessonList book={book} storage={storage} />);
     expect(
       screen.getByRole("link", { name: new RegExp(`^${first.title.replace(/[?()]/g, "\\$&")}`) }),
     ).toHaveTextContent(STRINGS.progress(1, first.challenges.length));
+    const lessons = book.lessons.filter((l) => l.module === first.module);
+    const total = lessons.reduce((n, l) => n + l.challenges.length, 0);
+    expect(
+      screen.getByRole("button", { name: new RegExp(`^${STRINGS.module(first.module)}: `) }),
+    ).toHaveTextContent(STRINGS.cover.moduleSummary(lessons.length, 1, total));
   });
 });
