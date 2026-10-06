@@ -15,6 +15,61 @@ prediction, puts in every fault, runs every challenge with the reference and a w
 finding; fixes go in code first, then in words through the drafting subagent; then each lesson is
 read once more, and the full check runs on the pushed head.
 
+## What changed for the learner
+
+Code that every module's figures and challenges share:
+
+- A prediction is never answered before the learner commits: the datapath's tables stay hidden
+  (a CSS rule had overridden `hidden`), its pins cannot clock it, and its explanation comes after
+  the learner's own edge.
+- Results come after the edges that make them: an investigation's after-text shows below the
+  figure once the learner has clocked; each fault's outcome shows once that fault has run; the
+  lesson's closing sentence once all have.
+- A long run goes in slices that redraw, counts its edges, and says when it gave up.
+- "Written" marks the register an edge wrote, from the register file's write enable and address.
+- A stuck-at fault in a drawing placed by hand draws the held wires dashed in the fault colour,
+  carrying the held value; the unwired CONST box is gone.
+- A narrow drawing opens on the parts its lesson names (`focus`); the wide ones get the strip and
+  zoom from the managing session.
+- Failed tests can be reported as words (`feedback: "words"`): hexadecimal values, no gate names
+  the elaborator made up. Module 8's ten challenges use it.
+- A full `case` is complete: no false latch warning. Gate messages offer only what a challenge
+  allows, show code as code, and say once that the tests could not run; repetition gets a plain
+  message.
+- A written challenge whose Try it is pins draws no elaborated tangle and folds its Try it, so
+  Run tests stays near the text.
+- The stepper says when only wires inside blocks changed, and its status follows the step; an
+  option's label ends a sentence once; the scroll note waits for more than an empty margin; a
+  mouse-pressed wire draws no focus box; no favicon 404.
+
+Module 8's lessons:
+
+- Two challenges' tests now catch wrong answers they passed (the order of the memory's checks; a
+  PC check of bits 11 and 10 alone).
+- Predictions offer the word alone, not the transfer that answered them; the motivation no
+  longer states 66; fetch's options say what happens, not a code not yet explained.
+- Challenges leave the reading to the learner: the fields' bit ranges, the ALU code's bits, the
+  52-bit literal and the branch conditions' flags are no longer in the tasks (the hints keep them).
+- The loop's flow table comes after the learner has run the loop; IR and CAUSE join the tables
+  where the prose quotes them; the fields figure says when a job ignores a field it reads.
+- YIN, RESULT X at the stop, the flags that go nowhere yet, and the two decoders are explained;
+  repeats cut; a wrong cross-reference in a hint corrected.
+
+## What was left, and why
+
+- Moving the drawings' blocks so the parts a lesson names sit in the first view: the strip, zoom
+  and `focus` serve that now; the managing session keeps opening a wide drawing at a named part as
+  a note for later.
+- The 64 bit buttons for a word in Try it (F11, B5, C10): a platform change to how words are
+  entered, for every module; noted, not done.
+- A second "Clock edge" in the capstone replaces the stepped edge (B11): the after-text is shown
+  only once the learner has clocked, and the step numbers are those of the first edge; a lock
+  after one edge would need its own prop.
+- The timeline's times 2 and 3 alike, and CLK at its last time (F9): the shared timing diagram's
+  convention; small.
+- Overcalled findings (C3, C7, C10, F4 in part, M15, and the minor ones the sceptic judged
+  taste) were not acted on.
+
 ## Log
 
 - 12:40. `main` (5598fdb: a cover on the front page; a trial overview strip and zoom on branches' `sum`) merged in as e23fa54; `docs/authoring.md`'s figure table kept both sides. Walk helper written; five walkers sent, one per lesson, with `module-8-learner/brief.md`.
