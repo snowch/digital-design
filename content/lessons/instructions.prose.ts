@@ -56,4 +56,5 @@ export const PROSE = {
     "The register file and the ALU, joined, make a datapath. An instruction's digits are wires to its parts. One edge does one instruction, and writes its result when WRITEY is 1.\n\nEvery instruction so far works on registers alone, and R1 and R2 started with words the lesson gave them. The shop needs numbers that no register holds yet: the limits it checks the rooms against, the number of seconds in a minute. How can an instruction carry a number of its own to the ALU?",
   modelVsReality:
     "The simulator shows a register no edge has written as X. The lesson set R1 and R2 for you. A real register file at power-on holds 0s and 1s nobody chose.\n\nIn this model the register file and the ALU settle in steps, and an edge takes no time. In a real datapath, the next edge must wait for the slowest path: the register file's read, the ALU's carry through 64 bits, and back to D, with the setup time (Module 4) before the edge.\n\nYou set WRITEY by hand here. In the course's machine, a block works it out from K and J; a later module builds that block's insides.",
+  fieldsLead: "Draft fields lead.",
 } as const;

@@ -33,6 +33,7 @@ export const LABELS = {
     writeMemcheck: "Write the checks and run the tests.",
     memoryFaults: "Choose a fault and run the program.",
     writeMemory: "Complete the text and run the tests.",
+    map: "Draft: the map.",
   },
   options: {
     p1Reading: "-184",

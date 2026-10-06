@@ -327,6 +327,63 @@ export interface ViewStrings {
   };
   /** Module 8: the datapath figure. */
   readonly datapath: DatapathStrings;
+  /** Module 8: the focused figures of the machine's ideas. */
+  readonly machine8: MachineFigureStrings;
+}
+
+/** Module 8: the words of the instruction-fields, widening, edges, memory-map and branches figures. */
+export interface MachineFigureStrings {
+  /** The radio group's name when a figure offers several instructions, constants or programs. */
+  readonly choose: string;
+  /** Above the fields: the whole word, {word}. */
+  readonly word: string;
+  /** A field's bits: {hi} and {lo}. */
+  readonly bits: string;
+  /** A register field's value: {n}. */
+  readonly register: string;
+  /** The constant's value read signed: {value}. */
+  readonly signedValue: string;
+  /** The fields as one group, for a screen reader. */
+  readonly fieldsLabel: string;
+  /** The widening's two rows. */
+  readonly constantRow: string;
+  readonly wideRow: string;
+  /** A row of 16 of W's bits: {hi} and {lo}. */
+  readonly bitRange: string;
+  /** Under the rows: what the shading means. */
+  readonly copyKey: string;
+  /** The two readings: {c} and {w}. */
+  readonly readings: string;
+  /** A bit, for a screen reader: {n}, {bit}, and whether it is a copy. */
+  readonly bitLabel: string;
+  readonly copied: string;
+  /** The edges figure's title, for a screen reader. */
+  readonly timelineTitle: string;
+  /** The memory map's table. */
+  readonly mapCaption: string;
+  readonly addresses: string;
+  readonly part: string;
+  readonly accesses: Readonly<
+    Record<"load-word" | "load-byte" | "store-word" | "store-byte", string>
+  >;
+  /** An allowed access. */
+  readonly allowed: string;
+  /** A refused access: {cause}. */
+  readonly refused: string;
+  readonly parts: Readonly<Record<string, string>>;
+  /** An address range: {first} and {last}. */
+  readonly range: string;
+  /** The branches figure's table. */
+  readonly flowCaption: string;
+  readonly address: string;
+  readonly instruction: string;
+  readonly went: string;
+  /** One place a run went: {to} and {times}. */
+  readonly wentTo: string;
+  /** A branch whose target the run never took: {to}. */
+  readonly notTaken: string;
+  /** The arrows, for a screen reader. */
+  readonly arrowsLabel: string;
 }
 
 /** Module 8: the datapath figure's words. */
@@ -724,6 +781,55 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     part: "Part",
     range: "{first} to {last}",
     chosen: "Chosen",
+  },
+  // Module 8's focused figures: provisional words, to be drafted by the prose process
+  // (docs/notes/module-8-figures.md).
+  machine8: {
+    choose: "Choose",
+    word: "The word {word}",
+    bits: "bits {hi} to {lo}",
+    register: "R{n}",
+    signedValue: "{value}, read signed",
+    fieldsLabel: "The instruction's fields",
+    constantRow: "C, 12 bits",
+    wideRow: "W, 64 bits",
+    bitRange: "bits {hi} to {lo}",
+    copyKey: "Shaded bits are copies of bit 11.",
+    readings: "C reads {c}; W reads {w}.",
+    bitLabel: "bit {n}: {bit}",
+    copied: "a copy of bit 11",
+    timelineTitle: "Timing diagram",
+    mapCaption: "The memory map, and what the memory does with each access",
+    addresses: "Addresses",
+    part: "Part",
+    accesses: {
+      "load-word": "Load word",
+      "load-byte": "Load byte",
+      "store-word": "Store word",
+      "store-byte": "Store byte",
+    },
+    allowed: "yes",
+    refused: "{cause}",
+    parts: {
+      rom: "ROM",
+      ram: "RAM",
+      display: "display",
+      lamps: "lamps",
+      signals: "signals",
+      sensorA: "sensor A",
+      sensorB: "sensor B",
+      timer: "timer",
+      waiting: "waiting",
+      none: "no memory",
+    },
+    range: "{first} to {last}",
+    flowCaption: "Where each instruction sent PC",
+    address: "Address",
+    instruction: "Instruction",
+    went: "Went to",
+    wentTo: "{to} ({times}×)",
+    notTaken: "{to} (never)",
+    arrowsLabel: "Arrows from each branch, call and jump to where it went",
   },
   // Module 8: the datapath figure. Drafted by the prose process (brief 6V,
   // docs/notes/module-8-datapath/briefs/6V.md).

@@ -31,6 +31,13 @@ import { CarrySteps } from "./CarrySteps";
 import { SuiteLab } from "./SuiteLab";
 // Module 8, the datapath
 import { DatapathFigure } from "./DatapathFigure";
+import {
+  BranchTargets,
+  EdgeTimeline,
+  InstructionFieldsFigure,
+  MemoryMapFigure,
+  WideningFigure,
+} from "./MachineFigures";
 
 /** The interactives lessons may name by kind. */
 export const INTERACTIVES: Readonly<Record<string, ComponentType<InteractiveProps>>> = {
@@ -61,6 +68,12 @@ export const INTERACTIVES: Readonly<Record<string, ComponentType<InteractiveProp
   "suite-lab": SuiteLab,
   // Module 8, the datapath
   datapath: DatapathFigure,
+  // Module 8's focused figures, for Module 9 too.
+  "instruction-fields": InstructionFieldsFigure,
+  widening: WideningFigure,
+  "edge-timeline": EdgeTimeline,
+  "memory-map": MemoryMapFigure,
+  "branch-targets": BranchTargets,
 };
 
 export {
@@ -84,6 +97,11 @@ export {
   CarrySteps,
   SuiteLab,
   DatapathFigure,
+  InstructionFieldsFigure,
+  WideningFigure,
+  EdgeTimeline,
+  MemoryMapFigure,
+  BranchTargets,
 };
 export { carryRun, carryAnswer } from "./CarrySteps";
 export { runAluSuite, firstCatch } from "./SuiteLab";

@@ -184,6 +184,14 @@ export const memoryAccess: LessonInput = {
       prose: PROSE.construction,
       interactives: [
         {
+          id: "map",
+          kind: "memory-map",
+          timeModel: "none",
+          caption: LABELS.captions.map,
+          lead: PROSE.mapLead,
+          props: {},
+        },
+        {
           id: "write-memcheck",
           kind: "challenge",
           timeModel: "settle",

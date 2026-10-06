@@ -60,4 +60,5 @@ export const PROSE = {
     "A constant rides in the instruction's last three digits. The \"widen\" step makes it 64 bits by copying bit 11, and a selector set by BCONST gives it to the ALU's B input.\n\nSo far you put each instruction on IR by hand, and set WRITEY and BCONST yourself. The shop's machine must do its jobs one after another, on its own. Where does the machine keep its list of instructions, and how does it know which one comes next?",
   modelVsReality:
     "The widening is wires and no gates. In a chip, bit 11's wire drives its own bit and the 52 bits above it, and a wire with many inputs to drive takes longer to change.\n\nThe selector is 64 two-way selectors. The model settles them in steps; in a chip they add delay on the way to the ALU.\n\nYou set BCONST by hand here. In the course's machine, a block works it out from K, as it does WRITEY. A later module builds that block's insides.",
+  wideningLead: "Draft widening lead.",
 } as const;

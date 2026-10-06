@@ -54,4 +54,6 @@ export const PROSE = {
     "The machine now runs a program on its own. The PC names the next instruction. The ROM gives it on IR. The decoder sets the control signals. The stop logic stops the machine at `stop` or when the instruction cannot run.\n\nEvery instruction still works on registers and constants alone. It does not read or write memory.\n\nFrom Module 6: the shop's sensors provide words at their addresses; the display shows what is written to its address. How can a program read the sensors or write the display?",
   modelVsReality:
     "Here, every instruction takes one clock edge. Fetch and all the work fit between two rising edges. The clock must wait for the slowest path: from PC through the ROM, decoder, register file, and ALU, and back. Module 9 will split instructions over several edges.\n\nThe simulator stops the clock when the machine stops and shows you why. A real machine has no one to tell. Module 12 will let a program say what happens instead.\n\nThe model's ROM gives its word as soon as PC settles. A real ROM takes time to read the address and return the word.",
+  edgesLead: "Draft edges lead.",
+  edgesAfter: "Draft edges after.",
 } as const;

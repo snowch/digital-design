@@ -176,7 +176,28 @@ export const constants: LessonInput = {
         },
       ],
     },
-    { kind: "explanation", title: LABELS.titles.explanation, prose: PROSE.explanation },
+    {
+      kind: "explanation",
+      title: LABELS.titles.explanation,
+      prose: PROSE.explanation,
+      interactives: [
+        {
+          id: "widening",
+          kind: "widening",
+          timeModel: "settle",
+          caption: LABELS.captions.widening,
+          lead: PROSE.wideningLead,
+          props: {
+            constants: [
+              { label: LABELS.widenings.hundred, c: "064" },
+              { label: LABELS.widenings.minusHundred, c: "F9C" },
+              { label: LABELS.widenings.largest, c: "7FF" },
+              { label: LABELS.widenings.smallest, c: "800" },
+            ],
+          },
+        },
+      ],
+    },
     {
       kind: "generalisation",
       title: LABELS.titles.generalisation,
