@@ -593,7 +593,7 @@ class Parser {
       if (this.is("{"))
         throw new HdlError(
           this.peek().at,
-          "repetition such as `{4{a}}` is not part of the language this course uses; write the bits out, as a number or a list",
+          "repetition such as `{4{a}}` is not part of the language this course uses; write the bits out as a number or a list",
         );
       while (this.is(",")) {
         this.next();

@@ -101,7 +101,7 @@ const INSTEAD: Partial<
   always_comb: [{ needs: ["assign"], text: "describe the logic with `assign`" }],
   "op-ternary": [
     { needs: ["always_comb", "case"], text: "choose with a `case` inside `always_comb`" },
-    { needs: ["always_comb", "if"], text: "choose with an `if` inside `always_comb`" },
+    { needs: ["always_comb", "if"], text: "choose with `if` inside `always_comb`" },
     { needs: ["op-bitwise"], text: "write the selection out with `&`, `|` and `~`" },
   ],
   if: [
