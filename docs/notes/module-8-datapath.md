@@ -222,7 +222,11 @@ The course's own, each named for what it does: WRITEY (write register Y), BCONST
 constant), AZERO (A is 0), LOAD, STORE, BYTE, STOP, BRANCH, CALL, JUMP; and the stop logic's GO
 (the edge goes ahead: PC's enable and the memory's writes) and WREG (WRITEY AND GO, the register
 file's write enable). The cause buses are CAUSEF (fetch), CAUSED (decoder), CAUSEM (memory) and
-CAUSE (the one the stop logic passes on). None of P&H's or H&H's names are used.
+CAUSE (the one the stop logic passes on). Two coincide with the textbooks' names, as the managing
+session found at the merge: Patterson and Hennessy's and Harris and Harris's single-cycle
+datapaths have a Branch signal, and both add a Jump signal for their jump instruction. BRANCH and
+JUMP are named, as LOAD, STORE and CALL are, after the kind of instruction that sets them
+(`docs/isa.md`); the other names, and the set as a whole, are the course's own.
 
 ## What the platform gained
 
@@ -291,3 +295,27 @@ tests (21 at each width) and about 1.5 minutes; the whole check took 17 to 19 mi
   is final at that step would let a learner follow the instruction's order more easily.
 - A challenge on the whole datapath elaborates about ten thousand parts on every keystroke; a
   pause before elaborating would keep the editor quick on a slow phone.
+
+## At the merge
+
+The managing session ran the full check on the branch in its own container: every stage passed,
+the ten screenshots of question 4 among them, so they were the build container's text rendering.
+It then read the five lessons before merging, and changed four things:
+
+- `memory-access`'s question said Module 6 put the shop's devices at `7D8`, `7E0`, `7C0` and
+  `7C8`. Those are the course machine's addresses; Module 6 chose its own, in a 6-bit address, and
+  had no lamps. Its generalisation said the machine's 8-byte words at multiples of 8 were Module
+  6's; Module 6's words were 2 bytes at even addresses. Its model note said "as you saw in Module
+  6" of a register that takes a sensor's reading, which Module 6's model note says and no figure
+  shows. The three passages were redrafted by the drafting subagent from a brief of the facts; the
+  question came back first without "read" and "written" and without the contrast between the two
+  sets of addresses, and was sent back once.
+- `branches`' originality note still described the capstone and the fault figure as they were
+  before the reviews (the register job stepped; the display showing the wrong room). It now says
+  what the page does, and names the control signal BRANCH's coincidence with the textbooks.
+- This note's sentence "None of P&H's or H&H's names are used" was wrong for BRANCH and JUMP; the
+  paragraph on the control signals' names says so.
+
+Left as they are: the two whole-datapath challenges (`memory-access`'s and `branches`') change no
+input while the clock is high. Every register in them is a part the course supplies, and the
+learner writes only selectors, so such a step could not fail for any answer.
