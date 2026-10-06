@@ -1,6 +1,6 @@
-explanation: At an edge, a register takes a word worked out from registers' values before that edge. In the NOW and PREV circuit, now takes IN; prev takes now's word; last takes SAVE.
+explanation: At an edge, every register takes a word that the gates worked out from the values the registers had before that edge. In the NOW and PREV circuit, the NOW register takes IN and the PREV register takes NOW. In the save-once circuit, the flip-flop last also takes SAVE, and both registers take their word only at an edge where STEP is 1.
 
-Moving words into registers at an edge, each worked out from values before the edge, is called **register transfer**. It is written with an arrow, one line per register: NOW ← IN and PREV ← NOW, at an edge where STEP is 1.
+Moving words into registers at an edge, each worked out from values before the edge, is called **register transfer**. It is written with an arrow, one line per register: NOW ← IN and PREV ← NOW. In the save-once circuit, both registers take their word at an edge where STEP is 1.
 
 All the lines of one edge happen at once. Their order does not matter, because every right-hand side is read before the edge. The counter of the previous lesson is a register transfer too: Q ← Q + 1 at an edge where EN is 1.
 
@@ -10,9 +10,9 @@ The order of the two blocks does not matter. You can write two `<=` lines inside
 
 nowPrevAsTextAfter: Words of any width work the same way. Module 1's readings are 16 bits. A register for them is declared `logic [15:0]`, and `16'h0000` is a 16-bit value written in hexadecimal.
 
-predictSwapLead: Two 4-bit registers, X and Y. X's D comes from Y's Q, and Y's D from X's Q, each through a word selector. While LOAD is 1, each selector takes A (for X) or B (for Y) instead, so the figure can start them with different words. Watch the circuit below.
+predictSwapLead: Two 4-bit registers, X and Y. The circuit has inputs A, B and LOAD. While LOAD is 1, X's D takes the input A and Y's D takes the input B. While LOAD is 0, X's D takes Y's Q and Y's D takes X's Q. Watch the circuit below.
 
-p3Question: LOAD is 1. At the first edge, X takes `0011` and Y takes `0101`. At the next edge, LOAD is 0. What is X after that?
+p3Question: The input A is `0011` and the input B is `0101` while LOAD is 1. At the first edge, X takes A and Y takes B. At the next edge, LOAD is 0. What is X after that?
 
 p3Explain: X is `0101` and Y is `0011`: the registers swapped their words at one edge. X ← Y and Y ← X both read the words from before the edge. In a program, swapping two variables needs a third to keep one of them; two registers need no third.
 

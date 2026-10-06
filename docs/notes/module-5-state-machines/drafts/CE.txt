@@ -40,6 +40,6 @@ scene.reset: Reset
 scene.clock: Clock
 scene.circuit: ?
 scene.display: Display
-scene.tick: Tick lamp
+scene.tick: Lamp
 scene.title: Count edges
 scene.summary: A Count switch on wire EN, a Reset button on wire RST and a clock on wire CLK go into a box marked with a question mark. Four wires go to a display, and wire TICK goes to a lamp.

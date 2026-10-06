@@ -57,7 +57,7 @@ test.describe("Module 5's challenges", () => {
       "state-machines",
       "late-ok",
       machineText(MACHINES.retry, { style: "codes" }),
-      "edge in WAIT with OK 1",
+      "edge in WAIT with OK 1 and TICK 1",
     ],
   ];
   for (const [lessonId, id, text, label] of wrong) {
@@ -74,10 +74,10 @@ test.describe("Module 5's challenges", () => {
     });
   }
 
-  test("the drawn next-state bit without NOT FAIL is rejected", async ({ page }) => {
+  test("the drawn next-state bit without NOT TICK in row 8 is rejected", async ({ page }) => {
     await openLesson(page, "state-machines");
     const section = challenge(page, "next-one");
-    await importText(section, W.NEXT_ONE_NO_NOT_FAIL);
+    await importText(section, W.NEXT_ONE_NO_NOT_TICK);
     await runTests(section);
     await expect(section.locator(".verdict-failure").first()).toBeVisible();
     await expect(section.locator(".challenge-complete")).toHaveCount(0);

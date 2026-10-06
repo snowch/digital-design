@@ -371,7 +371,7 @@ export const StateMachine = withProps(
         nextCode: word(nWord),
       });
     else
-      status = format(strings.machine.status, {
+      status = format(show.has("table") ? strings.machine.status : strings.machine.statusNoTable, {
         state: current.name,
         code: current.code,
         row: (nextRow ?? 0) + 1,

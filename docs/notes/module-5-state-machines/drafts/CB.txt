@@ -6,9 +6,9 @@ Open the "add one" block. Inside are four half adders in a chain. The first adds
 
 counterExplorerAfter: TICK is the last half adder's carry. It is 1 while Q is `1111` and EN is 1, so the next edge gives `0000`. To measure a wait of 16 edges, start the counter at `0000` and watch for TICK.
 
-construction: Build a 2-bit counter from the parts offered: flip-flops with reset and half adders. Each bit needs one flip-flop with reset and one half adder. Bit 0's carry goes into bit 1's half adder. See how bit 1 depends on bit 0's carry to compute its next value.
+construction: Build a 2-bit counter from "D flip-flop with reset" blocks and half adders. A "D flip-flop with reset" has an RST pin. At an edge where RST is 1, its Q becomes 0. The registers lesson built that reset from gates; this part has it inside. Each bit of the counter uses one flip-flop and one half adder. Bit 0's carry goes into bit 1's half adder.
 
-buildCountTwoLead: Draw a 2-bit counter. The parts are "D flip-flop with reset" blocks and half adder blocks.
+buildCountTwoLead: The parts are buttons above the drawing; press one port and then another to wire them.
 
 c1Task: Draw a circuit with inputs EN, RST and CLK and outputs Q1 and Q0.
 
@@ -26,15 +26,15 @@ c1Hints.2: If EN goes to both half adders, both bits change and the count jumps.
 
 c1Hints.3: Try one bit alone: put Q0 on half adder A and EN on its B. The SUM equals Q0 XOR EN, so at an edge where EN is 1, Q0 flips; where EN is 0, it stays.
 
-c1Hints.4: Half adder 0: add Q0 and EN; send its SUM to Q0's flip-flop D. Half adder 1: add Q1 and half adder 0's CARRY; send its SUM to Q1's flip-flop D.
+c1Hints.4: Half adder 1 adds Q1 and half adder 0's CARRY. Its SUM goes to Q1's flip-flop's D.
 
 c1Hints.5: Place two "D flip-flop with reset" blocks and two half adders. The first half adder adds Q0 and EN; its SUM goes to Q0's flip-flop D. The second half adder adds Q1 and the first's CARRY; its SUM goes to Q1's flip-flop D. Wire CLK and RST to both flip-flops.
 
-counterFaultsLead: This is the 4-bit counter with three faults to choose from. The first fault is the wire carrying ha1's CARRY into ha2 fixed at 0. The second fault is EN fixed at 1. The third fault is ha0's XOR gate made an OR gate. Press "Run checks" to run seven checks: a reset, then five rising edges with EN set to 1, then one more edge with EN set to 0.
+counterFaultsLead: This is the 4-bit counter with three faults to choose from. The first fault is C2 forced to 0: C2 is the wire carrying ha1's CARRY into ha2. The second fault is EN fixed at 1. The third fault is ha0's XOR gate made an OR gate. Press "Run checks" to run seven checks: a reset, then five rising edges with EN 1, then one edge with EN 0.
 
-A healthy counter gives `0000` after reset, then `0001`, `0010`, `0011`, `0100`, and `0101` from the five edges. With EN 0, it stays `0101`.
+A healthy counter gives `0000` after reset, then `0001`, `0010`, `0011`, `0100`, `0101` from the five edges, and stays `0101` with EN 0.
 
-Before running the checks, predict which checks will fail and what the faulty counter will do instead. Open the "add one" block to see where each fault acts. Then press "Run checks" and compare.
+Before running the checks, predict which will fail and what the faulty counter will do. Open the "add one" block to see where each fault acts. Then press "Run checks" and compare.
 
 counterFaultsOutcomes: **First fault:** bit 2 never gets the carry, so it never changes. The count goes `0000`, `0001`, `0010`, `0011`, then back to `0000`, `0001`, and stays at `0001`. Fails: "edge 4", "edge 5", "edge with EN 0". Total: 3 of 7.
 

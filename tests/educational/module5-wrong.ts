@@ -84,7 +84,7 @@ export const READINGS_UNDO_FIRST = `module readings(input logic [15:0] IN, input
 endmodule
 `;
 
-/** next-one: row 5 without NOT FAIL, so it is also 1 in row 4's case... and wherever TICK is 1 in TRY. */
+/** Row 5 without NOT FAIL: no test can tell (row 4 covers the difference). */
 export const NEXT_ONE_NO_NOT_FAIL = `module next_one(input logic S1, input logic S0, input logic OK, input logic FAIL, input logic TICK, output logic N1);
   logic TRY;
   logic WAIT;
@@ -97,6 +97,24 @@ export const NEXT_ONE_NO_NOT_FAIL = `module next_one(input logic S1, input logic
   assign GIVE_UP = S1 & S0;
   assign R4 = TRY & ~OK & FAIL;
   assign R5 = TRY & ~OK & TICK;
+  assign R8 = WAIT & ~TICK;
+  assign N1 = R4 | R5 | R8 | GIVE_UP;
+endmodule
+`;
+
+/** Row 8 without NOT TICK: 1 in WAIT when TICK is 1, where row 7 leads to TRY. */
+export const NEXT_ONE_NO_NOT_TICK = `module next_one(input logic S1, input logic S0, input logic OK, input logic FAIL, input logic TICK, output logic N1);
+  logic TRY;
+  logic WAIT;
+  logic GIVE_UP;
+  logic R4;
+  logic R5;
+  logic R8;
+  assign TRY = ~S1 & S0;
+  assign WAIT = S1 & ~S0;
+  assign GIVE_UP = S1 & S0;
+  assign R4 = TRY & ~OK & FAIL;
+  assign R5 = TRY & ~OK & ~FAIL & TICK;
   assign R8 = WAIT;
   assign N1 = R4 | R5 | R8 | GIVE_UP;
 endmodule

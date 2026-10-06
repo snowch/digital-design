@@ -419,9 +419,14 @@ export const stateMachines: LessonInput = {
           { label: "GO falls while the clock is high", set: { GO: 0 }, expect: { S: "01" } },
           { label: "clock low, FAIL 1", set: { CLK: 0, FAIL: 1 } },
           { label: "edge with FAIL 1", set: { CLK: 1 }, expect: { S: "10", SEND: 0 } },
-          { label: "clock low, FAIL 0, OK 1", set: { CLK: 0, FAIL: 0, OK: 1 } },
-          { label: "edge in WAIT with OK 1", set: { CLK: 1 }, expect: { S: "00", SEND: 0 } },
-          { label: "clock low, OK 0, GO 1", set: { CLK: 0, OK: 0, GO: 1 } },
+          // OK and TICK together in WAIT: OK wins, so a TICK-first arm fails here.
+          { label: "clock low, FAIL 0, OK 1, TICK 1", set: { CLK: 0, FAIL: 0, OK: 1, TICK: 1 } },
+          {
+            label: "edge in WAIT with OK 1 and TICK 1",
+            set: { CLK: 1 },
+            expect: { S: "00", SEND: 0 },
+          },
+          { label: "clock low, OK 0, TICK 0, GO 1", set: { CLK: 0, OK: 0, TICK: 0, GO: 1 } },
           { label: "edge with GO 1 again", set: { CLK: 1 }, expect: { S: "01" } },
           { label: "clock low, GO 0, FAIL 1", set: { CLK: 0, GO: 0, FAIL: 1 } },
           { label: "edge with FAIL 1 again", set: { CLK: 1 }, expect: { S: "10" } },

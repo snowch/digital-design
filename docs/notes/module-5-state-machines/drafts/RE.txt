@@ -1,42 +1,83 @@
 title: How do registers pass words to each other?
+
 objectives.1: Predict which word a register takes when its D comes from a register that changes at the same edge.
+
 objectives.2: Make a button press act only once, across multiple edges.
+
 objectives.3: Write 16-bit registers that pass words to each other as text.
+
 titles.question: A new display
+
 titles.motivation: One register's value from another
+
 titles.prediction: Which word does PREV take?
+
 titles.investigation: Watch NOW and PREV change
+
 titles.construction: Build NOW and PREV
+
 titles.failureExperiment: What happens with a long press
+
 titles.explanation: Words move at each edge
+
 titles.generalisation: Registers as text
+
 titles.challenge: Swap and undo
-titles.reflection: Moving on
+
+titles.reflection: Deciding the job
+
 challengeTitles.c1: Draw NOW and PREV
+
 challengeTitles.c2: Two readings with undo
+
 captions.scene: The second display shows the number saved before the latest one.
+
 captions.predictPrev: Predict PREV after two saves, then check.
+
 captions.nowPrevExplorer: Set IN, press SAVE and Clock CLK, and watch both displays.
+
 captions.buildNowPrev: Draw NOW and PREV and run the tests.
+
 captions.predictLongPress: Predict PREV after a press that lasts three edges, then check.
+
 captions.saveOnce: Keep SAVE pressed for several edges and watch it save once.
+
 captions.nowPrevAsText: Compare the two registers drawn as blocks with their text.
+
 captions.predictSwap: Predict X after one edge with each register's D from the other's Q, then check.
+
 captions.writeReadings: Write the two 16-bit registers with an undo and run the tests.
+
 options.p1Old: PREV is 0011
+
 options.p1New: PREV is 0101
+
 options.p1Zero: PREV is 0000
+
 options.p2Old: PREV is 0011
+
 options.p2New: PREV is 0101
+
 options.p2Zero: PREV is 0000
+
 options.p3Swapped: X is 0101
+
 options.p3Same: X is 0011
+
 options.unknown: The simulator cannot know X (XXXX)
+
 scene.switches: Switches
+
 scene.save: Save
+
 scene.clock: Clock
+
 scene.circuit: ?
-scene.now: Now
-scene.prev: Previous
+
+scene.now: NOW
+
+scene.prev: PREV
+
 scene.title: Switches with two displays
+
 scene.summary: Switches on four wires IN, a Save button on wire SAVE and a clock on wire CLK go into a box marked with a question mark; four wires go to display NOW and four to display PREV.

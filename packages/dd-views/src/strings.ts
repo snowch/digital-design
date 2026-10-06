@@ -293,6 +293,8 @@ export interface MachineStrings {
   readonly inputButton: string;
   /** The status line: {state} {code} now, row {row} applies, {next} {nextCode} at the next edge. */
   readonly status: string;
+  /** The status line with no table on show, so no row to name: {state} {code}, {next} {nextCode}. */
+  readonly statusNoTable: string;
   /** The status line while RST is 1. */
   readonly resetting: string;
   /** The status line when the register holds no state's code: {code}. */
@@ -576,6 +578,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     inputsLabel: "Inputs",
     inputButton: "{name} = {value}",
     status: "Now {state} ({code}). Row {row} applies: the next edge gives {next} ({nextCode}).",
+    statusNoTable: "Now {state} ({code}). The next edge gives {next} ({nextCode}).",
     resetting: "Now {state} ({code}). RST is 1: the next edge gives {next} ({nextCode}).",
     noState: "The register stores {code}, which is no state's code.",
     noName: "No state",

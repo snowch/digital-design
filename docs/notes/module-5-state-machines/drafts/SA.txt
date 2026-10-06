@@ -10,7 +10,7 @@ At a rising edge where RST is 1, the register becomes `00`, IDLE. Like the count
 
 The outputs SEND and SIREN depend on the state alone: SEND is 1 in TRY, SIREN in GIVE_UP.
 
-prediction: The two figures below run the circuit, each drawn as three blocks: next-state logic, a register, and output logic. S is the register's code; choose an answer and then press "Check my prediction".
+prediction: The two figures below run the circuit, each drawn as three blocks: next-state logic, a register, and output logic. S is an output showing the state's code. Choose an answer and then press "Check my prediction".
 
 p1Question: The figure resets the circuit to IDLE, then sets GO to 1 for one edge. GO goes back to 0, and two more edges pass with OK, FAIL and TICK all 0. What is the state at the end?
 

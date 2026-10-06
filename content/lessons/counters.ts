@@ -174,8 +174,8 @@ export const counters: LessonInput = {
             ],
             watch: "Q",
             options: [
-              { value: "0000", label: LABELS.options.p1Zero },
               { value: "1111", label: LABELS.options.p1Stop },
+              { value: "0000", label: LABELS.options.p1Zero },
               { value: "XXXX", label: LABELS.options.unknown },
             ],
             explain: PROSE.p1Explain,
@@ -201,9 +201,9 @@ export const counters: LessonInput = {
             ],
             watch: "Q",
             options: [
-              { value: "0010", label: LABELS.options.p2Kept },
               { value: "0101", label: LABELS.options.p2Counted },
               { value: "0000", label: LABELS.options.p2Zero },
+              { value: "0010", label: LABELS.options.p2Kept },
             ],
             explain: PROSE.p2Explain,
             signals: ["CLK", "RST", "EN", "Q"],

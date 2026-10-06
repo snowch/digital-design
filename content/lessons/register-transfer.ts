@@ -108,8 +108,8 @@ export const registerTransfer: LessonInput = {
             ],
             watch: "PREV",
             options: [
-              { value: "0011", label: LABELS.options.p1Old },
               { value: "0101", label: LABELS.options.p1New },
+              { value: "0011", label: LABELS.options.p1Old },
               { value: "0000", label: LABELS.options.p1Zero },
             ],
             explain: PROSE.p1Explain,
@@ -246,8 +246,8 @@ export const registerTransfer: LessonInput = {
             ],
             watch: "X",
             options: [
-              { value: "0101", label: LABELS.options.p3Swapped },
               { value: "0011", label: LABELS.options.p3Same },
+              { value: "0101", label: LABELS.options.p3Swapped },
               { value: "XXXX", label: LABELS.options.unknown },
             ],
             explain: PROSE.p3Explain,

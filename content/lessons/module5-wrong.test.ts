@@ -34,6 +34,23 @@ export const DEFROST_CLEAR_FIRST = machineText(
   { style: "enum" },
 );
 
+/** The lab's change with TICK read before OK in WAIT. */
+export const LATE_OK_TICK_FIRST = machineText(
+  {
+    ...MACHINES["retry-late-ok"],
+    rows: MACHINES["retry-late-ok"].rows.map((r) =>
+      r.from !== "WAIT"
+        ? r
+        : r.to === "TRY"
+          ? { ...r, when: { TICK: 1 } }
+          : r.to === "IDLE"
+            ? { ...r, when: { OK: 1, TICK: 0 } }
+            : r,
+    ),
+  },
+  { style: "codes" },
+);
+
 describe("plausible wrong attempts at Module 5's challenges", () => {
   it("fail where the learner would look", () => {
     const first = (v: ReturnType<typeof verdict>) => v.failures[0]?.label;
@@ -47,10 +64,16 @@ describe("plausible wrong attempts at Module 5's challenges", () => {
     expect(first(verdict(registerTransfer, "readings", W.READINGS_UNDO_FIRST))).toBe(
       "edge with NEW 1 and UNDO 1",
     );
-    expect(verdict(stateMachines, "next-one", W.NEXT_ONE_NO_NOT_FAIL).passed).toBe(false);
+    expect(first(verdict(stateMachines, "next-one", W.NEXT_ONE_NO_NOT_TICK))).toBeDefined();
+    // Row 5 without NOT FAIL is 1 only where row 4 is 1 too: N1 does not change, and no test
+    // can fail it. The hint names the row 8 mistake instead, which the tests do catch.
+    expect(verdict(stateMachines, "next-one", W.NEXT_ONE_NO_NOT_FAIL).passed).toBe(true);
+    expect(first(verdict(stateMachines, "late-ok", LATE_OK_TICK_FIRST))).toBe(
+      "edge in WAIT with OK 1 and TICK 1",
+    );
     expect(
       first(verdict(stateMachines, "late-ok", machineText(MACHINES.retry, { style: "codes" }))),
-    ).toBe("edge in WAIT with OK 1");
+    ).toBe("edge in WAIT with OK 1 and TICK 1");
     expect(first(verdict(stateEncoding, "defrost", DEFROST_CLEAR_FIRST))).toBe(
       "edge in DEFROST with WARM 1 and CLEAR 1",
     );

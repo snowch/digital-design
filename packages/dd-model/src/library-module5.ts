@@ -30,6 +30,9 @@ function need(ins: PortNets, port: string): NetId {
  * later one adds the carry from the one before. With EN at 0 nothing is added and NEXT is Q. COUT
  * is 1 when the sum does not fit: Q is all ones and EN is 1, so the next edge wraps to zero.
  */
+/** How far right of the one before each half adder of an add-one block sits, in cells. */
+const STAIR = 5;
+
 export function addOne(b: CircuitBuilder, ins: PortNets, options: BlockOptions = {}) {
   const q = need(ins, "Q");
   const en = need(ins, "EN");
@@ -60,7 +63,7 @@ export function addOne(b: CircuitBuilder, ins: PortNets, options: BlockOptions =
         sums.push(ha.SUM);
         carry = ha.CARRY;
       }
-      joinWord(bb, [...sums].reverse(), next, { name: "join", meta: at(12 + 7 * width, 1) });
+      joinWord(bb, [...sums].reverse(), next, { name: "join", meta: at(12 + STAIR * width, 1) });
     },
     {
       inputs: { Q: q, EN: en },
@@ -69,8 +72,8 @@ export function addOne(b: CircuitBuilder, ins: PortNets, options: BlockOptions =
         pins: {
           "in:Q": [0, 1],
           "in:EN": [0, 7],
-          "out:NEXT": [18 + 7 * width, 1],
-          "out:COUT": [18 + 7 * width, 3 + 4 * width],
+          "out:NEXT": [18 + STAIR * width, 1],
+          "out:COUT": [18 + STAIR * width, 3 + 4 * width],
         },
       },
     },
@@ -79,13 +82,16 @@ export function addOne(b: CircuitBuilder, ins: PortNets, options: BlockOptions =
 }
 
 /**
- * The half adders of an add-one block, placed as a staircase by path: each one 7 cells right of
+ * The half adders of an add-one block, placed as a staircase by path: each one STAIR cells right of
  * and 4 below the one before, under the split, so its carry runs down into the next one's B.
  * The block's builder cannot place Module 3's half adders itself (they take no position).
  */
 function staircase(circuit: Circuit, block: string, width: number): Circuit {
   const at = new Map(
-    Array.from({ length: width }, (_, i) => [`${block}/ha${i}`, { x: 9 + 7 * i, y: 6 + 4 * i }]),
+    Array.from({ length: width }, (_, i) => [
+      `${block}/ha${i}`,
+      { x: 9 + STAIR * i, y: 6 + 4 * i },
+    ]),
   );
   return {
     ...circuit,
@@ -237,6 +243,10 @@ export function nowPrevOnceCircuit(width = 4): Circuit {
   register(b, now, clk, { name: "prev", width, reset: rst, enable: step, q: prev });
   b.output("NOW", now);
   b.output("PREV", prev);
+  // OLD and STEP are outputs too, so the drawing and the table show them by the names the
+  // lesson uses.
+  b.output("OLD", old);
+  b.output("STEP", step);
   return b.build();
 }
 
@@ -302,7 +312,22 @@ export function module5Library(place: Place): Readonly<Record<string, () => Circ
         "out:NOW": [21, 12],
         "out:PREV": [21, 1],
       }),
-    "now-prev-once": () => nowPrevOnceCircuit(4),
+    "now-prev-once": () =>
+      place(nowPrevOnceCircuit(4), {
+        "in:SAVE": [0, 1],
+        "in:RST": [0, 5],
+        "in:CLK": [0, 8],
+        "in:IN": [0, 13],
+        last: [5, 1],
+        notOld: [11, 1],
+        andStep: [15, 0],
+        now: [20, 12],
+        prev: [28, 13.5],
+        "out:OLD": [36, 3],
+        "out:STEP": [36, 6],
+        "out:PREV": [36, 9],
+        "out:NOW": [36, 19],
+      }),
     swap: () => swapCircuit(4),
     ...machines,
   };

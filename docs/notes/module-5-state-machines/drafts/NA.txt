@@ -1,12 +1,12 @@
-question: The last lesson ended by asking whether it matters which state gets which code. A reset always loads `00`. The retry controller's table shows what each state does and what outputs it sends in each state. Yet it never says which code each state has: any four different 2-bit codes would work and carry out the same table.
+question: The last lesson ended by asking whether it matters which state gets which code. A reset always loads `00`. The retry controller's table says what each state does, not which code it has. Any four different 2-bit codes carry out the same table, so they all work the same way until a reset happens.
 
-So what should decide which code each state gets?
+But do they all behave the same after a reset? So what should decide which code each state gets?
 
 tryZeroTableLead: The figure shows the same controller with two codes swapped: TRY is `00` and IDLE is `01`. The diagram and the table are the same. The register has not been reset, so the status line says the register stores `XX`, which is no state's code.
 
-motivation: When you choose the codes, you decide three things: where a reset takes you, how many flip-flops your state register needs, and how many gates your next-state logic builds.
+motivation: When you choose the codes, you decide three things: where a reset takes you, how many flip-flops your state register needs, and whether a state's line comes from a decoder or from one register bit.
 
-The course's reset loads all zeros. So the state whose code is all zeros is where you land. Two bits give four codes, so four states need at least two flip-flops. But more flip-flops can mean fewer gates.
+The course's reset loads all zeros. So the state whose code is all zeros is where you land. Two bits give four codes, so four states need at least two flip-flops.
 
 prediction: The figure below runs the controller with TRY at `00`, and draws the circuit above its question.
 

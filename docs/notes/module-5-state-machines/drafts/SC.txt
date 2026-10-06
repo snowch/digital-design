@@ -1,6 +1,6 @@
 explanation: Between edges, the next-state logic works out the code of the next state from the state and the inputs. That code waits at the register's D. At the edge the register takes it, and the next-state logic starts again from the new state.
 
-The gates in the next-state logic read off the table, one gate per row. Rows 2 and 3 lead to IDLE, `00`, and need no gate: when no row gives a bit a 1, the OR gives 0. Row 9 reads no input, so its term is GIVE_UP's line itself. The gates are row1, row4, row5, row6, row7, row8 and two OR gates.
+Rows 2 and 3 lead to IDLE, `00`, and need no gate: when no row gives a bit a 1, the OR gives 0. Row 9 reads no input, so its term is GIVE_UP's line itself. The gates are row1, row4, row5, row6, row7, row8 and two OR gates.
 
 SEND and SIREN come from the output logic, which reads the state alone. An input that changes between edges cannot change them; only an edge can.
 
@@ -36,7 +36,7 @@ c2Task: The text box starts with the whole controller's text. Change the WAIT ar
 
 Inputs: GO, OK, FAIL, TICK, RST, CLK. Outputs: SEND, SIREN, S (the state's code).
 
-The tests run the controller through every state, including an edge in WAIT with OK 1, an edge in GIVE_UP with OK 1, one test where GO falls while CLK is 1, and one where OK rises while CLK is 1.
+The tests run the controller through every state, including an edge in WAIT with OK 1 and TICK 1 together (OK wins: the next state is IDLE), an edge in GIVE_UP with OK 1, one test where GO falls while CLK is 1, and one where OK rises while CLK is 1.
 
 c2Hints.1: Only the WAIT arm of the `case` changes. Write its rows in order: the row with OK first.
 
@@ -44,7 +44,7 @@ c2Hints.2: Adding the OK row after the TICK row lets TICK win when both are 1, a
 
 c2Hints.3: TRY's arm already starts with `if (OK) next = 2'b00;`: an answer ends the job.
 
-c2Hints.4: WAIT's arm starts `if (OK) next = 2'b00;`.
+c2Hints.4: WAIT's new arm should start `if (OK) next = 2'b00;`, like TRY's.
 
 c2Hints.5: Replace WAIT's arm with:
 
@@ -56,9 +56,9 @@ c2Hints.5: Replace WAIT's arm with:
 end
 ```
 
-reflection: A state machine is a register that stores its state and next-state logic that works out the next state from the state and the inputs. Here, the outputs come from the state alone.
+reflection: This lesson showed one machine four ways. The state diagram, the table, the circuit, and the text all say the same thing: which state the machine is in, and what the next state will be.
 
-The next-state logic was read off the table, one gate per row. The text says the same table with `case`. The codes `00` to `11` were chosen without a reason given. A reset always loads `00`. Does it matter which state gets which code?
+The codes `00` to `11` were chosen without a reason given. A reset always loads `00`. Does it matter which state gets which code?
 
 modelVsReality: The model's inputs change only between edges. A real answer can arrive at any moment, even just before an edge, when metastability is the risk. The next lesson shows what an input that rises and falls between two edges does.
 
