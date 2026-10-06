@@ -191,8 +191,8 @@ ol {
   margin: 0 0 var(--space-4);
 }
 
-/* The cover, at the top of the front page: what the course is, how the machine it builds runs one
-   step of a program, part by part with the modules that build each, and the way in. */
+/* The cover, at the top of the front page: what the course is, the way in, and how the machine it
+   builds runs one step of a program, part by part. */
 .cover {
   max-width: var(--measure);
 }
@@ -241,10 +241,6 @@ ol {
 .flow-name {
   font-weight: 600;
 }
-.flow-modules {
-  font-size: var(--text-sm);
-  color: var(--fg-muted);
-}
 .machine-flow > .flow-group {
   max-width: none;
   padding: var(--space-3);
@@ -286,7 +282,7 @@ ol {
   color: var(--fg-muted);
 }
 .cover-machine figcaption {
-  margin-top: var(--space-3);
+  margin-bottom: var(--space-4);
   font-size: var(--text-sm);
   color: var(--fg-muted);
 }

@@ -110,13 +110,19 @@ step.
 
 The author asked whether the course should have a cover page, and took the recommendation: the top
 of the front page becomes the cover, rather than a page a reader clicks past on every visit. It
-says what the course is, shows the whole machine the course builds (Module 8's last drawing, drawn
-small and without words), and leads in with one button: "Start with Module 1" for a new reader,
-or "Continue with" the first lesson not finished for a reader who has passed a challenge. Below
-it, one list gives every module the plan has, from 0 to 13, each with a name in plain words and
-its lessons, or a line saying it is still to be written. A reader meets the cover before every
-lesson, so its words use no term a lesson introduces; a test holds it to the term gate, and
-another checks its list of modules against the table above.
+says what the course is, then leads in with one button: "Start with Module 1" for a new reader,
+or "Continue with" the first lesson not finished for a reader who has passed a challenge. Under
+the way in, a picture of the machine the course builds: one step of a program as a flow of its
+parts, in plain words. Below it, one list gives every module the plan has, from 0 to 13, each
+with a name in plain words and its lessons, or a line saying it is still to be written. A reader
+meets the cover before every lesson, so its words use no term a lesson introduces; a test holds it
+to the term gate, and another checks its list of modules against the table above.
+
+The picture changed twice the same day. Module 8's last drawing, small, was too cluttered for a
+cover on a phone, so a flow of the machine's parts took its place. The flow first named under
+each part the modules that build it, and came before the button; a reader then met "Modules 5
+and 8" first and asked where Module 1 was and where to start. The button now comes first, and the
+parts name no modules: the list gives the order to read them in.
 
 ### 6 October 2026: a calculator of the course's own, in Module 10
 

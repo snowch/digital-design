@@ -65,14 +65,8 @@ export const STRINGS = {
       memory: "Memory, display, sensors and lamps",
       back: "Then the machine goes back to the first box for the next step",
     },
-    /** Under a part of the machine: the modules that build it. */
-    builtIn: (modules: readonly number[]) =>
-      modules.length === 1
-        ? `Module ${modules[0]}`
-        : `Modules ${modules.slice(0, -1).join(", ")} and ${modules[modules.length - 1]}`,
     /** Under the flow of one step. */
-    machine:
-      "The machine the course builds runs each step of a program this way. Each box names the modules that build that part; Module 8 joins them into one machine.",
+    machine: "The machine the course builds runs each step of a program this way.",
     /** Above the list of every module the plan has. */
     contents: (count: number) => `All ${count} modules`,
     /** Under a module with no lessons yet. */

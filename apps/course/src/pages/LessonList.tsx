@@ -1,8 +1,10 @@
 // Copyright © 2026 Christopher Snow
 
-// The course's front page: the cover (what the course is, how the machine it builds runs a step,
-// where to start or go on), then every module the plan has, in order, each with its lessons or the line that says it
-// is still to be written.
+// The course's front page: the cover (what the course is, where to start or go on, and how the
+// machine it builds runs a step), then every module the plan has, in order, each with its lessons
+// or the line that says it is still to be written. The way in comes before the machine: the
+// machine's parts are built across the modules out of reading order, and a reader who meets them
+// first asks where to start (the author, 6 October 2026).
 
 import { LessonStore, verifyCompletion, type Book, type Storage } from "@dd/lesson-runtime";
 
@@ -12,35 +14,24 @@ import { STRINGS } from "../strings";
 type Lesson = Book["lessons"][number];
 
 /**
- * The machine the course builds, as the flow of one step of a program: each part, and under it the
- * modules that build it (`docs/machine.md`; the term each part's lesson introduces is in brackets).
+ * The machine the course builds, as the flow of one step of a program, part by part
+ * (`docs/machine.md`): the PC and the next step's choice, the ROM, the decoder, then the register
+ * file, the ALU, and the RAM with the devices. No part names its modules: the list below gives the
+ * order to read them in.
  */
-export const MACHINE_PARTS = {
-  // The program counter (Module 8, fetch) is a register (Module 5); the next step's choice is
-  // Module 8's (branches).
-  next: [5, 8],
-  // The ROM (Module 6, memory-map).
-  program: [6],
-  // The decoder Module 8 draws closed and Module 9 opens.
-  reading: [9],
-  // The register file (Module 6).
-  numbers: [6],
-  // The ALU (Module 3, alu; Module 7).
-  arithmetic: [3, 7],
-  // The RAM and the devices at addresses (Module 6, ram and memory-map).
-  memory: [6],
-} as const;
+type FlowPart = "next" | "program" | "reading" | "numbers" | "arithmetic" | "memory";
 
 function MachineFlow() {
   const words = STRINGS.cover.flow;
-  const part = (key: keyof typeof MACHINE_PARTS) => (
+  const part = (key: FlowPart) => (
     <li className="flow-part" key={key}>
       <span className="flow-name">{words[key]}</span>
-      <span className="flow-modules">{STRINGS.cover.builtIn(MACHINE_PARTS[key])}</span>
     </li>
   );
   return (
     <figure className="cover-machine">
+      {/* Above the boxes, as a lesson's captions are: what the picture is, before it is read. */}
+      <figcaption>{STRINGS.cover.machine}</figcaption>
       <ol className="machine-flow">
         {part("next")}
         {part("program")}
@@ -55,7 +46,6 @@ function MachineFlow() {
         </li>
       </ol>
       <p className="flow-back">{words.back}</p>
-      <figcaption>{STRINGS.cover.machine}</figcaption>
     </figure>
   );
 }
@@ -87,7 +77,6 @@ export function LessonList({ book, storage }: { book: Book; storage: Storage }) 
       <div className="cover">
         <h1>{book.title}</h1>
         <p className="cover-lead">{STRINGS.cover.lead}</p>
-        <MachineFlow />
         {next && (
           <p className="cover-start">
             <a className="button primary" href={lessonHref(next.id)}>
@@ -101,6 +90,7 @@ export function LessonList({ book, storage }: { book: Book; storage: Storage }) 
         <p className="course-start">
           <a href={PREFACE_HREF}>{STRINGS.prefaceLink}</a>
         </p>
+        <MachineFlow />
       </div>
       {book.lessons.length === 0 && <p>{STRINGS.noLessons}</p>}
       <h2 className="contents-heading">{STRINGS.cover.contents(modules.length)}</h2>

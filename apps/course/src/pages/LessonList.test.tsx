@@ -14,7 +14,7 @@ import { LESSONS } from "@dd/content";
 
 import { PREFACE_HREF, lessonHref } from "../route";
 import { STRINGS } from "../strings";
-import { LessonList, MACHINE_PARTS } from "./LessonList";
+import { LessonList } from "./LessonList";
 
 const book = createBook(LESSONS, INTERACTIVES);
 const ordered = [...book.lessons].sort((a, b) => a.module - b.module || a.order - b.order);
@@ -53,6 +53,17 @@ describe("the course's front page: the cover", () => {
     ).toHaveAttribute("href", lessonHref(second.id));
   });
 
+  it("shows the way in before the machine, so a reader knows where to start", () => {
+    render(<LessonList book={book} storage={memoryStorage()} />);
+    const start = screen.getByRole("link", {
+      name: STRINGS.preface.start(first.module, first.title),
+    });
+    // The machine's parts are built across the modules out of reading order.
+    const figure = screen.getByRole("figure");
+    expect(start.compareDocumentPosition(figure) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(first.module).toBe(1);
+  });
+
   it("says what the course takes as known, and links to the page before the first lesson", () => {
     render(<LessonList book={book} storage={memoryStorage()} />);
     expect(screen.getByText(STRINGS.assumes)).toBeInTheDocument();
@@ -79,7 +90,7 @@ describe("the course's front page: the cover", () => {
 });
 
 describe("the course's front page: the machine, one step at a time", () => {
-  it("shows each part of the machine in the order a step meets it, with the modules that build it", () => {
+  it("shows each part of the machine in the order a step meets it, and no module numbers", () => {
     render(<LessonList book={book} storage={memoryStorage()} />);
     const figure = screen.getByRole("figure");
     const words = STRINGS.cover.flow;
@@ -88,23 +99,12 @@ describe("the course's front page: the machine, one step at a time", () => {
       .filter((li) => li.classList.contains("flow-part"))
       .map((li) => li.textContent);
     const order = ["next", "program", "reading", "numbers", "arithmetic", "memory"] as const;
-    expect(parts).toEqual(
-      order.map((k) => `${words[k]}${STRINGS.cover.builtIn(MACHINE_PARTS[k])}`),
-    );
+    expect(parts).toEqual(order.map((k) => words[k]));
     expect(within(figure).getByText(words.doing)).toBeInTheDocument();
     expect(within(figure).getByText(words.back)).toBeInTheDocument();
     expect(within(figure).getByText(STRINGS.cover.machine)).toBeInTheDocument();
-  });
-
-  it("names a part's modules as the course writes a list of numbers", () => {
-    expect(STRINGS.cover.builtIn([6])).toBe("Module 6");
-    expect(STRINGS.cover.builtIn([3, 7])).toBe("Modules 3 and 7");
-    expect(STRINGS.cover.builtIn([2, 3, 6])).toBe("Modules 2, 3 and 6");
-  });
-
-  it("names only modules the plan has", () => {
-    for (const modules of Object.values(MACHINE_PARTS))
-      for (const m of modules) expect(STRINGS.moduleNames[m]).toBeDefined();
+    // The list of modules gives the order to read them in; the machine names none.
+    expect(figure.textContent).not.toMatch(/Module/);
   });
 });
 
