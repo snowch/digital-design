@@ -199,8 +199,8 @@ export const registerFile: LessonInput = {
           caption: LABELS.captions.faults,
           lead: PROSE.faultsLead,
           props: {
-            // Shown once the checks have run, so the lead's prediction is not answered first.
-            outcomes: PROSE.faultsAfter,
+            // Each fault's outcome shows once that fault has run, so the lead's prediction is not answered first.
+
             libraryId: "regfile-block",
             scope: "regfile",
             faults: [
@@ -209,13 +209,21 @@ export const registerFile: LessonInput = {
                 path: "regfile/andW2",
                 gate: "or",
                 label: LABELS.faults.andW2ToOr,
+                outcome: PROSE.faultsAfterFault1,
               },
-              { kind: "stuck-at", net: "regfile/W1", value: 0, label: LABELS.faults.w1Low },
+              {
+                kind: "stuck-at",
+                net: "regfile/W1",
+                value: 0,
+                label: LABELS.faults.w1Low,
+                outcome: PROSE.faultsAfterFault2,
+              },
               {
                 kind: "wrong-gate",
                 path: "regfile/decoder/notS1",
                 gate: "buf",
                 label: LABELS.faults.notS1Cut,
+                outcome: PROSE.faultsAfterFault3,
               },
             ],
             run: FILL_AND_READ_TWO,

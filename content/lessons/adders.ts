@@ -180,13 +180,31 @@ export const adders: LessonInput = {
           caption: LABELS.captions.fullAdderFaults,
           lead: PROSE.fullAdderFaultsLead,
           props: {
-            // Shown once the checks have run, so the lead's prediction is not answered first.
-            outcomes: PROSE.fullAdderFaultsAfter,
+            // Each fault's outcome shows once that fault has run, so the lead's prediction is not answered first.
+
             libraryId: "full-adder-parts",
             faults: [
-              { kind: "wrong-gate", path: "orCarry", gate: "xor", label: LABELS.faults.orToXor },
-              { kind: "stuck-at", net: "CIN", value: 0, label: LABELS.faults.cinLow },
-              { kind: "wrong-gate", path: "ha2/xorSum", gate: "or", label: LABELS.faults.sumToOr },
+              {
+                kind: "wrong-gate",
+                path: "orCarry",
+                gate: "xor",
+                label: LABELS.faults.orToXor,
+                outcome: PROSE.fullAdderFaultsAfterFault1,
+              },
+              {
+                kind: "stuck-at",
+                net: "CIN",
+                value: 0,
+                label: LABELS.faults.cinLow,
+                outcome: PROSE.fullAdderFaultsAfterFault2,
+              },
+              {
+                kind: "wrong-gate",
+                path: "ha2/xorSum",
+                gate: "or",
+                label: LABELS.faults.sumToOr,
+                outcome: PROSE.fullAdderFaultsAfterFault3,
+              },
             ],
             run: [
               { label: "0 + 0 + 0", set: { A: 0, B: 0, CIN: 0 } },

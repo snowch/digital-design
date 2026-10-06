@@ -37,8 +37,14 @@ export const PROSE = {
     "Draw a circuit with inputs A, B and CIN, and outputs SUM and COUT. Read COUT and SUM together as a 2-bit number. It must equal A + B + CIN for all input patterns. SUM is 1 when an odd number of the three inputs are 1. COUT is 1 when two or more of the three inputs are 1. The circuit must pass 8 tests, one for each input pattern.",
   fullAdderFaultsLead:
     'The figure shows a full adder with this structure: ha1 adds A and B, with outputs on wires S1 and C1. The half adder ha2 adds S1 and CIN, with its SUM driving the full adder\'s SUM output and its CARRY on wire C2. The OR gate, orCarry, takes C1 and C2 and drives COUT. Press a half adder to open it and see its two gates inside. Press a wire to see its name and value. "Run checks" runs 5 checks. Each is named after the sum it tests, written as A + B + CIN:\n\n- "0 + 0 + 0"\n- "1 + 1 + 0"\n- "1 + 0 + 1"\n- "0 + 1 + 1"\n- "1 + 1 + 1"\n\nEach check compares the circuit\'s SUM and COUT with a healthy full adder\'s. Choose each fault in turn. Before you run the checks, say which you expect to fail.',
-  fullAdderFaultsAfter:
-    '- "OR to XOR on carry": No check fails. C1 and C2 are never both 1 at the same time. When A and B are both 1, ha1\'s sum, S1, is 0, so ha2 cannot make a carry. OR and XOR differ only when both their inputs are 1, so here they always agree.\n\n- "Carry in stuck at 0": 3 of 5 checks fail: "1 + 0 + 1", "0 + 1 + 1", and "1 + 1 + 1". These are the three checks where CIN is 1. When CIN is stuck at 0, the full adder operates as if CIN is always 0, so it only adds A and B.\n\n- "XOR to OR in ha2\'s sum": 2 of 5 checks fail: "1 + 0 + 1" and "0 + 1 + 1". In these checks, S1 and CIN are both 1, so the sum bit should be 0, but the OR gate incorrectly gives 1 instead. In the "1 + 1 + 1" check, S1 is 0, so OR and XOR give the same result and the check succeeds.',
+  fullAdderFaultsAfterFault1:
+    '"OR to XOR on carry": No check fails. C1 and C2 are never both 1 at the same time. When A and B are both 1, ha1\'s sum, S1, is 0, so ha2 cannot make a carry. OR and XOR differ only when both their inputs are 1, so here they always agree.',
+
+  fullAdderFaultsAfterFault2:
+    '"Carry in stuck at 0": 3 of 5 checks fail: "1 + 0 + 1", "0 + 1 + 1", and "1 + 1 + 1". These are the three checks where CIN is 1. When CIN is stuck at 0, the full adder operates as if CIN is always 0, so it only adds A and B.',
+
+  fullAdderFaultsAfterFault3:
+    '"XOR to OR in ha2\'s sum": 2 of 5 checks fail: "1 + 0 + 1" and "0 + 1 + 1". In these checks, S1 and CIN are both 1, so the sum bit should be 0, but the OR gate incorrectly gives 1 instead. In the "1 + 1 + 1" check, S1 is 0, so OR and XOR give the same result and the check succeeds.',
   explanation:
     "A 4-bit adder adds two 4-bit words with one full adder for each column. A carry made in one column must reach the next column to its left. The challenge below asks you to wire this. Bit 0's full adder has a carry in, CIN, like the others. When the adder just adds A and B, CIN is 0. The top column's carry out is the carry out of the whole sum, COUT.\n\nA carry can travel from bit 0 all the way to COUT, through each full adder in turn.",
   predictSignedLead:

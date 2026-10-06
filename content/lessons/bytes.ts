@@ -230,8 +230,8 @@ export const bytes: LessonInput = {
           caption: LABELS.captions.faults,
           lead: PROSE.faultsLead,
           props: {
-            // Shown once the checks have run, so the lead's prediction is not answered first.
-            outcomes: PROSE.faultsAfter,
+            // Each fault's outcome shows once that fault has run, so the lead's prediction is not answered first.
+
             libraryId: "byte-memory-block",
             scope: "bytes",
             faults: [
@@ -240,12 +240,14 @@ export const bytes: LessonInput = {
                 path: "bytes/xorOdd",
                 gate: "or",
                 label: LABELS.faults.xorToOr,
+                outcome: PROSE.faultsAfterFault1,
               },
               {
                 kind: "wrong-gate",
                 path: "bytes/notA0",
                 gate: "buf",
                 label: LABELS.faults.notA0Cut,
+                outcome: PROSE.faultsAfterFault2,
               },
             ],
             run: [

@@ -112,8 +112,17 @@ export const PROSE = {
   ],
   twoButtonsDescribe:
     "It remembers which of two buttons was pressed last; A lights it, B puts it out.",
-  faultLabAfter:
-    '"Feedback wire cut": the gate that drives LIGHT reads X where the other gate\'s output was (marked CUT). LIGHT is X unless B is pressed.\n\n"LIGHT gate changed to OR": the light goes the wrong way: off while A is pressed, on while B is pressed. Release both and the values never stop changing, so LIGHT is X.\n\n"Button A stuck at 1": the light stays 1 until B is pressed. The checks fail at "release B" because the light comes back on instead of staying off.\n\n"No fault", with A and B both pressed: both gates\' outputs are 0. A and B pressed together is the combination to avoid. Released in the same moment, both gates try to switch at once. The simulator cannot decide which gate wins, so LIGHT is X. In a real circuit one gate wins by being a little faster, and nothing says which.',
+  faultLabAfterFault1:
+    '"Feedback wire cut": the gate that drives LIGHT reads X where the other gate\'s output was (marked CUT). LIGHT is X unless B is pressed.',
+
+  faultLabAfterFault2:
+    '"LIGHT gate changed to OR": the light goes the wrong way: off while A is pressed, on while B is pressed. Release both and the values never stop changing, so LIGHT is X.',
+
+  faultLabAfterFault3:
+    '"Button A stuck at 1": the light stays 1 until B is pressed. The checks fail at "release B" because the light comes back on instead of staying off.',
+
+  faultLabAfterNoFault:
+    '"No fault", with A and B both pressed: both gates\' outputs are 0. A and B pressed together is the combination to avoid. Released in the same moment, both gates try to switch at once. The simulator cannot decide which gate wins, so LIGHT is X. In a real circuit one gate wins by being a little faster, and nothing says which.',
   raceLead:
     "Many latches take their D from other latches. Here the first latch's Q feeds the second latch's D, and both share one EN. Press EN to 1, then press D and drag the Step slider back to watch the change.",
   raceAfter:

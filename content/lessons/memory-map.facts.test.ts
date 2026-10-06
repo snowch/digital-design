@@ -34,8 +34,8 @@ describe("facts for the memory-map lesson", () => {
     const ram = checks(memoryMap, "map-faults", 1);
     expect(ram.failed).toEqual(["read 01 0000"]);
     expect(hex(ram.got[0]!["Q"]!)).toBe("0012");
-    expect(PROSE.faultsAfter).toContain("5 of 6");
-    expect(PROSE.faultsAfter).toContain("1 of 6");
+    expect(PROSE.faultsAfterFault1).toContain("5 of 6");
+    expect(PROSE.faultsAfterFault2).toContain("1 of 6");
   });
 
   it("the ROM challenge's words are the table's first four, as the task lists them", () => {

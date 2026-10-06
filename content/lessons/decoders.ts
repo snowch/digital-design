@@ -151,13 +151,31 @@ export const decoders: LessonInput = {
           caption: LABELS.captions.decoderFaults,
           lead: PROSE.decoderFaultsLead,
           props: {
-            // Shown once the checks have run, so the lead's prediction is not answered first.
+            // Each fault's outcome shows once that fault has run, so the lead's prediction is not answered first.
             outcomes: PROSE.decoderFaultsAfter,
             libraryId: "decoder-gates",
             faults: [
-              { kind: "stuck-at", net: "NS0", value: 1, label: LABELS.faults.ns0High },
-              { kind: "wrong-gate", path: "and3", gate: "or", label: LABELS.faults.and3ToOr },
-              { kind: "wrong-gate", path: "notS1", gate: "buf", label: LABELS.faults.ns1Cut },
+              {
+                kind: "stuck-at",
+                net: "NS0",
+                value: 1,
+                label: LABELS.faults.ns0High,
+                outcome: PROSE.decoderFaultsAfterFault1,
+              },
+              {
+                kind: "wrong-gate",
+                path: "and3",
+                gate: "or",
+                label: LABELS.faults.and3ToOr,
+                outcome: PROSE.decoderFaultsAfterFault2,
+              },
+              {
+                kind: "wrong-gate",
+                path: "notS1",
+                gate: "buf",
+                label: LABELS.faults.ns1Cut,
+                outcome: PROSE.decoderFaultsAfterFault3,
+              },
             ],
             run: [
               { label: "S1 0, S0 0", set: { S1: 0, S0: 0 } },

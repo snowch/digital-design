@@ -183,13 +183,31 @@ export const selectors: LessonInput = {
           caption: LABELS.captions.selectorFaults,
           lead: PROSE.selectorFaultsLead,
           props: {
-            // Shown once the checks have run, so the lead's prediction is not answered first.
-            outcomes: PROSE.selectorFaultsAfter,
+            // Each fault's outcome shows once that fault has run, so the lead's prediction is not answered first.
+
             libraryId: "selector-2-gates",
             faults: [
-              { kind: "wrong-gate", path: "notS", gate: "buf", label: LABELS.faults.noNot },
-              { kind: "stuck-at", net: "S", value: 1, label: LABELS.faults.sHigh },
-              { kind: "wrong-gate", path: "orY", gate: "xor", label: LABELS.faults.orToXor },
+              {
+                kind: "wrong-gate",
+                path: "notS",
+                gate: "buf",
+                label: LABELS.faults.noNot,
+                outcome: PROSE.selectorFaultsAfterFault1,
+              },
+              {
+                kind: "stuck-at",
+                net: "S",
+                value: 1,
+                label: LABELS.faults.sHigh,
+                outcome: PROSE.selectorFaultsAfterFault2,
+              },
+              {
+                kind: "wrong-gate",
+                path: "orY",
+                gate: "xor",
+                label: LABELS.faults.orToXor,
+                outcome: PROSE.selectorFaultsAfterFault3,
+              },
             ],
             run: [
               { label: "S 0, A 1, B 0", set: { S: 0, A: 1, B: 0 } },

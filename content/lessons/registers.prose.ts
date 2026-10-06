@@ -86,6 +86,12 @@ export const PROSE = {
     "Start with `always_ff @(posedge CLK) begin`. Make the first line inside `if (RST) Q <= 4'b0000;`.",
     "The complete block is:\n\n```\nalways_ff @(posedge CLK) begin\n  if (RST) Q <= 4'b0000;\n  else if (EN) Q <= D;\nend\n```",
   ],
-  keepFaultsAfter:
-    '- KEEP wire forced to 0: a box CONST with value 0 now drives KEEP, and andKeep\'s output goes nowhere. Two checks fail, at "edge with EN 0" and "another edge with EN 0". With EN at 0, CHOICE is 0, so Q takes 0 instead of keeping the 1.\n\n- EN forced to 1: Two checks fail at the same points. Every edge takes D, and D is 0 there. Two different faults fail the same checks, so the checks alone do not say which fault it is.\n\n- OR gate changed to AND: Three checks fail, at "load 1" and both edges with EN 0. LOAD needs EN 1, KEEP needs EN 0: they never both become 1. CHOICE is always 0, so every edge makes Q 0. "load 0" passes because 0 is expected.',
+  keepFaultsAfterFault1:
+    'KEEP wire forced to 0: a box CONST with value 0 now drives KEEP, and andKeep\'s output goes nowhere. Two checks fail, at "edge with EN 0" and "another edge with EN 0". With EN at 0, CHOICE is 0, so Q takes 0 instead of keeping the 1.',
+
+  keepFaultsAfterFault2:
+    "EN forced to 1: Two checks fail at the same points as the first fault. Every edge takes D, and D is 0 there. Two different faults fail the same checks, so the checks alone do not say which fault it is.",
+
+  keepFaultsAfterFault3:
+    'OR gate changed to AND: Three checks fail, at "load 1" and both edges with EN 0. LOAD needs EN 1, KEEP needs EN 0: they never both become 1. CHOICE is always 0, so every edge makes Q 0. "load 0" passes because 0 is expected.',
 } as const;

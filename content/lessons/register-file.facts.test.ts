@@ -31,6 +31,8 @@ describe("facts for the register-file lesson", () => {
     const low = checks(registerFile, "regfile-faults", 1);
     expect(low.failed).toEqual(["read 01 and 10", "read 10 and 01"]);
     expect(checks(registerFile, "regfile-faults", 2).failed).toHaveLength(8);
-    for (const n of ["2 of 8", "8 of 8"]) expect(PROSE.faultsAfter).toContain(n);
+    expect(PROSE.faultsAfterFault1).toContain("2 of 8");
+    expect(PROSE.faultsAfterFault2).toContain("2 of 8");
+    expect(PROSE.faultsAfterFault3).toContain("8 of 8");
   });
 });

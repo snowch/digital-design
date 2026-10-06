@@ -189,8 +189,8 @@ export const memoryMap: LessonInput = {
           caption: LABELS.captions.faults,
           lead: PROSE.faultsLead,
           props: {
-            // Shown once the checks have run, so the lead's prediction is not answered first.
-            outcomes: PROSE.faultsAfter,
+            // Each fault's outcome shows once that fault has run, so the lead's prediction is not answered first.
+
             libraryId: "shop-memory-block",
             scope: "shop",
             initial: { SENSOR, WORD: 1 },
@@ -200,8 +200,15 @@ export const memoryMap: LessonInput = {
                 path: "shop/andDisplay",
                 gate: "or",
                 label: LABELS.faults.displayOr,
+                outcome: PROSE.faultsAfterFault1,
               },
-              { kind: "stuck-at", net: "shop/WERAM", value: 1, label: LABELS.faults.ramHigh },
+              {
+                kind: "stuck-at",
+                net: "shop/WERAM",
+                value: 1,
+                label: LABELS.faults.ramHigh,
+                outcome: PROSE.faultsAfterFault2,
+              },
             ],
             run: [
               {

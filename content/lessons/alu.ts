@@ -170,13 +170,31 @@ export const alu: LessonInput = {
           caption: LABELS.captions.addsubFaults,
           lead: PROSE.addsubFaultsLead,
           props: {
-            // Shown once the checks have run, so the lead's prediction is not answered first.
-            outcomes: PROSE.addsubFaultsAfter,
+            // Each fault's outcome shows once that fault has run, so the lead's prediction is not answered first.
+
             libraryId: "addsub-4",
             faults: [
-              { kind: "stuck-at", net: "C0", value: 0, label: LABELS.faults.c0Low },
-              { kind: "wrong-gate", path: "bit1/xorB", gate: "or", label: LABELS.faults.xorToOr },
-              { kind: "stuck-at", net: "C2", value: 0, label: LABELS.faults.c2Low },
+              {
+                kind: "stuck-at",
+                net: "C0",
+                value: 0,
+                label: LABELS.faults.c0Low,
+                outcome: PROSE.addsubFaultsAfterFault1,
+              },
+              {
+                kind: "wrong-gate",
+                path: "bit1/xorB",
+                gate: "or",
+                label: LABELS.faults.xorToOr,
+                outcome: PROSE.addsubFaultsAfterFault2,
+              },
+              {
+                kind: "stuck-at",
+                net: "C2",
+                value: 0,
+                label: LABELS.faults.c2Low,
+                outcome: PROSE.addsubFaultsAfterFault3,
+              },
             ],
             run: [
               { label: "6 + 3", set: { A: "0110", B: "0011", SUB: 0 } },

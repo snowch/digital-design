@@ -189,13 +189,31 @@ export const registers: LessonInput = {
           caption: LABELS.captions.keepFaults,
           lead: PROSE.keepFaultsLead,
           props: {
-            // Shown once the checks have run, so the lead's prediction is not answered first.
-            outcomes: PROSE.keepFaultsAfter,
+            // Each fault's outcome shows once that fault has run, so the lead's prediction is not answered first.
+
             libraryId: "keep-bit",
             faults: [
-              { kind: "stuck-at", net: "KEEP", value: 0, label: LABELS.faults.keepCut },
-              { kind: "stuck-at", net: "EN", value: 1, label: LABELS.faults.enHigh },
-              { kind: "wrong-gate", path: "orChoice", gate: "and", label: LABELS.faults.orToAnd },
+              {
+                kind: "stuck-at",
+                net: "KEEP",
+                value: 0,
+                label: LABELS.faults.keepCut,
+                outcome: PROSE.keepFaultsAfterFault1,
+              },
+              {
+                kind: "stuck-at",
+                net: "EN",
+                value: 1,
+                label: LABELS.faults.enHigh,
+                outcome: PROSE.keepFaultsAfterFault2,
+              },
+              {
+                kind: "wrong-gate",
+                path: "orChoice",
+                gate: "and",
+                label: LABELS.faults.orToAnd,
+                outcome: PROSE.keepFaultsAfterFault3,
+              },
             ],
             run: [
               { label: "load 1", set: { D: 1, EN: 1, CLK: 0 }, clock: "CLK" },

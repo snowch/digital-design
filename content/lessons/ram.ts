@@ -170,19 +170,32 @@ export const ram: LessonInput = {
           caption: LABELS.captions.faults,
           lead: PROSE.faultsLead,
           props: {
-            // Shown once the checks have run, so the lead's prediction is not answered first.
-            outcomes: PROSE.faultsAfter,
+            // Each fault's outcome shows once that fault has run, so the lead's prediction is not answered first.
+
             libraryId: "ram-block",
             scope: "ram",
             faults: [
-              { kind: "stuck-at", net: "ram/W2", value: 1, label: LABELS.faults.w2High },
+              {
+                kind: "stuck-at",
+                net: "ram/W2",
+                value: 1,
+                label: LABELS.faults.w2High,
+                outcome: PROSE.faultsAfterFault1,
+              },
               {
                 kind: "wrong-gate",
                 path: "ram/decoder/notS0",
                 gate: "buf",
                 label: LABELS.faults.notS0Cut,
+                outcome: PROSE.faultsAfterFault2,
               },
-              { kind: "wrong-gate", path: "ram/andW3", gate: "or", label: LABELS.faults.andW3ToOr },
+              {
+                kind: "wrong-gate",
+                path: "ram/andW3",
+                gate: "or",
+                label: LABELS.faults.andW3ToOr,
+                outcome: PROSE.faultsAfterFault3,
+              },
             ],
             run: FILL_AND_READ,
           },

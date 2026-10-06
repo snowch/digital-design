@@ -74,5 +74,14 @@ export const PROSE = {
   modelVsReality:
     "The simulator treats all gates the same: each answers in one step. Real gates take different times. In the most common way of making chips, a NAND gate is smaller and faster than an AND gate. An AND on such a chip is usually built from a NAND gate followed by a NOT. So building from NAND is not only a matter of spares.\n\nIn the simulator, an unwired input reads X, marking an unknown value. In real circuits, an unconnected input does not behave that way. It may read 0 or 1, and noise can change it. Engineers wire every unused input to a fixed 0 or 1.\n\nThe engineer and the drawer are invented for this course. But real chips that each contain four NAND gates are common.",
   orFaultsOutcomes:
-    'With "Wire NA is cut", the checks show 2 of 4 failed. When B is 1, NB is 0. A NAND gate with one input 0 gives 1, so those rows still pass.\n\nWith "Gate nandA is AND instead of NAND", the checks show 2 of 4 failed. NA is now A instead of NOT A, so the circuit fails in those rows.\n\nWith "Gate nandY is AND instead of NAND", the checks show all 4 failed. Every row gives the opposite of OR.\n\nA fault inside a circuit can show in every row or in just some. A board built from tested parts still needs every row of the whole circuit tried.',
+    "A fault inside a circuit can show in every row or in just some. A board built from tested parts still needs every row of the whole circuit tried.",
+
+  orFaultsOutcomesFault1:
+    'With "Wire NA is cut", the checks show 2 of 4 failed. When B is 1, NB is 0. A NAND gate with one input 0 gives 1, so those rows still pass.',
+
+  orFaultsOutcomesFault2:
+    'With "Gate nandA is AND instead of NAND", the checks show 2 of 4 failed. NA is now A instead of NOT A, so the circuit fails in those rows.',
+
+  orFaultsOutcomesFault3:
+    'With "Gate nandY is AND instead of NAND", the checks show all 4 failed. Every row gives the opposite of OR.',
 } as const;

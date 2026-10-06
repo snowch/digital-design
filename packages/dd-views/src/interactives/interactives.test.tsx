@@ -108,6 +108,45 @@ describe("the fault lab", () => {
       true,
     );
   });
+
+  it("shows each fault's outcome once that fault has run, and the closing words once all have", async () => {
+    const user = userEvent.setup();
+    mount(FaultLab as typeof Prediction, {
+      id: "break-latch",
+      kind: "fault-lab",
+      timeModel: "settle",
+      caption: "c",
+      props: {
+        libraryId: "sr-latch",
+        faults: [
+          { kind: "wrong-gate", path: "sr/norQ", gate: "or", outcome: "What the OR gate does." },
+          { kind: "stuck-at", net: "S", value: 0, outcome: "What S stuck at 0 does." },
+        ],
+        run: [
+          { label: "press S", set: { S: 1, R: 0 } },
+          { label: "release", set: { S: 0, R: 0 } },
+        ],
+        outcomes: "What both faults show.",
+      },
+    });
+    const radios = screen.getAllByRole("radio");
+    const run = () => user.click(screen.getByRole("button", { name: S.fault.run }));
+    // A run of the circuit with no fault answers none of them.
+    await run();
+    expect(screen.queryByText(/What/)).not.toBeInTheDocument();
+    await user.click(radios[1] as HTMLElement);
+    expect(screen.queryByText("What the OR gate does.")).not.toBeInTheDocument();
+    await run();
+    expect(screen.getByText("What the OR gate does.")).toBeInTheDocument();
+    expect(screen.queryByText("What S stuck at 0 does.")).not.toBeInTheDocument();
+    expect(screen.queryByText("What both faults show.")).not.toBeInTheDocument();
+    await user.click(radios[2] as HTMLElement);
+    expect(screen.queryByText("What S stuck at 0 does.")).not.toBeInTheDocument();
+    await run();
+    expect(screen.getByText("What S stuck at 0 does.")).toBeInTheDocument();
+    expect(screen.queryByText("What the OR gate does.")).not.toBeInTheDocument();
+    expect(screen.getByText("What both faults show.")).toBeInTheDocument();
+  });
 });
 
 describe("the setup and hold experiment", () => {

@@ -258,13 +258,26 @@ export const counters: LessonInput = {
           props: {
             libraryId: "counter-4",
             faults: [
-              { kind: "stuck-at", net: "add/C2", value: 0, label: LABELS.faults.carryCut },
-              { kind: "stuck-at", net: "EN", value: 1, label: LABELS.faults.enHigh },
+              {
+                kind: "stuck-at",
+                net: "add/C2",
+                value: 0,
+                label: LABELS.faults.carryCut,
+                outcome: PROSE.counterFaultsOutcomesFault1,
+              },
+              {
+                kind: "stuck-at",
+                net: "EN",
+                value: 1,
+                label: LABELS.faults.enHigh,
+                outcome: PROSE.counterFaultsOutcomesFault2,
+              },
               {
                 kind: "wrong-gate",
                 path: "add/ha0/xorSum",
                 gate: "or",
                 label: LABELS.faults.xorToOr,
+                outcome: PROSE.counterFaultsOutcomesFault3,
               },
             ],
             run: [
@@ -276,7 +289,6 @@ export const counters: LessonInput = {
               { label: "edge 5", clock: "CLK" },
               { label: "edge with EN 0", set: { EN: 0 }, clock: "CLK" },
             ],
-            outcomes: PROSE.counterFaultsOutcomes,
           },
         },
         {

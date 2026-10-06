@@ -32,8 +32,14 @@ export const PROSE = {
     "Draw a circuit with inputs A (one bit), D (4 bits), WE and CLK, and output Q (4 bits). At a rising edge of CLK where WE is 1, the word at address A takes D, and the other address keeps its word. At an edge where WE is 0, no word changes. Q is always the word at address A, with no edge needed. The tests include steps where A changes while CLK is 1 and where WE rises while CLK is 1.",
   faultsLead:
     'The figure shows the four-word RAM opened: the decoder, the AND gates andW0 to andW3 with outputs W0 to W3, the registers word0 to word3, and the word selector.\n\nChoose a fault from the list. The three faults are: W2 forced to 1; the decoder\'s NOT gate on S0 replaced by a plain wire; the AND gate andW3 changed to an OR gate. The checks run eight fixed steps. They write `0001` at address 00, `0010` at 01, `0100` at 10 and `1000` at 11, one rising edge each. Then they read all four addresses with WE at 0 and no clock edge. Each check compares Q with what the healthy RAM gives.\n\nPressing any wire in the drawing shows its name and value, so you can find W0 to W3.\n\nSay which words you expect to break. Then press "Run checks" to see the results.',
-  faultsAfter:
-    'W2 forced to 1: 1 of 8 checks fails: "read 10". Q shows `1000`, not `0100`. Word2\'s register takes D at every rising edge, so it ends with the last word written, not the word at address 10.\n\nThe NOT gate on S0 replaced by a wire: 4 of 8 fail. The failing checks are "write 0001 at 00", "write 0100 at 10", "read 00" and "read 10". With S0 not turned round, Y0 is 1 for address 01, as Y1 is, and Y2 is 1 for address 11, as Y3 is. A write at 01 writes word0 and word1. A write at 11 writes word2 and word3. A write at 00 or 10 writes no word. Q is checked after each write too, not only at the reads.\n\nandW3 changed to OR: 0 of 8 fail. W3 is now Y3 OR WE, so every write also loads word3. The last write targets word3, so the read of address 11 finds the right word. Passing checks do not prove the circuit right. Checks that wrote word3 first, then another word, then read it would catch this fault.',
+  faultsAfterFault1:
+    'W2 forced to 1: 1 of 8 checks fails: "read 10". Q shows `1000`, not `0100`. Word2\'s register takes D at every rising edge, so it ends with the last word written, not the word at address 10.',
+
+  faultsAfterFault2:
+    'The NOT gate on S0 replaced by a wire: 4 of 8 fail. The failing checks are "write 0001 at 00", "write 0100 at 10", "read 00" and "read 10". With S0 not turned round, Y0 is 1 for address 01, as Y1 is, and Y2 is 1 for address 11, as Y3 is. A write at 01 writes word0 and word1. A write at 11 writes word2 and word3. A write at 00 or 10 writes no word. Q is checked after each write too, not only at the reads.',
+
+  faultsAfterFault3:
+    "andW3 changed to OR: 0 of 8 fail. W3 is now Y3 OR WE, so every write also loads word3. The last write targets word3, so the read of address 11 finds the right word. Passing checks do not prove the circuit right. Checks that wrote word3 first, then another word, then read it would catch this fault.",
   wideLead:
     "The next figure adds a third address pin, A2. The RAM block still reads only A1 and A0; the A2 pin is wired to nothing. The RAM keeps four words, at addresses 000 to 011. Addresses 100 to 111 are past the end.",
   p3Question:

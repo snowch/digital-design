@@ -182,13 +182,30 @@ export const remember: LessonInput = {
           caption: LABELS.captions.faultLab,
           lead: PROSE.faultLabLead,
           props: {
-            // Shown once the checks have run, so the lead's prediction is not answered first.
-            outcomes: PROSE.faultLabAfter,
+            // Each fault's outcome shows once that fault has run, so the lead's prediction is not answered first.
+            noFaultOutcome: PROSE.faultLabAfterNoFault,
             libraryId: "two-buttons",
             faults: [
-              { kind: "broken-wire", net: "DARK", label: LABELS.faults.cut },
-              { kind: "wrong-gate", path: "norLight", gate: "or", label: LABELS.faults.or },
-              { kind: "stuck-at", net: "A", value: 1, label: LABELS.faults.stuckA },
+              {
+                kind: "broken-wire",
+                net: "DARK",
+                label: LABELS.faults.cut,
+                outcome: PROSE.faultLabAfterFault1,
+              },
+              {
+                kind: "wrong-gate",
+                path: "norLight",
+                gate: "or",
+                label: LABELS.faults.or,
+                outcome: PROSE.faultLabAfterFault2,
+              },
+              {
+                kind: "stuck-at",
+                net: "A",
+                value: 1,
+                label: LABELS.faults.stuckA,
+                outcome: PROSE.faultLabAfterFault3,
+              },
             ],
             run: [
               { label: "press A", set: { A: 1, B: 0 } },

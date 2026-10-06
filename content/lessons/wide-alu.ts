@@ -234,8 +234,20 @@ export const wideAlu: LessonInput = {
             outcomes: PROSE.wideFaultsAfter,
             libraryId: "alu8-flags-64",
             faults: [
-              { kind: "stuck-at", net: "C32", value: 0, label: LABELS.faults.c32Low },
-              { kind: "stuck-at", net: "C16", value: 1, label: LABELS.faults.c16High },
+              {
+                kind: "stuck-at",
+                net: "C32",
+                value: 0,
+                label: LABELS.faults.c32Low,
+                outcome: PROSE.wideFaultsAfterFault1,
+              },
+              {
+                kind: "stuck-at",
+                net: "C16",
+                value: 1,
+                label: LABELS.faults.c16High,
+                outcome: PROSE.wideFaultsAfterFault2,
+              },
             ],
             run: WIDE_RUN,
           },

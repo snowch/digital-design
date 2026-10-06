@@ -35,8 +35,8 @@ describe("facts for the bytes lesson", () => {
     expect(cut.failed).toHaveLength(3);
     expect(cut.got[0]!["Q"]).toBe("11111111XXXXXXXX");
     expect(hex(cut.got[2]!["Q"]!)).toBe("FF00");
-    expect(PROSE.faultsAfter).toContain("2 of 5");
-    expect(PROSE.faultsAfter).toContain("3 of 5");
+    expect(PROSE.faultsAfterFault1).toContain("2 of 5");
+    expect(PROSE.faultsAfterFault2).toContain("3 of 5");
   });
 
   it("the motivation's example and the hint's example are the memory's bytes", () => {

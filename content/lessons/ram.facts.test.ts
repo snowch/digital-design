@@ -33,9 +33,9 @@ describe("facts for the RAM lesson", () => {
       "read 10",
     ]);
     expect(checks(ram, "ram-faults", 2).failed).toEqual([]);
-    expect(PROSE.faultsAfter).toContain("1 of 8");
-    expect(PROSE.faultsAfter).toContain("4 of 8");
-    expect(PROSE.faultsAfter).toContain("0 of 8");
+    expect(PROSE.faultsAfterFault1).toContain("1 of 8");
+    expect(PROSE.faultsAfterFault2).toContain("4 of 8");
+    expect(PROSE.faultsAfterFault3).toContain("0 of 8");
   });
 
   it("the challenges have the test counts the tasks describe", () => {

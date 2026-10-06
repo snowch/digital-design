@@ -38,8 +38,13 @@ export const PROSE = {
   ],
   checkFaultsLead:
     'The figure shows the decoder: press it, then its "checks" block. Each fault breaks one check.\n\nWith "NOKIND stuck at 0", the kind check never signals that no kind line is 1. With "BADNUMBER stuck at 0", the number check never refuses a number.\n\nThe seven words are: all zeros, kind 9, job 8 of a register job, job 2 of kind 8 with 5, job 3 of kind 8 with -1, job 2 of kind 8 with 4, and an add.\n\nChoose a fault and press "Run checks". Before you run it, predict what cause each word now gets.',
-  checkFaultsOutcomes:
-    "**NOKIND stuck at 0:** Two of the seven words fail. All-zeros and kind 9 result in cause `00` instead of `21`. Every control signal is 0, so the machine runs them as do-nothing instructions and continues. The job check does not catch them: it reads the kind lines, and none is 1.\n\n**BADNUMBER stuck at 0:** Two of the seven words fail. Job 2 with 5 and job 3 with -1 result in cause `00` instead of `21`. STOP is 1, so the machine stops. These are jobs a later module builds, as Module 8's machine treated them.\n\nThe other words keep their cause under both faults.",
+  checkFaultsOutcomes: "The other words keep their cause under both faults.",
+
+  checkFaultsOutcomesFault1:
+    "**NOKIND stuck at 0:** Two of the seven words fail. All-zeros and kind 9 result in cause `00` instead of `21`. Every control signal is 0, so the machine runs them as do-nothing instructions and continues. The job check does not catch them: it reads the kind lines, and none is 1.",
+
+  checkFaultsOutcomesFault2:
+    "**BADNUMBER stuck at 0:** Two of the seven words fail. Job 2 with 5 and job 3 with -1 result in cause `00` instead of `21`. STOP is 1, so the machine stops. These are jobs a later module builds, as Module 8's machine treated them.",
   explanation:
     "The ILLEGAL signal is an OR of the kind check, the job check and the number check. These checks are gates, like the control signals, and settle before the next edge. When ILLEGAL is 1, the cause block outputs `21`. The stop logic halts the machine. An illegal instruction changes no register and no memory word.",
   generalisation:

@@ -35,8 +35,14 @@ export const PROSE = {
   ],
   flagFaultsLead:
     'The figure shows the 4-bit ALU with all four flags. The slices, bit0 to bit3, are drawn as a staircase from bit 0 at the bottom left to bit 3 at the top right. Each slice is closed, and now has the zero chain\'s ZIN and ZOUT and an OVER output. A part labelled CONST, named one, gives Z0 = 1. Wires Z1, Z2 and Z3 pass each slice\'s ZOUT to the next slice\'s ZIN; bit 3\'s ZOUT is ZERO. At the right, the part "top bit" takes bit 3 of Y and gives MINUS. COUT and OVER come from bit 3. Press any wire to see its name and value.\n\n"Run checks" runs 5 checks: "3 - 5", "5 - 5", "7 - 8", "2 - 1" and "12 XOR 12". Each compares Y and the four flags with a healthy ALU. Three faults are ready: "Z2 stuck at 1", "Z0 stuck at 0" and "C3 stuck at 0". Choose each in turn, say first which checks you expect to fail, then run them. The results appear after the checks run.',
-  flagFaultsAfter:
-    'When "Z2 stuck at 1" is chosen, 1 of 5 checks fails: "2 - 1". Bit 2 now hears "no 1 below" whatever bits 0 and 1 hold, so ZERO looks only at bits 2 and 3. The result Y is `0001`, and ZERO says 1.\n\nWhen "Z0 stuck at 0" is chosen, 2 of 5 checks fail: "5 - 5" and "12 XOR 12". The zero chain now starts by saying "there is a 1", so ZERO is never 1, even when Y is `0000`.\n\nWhen "C3 stuck at 0" is chosen, 3 of 5 checks fail: "5 - 5", "7 - 8" and "2 - 1". Each of these subtractions makes a carry into bit 3, so bit 3 adds without it, and the flags read from bit 3 can be wrong too. "3 - 5" makes no carry into bit 3 and passes. "12 XOR 12" passes too: a bit-by-bit job adds all 0s, so it makes no carry.',
+  flagFaultsAfterFault1:
+    'When "Z2 stuck at 1" is chosen, 1 of 5 checks fails: "2 - 1". Bit 2 now hears "no 1 below" whatever bits 0 and 1 hold, so ZERO looks only at bits 2 and 3. The result Y is `0001`, and ZERO says 1.',
+
+  flagFaultsAfterFault2:
+    'When "Z0 stuck at 0" is chosen, 2 of 5 checks fail: "5 - 5" and "12 XOR 12". The zero chain now starts by saying "there is a 1", so ZERO is never 1, even when Y is `0000`.',
+
+  flagFaultsAfterFault3:
+    'When "C3 stuck at 0" is chosen, 3 of 5 checks fail: "5 - 5", "7 - 8" and "2 - 1". Each of these subtractions makes a carry into bit 3, so bit 3 adds without it, and the flags read from bit 3 can be wrong too. "3 - 5" makes no carry into bit 3 and passes. "12 XOR 12" passes too: a bit-by-bit job adds all 0s, so it makes no carry.',
   explanation:
     "The two words the adder adds are A and D. For subtract, D is NOT B. So OVER reads the top bits of A, D and the sum, not B's. Module 3 warned that its overflow rules for adding do not carry over to subtracting. Read on D, the word the adder really adds, the rule for adding two words does carry over: a sum overflows when both words it adds have the same top bit and the result's top bit differs. For 7 - (-8): A is `0111`, and D is NOT `1000`, which is `0111`. Both top bits are 0. The sum `1111` has top bit 1. OVER is 1.\n\nFor a bit-by-bit job, the adder adds all 0s to A, so COUT and OVER are both 0.\n\nAfter A - B, read signed: with no overflow, MINUS is right about the result's sign. With overflow, the true result is too big or too small to fit; its sign is lost, and MINUS says the opposite. Read unsigned, A is less than B when COUT is 0. A equals B when ZERO is 1.",
   overflowLimitLead:

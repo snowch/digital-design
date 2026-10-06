@@ -33,8 +33,14 @@ export const PROSE = {
     "Draw a circuit with inputs A, B and S and output Y. While S is 0, Y is A. While S is 1, Y is B. There are 8 tests, one for each pattern of S, A and B.",
   selectorFaultsLead:
     'The figure shows a 2-way selector built from gates. It has these parts:\n\n- notS: NOT of S; its output wire is NS\n- andA: A AND NS; its output wire is PA\n- andB: S AND B; its output wire is PB\n- orY: PA OR PB; its output is Y\n\nThe wires are not labelled in the drawing. To see a wire\'s name and value, press it.\n\n"Run checks" runs 5 checks. Each sets S, A and B to one pattern and compares Y with the healthy selector\'s Y. The 5 checks are:\n\n- "S 0, A 1, B 0"\n- "S 0, A 0, B 1"\n- "S 1, A 1, B 0"\n- "S 1, A 0, B 1"\n- "S 0, A 1, B 1"\n\nChoose each fault in turn. Before you run the checks, say which checks you expect to fail.',
-  selectorFaultsAfter:
-    '- "NOT gate notS becomes a wire": 3 of 5 checks fail: "S 0, A 1, B 0", "S 1, A 1, B 0" and "S 0, A 1, B 1". andA takes S instead of NS. Both AND gates pass while S is 1 and block while S is 0. Y is 0 when S is 0 and A OR B when S is 1.\n\n- "Input S is stuck at 1": 2 of 5 checks fail: "S 0, A 1, B 0" and "S 0, A 0, B 1". Y is always B. The check "S 0, A 1, B 1" still gives the right Y, because A and B are the same.\n\n- "OR gate orY becomes XOR": No check fails. An XOR gate gives 1 when exactly one input is 1. PA and PB are never both 1: andA takes NS and andB takes S, so they never pass together. It is true for every one of the 8 patterns of S, A and B, not only the 5 checks. So OR and XOR give the same Y for every input, and no check could catch this fault.',
+  selectorFaultsAfterFault1:
+    '"NOT gate notS becomes a wire": 3 of 5 checks fail: "S 0, A 1, B 0", "S 1, A 1, B 0" and "S 0, A 1, B 1". andA takes S instead of NS. Both AND gates pass while S is 1 and block while S is 0. Y is 0 when S is 0 and A OR B when S is 1.',
+
+  selectorFaultsAfterFault2:
+    '"Input S is stuck at 1": 2 of 5 checks fail: "S 0, A 1, B 0" and "S 0, A 0, B 1". Y is always B. The check "S 0, A 1, B 1" still gives the right Y, because A and B are the same.',
+
+  selectorFaultsAfterFault3:
+    '"OR gate orY becomes XOR": No check fails. An XOR gate gives 1 when exactly one input is 1. PA and PB are never both 1: andA takes NS and andB takes S, so they never pass together. It is true for every one of the 8 patterns of S, A and B, not only the 5 checks. So OR and XOR give the same Y for every input, and no check could catch this fault.',
   explanation:
     "When S is 0, andA passes A while andB gives 0. When S is 1, andB passes B while andA gives 0. The OR of a bit and 0 is that bit. So Y is the passed input.",
   wordSelectorLead:

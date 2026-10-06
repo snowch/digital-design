@@ -45,8 +45,14 @@ export const PROSE = {
     'This circuit runs the register\'s output Q back to the register\'s input through an "add one" block. At each rising edge, the register takes Q plus one.\n\nAt the start Q is `XXXX`: no edge has set it. Press RST to 1, then "Clock CLK": Q becomes `0000`. Press RST back to 0 and EN to 1. Each "Clock CLK" adds one to Q. Press EN to 0 and the count stays.\n\nOpen the "add one" block. Inside are four half adders in a chain. The first adds bit 0 of Q and EN. Each later half adder adds its bit and the carry from the one before. A register whose D is its own Q plus one is a **counter**. It goes up by one at each rising edge where EN is 1.',
   counterFaultsLead:
     'This is the 4-bit counter with three faults to choose from. The first fault is C2 forced to 0: C2 is the wire carrying ha1\'s CARRY into ha2. The second fault is EN fixed at 1. The third fault is ha0\'s XOR gate made an OR gate. Press "Run checks" to run seven checks: a reset, then five rising edges with EN 1, then one edge with EN 0.\n\nA healthy counter gives `0000` after reset, then `0001`, `0010`, `0011`, `0100`, `0101` from the five edges, and stays `0101` with EN 0.\n\nBefore running the checks, predict which will fail and what the faulty counter will do. Open the "add one" block to see where each fault acts. Then press "Run checks" and compare.',
-  counterFaultsOutcomes:
-    '**First fault:** bit 2 never gets the carry, so it never changes. The count goes `0000`, `0001`, `0010`, `0011`, then back to `0000`, `0001`, and stays at `0001`. Fails: "edge 4", "edge 5", "edge with EN 0". Total: 3 of 7.\n\n**Second fault:** EN is always 1, so every edge counts up. The edge with EN 0 should keep `0101` but gives `0110` instead. Fails: "edge with EN 0". Total: 1 of 7.\n\n**Third fault:** bit 0 becomes 1 at the first edge and never returns to 0. The count goes up by two each time: `0001`, `0011`, `0101`, `0111`, `1001`. Fails: "edge 2" to "edge 5" and "edge with EN 0". Total: 5 of 7.',
+  counterFaultsOutcomesFault1:
+    '**First fault:** bit 2 never gets the carry, so it never changes. The count goes `0000`, `0001`, `0010`, `0011`, then back to `0000`, `0001`, and stays at `0001`. Fails: "edge 4", "edge 5", "edge with EN 0". Total: 3 of 7.',
+
+  counterFaultsOutcomesFault2:
+    '**Second fault:** EN is always 1, so every edge counts up. The edge with EN 0 should keep `0101` but gives `0110` instead. Fails: "edge with EN 0". Total: 1 of 7.',
+
+  counterFaultsOutcomesFault3:
+    '**Third fault:** bit 0 becomes 1 at the first edge and never returns to 0. The count goes up by two each time: `0001`, `0011`, `0101`, `0111`, `1001`. Fails: "edge 2" to "edge 5" and "edge with EN 0". Total: 5 of 7.',
   explanation:
     "At every edge, all four flip-flops take their D at once. D is NEXT, worked out by the half adders from Q as it was before the edge. Q changes. The half adders work out a new NEXT. Nothing more happens until the next edge.\n\nThe carry passes along the chain, one half adder at a time. So NEXT does not change all at once.",
   modelVsReality:

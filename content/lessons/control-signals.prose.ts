@@ -38,8 +38,11 @@ export const PROSE = {
   ],
   decoderFaultsLead:
     'The figure shows the decoder: press it, then its control signals block. Each fault breaks one gate, or one line into the block. For example, "orOp0 made an AND" means the OR gate for OP0 becomes an AND gate. OP0\'s OR joins JOBS AND J0 with BRANCH. Another example: "LOAD stuck at 0" keeps kind 3\'s line at 0. Choose a fault, then press "Run checks". The test instructions are one of each kind 1 to 7. Before you run them, predict which will fail.',
-  decoderFaultsOutcomes:
-    "**orOp0 made an AND**: Two test instructions fail on OP0. Subtract (kind 1, job 3) needs OP0 = 1 from JOBS AND J0. Branch (kind 5, job 6) needs OP0 = 1 from BRANCH. An AND of the two is 1 for neither, since no instruction is both kinds. The other five need OP0 = 0, and get it. A wrong gate breaks one signal for some kinds.\n\n**LOAD stuck at 0**: Only the load fails, affecting five outputs. WRITEY, LOAD, BCONST and OP1 all show 0. The cause shows `21`. With its kind line stuck at 0, kind 3 produces no 1 on any kind line, so the checks block treats it as an unknown instruction. A lost kind line breaks every signal of one kind.",
+  decoderFaultsOutcomesFault1:
+    "**orOp0 made an AND**: Two test instructions fail on OP0. Subtract (kind 1, job 3) needs OP0 = 1 from JOBS AND J0. Branch (kind 5, job 6) needs OP0 = 1 from BRANCH. An AND of the two is 1 for neither, since no instruction is both kinds. The other five need OP0 = 0, and get it. A wrong gate breaks one signal for some kinds.",
+
+  decoderFaultsOutcomesFault2:
+    "**LOAD stuck at 0**: Only the load fails, affecting five outputs. WRITEY, LOAD, BCONST and OP1 all show 0. The cause shows `21`. With its kind line stuck at 0, kind 3 produces no 1 on any kind line, so the checks block treats it as an unknown instruction. A lost kind line breaks every signal of one kind.",
   explanation:
     "The decoder works like Module 5's next-state logic. Module 3's 2-to-4 decoders and an AND gate per kind make the kind lines, as Module 3's decoder made Module 5's state lines. Module 5's row was an AND of a state's line with the row's inputs; here, an AND of a kind's line with a job bit. Module 5's next-state bit was an OR of rows; here, a signal is an OR of kind lines and such ANDs.\n\nThe decoder has no register. Its signals change as soon as K or J changes, and they settle before the next edge.",
   generalisation:

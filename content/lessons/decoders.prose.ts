@@ -30,7 +30,16 @@ export const PROSE = {
   decoderFaultsLead:
     'The figure shows the decoder built from gates. Its parts are:\n\n- notS1: NOT of S1; its output wire is NS1\n- notS0: NOT of S0; its output wire is NS0\n- and0: NS1 AND NS0; it drives Y0\n- and1: NS1 AND S0; it drives Y1\n- and2: S1 AND NS0; it drives Y2\n- and3: S1 AND S0; it drives Y3\n\nPress a wire to see its name and value below the drawing. "Run checks" makes 4 checks, one per pattern of S1 and S0: "S1 0, S0 0", "S1 0, S0 1", "S1 1, S0 0", "S1 1, S0 1". Each check compares all four outputs with a healthy decoder. Choose each fault in turn. Before you run the checks, predict which checks will fail and how many lamps each failing check will light.',
   decoderFaultsAfter:
-    '- "NS0 stuck at 1": 2 of the 4 checks fail. With S0 at 1, and0 and and2 should be blocked by NS0, but NS0 is stuck at 1. At "S1 0, S0 1" (01), Y0 and Y1 both light. At "S1 1, S0 1" (11), Y2 and Y3 both light. Two lamps light where only one should.\n\n- "AND gate and3 changed to OR": 2 of the 4 checks fail. Y3 is now S1 OR S0, so it is 1 for 01, 10 and 11. At 01, Y1 and Y3 both light. At 10, Y2 and Y3 both light. At 00 and 11, the checks succeed.\n\n- "NOT gate notS1 becomes a wire": all 4 checks fail. NS1 now equals S1 instead of its opposite, so and0 and and1 see S1 where they should see NOT S1. At 00 and at 01, no lamp lights. At 10, Y0 and Y2 both light. At 11, Y1 and Y3 both light.\n\nEach fault breaks the rule that each AND gate is 1 for one pattern alone: some patterns light two lamps, and some light none.',
+    "Each fault breaks the rule that each AND gate is 1 for one pattern alone: some patterns light two lamps, and some light none.",
+
+  decoderFaultsAfterFault1:
+    '"NS0 stuck at 1": 2 of the 4 checks fail. With S0 at 1, and0 and and2 should be blocked by NS0, but NS0 is stuck at 1. At "S1 0, S0 1" (01), Y0 and Y1 both light. At "S1 1, S0 1" (11), Y2 and Y3 both light. Two lamps light where only one should.',
+
+  decoderFaultsAfterFault2:
+    '"AND gate and3 changed to OR": 2 of the 4 checks fail. Y3 is now S1 OR S0, so it is 1 for 01, 10 and 11. At 01, Y1 and Y3 both light. At 10, Y2 and Y3 both light. At 00 and 11, the checks succeed.',
+
+  decoderFaultsAfterFault3:
+    '"NOT gate notS1 becomes a wire": all 4 checks fail. NS1 now equals S1 instead of its opposite, so and0 and and1 see S1 where they should see NOT S1. At 00 and at 01, no lamp lights. At 10, Y0 and Y2 both light. At 11, Y1 and Y3 both light.',
   explanation:
     "Each decoder output answers the yes-or-no question one lamp asked in the motivation. Y2 is 1 exactly when S1 S0 equals 10. So a decoder compares its inputs with each of the numbers 0 to 3 at once.\n\nThe office has one button that starts a defrost in a freezer room. Its signal must reach only the room on show. AND each decoder output with the button's signal. The chosen room's AND gate passes the signal, and the other three block it.",
   demuxBlockLead:

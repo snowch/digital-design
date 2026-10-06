@@ -37,7 +37,13 @@ export const PROSE = {
   wideFaultsLead:
     'This figure shows the 64-bit ALU at its top level: four 16-bit groups, named g0 to g3. g0 works on bits 0 to 15, g1 on bits 16 to 31, g2 on bits 32 to 47, g3 on bits 48 to 63. Every group receives all of A and B, and takes its own 16 bits of each inside. Each group\'s carry out is the next group\'s carry in: wires C16, C32 and C48, each named for the bit it goes into. The zero chain passes between the groups the same way. The two gates xorC0 and andC0 make the carry into bit 0, as at 4 bits. Press any wire to see its name and value.\n\nWords this wide show as 16 hexadecimal digits. "Run checks" makes 4 checks, all count up: "1 + 1", "FFFF + 1", "FFFFFFFF + 1" and "FFFFFFFFFFFFFFFF + 1". Their carries pass through 1, 16, 32 and 64 slices. The fault options are "C32 stuck at 0" and "C16 stuck at 1". Say first which checks you expect to fail. The results appear after the checks run.',
   wideFaultsAfter:
-    '- "C32 stuck at 0": 2 of the 4 checks fail, "FFFFFFFF + 1" and "FFFFFFFFFFFFFFFF + 1". These are the checks whose carry reaches bit 32. The other two never carry that far, so they never see the fault.\n- "C16 stuck at 1": 1 of the 4 checks fails, "1 + 1". The other three carry into bit 16 anyway, so a 1 stuck there changes nothing for them.\n\nA carry stuck at 0 shows only in words whose carry reaches it. A carry stuck at 1 shows only in words whose carry does not reach it.',
+    "A carry stuck at 0 shows only in words whose carry reaches it. A carry stuck at 1 shows only in words whose carry does not reach it.",
+
+  wideFaultsAfterFault1:
+    '"C32 stuck at 0": 2 of the 4 checks fail, "FFFFFFFF + 1" and "FFFFFFFFFFFFFFFF + 1". These are the checks whose carry reaches bit 32. The other two never carry that far, so they never see the fault.',
+
+  wideFaultsAfterFault2:
+    '"C16 stuck at 1": 1 of the 4 checks fails, "1 + 1". The other three carry into bit 16 anyway, so a 1 stuck there changes nothing for them.',
   explanation:
     "A 64-bit ALU has thousands of gates. Draw them all at once and no screen holds them, and no learner reads them. The course draws a circuit one level at a time. The 64-bit ALU is four 16-bit groups. Each 16-bit group is four 4-bit groups. Each 4-bit group is four slices. Each slice is gates. Every level above the slices follows the same pattern: four parts, each carry out the next carry in. You open one level, look at it, and open the next where you need to.",
   levels64Lead:

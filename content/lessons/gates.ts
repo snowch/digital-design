@@ -176,14 +176,25 @@ export const gates: LessonInput = {
           props: {
             libraryId: "alarm",
             faults: [
-              { kind: "inverted", net: "SHUT", label: LABELS.faults.extraNot },
-              { kind: "broken-wire", net: "SHUT", label: LABELS.faults.cutShut },
+              {
+                kind: "inverted",
+                net: "SHUT",
+                label: LABELS.faults.extraNot,
+                outcome: PROSE.alarmFaultsOutcomesFault1,
+              },
+              {
+                kind: "broken-wire",
+                net: "SHUT",
+                label: LABELS.faults.cutShut,
+                outcome: PROSE.alarmFaultsOutcomesFault2,
+              },
               {
                 kind: "stuck-at",
                 net: "DOOR",
                 value: 0,
                 label: LABELS.faults.doorStuck,
                 explanation: PROSE.doorStuckExplain,
+                outcome: PROSE.alarmFaultsOutcomesFault3,
               },
             ],
             run: ALARM_RUN,

@@ -59,9 +59,16 @@ const Props = z.object({
   releaseAll: z.boolean().default(false),
   /**
    * Module 2: what the faults do, in the lesson's words, shown only once the checks have been
-   * run, so a lead that asks the learner to say first is not answered under the figure.
+   * run, so a lead that asks the learner to say first is not answered under the figure. Where the
+   * faults carry their own `outcome`, each shown once that fault has run, this is the closing text
+   * about all of them, shown once every fault has run.
    */
   outcomes: z.string().optional(),
+  /**
+   * What the circuit with no fault does in the lead's own experiment, shown once the learner has
+   * pressed "Release all at once" with no fault chosen.
+   */
+  noFaultOutcome: z.string().optional(),
   /** Module 7: let the learner open a block; off where the inside is a later challenge's answer. */
   canOpen: z.boolean().default(true),
 });
@@ -104,6 +111,10 @@ export const FaultLab = withProps(
     const sim = useSettleSim(circuit, data.initial);
     const [diagnosis, setDiagnosis] = useState<Diagnosis | undefined>();
     const [ran, setRan] = useState(false);
+    // The faults the learner has run, each shown its own outcome only once it has been run, as the
+    // datapath figure does (Module 8): a run of one fault no longer answers the others.
+    const [ranFaults, setRanFaults] = useState<ReadonlySet<number>>(new Set());
+    const [releasedHealthy, setReleasedHealthy] = useState(false);
     const expectations = useMemo(() => outputsPerStep(healthy, data.run), [healthy, data.run]);
 
     const runChecks = () => {
@@ -117,7 +128,14 @@ export const FaultLab = withProps(
       }));
       setDiagnosis(runSuite(circuit, { kind: "sequence", steps }));
       setRan(true);
+      if (chosen >= 0) setRanFaults((was) => new Set([...was, chosen]));
     };
+    const perFault = data.faults.some((f) => f.outcome !== undefined);
+    const own = chosen >= 0 && ranFaults.has(chosen) ? data.faults[chosen]?.outcome : undefined;
+    const noFault = chosen < 0 && releasedHealthy ? data.noFaultOutcome : undefined;
+    const closing = (perFault ? ranFaults.size === data.faults.length : ran)
+      ? data.outcomes
+      : undefined;
     const name = `${interactive.id}-fault`;
 
     return (
@@ -144,7 +162,14 @@ export const FaultLab = withProps(
         />
         <div className="fault-actions">
           {data.releaseAll && (
-            <button type="button" className="button secondary" onClick={() => sim.releaseAll()}>
+            <button
+              type="button"
+              className="button secondary"
+              onClick={() => {
+                sim.releaseAll();
+                if (chosen < 0) setReleasedHealthy(true);
+              }}
+            >
               {strings.explorer.releaseAll}
             </button>
           )}
@@ -181,9 +206,11 @@ export const FaultLab = withProps(
             )}
           </div>
         )}
-        {ran && data.outcomes && (
+        {(own || noFault || closing) && (
           <div className="fault-outcomes">
-            <Prose markdown={data.outcomes} />
+            {own && <Prose markdown={own} />}
+            {noFault && <Prose markdown={noFault} />}
+            {closing && <Prose markdown={closing} />}
           </div>
         )}
       </div>

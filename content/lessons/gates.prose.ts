@@ -70,7 +70,16 @@ export const PROSE = {
   modelVsReality:
     "In the figures, every gate answers at once. A real gate does not. It takes a short time to respond after an input changes.\n\nA real gate's inputs and output are voltages, as in Module 1. A gate reads each input against a threshold and drives its output to one of two voltages. The output is clean, 0 or 1, even if an input voltage has drifted a little.\n\nA cut wire in hardware is not X: the input pin floats, and may read 0, 1, or drift with noise. The simulator shows X because it cannot know. Real gates come in chips that contain several gates each. This lesson's lamps are invented for the course.",
   alarmFaultsOutcomes:
-    'With "An extra NOT gate is in the wire SHUT": the AND gate sees the opposite of SHUT. 2 of 4 rows fail: when WARM is 1 and DOOR is 0, ALARM is 0 (expected 1); when WARM is 1 and DOOR is 1, ALARM is 1 (expected 0).\n\nWith "The wire SHUT from NOT to AND is cut": 2 of 4 rows fail, the ones with WARM 1, where ALARM is X. With WARM 0, ALARM stays 0, because an AND gate with one input at 0 gives 0 whatever its other input is.\n\nWith "The door switch is broken and DOOR stays 0 even when open": DOOR is 0 whatever the door does. 1 row fails: when WARM is 1 and the door is open, ALARM is 1 when it should be 0. The lamp would light while staff load warm stock with the door open.\n\nEach fault breaks some rows but leaves others right. A test that tries only some rows can miss a fault. That is why each challenge tests every row.',
+    "Each fault breaks some rows but leaves others right. A test that tries only some rows can miss a fault. That is why each challenge tests every row.",
+
+  alarmFaultsOutcomesFault1:
+    'With "An extra NOT gate is in the wire SHUT": the AND gate sees the opposite of SHUT. 2 of 4 rows fail: when WARM is 1 and DOOR is 0, ALARM is 0 (expected 1); when WARM is 1 and DOOR is 1, ALARM is 1 (expected 0).',
+
+  alarmFaultsOutcomesFault2:
+    'With "The wire SHUT from NOT to AND is cut": 2 of 4 rows fail, the ones with WARM 1, where ALARM is X. With WARM 0, ALARM stays 0, because an AND gate with one input at 0 gives 0 whatever its other input is.',
+
+  alarmFaultsOutcomesFault3:
+    'With "The door switch is broken and DOOR stays 0 even when open": DOOR is 0 whatever the door does. 1 row fails: when WARM is 1 and the door is open, ALARM is 1 when it should be 0. The lamp would light while staff load warm stock with the door open.',
   doorStuckExplain:
     "The switch is broken, so DOOR stays 0 even when the door is open. The drawing shows a box marked CONST that gives this fixed 0.",
 } as const;

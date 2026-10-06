@@ -128,9 +128,26 @@ export const nand: LessonInput = {
           props: {
             libraryId: "nand-or",
             faults: [
-              { kind: "broken-wire", net: "NA", label: LABELS.faults.cutNa },
-              { kind: "wrong-gate", path: "nandA", gate: "and", label: LABELS.faults.nandAToAnd },
-              { kind: "wrong-gate", path: "nandY", gate: "and", label: LABELS.faults.nandYToAnd },
+              {
+                kind: "broken-wire",
+                net: "NA",
+                label: LABELS.faults.cutNa,
+                outcome: PROSE.orFaultsOutcomesFault1,
+              },
+              {
+                kind: "wrong-gate",
+                path: "nandA",
+                gate: "and",
+                label: LABELS.faults.nandAToAnd,
+                outcome: PROSE.orFaultsOutcomesFault2,
+              },
+              {
+                kind: "wrong-gate",
+                path: "nandY",
+                gate: "and",
+                label: LABELS.faults.nandYToAnd,
+                outcome: PROSE.orFaultsOutcomesFault3,
+              },
             ],
             run: [
               { label: "A 0, B 0", set: { A: 0, B: 0 } },
