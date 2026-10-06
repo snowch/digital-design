@@ -448,6 +448,8 @@ export interface DatapathStrings {
   /** At a step: the buses that changed at it, {nets}. */
   readonly stepChanged: string;
   readonly stepNothing: string;
+  /** A step where only wires inside the blocks changed, none of the drawing's named buses. */
+  readonly stepInside: string;
   readonly back: string;
   readonly next: string;
   readonly end: string;
@@ -907,6 +909,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     stepsNone: "Press Clock edge first.",
     stepChanged: "Buses that changed: {nets}.",
     stepNothing: "The clock has just risen; nothing has changed yet.",
+    stepInside: "Draft only wires inside the blocks changed.",
     back: "Back a step",
     next: "Next step",
     end: "Last step",

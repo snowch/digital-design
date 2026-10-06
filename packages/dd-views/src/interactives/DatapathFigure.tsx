@@ -168,7 +168,9 @@ export const DatapathFigure = withProps(
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [asking, healthy, data.ask, data.register],
     );
-    const optionLabel = (v: string) => data.options?.find((o) => o.value === v)?.label ?? v;
+    // An option's label inside a sentence that ends with its own full stop: "taken." ends once.
+    const optionLabel = (v: string) =>
+      (data.options?.find((o) => o.value === v)?.label ?? v).replace(/\.$/, "");
 
     const last = edge ? edge.history.length - 1 : 0;
     const at = Math.min(step, last);
@@ -294,8 +296,9 @@ export const DatapathFigure = withProps(
           ? format(t.gaveUp, { edges: RUN_LIMIT, pc: hex3(state.pc ?? 0) })
           : reason !== undefined
             ? format(t.halting, { reason: t.reasons[reason] ?? reason })
-            : state.pc !== undefined
-              ? format(t.running, { pc: hex3(state.pc) })
+            : // While the learner steps through an edge, the PC the steps show, not the edge's end.
+              shownState.pc !== undefined
+              ? format(t.running, { pc: hex3(shownState.pc) })
               : "";
 
     return (
@@ -416,7 +419,9 @@ export const DatapathFigure = withProps(
                 status={
                   at === 0
                     ? t.stepNothing
-                    : format(t.stepChanged, { nets: changedAt(at).join(", ") })
+                    : changedAt(at).length > 0
+                      ? format(t.stepChanged, { nets: changedAt(at).join(", ") })
+                      : t.stepInside
                 }
               />
             ) : (
