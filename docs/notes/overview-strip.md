@@ -17,14 +17,18 @@ wider than its box: on a phone and on a desktop alike for this drawing.
   moves the drawing there. From a keyboard the strip is one slider: the arrow keys move the
   drawing half a box, Home and End go to the ends. The strip stays at the top of the window while
   the drawing is on screen, which matters because the drawing is taller than a phone's screen.
-- **The zoom**: from fitting the box (about 0.13 on a 375-pixel phone) to twice the drawing's size.
-  Two fingers on the drawing zoom it, and one finger still scrolls it; a trackpad's pinch, which
-  the browser sends as the wheel with Ctrl held, zooms it too. The buttons Make smaller and Make
-  larger zoom by 1.5 a press: they are the one-pointer equal that WCAG 2.5.1 requires of a
-  gesture of two fingers, and a keyboard's way to zoom. Outside the drawing the browser's own zoom
-  works as before; inside it, two fingers zoom the drawing instead of the page.
-- **Below half size** the drawing's words are hidden, since they would be under 6 pixels high, and
-  its lines stay 1 to 2 pixels wide, as in the strip. A wire's touch target stays 14 pixels wide.
+- **The zoom**: from half the drawing's size (or fitting the box, where that is larger) to twice
+  its size. Two fingers on the drawing zoom it, and one finger still scrolls it; a trackpad's
+  pinch, which the browser sends as the wheel with Ctrl held, zooms it too. The buttons Make
+  smaller and Make larger step through half, three quarters, its own size, one and a half and
+  twice: they are the one-pointer equal that WCAG 2.5.1 requires of a gesture of two fingers, and
+  a keyboard's way to zoom. Outside the drawing the browser's own zoom works as before; inside it,
+  two fingers zoom the drawing instead of the page.
+- **Below 0.6 of its size** the drawing's words are hidden, since they would be under about
+  7 pixels high, and its lines stay 1 to 2 pixels wide, as in the strip. A wire's touch target
+  stays 14 pixels wide. Between 0.6 and 1 the words show smaller than the page's 11-pixel rule:
+  that rule holds for the page as it loads, and a learner who zooms a drawing out chooses smaller
+  words, as with the browser's own zoom.
 
 ## How it is built
 
@@ -72,3 +76,26 @@ box has the strip and the zoom, unless the figure sets `overview` to false. A fi
 to true, to give them to a smaller drawing wider than its box; none does. The per-figure trial
 setting on `branches` went. `tests/educational/overview.spec.ts` checks the rule across a lesson
 under the line and two over it, and drives the strip and the zoom on `branches`' loop.
+
+## What a learner's walk found, and what changed
+
+The session that built Module 8 walked `branches`' loop as a learner, at 1280 and 375 pixels,
+after the trial went live:
+
+1. A drag in the strip from its own place, before it was held at the top of the window, threw the
+   page down: about 16,000 pixels on a desktop, to the end of the page on a phone. Each move of a
+   drag scrolled the page to bring the pressed row on screen, which moved the strip under a still
+   finger, so the next move scrolled again. The tests had pressed and used the keys, never dragged.
+   Now only a press brings a row on screen; a drag moves the drawing across and never the page,
+   and a browser test drags from the strip's own place.
+2. Zoomed to fit, on a phone the drawing (285 pixels across) was smaller than the strip above it.
+   The zoom now stops at half the drawing's size.
+3. After zooming out, Make larger stepped by 1.5 from wherever the zoom was and never landed on
+   the drawing's own size again. The buttons now step through fixed sizes with 1 among them.
+4. At about 0.67 the words measured 10 pixels, under the page's 11-pixel rule; at about 0.69 on a
+   phone, with the strip, the walk found the best view of the lesson's branch logic. The words now
+   show down to 0.6 of their size, smaller than the rule by the learner's choice, and hide below.
+
+It also found every Module 8 lesson's words pointing at blocks that lie off the drawing's first
+view on a phone. The strip shows where they are; opening a figure at the part its words name is
+left for later.

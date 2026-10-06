@@ -23,8 +23,19 @@ export interface Region {
 /** The largest zoom: twice the drawing's own size, for words a learner wants larger. */
 export const MOST_ZOOM = 2;
 
-/** Below this zoom the drawing's words would be under 6 pixels high, so they are hidden. */
-export const WORDS_HIDDEN_BELOW = 0.5;
+/**
+ * The smallest zoom: half the drawing's size. Smaller, a phone's box shows less than the strip
+ * above it already does (a learner's walk of the branches lesson found the fitted drawing, 285
+ * pixels across, under the strip's 350).
+ */
+export const LEAST_ZOOM = 0.5;
+
+/**
+ * Below this zoom the drawing's words would be under about 7 pixels high, so they are hidden. Above
+ * it they show smaller than the page's 11-pixel rule, which holds for the page as it loads: a
+ * learner who zooms a drawing out chooses smaller words, as with the browser's own zoom.
+ */
+export const WORDS_HIDDEN_BELOW = 0.6;
 
 /** How far a drawing `width` units wide may be zoomed in a box with `room` pixels across. */
 export function zoomLimits(
@@ -32,7 +43,24 @@ export function zoomLimits(
   room: number,
 ): { readonly min: number; readonly max: number } {
   const fit = width > 0 && room > 0 ? room / width : 1;
-  return { min: Math.min(1, fit), max: MOST_ZOOM };
+  return { min: Math.min(1, Math.max(fit, LEAST_ZOOM)), max: MOST_ZOOM };
+}
+
+/** The zooms the buttons step through, the drawing's own size among them. */
+export function zoomSteps(limits: { readonly min: number; readonly max: number }): number[] {
+  const rungs = [0.5, 0.75, 1, 1.5, 2].filter((z) => z > limits.min + 1e-6 && z <= limits.max);
+  return [limits.min, ...rungs];
+}
+
+/** The next zoom a button gives from `zoom`, larger (1) or smaller (-1), from a pinch's too. */
+export function nextZoom(
+  zoom: number,
+  limits: { readonly min: number; readonly max: number },
+  direction: 1 | -1,
+): number {
+  const steps = zoomSteps(limits);
+  if (direction > 0) return steps.find((z) => z > zoom + 0.001) ?? limits.max;
+  return [...steps].reverse().find((z) => z < zoom - 0.001) ?? limits.min;
 }
 
 export function clampZoom(

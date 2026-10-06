@@ -2,7 +2,8 @@
 
 // A drawing much wider than its box (Module 8's whole datapath, 2,099 pixels across, in a phone's
 // box of about 350): the whole of it, small, above it, with a frame on the part on screen, and a
-// zoom from fitting the box to twice its size. Pinching zooms on a touch screen; the two buttons
+// zoom from half its size (or fitting the box, where that is larger) to twice its size, the
+// buttons stepping through its own size on the way. Pinching zooms on a touch screen; the buttons
 // do the same for one finger, a mouse or a keyboard, as every gesture of two fingers must have an
 // equal of one. The browser's own zoom of the page is left alone outside the drawing.
 //
@@ -16,6 +17,7 @@ import type { KeyboardEvent, PointerEvent as ReactPointerEvent } from "react";
 import {
   WORDS_HIDDEN_BELOW,
   clampZoom,
+  nextZoom,
   pointAt,
   scrollToPut,
   visibleRegion,
@@ -41,8 +43,8 @@ export interface ZoomControl {
   readonly zoom: number;
   readonly min: number;
   readonly max: number;
-  /** Zooms by a factor about the middle of what is on screen. */
-  readonly by: (factor: number) => void;
+  /** Zooms one step larger (1) or smaller (-1) about the middle of what is on screen. */
+  readonly step: (direction: 1 | -1) => void;
 }
 
 function drawingIn(box: HTMLElement | null): SVGSVGElement | null {
@@ -181,22 +183,20 @@ export function useZoom(
     };
   }, [box, width, zoomTo]);
 
-  const by = useCallback(
-    (factor: number) => {
+  const step = useCallback(
+    (direction: 1 | -1) => {
       const svg = drawingIn(box);
       if (!box || !svg) return;
       const at = middleOnScreen(box);
       const p = pointAt(svg.getBoundingClientRect(), width, at.x, at.y);
-      setZoom(zoomTo(current.current * factor, p.x, p.y, at.x, at.y));
+      const z = nextZoom(current.current, bounds.current, direction);
+      setZoom(zoomTo(z, p.x, p.y, at.x, at.y));
     },
     [box, width, zoomTo],
   );
 
-  return { zoom, min: limits.min, max: limits.max, by };
+  return { zoom, min: limits.min, max: limits.max, step };
 }
-
-/** How much one press of a zoom button zooms. */
-const ZOOM_STEP = 1.5;
 
 /**
  * The strip: the whole drawing in `box`, small, without its words, with a frame on the part on
@@ -298,9 +298,11 @@ export function OverviewStrip({
     };
   }, [box, paint]);
 
-  // Moves the drawing so that the point under the finger is in the middle of the box; brings its
-  // row on screen only when it is off screen now, so a drag across does not move the page.
-  const goTo = (clientX: number, clientY: number) => {
+  // Moves the drawing so that the point under the finger is in the middle of the box. A press also
+  // brings the point's row on screen when it is off screen now; a drag never moves the page, or the
+  // strip would move under a still finger and each move would scroll it again (a learner's walk
+  // found a drag from the strip's own place running to the end of the page).
+  const goTo = (clientX: number, clientY: number, press: boolean) => {
     const s = strip.current;
     const svg = drawingIn(box);
     const view = region();
@@ -312,7 +314,7 @@ export function OverviewStrip({
     const d = svg.getBoundingClientRect();
     const scale = (d.right - d.left) / width;
     box.scrollLeft += (x - (view.x0 + view.x1) / 2) * scale;
-    if (y < view.y0 + 20 || y > view.y1 - 20) {
+    if (press && (y < view.y0 + 20 || y > view.y1 - 20)) {
       const top = Math.max(bar.current.getBoundingClientRect().bottom, 0);
       window.scrollBy(0, d.top + y * scale - (top + window.innerHeight) / 2);
     }
@@ -321,10 +323,10 @@ export function OverviewStrip({
 
   const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     e.currentTarget.setPointerCapture(e.pointerId);
-    goTo(e.clientX, e.clientY);
+    goTo(e.clientX, e.clientY, true);
   };
   const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
-    if (e.currentTarget.hasPointerCapture(e.pointerId)) goTo(e.clientX, e.clientY);
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) goTo(e.clientX, e.clientY, false);
   };
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (!box) return;
@@ -349,7 +351,7 @@ export function OverviewStrip({
             type="button"
             className="button"
             disabled={zoom.zoom <= zoom.min + 0.001}
-            onClick={() => zoom.by(1 / ZOOM_STEP)}
+            onClick={() => zoom.step(-1)}
           >
             {strings.zoomOut}
           </button>
@@ -357,7 +359,7 @@ export function OverviewStrip({
             type="button"
             className="button"
             disabled={zoom.zoom >= zoom.max - 0.001}
-            onClick={() => zoom.by(ZOOM_STEP)}
+            onClick={() => zoom.step(1)}
           >
             {strings.zoomIn}
           </button>

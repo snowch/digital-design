@@ -106,26 +106,54 @@ test.describe("a drawing much wider than its box", () => {
       .toMatch(/^translate\(0px/);
   });
 
-  test("zooms out until the whole drawing fits its box, and in to twice its size", async ({
+  test("steps down to half its size, back through its own size, and up to twice", async ({
     page,
   }) => {
     await openLesson(page, "branches");
     const f = figure(page);
     const out = f.getByRole("button", { name: V.circuit.zoomOut });
     const into = f.getByRole("button", { name: V.circuit.zoomIn });
-    for (let i = 0; i < 12 && (await out.isEnabled()); i++) await out.click();
+    const sizes: number[] = [];
+    for (let i = 0; i < 6 && (await out.isEnabled()); i++) {
+      await out.click();
+      sizes.push(Math.round(((await drawnWidth(page)) / WIDTH) * 100));
+    }
     await expect(out).toBeDisabled();
-    expect(await box(page).evaluate((el) => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
-    // Below half its size the drawing's words would be under 6 pixels, so they are hidden.
-    const zoom = (await drawnWidth(page)) / WIDTH;
-    const seen = await drawing(page)
-      .locator("text")
-      .first()
-      .evaluate((t) => getComputedStyle(t).visibility);
-    expect(seen).toBe(zoom < 0.5 ? "hidden" : "visible");
-    for (let i = 0; i < 12 && (await into.isEnabled()); i++) await into.click();
+    expect(sizes).toEqual([75, 50]);
+    // At half its size the drawing's words would be 6 pixels high, so they are hidden.
+    const seen = () =>
+      drawing(page)
+        .locator("text")
+        .first()
+        .evaluate((t) => getComputedStyle(t).visibility);
+    expect(await seen()).toBe("hidden");
+    sizes.length = 0;
+    for (let i = 0; i < 6 && (await into.isEnabled()); i++) {
+      await into.click();
+      sizes.push(Math.round(((await drawnWidth(page)) / WIDTH) * 100));
+    }
     await expect(into).toBeDisabled();
-    expect(await drawnWidth(page)).toBeCloseTo(WIDTH * 2, 0);
+    expect(sizes).toEqual([75, 100, 150, 200]);
+    expect(await seen()).toBe("visible");
+  });
+
+  test("a drag in the strip moves the drawing across and never moves the page", async ({
+    page,
+  }) => {
+    await openLesson(page, "branches");
+    // The strip in its own place, above the drawing, not yet held at the top of the window.
+    const strip = figure(page).getByRole("slider", { name: V.circuit.overviewName });
+    await strip.scrollIntoViewIfNeeded();
+    await page.evaluate(() => window.scrollBy(0, -120));
+    const r = (await strip.boundingBox())!;
+    const y = r.y + r.height - 4;
+    await page.mouse.move(r.x + 10, y);
+    await page.mouse.down();
+    const pressed = await page.evaluate(() => window.scrollY);
+    for (let x = 20; x < r.width - 10; x += 20) await page.mouse.move(r.x + x, y);
+    await page.mouse.up();
+    expect(await page.evaluate(() => window.scrollY)).toBe(pressed);
+    expect(await box(page).evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
   });
 
   test("zooms with two fingers on a touch screen", async ({ page }, testInfo) => {
@@ -147,11 +175,12 @@ test.describe("a drawing much wider than its box", () => {
               ],
       });
     await touch("touchStart", 200);
-    for (const apart of [180, 150, 120, 90, 60]) await touch("touchMove", apart);
+    for (const apart of [190, 175, 160, 140]) await touch("touchMove", apart);
     await touch("touchEnd", 0);
+    // Fingers 200 pixels apart, then 140: the drawing at about 0.7 of its size.
     const w = await drawnWidth(page);
-    expect(w).toBeGreaterThan(WIDTH * 0.2);
-    expect(w).toBeLessThan(WIDTH * 0.5);
+    expect(w).toBeGreaterThan(WIDTH * 0.6);
+    expect(w).toBeLessThan(WIDTH * 0.8);
   });
 
   test("zooms with a trackpad's pinch, which comes as the wheel with Ctrl held", async ({
@@ -162,10 +191,10 @@ test.describe("a drawing much wider than its box", () => {
     const b = await boxAt(page, 300);
     await page.mouse.move(b.x + b.width / 2, b.y + 200);
     await page.keyboard.down("Control");
-    await page.mouse.wheel(0, 50);
-    await page.mouse.wheel(0, 50);
+    await page.mouse.wheel(0, 30);
     await page.keyboard.up("Control");
-    await expect.poll(() => drawnWidth(page)).toBeLessThan(WIDTH * 0.5);
+    await expect.poll(() => drawnWidth(page)).toBeLessThan(WIDTH * 0.85);
+    expect(await drawnWidth(page)).toBeGreaterThan(WIDTH * 0.6);
     // The page itself did not move sideways, and the browser did not zoom it.
     expect(await page.evaluate(() => window.visualViewport?.scale ?? 1)).toBe(1);
   });

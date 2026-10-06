@@ -176,7 +176,9 @@ the Vite build, Playwright. Each line below is a check and the reason it exists.
   and enter another in the same order, nor any wire touch a written value; the first two hold under
   every fault as well (the same tests; `docs/notes/roomy-wires.md`).
 - **The look of the page is held to rules and to screenshots**
-  (`tests/educational/aesthetics.spec.ts`). No visible text under 11 pixels, every control at
+  (`tests/educational/aesthetics.spec.ts`). No visible text under 11 pixels on the page as it
+  loads (a large drawing a learner zooms out shows its words smaller, down to 0.6 of their size,
+  then hides them; `docs/notes/overview-strip.md`), every control at
   least 40 pixels tall on a phone, no line of prose over about 85 characters; and the lesson
   header and the figures the test names must match their stored screenshots, at both widths. The typefaces
   ship with the site (Source Sans 3 for prose, Archivo for headings, JetBrains Mono for values

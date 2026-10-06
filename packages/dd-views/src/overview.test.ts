@@ -5,24 +5,54 @@
 
 import { describe, expect, it } from "vitest";
 
-import { MOST_ZOOM, clampZoom, pointAt, scrollToPut, visibleRegion, zoomLimits } from "./overview";
+import {
+  LEAST_ZOOM,
+  MOST_ZOOM,
+  clampZoom,
+  nextZoom,
+  pointAt,
+  scrollToPut,
+  visibleRegion,
+  zoomLimits,
+  zoomSteps,
+} from "./overview";
 
 // The branches lesson's whole datapath, 2,099 by 806, in a phone's box of 322 pixels inside.
 const W = 2099;
 const H = 806;
 
 describe("a wide drawing's zoom", () => {
-  it("goes down until its whole width fits the box, and up to twice its size", () => {
+  it("goes down to half its size, where fitting the box would be smaller, and up to twice", () => {
+    // In a phone's box the whole datapath would fit at about 0.15: smaller than the strip above it.
     const limits = zoomLimits(W, 322);
-    expect(limits.min).toBeCloseTo(322 / W);
+    expect(limits.min).toBe(LEAST_ZOOM);
     expect(limits.max).toBe(MOST_ZOOM);
-    expect(clampZoom(0.01, limits)).toBeCloseTo(322 / W);
+    expect(clampZoom(0.01, limits)).toBe(0.5);
     expect(clampZoom(5, limits)).toBe(2);
-    expect(clampZoom(0.5, limits)).toBe(0.5);
+    expect(clampZoom(0.7, limits)).toBe(0.7);
+  });
+
+  it("goes down only to fitting the box, where that is larger than half its size", () => {
+    expect(zoomLimits(1200, 900).min).toBeCloseTo(0.75);
   });
 
   it("never goes below its own size in a box it already fits", () => {
     expect(zoomLimits(300, 322).min).toBe(1);
+  });
+
+  it("steps through the drawing's own size, so a press always returns to it", () => {
+    const limits = zoomLimits(W, 322);
+    expect(zoomSteps(limits)).toEqual([0.5, 0.75, 1, 1.5, 2]);
+    expect(nextZoom(1, limits, -1)).toBe(0.75);
+    expect(nextZoom(0.5, limits, 1)).toBe(0.75);
+    // From where a pinch left it, to the next step either way.
+    expect(nextZoom(0.69, limits, 1)).toBe(0.75);
+    expect(nextZoom(0.69, limits, -1)).toBe(0.5);
+    expect(nextZoom(0.8, limits, 1)).toBe(1);
+    expect(nextZoom(2, limits, 1)).toBe(2);
+    expect(nextZoom(0.5, limits, -1)).toBe(0.5);
+    // A drawing that fits at 0.8 steps from there.
+    expect(zoomSteps(zoomLimits(1000, 800))).toEqual([0.8, 1, 1.5, 2]);
   });
 });
 
