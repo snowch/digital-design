@@ -25,6 +25,9 @@ export function useWidth<T extends Element>(fallback: number): [(el: T | null) =
   return [ref, width];
 }
 
+/** How far, in pixels, content may pass its box's edge before it counts as out of sight. */
+const MARGIN = 24;
+
 /**
  * Whether an element's content is wider than the element, so it scrolls sideways: a drawing on a
  * phone. False where nothing measures (a test without layout).
@@ -35,7 +38,9 @@ export function useOverflows<T extends Element>(): [(el: T | null) => void, bool
   const ref = useCallback((node: T | null) => setEl(node), []);
   useEffect(() => {
     if (!el) return;
-    const measure = () => setOverflows(el.scrollWidth > el.clientWidth + 1);
+    // A drawing's own margin may pass the edge by a few pixels with nothing in it: the note
+    // speaks only when more than that is out of sight.
+    const measure = () => setOverflows(el.scrollWidth > el.clientWidth + MARGIN);
     measure();
     if (typeof ResizeObserver === "undefined") return;
     const ro = new ResizeObserver(measure);

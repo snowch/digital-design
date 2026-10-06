@@ -493,9 +493,12 @@ function WriteEditor({ challenge, artifact, onChange, verdict }: ChallengeEditor
         title={strings.editor.writeTitle}
         highlight={marked}
         {...(challenge.initial.hdl !== undefined ? { untouched: challenge.initial.hdl } : {})}
+        drawn={challenge.tryIt !== "pins"}
       />
+      {/* A pins Try it is long (a word's bits are buttons): folded, it leaves Run tests near
+          the text. */}
       {result.circuit && (
-        <details className="editor-try" open>
+        <details className="editor-try" open={challenge.tryIt !== "pins"}>
           <summary>{strings.editor.tryIt}</summary>
           <TryIt
             circuit={result.circuit}
