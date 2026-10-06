@@ -26,6 +26,7 @@ import { CircuitView } from "../CircuitView";
 import { format, useViewStrings, type ViewStrings } from "../strings";
 import { TimingDiagram } from "../TimingDiagram";
 import { useSettleSim } from "../useSim";
+import { useWidth } from "../useWidth";
 import { withProps } from "./props";
 import { Step, runScript } from "./script";
 
@@ -113,6 +114,9 @@ function Label({
   );
 }
 
+/** The narrowest a diagram closes up to, as a share of its drawn width. */
+const SQUEEZE = 0.62;
+
 export function StateDiagram({
   machine: m,
   current,
@@ -123,11 +127,16 @@ export function StateDiagram({
   nextRow?: number;
 }) {
   const strings = useViewStrings();
-  const [w, h] = m.size ?? [400, 380];
+  const [natural, h] = m.size ?? [400, 380];
+  // On a narrow page the drawing closes up sideways, down to SQUEEZE of its width; its text and
+  // boxes keep their size, so they stay legible and the arrows between them shorten.
+  const [ref, available] = useWidth<HTMLDivElement>(natural);
+  const k = Math.min(1, Math.max(SQUEEZE, available / natural));
+  const w = Math.round(natural * k);
   const centre = { x: w / 2, y: h / 2 };
   const at = (name: string) => {
     const s = m.states.find((x) => x.name === name);
-    return { x: s?.at?.[0] ?? 0, y: s?.at?.[1] ?? 0, w: boxW(name) };
+    return { x: (s?.at?.[0] ?? 0) * k, y: s?.at?.[1] ?? 0, w: boxW(name) };
   };
   const arrows = arrowsOf(m);
   const label = (a: Arrow) =>
@@ -136,7 +145,7 @@ export function StateDiagram({
       ...conditionText(m, m.rows[r] as MachineRow, strings),
     ]);
   return (
-    <div className="state-diagram-wrap">
+    <div className="state-diagram-wrap" ref={ref}>
       <svg
         className="state-diagram"
         viewBox={`0 0 ${w} ${h}`}
@@ -164,7 +173,8 @@ export function StateDiagram({
           const cls = `state-arrow${taken ? " state-arrow-next" : ""}`;
           const p = at(a.from);
           const lines = label(a);
-          const given = m.rows[a.rows[0] as number]?.labelAt;
+          const placed = m.rows[a.rows[0] as number]?.labelAt;
+          const given = placed ? ([placed[0] * k, placed[1]] as const) : undefined;
           if (a.from === a.to) {
             // A loop on the side of the box away from the middle of the drawing.
             const top = p.y <= centre.y;
