@@ -31,6 +31,11 @@ export function parse(source: string): Module {
   return new Parser(tokenize(source)).module();
 }
 
+/** Module 8: a text of one or more modules, in order. */
+export function parseModules(source: string): Module[] {
+  return new Parser(tokenize(source)).modules();
+}
+
 class Parser {
   private index = 0;
 
@@ -70,7 +75,14 @@ class Parser {
     );
   }
 
-  module(): Module {
+  /** Module 8: modules one after another until the text ends. */
+  modules(): Module[] {
+    const out: Module[] = [this.module(true)];
+    while (this.peek().kind !== "end") out.push(this.module(true));
+    return out;
+  }
+
+  module(several = false): Module {
     const start = this.expect("module", "the text must start with `module`").at;
     const name = this.identifier("the module's name").text;
     const parameters: Parameter[] = [];
@@ -236,6 +248,12 @@ class Parser {
           t.at,
           "write `always_comb` for logic or `always_ff @(posedge clk)` for a flip-flop, not a plain `always`",
         );
+      } else if (
+        t.kind === "identifier" &&
+        (this.peek(1).kind === "identifier" ||
+          (this.peek(1).kind === "symbol" && this.peek(1).text === "#"))
+      ) {
+        items.push(this.instance());
       } else if (this.is("initial")) {
         throw new HdlError(
           t.at,
@@ -249,7 +267,7 @@ class Parser {
       }
     }
     this.expect("endmodule");
-    if (this.peek().kind !== "end") {
+    if (!several && this.peek().kind !== "end") {
       throw new HdlError(this.peek().at, "only one module per text in this course");
     }
     return {
@@ -262,6 +280,42 @@ class Parser {
       ...(enums.length ? { enums } : {}),
       at: start,
     };
+  }
+
+  /** Module 8: `name #(.P(v)) inst (.port(value), ...);`, ports connected by name. */
+  private instance(): Item {
+    const m = this.identifier("the module's name");
+    const parameters: { name: string; value: Expression; at: Position }[] = [];
+    if (this.is("#")) {
+      this.next();
+      this.expect("(");
+      if (!this.is(")")) {
+        do {
+          this.expect(".", "give each parameter by name, like `#(.N(64))`");
+          const p = this.identifier("a parameter name");
+          this.expect("(");
+          parameters.push({ name: p.text, value: this.expression(), at: p.at });
+          this.expect(")");
+        } while (this.is(",") && this.next());
+      }
+      this.expect(")");
+    }
+    const name = this.identifier("this use's own name");
+    this.expect("(");
+    const connections: { port: string; value?: Expression; at: Position }[] = [];
+    if (!this.is(")")) {
+      do {
+        this.expect(".", "connect each port by name, like `.A(QA)`");
+        const port = this.identifier("a port name");
+        this.expect("(");
+        if (this.is(")")) connections.push({ port: port.text, at: port.at });
+        else connections.push({ port: port.text, value: this.expression(), at: port.at });
+        this.expect(")");
+      } while (this.is(",") && this.next());
+    }
+    this.expect(")");
+    this.expect(";");
+    return { kind: "instance", module: m.text, name: name.text, parameters, connections, at: m.at };
   }
 
   /** Module 6: an array's words after its name, `[0:15]` or `[16]`. */

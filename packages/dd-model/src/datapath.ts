@@ -90,6 +90,27 @@ export const PARTS = {
 
 // ---- Small closed blocks --------------------------------------------------------------------
 
+/**
+ * A block's parts in a scope of their own (a closed block in a drawing), or, for a module the
+ * course supplies to the SystemVerilog subset, at the level its use already made (Module 8).
+ */
+function block<T>(
+  b: CircuitBuilder,
+  scoped: boolean,
+  name: string,
+  kind: string,
+  body: (bb: CircuitBuilder) => T,
+  ports: { inputs: Record<string, NetId>; outputs: Record<string, NetId> },
+): T {
+  return scoped ? b.scope(name, kind, body, ports) : body(b);
+}
+
+/** Where a block's outputs go, when its user has made their nets, and whether it is scoped. */
+export interface Given {
+  readonly outs?: Readonly<Record<string, NetId>>;
+  readonly scoped?: boolean;
+}
+
 function slicePart(b: CircuitBuilder, w: NetId, hi: number, lo: number, out: NetId, name: string) {
   if (hi === lo) b.component("bit", { a: w }, { y: out }, { name, params: { index: lo } });
   else b.component("slice", { a: w }, { y: out }, { name, params: { hi, lo } });
@@ -196,10 +217,13 @@ export function registerFile64(
   b: CircuitBuilder,
   ins: { RA: NetId; RB: NetId; WA: NetId; D: NetId; WE: NetId; CLK: NetId },
   init?: readonly (bigint | undefined)[],
+  given: Given = {},
 ) {
-  const qa = b.net("QA", 64);
-  const qb = b.net("QB", 64);
-  b.scope(
+  const qa = given.outs?.["QA"] ?? b.net("QA", 64);
+  const qb = given.outs?.["QB"] ?? b.net("QB", 64);
+  block(
+    b,
+    given.scoped ?? true,
     PARTS.regs,
     "register-file-16",
     (bb) => {
@@ -366,13 +390,16 @@ export const DECODER_OUTPUTS: Readonly<Record<"fetch" | "memory" | "full", reado
  * constant) to the control signals and the illegal-instruction check. Built as gates, drawn closed:
  * how it works out its outputs is Module 9's.
  */
-function decoder(
+export function decoder(
   b: CircuitBuilder,
   ins: { K: NetId; J: NetId; C: NetId },
   outputs: readonly string[],
+  given: Given = {},
 ): Record<string, NetId> {
-  const outs = Object.fromEntries(outputs.map((n) => [n, b.net(n)]));
-  b.scope(
+  const outs = Object.fromEntries(outputs.map((n) => [n, given.outs?.[n] ?? b.net(n)]));
+  block(
+    b,
+    given.scoped ?? true,
     PARTS.decoder,
     "control-decoder",
     (bb) => {
@@ -478,29 +505,34 @@ function decoder(
 
 // ---- The stop logic ----------------------------------------------------------------------------
 
+/** The checks in the order the steps run, each with its cause's number. */
+export const CAUSE_ORDER: readonly (readonly [string, number])[] = [
+  ["OUTSIDE", CAUSES.outsideRom],
+  ["NOT4", CAUSES.notMultipleOf4],
+  ["ILLEGAL", CAUSES.illegal],
+  ["NOMEM", CAUSES.noMemory],
+  ["MISALIGN", CAUSES.misaligned],
+  ["RONLY", CAUSES.readOnly],
+  ["SYSTEM", CAUSES.system],
+];
+
 /**
  * Whether this edge stops the machine, and why: HALT is 1 when any check fails or the instruction
  * stops the machine; CAUSE is the failed check's number, the lowest when several fail at once (the
  * first check in the order the steps run), or 00 for `stop`. Gates and a chain of selectors.
  */
-function stopLogic(
+export function stopLogic(
   b: CircuitBuilder,
   causes: Readonly<Record<string, NetId>>,
   stop: NetId,
   halt: NetId,
+  given: Given = {},
 ) {
-  const cause = b.net("CAUSE", 8);
-  const order: [string, number][] = [
-    ["OUTSIDE", CAUSES.outsideRom],
-    ["NOT4", CAUSES.notMultipleOf4],
-    ["ILLEGAL", CAUSES.illegal],
-    ["NOMEM", CAUSES.noMemory],
-    ["MISALIGN", CAUSES.misaligned],
-    ["RONLY", CAUSES.readOnly],
-    ["SYSTEM", CAUSES.system],
-  ];
-  const present = order.filter(([n]) => causes[n] !== undefined);
-  b.scope(
+  const cause = given.outs?.["CAUSE"] ?? b.net("CAUSE", 8);
+  const present = CAUSE_ORDER.filter(([n]) => causes[n] !== undefined);
+  block(
+    b,
+    given.scoped ?? true,
     PARTS.stops,
     "stop-logic",
     (bb) => {
@@ -616,7 +648,7 @@ export interface MemoryPorts {
  * of 8 or a byte at a device (33); RONLY, a store to the ROM or a read-only device (34); each only
  * for a load or a store. A write happens at a rising edge of CLK where WE is 1.
  */
-function memoryNets(b: CircuitBuilder) {
+export function memoryNets(b: CircuitBuilder) {
   return {
     IR: b.net("IR", 32),
     MQ: b.net("MQ", 64),
@@ -630,13 +662,16 @@ function memoryNets(b: CircuitBuilder) {
   };
 }
 
-function machineMemory(
+export function machineMemory(
   b: CircuitBuilder,
   ins: MemoryPorts,
   rom: DatapathOptions["rom"],
   out: ReturnType<typeof memoryNets>,
+  scoped = true,
 ) {
-  b.scope(
+  block(
+    b,
+    scoped,
     PARTS.memory,
     "machine-memory",
     (bb) => {
@@ -894,12 +929,15 @@ function machineMemory(
  * MINUS XOR OVER, and an XOR gate with job bit 0 turns the choice over or leaves it. Gates, and a
  * block a learner opens.
  */
-function branchCondition(
+export function branchCondition(
   b: CircuitBuilder,
   ins: { ZERO: NetId; MINUS: NetId; COUT: NetId; OVER: NetId; J: NetId },
+  given: Given = {},
 ): NetId {
-  const met = b.net("MET");
-  b.scope(
+  const met = given.outs?.["MET"] ?? b.net("MET");
+  block(
+    b,
+    given.scoped ?? true,
     PARTS.condition,
     "branch-condition",
     (bb) => {
@@ -981,7 +1019,8 @@ export function datapathCircuit(options: DatapathOptions): Circuit {
   // Nets made ahead of the parts that drive them: the loops through the PC and the memory.
   const pc = fetching ? b.net("PC", 64) : undefined;
   const result = b.net("RESULT", 64);
-  const yIn = b.net("YIN", 64);
+  // What register Y takes: the ALU's result, until the memory stage puts a selector in front.
+  const yIn = memory ? b.net("YIN", 64) : result;
   const halt = fetching ? b.net("HALT") : undefined;
   const go = fetching ? b.net("GO") : undefined;
   const wreg = fetching ? b.net("WREG") : (handWritey as NetId);
@@ -1054,8 +1093,6 @@ export function datapathCircuit(options: DatapathOptions): Circuit {
   );
 
   if (!fetching) {
-    // By hand: the ALU's result goes straight back to register Y.
-    b.gate("buf", [result], { name: "toY", output: yIn });
     b.output("Y", result);
     return b.build();
   }
@@ -1144,8 +1181,6 @@ export function datapathCircuit(options: DatapathOptions): Circuit {
       { A: back, B: pc4, S: ctrl["CALL"] as NetId },
       { name: PARTS.pickCall, outs: { Y: yIn } },
     );
-  } else if (!memory) {
-    b.gate("buf", [result], { name: "toY", output: yIn });
   }
   wordRegister(b, PARTS.pc, { D: next, EN: go as NetId, RST: rst as NetId, CLK: clk }, pc as NetId);
   b.output("HALT", halt as NetId);

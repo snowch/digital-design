@@ -31,7 +31,9 @@ export type Construct =
   | "enum"
   // Module 6: a memory written as an array, and filled from a list of values.
   | "array"
-  | "array-init";
+  | "array-init"
+  // Module 8: one module used inside another.
+  | "instance";
 
 export const ALL_CONSTRUCTS: readonly Construct[] = [
   "module",
@@ -56,6 +58,8 @@ export const ALL_CONSTRUCTS: readonly Construct[] = [
   // Module 6
   "array",
   "array-init",
+  // Module 8
+  "instance",
 ];
 
 /** What each construct is, in the words the gate uses when it refuses one. */
@@ -82,6 +86,8 @@ const EXPLAIN: Record<Construct, string> = {
   // Module 6: drafted by the prose process (docs/notes/module-6-memory.md).
   array: "arrays to declare memories, like `logic [7:0] mem [0:15]`",
   "array-init": "array initialisation like `= '{...}`",
+  // Module 8: drafted by the prose process (docs/notes/module-8-datapath.md).
+  instance: "one module used inside another, like `alu a1 (.A(QA), .B(QB), .Y(R));`",
 };
 
 /** What to write instead, where there is something. */
@@ -196,6 +202,12 @@ export function constructsUsed(module: Module): Construct[] {
         add("always_ff");
         statement(item.body);
         break;
+      // Module 8
+      case "instance":
+        add("instance");
+        for (const p of item.parameters) expression(p.value);
+        for (const c of item.connections) if (c.value) expression(c.value);
+        break;
     }
   }
   return used;
@@ -203,8 +215,16 @@ export function constructsUsed(module: Module): Construct[] {
 
 /** Messages for every construct the text uses that the challenge does not allow. Empty when none. */
 export function gateMessages(module: Module, allowed: readonly Construct[]): Message[] {
+  return gateMessagesOf(constructsUsed(module), allowed);
+}
+
+/** Module 8: the same, for the constructs a text of several modules uses. */
+export function gateMessagesOf(
+  used: readonly Construct[],
+  allowed: readonly Construct[],
+): Message[] {
   const set = new Set(allowed);
-  return constructsUsed(module)
+  return used
     .filter((c) => !set.has(c))
     .map((c) => {
       const instead = INSTEAD[c];

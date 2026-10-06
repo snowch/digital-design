@@ -108,6 +108,38 @@ describe("a settle after a settled state changes nothing either", () => {
     });
   });
 
+  it("works out a fixed value that holds an input, as a fault does, when the input is set", () => {
+    // A stuck-at fault on an input drives the input's own net with a fixed value: setting the
+    // input must not win over it.
+    const b = new CircuitBuilder("held");
+    const a = b.input("A");
+    b.output("Y", b.not(a));
+    const built = b.build();
+    const circuit: Circuit = {
+      ...built,
+      components: [
+        ...built.components,
+        {
+          id: built.components.length,
+          kind: "const",
+          name: "stuck",
+          path: "stuck",
+          inputs: {},
+          outputs: { y: a },
+          params: { width: 1, value: "1" },
+        },
+      ],
+    };
+    const sim = new Simulator(circuit);
+    sim.setInput("A", word(1, 1));
+    sim.settle();
+    sim.setInput("A", word(1, 0));
+    const plain = plainSettle(circuit, sim.snapshotValues());
+    const r = sim.settle();
+    expect(r.iterations).toBe(plain.iterations);
+    expect(sim.read("Y").value).toBe(0n);
+  });
+
   it("works out every gate again after a restore", () => {
     const circuit = ring(3);
     const sim = new Simulator(circuit);

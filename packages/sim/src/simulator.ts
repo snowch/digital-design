@@ -102,6 +102,7 @@ export class Simulator {
   private readonly defaultDelay: number;
   private readonly maxIterations: number;
   private readonly readers: Map<NetId, Component[]>;
+  private readonly drivers = new Map<NetId, Component[]>();
   private pending: ScheduledEvent[] = [];
   private sequence = 0;
   private phase = 0;
@@ -122,6 +123,11 @@ export class Simulator {
     this.values = circuit.nets.map((n) => unknown(n.width));
     this.readers = new Map();
     for (const c of circuit.components) {
+      for (const net of Object.values(c.outputs)) {
+        const list = this.drivers.get(net) ?? [];
+        list.push(c);
+        this.drivers.set(net, list);
+      }
       for (const net of Object.values(c.inputs)) {
         const list = this.readers.get(net) ?? [];
         list.push(c);
@@ -231,7 +237,12 @@ export class Simulator {
     // and the result are the same as working out every gate.
     if (this.dirty !== "all") {
       const readers = new Set<Component>();
-      for (const net of this.dirty) for (const c of this.readers.get(net) ?? []) readers.add(c);
+      for (const net of this.dirty) {
+        for (const c of this.readers.get(net) ?? []) readers.add(c);
+        // An input a fault holds (a fixed value driving the input's own net) is driven as well
+        // as set: its driver is worked out again, as a full first step would.
+        for (const c of this.drivers.get(net) ?? []) readers.add(c);
+      }
       due = [...readers];
     }
     this.dirty = "all";

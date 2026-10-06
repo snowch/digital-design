@@ -51,3 +51,22 @@ wrote every learner-facing sentence from a brief of checked facts.
   instruction. All passed first time, in 21 seconds. Seen to fail first: with the branch
   condition's XOR fed job bit 1 for bit 0, 30 of the 37 fail, and the memory stage run on a
   program with branches fails at its first `goto`.
+- 06:05 to 06:12 Module instances in the SystemVerilog subset: the parser reads `name #(.P(v))
+  inst (.port(value), ...);` and a text of several modules; the elaborator builds a module used
+  inside another as a block named after the use, of the module's kind, whether the module is the
+  text's own or one the course supplies (`CourseModule`: its ports and a function that builds it);
+  the top module is the one no other uses. The construct is `instance` in `gate.ts`, and a text of
+  two modules counts as using it. The loop check, which looked at every gate's readers by scanning
+  every gate, now indexes them and leaves the course's modules alone, as it leaves a flip-flop:
+  on a 64-bit datapath it would otherwise have taken minutes. Five tests, passing first time.
+- 06:12 to 06:15 The course's modules for a datapath text (`packages/hdl/src/machine-modules.ts`:
+  `registers`, `alu`, `memory`, `decoder`, `stops`, `condition`), each built by the same
+  function as the drawn block, and the whole datapath as text (`content/lessons/module8.ts`).
+  `module8.test.ts` runs the 37 programs through the text, instruction by instruction against
+  the reference: all passed first time, in 18 seconds.
+- 06:14 The whole Vitest run after these changes: 6 failures, all in Module 2 to 5 fault labs'
+  facts. The settle's new first step (only the readers of the inputs set since) missed a case: a
+  stuck-at fault on an input drives the input's own net with a fixed value, so setting the input
+  changed a net that a part also drives, and the part was not worked out again. The first step now
+  works out the drivers of those nets too; a test holds that case to a plain settle. Then 660
+  tests passed.

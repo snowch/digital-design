@@ -29,9 +29,9 @@ import {
   type Position,
   type Statement,
 } from "./ast";
-import { gateMessages, constructsUsed, type Construct } from "./gate";
+import { gateMessagesOf, constructsUsed, type Construct } from "./gate";
 import { LOOP_NOTE } from "./generate";
-import { parse } from "./parser";
+import { parseModules } from "./parser";
 import { arrayWrite, type ArrayMemory } from "./memory";
 
 export interface ElaborateOptions {
@@ -41,6 +41,40 @@ export interface ElaborateOptions {
   readonly delay?: number;
   /** Module 7: values for the module's parameters, in place of the defaults its text gives. */
   readonly parameters?: Readonly<Record<string, number>>;
+  /**
+   * Module 8: the modules the course supplies, which a text may use by name as it uses one of
+   * its own, each built from the course's parts and drawn as a closed block.
+   */
+  readonly modules?: Readonly<Record<string, CourseModule>>;
+}
+
+/** Module 8: a module the course supplies, by its ports and how to build it. */
+export interface CourseModule {
+  /** The ports and their widths, given the parameter values. */
+  ports(parameters: Readonly<Record<string, number>>): {
+    readonly inputs: Readonly<Record<string, number>>;
+    readonly outputs: Readonly<Record<string, number>>;
+  };
+  /** The parameters' default values. */
+  readonly parameters?: Readonly<Record<string, number>>;
+  /** Builds the module's parts inside the block a use of it makes, on the nets of its ports. */
+  build(
+    b: CircuitBuilder,
+    inputs: Readonly<Record<string, NetId>>,
+    outputs: Readonly<Record<string, NetId>>,
+    parameters: Readonly<Record<string, number>>,
+  ): void;
+}
+
+/** Module 8: the context a module used inside another is elaborated in. */
+interface Inside {
+  readonly b: CircuitBuilder;
+  /** The nets of its ports, by port name. */
+  readonly ports: Readonly<Record<string, NetId>>;
+  /** The modules of the same text, by name. */
+  readonly texts: ReadonlyMap<string, Module>;
+  /** The modules being elaborated, outermost first: a module may not use itself. */
+  readonly stack: readonly string[];
 }
 
 export interface Elaboration {
@@ -58,9 +92,9 @@ interface Signal {
 }
 
 export function elaborate(source: string, options: ElaborateOptions = {}): Elaboration {
-  let module: Module;
+  let modules: Module[];
   try {
-    module = parse(source);
+    modules = parseModules(source);
   } catch (error) {
     if (error instanceof HdlError)
       return {
@@ -69,13 +103,24 @@ export function elaborate(source: string, options: ElaborateOptions = {}): Elabo
       };
     throw error;
   }
-  const constructs = constructsUsed(module);
+  // Module 8: of several modules, the top is the one no other uses (the last such, if several).
+  const used = new Set(
+    modules.flatMap((m) => m.items.flatMap((i) => (i.kind === "instance" ? [i.module] : []))),
+  );
+  const module =
+    [...modules].reverse().find((m) => !used.has(m.name)) ??
+    (modules[modules.length - 1] as Module);
+  const constructs: Construct[] = [];
+  for (const m of modules)
+    for (const c of constructsUsed(m)) if (!constructs.includes(c)) constructs.push(c);
+  if (modules.length > 1 && !constructs.includes("instance")) constructs.push("instance");
   if (options.allowed) {
-    const gated = gateMessages(module, options.allowed);
+    const gated = gateMessagesOf(constructs, options.allowed);
     if (gated.length) return { module, messages: gated, constructs };
   }
   try {
-    const { circuit, warnings } = new Elaborator(module, options).run();
+    const texts = new Map(modules.map((m) => [m.name, m]));
+    const { circuit, warnings } = new Elaborator(module, options, undefined, texts).run();
     return { circuit, module, messages: warnings, constructs };
   } catch (error) {
     if (error instanceof HdlError)
@@ -104,16 +149,44 @@ class Elaborator {
   private readonly arrays = new Map<string, ArrayMemory>();
   private readonly overrides: Readonly<Record<string, number>>;
 
+  /** Module 8: the text's own modules, by name. */
+  private readonly texts: ReadonlyMap<string, Module>;
+
   constructor(
     private readonly module: Module,
-    options: ElaborateOptions,
+    private readonly options: ElaborateOptions,
+    private readonly inside?: Inside,
+    texts?: ReadonlyMap<string, Module>,
   ) {
-    this.b = new CircuitBuilder(module.name);
+    this.b = inside?.b ?? new CircuitBuilder(module.name);
     this.g = options.delay !== undefined ? { delay: options.delay } : {};
     this.overrides = options.parameters ?? {};
+    this.texts = inside?.texts ?? texts ?? new Map();
+  }
+
+  /** Module 8: the widths of the module's ports, with the parameter values given. */
+  portWidths(): Record<string, number> {
+    for (const p of this.module.parameters) {
+      const given = this.overrides[p.name];
+      this.params.set(p.name, given !== undefined ? BigInt(given) : this.constant(p.value));
+    }
+    return Object.fromEntries(
+      this.module.ports.map((port) => [
+        port.name,
+        port.range ? this.rangeWidth(port.range, port.at) : 1,
+      ]),
+    );
   }
 
   run(): { circuit: Circuit; warnings: Message[] } {
+    this.body();
+    const circuit = this.b.build();
+    this.loopWarnings(circuit);
+    return { circuit, warnings: this.warnings };
+  }
+
+  /** The module's ports, declarations and items, built into the builder. */
+  private body(): void {
     const m = this.module;
     for (const p of m.parameters) {
       const given = this.overrides[p.name];
@@ -123,8 +196,13 @@ class Elaborator {
       const width = port.range ? this.rangeWidth(port.range, port.at) : 1;
       if (this.signals.has(port.name))
         throw new HdlError(port.at, `${port.name} is declared twice`);
+      // Module 8: a module used inside another works on the nets its use connects.
+      const given = this.inside?.ports[port.name];
       const net =
-        port.direction === "input" ? this.b.input(port.name, width) : this.b.net(port.name, width);
+        given ??
+        (port.direction === "input"
+          ? this.b.input(port.name, width)
+          : this.b.net(port.name, width));
       if (port.direction === "input") this.driven.set(net, port.at);
       this.signals.set(port.name, { net, width, role: port.direction, at: port.at });
     }
@@ -217,19 +295,118 @@ class Elaborator {
           }
           break;
         }
+        // Module 8
+        case "instance":
+          this.instance(item);
+          break;
       }
     }
     for (const memory of this.arrays.values()) this.buildArray(memory);
     for (const [name, s] of this.signals) {
       if (s.role === "output") {
-        this.b.output(name, s.net);
+        if (!this.inside) this.b.output(name, s.net);
         if (!this.driven.has(s.net))
           throw new HdlError(s.at, `the output ${name} is never assigned`);
       }
     }
-    const circuit = this.b.build();
-    this.loopWarnings(circuit);
-    return { circuit, warnings: this.warnings };
+  }
+
+  /**
+   * Module 8: one module used inside this one. Its inputs take the values connected to them, its
+   * outputs drive the signals connected to them, and its parts sit in a block of its own, named
+   * after this use, of the module's kind.
+   */
+  private instance(item: Extract<Module["items"][number], { kind: "instance" }>): void {
+    const course = this.options.modules?.[item.module];
+    const text = course ? undefined : this.texts.get(item.module);
+    if (!course && !text) throw new HdlError(item.at, `there is no module called ${item.module}`);
+    const stack = this.inside?.stack ?? [this.module.name];
+    if (text && stack.includes(text.name))
+      throw new HdlError(item.at, `${item.module} cannot be used inside itself`);
+    const parameters: Record<string, number> = { ...(course?.parameters ?? {}) };
+    for (const p of item.parameters) {
+      const known = course
+        ? p.name in (course.parameters ?? {})
+        : text?.parameters.some((x) => x.name === p.name);
+      if (!known) throw new HdlError(p.at, `${item.module} has no parameter called ${p.name}`);
+      parameters[p.name] = Number(this.constant(p.value));
+    }
+    let inputs: Readonly<Record<string, number>>;
+    let outputs: Readonly<Record<string, number>>;
+    if (course) ({ inputs, outputs } = course.ports(parameters));
+    else {
+      const widths = new Elaborator(text as Module, { ...this.options, parameters }).portWidths();
+      const m = text as Module;
+      inputs = Object.fromEntries(
+        m.ports
+          .filter((p) => p.direction === "input")
+          .map((p) => [p.name, widths[p.name] as number]),
+      );
+      outputs = Object.fromEntries(
+        m.ports
+          .filter((p) => p.direction === "output")
+          .map((p) => [p.name, widths[p.name] as number]),
+      );
+    }
+    const seen = new Set<string>();
+    for (const c of item.connections) {
+      if (!(c.port in inputs) && !(c.port in outputs))
+        throw new HdlError(c.at, `${item.module} has no port called ${c.port}`);
+      if (seen.has(c.port)) throw new HdlError(c.at, `${c.port} is connected twice`);
+      seen.add(c.port);
+    }
+    const ins: Record<string, NetId> = {};
+    for (const [port, width] of Object.entries(inputs)) {
+      const c = item.connections.find((x) => x.port === port);
+      if (!c?.value) throw new HdlError(item.at, `connect ${item.module}'s input ${port}`);
+      const net = this.expression(c.value, width);
+      if (this.b.widthOf(net) !== width)
+        throw new HdlError(
+          c.at,
+          `${item.module}'s input ${port} is ${width} bit${width === 1 ? "" : "s"} wide; this value is ${this.b.widthOf(net)}`,
+        );
+      ins[port] = net;
+    }
+    const outs: Record<string, NetId> = {};
+    for (const [port, width] of Object.entries(outputs)) {
+      const c = item.connections.find((x) => x.port === port);
+      if (!c?.value) {
+        outs[port] = this.b.net(`${item.name}_${port}`, width);
+        continue;
+      }
+      if (c.value.kind !== "identifier")
+        throw new HdlError(c.at, `connect ${item.module}'s output ${port} to a signal's name`);
+      const target = this.target(c.value.name, c.value.at, false);
+      if (target.width !== width)
+        throw new HdlError(
+          c.at,
+          `${item.module}'s output ${port} is ${width} bit${width === 1 ? "" : "s"} wide; ${c.value.name} is ${target.width}`,
+        );
+      this.claim(target.net, c.at, width);
+      outs[port] = target.net;
+    }
+    this.b.scope(
+      item.name,
+      item.module,
+      (bb) => {
+        if (course) {
+          course.build(bb, ins, outs, parameters);
+          return;
+        }
+        new Elaborator(
+          text as Module,
+          { ...this.options, parameters },
+          { b: bb, ports: { ...ins, ...outs }, texts: this.texts, stack: [...stack, item.module] },
+        ).bodyInside(this.warnings);
+      },
+      { inputs: ins, outputs: outs },
+    );
+  }
+
+  /** Module 8: the body of a module used inside another; its warnings join the outer ones. */
+  bodyInside(warnings: Message[]): void {
+    this.body();
+    warnings.push(...this.warnings);
   }
 
   /** A flip-flop or register with the reset and enable a recognised shape names. */
@@ -1081,15 +1258,24 @@ class Elaborator {
 
   /** A combinational loop among the module's own gates (not inside a flip-flop) is a latch. */
   private loopWarnings(circuit: Circuit): void {
+    // Module 8: a module the course supplies is built from its parts, loops and all, as a
+    // flip-flop is; only the text's own gates are looked at.
+    const course = new Set(Object.keys(this.options.modules ?? {}));
+    const opaque = circuit.composites.filter(
+      (c) =>
+        // Module 6: a memory's loop holds its words, as a flip-flop's holds its bit.
+        c.kind === "dff" || c.kind === "register" || c.kind === "memory" || course.has(c.kind),
+    );
     const insideFlipFlop = (path: string) =>
-      circuit.composites.some(
-        (c) =>
-          // Module 6: a memory's loop holds its words, as a flip-flop's holds its bit.
-          (c.kind === "dff" || c.kind === "register" || c.kind === "memory") &&
-          (path === c.path || path.startsWith(`${c.path}/`)),
-      );
+      opaque.some((c) => path === c.path || path.startsWith(`${c.path}/`));
     const gates = circuit.components.filter((c) => !insideFlipFlop(c.path));
-    const gateIds = new Set(gates.map((c) => c.id));
+    const readers = new Map<NetId, number[]>();
+    for (const g of gates)
+      for (const n of Object.values(g.inputs)) {
+        const list = readers.get(n) ?? [];
+        list.push(g.id);
+        readers.set(n, list);
+      }
     const visiting = new Set<number>();
     const done = new Set<number>();
     const reported = new Set<string>();
@@ -1117,12 +1303,8 @@ class Elaborator {
       stack.push(id);
       const c = circuit.components[id];
       if (c) {
-        for (const out of Object.values(c.outputs)) {
-          for (const reader of circuit.components) {
-            if (!gateIds.has(reader.id)) continue;
-            if (Object.values(reader.inputs).includes(out)) visit(reader.id, stack);
-          }
-        }
+        for (const out of Object.values(c.outputs))
+          for (const reader of readers.get(out) ?? []) visit(reader, stack);
       }
       stack.pop();
       visiting.delete(id);

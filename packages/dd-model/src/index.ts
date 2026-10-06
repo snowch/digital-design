@@ -31,3 +31,4 @@ export * from "./assemble";
 export * from "./datapath";
 export * from "./datapath-run";
 export * from "./machine-suite";
+export { DATAPATH_AT, placedDatapath } from "./library-datapath";

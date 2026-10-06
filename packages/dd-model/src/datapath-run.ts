@@ -25,6 +25,21 @@ function net(circuit: Circuit, name: string): NetId | undefined {
   return circuit.nets.find((n) => n.name === name)?.id;
 }
 
+/**
+ * Where a block sits, found by a net only it has: the register file's `lowState`, the memory's
+ * `bank0State`. The drawn datapath names the blocks `registers` and `memory`; a text names them
+ * as it likes, so the reader finds them by what they hold (Module 8).
+ */
+function prefixOf(circuit: Circuit, suffix: string, width: number): string | undefined {
+  const n = circuit.nets.find(
+    (x) => x.width === width && (x.name === suffix || x.name.endsWith(`/${suffix}`)),
+  );
+  return n ? n.name.slice(0, n.name.length - suffix.length) : undefined;
+}
+
+const REG_STATE = 16 * 32 + 1;
+const BANK_STATE = 120 * 8 + 1;
+
 /** The datapath's state as the simulator holds it now: what the next edge works from. */
 export interface DatapathState {
   readonly pc?: bigint;
@@ -45,8 +60,9 @@ export interface DatapathState {
 
 /** Each register's word, read off the register file's two banks. */
 export function registersOf(circuit: Circuit, values: readonly Word[]): (bigint | undefined)[] {
-  const low = net(circuit, "registers/lowState");
-  const high = net(circuit, "registers/highState");
+  const at = prefixOf(circuit, "lowState", REG_STATE) ?? "registers/";
+  const low = net(circuit, `${at}lowState`);
+  const high = net(circuit, `${at}highState`);
   if (low === undefined || high === undefined) return [];
   const lo = memoryWords(values[low] as Word, 16, 32);
   const hi = memoryWords(values[high] as Word, 16, 32);
@@ -58,8 +74,9 @@ export function registersOf(circuit: Circuit, values: readonly Word[]): (bigint 
 
 /** Each register's word with its unknown bits, for a view that draws X digit by digit. */
 export function registerWords(circuit: Circuit, values: readonly Word[]): Word[] {
-  const low = net(circuit, "registers/lowState");
-  const high = net(circuit, "registers/highState");
+  const at = prefixOf(circuit, "lowState", REG_STATE) ?? "registers/";
+  const low = net(circuit, `${at}lowState`);
+  const high = net(circuit, `${at}highState`);
   if (low === undefined || high === undefined) return [];
   const lo = memoryWords(values[low] as Word, 16, 32);
   const hi = memoryWords(values[high] as Word, 16, 32);
@@ -74,7 +91,8 @@ export function ramBytesOf(
   circuit: Circuit,
   values: readonly Word[],
 ): (number | undefined)[] | undefined {
-  const banks = Array.from({ length: 8 }, (_, k) => net(circuit, `memory/bank${k}State`));
+  const at = prefixOf(circuit, "bank0State", BANK_STATE) ?? "memory/";
+  const banks = Array.from({ length: 8 }, (_, k) => net(circuit, `${at}bank${k}State`));
   if (banks.some((b) => b === undefined)) return undefined;
   const rows = banks.map((b) => memoryWords(values[b as NetId] as Word, 120, 8));
   const out: (number | undefined)[] = [];
@@ -92,7 +110,8 @@ export function datapathState(circuit: Circuit, values: readonly Word[]): Datapa
     return id === undefined ? undefined : values[id];
   };
   const opt = <T>(key: string, v: T | undefined) => (v === undefined ? {} : { [key]: v });
-  const waiting = [read("memory/W0"), read("memory/W1")];
+  const mem = prefixOf(circuit, "bank0State", BANK_STATE) ?? "memory/";
+  const waiting = [read(`${mem}W0`), read(`${mem}W1`)];
   const ram = ramBytesOf(circuit, values);
   const halt = known(read("HALT"));
   const cause = known(read("CAUSE"));
@@ -104,7 +123,7 @@ export function datapathState(circuit: Circuit, values: readonly Word[]): Datapa
     ...(ram ? { ram } : {}),
     ...opt("display", known(read("DISPLAY"))),
     ...opt("lamps", lamps === undefined ? undefined : Number(lamps)),
-    ...opt("timer", known(read("memory/COUNT"))),
+    ...opt("timer", known(read(`${mem}COUNT`))),
     ...(waiting.every((w) => w && isKnown(w))
       ? { waiting: Number((waiting[0] as Word).value) | (Number((waiting[1] as Word).value) << 1) }
       : {}),
@@ -178,13 +197,14 @@ const hex = (v: bigint | number | undefined) =>
  * reason and that one more edge changes nothing.
  */
 export function compareWithReference(
-  stage: Stage,
+  stage: Stage | ((rom: Uint8Array) => Circuit),
   source: string,
   inputs: MachineInputs = QUIET_INPUTS,
   limit = 400,
 ): DatapathComparison {
   const program = assemble(source);
-  const circuit = datapathCircuit({ stage, rom: program.rom });
+  const circuit =
+    typeof stage === "function" ? stage(program.rom) : datapathCircuit({ stage, rom: program.rom });
   const sim = resetDatapath(circuit, inputs);
   let ref: CpuState = resetMachine(program.rom);
   const differences: string[] = [];
@@ -233,7 +253,12 @@ export function compareWithReference(
     ref.regs.forEach((v, k) => same(`R${k}`, at, now.regs[k], v));
     if (now.ram)
       ref.ram.forEach((v, k) => same(`the byte at ${hex(0x400 + k)}`, at, now.ram?.[k], v));
-    if (now.display !== undefined || stage === "memory" || stage === "full") {
+    if (
+      now.display !== undefined ||
+      stage === "memory" ||
+      stage === "full" ||
+      typeof stage === "function"
+    ) {
       same("the display", at, now.display, ref.display);
       same("the lamps", at, now.lamps, ref.lamps);
       same("the timer", at, now.timer, ref.timer);

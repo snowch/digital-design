@@ -7,3 +7,4 @@ export * from "./gate";
 export * from "./elaborate";
 export * from "./generate";
 export * from "./expression";
+export * from "./machine-modules";

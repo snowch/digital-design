@@ -19,6 +19,7 @@ import { combinationalLibrary } from "./library-combinational";
 import { module5Library } from "./library-module5";
 // Module 6's circuits live in their own file too.
 import { MEMORY_INSIDE, memoryLibrary } from "./library-memory";
+import { DATAPATH_INSIDE, datapathLibrary } from "./library-datapath";
 
 /**
  * A loop of `n` inverters with a `kick` input ORed into it. While kick is 1 the loop is forced;
@@ -266,6 +267,8 @@ export const INSIDE: Readonly<Record<string, Readonly<Record<string, readonly [n
     ...MEMORY_INSIDE,
     // Module 7, the ALU
     ...ALU_INSIDE,
+    // Module 8, the datapath
+    ...DATAPATH_INSIDE,
   };
 
 /**
@@ -437,6 +440,8 @@ export const LIBRARY: Readonly<Record<string, () => Circuit>> = {
   ...memoryLibrary(placed),
   // Module 7, the ALU: eight jobs, four flags, any width.
   ...aluLibrary(placed),
+  // Module 8, the datapath.
+  ...datapathLibrary(placed),
 };
 
 export function libraryCircuit(id: string): Circuit {

@@ -73,7 +73,30 @@ export interface Range {
   readonly lo: Expression;
 }
 
-export type Item = ContinuousAssign | AlwaysComb | AlwaysFf;
+export type Item = ContinuousAssign | AlwaysComb | AlwaysFf | Instance;
+
+/**
+ * Module 8: one module used inside another, `alu #(.N(64)) a1 (.A(QA), .B(QB), .Y(R));`, its
+ * ports connected by name. A connection with nothing in its brackets leaves an output unused.
+ */
+export interface Instance {
+  readonly kind: "instance";
+  /** The module used: one in the same text, or one the course supplies. */
+  readonly module: string;
+  /** This use's own name, which is the block's name in a drawing. */
+  readonly name: string;
+  readonly parameters: readonly {
+    readonly name: string;
+    readonly value: Expression;
+    readonly at: Position;
+  }[];
+  readonly connections: readonly {
+    readonly port: string;
+    readonly value?: Expression;
+    readonly at: Position;
+  }[];
+  readonly at: Position;
+}
 
 export interface ContinuousAssign {
   readonly kind: "assign";
