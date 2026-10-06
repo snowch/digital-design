@@ -116,8 +116,20 @@ endmodule`);
     expect(texts).toEqual([
       "This challenge does not use a `parameter`.",
       "This challenge does not use concatenation with `{a, b}`. Instead, use one-bit signals.",
-      "This challenge does not use arithmetic with `+` and `-`. Instead, write the gates out; adders come in a later module.",
+      "This challenge does not use arithmetic with `+` and `-`. Instead, write the gates out.",
     ]);
+    // The way offered instead is one the challenge allows: never a refusal pointing at another.
+    const ternary =
+      "module m(input logic s, a, b, output logic y); assign y = s ? a : b; endmodule";
+    const steer = (allowed: string[]) =>
+      elaborate(ternary, { allowed: ["module", "ports", "logic", "assign", ...allowed] as never })
+        .messages.map((m) => m.text)
+        .join(" ");
+    expect(steer(["always_comb", "case"])).toMatch(
+      /Instead, choose with a `case` inside `always_comb`/,
+    );
+    expect(steer(["op-bitwise"])).toMatch(/Instead, write the selection out with/);
+    expect(steer([])).not.toMatch(/Instead/);
     const ok = elaborate(ADDER, {
       allowed: [...base, "parameter", "concat", "op-arith"],
     }).messages.filter((m) => m.severity !== "warning");

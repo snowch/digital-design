@@ -91,19 +91,35 @@ const EXPLAIN: Record<Construct, string> = {
 };
 
 /** What to write instead, where there is something. */
-const INSTEAD: Partial<Record<Construct, string>> = {
-  always_comb: "describe the logic with `assign`",
-  "op-ternary": "write the selection out with `&`, `|` and `~`",
-  if: "write the selection out with `&`, `|` and `~`",
-  case: "write the selection out with `&`, `|` and `~`",
-  vector: "use one-bit signals",
-  concat: "use one-bit signals",
-  select: "use one-bit signals",
-  "op-arith": "write the gates out; adders come in a later module",
+/**
+ * What to use instead, each with the constructs it needs: the first whose constructs the
+ * challenge allows is offered, so a message never sends the learner to something else it refuses.
+ */
+const INSTEAD: Partial<
+  Record<Construct, readonly { needs: readonly Construct[]; text: string }[]>
+> = {
+  always_comb: [{ needs: ["assign"], text: "describe the logic with `assign`" }],
+  "op-ternary": [
+    { needs: ["always_comb", "case"], text: "choose with a `case` inside `always_comb`" },
+    { needs: ["always_comb", "if"], text: "choose with an `if` inside `always_comb`" },
+    { needs: ["op-bitwise"], text: "write the selection out with `&`, `|` and `~`" },
+  ],
+  if: [
+    { needs: ["case"], text: "choose with a `case`" },
+    { needs: ["op-bitwise"], text: "write the selection out with `&`, `|` and `~`" },
+  ],
+  case: [
+    { needs: ["if"], text: "choose with `if`" },
+    { needs: ["op-bitwise"], text: "write the selection out with `&`, `|` and `~`" },
+  ],
+  vector: [{ needs: [], text: "use one-bit signals" }],
+  concat: [{ needs: [], text: "use one-bit signals" }],
+  select: [{ needs: [], text: "use one-bit signals" }],
+  "op-arith": [{ needs: ["op-bitwise"], text: "write the gates out" }],
   // Module 5
-  enum: "write each value as a number, such as `2'b01`",
+  enum: [{ needs: [], text: "write each value as a number, such as `2'b01`" }],
   // Module 6
-  "array-init": "write every word with `always_ff`",
+  "array-init": [{ needs: ["always_ff"], text: "write every word with `always_ff`" }],
 };
 
 /** Every construct the text uses, in order of first appearance. */
@@ -227,7 +243,7 @@ export function gateMessagesOf(
   return used
     .filter((c) => !set.has(c))
     .map((c) => {
-      const instead = INSTEAD[c];
+      const instead = INSTEAD[c]?.find((i) => i.needs.every((n) => set.has(n)))?.text;
       return {
         severity: "gate",
         text: `This challenge does not use ${EXPLAIN[c]}.${instead ? ` Instead, ${instead}.` : ""}`,

@@ -589,6 +589,12 @@ class Parser {
     if (this.is("{")) {
       this.next();
       const parts: Expression[] = [this.expression()];
+      // Repetition, `{4{a}}`, is a construct the course's language leaves out: said plainly.
+      if (this.is("{"))
+        throw new HdlError(
+          this.peek().at,
+          "repetition such as `{4{a}}` is not part of the language this course uses; write the bits out, as a number or a list",
+        );
       while (this.is(",")) {
         this.next();
         parts.push(this.expression());

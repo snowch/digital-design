@@ -111,8 +111,15 @@ export function VerdictView({
   if (verdict.blocked !== undefined) {
     return (
       <div className="verdict blocked">
-        <p>{strings.challenge.blocked}</p>
-        <pre className="verdict-blocked">{verdict.blocked}</pre>
+        {/* The status line above already says the tests could not run; this says why. */}
+        <div className="verdict-blocked">
+          {verdict.blocked.split("\n").map((line, i) => (
+            <p key={i}>
+              {/* A message names code between backticks, as the lessons do: shown as code. */}
+              {line.split("`").map((part, k) => (k % 2 === 1 ? <code key={k}>{part}</code> : part))}
+            </p>
+          ))}
+        </div>
       </div>
     );
   }

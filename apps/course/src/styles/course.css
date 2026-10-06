@@ -337,6 +337,9 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
   border: none;
   padding: 0;
 }
+.verdict-blocked p {
+  margin: 0 0 var(--space-1);
+}
 .hints {
   margin-top: var(--space-5);
   padding-top: var(--space-4);
