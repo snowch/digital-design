@@ -64,7 +64,7 @@ export const PROSE = {
   modelVsReality:
     "In this machine, every instruction takes one edge. The clock must wait for the slowest one. A load's path is the longest: PC, the ROM, the decoder, the register file, the ALU's add, the memory's read, and back to the register file. Module 9 splits instructions across several edges.\n\nIn the settle model, every gate takes one step. Real gates and wires take different times. A real circuit's passing values differ from the model's. A passing value is a value a signal takes for a few steps before it settles. Real circuits have them too. Registers take their words only at an edge. A passing value that settles before the next edge, with the setup time to spare (Module 4), does no harm.",
   flowLead:
-    'The table shows each line of the loop above. The "went to" column lists where a line sent PC, other than the next line, and both ways of a branch, with how many times. Arrows on the left show the jumps away. The branch at `014` sends PC back to `00C` while R1 differs from R0: 4 times, then on to `018` once. The run is already made.',
+    'The table shows each line of the loop above. The "went to" column lists where a line sent PC, other than the next line, and both ways of a branch, with how many times. Arrows on the left show the jumps away. The run is already made.',
   callFlowLead:
     'The table shows each program line. The "went to" column lists where each line sent PC, and how many times. Arrows show those paths. The call at `00C` goes to `018` once, the branch at `020` goes to `018` twice and to `024` once, and the jump at `024` returns to `010` once.',
 } as const;

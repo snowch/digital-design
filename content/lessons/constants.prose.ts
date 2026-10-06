@@ -61,7 +61,7 @@ export const PROSE = {
   modelVsReality:
     "The widening is wires and no gates. In a chip, bit 11's wire drives its own bit and the 52 bits above it, and a wire with many inputs to drive takes longer to change.\n\nThe selector is 64 two-way selectors. The model settles them in steps; in a chip they add delay on the way to the ALU.\n\nYou set BCONST by hand here. In the course's machine, a block works it out from K, as it does WRITEY. A later module builds that block's insides.",
   fieldsLead:
-    "The six fields of a constant job are the same as in the last lesson. C's 12 bits carry a number. B is unused.",
+    "The six fields of a constant job are the same as in the last lesson. C's 12 bits carry a number.",
   wideningLead:
     "The figure shows W, a 64-bit word in four rows of 16 bits, with C's 12 bits below, each under the bit of W it becomes. Bit 11 is outlined in both. W's bits 63 to 12 are drawn dashed: copies of bit 11. Gaps every four bits group them into hexadecimal digits. Below, the line reads C and W as signed. The figure opens on `F9C`; for `064` and `7FF`, every copy is 0.",
 } as const;
