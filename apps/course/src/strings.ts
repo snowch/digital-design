@@ -54,11 +54,25 @@ export const STRINGS = {
   cover: {
     /** Under the course title: what the course is. */
     lead: "You build a working computer from its parts, starting from two voltages on a wire, and for each circuit you predict what will happen, build it, run it, break it, and explain what happened. Everything runs in your browser, your work stays in your browser, and every simulation shows the real circuit, not an animation.",
-    /** Under the drawing of the whole machine. */
+    /** How the machine the course builds runs one step: its parts, read from the top. */
+    flow: {
+      next: "Next step",
+      program: "The program",
+      reading: "What to do",
+      doing: "Running the step",
+      numbers: "Sixteen stored numbers",
+      arithmetic: "Arithmetic and logic",
+      memory: "Memory, display, sensors and lamps",
+      back: "Then the machine goes back to the first box for the next step",
+    },
+    /** Under a part of the machine: the modules that build it. */
+    builtIn: (modules: readonly number[]) =>
+      modules.length === 1
+        ? `Module ${modules[0]}`
+        : `Modules ${modules.slice(0, -1).join(", ")} and ${modules[modules.length - 1]}`,
+    /** Under the flow of one step. */
     machine:
-      "This is the machine the course builds. Most of its parts are kinds of part that Modules 3 to 7 build: circuits that select one of several inputs, add numbers, keep individual values, manage collections of numbers, and perform arithmetic. Module 8 joins them into this machine.",
-    /** The drawing's name for a screen reader. */
-    machineLabel: "The circuit diagram of the complete computer the course builds.",
+      "The machine the course builds runs each step of a program this way. Each box names the modules that build that part; Module 8 joins them into one machine.",
     /** Above the list of every module the plan has. */
     contents: (count: number) => `All ${count} modules`,
     /** Under a module with no lessons yet. */
