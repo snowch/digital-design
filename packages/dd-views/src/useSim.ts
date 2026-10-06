@@ -30,7 +30,11 @@ export interface PrimeStep {
   readonly clock?: string;
 }
 
-function fresh(
+/**
+ * A figure's simulator as it first shows: every input 0 (CLK too, so the first clock is an edge)
+ * or its given value, settled, then the prime run. Exported for the tests of what a figure shows.
+ */
+export function figureSim(
   circuit: Circuit,
   initial: InitialInputs = {},
   prime: readonly PrimeStep[] = [],
@@ -70,7 +74,7 @@ export function useSettleSim(
     let s = sims.get(circuit);
     if (!s) {
       sims.clear();
-      s = fresh(circuit, initial, prime);
+      s = figureSim(circuit, initial, prime);
       sims.set(circuit, s);
     }
     return s;
@@ -108,7 +112,7 @@ export function useSettleSim(
       bump();
     },
     reset: () => {
-      sims.set(circuit, fresh(circuit, initial, prime));
+      sims.set(circuit, figureSim(circuit, initial, prime));
       bump();
     },
   };

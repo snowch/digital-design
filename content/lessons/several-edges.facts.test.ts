@@ -5,8 +5,8 @@
 
 import { describe, expect, it } from "vitest";
 
-import { stateSequence } from "@dd/dd-model";
-import { grade, kindSequences } from "@dd/dd-views";
+import { MACHINE_NETS, libraryCircuit, stateSequence } from "@dd/dd-model";
+import { figureSim, grade, kindSequences, type PrimeStep } from "@dd/dd-views";
 import { parseLesson, testCount } from "@dd/lesson-schema";
 
 import { figureAnswer, runToStop, signed } from "./module8-facts";
@@ -18,6 +18,17 @@ const challenge = (id: string) => lesson.challenges.find((c) => c.id === id)!;
 describe("facts for the several-edges lesson", () => {
   it("the prediction: the first load takes 5 edges", () => {
     expect(figureAnswer(severalEdges, "predict-load-edges")).toBe("5");
+  });
+
+  it("the controller's figure starts after a reset, in FETCH, where its first edge moves it", () => {
+    const figure = lesson.sections
+      .flatMap((s) => s.interactives)
+      .find((i) => i.id === "controller");
+    const prime = (figure?.props as { prime?: PrimeStep[] } | undefined)?.prime ?? [];
+    const s = figureSim(libraryCircuit("controller"), {}, prime).outputs()[
+      MACHINE_NETS.stateOutput
+    ];
+    expect(s && s.known === 7n ? s.value : "unknown").toBe(0n);
   });
 
   it("which room is colder: 23 edges to the stop, -250 on the display", () => {

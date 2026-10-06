@@ -392,6 +392,12 @@ circuits. Four places were corrected:
 In the draft from brief M1, "still" was dropped from the reflection and "those tests" became "the
 tests"; both were put back.
 
+A look at the built pages on a phone found one more: 9.3's controller figure opened on XXX, a
+state register nothing had reset, while its lead says to set the decoder's signals and press
+Clock CLK, which from XXX moves nothing. It now starts after a reset, in FETCH, as Module 5's
+machines start in theirs, and a facts test runs the figure's own start (`figureSim`, exported for
+it) and requires FETCH; without the reset, the test fails.
+
 The managing session's check, which renders text as CI does, passed the ten screenshot tests the
 building session's container failed, and failed one test that container could not see: on a
 phone, 9.3's state table for the

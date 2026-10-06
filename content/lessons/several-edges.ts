@@ -258,7 +258,13 @@ export const severalEdges: LessonInput = {
           caption: LABELS.captions.controller,
           lead: PROSE.controllerLead,
           after: PROSE.controllerAfter,
-          props: { machine: "controller", show: ["diagram", "table", "trace"] },
+          // After a reset, in FETCH, as Module 5's machines start in their reset state: from the
+          // register's unknown first value no setting of the inputs would move it.
+          props: {
+            machine: "controller",
+            show: ["diagram", "table", "trace"],
+            prime: [{ set: { RST: 1 }, clock: "CLK" }, { set: { RST: 0 } }],
+          },
         },
       ],
     },
