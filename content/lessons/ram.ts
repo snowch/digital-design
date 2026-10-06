@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Lesson: Module 6, lesson 1, RAM: many words, each found by its address.
 //
 // The structure is here; the words are in ram.prose.ts and ram.labels.ts. The circuits are the
@@ -360,7 +362,11 @@ export const ram: LessonInput = {
           { label: "clock low, A 011, D 0011", set: { CLK: 0, A1: 1, D: "0011" } },
           { label: "edge: write at 011", set: { CLK: 1 }, expect: { Q: "0011", OK: 1 } },
           { label: "A2 rises while the clock is high", set: { A2: 1 }, expect: { OK: 0 } },
-          { label: "clock low, A 001, WE 0", set: { CLK: 0, A2: 0, A1: 0 }, expect: { Q: "0101" } },
+          {
+            label: "clock low, A 001, WE 0",
+            set: { CLK: 0, A2: 0, A1: 0, WE: 0 },
+            expect: { Q: "0101" },
+          },
         ],
       },
       hints: [...PROSE.c2Hints],

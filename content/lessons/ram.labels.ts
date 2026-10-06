@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Titles, objectives, captions and labels of the lesson on RAM, drafted by the prose process
 // from a brief of facts (see CLAUDE.md and docs/notes/module-6-memory.md) and checked against the
 // lesson's structure.
@@ -8,7 +10,7 @@ export const LABELS = {
     "Explain how a decoder and AND gates with write enable let an edge write one of many words.",
     "Explain why reading a word needs no clock edge and writing one waits for an edge.",
     "Build a memory of two words from registers, a selector and gates.",
-    "Explain what happens when an address uses more bits than the memory has, and how to refuse it.",
+    "Explain what happens when an address uses more bits than the memory reads (decodes), and how to refuse it.",
   ],
   titles: {
     question: "Keeping a setting for each room",
@@ -28,12 +30,14 @@ export const LABELS = {
   },
   captions: {
     scene: "Two switches choose a room; the display shows its setting.",
-    predictOther: "Predict Q after you write a word at address 10 and move to room 01, then check.",
-    predictTwo: "Predict Q after you write two words and move back to address 10, then check.",
+    predictOther:
+      "Predict Q after the figure writes a word at address 10 and sets the address to 01, then check.",
+    predictTwo:
+      "Predict Q after the figure writes two words and moves back to address 10, then check.",
     explorer: "Press the pins and Clock CLK, watch the table, then press the block to open it.",
     buildTwo: "Draw a memory of two words and run the tests.",
     faults: "Choose a fault and run the checks.",
-    predictWide: "Predict Q after you write at address 101, then check.",
+    predictWide: "Predict Q after the figure writes at address 101, then check.",
     wideExplorer: "Try addresses from 100 to 111 and see which word each reaches.",
     opened: "Watch the decoder's outputs and the W wires as you press the pins.",
     big: "A memory of 16 words, drawn as one closed block.",

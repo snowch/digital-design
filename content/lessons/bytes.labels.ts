@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Titles, objectives, captions and labels of the lesson on bytes, drafted by the prose process
 // from a brief of facts (see CLAUDE.md and docs/notes/module-6-memory.md) and checked against the
 // lesson's structure.
@@ -35,14 +37,14 @@ export const LABELS = {
       "Predict the word at address 0100 after a byte is written at address 0101, then check.",
     explorer: "Press the pins, set A and D, press Clock CLK, and watch the table.",
     buildWrite: "Draw the write enables and ODD, and run the tests.",
-    predictOdd: "Predict Q after a word is written at the odd address 0101, then check.",
+    predictOdd: "Predict Q after a word write is tried at the odd address 0101, then check.",
     faults: "Choose a fault and run the checks.",
     opened: "The memory opened, to watch the banks' write enables.",
     readBytes: "Type the three answers and run the tests.",
   },
   faults: {
-    xorToOr: "xorOdd changed to an OR gate",
-    notA0Cut: "NOT on A0 replaced by a wire",
+    xorToOr: "xorOdd (XOR feeding WEO) changed to an OR gate",
+    notA0Cut: "notA0 (NOT feeding WEE) replaced by a wire",
   },
   options: {
     p1High: "Q is 00FF",
@@ -83,5 +85,9 @@ export const LABELS = {
     title: "A circuit that keeps 16-bit readings and smaller numbers",
     summary:
       "A receiver gives a 16-bit reading. Four address switches set where to keep it; a switch chooses between a 16-bit word and a smaller number; a Save button controls the write; a clock feeds a circuit marked with a question mark. Sixteen wires from that circuit drive a display.",
+  },
+  memoryTable: {
+    caption: "Every byte the memory keeps, by address",
+    kept: "Byte",
   },
 } as const;

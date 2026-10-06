@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Lesson: Module 6, lesson 2, the register file: two words out at once.
 //
 // The structure is here; the words are in register-file.prose.ts and register-file.labels.ts. The

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 6's challenges and figures, driven through the page as the earlier lessons' are: every
 // challenge completed with its reference (drawn through the editor, part by part and wire by wire;
 // written as text; or answered), a plausible wrong attempt rejected with the failing test named,

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 6: memories written as arrays elaborate to the simulator's memory, read by index with no
 // clock and written at an edge; a list of values fills one; the gate refuses an array to a
 // challenge that has not met it, in a plain sentence.

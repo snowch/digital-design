@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 6: memories written as arrays.
 //
 // `logic [7:0] mem [0:15];` declares sixteen words of eight bits. A word is read anywhere an

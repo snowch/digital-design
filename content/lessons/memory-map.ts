@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Lesson: Module 6, lesson 4, the memory map: the shop's display and sensor at addresses, a ROM
 // filled from a list, and the module's capstone, a memory of the shape a small program needs.
 //
@@ -34,7 +36,7 @@ export const SENSOR = "1111111101001000";
 /** The four words of the ROM challenge: the table's first four. */
 export const LOWEST = SHOP_TABLE_WORDS.slice(0, 4);
 
-const ROM_HEADER = "module lowest(input logic [1:0] A, output logic [15:0] Q);";
+const ROM_HEADER = "module room_limits(input logic [1:0] A, output logic [15:0] Q);";
 
 const ROM_TEXT = `${ROM_HEADER}
   logic [15:0] limits [0:3] = '{${LOWEST.map((w) => `16'h${hex4(w)}`).join(", ")}};
@@ -181,6 +183,7 @@ export const memoryMap: LessonInput = {
           props: {
             libraryId: "shop-memory-block",
             scope: "shop",
+            initial: { SENSOR, WORD: 1 },
             faults: [
               {
                 kind: "wrong-gate",

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 6: the memories behave as the lessons say, as gates and as components.
 
 import { describe, expect, it } from "vitest";

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 6: the memory explorer. A memory running in the simulator, drawn as a block that opens
 // one level at a time (the memory, its words, a word's flip-flops), with its address, data and
 // write-enable inputs to set, its clock to press, and a table of every word it holds, with the
@@ -43,6 +45,12 @@ const Props = z.object({
       banks: z.array(Bank).optional(),
       /** How many binary digits an address is written with in the table. */
       addressBits: z.number(),
+      /**
+       * The lesson's own caption and heading for the kept column, where a row is not a word (a
+       * memory of bytes); the book's "word" wording otherwise.
+       */
+      caption: z.string().optional(),
+      keptHeading: z.string().optional(),
       /**
        * Each read: the output's name, as the table says it, and the address the memory reads (in
        * a bank, the row that bank reads).
@@ -154,11 +162,11 @@ function WordsTable({
   return (
     <div className="truth-table-wrap memory-table-wrap">
       <table className="truth-table memory-table">
-        <caption>{strings.memory.caption}</caption>
+        <caption>{memory.caption ?? strings.memory.caption}</caption>
         <thead>
           <tr>
             <th scope="col">{strings.memory.address}</th>
-            <th scope="col">{strings.memory.word}</th>
+            <th scope="col">{memory.keptHeading ?? strings.memory.word}</th>
             <th scope="col">{strings.memory.marks}</th>
           </tr>
         </thead>

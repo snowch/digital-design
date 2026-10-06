@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Helpers for Module 6's facts tests: each reads a figure's own props and runs them through the
 // code the figure runs, so a number the prose states is the number the page shows.
 

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 6's memories.
 //
 // Two kinds, and the note for the module (docs/notes/module-6-memory.md) says why both:

@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Lesson: Module 6, lesson 3, bytes: a memory whose every address names eight bits, and the
 // 16-bit words it keeps as two of them, the low byte at the lower address.
 //
@@ -20,6 +22,8 @@ const BYTES_TABLE = {
     { net: "bytes/odd/state", words: 8, width: 8 },
   ],
   addressBits: 4,
+  caption: LABELS.memoryTable.caption,
+  keptHeading: LABELS.memoryTable.kept,
   reads: [
     { port: LABELS.banks.even, address: "bytes/ROW", bank: 0 },
     { port: LABELS.banks.odd, address: "bytes/ROW", bank: 1 },

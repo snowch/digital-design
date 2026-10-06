@@ -1,3 +1,5 @@
+// Copyright © 2026 Chris Snow
+
 // Module 6: memories as components with behaviour.
 //
 // A memory of a few words is drawn and simulated as gates (dd-model's `ram`); a larger one would
