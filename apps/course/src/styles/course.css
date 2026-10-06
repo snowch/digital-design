@@ -337,6 +337,9 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
   border: none;
   padding: 0;
 }
+.verdict-blocked p {
+  margin: 0 0 var(--space-1);
+}
 .hints {
   margin-top: var(--space-5);
   padding-top: var(--space-4);
@@ -1899,6 +1902,10 @@ button.bit {
 }
 /* A flex item will not shrink below its content unless told: a table of 64-bit words is wider
    than a phone, so each table keeps to the column and scrolls inside its own box. */
+/* Hidden until a prediction is committed: the display above would otherwise win over [hidden]. */
+.datapath-tables[hidden] {
+  display: none;
+}
 .datapath-tables > * {
   min-width: 0;
   max-width: 100%;
@@ -2076,4 +2083,14 @@ button.bit {
 /* A gap after every fourth bit, so each hexadecimal digit's bits stand together. */
 .wide-bit.digit-end {
   margin-right: 4px;
+}
+/* Module 8: a wire a stuck-at fault holds, drawn from its old driver, dashed in the fault colour. */
+.wire.wire-held > path:not(.wire-hit):not(.wire-halo) {
+  stroke: var(--bad);
+  stroke-dasharray: 6 4;
+}
+/* A wire pressed with a mouse keeps its halo, not a focus box drawn through other parts; the
+   keyboard's focus ring stays. */
+.wire:focus:not(:focus-visible) {
+  outline: none;
 }

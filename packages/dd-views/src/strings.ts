@@ -436,6 +436,10 @@ export interface DatapathStrings {
   readonly halting: string;
   /** After the edge that stopped it: {reason}. */
   readonly stopped: string;
+  /** After a run that reached {edges} edges without stopping, at {pc}. */
+  readonly gaveUp: string;
+  /** While a run is going: {edges} made so far. */
+  readonly runningEdges: string;
   /** Why the machine stops, by cause; `stop` and `later` for CAUSE 00. */
   readonly reasons: Readonly<Record<string, string>>;
   /** The stepper over the last edge. */
@@ -444,6 +448,8 @@ export interface DatapathStrings {
   /** At a step: the buses that changed at it, {nets}. */
   readonly stepChanged: string;
   readonly stepNothing: string;
+  /** A step where only wires inside the blocks changed, none of the drawing's named buses. */
+  readonly stepInside: string;
   readonly back: string;
   readonly next: string;
   readonly end: string;
@@ -886,6 +892,8 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     running: "PC is {pc}.",
     halting: "Stops at next edge: {reason}.",
     stopped: "Stopped: {reason}.",
+    gaveUp: "The machine did not stop after {edges} edges, so the run gave up; PC is {pc}.",
+    runningEdges: "{edges} edges made so far.",
     reasons: {
       "11": "instruction fetch outside the ROM",
       "12": "fetch at an address not a multiple of 4",
@@ -901,6 +909,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     stepsNone: "Press Clock edge first.",
     stepChanged: "Buses that changed: {nets}.",
     stepNothing: "The clock has just risen; nothing has changed yet.",
+    stepInside: "No named bus changed; this step was inside the blocks.",
     back: "Back a step",
     next: "Next step",
     end: "Last step",

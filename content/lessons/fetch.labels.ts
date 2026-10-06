@@ -9,7 +9,7 @@ export const LABELS = {
     "Follow the program counter through a program's edges.",
     "Predict when and why the machine stops.",
     "Write the program counter with reset and GO.",
-    "Write the ROM's fetch checks as a module.",
+    "Write the ROM's checks on PC as a module.",
   ],
   titles: {
     question: "The machine, so far",
@@ -37,8 +37,8 @@ export const LABELS = {
   },
   options: {
     p1On: "Runs on to address 00C",
-    p1Stops: "Stops, cause 21",
-    p1Stop: "Stops at the end, cause 00",
+    p1Stops: "Stops, no instruction",
+    p1Stop: "Stops, program ends",
   },
   faults: {
     pc4Low: "PC4 stuck at 0",

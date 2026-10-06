@@ -262,6 +262,13 @@ export const Challenge = z.object({
    * table, without the drawing.
    */
   tryIt: z.enum(["drawing", "pins"]).default("drawing"),
+  /**
+   * Module 8: how a failed test is reported. "gates" gives each value in binary and names the
+   * gate that drives the first wrong signal; "words" gives a value of eight bits or more in
+   * hexadecimal, as the lessons write words, and leaves out the gates and their generated names,
+   * which a written datapath's learner never wrote.
+   */
+  feedback: z.enum(["gates", "words"]).default("gates"),
   /** Module 2: a gate budget, a depth and the kinds of gate allowed, each graded as a test. */
   limits: Limits.optional(),
   /**

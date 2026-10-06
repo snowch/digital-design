@@ -38,6 +38,9 @@ const CHECKS_VECTORS = (
     [0x402n, 0x11],
     [0x7c0n, 0x11],
     [0xfffffffffffffffcn, 0x11],
+    // Only one bit above bit 11 is 1: a check of bits 11 and 10 alone misses them.
+    [0x1000n, 0x11],
+    [0x8000000000000000n, 0x11],
   ] as const
 ).map(([pc, cause]) => ({
   label: `PC ${pc.toString(16).toUpperCase().padStart(3, "0")}`,
@@ -99,6 +102,7 @@ export const fetch: LessonInput = {
           caption: LABELS.captions.predictEnd,
           props: {
             libraryId: "datapath-fetch",
+            focus: ["decoder", "stops"],
             program: RUNS_OFF,
             edges: 2,
             shown: [1],
@@ -126,9 +130,10 @@ export const fetch: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.margin,
           lead: PROSE.marginLead,
-          after: PROSE.marginAfter,
           props: {
+            outcomes: PROSE.marginAfter,
             libraryId: "datapath-fetch",
+            focus: ["rom", "pc", "plus4"],
             program: MARGIN,
             shown: [1, 2, 3, 4],
             buses: ["PC", "PC4", "IR", "RESULT"],
@@ -165,20 +170,28 @@ export const fetch: LessonInput = {
           caption: LABELS.captions.fetchFaults,
           lead: PROSE.fetchFaultsLead,
           props: {
-            outcomes: PROSE.fetchFaultsAfter,
             libraryId: "datapath-fetch",
+            focus: ["plus4", "decoder"],
             program: MARGIN,
             shown: [1, 2, 3, 4],
-            buses: ["PC", "PC4", "IR"],
+            buses: ["PC", "PC4", "IR", "CAUSE"],
             run: true,
             faults: [
-              { kind: "stuck-at", net: "PC4", value: 0, at: [4, 6], label: LABELS.faults.pc4Low },
+              {
+                kind: "stuck-at",
+                net: "PC4",
+                value: 0,
+                at: [4, 6],
+                label: LABELS.faults.pc4Low,
+                outcome: PROSE.fetchFaultPc4,
+              },
               {
                 kind: "stuck-at",
                 net: "STOP",
                 value: 0,
                 at: [29, 2],
                 label: LABELS.faults.stopLow,
+                outcome: PROSE.fetchFaultStop,
               },
             ],
           },
@@ -236,6 +249,7 @@ export const fetch: LessonInput = {
       title: LABELS.challengeTitles.c1,
       task: PROSE.c1Task,
       gradedDirection: "write",
+      feedback: "words",
       interface: {
         inputs: [{ name: "CLK" }, { name: "RST" }, { name: "GO" }],
         outputs: [{ name: "PC", width: 64 }],
@@ -252,6 +266,7 @@ export const fetch: LessonInput = {
       title: LABELS.challengeTitles.c2,
       task: PROSE.c2Task,
       gradedDirection: "write",
+      feedback: "words",
       interface: {
         inputs: [{ name: "PC", width: 64 }],
         outputs: [{ name: "CAUSEF", width: 8 }],

@@ -60,9 +60,13 @@ const MEMCHECK_CASES: readonly [number | bigint, "load" | "store" | "none", bool
   [0x7c0, "store", true],
   [0x7d8, "load", false],
   [0x7d8, "store", false],
+  // Both 33 (a byte at a device) and 34 (a store to a sensor) apply: the order of the checks shows.
+  [0x7d8, "store", true],
   [0x7f8, "load", false],
   [0x800, "store", true],
   [0xfffffffffffffff8n, "load", false],
+  // Only bit 12 is 1: outside the memory, though bits 11 and 10 say nothing of it.
+  [0x1000, "load", false],
   [0x800, "none", false],
 ];
 const MEMCHECK_VECTORS = MEMCHECK_CASES.map(([address, access, byte]) => {
@@ -156,6 +160,7 @@ export const memoryAccess: LessonInput = {
           caption: LABELS.captions.predictLoad,
           props: {
             libraryId: "datapath-memory",
+            focus: ["pickA", "memory", "pickLoad"],
             program: SHOW_MARGIN,
             inputs: SENSORS,
             shown: [2, 3],
@@ -184,9 +189,10 @@ export const memoryAccess: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.showMargin,
           lead: PROSE.showMarginLead,
-          after: PROSE.showMarginAfter,
           props: {
+            outcomes: PROSE.showMarginAfter,
             libraryId: "datapath-memory",
+            focus: ["pickA", "memory", "pickLoad"],
             program: SHOW_MARGIN,
             inputs: SENSORS,
             shown: [2, 3, 4, 5],
@@ -235,10 +241,11 @@ export const memoryAccess: LessonInput = {
           props: {
             outcomes: PROSE.memoryFaultsAfter,
             libraryId: "datapath-memory",
+            focus: ["memory", "pickLoad"],
             program: SHOW_MARGIN,
             inputs: SENSORS,
             shown: [2, 3, 4],
-            buses: ["RESULT", "MQ", "YIN"],
+            buses: ["RESULT", "MQ", "YIN", "CAUSE"],
             devices: true,
             run: true,
             faults: [
@@ -248,6 +255,7 @@ export const memoryAccess: LessonInput = {
                 value: 0,
                 at: [50, 17],
                 label: LABELS.faults.loadLow,
+                outcome: PROSE.memoryFaultLoad,
               },
               {
                 kind: "stuck-at",
@@ -255,6 +263,7 @@ export const memoryAccess: LessonInput = {
                 value: 1,
                 at: [50, 17],
                 label: LABELS.faults.storeHigh,
+                outcome: PROSE.memoryFaultStore,
               },
             ],
           },
@@ -286,6 +295,7 @@ export const memoryAccess: LessonInput = {
       title: LABELS.challengeTitles.c1,
       task: PROSE.c1Task,
       gradedDirection: "write",
+      feedback: "words",
       interface: {
         inputs: [
           { name: "ADDR", width: 64 },
@@ -307,6 +317,7 @@ export const memoryAccess: LessonInput = {
       title: LABELS.challengeTitles.c2,
       task: PROSE.c2Task,
       gradedDirection: "write",
+      feedback: "words",
       interface: {
         inputs: [
           { name: "CLK" },

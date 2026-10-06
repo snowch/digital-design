@@ -28,7 +28,12 @@ import { Step, outputsPerStep } from "./script";
 
 // A lesson may name a fault and say what it models in its own words; otherwise the fault
 // library's label and explanation show (Module 2 added `explanation`).
-const label = { label: z.string().optional(), explanation: z.string().optional() };
+const label = {
+  label: z.string().optional(),
+  explanation: z.string().optional(),
+  /** Module 8: what this fault does, shown only once the learner has run it. */
+  outcome: z.string().optional(),
+};
 export const FaultSpec = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("broken-wire"), net: z.string(), ...label }),
   z.object({ kind: z.literal("inverted"), net: z.string(), ...label }),

@@ -106,6 +106,31 @@ describe("elaborating always_comb", () => {
     expect(d.failures).toEqual([]);
   });
 
+  it("says plainly that repetition is not part of the course's language", () => {
+    const r = elaborate(
+      "module m(input logic [3:0] a, output logic [7:0] y); assign y = {4{a[0]}, a}; endmodule",
+    );
+    expect(r.messages.map((m) => m.text).join(" ")).toMatch(/repetition such as `\{4\{a\}\}`/);
+  });
+
+  it("takes a case whose labels name every value of its subject as complete, with no warning", () => {
+    const full = elaborate(
+      "module m(input logic s, a, b, output logic y); always_comb begin case (s) 1'b0: y = a; 1'b1: y = b; endcase end endmodule",
+    );
+    expect(full.messages).toEqual([]);
+    const sim = new Simulator(full.circuit as Circuit);
+    sim.setInput("s", bit1);
+    sim.setInput("a", bit0);
+    sim.setInput("b", bit1);
+    sim.settle();
+    expect(formatWord(sim.read("y"))).toBe("1");
+    // A label short of every value still leaves a path out, and is still told so.
+    const short = elaborate(
+      "module m(input logic [1:0] s, input logic a, b, output logic y); always_comb begin case (s) 2'b00: y = a; 2'b01: y = b; endcase end endmodule",
+    );
+    expect(short.messages.map((m) => m.severity)).toEqual(["warning"]);
+  });
+
   it("warns about a path that leaves a signal unassigned, and leaves it unknown", () => {
     const r = elaborate(
       "module m(input logic s, a, output logic y); always_comb begin if (s) y = a; end endmodule",

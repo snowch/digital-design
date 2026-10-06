@@ -22,6 +22,11 @@ export interface HdlPanelProps {
   readonly untouched?: string;
   /** Module 8: modules the course supplies to the text. */
   readonly modules?: Readonly<Record<string, CourseModule>>;
+  /**
+   * Whether the circuit the text describes is drawn under it. A text that elaborates to a
+   * tangle of generated parts (a challenge whose Try it is pins) is not drawn.
+   */
+  readonly drawn?: boolean;
 }
 
 export function messageLine(m: Message): string {
@@ -37,6 +42,7 @@ export function HdlPanel({
   rows = 10,
   untouched,
   modules,
+  drawn = true,
 }: HdlPanelProps) {
   const strings = useViewStrings();
   const id = useId();
@@ -84,7 +90,7 @@ export function HdlPanel({
           </ul>
         )}
       </div>
-      {result?.circuit && (
+      {drawn && result?.circuit && (
         <CircuitView
           circuit={result.circuit}
           title={strings.hdl.drawn}

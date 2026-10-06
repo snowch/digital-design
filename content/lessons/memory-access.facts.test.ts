@@ -5,9 +5,12 @@
 import { describe, expect, it } from "vitest";
 
 import { assemble, datapathRamWord, instructionHex } from "@dd/dd-model";
+import { grade } from "@dd/dd-views";
+import { parseLesson } from "@dd/lesson-schema";
 
 import { memoryAccess, SHOW_MARGIN } from "./memory-access";
 import { figureAnswer, runToStop, signed } from "./module8-facts";
+import { MEMCHECK_REFERENCE } from "./module8";
 import { testCountOf } from "./module3-facts";
 
 describe("facts for the loads and stores lesson", () => {
@@ -56,6 +59,25 @@ describe("facts for the loads and stores lesson", () => {
     expect([
       testCountOf(memoryAccess, "memcheck-text"),
       testCountOf(memoryAccess, "memory-text"),
-    ]).toEqual([14, 10]);
+    ]).toEqual([16, 10]);
+  });
+
+  it("a memcheck that tests 33 before 34 fails where both apply: a store byte at a sensor", () => {
+    const c = parseLesson(memoryAccess).challenges.find((x) => x.id === "memcheck-text");
+    const lines = MEMCHECK_REFERENCE.split("\n");
+    const at = (text: string) => lines.findIndex((l) => l.includes(text));
+    const s34 = at("ADDR[10] == 1'b0");
+    const b33 = at("BYTE & (ADDR[10:6]");
+    // The 34 checks (three lines) moved after the two 33 checks.
+    const reordered = [
+      ...lines.slice(0, s34),
+      ...lines.slice(b33, b33 + 2),
+      ...lines.slice(s34, b33),
+      ...lines.slice(b33 + 2),
+    ].join("\n");
+    expect(reordered).not.toBe(MEMCHECK_REFERENCE);
+    expect(c && grade(c, { hdl: reordered }).failures.map((f) => f.label)).toEqual([
+      "store byte at 7D8",
+    ]);
   });
 });

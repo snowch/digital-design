@@ -141,6 +141,7 @@ export const branches: LessonInput = {
           caption: LABELS.captions.predictBranch,
           props: {
             libraryId: "datapath-full",
+            focus: ["condition", "next"],
             program: COLDER,
             inputs: SENSORS,
             edges: 2,
@@ -168,24 +169,14 @@ export const branches: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.sum,
           lead: PROSE.sumLead,
-          after: PROSE.sumAfter,
           props: {
+            outcomes: PROSE.sumAfter,
             libraryId: "datapath-full",
             program: SUM,
             shown: [0, 1, 2],
             buses: ["RESULT", "PC4", "NEXT"],
             devices: true,
             run: true,
-          },
-        },
-        {
-          id: "flow",
-          kind: "branch-targets",
-          timeModel: "none",
-          caption: LABELS.captions.flow,
-          lead: PROSE.flowLead,
-          props: {
-            programs: [{ label: LABELS.programs.sum, program: SUM }],
           },
         },
       ],
@@ -219,6 +210,7 @@ export const branches: LessonInput = {
           props: {
             outcomes: PROSE.branchFaultsAfter,
             libraryId: "datapath-full",
+            focus: ["condition", "next"],
             program: SUM,
             shown: [0, 1, 2],
             buses: ["RESULT", "NEXT"],
@@ -231,8 +223,16 @@ export const branches: LessonInput = {
                 value: 1,
                 at: [52, 20],
                 label: LABELS.faults.metHigh,
+                outcome: PROSE.branchFaultMetHigh,
               },
-              { kind: "stuck-at", net: "MET", value: 0, at: [52, 20], label: LABELS.faults.metLow },
+              {
+                kind: "stuck-at",
+                net: "MET",
+                value: 0,
+                at: [52, 20],
+                label: LABELS.faults.metLow,
+                outcome: PROSE.branchFaultMetLow,
+              },
             ],
           },
         },
@@ -244,19 +244,30 @@ export const branches: LessonInput = {
       prose: PROSE.explanation,
       interactives: [
         {
+          id: "flow",
+          kind: "branch-targets",
+          timeModel: "none",
+          caption: LABELS.captions.flow,
+          lead: PROSE.flowLead,
+          props: {
+            programs: [{ label: LABELS.programs.sum, program: SUM }],
+          },
+        },
+        {
           id: "one-instruction",
           kind: "datapath",
           timeModel: "settle",
           caption: LABELS.captions.oneInstruction,
           lead: PROSE.oneInstructionLead,
-          after: PROSE.oneInstructionAfter,
           props: {
+            outcomes: PROSE.oneInstructionAfter,
             libraryId: "datapath-full",
+            focus: ["alu", "condition", "next"],
             program: COLDER,
             inputs: SENSORS,
             edges: 1,
             shown: [2, 3],
-            buses: ["QA", "QB", "RESULT", "PC4", "NEXT"],
+            buses: ["QA", "QB", "RESULT", "PC4", "NEXT", "IR"],
             steps: true,
           },
         },
@@ -281,9 +292,10 @@ export const branches: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.call,
           lead: PROSE.callLead,
-          after: PROSE.callAfter,
           props: {
+            outcomes: PROSE.callAfter,
             libraryId: "datapath-full",
+            focus: ["yWord", "next"],
             program: CALL,
             shown: [1, 2, 15],
             buses: ["RESULT", "PC4", "NEXT", "YIN"],
@@ -316,6 +328,7 @@ export const branches: LessonInput = {
       title: LABELS.challengeTitles.c1,
       task: PROSE.c1Task,
       gradedDirection: "write",
+      feedback: "words",
       interface: {
         inputs: [
           { name: "J", width: 4 },
@@ -338,6 +351,7 @@ export const branches: LessonInput = {
       title: LABELS.challengeTitles.c2,
       task: PROSE.c2Task,
       gradedDirection: "write",
+      feedback: "words",
       interface: {
         inputs: [
           { name: "CLK" },

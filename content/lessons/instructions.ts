@@ -112,7 +112,13 @@ export const instructions: LessonInput = {
           caption: LABELS.captions.fields,
           lead: PROSE.fieldsLead,
           props: {
-            instructions: JOBS.slice(0, 4).map((j) => ({ label: j.label, text: j.text })),
+            instructions: JOBS.slice(0, 4).map((j, k) => ({
+              label: j.label,
+              text: j.text,
+              // Copy B reads A and count up reads B, and each ignores what it reads.
+              ...(k === 2 ? { notes: { A: LABELS.fieldIgnored.copyA } } : {}),
+              ...(k === 3 ? { notes: { B: LABELS.fieldIgnored.countUpB } } : {}),
+            })),
             notes: LABELS.fieldNotes,
           },
         },
@@ -130,8 +136,10 @@ export const instructions: LessonInput = {
           caption: LABELS.captions.predictDifference,
           props: {
             libraryId: "datapath-jobs",
+            focus: ["registers", "alu"],
             registers: ROOMS,
-            instructions: [JOBS[0]],
+            // The word alone: the transfer would answer the prediction.
+            instructions: [{ ...JOBS[0], label: "13123000" }],
             shown: [1, 2, 3],
             buses: ["QA", "QB", "RESULT"],
             question: PROSE.p1Question,
@@ -158,9 +166,10 @@ export const instructions: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.jobs,
           lead: PROSE.jobsLead,
-          after: PROSE.jobsAfter,
           props: {
+            outcomes: PROSE.jobsAfter,
             libraryId: "datapath-jobs",
+            focus: ["registers", "alu"],
             registers: ROOMS,
             instructions: JOBS,
             shown: [1, 2, 3, 4],
@@ -198,12 +207,25 @@ export const instructions: LessonInput = {
           props: {
             outcomes: PROSE.jobsFaultsAfter,
             libraryId: "datapath-jobs",
+            focus: ["registers", "alu"],
             registers: ROOMS,
             instructions: [JOBS[0], JOBS[1]],
             shown: [0, 1, 2, 3],
             faults: [
-              { kind: "stuck-at", net: "Y", value: 0, label: LABELS.faults.yLow },
-              { kind: "stuck-at", net: "OP0", value: 0, label: LABELS.faults.op0Low },
+              {
+                kind: "stuck-at",
+                net: "Y",
+                value: 0,
+                label: LABELS.faults.yLow,
+                outcome: PROSE.jobsFaultY,
+              },
+              {
+                kind: "stuck-at",
+                net: "OP0",
+                value: 0,
+                label: LABELS.faults.op0Low,
+                outcome: PROSE.jobsFaultOp0,
+              },
             ],
           },
         },
@@ -234,6 +256,7 @@ export const instructions: LessonInput = {
       title: LABELS.challengeTitles.c1,
       task: PROSE.c1Task,
       gradedDirection: "write",
+      feedback: "words",
       interface: {
         inputs: [{ name: "IR", width: 32 }],
         outputs: [
@@ -257,6 +280,7 @@ export const instructions: LessonInput = {
       title: LABELS.challengeTitles.c2,
       task: PROSE.c2Task,
       gradedDirection: "write",
+      feedback: "words",
       interface: {
         inputs: [{ name: "CLK" }, { name: "IR", width: 32 }, { name: "WRITEY" }],
         outputs: [{ name: "RESULT", width: 64 }],

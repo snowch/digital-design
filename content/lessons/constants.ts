@@ -53,24 +53,24 @@ const CONSTANTS_STEPS: {
   expect: Record<string, string>;
 }[] = [
   {
-    label: "R3 <= R1 + 100, BCONST 1, clock low",
+    label: "R3 ← R1 + 100, BCONST 1, clock low",
     set: { CLK: 0, IR: "0x22103064", WRITEY: 1, BCONST: 1 },
     expect: { RESULT: h64(-84n) },
   },
   { label: "edge: R3 takes -84", set: { CLK: 1 }, expect: { RESULT: h64(-84n) } },
   {
-    label: "R4 <= R3 + R3 and BCONST 0 arrive while the clock is high",
+    label: "R4 ← R3 + R3 and BCONST 0 arrive while the clock is high",
     set: { IR: "0x12334000", BCONST: 0 },
     expect: { RESULT: h64(-168n) },
   },
   { label: "clock low", set: { CLK: 0 }, expect: { RESULT: h64(-168n) } },
   { label: "edge: R4 takes -168", set: { CLK: 1 }, expect: { RESULT: h64(-168n) } },
   {
-    label: "R5 <= -250, BCONST 1, clock low",
+    label: "R5 ← -250, BCONST 1, clock low",
     set: { CLK: 0, IR: "0x25005F06", BCONST: 1 },
     expect: { RESULT: h64(-250n) },
   },
-  { label: "R5 <= -2048", set: { IR: "0x25005800" }, expect: { RESULT: h64(-2048n) } },
+  { label: "R5 ← -2048", set: { IR: "0x25005800" }, expect: { RESULT: h64(-2048n) } },
   { label: "R5 <= 2047", set: { IR: "0x250057FF" }, expect: { RESULT: h64(2047n) } },
 ];
 
@@ -113,8 +113,10 @@ export const constants: LessonInput = {
           caption: LABELS.captions.predictConstant,
           props: {
             libraryId: "datapath-constants",
+            focus: ["widen", "pickB"],
             registers: ROOMS,
-            instructions: [CONSTANT_JOBS[0]],
+            // The word alone: the transfer would be the answer.
+            instructions: [{ ...CONSTANT_JOBS[0], label: "25003F9C" }],
             shown: [1, 2, 3],
             buses: ["WIDE", "ALUB", "RESULT"],
             question: PROSE.p1Question,
@@ -141,9 +143,10 @@ export const constants: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.constants,
           lead: PROSE.constantsLead,
-          after: PROSE.constantsAfter,
           props: {
+            outcomes: PROSE.constantsAfter,
             libraryId: "datapath-constants",
+            focus: ["widen", "pickB"],
             registers: ROOMS,
             instructions: CONSTANT_JOBS,
             shown: [1, 2, 3, 4],
@@ -179,15 +182,27 @@ export const constants: LessonInput = {
           caption: LABELS.captions.constantsFaults,
           lead: PROSE.constantsFaultsLead,
           props: {
-            outcomes: PROSE.constantsFaultsAfter,
             libraryId: "datapath-constants",
+            focus: ["widen", "pickB"],
             registers: ROOMS,
             instructions: [CONSTANT_JOBS[0], CONSTANT_JOBS[1]],
             shown: [1, 2, 3],
             buses: ["WIDE", "ALUB", "RESULT"],
             faults: [
-              { kind: "stuck-at", net: "widen/C11", value: 0, label: LABELS.faults.copyLow },
-              { kind: "stuck-at", net: "BCONST", value: 0, label: LABELS.faults.bconstLow },
+              {
+                kind: "stuck-at",
+                net: "widen/C11",
+                value: 0,
+                label: LABELS.faults.copyLow,
+                outcome: PROSE.constantsFaultCopy,
+              },
+              {
+                kind: "stuck-at",
+                net: "BCONST",
+                value: 0,
+                label: LABELS.faults.bconstLow,
+                outcome: PROSE.constantsFaultBconst,
+              },
             ],
           },
         },
@@ -226,9 +241,10 @@ export const constants: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.hour,
           lead: PROSE.hourLead,
-          after: PROSE.hourAfter,
           props: {
+            outcomes: PROSE.hourAfter,
             libraryId: "datapath-constants",
+            focus: ["widen", "pickB"],
             registers: {},
             instructions: [
               {
@@ -270,6 +286,7 @@ export const constants: LessonInput = {
       title: LABELS.challengeTitles.c1,
       task: PROSE.c1Task,
       gradedDirection: "write",
+      feedback: "words",
       interface: {
         inputs: [{ name: "C", width: 12 }],
         outputs: [{ name: "W", width: 64 }],
@@ -286,6 +303,7 @@ export const constants: LessonInput = {
       title: LABELS.challengeTitles.c2,
       task: PROSE.c2Task,
       gradedDirection: "write",
+      feedback: "words",
       interface: {
         inputs: [
           { name: "CLK" },
@@ -309,6 +327,6 @@ export const constants: LessonInput = {
     textbookExample:
       "The I-type instruction's 16-bit immediate, sign-extended by a box labelled 'Sign extend' and chosen by ALUSrc into the ALU (Patterson and Hennessy; Harris and Harris's ImmSrc and Extend unit); Nand2Tetris's A-instruction, which loads a 15-bit constant into the A register.",
     howThisDiffers:
-      "The constant is the course's own three hexadecimal digits at the right of its own layout, 12 bits from -2048 to 2047, and its widening is shown as wires (bit 11 copied into the 52 bits above it), predicted on the shop's -250 against its unsigned reading 3846. The selector is Module 3's word selector, its select line named BCONST for what it chooses and set by hand. The faults break the copied bit and the selector. The generalisation is the course's own: 3600 seconds in an hour, which does not fit, built in two instructions by doubling 1800.",
+      "The constant is the course's own three hexadecimal digits at the right of its own layout, 12 bits from -2048 to 2047, and its widening is shown as wires (bit 11 copied into the 52 bits above it), predicted on the constant `F9C`, -100 read signed, against its unsigned reading 3996. The selector is Module 3's word selector, its select line named BCONST for what it chooses and set by hand. The faults break the copied bit and the selector. The generalisation is the course's own: 3600 seconds in an hour, which does not fit, built in two instructions by doubling 1800.",
   },
 };

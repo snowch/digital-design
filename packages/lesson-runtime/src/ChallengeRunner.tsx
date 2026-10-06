@@ -142,7 +142,7 @@ export function ChallengeRunner({
       <p className="challenge-status" role="status" aria-live="polite">
         {status}
       </p>
-      {verdict && <VerdictView verdict={verdict} />}
+      {verdict && <VerdictView verdict={verdict} feedback={challenge.feedback} />}
       <HintLadder
         hints={challenge.hints}
         revealed={saved?.hintsRevealed ?? 0}

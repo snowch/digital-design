@@ -1,0 +1,90 @@
+# Module 8 as a learner meets it: a pass for the reader's experience
+
+A working note on the branch `module-8-datapath`, after the focused figures
+(`docs/notes/module-8-figures.md`). The author asked to make Module 8 a great reader and learner
+experience. Times are read from `date -u` as each entry is written. "The managing model" is the
+session doing the work; "the drafting subagent" writes every learner-facing sentence from a brief
+of checked facts.
+
+## Approach
+
+The earlier reviews read the lessons' words and screenshots. This pass gives each lesson to a
+walker who drives the built page as a learner does: presses every control, commits every
+prediction, puts in every fault, runs every challenge with the reference and a wrong attempt, at
+1280 px and at 375 px, and reports where the experience fails the learner. A sceptic attacks each
+finding; fixes go in code first, then in words through the drafting subagent; then each lesson is
+read once more, and the full check runs on the pushed head.
+
+## What changed for the learner
+
+Code that every module's figures and challenges share:
+
+- A prediction is never answered before the learner commits: the datapath's tables stay hidden
+  (a CSS rule had overridden `hidden`), its pins cannot clock it, and its explanation comes after
+  the learner's own edge.
+- Results come after the edges that make them: an investigation's after-text shows below the
+  figure once the learner has clocked; each fault's outcome shows once that fault has run; the
+  lesson's closing sentence once all have.
+- A long run goes in slices that redraw, counts its edges, and says when it gave up.
+- "Written" marks the register an edge wrote, from the register file's write enable and address.
+- A stuck-at fault in a drawing placed by hand draws the held wires dashed in the fault colour,
+  carrying the held value; the unwired CONST box is gone.
+- A narrow drawing opens on the parts its lesson names (`focus`); the wide ones get the strip and
+  zoom from the managing session.
+- Failed tests can be reported as words (`feedback: "words"`): hexadecimal values, no gate names
+  the elaborator made up. Module 8's ten challenges use it.
+- A full `case` is complete: no false latch warning. Gate messages offer only what a challenge
+  allows, show code as code, and say once that the tests could not run; repetition gets a plain
+  message.
+- A written challenge whose Try it is pins draws no elaborated tangle and folds its Try it, so
+  Run tests stays near the text.
+- The stepper says when only wires inside blocks changed, and its status follows the step; an
+  option's label ends a sentence once; the scroll note waits for more than an empty margin; a
+  mouse-pressed wire draws no focus box; no favicon 404.
+
+Module 8's lessons:
+
+- Two challenges' tests now catch wrong answers they passed (the order of the memory's checks; a
+  PC check of bits 11 and 10 alone).
+- Predictions offer the word alone, not the transfer that answered them; the motivation no
+  longer states 66; fetch's options say what happens, not a code not yet explained.
+- Challenges leave the reading to the learner: the fields' bit ranges, the ALU code's bits, the
+  52-bit literal and the branch conditions' flags are no longer in the tasks (the hints keep them).
+- The loop's flow table comes after the learner has run the loop; IR and CAUSE join the tables
+  where the prose quotes them; the fields figure says when a job ignores a field it reads.
+- YIN, RESULT X at the stop, the flags that go nowhere yet, and the two decoders are explained;
+  repeats cut; a wrong cross-reference in a hint corrected.
+
+## What was left, and why
+
+- Moving the drawings' blocks so the parts a lesson names sit in the first view: the strip, zoom
+  and `focus` serve that now; the managing session keeps opening a wide drawing at a named part as
+  a note for later.
+- The 64 bit buttons for a word in Try it (F11, B5, C10): a platform change to how words are
+  entered, for every module; noted, not done.
+- A second "Clock edge" in the capstone replaces the stepped edge (B11): the after-text is shown
+  only once the learner has clocked, and the step numbers are those of the first edge; a lock
+  after one edge would need its own prop.
+- The timeline's times 2 and 3 alike, and CLK at its last time (F9): the shared timing diagram's
+  convention; small.
+- Overcalled findings (C3, C7, C10, F4 in part, M15, and the minor ones the sceptic judged
+  taste) were not acted on.
+
+## Log
+
+- 12:40. `main` (5598fdb: a cover on the front page; a trial overview strip and zoom on branches' `sum`) merged in as e23fa54; `docs/authoring.md`'s figure table kept both sides. Walk helper written; five walkers sent, one per lesson, with `module-8-learner/brief.md`.
+- 12:50. Walks in for memory-access and fetch (`module-8-learner/walks/`). Started on what needs no sceptic: the `memory-text` reference drew four false "latch" warnings because a `case` whose labels name every value of its subject was taken to leave a path out; it now counts as complete (`packages/hdl/src/elaborate.ts`, with a test that a short case is still warned about).
+- 12:53. Two challenges whose tests passed wrong answers (M2, F1): `memcheck-text` gains a store byte at `7D8`, where 33 and 34 both apply, and a load at `1000`; `checks-text` gains PC `1000` and `8000000000000000`, each with one bit above bit 11. The task texts' counts became 16 and 11 tests. The facts tests now grade the two wrong attempts and pin where they fail.
+- 12:57. Walks in for instructions and constants. Fixed in code, as the walks showed them: the datapath figure's tables showed the prediction's answer before commit, because `.datapath-tables { display: flex }` overrode the `hidden` attribute (I1, M3, C1); the drawing's pins clocked the machine before commit (M4); every investigation's after-text, results included, showed from load (I4, M10, F7, C3), and now shows below the figure once the learner has made an edge; one fault's run showed every fault's outcome (I5, M8, F3, C5), and each fault now carries its own outcome, shown once that fault has run, with the lesson's closing sentence once all have; a run that reaches 500 edges says it gave up (F3). The fault texts were split at their paragraph breaks; no sentence changed.
+- 13:00. All five walks in; sent to one sceptic. Meanwhile, in the platform: a challenge may set `feedback: "words"`, which reports a failed test with values of eight bits or more in hexadecimal and leaves out the gate and "places to look" the elaborator named (I2, M11, F6, C4, B5, B6); Module 8's ten challenges set it. A test in `VerdictView.test.tsx`.
+- 13:04. The sceptic's verdicts (`module-8-learner/verdicts.md`): of 73 findings, 15 already fixed, 5 overcalled; the trial's two (B1, B4) sent to the managing session, whose trial it is. Meanwhile: a run in slices of 20 edges that redraw, with its count (B2); a step where only wires inside blocks changed says so, and the status's PC follows the step (F4, B11); an option's label ends a sentence once (B9); the prediction's explanation shows after the learner's edge (I9); a `focus` prop opens a wide drawing on the parts the lesson names (M5, F8, B3).
+- 13:09. In code: "Written" marks the register the edge wrote, read off the register file's WE and WA just before it, so a rewrite of the same value is marked and WRITEY at 0 is not (I3, C5); a stuck-at fault in a drawing placed by hand draws the held wires dashed in the fault colour with the held value, and leaves out the unwired CONST box and its 64-digit label (I5, F3, M9, C5); every datapath figure opens on the parts its lesson names (`focus`), and IR (capstone) and CAUSE (fetch and memory faults) join the tables (B11, F8, M9).
+- 13:14. In the platform: a gate message offers instead only what the challenge allows (`? :` points to a `case` in `always_comb` where that is allowed), and `+` no longer says adders come later (F2, C6, I7); a gate message shows its code as code, and "Tests could not run" is said once (I7, B12); repetition `{4{a}}` gets a plain message, not a parse error (C6); a written challenge whose Try it is pins draws no elaborated tangle under its text and folds its Try it, so Run tests sits near the text (C8, M6, M7, F12, B5); the scroll note waits for more than a drawing's empty margin (C9).
+- 13:15. In the lessons: the loop's flow table moved from the investigation into the explanation, after the learner has run the loop (B10); the instructions and constants predictions offer the word alone, `13123000` and `25003F9C`, since the transfer was the answer (I1, C1); constants' test labels write `←` as the prose does (C4); the originality note names the prediction the page makes (C11). In the platform: a wire pressed with a mouse draws no focus box (I10); an empty icon stops the favicon 404 (I15).
+- 13:17. Cut two repeats in instructions (the list of instructions beside the radios that name them; "Here you set it by hand", said again in model versus reality). Briefs GL (18 items across the five lessons) and GM (the new figure and checker messages) sent to the drafting subagent.
+- 13:19. GM came back. `gaveUp` dropped that the run gave up (added: "so the run gave up"); `repetition` drifted to "this language" (kept the gate's own "the language this course uses"); the rest stands, already matching the provisional text.
+- 13:19. Module 8's Playwright spec on the changed figures: 52 passed.
+- 13:20. The managing session fixed the strip's drag and zoom (B1, B4) on its branch (b86b61c), and, at the author's request, gives the strip and zoom to every drawing 1,000 px or wider, Module 8's from fetch on. This branch's `focus` steps aside for a zoomable drawing, so after the merge it opens only the narrower ones (instructions, constants) on their parts; the managing session keeps opening at the named part as a note for later.
+- 13:23. GL came back (the agent ended on a tool error after writing it out in full). Faults: `constants/explanation` came back with the instructions lesson's explanation stitched on before it (only its changed last sentence was placed); `constants/construction` dropped the two sentences on W and WIDE that the item said to keep (only the changed sentence was placed); `fieldsLead` drifted "more than the digits" to "tells you more" (added "than the digits") and cut "into each field" (now "into its fields"); the field notes began with a capital (lowered, as every note is); `fetch/c1Hints.3` came back with HTML entities for `<` (written as `<`); `mapLead` made DOOR and WARM two devices, "DOOR, WARM" (one device again) and said "a cause" for the cause that stops the machine. Each placed by replacing only the sentence the brief named.
+- 13:24. Each lesson read once more, start to finish, in page order (dumped from the lesson data with every lead, outcome, task and hint in place). Two repeats cut: constants' explanation ended with the sentence the widening's lead opens with; fetch's decoder paragraph said twice that the decoder turns K and J into control signals. No join needed new words.
+- 13:43. The full check on 3fbab89 (`main` at 5ac9a01 merged in): 730 unit and integration tests pass; Playwright fails the same 10 screenshot comparisons a clean `main` fails in this container (none names a Module 8 figure; no baseline touched) and passes the rest. The note's later commits change only this note.

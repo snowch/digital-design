@@ -40,6 +40,9 @@ A lesson is one module in `content/lessons/` exporting a `LessonInput` (the type
   `packages/hdl/src/machine-modules.ts`) with one module used inside another, and `program` and
   `registers` give what the ROM and the registers start with. Such a text elaborates to thousands
   of parts, so it sets `tryIt: "pins"`.
+  `feedback: "words"` (Module 8) reports a failed test as the lessons write words: a value of
+  eight bits or more in hexadecimal, and no gate or "places to look", whose names the elaborator
+  made up and the learner never wrote. The default, `"gates"`, suits a drawn or gate-level circuit.
   An `answer` challenge has no circuit: it declares `fields` (a number with a unit, a row of bits,
   a short text), tests of kind `answers` that name a grader the book supplies
   (`ANSWER_GRADERS` in `packages/dd-model/src/graders.ts`) and list cases (`label`, `given`,

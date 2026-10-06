@@ -16,7 +16,7 @@
 // Every value is the simulator's: the views read nets and the memories' state nets, never the
 // reference.
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 
 import {
@@ -40,6 +40,11 @@ import { CircuitView, valueLabel } from "../CircuitView";
 import { format, useViewStrings } from "../strings";
 import { FaultSpec, toFault } from "./FaultLab";
 import { withProps } from "./props";
+
+/** How many edges "Run until it stops" makes before it gives up on a machine that never stops. */
+const RUN_LIMIT = 500;
+/** Edges a run makes between two redraws. */
+const RUN_SLICE = 20;
 
 const Inputs = z.record(z.string(), z.union([z.string(), z.number()]));
 
@@ -72,6 +77,8 @@ const Props = z.object({
   canOpen: z.boolean().default(true),
   /** The whole drawing small above it, and zoom: a large drawing has them unless this is false. */
   overview: z.boolean().optional(),
+  /** The parts, by name, the drawing opens on when it is wider than its box. */
+  focus: z.array(z.string()).optional(),
   /** Faults the learner may put in, one at a time; the figure starts again with each. */
   faults: z.array(FaultSpec).default([]),
   /** Shown once the learner has made an edge, so the results do not answer the lead's question. */
@@ -145,6 +152,10 @@ export const DatapathFigure = withProps(
     const [edge, setEdge] = useState<Edge | undefined>();
     const [stopped, setStopped] = useState(false);
     const [ran, setRan] = useState(false);
+    // The faults the learner has run, each shown its own outcome only once it has been run.
+    const [ranFaults, setRanFaults] = useState<ReadonlySet<number>>(new Set());
+    // A run that reached 500 edges without stopping says so, rather than looking as if nothing ran.
+    const [gaveUp, setGaveUp] = useState(false);
     const [step, setStep] = useState(Number.POSITIVE_INFINITY);
     const [scope, setScope] = useState("");
     const [stored, setStored] = useSlot<Stored>(store, interactive.id);
@@ -159,7 +170,9 @@ export const DatapathFigure = withProps(
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [asking, healthy, data.ask, data.register],
     );
-    const optionLabel = (v: string) => data.options?.find((o) => o.value === v)?.label ?? v;
+    // An option's label inside a sentence that ends with its own full stop: "taken." ends once.
+    const optionLabel = (v: string) =>
+      (data.options?.find((o) => o.value === v)?.label ?? v).replace(/\.$/, "");
 
     const last = edge ? edge.history.length - 1 : 0;
     const at = Math.min(step, last);
@@ -168,6 +181,10 @@ export const DatapathFigure = withProps(
     const shownState = stepping ? datapathState(circuit, values) : state;
     const bump = () => setGeneration((g) => g + 1);
 
+    const noteRun = () => {
+      if (faults.length === 0 || faultAt >= 0) setRan(true);
+      if (faultAt >= 0) setRanFaults((was) => new Set([...was, faultAt]));
+    };
     const clock = () => {
       if (stopped) return;
       const before = sim.snapshotValues();
@@ -176,37 +193,65 @@ export const DatapathFigure = withProps(
       setEdge({ before, history: high.history });
       setStep(Number.POSITIVE_INFINITY);
       if (halting) setStopped(true);
-      if (faults.length === 0 || faultAt >= 0) setRan(true);
+      noteRun();
       bump();
     };
+    // A run goes in slices of edges with a redraw between them, so a machine that never stops
+    // shows its edges climbing instead of freezing the page; a new start cancels it.
+    const [running, setRunning] = useState<number | undefined>();
+    const runToken = useRef(0);
+    useEffect(() => () => void (runToken.current += 1), []);
     const run = () => {
-      let before = sim.snapshotValues();
-      for (let k = 0; k < 500; k++) {
-        before = sim.snapshotValues();
-        const halting = datapathState(circuit, before).halt === 1;
-        const { high } = sim.clockCycle("CLK");
-        setEdge({ before, history: high.history });
-        if (halting) {
-          setStopped(true);
-          break;
+      const token = (runToken.current += 1);
+      let k = 0;
+      const slice = () => {
+        if (token !== runToken.current) return;
+        let before = sim.snapshotValues();
+        for (const end = Math.min(k + RUN_SLICE, RUN_LIMIT); k < end; k++) {
+          before = sim.snapshotValues();
+          const halting = datapathState(circuit, before).halt === 1;
+          const { high } = sim.clockCycle("CLK");
+          if (halting) {
+            setEdge({ before, history: high.history });
+            setStopped(true);
+            finish(false);
+            return;
+          }
+          if (k + 1 === end) setEdge({ before, history: high.history });
         }
-      }
-      setStep(Number.POSITIVE_INFINITY);
-      if (faults.length === 0 || faultAt >= 0) setRan(true);
-      bump();
+        if (k >= RUN_LIMIT) return finish(true);
+        setRunning(k);
+        bump();
+        window.setTimeout(slice, 0);
+      };
+      const finish = (gaveUp: boolean) => {
+        setRunning(undefined);
+        setGaveUp(gaveUp);
+        setStep(Number.POSITIVE_INFINITY);
+        noteRun();
+        bump();
+      };
+      setRunning(0);
+      slice();
     };
     const restart = (from: typeof built) => {
+      runToken.current += 1;
+      setRunning(undefined);
       setSim(start(from));
       setChosen(0);
       setEdge(undefined);
       setStopped(false);
+      setGaveUp(false);
       bump();
     };
     const reset = () => {
+      runToken.current += 1;
+      setRunning(undefined);
       setSim(start());
       setChosen(0);
       setEdge(undefined);
       setStopped(false);
+      setGaveUp(false);
       bump();
     };
     const choose = (k: number) => {
@@ -228,6 +273,25 @@ export const DatapathFigure = withProps(
     };
 
     const words = registerWords(circuit, values);
+    // The register the last edge wrote, read off the register file's write enable and write
+    // address just before it: a write of the value a register already held is still a write.
+    const writtenAt = useMemo(() => {
+      if (!edge) return undefined;
+      const file = circuit.composites.find((c) => c.path === "registers");
+      const we = file?.inputs["WE"];
+      const wa = file?.inputs["WA"];
+      if (we === undefined || wa === undefined) return undefined;
+      const enable = edge.before[we];
+      const address = edge.before[wa];
+      if (
+        !enable ||
+        !address ||
+        enable.known !== 1n ||
+        address.known !== (1n << BigInt(address.width)) - 1n
+      )
+        return undefined;
+      return enable.value === 1n ? Number(address.value) : -1;
+    }, [edge, circuit]);
     const before = edge ? registerWords(circuit, edge.before) : [];
     const shown = data.shown ?? Array.from({ length: 16 }, (_, k) => k);
     const netValue = (name: string) => {
@@ -247,11 +311,16 @@ export const DatapathFigure = withProps(
     const reason = reasonKey(state);
     const status = stopped
       ? format(t.stopped, { reason: t.reasons[reason ?? ""] ?? "" })
-      : reason !== undefined
-        ? format(t.halting, { reason: t.reasons[reason] ?? reason })
-        : state.pc !== undefined
-          ? format(t.running, { pc: hex3(state.pc) })
-          : "";
+      : running !== undefined
+        ? format(t.runningEdges, { edges: running })
+        : gaveUp
+          ? format(t.gaveUp, { edges: RUN_LIMIT, pc: hex3(state.pc ?? 0) })
+          : reason !== undefined
+            ? format(t.halting, { reason: t.reasons[reason] ?? reason })
+            : // While the learner steps through an edge, the PC the steps show, not the edge's end.
+              shownState.pc !== undefined
+              ? format(t.running, { pc: hex3(shownState.pc) })
+              : "";
 
     return (
       <div className="explorer datapath-figure" data-interactive={interactive.id}>
@@ -318,11 +387,13 @@ export const DatapathFigure = withProps(
           circuit={circuit}
           {...(committed ? { values } : {})}
           title={strings.explorer.title}
-          onToggleInput={toggle}
+          // Before a prediction is committed the pins clock nothing: an edge would answer it.
+          onToggleInput={committed ? toggle : () => undefined}
           scope={scope}
           table={false}
           writtenWidth={4}
           overview={data.overview}
+          {...(data.focus ? { focus: data.focus } : {})}
           {...(data.canOpen ? { onScope: setScope } : {})}
         />
         {committed && status && (
@@ -332,11 +403,21 @@ export const DatapathFigure = withProps(
         )}
         {committed && (
           <div className="explorer-actions">
-            <button type="button" className="button" disabled={stopped} onClick={clock}>
+            <button
+              type="button"
+              className="button"
+              disabled={stopped || running !== undefined}
+              onClick={clock}
+            >
               {t.clock}
             </button>
             {data.run && (
-              <button type="button" className="button secondary" disabled={stopped} onClick={run}>
+              <button
+                type="button"
+                className="button secondary"
+                disabled={stopped || running !== undefined}
+                onClick={run}
+              >
                 {t.run}
               </button>
             )}
@@ -345,8 +426,9 @@ export const DatapathFigure = withProps(
             </button>
           </div>
         )}
-        {asking && committed && data.explain && <Prose markdown={data.explain} />}
-        {ran && data.outcomes && <Prose markdown={data.outcomes} />}
+        {/* The why comes after the learner's own edge has shown the what: before it, the
+            explanation would describe an edge the drawing has not made. */}
+        {asking && committed && ran && data.explain && <Prose markdown={data.explain} />}
         {data.steps && (
           <section className="datapath-steps" aria-label={t.stepsHeading}>
             <p className="datapath-steps-heading">{t.stepsHeading}</p>
@@ -361,7 +443,9 @@ export const DatapathFigure = withProps(
                 status={
                   at === 0
                     ? t.stepNothing
-                    : format(t.stepChanged, { nets: changedAt(at).join(", ") })
+                    : changedAt(at).length > 0
+                      ? format(t.stepChanged, { nets: changedAt(at).join(", ") })
+                      : t.stepInside
                 }
               />
             ) : (
@@ -422,7 +506,10 @@ export const DatapathFigure = withProps(
                   const w = words[k];
                   if (!w) return null;
                   const was = before[k];
-                  const written = was !== undefined && valueLabel(was) !== valueLabel(w);
+                  const written =
+                    writtenAt !== undefined
+                      ? writtenAt === k
+                      : was !== undefined && valueLabel(was) !== valueLabel(w);
                   return (
                     <tr key={k} className={written ? "row-current" : ""}>
                       <th scope="row">{`R${k}`}</th>
@@ -525,6 +612,14 @@ export const DatapathFigure = withProps(
             </div>
           )}
         </div>
+        {/* What the edges showed, in the lesson's words: below the figure, and only once the
+            learner has made them, so the text does not answer what the lead asks them to find. */}
+        {faultAt >= 0 && ranFaults.has(faultAt) && data.faults[faultAt]?.outcome && (
+          <Prose markdown={data.faults[faultAt]?.outcome ?? ""} />
+        )}
+        {(faults.length === 0 ? ran : ranFaults.size === faults.length) && data.outcomes && (
+          <Prose markdown={data.outcomes} />
+        )}
       </div>
     );
   },
