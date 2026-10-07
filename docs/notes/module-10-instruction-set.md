@@ -53,7 +53,22 @@ subagent that wrote every learner-facing sentence from a brief of checked facts.
   decoder's table and each kind's edges with kind A, a question on `kind-edges`. The diagram
   checks caught the 64-bit words written on that drawing running off it and onto a wire; the
   circuit explorer and the fault lab now take `writtenWidth`, as Module 8's datapath figure does.
-- 05:51 on The figures' own words (brief 6V), the mechanical walk, this note and the full check.
+- 05:51 to 05:58 Two corrections from the managing session. Lesson 10.1's PCEN fault "skips the
+  three instructions between"; it is four (`004` to `010`). The error was the building session's,
+  in brief 1B, which the drafter copied faithfully; the brief and the sentence were corrected with
+  the fewest words, and the facts test now counts the instructions from the assembled program.
+  The managing session also asked for a figure in each lesson's opening wherever one helps; 10.2
+  to 10.5 had one in their motivation, 10.1 had none (below, 06:00). The unit tests on the branch:
+  1039 passed, in 173 seconds (`main`'s 897 took 96; the module adds 142 tests and 77 seconds, of
+  which the second circuit's suite run is about a minute).
+- 05:58 to 06:00 The figures' own words, brief 6V. The draft dropped ten facts, copied one description and wrapped every
+  slot in backticks, which the figures write as plain text (list below).
+- 06:00 to 06:17 Lesson 10.1's opening figure, `machine-parts`: each part the motivation names, as
+  each machine's circuit has it, read from the two circuits by the component that keeps it
+  (`machineParts`, machine-compare.ts) and pinned by its unit test, the lesson's facts test and the
+  browser spec. Its words, brief 6W; the draft dropped one fact.
+- 06:17 to 06:20 The mechanical walk (below) and this note.
+- 06:20 on The full check, `npm run check`, on the branch's head.
 
 ## The outline
 
@@ -134,6 +149,11 @@ field, digit, layout, circuit, run, stop. "Cycle" appears nowhere; "step" is not
 Every figure is a view of the simulator or of the reference, and each passes the diagram and
 aesthetic rules at both widths.
 
+- `machine-parts` (new, 10.1, the motivation): one row for each part the motivation names, one
+  column for each machine; a cell says what that circuit has for the part (a register and its
+  width, the register file, the ROM's output for Module 8's IR, the memory, the devices, or none),
+  found from the component that drives the part's net or keeps it. It holds no question: it shows
+  what the motivation's words say, before the investigation runs the two machines.
 - `machine-compare` (new, 10.1): Module 8's machine (`datapath-full`) and Module 9's
   (`multicycleCircuit`) in two simulators, compared after every instruction: what a program can
   see on each, what Module 9's keeps of its own, every instruction with the edges each machine
@@ -225,9 +245,45 @@ took 3 instructions and 24 bytes with the store and the stop, against 5 and 20 b
 sum of constant jobs, one for each 2047 or so. The lesson states what the runs show and does not
 repeat the claim. A change to `docs/isa.md` is the author's.
 
+## What the drafts got wrong
+
+The drafting subagent's faults, each caught by the building session's check of facts and fixed by
+adding words or by sending the draft back; the drafts and the fixes are kept beside the briefs
+(`docs/notes/module-10-instruction-set/drafts/`).
+
+- **Facts dropped**, the most common fault: a qualifier that carries the fact ("read signed", "at
+  the stop", "the stop among them", "Module 9's machine" for "it"), a lead-in that says what a
+  verdict is about ("Not an instruction:", "The packed layout moves:"), a figure's step in a lead.
+  Fixed by putting the brief's words back.
+- **The brief's own description copied as the text** (6V's `answer`).
+- **Meaning drifted**: "stops", what the machines do, came back as "stop", the instruction's name.
+- **Formatting the figures cannot show**: slots wrapped in backticks; headings and labels with full
+  stops; values in quotes; "!=" typed as "≠", which the machine's text does not use.
+- **Wrong facts that came from the briefs, not the drafter**: two, both the building session's, both
+  in brief 1B (the PCEN fault writes R2, and it skips four instructions, not three). The drafter
+  copied each faithfully. The first was caught by the facts test before it reached a page; the
+  second by the managing session's reading, after which the facts test counts it.
+
+## The mechanical walk
+
+Each lesson was opened in the built site at 1280 px and 768 px in the light theme and at 375 px in
+the dark theme; every prediction committed, every run pressed, every figure photographed after use.
+No page was wider than its screen and no console error was raised. The challenges were tried with
+their references and with plausible wrong attempts, through the page, in the browser spec at both
+widths (each wrong attempt is rejected with its failing test named; a saved mark alone earns
+nothing). Found and fixed on the way: the comparison log ran off a phone (10.1); the layouts showed
+before the prediction was committed (10.2); the 64-bit words on the capstone's drawing ran off it
+and onto a wire (10.5).
+
+**Six stored screenshots fail in this container, on `main` as well as on the branch**: the
+registers, state machines and signals lessons' figures and Module 2's pairs figure, by 2 to 4 per
+cent of their pixels, where a line of prose wraps one word differently. The same six fail on a
+clean worktree of `main` built here, so the cause is this container's text rendering, not
+Module 10; none of the figures Module 10 touches is among them, and no baseline was updated.
+
 ## What the platform gained
 
-New files: `machine-compare.ts`, `encoding.ts`, `programs10.ts`, `capstone10.ts` (model);
+New files: `machine-compare.ts` (with `machineParts`), `encoding.ts`, `programs10.ts`, `capstone10.ts` (model);
 `Module10Figures.tsx`, `strings10.ts` (views); `module10.ts` and five lessons (content);
 `tests/educational/module10.spec.ts`. Appends to shared files, each in a block of its own naming the
 module: `MachineOptions.setIf`, `ControlOptions.setIf` and `shortJobs` with the decoder's options and
