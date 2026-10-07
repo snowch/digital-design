@@ -269,6 +269,33 @@ function choices(
   };
 }
 
+/**
+ * An instruction's word, typed as eight hexadecimal digits. A case gives the `field` and `shown`,
+ * the instruction as the task writes it, and expects its `word`. A wrong word is reported as the
+ * fields it holds, digit by digit, beside the instruction asked for, so the answer is not printed.
+ */
+function instructionWord(
+  answers: Readonly<Record<string, string>>,
+  given: Readonly<Record<string, string | number>>,
+  expect: Readonly<Record<string, string | number>>,
+): AnswerResult | AnswerProblem {
+  const field = String(given["field"]);
+  const gone = missing(answers, [field]);
+  if (gone) return gone;
+  const h = parseHex(answers[field]);
+  if (h === undefined || h.length > 8) return { invalid: field };
+  const typed = h.padStart(8, "0");
+  const d = (k: number) => typed[k] ?? "0";
+  const c = Number.parseInt(typed.slice(5), 16);
+  const read = `K ${d(0)}, J ${d(1)}, A ${d(2)}, B ${d(3)}, Y ${d(4)}, C ${typed.slice(5)} (${c >= 0x800 ? c - 0x1000 : c})`;
+  return {
+    pass: typed === String(expect["word"]).toUpperCase(),
+    inputs: {},
+    actual: { [field]: read },
+    expected: { [field]: String(given["shown"]) },
+  };
+}
+
 /** The graders lessons may name in an answers challenge's tests. */
 export const ANSWER_GRADERS: Readonly<Record<string, AnswerGrader>> = {
   threshold,
@@ -279,4 +306,5 @@ export const ANSWER_GRADERS: Readonly<Record<string, AnswerGrader>> = {
   exposes,
   // Module 10
   choices,
+  "instruction-word": instructionWord,
 };

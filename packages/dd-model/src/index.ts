@@ -41,3 +41,5 @@ export * from "./multicycle";
 export * from "./multicycle-run";
 export * from "./multicycle-view";
 export * from "./machine-compare";
+export * from "./encoding";
+export * from "./programs10";

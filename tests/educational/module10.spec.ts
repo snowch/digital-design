@@ -25,7 +25,7 @@ import {
   writeText,
 } from "./helpers";
 
-const MODULE_10 = ["instruction-set"] as const;
+const MODULE_10 = ["instruction-set", "encoding"] as const;
 
 /** Fills an answers challenge's fields: a choice by its option's words, any other by typing. */
 async function answerAll(
@@ -88,6 +88,19 @@ const WRONG: readonly {
     from: "  assign WREG = ((state == WRITE) | ((state == ALU) & ~MEM)) & WRITEY & GO;",
     to: "  assign WREG = (state == WRITE) & WRITEY & GO;",
     why: "jobs that end at ALU without writing register Y",
+  },
+  {
+    lesson: "encoding",
+    id: "encode-words",
+    answers: { sub: "2220500" + "7" },
+    why: "a subtract written with the add job",
+  },
+  {
+    lesson: "encoding",
+    id: "ydigit-text",
+    from: "      4'h3: WA = IR[19:16];\n",
+    to: "",
+    why: "a load's Y left in digit 3",
   },
 ];
 
@@ -196,5 +209,40 @@ test.describe("Module 10's figures", () => {
     await expect(seenRow(figure, format(T.register, { n: 2 }))).toContainText(T.differsMark);
     await figure.getByRole("button", { name: T.run }).click();
     await expect(figure.getByText(/Module 9's PC has moved/)).toBeVisible();
+  });
+
+  test("the packed layout moves a constant job's Y, once the prediction is committed", async ({
+    page,
+  }) => {
+    await openLesson(page, "encoding");
+    const figure = page.locator("#ix-predict-moved");
+    await figure.scrollIntoViewIfNeeded();
+    await expect(figure.locator(".layout-row")).toHaveCount(0);
+    await figure.getByRole("radio").first().check();
+    await figure.getByRole("button", { name: V.prediction.commit }).click();
+    await expect(figure.locator("[role=status]").first()).toContainText(V.prediction.match);
+    await expect(figure.getByText("Word: 22120064")).toBeVisible();
+    await expect(figure.locator(".layout-field.moved")).toHaveText(["Y2"]);
+  });
+
+  test("the explorer reads a typed word, and the calculator runs the ALU on its job", async ({
+    page,
+  }) => {
+    await openLesson(page, "encoding");
+    const figure = page.locator("#ix-explorer");
+    await figure.scrollIntoViewIfNeeded();
+    const word = figure.getByRole("textbox", { name: T.wordLabel });
+    await word.fill("22102064");
+    await expect(figure.locator(".explorer-meaning")).toHaveText("R2 ← R1 + 100");
+    await word.fill("00000000");
+    await expect(figure.locator(".explorer-meaning")).toContainText("cause 21");
+    await expect(figure.locator(".calculator-y")).toContainText("66");
+    await expect(figure.locator(".calculator-flags")).toHaveText(
+      `${T.flagsLabel}: ZERO 0, MINUS 0, COUT 1, OVER 0`,
+    );
+    await word.fill("22102064");
+    await figure.getByRole("button", { name: T.fromWord }).click();
+    await expect(figure.getByRole("textbox", { name: T.bLabel })).toHaveValue("100");
+    await expect(figure.locator(".calculator-y")).toContainText("-84");
   });
 });

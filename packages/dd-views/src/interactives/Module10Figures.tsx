@@ -16,7 +16,26 @@ import { useMemo, useRef, useState } from "react";
 import { z } from "zod";
 
 import {
+  MODULE_9,
+  assemble,
+  branchSays,
+  calculate,
+  comparisons,
+  runProgram,
+  courseLayout,
   edgePair,
+  fieldsOf,
+  instructionFields,
+  meaningOf,
+  packedLayout,
+  parseHexWord,
+  parseNumberWord,
+  widening,
+  type AssemblyOptions,
+  type Entry,
+  type Layout,
+  type MachineOptions,
+  type Meaning,
   instructionPair,
   pairView,
   runPair,
@@ -335,6 +354,787 @@ export const MachineCompare = withProps(
         )}
         {allRan && data.outcomes && <Prose markdown={data.outcomes} />}
         {asking && committed && data.explain && <Prose markdown={data.explain} />}
+      </div>
+    );
+  },
+);
+
+// ---------------------------------------------------------------------------------------------
+// `layout-compare`: one instruction in the course's layout and in a packed one, digit by digit,
+// with each layout's constant range and the fields the packed layout moves (encoding.ts).
+
+const Choice = z.object({ label: z.string(), text: z.string() });
+
+const LayoutProps = z.object({
+  /** The instructions to choose from: a line of docs/isa.md's assembly, or `0x` and 8 digits. */
+  instructions: z.array(Choice).min(1),
+  /**
+   * Optional: commit to which fields the packed layout moves for the first instruction (`none`,
+   * or the names joined by ", ") before the layouts show.
+   */
+  question: z.string().optional(),
+  options: z.array(z.object({ value: z.string(), label: z.string() })).optional(),
+  explain: z.string().default(""),
+});
+
+/** The question's answer: the fields the packed layout moves for the first instruction. */
+export function layoutAnswer(data: { instructions: readonly { text: string }[] }): string {
+  const moved = packedLayout(wordOfText(data.instructions[0]?.text ?? "0x00000000")).moved;
+  return moved.length ? moved.join(", ") : "none";
+}
+
+/** A word given as eight digits after `0x`, or as a line the authors' assembler reads. */
+function wordOfText(text: string, assembly: AssemblyOptions = {}): number {
+  if (/^0x[0-9a-f]{8}$/i.test(text)) return Number.parseInt(text.slice(2), 16) >>> 0;
+  const line = assemble(text, assembly).lines.find((l) => l.instruction !== undefined);
+  return (line?.instruction ?? 0) >>> 0;
+}
+
+const hex8 = (v: number) => (v >>> 0).toString(16).toUpperCase().padStart(8, "0");
+
+function LayoutRow({ layout, title }: { layout: Layout; title: string }) {
+  const t = useViewStrings().machine10;
+  const digits = hex8(layout.word);
+  const c = layout.fields.find((f) => f.name === "C");
+  return (
+    <div className="layout-row">
+      <p className="layout-title">{title}</p>
+      <p className="fields-word">{format(t.layoutWord, { word: digits })}</p>
+      <ol className="layout-digits" aria-label={title}>
+        {layout.fields.map((f) => (
+          <li
+            key={f.name}
+            className={`layout-field layout-${f.name}${layout.moved.includes(f.name) ? " moved" : ""}`}
+            style={{ gridColumn: `${8 - f.hi} / span ${f.hi - f.lo + 1}` }}
+          >
+            <span className="layout-name">{f.name}</span>
+            <span className="layout-value">{digits.slice(7 - f.hi, 8 - f.lo)}</span>
+          </li>
+        ))}
+      </ol>
+      <p className="layout-range">
+        {c
+          ? format(t.layoutRange, { bits: layout.constantBits, min: layout.min, max: layout.max })
+          : ""}
+      </p>
+    </div>
+  );
+}
+
+export const LayoutCompare = withProps(
+  LayoutProps,
+  function LayoutCompare({
+    data,
+    interactive,
+    store,
+  }: InteractiveProps & { data: z.infer<typeof LayoutProps> }) {
+    const strings = useViewStrings();
+    const t = strings.machine10;
+    const [stored, setStored] = useSlot<Stored>(store, interactive.id);
+    const asking = data.question !== undefined && data.options !== undefined;
+    const committed = !asking || stored?.choice !== undefined;
+    const answer = useMemo(() => (asking ? layoutAnswer(data) : ""), [asking, data]);
+    const optionLabel = (v: string) =>
+      (data.options?.find((o) => o.value === v)?.label ?? v).replace(/\.$/, "");
+    const [chosen, setChosen] = useState(0);
+    const given = data.instructions[chosen] ?? data.instructions[0];
+    const instruction = useMemo(() => (given ? wordOfText(given.text) : 0), [given]);
+    const course = courseLayout(instruction);
+    const packed = packedLayout(instruction);
+    return (
+      <div className="machine-figure layout-compare" data-interactive={interactive.id}>
+        {asking && (
+          <div className="carry-question">
+            <Prose markdown={data.question ?? ""} />
+            <PredictionChallenge
+              name={`${interactive.id}-question`}
+              options={data.options ?? []}
+              committed={stored?.choice}
+              onCommit={(choice) => setStored({ choice })}
+              onAgain={() => setStored(undefined)}
+              legend={strings.prediction.legend}
+              commitLabel={strings.prediction.commit}
+              againLabel={strings.prediction.again}
+              verdict={
+                stored?.choice !== undefined && (
+                  <p
+                    role="status"
+                    className={stored.choice === answer ? "prediction-match" : "prediction-nomatch"}
+                  >
+                    {format(strings.prediction.youSaid, { choice: optionLabel(stored.choice) })}{" "}
+                    {format(t.layoutAnswer, { answer: optionLabel(answer) })}{" "}
+                    {stored.choice === answer
+                      ? strings.prediction.match
+                      : strings.prediction.noMatch}
+                  </p>
+                )
+              }
+            />
+          </div>
+        )}
+        {committed && data.instructions.length > 1 && (
+          <fieldset className="carry-cases">
+            <legend>{strings.machine8.choose}</legend>
+            {data.instructions.map((c, k) => (
+              <label key={c.label} className="fault-choice">
+                <input
+                  type="radio"
+                  name={`${interactive.id}-choice`}
+                  checked={chosen === k}
+                  onChange={() => setChosen(k)}
+                />
+                <span>{c.label}</span>
+              </label>
+            ))}
+          </fieldset>
+        )}
+        {committed && (
+          <>
+            <LayoutRow layout={course} title={t.courseLayout} />
+            <LayoutRow layout={packed} title={t.packedLayout} />
+            <p role="status" className="layout-moved">
+              {packed.moved.length
+                ? format(t.layoutMoved, { names: packed.moved.join(", ") })
+                : t.layoutStill}
+            </p>
+          </>
+        )}
+        {asking && committed && data.explain && <Prose markdown={data.explain} />}
+      </div>
+    );
+  },
+);
+
+// ---------------------------------------------------------------------------------------------
+// `encoding-explorer`: a word typed or chosen, its fields, what the machine makes of it and its
+// constant widened (machine.ts, encoding.ts); and the course's calculator, Module 7's ALU from
+// the library at 16 or 64 bits, simulated, with the job and B taken from the word on request.
+
+const ExplorerProps = z.object({
+  /** Words offered to try, each a label and a line of assembly or `0x` and 8 digits. */
+  words: z.array(Choice).default([]),
+  /** The calculator under the explorer. */
+  calculator: z.boolean().default(true),
+  width: z.union([z.literal(16), z.literal(64)]).default(64),
+  /** Module 10's capstone: the learner's copy, with set if at kind A and kind 9's call. */
+  capstone: z.boolean().default(false),
+});
+
+function entryText(t: ReturnType<typeof useViewStrings>["machine10"], e: Entry): string {
+  if ("value" in e) return "";
+  const p = e.problem;
+  switch (p.kind) {
+    case "empty":
+      return t.entryEmpty;
+    case "not-hex":
+      return format(t.entryNotHex, { char: p.char });
+    case "hex-too-long":
+      return format(t.entryHexLong, { digits: p.digits });
+    case "not-number":
+      return format(t.entryNotNumber, { char: p.char });
+    case "number-range":
+      return format(t.entryRange, { min: p.min.toString(), max: p.max.toString() });
+  }
+}
+
+/** A meaning in the figure's words. */
+function meaningText(
+  t: ReturnType<typeof useViewStrings>["machine10"],
+  m: Meaning,
+  k: number,
+  j: number,
+): string {
+  const job = (n: number) => t.jobs[String(n)] ?? "";
+  const cond = (n: number) => t.conds[String(n)] ?? "";
+  const address = (a: number | undefined, c: number) =>
+    a === undefined
+      ? hex3(c & 0xfff)
+      : c === 0
+        ? `R${a}`
+        : `R${a} ${c < 0 ? "-" : "+"} ${Math.abs(c)}`;
+  const M = t.meanings;
+  switch (m.form) {
+    case "register":
+      if (m.job === 5) return format(M["registerCopy"] ?? "", m);
+      if (m.job === 6) return format(M["registerUp"] ?? "", m);
+      if (m.job === 7) return format(M["registerDown"] ?? "", m);
+      return format(M["register"] ?? "", { ...m, job: job(m.job) });
+    case "constant":
+      if (m.job === 5) return format(M["constantCopy"] ?? "", m);
+      if (m.job === 6) return format(M["registerUp"] ?? "", m);
+      if (m.job === 7) return format(M["registerDown"] ?? "", m);
+      return format(M["constant"] ?? "", { ...m, job: job(m.job) });
+    case "load":
+      return format(M[m.byte ? "loadByte" : "loadWord"] ?? "", {
+        y: m.y,
+        address: address(m.a, m.c),
+      });
+    case "store":
+      return format(M[m.byte ? "storeByte" : "storeWord"] ?? "", {
+        b: m.b,
+        address: address(m.a, m.c),
+      });
+    case "branch":
+      if (m.cond === 0) return format(M["branchAlways"] ?? "", m);
+      if (m.cond === 1) return M["branchNever"] ?? "";
+      return format(M["branch"] ?? "", { ...m, cond: cond(m.cond) });
+    case "call":
+      return format(M["call"] ?? "", m);
+    case "jump":
+      return format(M["jump"] ?? "", m);
+    case "system":
+      return format(t.systemJobs[String(m.job)] ?? "", m);
+    case "setIf":
+      return format(M["setIf"] ?? "", { ...m, cond: cond(m.cond) });
+    case "callRegister":
+      return format(M["callRegister"] ?? "", m);
+    case "illegal":
+      return format(t.illegal[m.why] ?? "", {
+        k: k.toString(16).toUpperCase(),
+        j: j.toString(16).toUpperCase(),
+        c: 0,
+      });
+  }
+}
+
+const bitText = (w: bigint, width: number) => w.toString(2).padStart(width, "0");
+
+export const EncodingExplorer = withProps(
+  ExplorerProps,
+  function EncodingExplorer({
+    data,
+    interactive,
+  }: InteractiveProps & { data: z.infer<typeof ExplorerProps> }) {
+    const strings = useViewStrings();
+    const t = strings.machine10;
+    const options: MachineOptions = data.capstone ? { setIf: 10, callThroughRegister: 9 } : {};
+    const assembly = data.capstone ? { setIf: 10, callThroughRegister: 9 } : {};
+    const firstWord = data.words[0] ? hex8(wordOfText(data.words[0].text, assembly)) : "13123000";
+    const [text, setText] = useState(firstWord);
+    const typed = parseHexWord(text, 32);
+    const instruction = "value" in typed ? Number(typed.value) >>> 0 : undefined;
+    const fields = instruction === undefined ? [] : instructionFields(instruction);
+    const meaning = instruction === undefined ? undefined : meaningOf(instruction, options);
+    const f = instruction === undefined ? undefined : fieldsOf(instruction);
+    const wide = f ? widening(f.raw) : undefined;
+    const meaningLine =
+      meaning && f
+        ? meaning.form === "illegal" && meaning.why === "number"
+          ? format(t.illegal["number"] ?? "", { c: f.c })
+          : meaningText(t, meaning, f.k, f.j)
+        : "";
+
+    // The calculator.
+    const [width, setWidth] = useState<16 | 64>(data.width);
+    const [form, setForm] = useState<"hex" | "signed">("signed");
+    const [aText, setAText] = useState("-184");
+    const [bText, setBText] = useState("-250");
+    const [job, setJob] = useState(3);
+    const [took, setTook] = useState<string | undefined>();
+    const parse = (s: string) =>
+      form === "hex" ? parseHexWord(s, width) : parseNumberWord(s, width);
+    const a = parse(aText);
+    const b = parse(bText);
+    const result =
+      "value" in a && "value" in b ? calculate(width, job, a.value, b.value) : undefined;
+    const signedOf = (v: bigint) => {
+      const top = 1n << BigInt(width - 1);
+      return (v >= top ? v - (1n << BigInt(width)) : v).toString();
+    };
+    const showWord = (v: bigint) => (form === "hex" ? v.toString(16).toUpperCase() : signedOf(v));
+    const takeFromWord = () => {
+      if (!f || (f.k !== 1 && f.k !== 2) || f.j > 7) {
+        setTook(t.fromWordNone);
+        return;
+      }
+      setJob(f.j);
+      let note = format(t.tookJob, { job: `${f.j} ${t.jobNames[String(f.j)] ?? ""}`.trim() });
+      if (f.k === 2 && wide) {
+        setBText(showWord(BigInt.asUintN(width, wide.w)));
+        note += ` ${t.tookB}`;
+      }
+      setTook(note);
+    };
+    const rows: number[] = [];
+    for (let hi = width - 1; hi >= 0; hi -= 16) rows.push(hi);
+
+    return (
+      <div className="machine-figure encoding-explorer" data-interactive={interactive.id}>
+        <label className="answer-field explorer-word">
+          <span className="answer-label">{t.wordLabel}</span>
+          <span className="answer-input">
+            <input
+              type="text"
+              autoComplete="off"
+              spellCheck={false}
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+            />
+          </span>
+        </label>
+        <p className="explorer-help">
+          {"value" in typed ? t.wordHelp : format(t.wordProblem, { n: 8 })}
+        </p>
+        {data.words.length > 0 && (
+          <fieldset className="carry-cases">
+            <legend>{t.examples}</legend>
+            {data.words.map((w) => {
+              const digits = hex8(wordOfText(w.text, assembly));
+              return (
+                <label key={w.label} className="fault-choice">
+                  <input
+                    type="radio"
+                    name={`${interactive.id}-word`}
+                    checked={text.replace(/\s/g, "").toUpperCase() === digits}
+                    onChange={() => setText(digits)}
+                  />
+                  <span>{w.label}</span>
+                </label>
+              );
+            })}
+          </fieldset>
+        )}
+        {instruction !== undefined && (
+          <>
+            <ol className="fields" aria-label={t.fieldsLabel}>
+              {fields.map((x) => (
+                <li key={x.name} className={`field field-${x.name}`}>
+                  <span className="field-name">{x.name}</span>
+                  <span className="field-bits-range">
+                    {format(strings.machine8.bits, { hi: x.hi, lo: x.lo })}
+                  </span>
+                  <span className="field-digits">{x.digits}</span>
+                  <span className="field-bits">{x.bits.replace(/(.{4})(?=.)/g, "$1 ")}</span>
+                </li>
+              ))}
+            </ol>
+            <p className="explorer-meaning-heading">{t.meaningHeading}</p>
+            <p role="status" className="explorer-meaning">
+              {meaningLine}
+            </p>
+            {wide && (
+              <p className="explorer-widened">
+                {format(t.widened, {
+                  c: hex3(f?.raw ?? 0),
+                  w: BigInt.asUintN(64, wide.w).toString(16).toUpperCase().padStart(16, "0"),
+                  n: wide.wSigned.toString(),
+                })}
+              </p>
+            )}
+          </>
+        )}
+        {data.calculator && (
+          <section className="calculator" aria-label={t.calcHeading}>
+            <p className="calculator-heading">{t.calcHeading}</p>
+            <fieldset className="carry-cases">
+              <legend>{t.widthLegend}</legend>
+              {([16, 64] as const).map((n) => (
+                <label key={n} className="fault-choice">
+                  <input
+                    type="radio"
+                    name={`${interactive.id}-width`}
+                    checked={width === n}
+                    onChange={() => setWidth(n)}
+                  />
+                  <span>{format(t.widthOption, { n })}</span>
+                </label>
+              ))}
+            </fieldset>
+            <fieldset className="carry-cases">
+              <legend>{t.formLegend}</legend>
+              {(["signed", "hex"] as const).map((k) => (
+                <label key={k} className="fault-choice">
+                  <input
+                    type="radio"
+                    name={`${interactive.id}-form`}
+                    checked={form === k}
+                    onChange={() => setForm(k)}
+                  />
+                  <span>{k === "hex" ? t.formHex : t.formSigned}</span>
+                </label>
+              ))}
+            </fieldset>
+            {(
+              [
+                [t.aLabel, aText, setAText, a],
+                [t.bLabel, bText, setBText, b],
+              ] as const
+            ).map(([label, value, set, entry]) => (
+              <label key={label} className="answer-field">
+                <span className="answer-label">{label}</span>
+                <span className="answer-input">
+                  <input
+                    type="text"
+                    autoComplete="off"
+                    spellCheck={false}
+                    value={value}
+                    onChange={(e) => set(e.target.value)}
+                  />
+                </span>
+                {"problem" in entry && <span className="answer-unit">{entryText(t, entry)}</span>}
+              </label>
+            ))}
+            <label className="answer-field">
+              <span className="answer-label">{t.jobLabel}</span>
+              <span className="answer-input">
+                <select value={job} onChange={(e) => setJob(Number(e.target.value))}>
+                  {Array.from({ length: 8 }, (_, k) => (
+                    <option key={k} value={k}>
+                      {format(t.jobOption, {
+                        k: k.toString(2).padStart(3, "0"),
+                        name: t.jobNames[String(k)] ?? "",
+                      })}
+                    </option>
+                  ))}
+                </select>
+              </span>
+            </label>
+            <div className="explorer-actions">
+              <button type="button" className="button secondary" onClick={takeFromWord}>
+                {t.fromWord}
+              </button>
+            </div>
+            {took && <p className="calculator-took">{took}</p>}
+            {result && (
+              <div className="calculator-result" role="group" aria-label={t.yHeading}>
+                <p className="calculator-y">
+                  <span className="field-name">{t.yHeading}</span> {t.yHex}{" "}
+                  <code>
+                    {result.y.value
+                      .toString(16)
+                      .toUpperCase()
+                      .padStart(width / 4, "0")}
+                  </code>
+                  , {t.yUnsigned} <code>{result.y.value.toString()}</code>, {t.ySigned}{" "}
+                  <code>{signedOf(result.y.value)}</code>
+                </p>
+                {rows.map((hi) => (
+                  <p key={hi} className="calculator-bits">
+                    <span className="wide-range">{format(t.bitsRow, { hi, lo: hi - 15 })}</span>{" "}
+                    <code>
+                      {bitText(result.y.value, width)
+                        .slice(width - 1 - hi, width - hi + 15)
+                        .replace(/(.{4})(?=.)/g, "$1 ")}
+                    </code>
+                  </p>
+                ))}
+                <p className="calculator-flags">
+                  {t.flagsLabel}:{" "}
+                  {(
+                    [
+                      ["ZERO", result.zero],
+                      ["MINUS", result.minus],
+                      ["COUT", result.cout],
+                      ["OVER", result.over],
+                    ] as const
+                  )
+                    .map(([name, value]) => format(t.flag, { name, value }))
+                    .join(", ")}
+                </p>
+              </div>
+            )}
+          </section>
+        )}
+      </div>
+    );
+  },
+);
+
+// ---------------------------------------------------------------------------------------------
+// `swap-compare`: two registers' words and every comparison a program needs, each said by one of
+// the machine's branches, with A and B in order or swapped; whether the reference takes that
+// branch, and whether the comparison holds (programs10.ts).
+
+const SwapProps = z.object({
+  /** Pairs of words for R1 and R2, signed decimals, each with the lesson's label. */
+  cases: z.array(z.object({ label: z.string(), a: z.string(), b: z.string() })).min(1),
+  /**
+   * Optional: commit to the branch that says R1 > R2, read as `reading`, before the table shows.
+   * Each option's value is a branch: its job and `swap` or `keep`, as `6:swap`.
+   */
+  question: z.string().optional(),
+  options: z.array(z.object({ value: z.string(), label: z.string() })).optional(),
+  explain: z.string().default(""),
+  reading: z.enum(["signed", "unsigned"]).default("signed"),
+});
+
+/** The question's answer: the option whose branch is taken exactly when R1 > R2 in every case. */
+export function swapAnswer(data: z.infer<typeof SwapProps>): string {
+  const says = (value: string) => {
+    const [job, order] = value.split(":");
+    return data.cases.every((c) => {
+      const want = comparisons(BigInt(c.a), BigInt(c.b)).find(
+        (x) => x.relation === ">" && x.reading === data.reading,
+      )?.holds;
+      return branchSays(Number(job), order === "swap", BigInt(c.a), BigInt(c.b)) === want;
+    });
+  };
+  return data.options?.find((o) => says(o.value))?.value ?? "";
+}
+
+export const SwapCompare = withProps(
+  SwapProps,
+  function SwapCompare({
+    data,
+    interactive,
+    store,
+  }: InteractiveProps & { data: z.infer<typeof SwapProps> }) {
+    const strings = useViewStrings();
+    const t = strings.machine10;
+    const [chosen, setChosen] = useState(0);
+    const [stored, setStored] = useSlot<Stored>(store, interactive.id);
+    const asking = data.question !== undefined && data.options !== undefined;
+    const committed = !asking || stored?.choice !== undefined;
+    const answer = useMemo(() => (asking ? swapAnswer(data) : ""), [asking, data]);
+    const optionLabel = (v: string) =>
+      (data.options?.find((o) => o.value === v)?.label ?? v).replace(/\.$/, "");
+    const given = data.cases[chosen] ?? data.cases[0];
+    const rows = given ? comparisons(BigInt(given.a), BigInt(given.b)) : [];
+    const branchText = (job: number, swapped: boolean) =>
+      format(t.branchForm, {
+        a: swapped ? "R2" : "R1",
+        b: swapped ? "R1" : "R2",
+        cond: t.conds[String(job)] ?? "",
+      });
+    return (
+      <div className="machine-figure swap-compare" data-interactive={interactive.id}>
+        {asking && (
+          <div className="carry-question">
+            <Prose markdown={data.question ?? ""} />
+            <PredictionChallenge
+              name={`${interactive.id}-question`}
+              options={data.options ?? []}
+              committed={stored?.choice}
+              onCommit={(choice) => setStored({ choice })}
+              onAgain={() => setStored(undefined)}
+              legend={strings.prediction.legend}
+              commitLabel={strings.prediction.commit}
+              againLabel={strings.prediction.again}
+              verdict={
+                stored?.choice !== undefined && (
+                  <p
+                    role="status"
+                    className={stored.choice === answer ? "prediction-match" : "prediction-nomatch"}
+                  >
+                    {format(strings.prediction.youSaid, { choice: optionLabel(stored.choice) })}{" "}
+                    {format(t.swapAnswer, { answer: optionLabel(answer) })}{" "}
+                    {stored.choice === answer
+                      ? strings.prediction.match
+                      : strings.prediction.noMatch}
+                  </p>
+                )
+              }
+            />
+          </div>
+        )}
+        {committed && (
+          <>
+            {data.cases.length > 1 && (
+              <fieldset className="carry-cases">
+                <legend>{t.casesLegend}</legend>
+                {data.cases.map((c, k) => (
+                  <label key={c.label} className="fault-choice">
+                    <input
+                      type="radio"
+                      name={`${interactive.id}-case`}
+                      checked={chosen === k}
+                      onChange={() => setChosen(k)}
+                    />
+                    <span>{c.label}</span>
+                  </label>
+                ))}
+              </fieldset>
+            )}
+            <div className="truth-table-wrap">
+              <table className="truth-table datapath-table swap-table">
+                <caption>{format(t.swapCaption, { a: given?.a ?? "", b: given?.b ?? "" })}</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">{t.relation}</th>
+                    <th scope="col">{t.branch}</th>
+                    <th scope="col">{t.taken}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((r) => (
+                    <tr
+                      key={`${r.relation}${r.reading}`}
+                      className={r.swapped ? "row-current" : ""}
+                    >
+                      <th scope="row">
+                        {format(t.relationForm, {
+                          rel: t.relations[r.relation] ?? r.relation,
+                          reading: r.reading === "signed" ? t.signedWord : t.unsignedWord,
+                        })}
+                      </th>
+                      <td className="memory-word">{branchText(r.job, r.swapped)}</td>
+                      <td>{r.taken ? t.yes : t.no}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="compare-note">{t.swapKey}</p>
+          </>
+        )}
+        {asking && committed && data.explain && <Prose markdown={data.explain} />}
+      </div>
+    );
+  },
+);
+
+// ---------------------------------------------------------------------------------------------
+// `program-compare`: two programs run from reset on the reference, side by side: each listing,
+// the instructions written and run, the ROM's bytes, and the registers and display the lesson
+// names (programs10.ts). With a question, the learner commits before the runs show.
+
+const ProgramProps = z.object({
+  programs: z
+    .array(
+      z.object({
+        label: z.string(),
+        program: z.string(),
+        /** Module 10's capstone: the learner's copy, with set if at kind A. */
+        capstone: z.boolean().default(false),
+      }),
+    )
+    .min(1)
+    .max(2),
+  inputs: ShopInputs,
+  /** The registers to show after each run, by number. */
+  shown: z.array(z.number().int().min(0).max(15)).default([]),
+  display: z.boolean().default(true),
+  /** Shown once the learner has run the programs. */
+  outcomes: z.string().optional(),
+  question: z.string().optional(),
+  options: z.array(z.object({ value: z.string(), label: z.string() })).optional(),
+  explain: z.string().default(""),
+  /** What the question asks: a program's instructions run or written, by its index. */
+  ask: z
+    .object({ program: z.number().int().min(0), what: z.enum(["ran", "written", "display"]) })
+    .optional(),
+});
+type ProgramData = z.infer<typeof ProgramProps>;
+
+const CAPSTONE: MachineOptions = { ...MODULE_9, callThroughRegister: 9, setIf: 10 };
+
+function runsOf(data: Pick<ProgramData, "programs" | "inputs">) {
+  return data.programs.map((p) => ({
+    run: runProgram(p.program, shop(data.inputs), p.capstone ? CAPSTONE : MODULE_9),
+    lines: assemble(p.program, p.capstone ? { callThroughRegister: 9, setIf: 10 } : {}).lines,
+  }));
+}
+
+/** The question's answer, read off the reference's runs. */
+export function programAnswer(data: ProgramData): string {
+  if (!data.ask) return "";
+  const r = runsOf(data)[data.ask.program]?.run;
+  if (!r) return "";
+  if (data.ask.what === "display") return BigInt.asIntN(64, r.state.display).toString();
+  return String(data.ask.what === "ran" ? r.ran : r.written);
+}
+
+export const ProgramCompare = withProps(
+  ProgramProps,
+  function ProgramCompare({ data, interactive, store }: InteractiveProps & { data: ProgramData }) {
+    const strings = useViewStrings();
+    const t = strings.machine10;
+    const runs = useMemo(() => runsOf(data), [data]);
+    const [ran, setRan] = useState(false);
+    const [stored, setStored] = useSlot<Stored>(store, interactive.id);
+    const asking = data.question !== undefined && data.options !== undefined && !!data.ask;
+    const committed = !asking || stored?.choice !== undefined;
+    const answer = useMemo(() => (asking ? programAnswer(data) : ""), [asking, data]);
+    const optionLabel = (v: string) =>
+      (data.options?.find((o) => o.value === v)?.label ?? v).replace(/\.$/, "");
+    return (
+      <div className="machine-figure program-compare" data-interactive={interactive.id}>
+        {asking && (
+          <div className="carry-question">
+            <Prose markdown={data.question ?? ""} />
+            <PredictionChallenge
+              name={`${interactive.id}-question`}
+              options={data.options ?? []}
+              committed={stored?.choice}
+              onCommit={(choice) => setStored({ choice })}
+              onAgain={() => setStored(undefined)}
+              legend={strings.prediction.legend}
+              commitLabel={strings.prediction.commit}
+              againLabel={strings.prediction.again}
+              verdict={
+                stored?.choice !== undefined && (
+                  <p
+                    role="status"
+                    className={stored.choice === answer ? "prediction-match" : "prediction-nomatch"}
+                  >
+                    {format(strings.prediction.youSaid, { choice: optionLabel(stored.choice) })}{" "}
+                    {format(t.programAnswer, { answer: optionLabel(answer) })}{" "}
+                    {stored.choice === answer
+                      ? strings.prediction.match
+                      : strings.prediction.noMatch}
+                  </p>
+                )
+              }
+            />
+          </div>
+        )}
+        <div className="program-columns">
+          {data.programs.map((p, k) => {
+            const r = runs[k];
+            if (!r) return null;
+            return (
+              <section key={p.label} className="program-column" aria-label={p.label}>
+                <p className="layout-title">{p.label}</p>
+                <div className="truth-table-wrap">
+                  <table className="truth-table datapath-table program-listing">
+                    <caption>{t.listingCaption}</caption>
+                    <thead>
+                      <tr>
+                        <th scope="col">{t.address}</th>
+                        <th scope="col">{t.instruction}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {r.lines.map((l) => (
+                        <tr key={l.address}>
+                          <td className="memory-word">{hex3(l.address)}</td>
+                          <td className="memory-word">
+                            {l.label ? `${l.label}: ` : ""}
+                            {l.text}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {committed && ran && (
+                  <ul className="program-counts">
+                    <li>{format(t.written, { n: r.run.written })}</li>
+                    <li>{format(t.ran, { n: r.run.ran })}</li>
+                    <li>{format(t.romBytes, { n: r.run.romBytes })}</li>
+                    {data.shown.map((n) => (
+                      <li key={n}>
+                        {format(t.registerAfter, { n, value: signed(r.run.state.regs[n]) })}
+                      </li>
+                    ))}
+                    {data.display && (
+                      <li>{format(t.displayAfter, { value: signed(r.run.state.display) })}</li>
+                    )}
+                  </ul>
+                )}
+              </section>
+            );
+          })}
+        </div>
+        {committed && (
+          <div className="explorer-actions">
+            <button type="button" className="button" disabled={ran} onClick={() => setRan(true)}>
+              {t.runBoth}
+            </button>
+          </div>
+        )}
+        {committed && ran && data.outcomes && <Prose markdown={data.outcomes} />}
+        {asking && committed && ran && data.explain && <Prose markdown={data.explain} />}
       </div>
     );
   },

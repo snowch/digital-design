@@ -42,6 +42,110 @@ export interface Machine10Strings {
   /** After a prediction: what the machines did, {answer}. */
   readonly answer: string;
   readonly nothing: string;
+
+  // The layouts compared (layout-compare).
+  readonly courseLayout: string;
+  readonly packedLayout: string;
+  /** {word}: the instruction's eight digits in a layout. */
+  readonly layoutWord: string;
+  /** {bits}, {min}, {max}: the constant's width and range in a layout. */
+  readonly layoutRange: string;
+  readonly layoutUnused: string;
+  /** {names}: the fields that sit in other digits than in the course's layout. */
+  readonly layoutMoved: string;
+  readonly layoutStill: string;
+  /** A digit's accessible name: {n} its place, {field} its field, {digit} its value. */
+  readonly digitLabel: string;
+  readonly digitPlace: string;
+  readonly unusedField: string;
+  /** After a prediction: the fields the packed layout moves, {answer}. */
+  readonly layoutAnswer: string;
+
+  // The encoding explorer and the calculator (encoding-explorer).
+  readonly wordLabel: string;
+  readonly wordHelp: string;
+  /** {n}: digits a word has. */
+  readonly wordProblem: string;
+  readonly examples: string;
+  readonly fieldsLabel: string;
+  readonly meaningHeading: string;
+  readonly meanings: Readonly<Record<string, string>>;
+  readonly jobs: Readonly<Record<string, string>>;
+  /** The ALU's eight jobs by their code, as Module 7 names them. */
+  readonly jobNames: Readonly<Record<string, string>>;
+  readonly conds: Readonly<Record<string, string>>;
+  readonly systemJobs: Readonly<Record<string, string>>;
+  readonly illegal: Readonly<Record<string, string>>;
+  /** {c}: the constant's digits, {w}: its 64-bit word, {n}: its value read signed. */
+  readonly widened: string;
+  readonly calcHeading: string;
+  readonly widthLegend: string;
+  /** {n}: bits. */
+  readonly widthOption: string;
+  readonly formLegend: string;
+  readonly formHex: string;
+  readonly formSigned: string;
+  readonly aLabel: string;
+  readonly bLabel: string;
+  readonly jobLabel: string;
+  /** {k}: the job's code, {name}: its name. */
+  readonly jobOption: string;
+  readonly fromWord: string;
+  readonly fromWordNone: string;
+  /** {job}: the job the button took from J. */
+  readonly tookJob: string;
+  readonly tookB: string;
+  readonly yHeading: string;
+  readonly yHex: string;
+  readonly yUnsigned: string;
+  readonly ySigned: string;
+  readonly flagsLabel: string;
+  /** {name}, {value}. */
+  readonly flag: string;
+  readonly bitsRow: string;
+  readonly entryEmpty: string;
+  /** {char}. */
+  readonly entryNotHex: string;
+  /** {digits}. */
+  readonly entryHexLong: string;
+  /** {char}. */
+  readonly entryNotNumber: string;
+  /** {min}, {max}. */
+  readonly entryRange: string;
+
+  // The comparisons swapped (swap-compare).
+  readonly casesLegend: string;
+  /** {a}, {b}: R1's and R2's words. */
+  readonly swapCaption: string;
+  readonly relation: string;
+  readonly branch: string;
+  readonly taken: string;
+  readonly relations: Readonly<Record<string, string>>;
+  /** {rel} the relation's sign, {reading} signed or unsigned. */
+  readonly relationForm: string;
+  readonly signedWord: string;
+  readonly unsignedWord: string;
+  /** {a}, {b} registers, {cond} the condition. */
+  readonly branchForm: string;
+  readonly yes: string;
+  readonly no: string;
+  readonly swapKey: string;
+  /** After a prediction: the branch that says it, {answer}. */
+  readonly swapAnswer: string;
+
+  // Two programs compared (program-compare).
+  readonly listingCaption: string;
+  /** {n} in each. */
+  readonly written: string;
+  readonly ran: string;
+  readonly romBytes: string;
+  /** {n} the register, {value} its word read signed. */
+  readonly registerAfter: string;
+  readonly displayAfter: string;
+  readonly runBoth: string;
+  readonly address: string;
+  /** After a prediction: {answer}. */
+  readonly programAnswer: string;
 }
 
 export const MACHINE10_STRINGS: Machine10Strings = {
@@ -76,4 +180,127 @@ export const MACHINE10_STRINGS: Machine10Strings = {
   statusGaveUp: "{n} instructions have run and the machines have not stopped.",
   answer: "The machines differ on: {answer}.",
   nothing: "nothing",
+
+  courseLayout: "The course's layout",
+  packedLayout: "A packed layout",
+  layoutWord: "Word: {word}",
+  layoutRange: "Constant: {bits} bits, {min} to {max}.",
+  layoutUnused: "Constant: not used by this kind.",
+  layoutMoved: "Moved: {names}.",
+  layoutStill: "No field moves.",
+  digitLabel: "digit {n}, {field}, {digit}",
+  digitPlace: "digit {n}",
+  unusedField: "unused",
+  layoutAnswer: "The packed layout moves: {answer}.",
+
+  wordLabel: "Instruction (8 hexadecimal digits)",
+  wordHelp: "Type a word, or choose one below.",
+  wordProblem: "An instruction has {n} hexadecimal digits.",
+  examples: "Words to try",
+  fieldsLabel: "The word's fields",
+  meaningHeading: "What the machine makes of it",
+  meanings: {
+    register: "R{y} ← R{a} {job} R{b}",
+    registerCopy: "R{y} ← R{b}",
+    registerUp: "R{y} ← R{a} + 1",
+    registerDown: "R{y} ← R{a} - 1",
+    constant: "R{y} ← R{a} {job} {c}",
+    constantCopy: "R{y} ← {c}",
+    loadWord: "R{y} ← memory[{address}]",
+    loadByte: "R{y} ← the byte at memory[{address}]",
+    storeWord: "memory[{address}] ← R{b}",
+    storeByte: "the byte at memory[{address}] ← R{b}'s low byte",
+    branch: "if R{a} {cond} R{b}: PC ← PC + 4 × {c}",
+    branchAlways: "PC ← PC + 4 × {c}",
+    branchNever: "nothing: the PC moves on",
+    call: "R{y} ← PC + 4, PC ← PC + 4 × {c}",
+    jump: "PC ← R{a} + {c}",
+    setIf: "R{y} ← 1 if R{a} {cond} R{b}, else 0",
+    callRegister: "R{y} ← PC + 4, PC ← R{a} + {c}",
+  },
+  jobs: { "0": "AND", "1": "XOR", "2": "+", "3": "-", "4": "OR" },
+  jobNames: {
+    "0": "AND",
+    "1": "XOR",
+    "2": "add",
+    "3": "subtract",
+    "4": "OR",
+    "5": "copy B",
+    "6": "count up",
+    "7": "count down",
+  },
+  conds: {
+    "0": "always",
+    "1": "never",
+    "2": "==",
+    "3": "!=",
+    "4": "< (unsigned)",
+    "5": ">= (unsigned)",
+    "6": "< (signed)",
+    "7": ">= (signed)",
+  },
+  systemJobs: {
+    "0": "call system",
+    "1": "resume",
+    "2": "R{y} ← C{c}",
+    "3": "C{c} ← R{a}",
+    "4": "stop",
+  },
+  illegal: {
+    kind: "Not an instruction: kind {k} is not one of the machine's kinds. The machine stops with cause 21.",
+    job: "Not an instruction: kind {k} has no job {j}. The machine stops with cause 21.",
+    number: "Not an instruction: C{c} is no control register. The machine stops with cause 21.",
+  },
+  widened: "The constant {c} widens to {w}, which reads {n}.",
+  calcHeading: "The calculator: Module 7's ALU",
+  widthLegend: "Width",
+  widthOption: "{n} bits",
+  formLegend: "Type A and B as",
+  formHex: "hexadecimal",
+  formSigned: "numbers, read signed",
+  aLabel: "A",
+  bLabel: "B",
+  jobLabel: "Job",
+  jobOption: "{k} {name}",
+  fromWord: "Take the job and B from the word",
+  fromWordNone: "Only a register job or a constant job gives the ALU a job.",
+  tookJob: "The job is the word's J: {job}.",
+  tookB: "B is the word's constant, widened.",
+  yHeading: "Y",
+  yHex: "hexadecimal",
+  yUnsigned: "unsigned",
+  ySigned: "signed",
+  flagsLabel: "Flags",
+  flag: "{name} {value}",
+  bitsRow: "bits {hi} to {lo}",
+  entryEmpty: "Type a word.",
+  entryNotHex: "{char} is not a hexadecimal digit.",
+  entryHexLong: "A word this wide has at most {digits} hexadecimal digits.",
+  entryNotNumber: "{char} is not part of a number.",
+  entryRange: "The number must be from {min} to {max}.",
+
+  casesLegend: "R1 and R2",
+  swapCaption: "R1 is {a}, R2 is {b}",
+  relation: "Comparison",
+  branch: "Branch that says it",
+  taken: "Taken?",
+  relations: { "<": "R1 < R2", ">=": "R1 >= R2", ">": "R1 > R2", "<=": "R1 <= R2" },
+  relationForm: "{rel}, {reading}",
+  signedWord: "signed",
+  unsignedWord: "unsigned",
+  branchForm: "if {a} {cond} {b}",
+  yes: "yes",
+  no: "no",
+  swapKey: "A marked row names its registers swapped.",
+  swapAnswer: "The branch that says it: {answer}.",
+
+  listingCaption: "The program",
+  written: "Instructions written: {n}",
+  ran: "Instructions run, the stop among them: {n}",
+  romBytes: "ROM used: {n} bytes",
+  registerAfter: "R{n} at the stop: {value}",
+  displayAfter: "Display at the stop: {value}",
+  runBoth: "Run the programs",
+  address: "Address",
+  programAnswer: "The run gives: {answer}.",
 };

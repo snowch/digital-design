@@ -238,3 +238,35 @@ export const MACHINE_INTERFACE = {
     { name: "LAMPS", width: 3 },
   ],
 };
+
+// Lesson 10.2: the packed layout's register Y, which moves with the kind.
+
+const YDIGIT_HEADER = `module ydigit(
+  input logic [31:0] IR,
+  output logic [3:0] WA
+);`;
+
+/** The start: the course's layout, where Y is always digit 3. */
+export const YDIGIT_START = `${YDIGIT_HEADER}
+  assign WA = IR[15:12];
+endmodule
+`;
+
+/** The packed layout's Y: digit 4 for a constant job or a load, digit 5 for a call. */
+export const YDIGIT_REFERENCE = `${YDIGIT_HEADER}
+  always_comb
+    case (IR[31:28])
+      4'h2: WA = IR[19:16];
+      4'h3: WA = IR[19:16];
+      4'h6: WA = IR[23:20];
+      default: WA = IR[15:12];
+    endcase
+endmodule
+`;
+
+/** The digit the packed layout keeps register Y in, by kind: what the challenge's tests expect. */
+export function packedY(word: number): number {
+  const k = (word >>> 28) & 15;
+  const digit = k === 2 || k === 3 ? 4 : k === 6 ? 5 : 3;
+  return (word >>> (digit * 4)) & 15;
+}

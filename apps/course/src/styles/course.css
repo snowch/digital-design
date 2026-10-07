@@ -2150,3 +2150,87 @@ button.bit {
   display: flex;
   align-items: center;
 }
+
+/* Module 10: the two machines compared, the layouts compared, the encoding explorer and the
+   calculator. Colours and sizes from tokens.css. */
+.compare-note {
+  margin: var(--space-1) 0 var(--space-3);
+  color: var(--fg-muted);
+}
+.compare-address {
+  color: var(--fg-muted);
+}
+.layout-row {
+  margin: var(--space-2) 0;
+}
+.layout-title {
+  font-weight: 650;
+  margin: 0 0 var(--space-1);
+}
+.layout-digits {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 4px;
+}
+.layout-field {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+  padding: var(--space-1) 0;
+  min-width: 0;
+}
+.layout-field.moved {
+  outline: 2px solid var(--sig-cursor);
+  outline-offset: -1px;
+}
+.layout-name {
+  font-weight: 700;
+}
+.layout-value {
+  font-family: var(--font-mono);
+  letter-spacing: 0.15em;
+}
+.layout-range,
+.layout-moved {
+  margin: var(--space-1) 0 0;
+}
+.explorer-help,
+.explorer-meaning-heading,
+.calculator-heading {
+  margin: var(--space-1) 0;
+}
+.explorer-meaning-heading,
+.calculator-heading {
+  font-weight: 650;
+}
+.explorer-meaning {
+  font-family: var(--font-mono);
+  margin: 0 0 var(--space-2);
+}
+.calculator {
+  margin-top: var(--space-3);
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-2);
+}
+.calculator select {
+  min-height: 40px;
+  font: inherit;
+}
+.calculator-bits {
+  margin: 2px 0;
+}
+.calculator-bits code,
+.calculator-y code {
+  overflow-wrap: anywhere;
+}
+.calculator-y,
+.calculator-flags,
+.calculator-took {
+  margin: var(--space-1) 0;
+}
