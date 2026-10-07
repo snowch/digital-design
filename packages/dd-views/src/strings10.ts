@@ -346,11 +346,11 @@ export const MACHINE10_STRINGS: Machine10Strings = {
   edgesAnswer: "The controller takes {answer}.",
 
   partsCaption: "Each machine's parts",
-  partsShared: "What a program can see: both machines have these",
-  partsOwn: "Its own parts",
-  constantsCaption: "PROVISIONAL constants as addresses",
-  constantsRun: "{first} to {last}",
-  constantsWiden: "PROVISIONAL widen to {first} to {last}",
+  partsShared: "Shared parts: what a program can see.",
+  partsOwn: "Parts this machine has alone.",
+  constantsCaption: "Every constant as an address.",
+  constantsRun: "constants {first} to {last}",
+  constantsWiden: "widen to {first} to {last}",
   constantsParts: {
     rom: "the ROM",
     ram: "the RAM",
@@ -358,7 +358,7 @@ export const MACHINE10_STRINGS: Machine10Strings = {
     none: "no memory",
     negative: "no memory",
   },
-  constantsStop: "PROVISIONAL stops, cause {cause}",
+  constantsStop: "a load stops the machine with cause {cause}",
   partNames: {
     registers: "R0 to R15",
     pc: "PC",

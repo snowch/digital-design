@@ -194,6 +194,7 @@ export const roomToGrow: LessonInput = {
             writtenWidth: 4,
             highlight: [...JOIN_PLACES],
             still: true,
+          canOpen: false,
             highlightLabel: LABELS.joinMark,
           },
         },

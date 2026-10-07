@@ -130,6 +130,11 @@ subagent that wrote every learner-facing sentence from a brief of checked facts.
   Module 0 draws (`50e2f0d`) was looked at in 10.5's fault lab: SET stuck reads as a dashed wire
   into pickSet's S, and the report writes YIN in hexadecimal.
 
+- 14:10 to 16:00, 7 October. Four drawings, at the author's request, on a branch restarted from
+  main at `c372a76` (below, "Four drawings"). Brief 7F drafted once; the draft contradicted
+  itself on the constants that reach a part (`000` to `7FF`, then `7F8` to `7FF` reaching none)
+  and dropped "opening", "only" and where 10.5's words are read; each fixed by adding words.
+
 ## The outline
 
 Five lessons, as Modules 8 and 9 had (titles and challenges as they stand on the pages): each answers the question the one before ends on, and each
@@ -256,8 +261,8 @@ field, digit, layout, circuit, run, stop. "Cycle" appears nowhere; "step" is not
 Every figure is a view of the simulator or of the reference, and each passes the diagram and
 aesthetic rules at both widths.
 
-- `machine-parts` (new, 10.1, the motivation): one row for each part the motivation names, one
-  column for each machine; a cell says what that circuit has for the part (a register and its
+- `machine-parts` (new, 10.1, the motivation; drawn since 7 October, "Four drawings" below):
+  first one row for each part the motivation names, one column for each machine; a cell says what that circuit has for the part (a register and its
   width, the register file, the ROM's output for Module 8's IR, the memory, the devices, or none),
   found from the component that drives the part's net or keeps it. It holds no question: it shows
   what the motivation's words say, before the investigation runs the two machines.
@@ -294,6 +299,45 @@ aesthetic rules at both widths.
 asks a prediction it would answer (a register's word after a job, a branch's constant, a flag), and
 the plan allows it only where it answers none. It appears in 10.2 and nowhere else in Module 10;
 10.3 to 10.5 work from figures of their own.
+
+## Four drawings
+
+The author asked for four drawings, in order of value. Each is a view of the model; each passed
+the content tests' wire rules and the browser's diagram and look tests at both widths.
+
+1. **10.1, the two machines' parts** (`machine-parts`, now a drawing, not a table). Two outlines,
+   Module 8's above and Module 9's below, overlap on a shaded band: R0 to R15, the PC, the memory
+   and the devices, the parts a program can see. Each machine's own parts sit inside its outline
+   only. The bands come from the same `machineParts()` rows the table read: a part is shared when
+   both circuits have it in the same form. The table went: the drawing carries every cell the
+   table had, the form of each part included, and a table of ten rows and two columns would say
+   it twice. The explanation's two definitions point at the drawing.
+2. **10.4, where a left-out instruction would join** (`join-places`, a still `circuit-explorer`).
+   A circuit built from the datapath's own blocks (`joinPlacesCircuit`): the B selector, the ALU,
+   the `+ 4` block and register Y's word selector, each marked with a dashed outline whose
+   accessible name says what the mark means (`highlightLabel`; the default meant a failed test).
+   The whole datapath was tried first (`datapath-full`, focused and marked): on a phone it was a
+   tall overview with faint marks, a register table nobody chose and an "illegal instruction"
+   status. `still` draws the circuit with no signal table and no controls, and the blocks do not
+   open: the figure says where, not what values. The table of costs became one block per
+   instruction, the same words, so a phone reads it without a sideways scroll.
+3. **10.5, the condition and its two uses** (`condition-uses`, a live `circuit-explorer`). The
+   condition block's MET goes to an AND with BRANCH and the next PC's selector, and through
+   met-word to register Y's selector with SET. It opens with PC + 4 at `10`, the target at `40`
+   and HR at `42`; job 0 is met always, so pressing BRANCH moves NEXT to `40` and SET makes YIN
+   1. Decision D, the stepped view of set if's edges, is still not done, for the reason above:
+   it needs `multicycleCircuit` itself to gain the source, a new circuit and its routing. This
+   drawing shows the mechanism the stepped view would have stepped through, live.
+4. **10.3, every constant as an address** (`constant-map`, new). 8.4's `memory-map` did not fit:
+   it is a table of which loads and stores each part allows, with no row for `800` to `FFF`. The
+   new figure reuses its parts (`memoryMapParts`) and the widen block's simulation
+   (`constantRanges`): five blocks, `000` to `3FF` the ROM, `400` to `7BF` the RAM, `7C0` to `7F7`
+   the devices, `7F8` to `7FF` no part, and `800` to `FFF` widened to `FFFFFFFFFFFFF800` and up,
+   no part. It sits after the widening figure, not beside it: side by side, each is too narrow on
+   a phone and the widening figure's bit rows need the width.
+
+Facts tests pin the constant map's runs, the four places' blocks and the condition's two uses;
+the browser suite presses BRANCH and SET and checks the words the map gives.
 
 ## The capstone: set if, and every part it changed
 

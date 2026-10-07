@@ -107,7 +107,7 @@ export function joinPlacesCircuit(): Circuit {
  * (`widenMet`) and register Y takes it when SET is 1 (`pickSet`).
  */
 export function conditionUsesCircuit(): Circuit {
-  const b = new CircuitBuilder("conditionUses");
+  const b = new CircuitBuilder("datapath");
   const j = b.input("J", 4);
   const zero = b.input("ZERO");
   const minus = b.input("MINUS");

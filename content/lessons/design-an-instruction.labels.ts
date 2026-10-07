@@ -31,7 +31,7 @@ export const LABELS = {
   },
   conditionMark: "the condition block, which both uses share",
   captions: {
-    conditionUses: "The condition block and its two uses.",
+    conditionUses: "The condition block and its two paths: to branch, and to set if.",
     need: "Run the count of cold rooms on the course's machine.",
     shorter: "Run the count of cold rooms two ways.",
     predictEdges: "Predict set if's edges, then check.",
