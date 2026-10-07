@@ -40,3 +40,5 @@ export * from "./control";
 export * from "./multicycle";
 export * from "./multicycle-run";
 export * from "./multicycle-view";
+// Module 0, meet the machine: the finished machine read for a learner with no terms yet.
+export * from "./meet";

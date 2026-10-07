@@ -15,6 +15,7 @@ import { Simulator, formatWord, parseWord, word as wordOf } from "@dd/sim";
 import { aluResult, hexWord, opBits } from "./alu";
 import { applyFaults, stuckAt } from "./faults";
 import { libraryCircuit } from "./library";
+import { machineRun, machineSlices, machineStep } from "./meet";
 
 export interface AnswerResult {
   readonly pass: boolean;
@@ -253,4 +254,8 @@ export const ANSWER_GRADERS: Readonly<Record<string, AnswerGrader>> = {
   "memory-read": memoryRead,
   // Module 7
   exposes,
+  // Module 0: graded by running the finished machine (meet.ts).
+  "machine-run": machineRun,
+  "machine-step": machineStep,
+  "machine-slices": machineSlices,
 };
