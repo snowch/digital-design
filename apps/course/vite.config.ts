@@ -3,12 +3,22 @@
 // The course app. One bundle, built under the base path GitHub Pages serves it from
 // (/digital-design/ on snowch.github.io, an origin the author's books share). BASE_PATH lets the
 // deploy workflow pass the path Pages reports, and lets a local build serve at the root.
+//
+// The page's description, what a shared link's preview shows, and the cover for a reader whose
+// browser runs no scripts are written into index.html from the cover's own words (static-page.ts).
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
+
+import { staticPage } from "./src/static-page";
+
+const coverWords: Plugin = {
+  name: "cover-words",
+  transformIndexHtml: (html) => staticPage(html),
+};
 
 export default defineConfig({
   base: process.env.BASE_PATH ?? "/digital-design/",
-  plugins: [react()],
+  plugins: [react(), coverWords],
   build: {
     outDir: "dist",
     sourcemap: true,

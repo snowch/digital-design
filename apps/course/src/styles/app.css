@@ -233,6 +233,16 @@ ol {
   display: block;
   color: var(--hero-sub);
 }
+/* What you do in the course, the first thing a newcomer reads after the title (the author forwarded
+   a first-time visitor's review: the page must say at once that you build a computer). */
+.cover-hero .cover-tagline {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--hero-fg);
+  max-width: var(--measure);
+  margin-bottom: var(--space-3);
+}
 .cover-hero .cover-lead {
   font-size: var(--text-md);
   color: var(--hero-muted);
