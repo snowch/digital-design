@@ -1023,6 +1023,9 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       // Module 11, lesson 3 (brief 3L).
       registerRole:
         "The calling convention gives R1 to R4, R5 to R9, and R10 to R13 each one role, with R1 carrying the result.",
+      // Module 11, lesson 5 (brief 5L).
+      recursionDepth:
+        "{actual} is not it; each reading's call pushes 2 words, and the stack has 120 words of RAM.",
       // Module 11, lesson 4 (brief 4L).
       stackAddress:
         "{actual} is not that address; R14 starts at 7C0 and each push takes 8 off it before it stores.",

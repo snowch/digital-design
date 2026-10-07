@@ -205,7 +205,9 @@ export function depthRun(
     const made = s.callsMade;
     s = debugStep(s, inputs);
     const sp = s.cpu.regs[14];
-    depths.push(sp === undefined || sp > 0x7c0n ? 0 : Number((0x7c0n - sp) / 8n));
+    // A push that runs R14 below the RAM stores nothing (the ROM refuses it), so the stack holds
+    // at most the RAM's 120 words.
+    depths.push(sp === undefined || sp > 0x7c0n ? 0 : Math.min(120, Number((0x7c0n - sp) / 8n)));
     if (s.callsMade > made) calls.push(depths.length - 1);
   }
   return { depths, calls, state: s, deepest: Math.max(...depths) };

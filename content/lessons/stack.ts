@@ -52,7 +52,7 @@ export const stack: LessonInput = {
   module: 11,
   order: 4,
   objectives: [...LABELS.objectives],
-  introduces: ["stack", "frame"],
+  introduces: ["stack"],
   sections: [
     {
       kind: "question",

@@ -24,7 +24,7 @@ import {
 
 const T = DEFAULT_VIEW_STRINGS.machine11;
 
-const MODULE_11 = ["assembly", "lists", "functions", "stack"] as const;
+const MODULE_11 = ["assembly", "lists", "functions", "stack", "recursion"] as const;
 
 async function answerAll(
   section: Locator,
@@ -119,6 +119,14 @@ const WRONG: readonly {
     to: "",
     fails: "Call R1 -170, R2 -190",
     left: "registers the function did not put back R10, R11, R14",
+  },
+  {
+    lesson: "recursion",
+    id: "colder-newest",
+    from: "        if R5 >= R3 signed goto none\n",
+    to: "",
+    fails: "Log -190, -181, -205, -170, -210; limit -200",
+    left: "what the display showed, in order -210, -170, -205, -181, -190",
   },
 ];
 
