@@ -79,6 +79,13 @@ const Props = z.object({
   drawing: z.string().optional(),
   /** Shown once the learner has run a line (or, with faults, once every fault has run). */
   outcomes: z.string().optional(),
+  /** Shown once the program has stopped after the learner changed a room's reading. */
+  outcomesChanged: z.string().optional(),
+  /**
+   * A box for the number in the line the program leaves as `{limit}`, which the learner may
+   * change: the machine is the program with that number, and the "Kept as" column follows it.
+   */
+  limit: z.number().int().min(-2048).max(2047).optional(),
   question: z.string().optional(),
   options: z.array(z.object({ value: z.string(), label: z.string() })).optional(),
   explain: z.string().default(""),
@@ -115,23 +122,32 @@ export const MachineAtWork = withProps(
   function MachineAtWork({ data, interactive, store }: InteractiveProps & { data: Data }) {
     const strings = useViewStrings();
     const t = strings.meet;
-    const lines = useMemo(() => meetLines(data.program), [data.program]);
+    // The program as the machine runs it: a `{limit}` left in it is the learner's number.
+    const [limit, setLimit] = useState(String(data.limit ?? ""));
+    const [limitUsed, setLimitUsed] = useState(data.limit);
+    const program = useMemo(
+      () =>
+        limitUsed === undefined
+          ? data.program
+          : programText(data.program).replace("{limit}", String(limitUsed)),
+      [data.program, limitUsed],
+    );
+    const lines = useMemo(() => meetLines(program), [program]);
     const [faultAt, setFaultAt] = useState(-1);
     const fault = data.faults[faultAt];
     const built = useMemo(
       () =>
         meetMachine({
-          program: data.program,
+          program,
           ...(fault && MEET_STUCK[fault.stuck] ? { stuck: MEET_STUCK[fault.stuck] } : {}),
         }),
-      [data.program, fault],
+      [program, fault],
     );
     const { circuit } = built;
     const [readings, setReadings] = useState<Record<string, string>>(() =>
       Object.fromEntries(Object.entries(data.inputs).map(([k, v]) => [k, String(v)])),
     );
-    const start = (inputs = readings) =>
-      meetStart(built, { program: data.program, inputs, lines: data.lines });
+    const start = (inputs = readings) => meetStart(built, { program, inputs, lines: data.lines });
     const [sim, setSim] = useState<Simulator>(() => start());
     const [generation, setGeneration] = useState(0);
     const bump = () => setGeneration((g) => g + 1);
@@ -140,7 +156,12 @@ export const MachineAtWork = withProps(
     const [running, setRunning] = useState(false);
     const [gaveUp, setGaveUp] = useState(false);
     const [ran, setRan] = useState(false);
+    // The stops the texts below the figure wait for: a run to the end, with each fault, and after
+    // the learner changed a reading, so no text tells the learner what a run has not yet shown.
     const [ranFaults, setRanFaults] = useState<ReadonlySet<number>>(new Set());
+    const [stoppedOnce, setStoppedOnce] = useState(false);
+    const readingChanged = useRef(false);
+    const [stoppedChanged, setStoppedChanged] = useState(false);
     const [stored, setStored] = useSlot<Stored>(store, interactive.id);
     const live = useMemo(() => sim.snapshotValues(), [sim, generation]);
     const state = datapathState(circuit, live);
@@ -169,8 +190,9 @@ export const MachineAtWork = withProps(
     // A run moves a line at a time on a timer; a new start, a pause or leaving the page ends it.
     const runToken = useRef(0);
     useEffect(() => () => void (runToken.current += 1), []);
-    const noteRun = () => {
-      setRan(true);
+    const noteStop = () => {
+      setStoppedOnce(true);
+      if (readingChanged.current) setStoppedChanged(true);
       if (faultAt >= 0) setRanFaults((was) => new Set([...was, faultAt]));
     };
     /** One line: one edge of the machine. True when the machine has now stopped. */
@@ -179,8 +201,11 @@ export const MachineAtWork = withProps(
       const halting = datapathState(circuit, was).halt === 1;
       sim.clockCycle("CLK");
       setBefore(was);
-      if (halting) setStopped(true);
-      noteRun();
+      if (halting) {
+        setStopped(true);
+        noteStop();
+      }
+      setRan(true);
       bump();
       return halting;
     };
@@ -211,7 +236,7 @@ export const MachineAtWork = withProps(
     const restart = (from = built, inputs = readings) => {
       runToken.current += 1;
       setRunning(false);
-      setSim(meetStart(from, { program: data.program, inputs, lines: data.lines }));
+      setSim(meetStart(from, { program, inputs, lines: data.lines }));
       setBefore(undefined);
       setStopped(false);
       setGaveUp(false);
@@ -231,14 +256,23 @@ export const MachineAtWork = withProps(
       // number ("-", "") waits until it is a number.
       if (/^-?\d+$/.test(text.trim())) {
         setShopInput(sim, name, Number(text));
+        readingChanged.current = true;
         bump();
+      }
+    };
+    const changeLimit = (text: string) => {
+      setLimit(text);
+      // A whole number that fits a line; anything else waits, as a half-typed reading does.
+      if (/^-?\d+$/.test(text.trim()) && Math.abs(Number(text)) <= 2047) {
+        setLimitUsed(Number(text));
+        readingChanged.current = true;
       }
     };
 
     const drawing = data.drawing === undefined ? undefined : MEET_PLACES[data.drawing];
     const words = registerWords(circuit, live);
     const was = before ? registerWords(circuit, before) : [];
-    const shown = data.shown ?? namedRegisters(programText(data.program));
+    const shown = data.shown ?? namedRegisters(programText(program));
     const next = nextLine(state);
     const lastRun = before ? nextLine(datapathState(circuit, before)) : undefined;
     const trapped = stopped && state.cause !== undefined && state.cause !== 0;
@@ -295,6 +329,23 @@ export const MachineAtWork = withProps(
             chosen={faultAt}
             onChoose={setFaultAt}
           />
+        )}
+        {data.limit !== undefined && (
+          <fieldset className="meet-readings">
+            <label className="meet-reading">
+              <span>{t.limitLabel}</span>
+              <input
+                type="number"
+                inputMode="numeric"
+                min={-2048}
+                max={2047}
+                step={1}
+                value={limit}
+                disabled={!committed}
+                onChange={(e) => changeLimit(e.target.value)}
+              />
+            </label>
+          </fieldset>
         )}
         {data.readings.length > 0 && (
           <fieldset className="meet-readings">
@@ -435,9 +486,10 @@ export const MachineAtWork = withProps(
         {asking && committed && ran && data.explain && <Prose markdown={data.explain} />}
         {fault?.outcome && ranFaults.has(faultAt) && <Prose markdown={fault.outcome} />}
         {data.outcomes &&
-          (data.faults.length === 0 ? ran : ranFaults.size === data.faults.length) && (
+          (data.faults.length === 0 ? stoppedOnce : ranFaults.size === data.faults.length) && (
             <Prose markdown={data.outcomes} />
           )}
+        {data.outcomesChanged && stoppedChanged && <Prose markdown={data.outcomesChanged} />}
       </div>
     );
   },

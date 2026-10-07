@@ -651,6 +651,8 @@ export interface MeetStrings {
   readonly faultLegend: string;
   readonly healthy: string;
   readonly drawingTitle: string;
+  /** The box for the number in line 5, which the learner may change. */
+  readonly limitLabel: string;
   readonly ladder: {
     readonly paused: string;
     readonly levelsName: string;
@@ -1251,6 +1253,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     faultLegend: "Stuck wire",
     healthy: "No fault",
     drawingTitle: "Inside the machine",
+    limitLabel: "Line 5's number",
     ladder: {
       paused: "Paused before line {line}: {text}.",
       levelsName: "Levels",
