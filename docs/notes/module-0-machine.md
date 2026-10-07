@@ -255,3 +255,42 @@ then fix brief F1 to the drafter, then the lesson read once more.
 6. The reflection's heading matches its body; the model note quotes "Run one line".
 7. The generalisation no longer says a phone runs one line at a time: a phone runs many programs
    and does several things at once, and each program's lines take effect in their order.
+
+## The review of lesson 0.2
+
+Eleven findings, acted on code first, then fix briefs F2A, F2B and F2L, then a whole read.
+
+1. The ladder's smallest-parts level now opens the half of the adding part that makes the sum: two
+   of the smallest parts, one making the sum on SUM, the other the half's second output. Its title
+   and its "Built in Module 2" agree; the adding part above it is Module 3's. Nine levels:
+   11, 8, 7, 7, 7, 7, 3, 2, 1.
+2. Each "Down a level" opens the box the level above marks: the 16-slice group comes between the
+   part that adds and the four slices, the adding part before its half, and the ladder ends on
+   the wire SUM in the drawing just come down into. The 16-slice group's B input and piece moved a
+   cell so their labels stand apart (`library-alu.ts`; no first-drawn figure changes).
+3. The prediction says why the part that adds already gives 66 while line 3 waits, and that R3
+   takes it when line 3 runs; the explanation agrees.
+4. The prediction says once that the part that adds also subtracts, with a pointer to Module 3's
+   `alu` lesson.
+5. The ladder's captions show before the commit (they state no number); only its readings wait.
+6. The stuck-wire figure is paused before line 3, has no readings to change, asks what the display
+   will show (read off the stuck machine: 64), and its text waits for the stop and clears on Start
+   again and on a new choice.
+7. Its drawing is the half that makes the sum, where the wire leaves it; the lead says to look
+   before running: the part gives 1, the wire stays low. No X shows at the pause.
+8. The answer feedback: a Module 0 failure whose expected value is the answer says a drafted
+   sentence about the learner's own answer instead (`detail` on a grader's result); a choice shows
+   by its label; the slices field says what a valid entry is; the slices check is two tests, so the
+   runtime's "All {total} tests passed" never reads "All 1 tests" here (a singular for the runtime's
+   string is left for a platform change).
+9. Repeats cut: the 1s-and-0s sentence now stands in the ladder's closing text and the
+   explanation's argument only; "the course builds from the bottom" in the motivation only; the
+   captions no longer repeat their leads; the zoom instruction went.
+10. High and low are defined before use and mean a voltage only; the slices of least worth are no
+    longer "the lowest"; "noise" became nearby wires and motors pushing a wire's voltage about.
+11. The ladder's lead no longer claims "the same number all the way down"; the construction no
+    longer says "the other way"; the objective reads plainly; the claim about testing is the course
+    having you test each part you build.
+
+Rendering a lesson's figures also got cheaper: a prediction's answer is worked out once the
+learner commits, and figures of one program share one built machine.

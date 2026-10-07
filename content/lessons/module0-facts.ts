@@ -26,6 +26,7 @@ interface Props {
   lines?: number;
   ask?: Parameters<typeof meetAnswer>[1];
   register?: number;
+  askFault?: number;
   faults?: { stuck: string }[];
 }
 
@@ -43,7 +44,7 @@ export function meetFigure(lesson: LessonInput, id: string, fault = -1): Simulat
 /** The answer a figure's prediction is checked against. */
 export function meetFigureAnswer(lesson: LessonInput, id: string): string {
   const p = figureOf(lesson, id) as unknown as Props;
-  return meetAnswer(meetFigure(lesson, id), p.ask ?? "display", p.register ?? 0);
+  return meetAnswer(meetFigure(lesson, id, p.askFault ?? -1), p.ask ?? "display", p.register ?? 0);
 }
 
 /** A figure run to its stop, with other readings if given: the lines, the display, the lamps. */

@@ -993,8 +993,21 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     // Module 7
     otherThan: "anything other than {value}",
     // Module 0. Drafted by the prose process (docs/notes/module-0-machine/briefs/F2V.md).
-    details: {},
-    invalidFor: {},
+    details: {
+      runDisplay: "When the program stops, the display does not show {actual}.",
+      runLamp: "When the program stops, CLASH is not {actual}.",
+      traceChanged: "Your answer, {actual}, is not the number line 3 changes.",
+      traceValue: "Line 3 does not give {actual}.",
+      traceNext: "After line 3, the machine does not run line {actual} next.",
+      tracePart: "The number line 3 gives does not come from {actual}.",
+      slicesHigh: "The slices worth 128, 64, 32 and 16 do not give {actual}.",
+      slicesLow: "The slices worth 8, 4, 2 and 1 do not give {actual}.",
+      slices: "The eight slices do not give {actual}.",
+    },
+    invalidFor: {
+      slices:
+        "Type eight 1s and 0s, one for each slice, the slice worth 128 first; a space between the two groups of four is allowed.",
+    },
   },
   // Module 6. Drafted by the prose process (docs/notes/module-6-memory.md).
   memory: {

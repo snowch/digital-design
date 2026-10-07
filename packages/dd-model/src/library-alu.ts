@@ -274,14 +274,16 @@ export const ALU_INSIDE: Readonly<Record<string, At>> = {
   "alu-group-16": shifted(
     {
       "in:A": [0, 1],
-      "in:B": [0, 4],
+      // B and its piece a cell lower than Module 7 first placed them, so the two pieces' names
+      // and titles stand apart (Module 0's ladder is the first figure to open this group).
+      "in:B": [0, 5],
       "in:CIN": [0, 36],
       "in:ZIN": [0, 39],
       "in:OP2": [0, 42],
       "in:OP1": [0, 45],
       "in:OP0": [0, 48],
       pieceA: [4, 1],
-      pieceB: [4, 4],
+      pieceB: [4, 5],
       q0: [12, 30],
       q1: [18, 21],
       q2: [24, 12],

@@ -92,7 +92,10 @@ export const Ladder = withProps(
     const [stored, setStored] = useSlot<Stored>(store, interactive.id);
     const asking = data.question !== undefined && data.options !== undefined;
     const committed = !asking || stored?.choice !== undefined;
-    const answer = useMemo(() => (asking ? meetAnswer(sim, "ones") : ""), [asking, sim]);
+    const answer = useMemo(
+      () => (asking && committed ? meetAnswer(sim, "ones") : ""),
+      [asking, committed, sim],
+    );
     const optionLabel = (v: string) =>
       (data.options?.find((o) => o.value === v)?.label ?? v).replace(/\.$/, "");
 

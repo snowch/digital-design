@@ -251,5 +251,54 @@
     "Eight 1s and 0s, one for each slice.",
     "Eight 1s and 0s, the slice worth 128 first",
     "dropped: the order"
+  ],
+  [
+    "F2A",
+    "prediction",
+    "The part that adds has already worked out 66.",
+    "The part that adds has already worked out 66: it works all the time on whatever numbers reach it, and R1 and R2 already reach it. R3 is not set yet; when line 3 runs, R3 takes the 66.",
+    "dropped: why the part already gives 66, and where the 66 goes"
+  ],
+  [
+    "F2A",
+    "levelFour",
+    "The four lowest slices, worth",
+    "The four slices of least worth:",
+    "\"low\" is a wire's voltage only on this page"
+  ],
+  [
+    "F2B",
+    "construction",
+    "Now go the other way: from new readings to what the slices give.",
+    "Now do it for new readings: from the readings to what the slices give.",
+    "wrong: the prediction went the same way; the brief said not \"the other way\""
+  ],
+  [
+    "F2B",
+    "c1Task",
+    "from the eight lowest slices of the part that adds",
+    "from the eight slices of least worth in the part that adds",
+    "\"low\" is a wire's voltage only on this page"
+  ],
+  [
+    "F2B",
+    "stuckLead",
+    "Before you run it, decide: what will the shop's display show? Then press \"Run\".",
+    "The drawing is the half of that slice's adding part that makes the sum. Look before you run: the part that makes the sum gives 1, and the wire SUM stays low. Then answer the question above the drawing.",
+    "dropped: what the drawing is and what to look at; wrong: Run comes after the answer"
+  ],
+  [
+    "F2B",
+    "explanation",
+    "This is why the course tests every part it builds before a later lesson uses it as a box.",
+    "This is why the course has you test each part you build before a later lesson uses it as a box.",
+    "drifted: the brief's claim, which the course can stand behind"
+  ],
+  [
+    "F2B",
+    "reflection",
+    " One number at the top is 1s and 0s on wires at the bottom.",
+    "",
+    "second pass: a repeat of the ladder's closing text"
   ]
 ]

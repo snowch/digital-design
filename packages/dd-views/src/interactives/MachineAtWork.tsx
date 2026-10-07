@@ -171,9 +171,11 @@ export const MachineAtWork = withProps(
     const asking = data.question !== undefined && data.options !== undefined;
     const committed = !asking || stored?.choice !== undefined;
     // The answer is read off the figure as it first shows, whatever the learner has done since.
+    // Worked out once the learner has committed, the only time it is shown: a run to the stop on
+    // the gates costs about half a second, which every page would otherwise pay as it loads.
     const answer = useMemo(
       () =>
-        asking
+        asking && committed
           ? meetAnswer(
               meetStart(
                 meetMachine({
@@ -195,6 +197,7 @@ export const MachineAtWork = withProps(
           : "",
       [
         asking,
+        committed,
         data.program,
         data.inputs,
         data.lines,

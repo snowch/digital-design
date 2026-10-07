@@ -25,9 +25,11 @@ const LEVELS = [
   { title: LABELS.levels.line, caption: PROSE.levelLine, module: 11, place: "line" },
   { title: LABELS.levels.parts, caption: PROSE.levelParts, module: 8, place: "parts" },
   { title: LABELS.levels.adder, caption: PROSE.levelAdder, module: 7, place: "adder" },
+  { title: LABELS.levels.sixteen, caption: PROSE.levelSixteen, module: 7, place: "sixteen" },
   { title: LABELS.levels.four, caption: PROSE.levelFour, module: 7, place: "four" },
   { title: LABELS.levels.slice, caption: PROSE.levelSlice, module: 7, place: "slice" },
-  { title: LABELS.levels.smallest, caption: PROSE.levelSmallest, module: 3, place: "smallest" },
+  { title: LABELS.levels.adding, caption: PROSE.levelAdding, module: 3, place: "adding" },
+  { title: LABELS.levels.smallest, caption: PROSE.levelSmallest, module: 2, place: "smallest" },
   { title: LABELS.levels.wire, caption: PROSE.levelWire, module: 1, place: "wire" },
 ].map((l) => ({ ...l, moduleName: name(l.module) }));
 
@@ -61,8 +63,8 @@ export const insideTheMachine: LessonInput = {
           timeModel: "none",
           caption: LABELS.captions.question,
           after: PROSE.questionAfter,
-          // The last lesson's run, paused before its last line: 66 on the display, no buttons.
-          props: { program: GAP, inputs: ROOMS, lines: 6, readings: [], controls: false },
+          // The last lesson's run, paused once 66 is on the display (after line 4), no buttons.
+          props: { program: GAP, inputs: ROOMS, lines: 4, readings: [], controls: false },
         },
       ],
     },
@@ -81,7 +83,7 @@ export const insideTheMachine: LessonInput = {
             program: GAP,
             inputs: ROOMS,
             lines: 2,
-            levels: LEVELS.slice(2, 4),
+            levels: LEVELS.slice(2, 5),
             question: PROSE.p1Question,
             options: [
               { value: "64 + 2", label: LABELS.options.p1Two },
@@ -143,8 +145,20 @@ export const insideTheMachine: LessonInput = {
           props: {
             program: GAP,
             inputs: ROOMS,
+            // Paused before line 3, where the stuck wire shows: its part gives 1, the wire stays 0.
+            lines: 2,
+            readings: [],
             faults: [{ stuck: "sum-low", label: LABELS.faults.stuck, outcome: PROSE.stuckAfter }],
-            drawing: "wire",
+            drawing: "smallest",
+            question: PROSE.stuckQuestion,
+            options: [
+              { value: "66", label: LABELS.options.stuck66 },
+              { value: "64", label: LABELS.options.stuck64 },
+              { value: "stops", label: LABELS.options.stuckStops },
+            ],
+            ask: "display",
+            askFault: 0,
+            explain: PROSE.stuckExplain,
           },
         },
       ],
@@ -186,13 +200,11 @@ export const insideTheMachine: LessonInput = {
       tests: {
         kind: "answers",
         grader: "machine-slices",
-        cases: [
-          {
-            label: LABELS.cases.slices,
-            given: { program: GAP, ...SLICES_ROOMS, lines: 2, slices: 8, field: "slices" },
-            expect: {},
-          },
-        ],
+        cases: (["high", "low"] as const).map((half) => ({
+          label: half === "high" ? LABELS.cases.slicesHigh : LABELS.cases.slicesLow,
+          given: { program: GAP, ...SLICES_ROOMS, lines: 2, slices: 8, field: "slices", half },
+          expect: {},
+        })),
       },
       hints: [...PROSE.c1Hints],
       reference: { answers: { slices: "0100 0110" } },

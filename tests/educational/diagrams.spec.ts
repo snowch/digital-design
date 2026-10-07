@@ -535,7 +535,18 @@ test.describe("the diagrams", () => {
     }
     const stuck = page.locator("#ix-stuck");
     await stuck.scrollIntoViewIfNeeded();
-    await stuck.getByRole("radio").nth(1).check();
+    // Its prediction first (64, read off the stuck machine), then the stuck wire.
+    const props = LESSONS.find((l) => l.id === "inside-the-machine")!
+      .sections.flatMap((s) => s.interactives)
+      .find((x) => x.id === "stuck")!.props as {
+      options: { value: string; label: string }[];
+      faults: { label: string }[];
+    };
+    await stuck
+      .getByRole("radio", { name: props.options.find((o) => o.value === "64")!.label, exact: true })
+      .check();
+    await stuck.getByRole("button", { name: V.prediction.commit }).click();
+    await stuck.getByRole("radio", { name: props.faults[0]!.label, exact: true }).check();
     await stuck.getByRole("button", { name: V.meet.run, exact: true }).click();
     await expect(stuck.locator(".datapath-status")).toHaveText(
       format(V.meet.status.stopped, { line: 9 }),

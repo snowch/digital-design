@@ -27,6 +27,19 @@ const FIRST = lessonData("what-computers-do");
 const SECOND = lessonData("inside-the-machine");
 const M = V.meet;
 
+/** Module 0's stuck-wire figure: commit its prediction (64), then choose the stuck wire. */
+async function stickWire(
+  figure: Locator,
+  lesson: { sections: { interactives: { id: string; props: unknown }[] }[] },
+) {
+  const props = lesson.sections.flatMap((s) => s.interactives).find((x) => x.id === "stuck")!
+    .props as { options: { value: string; label: string }[]; faults: { label: string }[] };
+  const option = props.options.find((o) => o.value === "64")!;
+  await figure.getByRole("radio", { name: option.label, exact: true }).check();
+  await figure.getByRole("button", { name: V.prediction.commit }).click();
+  await figure.getByRole("radio", { name: props.faults[0]!.label, exact: true }).check();
+}
+
 /** Fills an answers challenge's fields: a typed number or text, or a chosen option. */
 async function fill(section: Locator, answers: Readonly<Record<string, string>>): Promise<void> {
   for (const [field, value] of Object.entries(answers)) {
@@ -161,7 +174,7 @@ test.describe("the machine at work", () => {
     await openLesson(page, SECOND.id);
     const figure = page.locator("#ix-stuck");
     await figure.scrollIntoViewIfNeeded();
-    await figure.getByRole("radio").nth(1).check();
+    await stickWire(figure, SECOND);
     await figure.getByRole("button", { name: M.run, exact: true }).click();
     await expect(figure.locator(".datapath-status")).toHaveText(
       format(M.status.stopped, { line: 9 }),
@@ -212,7 +225,7 @@ test.describe("the ladder", () => {
     const figure = page.locator("#ix-predict-slices");
     await figure.scrollIntoViewIfNeeded();
     await expect(figure.locator(".ladder-reading")).toHaveCount(0);
-    await expect(figure.locator(".ladder-level .prose")).toHaveCount(0);
+    // The levels' words show from the start: they state no number.
     await figure.getByRole("radio").first().check();
     await figure.getByRole("button", { name: V.prediction.commit }).click();
     await expect(figure.locator("[role=status]").first()).toContainText(V.prediction.match);

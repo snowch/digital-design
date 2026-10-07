@@ -202,8 +202,21 @@ export interface MeetSetup {
 }
 
 /** The machine for a setup, with a stuck wire if the setup names one. */
+/**
+ * Built machines by program: a page holds several figures of one program, and building the drawn
+ * machine takes a tenth of a second or more. A circuit is never changed once built (a fault makes
+ * a new one), so figures can share it.
+ */
+const BUILT = new Map<string, BuiltDatapath>();
+
 export function meetMachine(setup: Pick<MeetSetup, "program" | "stuck">): BuiltDatapath {
-  const healthy = buildDatapath({ libraryId: MEET_LIBRARY, program: programText(setup.program) });
+  const text = programText(setup.program);
+  let healthy = BUILT.get(text);
+  if (!healthy) {
+    healthy = buildDatapath({ libraryId: MEET_LIBRARY, program: text });
+    if (BUILT.size >= 8) BUILT.delete(BUILT.keys().next().value as string);
+    BUILT.set(text, healthy);
+  }
   if (!setup.stuck) return healthy;
   return {
     ...healthy,
