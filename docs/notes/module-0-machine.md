@@ -8,7 +8,8 @@ the subagent that wrote every learner-facing sentence from a brief of checked fa
 ## Times
 
 - Started: 2026-10-07 about 04:28 UTC, reading the plan and the documents it names.
-- Outline sent to the managing session about 04:55; both lessons passing their tests at 05:28.
+- Outline sent to the managing session about 04:55; both lessons passing their tests at 05:28;
+  the mechanical walk and its fixes to 05:55; `main` merged at 05:58; the full check from 06:04.
 
 ## Why two lessons, and the program
 
@@ -146,6 +147,30 @@ brief's words and "word" is rationed.
   wire is shown inside the slice's adding part, a small drawing that passes every rule, while the
   whole slice stays one press up the ladder, held to the rules for an opened block.
 
+## The mechanical walk
+
+Both pages were walked in the built site at 375, 768 and 1280 pixels, light and dark, with every
+figure used (each prediction committed, each machine run to its stop, each ladder walked to its
+foot, the stuck wire chosen and run). No console error and no sideways scroll at any width. Found
+and fixed:
+
+- the shop's scene was cut off on a phone: its wire counts and "The machine" made it wider than
+  the card; the counts go, with the sentence about them, and the box reads "Machine";
+- the ladder's four-slices and wire levels opened at the drawing's left edge on a phone: `focus`
+  takes full paths from the top, and the places gave local names;
+- each level's caption stated the number the figure reads off the simulator under it; the
+  captions keep what the level shows.
+
+The levels that draw the whole machine and the part that adds are tall on a phone, as Module 8's
+and 9's are, with the overview strip and zoom.
+
+## The merges
+
+`main` moved once during the build (the cover's words written into index.html, and the branches
+test's time). Merged with no conflict. Main's build now reads the cover's strings in Node, which
+cannot load the lessons' index the strings had imported for the module names, so the names have a
+subpath of their own, `@dd/content/module-names`.
+
 ## What the module added to the check's time
 
 Unit tests: 25 new (`meet.test.ts`, two facts tests, the strings gate, the cover), about 20
@@ -170,5 +195,6 @@ as the plan says.
 
 ## The pre-existing failure
 
-`branches.facts.test.ts`, "the loop: 15 on the display after 20 edges", times out at 5 s in this
-container on a clean checkout of `main` as well; it is not this branch's.
+`branches.facts.test.ts`, "the loop: 15 on the display after 20 edges", timed out at 5 s in this
+container on a clean checkout of `main` as well; `main` has since given it the time its neighbours
+have, and the merge brought that in.
