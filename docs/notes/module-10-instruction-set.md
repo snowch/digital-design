@@ -194,11 +194,12 @@ Decisions the managing session took after the reading review, each changing
   changed; 9.2's figure was checked at both widths.
 - **`runProgram` counts the stop as run and a refused instruction as not** (decisions G and K),
   as 9.3 counts; the counts every figure states were checked again.
-- **`docs/isa.md`'s "runs its data as instructions"** (decision H) is the author's file and is not
-  edited here. The runs show what happens: the machine runs data after a program as
-  instructions until one is refused, which is usually its first (5000 puts `00001388` at `008`,
-  kind 0; -250 puts `FFFFFF06`, kind F), while `12345678` runs as an add and the halt comes at
-  the word's top half, at `00C`. The managing session will raise it with the author.
+- **`docs/isa.md`'s "runs its data as instructions"** (decision H) was not edited here. The runs
+  show what happens: the machine runs data after a program as instructions until one is refused,
+  which is usually its first (5000 puts `00001388` at `008`, kind 0; -250 puts `FFFFFF06`, kind
+  F), while `12345678` runs as an add and the halt comes at the word's top half, at `00C`. The
+  managing session corrected `docs/isa.md` to say so on 7 October 2026, with the wide-constant
+  claim below, once the author said the file was agent-written.
 
 - **The capstone's order** (decision C): the question and the motivation state the need only;
   the design challenge sits in the motivation, before any section states one of its answers; the
@@ -358,7 +359,7 @@ constant jobs of at most 2047). The general ways are: **one absolute load of a w
 ROM** after the program, which gives any 64-bit number in one instruction and 8 bytes of ROM (5000
 took 3 instructions and 24 bytes with the store and the stop, against 5 and 20 by sums); or a
 sum of constant jobs, one for each 2047 or so. The lesson states what the runs show and does not
-repeat the claim. A change to `docs/isa.md` is the author's.
+repeat the claim. The managing session corrected `docs/isa.md` to match on 7 October 2026.
 
 ## What the drafts got wrong
 

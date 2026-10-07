@@ -176,8 +176,12 @@ One line is one instruction, written as the transfer it makes, with Module 5's a
 - A label ends with a colon. `//` starts a comment, as in the course's SystemVerilog.
 - `word` and `byte` put fixed values in the ROM: `limits: word -250, -184`. A `word` starts at a
   multiple of 8, with 0s before it where needed. The assembler fills the ROM after the program
-  and its data with 0s, so a program that runs off its end runs its data as instructions, then
-  stops at the first all-zero instruction; a program ends with `stop`.
+  and its data with 0s. A program that runs off its end fetches whatever follows as instructions
+  and halts, with cause 21, at the first the machine refuses. That is usually the first word of
+  its data, or a 0 placed before it: a small number's low half is kind 0 (5000 is `00001388`), a
+  negative number's kind F (-250 is `FFFFFF06`). A data word whose low half happens to be an
+  instruction runs first (`12345678` runs as `R5 <= R3 + R4`, and its zero top half halts the
+  run). So a program ends with `stop`.
 - The shop's devices have names the assembler knows, which stand for their addresses:
   `display`, `lamps`, `signals` (DOOR and WARM), `sensorA`, `sensorB`, `timer` and `waiting`
   (`docs/machine.md`, "Devices").
@@ -261,5 +265,7 @@ Module 10's "design, justify and implement one new instruction". Kinds 9 to F ar
 - **A call through a register**: `RY ← PC + 4` and `PC ← RA + c`, for a function chosen at run
   time.
 - **A comparison with zero** in one instruction, without a register that holds 0.
-- **A constant wider than 12 bits**, built in two instructions today.
+- **A constant wider than 12 bits.** Today a program loads one from a word kept in the ROM, in one
+  instruction and 8 bytes, or builds it from constant jobs that add at most 2047 each, or by
+  doubling.
 - **Multiplication.**
