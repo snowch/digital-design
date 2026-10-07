@@ -56,6 +56,16 @@ describe("facts for the encoding lesson", () => {
     expect(packedLayout(word("call there, R15\nthere: stop")).word).toBe(0x60f00001);
   });
 
+  it("digit 3 of each packed word: the constant's top digit, or a call's second; all 0", () => {
+    const c = (w: number) => packedLayout(w).fields.find((f) => f.name === "C");
+    expect([c(0x22120064)?.hi, c(0x380207d8)?.hi, c(0x60f00001)?.hi]).toEqual([3, 3, 4]);
+    for (const w of [0x22120064, 0x380207d8, 0x60f00001]) expect((w >>> 12) & 0xf).toBe(0);
+  });
+
+  it("the construction: -100 is F9C as 12 bits", () => {
+    expect((4096 - 100).toString(16).toUpperCase()).toBe("F9C");
+  });
+
   it("37 pairs of K and J are instructions; kind 8's jobs 2 and 3 depend on the constant", () => {
     const map = kindMap(false);
     expect(map.flat().filter((x) => x === "legal").length).toBe(37);

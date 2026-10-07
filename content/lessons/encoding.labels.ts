@@ -5,7 +5,7 @@
 // against the lesson.
 
 export const LABELS = {
-  title: "Why do instruction fields sit on digit boundaries?",
+  title: "Why does every field keep one place in every instruction, and what does that cost?",
   objectives: [
     "Explain what the course's layout gives and what it costs.",
     "Compare the course's layout with a packed layout.",
@@ -59,6 +59,13 @@ export const LABELS = {
     sub: "R5 ← R2 - 7 (subtract)",
     load: "R4 ← memory[R1 + 16] (a word)",
     branch: "if R3 != R6, PC ← PC + 4 × (-3)",
+  },
+  unusedNotes: {
+    registerC: "Unused: a register job reads no constant",
+    constantB: "Unused: the ALU's B takes the constant instead",
+    loadA: "Unused: the address is the constant alone, and the ALU's A takes 0",
+    loadB: "Unused: a load reads no register as B",
+    branchY: "Unused: a branch writes no register",
   },
   fieldNotes: {
     K: "The kind, selecting the instruction",

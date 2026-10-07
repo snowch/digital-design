@@ -65,10 +65,26 @@ export const encoding: LessonInput = {
           lead: PROSE.oneLayoutLead,
           props: {
             instructions: [
-              { label: LABELS.words.subtract, text: "R3 <= R1 - R2" },
-              { label: LABELS.words.addConstant, text: "R2 <= R1 + 100" },
-              { label: LABELS.words.load, text: "R2 <= word[sensorA]" },
-              { label: LABELS.words.branch, text: "0x56230002" },
+              {
+                label: LABELS.words.subtract,
+                text: "R3 <= R1 - R2",
+                notes: { C: LABELS.unusedNotes.registerC },
+              },
+              {
+                label: LABELS.words.addConstant,
+                text: "R2 <= R1 + 100",
+                notes: { B: LABELS.unusedNotes.constantB },
+              },
+              {
+                label: LABELS.words.load,
+                text: "R2 <= word[sensorA]",
+                notes: { A: LABELS.unusedNotes.loadA, B: LABELS.unusedNotes.loadB },
+              },
+              {
+                label: LABELS.words.branch,
+                text: "0x56230002",
+                notes: { Y: LABELS.unusedNotes.branchY },
+              },
             ],
             notes: LABELS.fieldNotes,
           },
@@ -112,12 +128,12 @@ export const encoding: LessonInput = {
           after: PROSE.layoutsAfter,
           props: {
             instructions: [
+              { label: LABELS.words.subtract, text: "R3 <= R1 - R2" },
+              { label: LABELS.words.branch, text: "0x56230002" },
+              { label: LABELS.words.jump, text: "0x70F00000" },
               { label: LABELS.words.addConstant, text: "R2 <= R1 + 100" },
               { label: LABELS.words.load, text: "R2 <= word[sensorA]" },
-              { label: LABELS.words.branch, text: "0x56230002" },
               { label: LABELS.words.call, text: "0x6000F005" },
-              { label: LABELS.words.jump, text: "0x70F00000" },
-              { label: LABELS.words.subtract, text: "R3 <= R1 - R2" },
             ],
           },
         },

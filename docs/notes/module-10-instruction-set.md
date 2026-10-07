@@ -86,6 +86,14 @@ subagent that wrote every learner-facing sentence from a brief of checked facts.
   opening question changed with 10.3's reflection (finding 8). The 10.2 findings' calculator fix
   (convert the typed words on a switch of form; drop "B is the word's constant" once B is typed)
   went in alongside.
+- 08:10 to 08:35 The findings for 10.2 (ten). Code: each instruction on the opening figure has
+  notes for the fields it leaves unused (item 1); the layouts figure opens on the register job,
+  which nothing moves (item 3), with a browser test. Brief 2B's item 2 was wrong (mine, copied by
+  the drafter) and is corrected; brief 2R, drafted in two parts, carried every fact. The prompt to
+  predict in the failure experiment is gone (its answer showed on load). The plan change of item
+  5 is recorded above as the managing session's. Findings for 10.1, 10.4 and 10.5 arrived
+  meanwhile, with decisions A to K; `runProgram`'s count of a refused word (G, K) is held for
+  10.4's round, where it changes a stated count.
 
 ## The outline
 
@@ -102,7 +110,7 @@ rely on, and why the instructions and their layout are what they are.
    for the same instructions, Module 9's machine with its jobs written at the ALU edge in 3 edges,
    tested edge by edge and against the reference. Introduces **instruction set** and
    **microarchitecture**.
-2. `encoding`, "Why do instruction fields sit on digit boundaries?": the layout as a design. The encoding explorer
+2. `encoding`, "Why does every field keep one place in every instruction, and what does that cost?": the layout as a design. The encoding explorer
    with the course's calculator; the course's layout beside a packed one, in which a kind that
    leaves a register digit unused gives it to the constant, and pays with a field that moves.
    Challenges: write instructions' words (answers); write the packed layout's register file
@@ -127,6 +135,18 @@ rely on, and why the instructions and their layout are what they are.
    the layout's rules (a free kind, the fields where every instruction keeps them, the program it
    shortens, what it costs); the decoder's text with kind A; the machine's text with the new source
    for register Y, run end to end. Introduces nothing.
+
+## Changes to the plan, the managing session's
+
+Decisions the managing session took after the reading review, each changing
+`docs/notes/module-10-plan.md`; recorded here as theirs.
+
+- **10.2 compares two whole-digit layouts, not a layout packed by bits** (10.2's item 5). The plan
+  asked for "a layout packed by bits"; the page compares fields that keep one place in every
+  instruction with fields that move. 10.1's reflection, 10.2's title and its question now ask
+  what the page compares, and the question says why the fields are whole digits: sixteen
+  registers, kinds and jobs need 4 bits each, so cutting by bits buys room only where a field is
+  unused, which the packed layout shows.
 
 ## The capstone's instruction, and the machine it changes
 

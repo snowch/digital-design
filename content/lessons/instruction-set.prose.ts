@@ -55,7 +55,7 @@ export const PROSE = {
     "The whole answer: the arm in hint 3, WREG in hint 4, and in the module `machine` the line `YIN = HR;` becomes `YIN = RESULT;`.",
   ],
   reflection:
-    "The instruction set is the agreement. The microarchitecture is how one circuit keeps it. You wrote a third circuit, and every program ran to the same result.\n\nThe agreement covers what each instruction does. It also covers how each instruction's word is laid out: K, J, A, B, Y and three digits of constant, each field in the same place.\n\nWhy that layout, of whole hexadecimal digits? What does it cost?",
+    "The instruction set is the agreement. The microarchitecture is how one circuit keeps it. You wrote a third circuit, and every program ran to the same result.\n\nThe agreement covers what each instruction does. It also covers how each instruction's word is laid out: K, J, A, B, Y and three digits of constant, each field in the same place in every instruction.\n\nWhy does every field keep one place in every instruction, and what does that cost?",
   modelVsReality:
     "The simulator compares the two machines after every instruction, against a model that runs one instruction at a time. Makers of real machines test a new circuit the same way: against such a model, on many programs.\n\nA real maker may sell a small, slow circuit and a large, fast one that run the same programs. How long an instruction takes is not part of the agreement, on the course's machines or on real ones.",
 } as const;

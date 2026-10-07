@@ -297,6 +297,20 @@ test.describe("Module 10's figures", () => {
     await expect(figure.locator(".layout-field.moved")).toHaveText(["Y2"]);
   });
 
+  test("the layouts open on a register job, which nothing moves; a load's Y moves", async ({
+    page,
+  }) => {
+    await openLesson(page, "encoding");
+    const figure = page.locator("#ix-layouts");
+    await figure.scrollIntoViewIfNeeded();
+    await expect(figure.getByText("Word: 13123000").first()).toBeVisible();
+    await expect(figure.locator(".layout-field.moved")).toHaveCount(0);
+    await expect(figure.locator(".layout-moved")).toHaveText(T.layoutStill);
+    await figure.getByRole("radio").nth(4).check();
+    await expect(figure.getByText("Word: 380207D8")).toBeVisible();
+    await expect(figure.locator(".layout-field.moved")).toHaveText(["Y2"]);
+  });
+
   test("the explorer reads a typed word, and the calculator runs the ALU on its job", async ({
     page,
   }) => {
@@ -316,6 +330,14 @@ test.describe("Module 10's figures", () => {
     await figure.getByRole("button", { name: T.fromWord }).click();
     await expect(figure.getByRole("textbox", { name: T.bLabel })).toHaveValue("100");
     await expect(figure.locator(".calculator-y")).toContainText("-84");
+    await expect(figure.locator(".calculator-took")).toContainText(T.tookB);
+    // A switch of form converts the words typed: B keeps its value, written in hexadecimal.
+    await figure.getByRole("radio", { name: T.formHex }).check();
+    await expect(figure.getByRole("textbox", { name: T.bLabel })).toHaveValue("64");
+    await expect(figure.locator(".calculator-y")).toContainText("-84");
+    // B typed by hand is no longer the word's constant.
+    await figure.getByRole("textbox", { name: T.bLabel }).fill("65");
+    await expect(figure.locator(".calculator-took")).not.toContainText(T.tookB);
   });
 
   test("the branch that says greater than is the swapped less than; the table holds for all", async ({
