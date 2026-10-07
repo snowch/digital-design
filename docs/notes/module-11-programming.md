@@ -11,7 +11,8 @@ from a brief of checked facts. The plan is `docs/notes/module-11-plan.md`.
 - Outline settled and sent: 16:26. Model, assembler and graders: 16:36.
 - Lessons: 11.1 at 16:58, 11.2 at 17:14, 11.3 at 17:21, 11.4 at 17:26, 11.5 at 17:33, 11.6 at
   17:42, 11.7 at 17:45. Second pass, each lesson read whole: 17:50.
-- Mechanical walk and its fixes: 17:50 to 18:05. Note written: 18:05. The full check: below.
+- Mechanical walk and its fixes: 17:50 to 18:05. Note written: 18:05.
+- The early review reached the session at 18:05; its items were done from 18:05 to 18:55 (below).
 
 ## Log
 
@@ -54,28 +55,33 @@ one before ends on.
    neighbouring readings. Introduces **breakpoint**.
 3. `functions`, "How can a program use one piece of program from two places?": a call keeps the
    return address in R15, `goto R15` returns; arguments in R1 to R4, the result in R1; free and
-   kept registers; the convention as an agreement the hardware does not know. Challenges: which
-   registers a function must put back (answers); a function `above` (how far a reading is above a
-   limit, or 0), tested by calling it directly with several arguments. Introduces **function**,
-   **argument**, **calling convention**.
+   kept registers; the convention as an agreement the hardware does not know. The function is
+   `overBy` (how far a reading is above a limit, or 0), which works in R5. Construction: the
+   caller's side, the larger of the two rooms' amounts, which must keep room A's result in a kept
+   register through the second call (in R5 it is lost). Challenge: a function of the learner's
+   own, `outOfRange` (three arguments, the fridge's range), tested by calling it directly.
+   Introduces **function**, **argument**, **calling convention**.
 4. `stack`, "What must a function that calls another keep, and where?": R15 overwritten by the
-   inner call, the run cut off; a stack in RAM from `7C0` down, pushed and popped with R14; frames;
-   the convention's rows for R10 to R13 and R14 completed. The debugger gains the stack view.
-   Challenges: a function that calls `above` twice and keeps a word in R10; the stack's addresses
-   after a run of pushes (answers). Introduces **stack**. ("Frame" was planned as a term and is
-   not rationed; "Terms" says why.)
-5. `recursion`, "Can a function call itself?": the log shown newest first by a function that calls
-   itself on the rest of the log; its frames growing and shrinking; a missing last case, and a log
-   too long, each running the stack into the ROM (cause `34` at a push). Challenges: show only the
-   readings colder than a limit, newest first, by a function that calls itself; the stack's depth
-   for a log of n readings (answers). Introduces **recursion**.
+   inner call, the run cut off; a stack in RAM from `7C0` down, pushed and popped with R14; the
+   convention's rows for R10 to R13 and R14 completed. The main program keeps ALARM's bit in R10
+   through the call to `sumOver`, so the push and pop visibly save it; pops in the order of the
+   pushes send the return to `001` (cause `12`). The debugger gains the stack view. Construction:
+   the stack's addresses for `check`, a function the lesson lists and never runs. Challenge:
+   `roomsOver`, which calls `overBy` twice and keeps two words. Introduces **stack**. ("Frame"
+   was planned as a term and is not rationed; "Terms" says why.)
+5. `recursion`, "Can a function call itself?": the cold store's rooms, each three words (its
+   reading and the addresses of the rooms behind its two doors), counted by `warmRooms`, which
+   calls itself behind each door. The stack rises and falls with the way in; a door that leads
+   back runs it into the ROM (cause `34` at a push). Construction: the calls and the stack's depth
+   for a second store (answers). Challenge: `farthest`, how many rooms lie on the longest way in.
+   Introduces **recursion**.
 6. `debugging`, "How do you find the mistake in a program that runs and gives a wrong answer?": a
    method (reproduce on the failing log, say what each part should leave, pause before the part,
    step and watch, find the first instruction whose result differs, fix, run every log); every
-   stop's reason in plain words. Programs with real mistakes: a count off by one (the last reading
-   never read), a forgotten push and pop of R15 together with an unsigned comparison of signed
-   readings, and a stack started in the ROM. Challenges: the two programs to mend, each run on
-   several logs. Introduces nothing.
+   way a run ends in plain words. Programs with real mistakes: a count off by one (the last
+   reading never read), and a stack started in the ROM. Challenges: mend the count; mend a count
+   over the limit with two mistakes the module has not shown, a list stepped by 4 (a halt) and the
+   count read as the address of `count` (then a wrong answer). Introduces nothing.
 7. `log-report`, the capstone, "Can you write a program the shop can use?": the day's report from
    a log (below). Introduces nothing.
 
@@ -111,14 +117,24 @@ the authors' tool reported as "not a number"), a `goto` or `call` to a name on d
 
 ## Figures
 
-- `program-listing` (11.1, the opening and the prediction): a program's lines beside their
-  addresses and words, labels and the addresses they stand for, each branch's constant with its
-  target; optionally a question before the words show.
+- `program-listing` (every lesson's prediction, 11.1's opening, 11.4's construction): a program's
+  lines beside their addresses and words, names and the addresses they stand for, each branch's
+  constant with its target; optionally a question before the words show, about the listing (a
+  word, an address, a constant) or about a run from reset (`runAnswer`: a register, a word, the
+  display, the calls), which the lesson's investigation then runs.
 - `debugger` (from 11.1, grown): the program as text (editable where the lesson says), the listing
-  with the line about to run, R0 to R15, the PC, the devices; step, step back, run, reset; every
-  stop's reason; the run cut off after a set number of instructions. From 11.2 breakpoints, a watch
-  and a memory view with the registers that point into it marked; from 11.4 the stack view with
-  frames.
+  in a box of its own height that keeps the line about to run in view, R0 to R15, the PC, the
+  devices; step, step back, run, reset; every stop's reason; the run cut off after a set number of
+  instructions; its `outcomes` shown only once the run has ended. From 11.2 breakpoints, a watch
+  and a memory view with the registers that point into it marked; from 11.4 the stack view,
+  grouped by the call that pushed. Without its listing (`listing: false`, a `runLabel`), it is
+  11.2's opening figure: R1 moving down the log, one reading a press.
+
+Each lesson's opening figure: 11.1 the colder-room program's listing; 11.2 R1 moving down the log;
+11.3 the check written twice against written once; 11.4 `sumOver` with no stack, R15 overwritten
+and the run cut off (the stack is the answer to it, so it is not drawn before the question); 11.5
+the cold store's rooms as words; 11.6 the count on five logs beside what each asks; 11.7 the
+starting text on six logs beside the report each asks for.
 - `stack-depth` (11.4, 11.5): the stack's depth over a whole run, calls and returns marked. Its
   height is clamped at 120 words so a run that reaches the ROM still fits the drawing.
 - `program-compare` (Module 10's, used unchanged in 11.2 and 11.3): signed and unsigned on readings
@@ -213,6 +229,10 @@ Words used and not rationed, with the reason:
 - Added: an address written as a name plus or minus a number (`word[log + 8]`), so a program can
   read a word inside a list by name. The plan allowed it as a refinement. No lesson's program needs
   it yet; the model's tests use it.
+- Added after the early review: a `word` may be written as a name, which the assembler replaces
+  with that name's address on its second pass (`hall: word -150, prep, store`). 11.5's rooms need
+  it: each room holds the addresses of the rooms behind its doors. A name nothing defines is
+  refused as `unknownName`, on the data line. `docs/isa.md` says so.
 - New refusals, each with a code and a sentence in `strings11.ts`: a name nothing defines
   (`unknownName`; before, "not a number"), a name defined twice (`twice`), a branch or call to a
   name on data (`dataTarget`), a number too wide for its `word` or `byte` (`wordTooWide`), a word
@@ -235,11 +255,17 @@ a function's caller sees it: R10 to R14 hold, after the return, what they held b
 
 - The capstone's three tiers are three ways into one challenge (the starting text, the
   specification with an empty program, the requirements alone), as the outline says.
-- The plan's lesson 6 mistake "a signed comparison on unsigned values" became an unsigned
-  comparison on signed readings. Every quantity in the shop is a reading that can be below 0; no
-  program in the course holds a value meant unsigned that a signed comparison would get wrong, so
-  the plan's version would need a contrived program. The unsigned-on-signed mistake is the one 11.1
-  and 11.2 warn about, and 11.6 finds it with the method.
+- The plan's lesson 6 mistake "a signed comparison on unsigned values" was first built as an
+  unsigned comparison on signed readings, since no program in the shop holds a value meant
+  unsigned. After the early review, 11.6 drops it with the other mistakes the module had already
+  shown (item 7 below); the unsigned comparison stays where 11.2 shows it.
+- Recursion is taught on a job whose work nests (early note 2, review item 5): the cold store's
+  rooms, each leading to up to two more. A loop could do it only by keeping a stack of its own, so
+  the lesson's point is what recursion keeps on the stack and what that costs, and the depth follows
+  the longest way in. Showing the log newest first, the first build's example, is done more simply
+  by a loop that walks backwards.
+- `overBy` works in R5, a free register, as the convention allows. That makes 11.3's construction
+  honest: a caller that keeps room A's result in R5 loses it, on readings the tests include.
 - Module 10's `program-compare` says a run "halted at the stop"; Module 11 says a run *stops* at
   `stop`, *halts* only for a trap cause, *pauses* at a breakpoint, and is *cut off* at 5000
   instructions. The two figures keep their own strings; 11.2 and 11.3 use `program-compare` only
@@ -279,6 +305,71 @@ prediction gate; the mistakes figure mended; breakpoint and watch; the tiers' bu
 ran at both widths alongside the diagrams and aesthetics tests, which pass for every Module 11
 figure. The ten stored-screenshot failures this container shows on `main` (Module 10's note) are
 the same here and none is Module 11's.
+
+## The managing session's early review, and what was done
+
+The review of 11.1 to 11.5 at 7eaaf1b (and its three earlier notes) reached this session at 18:05,
+queued since 16:27 and 17:46. The full check then running was stopped. Each item:
+
+1. **The learner cannot watch the debugger while it steps.** The listing sits in a box of its own
+   height (17rem on a phone, 20rem from 481px, 26rem from 60rem) that scrolls itself, never the
+   page, to keep the line about to run in view, with its header held. On a desk the watch, the
+   registers, the devices, the stack and the memory sit beside it; on a phone below it, the watch
+   first. The pause toggles are 28px tall from 481px and stay 40px on a phone. A browser test, at
+   both widths, steps, runs to a breakpoint and steps back on 11.2's, 11.4's and 11.5's long
+   debuggers and checks that the buttons, the ▶ row (inside its box) and the watch are on screen.
+2. **Results before the run.** Every Module 11 debugger's result text is its `outcomes`, shown once
+   the run has ended (and the prediction, where there is one, made). 11.1's mistakes text waits for
+   the mended program's run. `log-results` already waited for "Run all". 11.5's failure experiment
+   is one figure now, so no lead answers another figure's question. A browser test checks three
+   figures' results are absent at load and present after the run.
+3. **Predictions the page answers.** Each prediction now asks about something the page has not
+   said, offers the tempting wrong answer, and labels options with the value alone: 11.2 where R1
+   ends (`070`; `068` tempting); 11.3 what R15 holds when the program stops (`01C`; `00C`, `018`);
+   11.4 the word at `7B8` while `overBy` first runs (`014`; `010`, the call's own address); 11.5
+   how many calls (13; 6); 11.6 R2 at the first pause, its explanation no longer naming the line
+   the construction asks for. 11.4's failure experiment is new (item 8) and its lead says nothing
+   of the result.
+4. **Challenges the page answers; constructions weaker than challenges.** 11.3: the roles quiz
+   (whose R1 had two true answers) is gone; the construction writes the caller, the challenge a
+   new function, `outOfRange`. 11.4: the construction asks the stack's addresses of `check`, which
+   the lesson lists and never runs, including the word left at `7B8` after the pops; the challenge
+   writes `roomsOver`. 11.5: the construction works out the calls and depth for a second store; the
+   challenge writes `farthest`. 11.6's prediction explanation no longer names the line.
+5. **Recursion.** Rebuilt on the cold store's rooms (above). `word` takes a name (above).
+6. **The same debugger twice.** Each prediction is now the listing with its question (the
+   `program-listing` figure asks about a run through `runAnswer`); the investigation does the
+   running. 11.4 has three debuggers (the lost return, the stack, the swapped pops), not five.
+7. **11.6's second challenge.** Two mistakes the module has not shown: a list stepped by 4 (cause
+   `33` at the load) and the count read as the address of `count` (then a wrong count, 94 on log
+   1). Both show on every test log.
+8. **Words.** Functions renamed so a sentence cannot absorb them: `overBy`, `sumOver`, `roomsOver`,
+   `outOfRange`, `warmRooms`, `farthest`, `lowestOf`, `highestOf`, `warmCount`; the fact sheet
+   (`briefs/00-module.md`) gained a section on them and on the words read two ways. "Either
+   reading", "without a word" and calls "at once" are gone. The untrue statements are rewritten
+   from new facts: the stack is shared and each call's words are its own; 11.5's reflection points
+   at 11.2's and 11.3's wrong answers; no function "keeps two words through both calls". 11.4's
+   main program keeps ALARM's bit in R10, so the push protects something the learner sees. 11.4's
+   failure experiment is pops in the wrong order (cause `12` at `001`). Captions name what a
+   figure shows. "Frame" left 11.4's objectives.
+
+The early notes: opening figures are named under "Figures"; recursion as item 5; the capstone's
+question, prediction and failure experiment are each about the report (its six logs, `lowestOf` on
+log 5, a `highestOf` started at 0), and its other sections draw on the module rather than repeat it.
+
+Found on the way and mended: a failed test of a function said "registers the function did not put
+back None; whether the run came back to R15 yes". It now says "R10 to R14 as they were; a return
+through R15" (brief 8K). 11.5's opening figure first rendered empty, its memory region named by an
+address the panel does not read; it is named `hall` now, and a browser test holds it.
+
+Every new word came from briefs 2R to 8K, drafted by the drafting subagent and checked; the fixes
+of fact are in `drafts/*-fixes.json`, the second pass's in `drafts/*-pass2.json`. Two drafts went
+back: 4RA's question (a false fact about the calls' arguments, and the result told before the run)
+and 2R's generalisation (an invented sentence).
+
+The mechanical walk was repeated on the rebuilt pages, at 1280 and 768 in the light theme and 375
+in the dark: no console error, no sideways scroll. The drawing and look tests pass for every Module
+11 figure; the ten stored screenshots that fail in this container fail on `main` too.
 
 ## What the build would change
 
