@@ -2,6 +2,8 @@
 
 // The shell's own words. Drafted by the prose process; see CLAUDE.md.
 
+import { MODULE_NAMES } from "@dd/content";
+
 export const STRINGS = {
   skip: "Skip to content",
   lessons: "Lessons",
@@ -117,22 +119,8 @@ export const STRINGS = {
     continueWith: (module: number, title: string) => `Continue with Module ${module}: ${title}`,
   },
   /** Every module the plan has (`docs/plan.md`), by number from 0, in plain words. */
-  moduleNames: [
-    "What computers do",
-    "Voltage to numbers",
-    "Learning AND, OR, NOT",
-    "Selecting, comparing, adding",
-    "Memory and time",
-    "Counting and sequences",
-    "Accessing many numbers",
-    "Arithmetic and logic",
-    "Putting pieces together",
-    "Control and sequencing",
-    "The machine's vocabulary",
-    "Programming and debugging",
-    "Errors and responses",
-    "The whole machine",
-  ] as readonly string[],
+  // Module 0: the names live with the lessons, so a lesson can name a module in these words.
+  moduleNames: MODULE_NAMES,
   progress: (passed: number, total: number) => `${passed} of ${total} challenges complete`,
   missing: (path: string) => `There is no page at ${path}.`,
   noLesson: (id: string) => `There is no lesson called ${id}.`,

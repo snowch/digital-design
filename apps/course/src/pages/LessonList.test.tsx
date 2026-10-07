@@ -54,6 +54,25 @@ describe("the course's front page: the cover", () => {
     ).toHaveAttribute("href", lessonHref(second.id));
   });
 
+  it("takes a returning reader on from the furthest lesson they passed a challenge in", () => {
+    // A reader who began in Module 2 before Module 0 existed is not sent back to Module 0.
+    const later = ordered.find((l) => l.module === 2 && l.challenges.length > 1)!;
+    const after = ordered[ordered.indexOf(later) + 1]!;
+    const storage = memoryStorage();
+    pass(storage, later.id, 1);
+    const { unmount } = render(<LessonList book={book} storage={storage} />);
+    expect(
+      screen.getByRole("link", { name: STRINGS.cover.continueWith(later.module, later.title) }),
+    ).toHaveAttribute("href", lessonHref(later.id));
+    unmount();
+    // That lesson finished, the way on is the next lesson, though Module 0 is still unfinished.
+    pass(storage, later.id, later.challenges.length);
+    render(<LessonList book={book} storage={storage} />);
+    expect(
+      screen.getByRole("link", { name: STRINGS.cover.continueWith(after.module, after.title) }),
+    ).toHaveAttribute("href", lessonHref(after.id));
+  });
+
   it("shows the way in before the path, so a reader knows where to start", () => {
     render(<LessonList book={book} storage={memoryStorage()} />);
     const start = screen.getByRole("link", {
@@ -64,7 +83,7 @@ describe("the course's front page: the cover", () => {
     expect(start).toHaveTextContent(first.title);
     const path = screen.getByRole("heading", { name: STRINGS.cover.journeyHeading });
     expect(start.compareDocumentPosition(path) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(first.module).toBe(1);
+    expect(first.module).toBe(0);
   });
 
   it("puts a real circuit beside the opening words, which the reader can press", () => {

@@ -121,6 +121,9 @@ describe("the course's lessons", () => {
       for (const s of l.sections)
         for (const x of s.interactives) {
           if (x.kind !== "scene") continue;
+          // Module 0's shop names no signal: its learner has met none, and its challenges are
+          // answers about the running machine, with no circuit interface.
+          if (l.module === 0) continue;
           const names = l.challenges.flatMap((c) =>
             [...c.interface.inputs, ...c.interface.outputs].map((p) => p.name),
           );
@@ -165,7 +168,8 @@ describe("the course's lessons", () => {
               ? c.initial
               : { circuit: compileDrawing(emptyDrawing(c.interface)).circuit };
           expect(grade(c, start).passed).toBe(false);
-        });
+          // Module 0's challenges run the whole machine on its gates, a run a case.
+        }, 15_000);
       }
 
       it("renders every section and figure without a problem note", () => {

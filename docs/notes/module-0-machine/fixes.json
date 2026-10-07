@@ -1,0 +1,137 @@
+[
+  [
+    "1L",
+    "options.p1Skip",
+    "Skip to line 9",
+    "Lines 1 to 6, then line 9",
+    "drifted: the brief's option names the lines run"
+  ],
+  ["1L", "options.p1Stop", "Stop at line 6", "Lines 1 to 6, then it stops", "drifted: as above"],
+  [
+    "1L",
+    "options.p1All",
+    "All nine lines",
+    "All nine lines, 1 to 9",
+    "the three options in one shape"
+  ],
+  [
+    "1B",
+    "construction",
+    "5.0 degrees warmer than room B",
+    "5.0 degrees or more warmer than room B",
+    "dropped: or more"
+  ],
+  [
+    "1C",
+    "c2Task",
+    "with your answers.",
+    "with your answers. There are 2 tests.",
+    "dropped: the count of tests"
+  ],
+  [
+    "1C",
+    "inYourHeadLead",
+    "from the program first.",
+    "from the program first. Then check it in the investigation's figure if you like.",
+    "dropped: where to check"
+  ],
+  [
+    "1C",
+    "modelVsReality",
+    "Each press of Run runs one line.",
+    "Each press of Run one line runs one line.",
+    "wrong: Run runs to the stop"
+  ],
+  [
+    "1A",
+    "question",
+    "How does the machine decide",
+    "The figure below draws them: the sensors on the left, the machine in the middle, the display and the lamps on the right.\n\nHow does the machine decide",
+    "dropped: what the figure draws (paragraph break kept as the brief's two paragraphs)"
+  ],
+  [
+    "1A",
+    "shopAfter",
+    "how many wires carry the number",
+    "how many wires take the number",
+    "vocabulary: carry is rationed (Module 3)"
+  ],
+  [
+    "1A",
+    "prediction",
+    "Work out what line 3",
+    "Its numbers and buttons stay hidden until you choose an answer. Work out what line 3",
+    "dropped: values hidden until the commit"
+  ],
+  [
+    "2A",
+    "prediction",
+    "press Check my prediction.",
+    "press \"Check my prediction\".",
+    "the button's name in quotation marks, as elsewhere"
+  ],
+  ["2A", "p1Explain", "Press Down a level", "Press \"Down a level\"", "as above"],
+  [
+    "2A",
+    "ladderLead",
+    "Press Down a level at each step,",
+    "Each press of \"Down a level\" goes one level down,",
+    "\"step\" names a stepping figure elsewhere; one level a press is the fact"
+  ],
+  ["2A", "levelParts", "press Make smaller", "press \"Make smaller\"", "as above"],
+  [
+    "1B",
+    "c1Hints.1",
+    "The concept: ",
+    "",
+    "the runtime names each rung itself; the label repeated it"
+  ],
+  ["1B", "c1Hints.2", "The mistake: ", "", "as above"],
+  ["1B", "c1Hints.3", "A smaller example: ", "", "as above"],
+  ["1B", "c1Hints.4", "Part of the answer: ", "", "as above"],
+  ["1B", "c1Hints.5", "The answer: ", "", "as above"],
+  [
+    "2B",
+    "c1Task",
+    "reads the eight slices.",
+    "reads the eight slices. There is 1 test.",
+    "dropped: the count of tests"
+  ],
+  [
+    "2B",
+    "stuckLead",
+    "inside the slice worth 2 and stays",
+    "inside the slice worth 2, and it stays",
+    "a join that read as a list"
+  ],
+  [
+    "6V",
+    "status.running",
+    "Running: line {line}.",
+    "Running. Next: line {line}.",
+    "wrong: {line} is the line it runs next"
+  ],
+  [
+    "6V",
+    "status.trapped",
+    "Cannot run line {line}.",
+    "Stopped: it cannot run line {line}.",
+    "dropped: that it stopped"
+  ],
+  [
+    "6V",
+    "ladder.number",
+    "{value}",
+    "The number here: {value}",
+    "dropped: the label, which the brief gave"
+  ],
+  ["6V", "ladder.digits", "{digits}", "Its 1s and 0s: {digits}", "as above"],
+  [
+    "2L",
+    "captions.ladder",
+    "Press 'Down a level' to descend",
+    "Press \"Down a level\" to go down",
+    "button names in double quotation marks; plain word"
+  ],
+  ["2L", "titles.prediction", "Which slices give 1", "Which slices give a 1", "the brief's wording"]
+]

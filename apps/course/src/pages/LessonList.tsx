@@ -114,13 +114,22 @@ export function LessonList({
       verifyCompletion(book, l, new LessonStore(storage, book.id, l.id).get()),
     ]),
   );
-  // A reader who has passed a challenge goes on from the first lesson not finished; a new reader
-  // starts at the first lesson.
-  const started = ordered.some((l) => (completion.get(l.id)?.passed ?? 0) > 0);
-  const unfinished = ordered.find((l) => {
+  // A reader who has passed a challenge goes on from the furthest lesson in which they have passed
+  // one, to the first lesson from there not finished; a new reader starts at the first lesson.
+  // Module 0 came after some readers began: one who was in Module 3 goes on in Module 3, not back
+  // to Module 0, which the list still shows unfinished. Only when every lesson from there on is
+  // finished does the way in go back to the first one not finished.
+  const furthest = ordered.reduce(
+    (at, l, i) => ((completion.get(l.id)?.passed ?? 0) > 0 ? i : at),
+    -1,
+  );
+  const notFinished = (l: Lesson) => {
     const c = completion.get(l.id);
     return c !== undefined && c.total > 0 && c.passed < c.total;
-  });
+  };
+  const unfinished =
+    ordered.slice(Math.max(0, furthest)).find(notFinished) ?? ordered.find(notFinished);
+  const started = furthest >= 0;
   const next: Lesson | undefined = started ? (unfinished ?? ordered[0]) : ordered[0];
   // The page lists every module, each one line until it is pressed; the module of the lesson the
   // button above names starts open, and so does the module of the lesson the reader has just left
