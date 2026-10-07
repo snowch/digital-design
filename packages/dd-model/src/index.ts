@@ -46,3 +46,6 @@ export * from "./programs10";
 export * from "./capstone10";
 // Module 0, meet the machine: the finished machine read for a learner with no terms yet.
 export * from "./meet";
+// Module 11, programming and debugging: the debugger's runs and programs graded by running them.
+export * from "./debugger";
+export * from "./program-tests";
