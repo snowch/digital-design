@@ -210,7 +210,7 @@ export function LessonList({
       </section>
       <Journey written={(m) => byModule.has(m)} />
       {book.lessons.length === 0 && <p>{STRINGS.noLessons}</p>}
-      <h2 className="contents-heading">{STRINGS.cover.contents(modules.length)}</h2>
+      <h2 className="contents-heading visually-hidden">{STRINGS.cover.contents(modules.length)}</h2>
       {modules.map((module) => {
         const lessons = byModule.get(module) ?? [];
         const name = STRINGS.moduleNames[module];

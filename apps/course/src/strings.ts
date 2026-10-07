@@ -127,7 +127,10 @@ export const STRINGS = {
       to === from + 1 ? `Modules ${from} and ${to}` : `Modules ${from} to ${to}`,
     /** On a stage whose modules have no lessons yet. */
     stageToWrite: "Still to be written",
-    /** Above the list of every module the plan has. */
+    /**
+     * The heading of the list of every module the plan has, for readers who move by headings. It is
+     * not shown: the rule under the stages ends them, and each module below names itself.
+     */
     contents: (count: number) => `All ${count} modules`,
     /** Under a module with no lessons yet. */
     toWrite: "This module is still to be written.",
