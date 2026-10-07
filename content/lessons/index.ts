@@ -52,6 +52,7 @@ import { encoding } from "./encoding";
 import { immediates } from "./immediates";
 import { roomToGrow } from "./room-to-grow";
 import { designAnInstruction } from "./design-an-instruction";
+import { assembly } from "./assembly";
 
 const INPUTS: readonly LessonInput[] = [
   // Module 0, meet the machine.
@@ -102,6 +103,8 @@ const INPUTS: readonly LessonInput[] = [
   immediates,
   roomToGrow,
   designAnInstruction,
+  // Module 11, programming and debugging
+  assembly,
 ];
 
 export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(

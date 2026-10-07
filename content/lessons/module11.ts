@@ -53,15 +53,24 @@ export const WARMER_REFERENCE = `// Show the warmer room's reading on the displa
 show: word[display] <= R2
       stop`;
 
-/** The program the second challenge assembles by hand. */
-export const BE_THE_ASSEMBLER = `       R1 <= word[limit]
-       R2 <= word[sensorA]
-       if R1 < R2 signed goto warm
-       stop
-warm:  R3 <= 1
-       word[lamps] <= R3
+/** Room A against a limit kept as data after the program: the explanation's listing. */
+export const LIMIT_AS_DATA = `       R2 <= word[sensorA]
+       R3 <= word[limit]
+       if R2 < R3 signed goto fine
+       R4 <= 1
+       word[lamps] <= R4
+fine:  word[display] <= R2
        stop
 limit: word -180`;
+
+/** The program the second challenge assembles by hand. */
+export const BE_THE_ASSEMBLER = `       R1 <= word[limit]
+       R2 <= word[sensorB]
+       if R2 < R1 signed goto cold
+       R3 <= 1
+       word[lamps] <= R3
+cold:  stop
+limit: word -200`;
 
 // ---------------------------------------------------------------------------------------------
 // 11.2 lists

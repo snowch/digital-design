@@ -37,6 +37,7 @@ import { Builder } from "./Builder";
 import { rememberVerdicts } from "./grade-cache";
 import { CircuitView, levelOf, SignalTable } from "./CircuitView";
 import { HdlPanel } from "./HdlPanel";
+import { ProgramEditor, gradeProgram, isProgramChallenge } from "./ProgramEditor";
 import { GATE_IDS, labelFor } from "./parts";
 import {
   circuitToDrawing,
@@ -146,6 +147,8 @@ export function circuitOf(
 }
 
 export function grade(challenge: Challenge, artifact: Artifact): Verdict {
+  // Module 11: a program, graded by running it.
+  if (isProgramChallenge(challenge)) return gradeProgram(challenge, artifact);
   if (challenge.tests.kind === "answers") return gradeAnswers(challenge, artifact);
   const { circuit, blocked } = circuitOf(challenge, artifact);
   const total =
@@ -543,7 +546,9 @@ function WriteEditor({ challenge, artifact, onChange, verdict }: ChallengeEditor
 }
 
 export const ChallengeEditor: ComponentType<ChallengeEditorProps> = (props) =>
-  props.challenge.gradedDirection === "answer" ? (
+  isProgramChallenge(props.challenge) ? (
+    <ProgramEditor {...props} />
+  ) : props.challenge.gradedDirection === "answer" ? (
     <AnswerEditor {...props} />
   ) : props.challenge.gradedDirection === "write" ? (
     <WriteEditor {...props} />
