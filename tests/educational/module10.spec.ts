@@ -153,6 +153,13 @@ const WRONG: readonly {
     to: "",
     why: "SET joined but no new source for register Y",
   },
+  {
+    lesson: "design-an-instruction",
+    id: "set-machine",
+    from: "{63'h0, MET}",
+    to: "{63'h0, MINUS}",
+    why: "MINUS alone as the condition, wrong when the subtraction overflows",
+  },
 ];
 
 test.describe("Module 10's wrong attempts are rejected with the failing test named", () => {

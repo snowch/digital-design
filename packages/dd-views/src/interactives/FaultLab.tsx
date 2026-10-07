@@ -48,10 +48,18 @@ export const FaultSpec = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("wrong-gate"), path: z.string(), gate: z.string(), ...label }),
 ]);
 
+/** A known word of several bits, as the report writes it: in binary, or in hexadecimal. */
+function inRadix(bits: string, radix: 2 | 16): string {
+  if (radix === 2 || bits.length < 2 || !/^[01]+$/.test(bits)) return bits;
+  return `0x${BigInt(`0b${bits}`).toString(16).toUpperCase()}`;
+}
+
 const Props = z.object({
   libraryId: z.string(),
   /** Module 10: the widest word written on the drawing; wider words show in the checks only. */
   writtenWidth: z.number().int().min(1).optional(),
+  /** The base the report writes a known word of several bits in: 2, or 16 for a wide word. */
+  radix: z.union([z.literal(2), z.literal(16)]).default(2),
   faults: z.array(FaultSpec).min(1),
   run: z.array(Step).min(1),
   scope: z.string().default(""),
@@ -207,10 +215,10 @@ export const FaultLab = withProps(
                     {format(strings.fault.failure, {
                       label: f.label,
                       actual: Object.entries(f.actual)
-                        .map(([k, v]) => `${k}=${v}`)
+                        .map(([k, v]) => `${k}=${inRadix(v, data.radix)}`)
                         .join(", "),
                       expected: Object.entries(f.expected)
-                        .map(([k, v]) => `${k}=${v}`)
+                        .map(([k, v]) => `${k}=${inRadix(v, data.radix)}`)
                         .join(", "),
                     })}
                   </li>

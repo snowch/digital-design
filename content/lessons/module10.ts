@@ -191,6 +191,35 @@ R4 <= R5 + R6
 word[display] <= R4
 stop`;
 
+/**
+ * The capstone machine's tests: the cold-room count with the shop's readings, edge by edge; then,
+ * each from a reset with other readings, both rooms colder, neither, and room A at the largest
+ * word, whose subtraction overflows, each checked at its halt. A source for register Y that gives
+ * the right count on one pair of readings (the condition turned over, MINUS alone, COUT) gives a
+ * wrong one on another.
+ */
+export function setMachineSteps(): MachineStep[] {
+  const opts = { callThroughRegister: true, setIf: true } as const;
+  const quiet = { door: 0, warm: 0 } as const;
+  return [
+    ...machineSteps(COUNT_COLD_SET, { ...quiet, sensorA: -184n, sensorB: -250n }, opts, {
+      name: "Room B colder",
+    }),
+    ...machineSteps(COUNT_COLD_SET, { ...quiet, sensorA: -250n, sensorB: -300n }, opts, {
+      name: "Both colder",
+      edges: false,
+    }),
+    ...machineSteps(COUNT_COLD_SET, { ...quiet, sensorA: -100n, sensorB: -150n }, opts, {
+      name: "Neither colder",
+      edges: false,
+    }),
+    ...machineSteps(COUNT_COLD_SET, { ...quiet, sensorA: (1n << 63n) - 1n, sensorB: -250n }, opts, {
+      name: "Room A at the largest word",
+      edges: false,
+    }),
+  ];
+}
+
 // Tests a machine's text edge by edge, as lesson 9.5's second challenge does.
 
 /** One step of a sequence test. */
@@ -215,7 +244,12 @@ export function machineSteps(
   source: string,
   inputs: MachineInputs,
   options: ControlOptions,
-  run1: { name?: string; display?: bigint } = {},
+  run1: {
+    name?: string;
+    display?: bigint;
+    /** Whether each edge is checked, or only the halt and the display at the end. */
+    edges?: boolean;
+  } = {},
 ): MachineStep[] {
   const program = assemble(source, assemblyFor(options));
   const { records, state } = run(resetMachine(program.rom), 200, inputs, referenceFor(options));
@@ -246,7 +280,7 @@ export function machineSteps(
           `${h3(pc)}, edge ${i + 1} (${st}): ${next} after it${last ? `, PC ${h3(nextPc)}` : ""}`,
         ),
         set: { CLK: 1 },
-        expect: { S: code(next), PC: h64(last ? nextPc : pc) },
+        ...(run1.edges === false ? {} : { expect: { S: code(next), PC: h64(last ? nextPc : pc) } }),
       });
       steps.push({ label: at("clock low"), set: { CLK: 0 } });
     });
@@ -276,7 +310,7 @@ export function machineSteps(
     {
       label: at(`${h3(stopPc)}, edge 1 (FETCH): READ after it`),
       set: { CLK: 1 },
-      expect: { S: code("READ"), PC: h64(stopPc) },
+      ...(run1.edges === false ? {} : { expect: { S: code("READ"), PC: h64(stopPc) } }),
     },
     { label: at("clock low: the stop halts the machine"), set: { CLK: 0 } },
     {

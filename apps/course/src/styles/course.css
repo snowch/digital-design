@@ -1076,6 +1076,10 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
   align-items: center;
   min-height: 2.75rem;
 }
+/* A long label wraps; its radio button keeps its size (10.5's design choices on a phone). */
+.fault-choice input[type="radio"] {
+  flex-shrink: 0;
+}
 .prediction-outcome {
   margin-top: var(--space-3);
 }
