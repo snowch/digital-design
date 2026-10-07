@@ -34,6 +34,7 @@ import { bitAt, parseWord, runSuite, type Circuit } from "@dd/sim";
 
 import { AnswerEditor, gradeAnswers } from "./AnswerEditor";
 import { Builder } from "./Builder";
+import { rememberVerdicts } from "./grade-cache";
 import { CircuitView, levelOf, SignalTable } from "./CircuitView";
 import { HdlPanel } from "./HdlPanel";
 import { GATE_IDS, labelFor } from "./parts";
@@ -569,7 +570,8 @@ export function createBook(
     lessons,
     interactives,
     ChallengeEditor,
-    grade,
+    // Remembered, so the front page and a lesson re-check saved work without running it again.
+    grade: rememberVerdicts(grade),
     timeModelNotes: TIME_MODEL_NOTES,
   };
 }
