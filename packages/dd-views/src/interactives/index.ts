@@ -1,6 +1,9 @@
 // Copyright © 2026 Christopher Snow
 
 import type { ComponentType } from "react";
+// Module 11, programming and debugging
+import { DebuggerFigure } from "./Debugger";
+import { LogResults, ProgramListing, StackDepth } from "./Module11Figures";
 // Module 0, meet the machine
 import { MachineAtWork } from "./MachineAtWork";
 import { Ladder } from "./Ladder";
@@ -101,6 +104,11 @@ export const INTERACTIVES: Readonly<Record<string, ComponentType<InteractiveProp
   "encoding-explorer": EncodingExplorer,
   "swap-compare": SwapCompare,
   "program-compare": ProgramCompare,
+  // Module 11, programming and debugging
+  debugger: DebuggerFigure,
+  "program-listing": ProgramListing,
+  "stack-depth": StackDepth,
+  "log-results": LogResults,
   // Module 0, meet the machine
   "machine-at-work": MachineAtWork,
   ladder: Ladder,
@@ -162,3 +170,22 @@ export { runScript, outputsPerStep, Step } from "./script";
 export { toFault } from "./FaultLab";
 export { answerOf } from "./ReadingPrediction";
 export { StateMachine, StateDiagram, MachineTable, conditionText } from "./StateMachine";
+// Module 11
+export {
+  DebuggerFigure,
+  DebuggerView,
+  ProgramText,
+  debuggerAnswer,
+  refusalText,
+  runAnswer,
+  stopText,
+  watchValue,
+} from "./Debugger";
+export {
+  LogResults,
+  ProgramListing,
+  StackDepth,
+  depthRun,
+  listingAnswer,
+  resultsOf,
+} from "./Module11Figures";

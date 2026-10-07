@@ -6,6 +6,7 @@
 import { createContext, useContext } from "react";
 
 import { MACHINE10_STRINGS, type Machine10Strings } from "./strings10";
+import { MACHINE11_STRINGS, type Machine11Strings } from "./strings11";
 
 export interface ViewStrings {
   readonly circuit: {
@@ -370,6 +371,8 @@ export interface ViewStrings {
   readonly control: ControlStrings;
   /** Module 10: the machines compared, the encoding explorer and calculator, programs compared. */
   readonly machine10: Machine10Strings;
+  /** Module 11: the assembler's refusals, the debugger and the program figures. */
+  readonly machine11: Machine11Strings;
 }
 
 /** Module 8: the words of the instruction-fields, widening, edges, memory-map and branches figures. */
@@ -1017,6 +1020,30 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
         "A branch's constant is its target's address less its own, divided by 4, written as 12 bits read signed; {actual} is not that for this branch.",
       reachFurthest:
         "A branch at 000 can reach 000 + 4 × the largest constant; {actual} is not that address.",
+      // Module 11, lessons 5 and 6 (brief 7R2).
+      storeCalls:
+        "{actual} is not it; warmRooms is called once for the hall, then once for what lies behind each door of every room it finds, a room or nothing.",
+      storeWords:
+        "{actual} is not it; a call that finds a room pushes 4 words, and the words of every call not yet returned are on the stack together.",
+      storeR14:
+        "{actual} is not it; R14 starts at 7C0, and each word pushed takes 8 off it; give the address as three hexadecimal digits.",
+      edgeLog:
+        "On that log, the program and a right one show the same number, so that log cannot show the mistake.",
+      // Module 11, lesson 5 (brief 5L).
+      recursionDepth:
+        "{actual} is not it; a call that finds a room pushes 4 words, a call for a door that leads nowhere pushes none, and R14 starts at 7C0.",
+      // Module 11, lesson 4 (brief 4L).
+      stackWord:
+        "{actual} is not that word; a pop copies a word, adds 8 to R14, and leaves the word where it was. Give the word as three hexadecimal digits.",
+      stackAddress:
+        "{actual} is not that address; R14 starts at 7C0 and each push takes 8 off it before it stores.",
+      // Module 11, lesson 1 (brief 1L).
+      asmAddress:
+        "{actual} is not the address. Each instruction takes 4 bytes from 000; a word starts at a multiple of 8.",
+      asmBranchWord:
+        "{actual} is not the branch's word. A branch has kind 5, the condition's job, registers A and B, and a constant counting instructions.",
+      asmLoadWord:
+        "{actual} is not the load's word. A load has kind 3, job 8, with Y as the register written and the constant as the address.",
       codeFate:
         "A code is taken if K and J name an instruction the course's machine accepts today; a refused code is free, except all zeros, which must stay refused.",
       countWith:
@@ -1245,6 +1272,8 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
   },
   // Module 10 (strings10.ts).
   machine10: MACHINE10_STRINGS,
+  // Module 11 (strings11.ts).
+  machine11: MACHINE11_STRINGS,
   // Module 0. Drafted by the prose process (docs/notes/module-0-machine/briefs/6V.md).
   meet: {
     lines: {

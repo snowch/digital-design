@@ -1,0 +1,29 @@
+[
+  [
+    "motivation",
+    "The result of `lowestOf` in R1",
+    "`lowestOf` takes the list's address in R1 and how many readings in R2. Its result in R1"
+  ],
+  [
+    "motivation",
+    "its result in R1 is also how many readings are warmer than the limit.",
+    "its result in R1 is also how many readings are warmer than the limit. It stores the lowest reading at `400` and the highest at `408`."
+  ],
+  [
+    "prediction",
+    "Then it calls `lowestOf`.",
+    "Then it calls `lowestOf` and shows the result on the display."
+  ],
+  [
+    "c1Task",
+    "The report is the one set out in the motivation.",
+    "The report:\n   - the display shows how many readings are warmer than the limit, and a reading equal to the limit is not warmer;\n   - ALARM is on when any reading is warmer, and no lamp is on otherwise;\n   - the word at `400` holds the lowest reading and the word at `408` the highest, both 0 for an empty log;\n   - the program ends at its `stop`."
+  ],
+  ["reflection", "- Your program", "Your program"],
+  ["reflection", "\n- When", "\n\nWhen"],
+  ["reflection", "\n- A shop", "\n\nA shop"],
+  ["reflection", "\n- What if", "\n\nWhat if"],
+  ["modelVsReality", "1. A real", "A real"],
+  ["modelVsReality", "\n2. Real", "\n\nReal"],
+  ["modelVsReality", "\n3. Tests", "\n\nTests"]
+]

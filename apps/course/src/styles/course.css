@@ -2487,3 +2487,434 @@ button.bit {
   stroke: var(--canvas);
   stroke-width: 4px;
 }
+
+/* Module 11: the assembler and the debugger, the listing, the stack's depth and the logs. */
+.debugger-status {
+  font-weight: 600;
+  margin: 0 0 var(--space-3);
+}
+.debugger-listing .debugger-line {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.debugger-listing .next-mark {
+  color: var(--accent);
+}
+.debugger-listing .row-paused td:first-child {
+  color: var(--bad);
+}
+.debugger-pause {
+  width: 2.75rem;
+  padding-right: 0;
+}
+.pause-toggle {
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+.pause-toggle[aria-pressed="true"] {
+  color: var(--bad);
+  border-color: var(--bad);
+}
+.listing-goes {
+  display: block;
+  color: var(--fg-muted);
+  font-size: var(--text-xs);
+}
+.debugger-panels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-3) 0;
+}
+.debugger-panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  padding: var(--space-2) var(--space-3);
+  min-width: 0;
+}
+.debugger-memory,
+.debugger-stack {
+  margin: var(--space-3) 0;
+}
+.debugger-registers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px var(--space-3);
+  margin: 0;
+}
+.debugger-register {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+  min-width: 0;
+}
+.debugger-register dt {
+  font-weight: 700;
+  min-width: 2.2em;
+}
+.debugger-register dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.debugger-register.register-changed {
+  background: var(--accent-soft);
+  border-radius: var(--radius-sm);
+}
+.register-hex {
+  display: block;
+  color: var(--fg-muted);
+  font-size: var(--text-xs);
+}
+.debugger-devices {
+  margin: 0;
+}
+.debugger-devices > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: baseline;
+  margin-bottom: var(--space-1);
+}
+.debugger-devices dt {
+  font-weight: 700;
+}
+.debugger-devices dd {
+  margin: 0;
+}
+.debugger-display {
+  font-size: var(--text-md);
+}
+.debugger-lamps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+.lamp-chip {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 0 var(--space-2);
+  font-size: var(--text-xs);
+}
+.lamp-chip.lamp-on {
+  background: var(--warn-bg);
+  border-color: var(--warn);
+  color: var(--warn);
+  font-weight: 700;
+}
+.watch-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: flex-end;
+}
+.watch-add label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1 1 10rem;
+  font-size: var(--text-xs);
+}
+.watch-input,
+.program-run-choice select {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  min-height: 2.75rem;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+  color: var(--fg);
+}
+.watch-note {
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+}
+.watch-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-2) 0 0;
+}
+.watch-list li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+.watch-list li.watch-changed {
+  background: var(--accent-soft);
+  border-radius: var(--radius-sm);
+}
+.watch-was {
+  color: var(--fg-muted);
+  font-size: var(--text-xs);
+}
+.watch-remove {
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  margin-left: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+  color: var(--fg-muted);
+  cursor: pointer;
+}
+.memory-pointer {
+  color: var(--accent);
+  font-size: var(--text-xs);
+}
+.stack-frames,
+.stack-words {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.stack-frame {
+  border-left: 3px solid var(--accent);
+  padding-left: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+.stack-frame-name {
+  font-weight: 700;
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-sm);
+}
+.stack-word {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.stack-top {
+  color: var(--accent);
+  font-size: var(--text-xs);
+}
+.program-text .button {
+  margin-top: var(--space-2);
+}
+.program-run-choice {
+  display: block;
+  margin: var(--space-3) 0;
+}
+.program-run-choice select {
+  max-width: 100%;
+}
+.program-data pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+svg.stack-depth {
+  display: block;
+  max-width: 100%;
+}
+.stack-depth .depth-axis {
+  stroke: var(--fg-muted);
+}
+.stack-depth .depth-grid {
+  stroke: var(--border);
+}
+.stack-depth .depth-line {
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+.stack-depth .depth-call {
+  stroke: var(--fg);
+  stroke-width: 2;
+}
+.stack-depth .depth-label {
+  fill: var(--fg-muted);
+  font-size: 13px;
+  font-family: var(--font-mono);
+}
+.log-cards {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--space-3);
+}
+.log-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  padding: var(--space-2) var(--space-3);
+  min-width: 0;
+}
+.log-readings {
+  overflow-wrap: anywhere;
+  font-size: var(--text-sm);
+}
+.log-table .row-differs {
+  background: var(--bad-bg);
+}
+.log-verdict {
+  font-weight: 700;
+  margin: var(--space-2) 0 0;
+}
+.debugger .memory-word,
+.debugger-figure .memory-word,
+.program-listing-figure .memory-word,
+.log-results .memory-word {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+/* Module 11's listings write a program's lines in table cells, which app.css's rule against the
+   mono face's ligatures does not reach: <= would read as one glyph. */
+.memory-word,
+.watch-input {
+  font-variant-ligatures: none;
+  font-feature-settings:
+    "calt" 0,
+    "liga" 0;
+}
+/* The address and the word stay whole; the line wraps between its words. */
+.debugger-listing td.memory-word:not(.debugger-line) {
+  white-space: nowrap;
+}
+/* A line breaks only between its words, never inside a name; on a phone the listing's text is a
+   size smaller so the address, the word and most lines fit beside each other. */
+.debugger-listing .debugger-line {
+  overflow-wrap: normal;
+  word-break: normal;
+}
+/* The watch's box and its button on one line. */
+.watch-input {
+  width: 100%;
+  min-width: 0;
+}
+/* On a phone the listing's box and a long region of memory are short boxes of their own, each
+   keeping its current row in view, so the buttons, the line about to run, the watch and the view
+   a lead points at fit one screen. */
+.memory-box {
+  overscroll-behavior: contain;
+}
+.memory-box td:first-child {
+  white-space: nowrap;
+}
+.memory-box thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg-raised);
+}
+@media (max-width: 480px) {
+  .memory-box {
+    max-height: 8.5rem;
+    overflow-y: auto;
+  }
+  /* The watch's box keeps its name for a screen reader; on a phone its line of help is not shown,
+     and the button beside the box says what it does. */
+  .watch-add label > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .memory-box th,
+  .memory-box td {
+    padding-top: var(--space-1);
+    padding-bottom: var(--space-1);
+  }
+  .debugger-values > .debugger-panel:first-child,
+  .debugger-memory,
+  .debugger-stack {
+    margin: 0 0 var(--space-2);
+  }
+  .debugger-stack .stack-frames {
+    max-height: 8rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .debugger-status {
+    font-size: var(--text-sm);
+  }
+  .debugger-listing .memory-word {
+    font-size: var(--text-xs);
+  }
+  .debugger-listing th,
+  .debugger-listing td {
+    padding-right: var(--space-2);
+  }
+}
+/* The debugger: the listing in a box of its own height that keeps the line about to run in view,
+   so the buttons, that line and the values it changes fit one screen. On a desk the values sit
+   beside the listing; on a phone under it, the watch first. */
+.debugger-body {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: minmax(0, 1fr);
+}
+.debugger-run,
+.debugger-values {
+  min-width: 0;
+}
+.debugger-listing-wrap {
+  max-height: 9rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.debugger-listing-wrap .debugger-listing {
+  margin: 0;
+}
+.debugger-listing thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg-raised);
+}
+.debugger-listing td {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+.debugger-values .debugger-panels {
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+}
+.debugger-values > .debugger-panel:first-child {
+  margin-bottom: var(--space-3);
+}
+@media (min-width: 481px) {
+  .pause-toggle {
+    min-width: 2rem;
+    min-height: 1.75rem;
+  }
+  .debugger-listing-wrap {
+    max-height: 20rem;
+  }
+}
+@media (min-width: 60rem) {
+  .debugger-body {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: start;
+  }
+  .debugger-listing-wrap {
+    max-height: 26rem;
+  }
+  .debugger-values .debugger-panels {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .debugger-body.debugger-compact {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.stack-fold {
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-2);
+}
+.value-hex,
+.value-dec {
+  white-space: nowrap;
+}
+.memory-name {
+  color: var(--fg-muted);
+}

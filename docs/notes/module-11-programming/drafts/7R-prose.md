@@ -1,0 +1,1 @@
+prediction: A program calls the function `lowestOf` on log 5: -184, 35, -176, 12, -190. The function finds the lowest reading and writes it to the display. Predict what the display shows. Press "Check my prediction" to see the listing.

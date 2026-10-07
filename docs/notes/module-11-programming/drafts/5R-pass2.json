@@ -1,0 +1,15 @@
+[
+  ["c2Task", "From `chillB` it is\n1. 3. `farthest`", "From `chillB` it is 1.\n3. `farthest`"],
+  ["construction", "1. How deep", "How deep"],
+  ["construction", "\n2. The figure", "\n\nThe figure"],
+  ["longStoreLead", "1. The second store's", "The second store's"],
+  ["longStoreLead", "\n2. The hall", " The hall"],
+  ["depthLead", "1. The figure", "The figure"],
+  ["depthLead", "\n2. The stack", " The stack"],
+  ["wayBackAfter", " From the deep freeze,", "\n\nFrom the deep freeze,"],
+  ["wayBackAfter", " Each call that finds", "\n\nEach call that finds"],
+  ["reflection", " The office's programs", "\n\nThe office's programs"],
+  ["reflection", " How do you find", "\n\nHow do you find"],
+  ["modelVsReality", " The course's machine", "\n\nThe course's machine"],
+  ["modelVsReality", " Real records", "\n\nReal records"]
+]

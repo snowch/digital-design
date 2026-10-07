@@ -1,0 +1,18 @@
+debuggerLead: The listing marks the line about to run with ▶. On a wide screen, the devices and registers sit beside the listing. On a narrow one, they follow it. The devices are the display, the lamps and room A's sensor. Next come R2, R3 and R4, the registers this program writes, and the PC. A register nothing has set shows X.
+
+"Step" runs one instruction. "Step back" goes back one. "Run to the end" runs until the program stops. "Reset" goes back to the start. The message under the buttons says what comes next, or how the run ended.
+
+Press "Step" until the program stops. Watch which register each instruction writes, and which device each store changes: the lamps at `010`, the display at `014`.
+
+mistakesLead: The figure holds room A's program again, with three mistakes. You can change its text.
+
+The assembler refuses three lines. Each refusal gives the line's number and the reason:
+
+- line 3, `R3 <= -18000`;
+- line 4, `if R2 < R3 goto fine`;
+- line 7, `word[dispaly] <= R2`.
+
+Mend each line. When the assembler refuses no line, the listing and the debugger appear.
+
+Once you have changed the text, a button "Put back the program" appears. It brings back the three mistakes.
+

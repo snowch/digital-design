@@ -150,7 +150,12 @@ changes nothing but the trap's registers (cause `21`), and it wins over `22` whe
 Before Module 12 sets a handler, the machine stops, and the simulator shows the instruction, its
 address and why it was refused.
 
-## The assembly language: a proposal for Module 11
+## The assembly language
+
+Module 11 built the learner's assembler for this language and kept the proposal below as it was,
+with one addition (a name with a number added) and the refusals listed after the table
+(`docs/notes/module-11-programming.md`). The authors' assembler and the learner's are one parser,
+so every lesson's program assembles alike.
 
 One line is one instruction, written as the transfer it makes, with Module 5's arrow as text:
 `<=`, which the `register-transfer` lesson calls "the transfer arrow written as text"
@@ -168,20 +173,35 @@ One line is one instruction, written as the transfer it makes, with Module 5's a
 | system | `call system`, `resume`, `R3 <= C3`, `C4 <= R3`, `stop`, `nothing` |
 
 - **A name stands for an address.** `word[sensorA]` is the word at room A's sensor; `R1 <= table`
-  puts the address of the label `table` in R1, and `R1 <= word[table]` the word there.
+  puts the address of the label `table` in R1, and `R1 <= word[table]` the word there. A name
+  may have a number added or taken off, `word[log + 8]`, the address 8 bytes past `log` (Module
+  11).
 - `R3 <= R1 + 1` and `R3 <= R1 - 1` are count up and count down, the ALU's own jobs, with no
   constant; any other number is a constant job.
 - A number is decimal, or hexadecimal after `0x`; a constant from -2048 to 2047 fits, and any
   other is refused with a sentence that says the range.
 - A label ends with a colon. `//` starts a comment, as in the course's SystemVerilog.
 - `word` and `byte` put fixed values in the ROM: `limits: word -250, -184`. A `word` starts at a
-  multiple of 8, with 0s before it where needed. The assembler fills the ROM after the program
+  multiple of 8, with 0s before it where needed. A word may be written as a name, which the
+  assembler replaces with that name's address on its second pass, so records can hold each
+  other's addresses: `hall: word -150, prep, store` (Module 11's cold store; a name nothing
+  defines is refused). The assembler fills the ROM after the program
   and its data with 0s. A program that runs off its end fetches whatever follows as instructions
   and halts, with cause 21, at the first the machine refuses. That is usually the first word of
   its data, or a 0 placed before it: a small number's low half is kind 0 (5000 is `00001388`), a
   negative number's kind F (-250 is `FFFFFF06`). A data word whose low half happens to be an
   instruction runs first (`12345678` runs as `R5 <= R3 + R4`, and its zero top half halts the
   run). So a program ends with `stop`.
+- **What the assembler refuses** (Module 11), each with the line's number and a sentence in the
+  course's words, all of a program's refusals at once: a number that is not one; a register
+  outside R0 to R15; a constant outside -2048 to 2047; a branch target not a whole number of
+  instructions away, or too far; `>`; `<` or `>=` without `signed` or `unsigned`; a name nothing
+  defines; a name defined twice; a name the language uses (a register, a device, `goto`); a
+  `goto` or `call` to a name on data; a data word too wide; `=` for `<=`; multiplication, division
+  or a shift; two jobs on one line; a store of a number; a branch on a number; a call with no
+  register for the return address; an address of two registers; a program too large for the ROM.
+  Within the 1 KB ROM no branch can be too far: 256 instructions are well inside a constant's
+  reach.
 - The shop's devices have names the assembler knows, which stand for their addresses:
   `display`, `lamps`, `signals` (DOOR and WARM), `sensorA`, `sensorB`, `timer` and `waiting`
   (`docs/machine.md`, "Devices").
@@ -209,7 +229,10 @@ Read digit by digit, the branch `56230002` is kind 5 (branch), job 6 (less, sign
 R3, Y unused, and the constant 2: the target is two instructions on, `010`. The load `380027D8` is
 kind 3 (load), job 8 (a word, absolute), A and B unused, Y is R2, and the address `7D8`.
 
-## The calling convention: a proposal for Module 11
+## The calling convention
+
+Module 11 teaches this convention as proposed, with no register's role moved
+(`docs/notes/module-11-programming.md`).
 
 The hardware treats every register alike; these roles are an agreement between programs only.
 
@@ -226,6 +249,9 @@ The hardware treats every register alike; these roles are an agreement between p
   `R14 <= R14 - 8` then `word[R14] <= R10`; a pop is `R10 <= word[R14]` then
   `R14 <= R14 + 8`. A program starts with `R14 <= 0x7C0`, so its first push writes `7B8`.
 - **A function that calls another** pushes R15 first and pops it before `goto R15`.
+- **A function that changes a kept register** (R10 to R13) pushes it first and pops it before it
+  returns, and leaves R14 as it found it. Module 11's tests call a learner's function directly,
+  with R10 to R13 and R14 set, and check them after its return.
 - **Against the commercial conventions:** with sixteen registers, every number has some role in
   some convention, so what this one must not do is follow any of them. It follows none, though
   numbers coincide: ARM passes arguments in r0 to r3 and keeps r4 to r11, with r13 the stack and
