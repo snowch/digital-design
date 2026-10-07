@@ -74,15 +74,27 @@ subagent that wrote every learner-facing sentence from a brief of checked facts.
   the six named under the walk below, all outside Module 10; six of them were run on a clean
   worktree of `main` here and fail the same way. CI's run of the same check on `421cce7`
   (Check #266) passed, every screenshot included, in 26 minutes.
+- 07:38 to 08:08 The reading half's findings for 10.3 (twelve), from the managing session. Code
+  first: each comparison carries the flags of the subtraction its branch makes, shown under the
+  branch (finding 3); the swap figure shows its pairs before the prediction and only the rows asked
+  about after it (finding 9); the wide number's figure asks how many instructions the sums run
+  (finding 7); Module 8's `branch-targets` drawn in the construction (finding 4), on the 7 × 5
+  loop, since the colder-room program's branch line ran 28 px wider than a phone. Then brief 3R,
+  one fact list per key, drafted in three parts; brief 3R2 for the figure's words. The drafts
+  dropped seven facts, two of them the findings' own (the word placed in the ROM, the job meant
+  by challenge 1's first question); the second pass cut two repeats the brief had carried. 10.4's
+  opening question changed with 10.3's reflection (finding 8). The 10.2 findings' calculator fix
+  (convert the typed words on a switch of form; drop "B is the word's constant" once B is typed)
+  went in alongside.
 
 ## The outline
 
-Five lessons, as Modules 8 and 9 had: each answers the question the one before ends on, and each
+Five lessons, as Modules 8 and 9 had (titles and challenges as they stand on the pages): each answers the question the one before ends on, and each
 split falls where the learner's view of the machine changes. Module 8 asked what each instruction
 does to the datapath, Module 9 how the control makes it do it; Module 10 asks what a program may
 rely on, and why the instructions and their layout are what they are.
 
-1. `instruction-set`, "What must every machine agree on?": Module 8's machine and Module 9's run
+1. `instruction-set`, "What must every machine running a program agree on?": Module 8's machine and Module 9's run
    one program side by side, compared after every instruction. They agree on R0 to R15, the PC,
    the memory and the devices, and on nothing else; mid-instruction they differ. Faults: HOLDR
    stuck at 1 keeps the agreement, PCEN stuck at 1 breaks it. Challenges: sort a list of the
@@ -90,23 +102,25 @@ rely on, and why the instructions and their layout are what they are.
    for the same instructions, Module 9's machine with its jobs written at the ALU edge in 3 edges,
    tested edge by edge and against the reference. Introduces **instruction set** and
    **microarchitecture**.
-2. `encoding`, "Why is every field a whole digit?": the layout as a design. The encoding explorer
+2. `encoding`, "Why do instruction fields sit on digit boundaries?": the layout as a design. The encoding explorer
    with the course's calculator; the course's layout beside a packed one, in which a kind that
    leaves a register digit unused gives it to the constant, and pays with a field that moves.
-   Challenges: write instructions' words (answers); write the packed layout's constant, which
-   needs a selector the course's layout does not. Introduces **opcode** (the kind and job
+   Challenges: write instructions' words (answers); write the packed layout's register file
+   write address, `ydigit`, which needs a selector chosen by the kind where the course's layout
+   reads digit 3 for every kind. Introduces **opcode** (the kind and job
    together, the books' word).
-3. `immediates`, "What can one instruction say?": the constant's range, the 2 KB memory chosen so
+3. `immediates`, "How far can 12 bits reach, and how does a program say greater than?": the constant's range, the 2 KB memory chosen so
    every address fits, a branch's reach counted in instructions, "greater than" as "less than"
-   with the registers swapped, and a number too wide for the constant. Challenges: constants and
-   reaches (answers); comparisons rewritten without "greater than" (answers). Introduces
+   with the registers swapped, and a number too wide for the constant. Challenges: the largest
+   number a constant job puts in a register, a branch's constant and a branch's reach (answers);
+   "greater than" written as text from the ALU's subtraction with its inputs swapped. Introduces
    **immediate** (the books' word for the constant).
-4. `room-to-grow`, "What does the machine leave out?": the illegal kinds and jobs, an all-zero word
+4. `room-to-grow`, "What room is left in the instruction set?": the illegal kinds and jobs, an all-zero word
    that stops a program that runs off its end, the free kinds, and what each instruction
    `docs/isa.md` leaves out would cost the circuit and save a program, counted by runs of the
-   reference. Challenges: what the machine does with a word (answers); instructions counted for a
-   program with and without a left-out instruction (answers). Introduces nothing.
-5. `design-an-instruction`, the capstone, "Design, justify and implement one new instruction":
+   reference. Challenges: what the machine does with each of six words (answers); the instructions
+   the loop for 7 × n runs, counted for 7 × 9 and 7 × 50 (answers). Introduces nothing.
+5. `design-an-instruction`, the capstone, "How do you add a new instruction?":
    set if, `RY ← 1` if `RA cond RB`, else 0, at kind A, the job digit a branch's condition. It
    needs what Module 9's capstone did not: a change to the datapath, the condition MET carried as a
    word to register Y, through a new control signal SET. Challenges: the design, checked against

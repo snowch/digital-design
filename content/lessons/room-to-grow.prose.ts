@@ -16,7 +16,7 @@ export const PROSE = {
   p1Explain:
     "It stops at `008` with cause `21`. The word at `008` is `00000000`, kind 0: an illegal instruction. The display shows 66: both instructions ran. A word of all zeros is illegal on purpose: a program that runs off its end stops at the first word of zeros. If data followed the program in the ROM, the machine would run the data's words as instructions first.",
   question:
-    "Lesson 3 ended: kinds 0 and 9 to F say nothing. What does the machine do with a word it has no instruction for? What else does it leave out, and what would each cost to add?",
+    "Lesson 3 ended: on the course's machine, kinds 0 and 9 to F name no instruction. What does the machine do with an instruction's 32 bits that name no instruction? What else does the instruction set leave out, and what would each cost to add?",
   motivation:
     "A word is an illegal instruction when its kind is 0, or 9 to F; when its job is one its kind does not define; or when it is a system job 2 or 3 naming a control register outside 0 to 4. Of the 256 pairs of kind and job, 37 are instructions whatever the constant. Two more, kind 8's jobs 2 and 3, are instructions only when the constant is 0 to 4. At an illegal instruction the machine stops with cause `21` (Module 9). A word of all zeros, `00000000`, is kind 0: illegal. After a program and its data, every byte of the ROM is 0.",
   investigation:

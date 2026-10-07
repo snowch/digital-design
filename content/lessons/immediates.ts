@@ -22,6 +22,7 @@ import {
   GREATER_START,
   WIDE_SUMS,
   WIDE_WORD,
+  multiplyLoop,
 } from "./module10";
 
 /** R1 and R2 for the comparisons: larger, smaller, equal, and a pair whose subtraction overflows. */
@@ -143,6 +144,14 @@ export const immediates: LessonInput = {
             ],
             shown: [1],
             outcomes: PROSE.wideAfter,
+            question: PROSE.p2Question,
+            options: [
+              { value: "3", label: LABELS.options.p2Three },
+              { value: "5", label: LABELS.options.p2Five },
+              { value: "6", label: LABELS.options.p2Six },
+            ],
+            ask: { program: 0, what: "ran" },
+            explain: PROSE.p2Explain,
           },
         },
       ],
@@ -152,6 +161,16 @@ export const immediates: LessonInput = {
       title: LABELS.titles.construction,
       prose: PROSE.construction,
       interactives: [
+        {
+          id: "colder-branch",
+          kind: "branch-targets",
+          timeModel: "none",
+          caption: LABELS.captions.colderBranch,
+          lead: PROSE.colderBranchLead,
+          props: {
+            programs: [{ label: LABELS.programs.colder, program: multiplyLoop(5) }],
+          },
+        },
         {
           id: "work-reach",
           kind: "challenge",

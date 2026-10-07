@@ -127,6 +127,14 @@ export interface Machine10Strings {
   readonly yes: string;
   readonly no: string;
   readonly swapKey: string;
+  /** The subtraction a row's branch makes and its flags: {x} - {y}, {minus}, {over}, {cout}. */
+  readonly flagsSigned: string;
+  readonly flagsUnsigned: string;
+  /** Before a prediction, the pairs it asks about; after it, the rows it asked about. */
+  readonly pairsCaption: string;
+  readonly askedCaption: string;
+  /** {a} and {b}: a pair's R1 and R2. */
+  readonly pairHeading: string;
   /** After a prediction: the branch that says it, {answer}. */
   readonly swapAnswer: string;
 
@@ -299,6 +307,11 @@ export const MACHINE10_STRINGS: Machine10Strings = {
   yes: "yes",
   no: "no",
   swapKey: "A marked row names its registers swapped.",
+  flagsSigned: "{x} - {y}: MINUS {minus}, OVER {over}",
+  flagsUnsigned: "{x} - {y}: COUT {cout}",
+  pairsCaption: "Pairs of R1 and R2",
+  askedCaption: "R1 > R2 and each branch for each pair",
+  pairHeading: "R1 {a}, R2 {b}",
   swapAnswer: "The branch that says it is {answer}.",
 
   listingCaption: "The program",
