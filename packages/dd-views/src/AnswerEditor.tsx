@@ -45,18 +45,23 @@ export function gradeAnswers(
   const answers = answersOf(challenge, artifact);
   const labelOf = (id: string) => challenge.fields.find((f) => f.id === id)?.label ?? id;
   const term = (key: string) => strings.answers.terms[key] ?? labelOf(key);
+  // A choice is shown by what the learner read for it, not by its value.
+  const shown = (key: string, v: string) =>
+    challenge.fields.find((f) => f.id === key)?.options?.find((o) => o.value === v)?.label ?? v;
   const named = (values: Readonly<Record<string, string>>) =>
     Object.fromEntries(
-      Object.entries(values).map(([k, v]) => [
-        term(k),
-        v === OF_YOUR_BITS
-          ? strings.answers.ofYourBits
-          : v === OF_THE_MEMORY
-            ? strings.answers.ofTheMemory
-            : v.startsWith(OTHER_THAN)
-              ? format(strings.answers.otherThan, { value: v.slice(OTHER_THAN.length) })
-              : v,
-      ]),
+      Object.entries(values)
+        .map(([k, raw]) => [k, shown(k, raw)] as const)
+        .map(([k, v]) => [
+          term(k),
+          v === OF_YOUR_BITS
+            ? strings.answers.ofYourBits
+            : v === OF_THE_MEMORY
+              ? strings.answers.ofTheMemory
+              : v.startsWith(OTHER_THAN)
+                ? format(strings.answers.otherThan, { value: v.slice(OTHER_THAN.length) })
+                : v,
+        ]),
     );
   const failures: VerdictFailure[] = [];
   const results = cases.map((c) => grader(answers, c.given, c.expect));
@@ -73,7 +78,9 @@ export function gradeAnswers(
       const blocked =
         "missing" in r
           ? format(strings.answers.unanswered, { fields: r.missing.map(labelOf).join(", ") })
-          : format(strings.answers.invalid, { field: labelOf(r.invalid) });
+          : strings.answers.invalidFor[r.invalid] !== undefined
+            ? strings.answers.invalidFor[r.invalid]!
+            : format(strings.answers.invalid, { field: labelOf(r.invalid) });
       return { passed: false, total: cases.length, failures: [], blocked };
     }
     if (!r.pass)
@@ -83,6 +90,21 @@ export function gradeAnswers(
         inputs: named(r.inputs),
         actual: named(r.actual),
         expected: named(r.expected),
+        // Module 0: a sentence in place of values that would give the answer away.
+        ...(r.detail && strings.answers.details[r.detail.key] !== undefined
+          ? {
+              detail: format(
+                strings.answers.details[r.detail.key]!,
+                Object.fromEntries(
+                  Object.entries(r.detail.values ?? {}).map(([k, v]) => {
+                    const said = r.detail?.field ? shown(r.detail.field, v) : v;
+                    // Inside a sentence, a choice's label starts in lower case.
+                    return [k, said === v ? v : said.charAt(0).toLowerCase() + said.slice(1)];
+                  }),
+                ),
+              ),
+            }
+          : {}),
       });
   }
   return { passed: failures.length === 0, total: cases.length, failures };

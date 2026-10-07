@@ -91,6 +91,8 @@ const Props = z.object({
   explain: z.string().default(""),
   ask: z.enum(["lines", "display", "lamps", "changed", "next", "value"]).default("display"),
   register: z.number().int().min(0).max(15).default(0),
+  /** The fault, by its index, the prediction's answer is read off: a stuck wire's effect. */
+  askFault: z.number().int().nonnegative().optional(),
 });
 type Data = z.infer<typeof Props>;
 
@@ -173,16 +175,34 @@ export const MachineAtWork = withProps(
       () =>
         asking
           ? meetAnswer(
-              meetStart(meetMachine({ program: data.program }), {
-                program: data.program,
-                inputs: data.inputs,
-                lines: data.lines,
-              }),
+              meetStart(
+                meetMachine({
+                  program: data.program,
+                  ...(data.askFault !== undefined &&
+                  MEET_STUCK[data.faults[data.askFault]?.stuck ?? ""]
+                    ? { stuck: MEET_STUCK[data.faults[data.askFault]?.stuck ?? ""] }
+                    : {}),
+                }),
+                {
+                  program: data.program,
+                  inputs: data.inputs,
+                  lines: data.lines,
+                },
+              ),
               data.ask,
               data.register,
             )
           : "",
-      [asking, data.program, data.inputs, data.lines, data.ask, data.register],
+      [
+        asking,
+        data.program,
+        data.inputs,
+        data.lines,
+        data.ask,
+        data.register,
+        data.askFault,
+        data.faults,
+      ],
     );
     const optionLabel = (v: string) =>
       (data.options?.find((o) => o.value === v)?.label ?? v).replace(/\.$/, "");
@@ -240,6 +260,14 @@ export const MachineAtWork = withProps(
       setBefore(undefined);
       setStopped(false);
       setGaveUp(false);
+      // A text about a run waits for the next run: Start again, or a new choice, clears it.
+      setRanFaults(new Set());
+      setStoppedOnce(false);
+      setStoppedChanged(false);
+      // A reading or line 5's number changed before Start again still counts as changed.
+      readingChanged.current =
+        limitUsed !== data.limit ||
+        Object.entries(inputs).some(([k, v]) => String(data.inputs[k] ?? "") !== v);
       bump();
     };
     // A new fault is a new machine: start again on it.

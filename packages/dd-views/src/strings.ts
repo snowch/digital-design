@@ -334,6 +334,10 @@ export interface ViewStrings {
     readonly ofTheMemory: string;
     /** Module 7: what a test that a fault must change expects, around the right result. */
     readonly otherThan: string;
+    /** Module 0: a sentence per failure in place of values that would give the answer away. */
+    readonly details: Readonly<Record<string, string>>;
+    /** Module 0: what a valid entry is, by field, in place of the general sentence. */
+    readonly invalidFor: Readonly<Record<string, string>>;
   };
   /** Module 6: the memory explorer's table of words. */
   readonly memory: {
@@ -988,6 +992,9 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     ofTheMemory: "What the memory gives",
     // Module 7
     otherThan: "anything other than {value}",
+    // Module 0. Drafted by the prose process (docs/notes/module-0-machine/briefs/F2V.md).
+    details: {},
+    invalidFor: {},
   },
   // Module 6. Drafted by the prose process (docs/notes/module-6-memory.md).
   memory: {

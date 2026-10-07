@@ -354,7 +354,15 @@ export const MEET_WIRE = `${SLICE}/SUM`;
 export const MEET_PLACES: Readonly<Record<string, MeetPlace>> = {
   line: { net: "RESULT", show: "number" },
   parts: { scope: "", net: "RESULT", show: "number", focus: ["alu"], highlight: ["alu"] },
+  // Each level opens the box the level above marks.
   adder: { scope: "alu", net: "RESULT", show: "digits", focus: ["alu/g0"], highlight: ["alu/g0"] },
+  sixteen: {
+    scope: "alu/g0",
+    net: "alu/Y0",
+    show: "digits",
+    focus: ["alu/g0/q0"],
+    highlight: ["alu/g0/q0"],
+  },
   four: {
     scope: "alu/g0/q0",
     net: "alu/g0/Y0",
@@ -369,10 +377,17 @@ export const MEET_PLACES: Readonly<Record<string, MeetPlace>> = {
     focus: [`${SLICE}/fa`],
     highlight: [`${SLICE}/fa`],
   },
-  smallest: { scope: `${SLICE}/fa/ha2`, net: MEET_WIRE, show: "digits" },
-  // The slice's adding part, where the wire leaves it as SUM: a small drawing, clear as first
-  // drawn, where the slice whole is too busy to open a page on.
-  wire: { scope: `${SLICE}/fa`, net: MEET_WIRE, show: "level", focus: [MEET_WIRE] },
+  adding: {
+    scope: `${SLICE}/fa`,
+    net: MEET_WIRE,
+    show: "digits",
+    focus: [`${SLICE}/fa/ha2`],
+    highlight: [`${SLICE}/fa/ha2`],
+  },
+  // The half of the adding part that makes the sum: two of the smallest parts, and the wire SUM
+  // that leaves it, the ladder's foot, in the drawing the learner has just come down into.
+  smallest: { scope: `${SLICE}/fa/ha2`, net: MEET_WIRE, show: "digits", focus: [MEET_WIRE] },
+  wire: { scope: `${SLICE}/fa/ha2`, net: MEET_WIRE, show: "level", focus: [MEET_WIRE] },
 };
 
 /** The wires a Module 0 figure may hold stuck, by a plain key. */
@@ -492,6 +507,7 @@ export function machineRun(
   const actual: Record<string, string> = {};
   const expected: Record<string, string> = {};
   let pass = true;
+  let detail: AnswerResult["detail"];
   for (const [key, want] of Object.entries(expect)) {
     const said = filled(String(want), answers);
     const got =
@@ -507,9 +523,24 @@ export function machineRun(
     expected[key] = wanted;
     if (key === "display" && !WHOLE.test(wanted))
       return { invalid: placeholders(String(want))[0] ?? key };
-    if (got !== wanted) pass = false;
+    if (got !== wanted) {
+      pass = false;
+      // The learner said what the shop would see: printing what it sees would give the answer.
+      if (placeholders(String(want)).length && detail === undefined)
+        detail = {
+          key: key === "display" ? "runDisplay" : "runLamp",
+          field: placeholders(String(want))[0] ?? key,
+          values: { actual: said },
+        };
+    }
   }
-  return { pass, inputs: shownInputs(given), actual, expected };
+  return {
+    pass,
+    inputs: shownInputs(given),
+    actual,
+    expected,
+    ...(detail ? { detail } : {}),
+  };
 }
 
 /**
@@ -540,11 +571,14 @@ export function machineStep(
     part: record.fields?.k === 3 ? "memory" : "adder",
   };
   const expected = traced[check] ?? "";
+  const key = `trace${check.charAt(0).toUpperCase()}${check.slice(1)}`;
   return {
     pass: answer === expected,
     inputs: shownInputs(given),
     actual: { [check]: answer },
     expected: { [check]: expected },
+    // The expected value is the answer, so the book says a sentence about the learner's own.
+    detail: { key, field: check, values: { actual: answer } },
   };
 }
 
@@ -571,10 +605,19 @@ export function machineSlices(
     out === undefined
       ? "X".repeat(count)
       : (out & ((1n << BigInt(count)) - 1n)).toString(2).padStart(count, "0");
+  // A case may check half the slices: `half` is `high` (the four highest) or `low`.
+  const half = String(given["half"] ?? "");
+  const cut = count / 2;
+  const part = (d: string) =>
+    half === "high" ? d.slice(0, cut) : half === "low" ? d.slice(cut) : d;
   return {
-    pass: said === digits,
+    pass: part(said) === part(digits),
     inputs: shownInputs(given),
-    actual: { [field]: said },
-    expected: { [field]: digits },
+    actual: { [field]: part(said) },
+    expected: { [field]: part(digits) },
+    detail: {
+      key: half === "high" ? "slicesHigh" : half === "low" ? "slicesLow" : "slices",
+      values: { actual: part(said) },
+    },
   };
 }
