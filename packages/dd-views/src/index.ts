@@ -15,6 +15,7 @@ export * from "./TruthTable";
 export * from "./Builder";
 export * from "./HdlPanel";
 export * from "./book";
+export { rememberVerdicts, KEPT_PER_CHALLENGE } from "./grade-cache";
 export * from "./interactives";
 export * from "./SignalPlot";
 export * from "./BitRow";

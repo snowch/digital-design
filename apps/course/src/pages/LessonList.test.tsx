@@ -8,9 +8,9 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
-import { INTERACTIVES, createBook } from "@dd/dd-views";
+import { INTERACTIVES, createBook, grade, rememberVerdicts } from "@dd/dd-views";
 import { LessonStore, memoryStorage } from "@platform/lesson-runtime";
-import { termPattern } from "@platform/lesson-schema";
+import { termPattern, type Artifact, type Challenge } from "@platform/lesson-schema";
 import { LESSONS } from "@dd/content";
 
 import { PREFACE_HREF, lessonHref } from "../route";
@@ -245,6 +245,31 @@ describe("the course's front page: every module of the plan", () => {
     await user.click(line);
     expect(line).toHaveAttribute("aria-expanded", "false");
     expect(link()).not.toBeInTheDocument();
+  });
+
+  it("checks saved work once, not again each time a module is opened or closed", async () => {
+    // The book's grader is remembered (rememberVerdicts): a press re-renders the page, and the
+    // checks that run a whole machine take a second or more each.
+    const runs: string[] = [];
+    const counted = {
+      ...book,
+      grade: rememberVerdicts((c: Challenge, a: Artifact) => {
+        runs.push(c.id);
+        return grade(c, a);
+      }),
+    };
+    const storage = memoryStorage();
+    pass(storage, first.id, first.challenges.length);
+    const user = userEvent.setup();
+    render(<LessonList book={counted} storage={storage} />);
+    expect(runs).toHaveLength(first.challenges.length);
+    const later = ordered.find((l) => l.module !== first.module)!;
+    const line = screen.getByRole("button", {
+      name: new RegExp(`^${STRINGS.module(later.module)}: `),
+    });
+    await user.click(line);
+    await user.click(line);
+    expect(runs).toHaveLength(first.challenges.length);
   });
 
   it("shows each lesson's progress, and its module's, recomputed from stored work", () => {
