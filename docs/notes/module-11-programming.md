@@ -490,6 +490,14 @@ sideways scroll.
 
 ## The full check
 
+After the reading review, `npm run check` at c892850 (`main` at 014094c already merged), 22:19 to
+22:45 UTC: Prettier, the copyright lines, the platform copy, `tsc`, Vitest (118 files, 1191 tests),
+the build and Playwright pass, except the same ten stored screenshots that fail in this container
+on `main` (none Module 11's): 780 passed, 10 failed, 48 skipped. The run before it, at d9d21e1,
+also failed the phone's legibility test: the debugger's listing, with its longer "Instruction"
+column, was 3 pixels too wide in 11.2; c892850 gives its cells a step less padding.
+
+Before the review:
 `npm run check` at b01177b (after merging `main` at 014094c), 19:00 to 19:35 UTC: Prettier, the
 copyright lines, the platform copy, `tsc`, Vitest (118 files, 1185 tests), the build and Playwright
 all pass, except the ten stored screenshots that fail in this container on `main` as well (Modules
