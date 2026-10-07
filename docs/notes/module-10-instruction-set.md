@@ -68,7 +68,12 @@ subagent that wrote every learner-facing sentence from a brief of checked facts.
   (`machineParts`, machine-compare.ts) and pinned by its unit test, the lesson's facts test and the
   browser spec. Its words, brief 6W; the draft dropped one fact.
 - 06:17 to 06:20 The mechanical walk (below) and this note.
-- 06:20 on The full check, `npm run check`, on the branch's head.
+- 06:20 to 06:46 The full check, `npm run check`, on `421cce7`, in this container: 25 minutes 46
+  seconds; every step passed but the stored screenshots, where 641 browser tests passed and 10
+  failed. The ten are the first lesson's header and figures, the scenes and the sum on paper, and
+  the six named under the walk below, all outside Module 10; six of them were run on a clean
+  worktree of `main` here and fail the same way. CI's run of the same check on `421cce7`
+  (Check #266) passed, every screenshot included, in 26 minutes.
 
 ## The outline
 
