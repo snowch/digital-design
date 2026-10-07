@@ -204,3 +204,34 @@ lesson differs, in the same commit as the lesson.
   what was extracted or could be, every edit to a lesson or document on `main`, the terms and their
   exemptions, the assembler's language and every refinement, the calling convention and every
   change, and what the build would change.
+
+## Changes after the reviews
+
+The managing session changed this plan on 7 October 2026, twice: after an early look at lessons
+11.1 to 11.5, and after each lesson's reading review and its sceptic. The module note
+(`docs/notes/module-11-programming.md`) records every item and what the build did with each;
+these change what the plan above says.
+
+- **Recursion is taught on work that nests**: the cold store's rooms, each leading to up to two
+  more, counted by a function that calls itself behind each door. The first build's example, the
+  log shown newest first, is done more simply by a loop that walks backwards, which the lesson
+  itself said, and its tests had to forbid that loop. A `word` may now hold a name, which the
+  rooms need (`docs/isa.md`).
+- **Results after the run that makes them**, as on every earlier module's pages: the debugger's
+  result text shows once its run ends. A prediction asks what the page has not said, with the
+  tempting wrong answer among bare values; a challenge asks for what the page has not shown.
+- **The debugger is used where the learner looks**: the line about to run in a box that keeps it
+  in view, the buttons, the watch and the view a lesson's steps name on one screen, at both
+  widths; an address shown in the three-digit hexadecimal the pages write, beside its decimal; the
+  stack drawn with the word R14 names first, and only words that were pushed.
+- **How a run ends has one word each**: it stops at its `stop`; the machine halts with a cause;
+  the debugger pauses at a breakpoint and the run can go on; a run is cut off after 5000
+  instructions; the end before an instruction that needs a register nothing has set has a word of
+  its own.
+- **A challenge tests what it teaches**: a caller that relies on a register the convention lets a
+  function change fails; a function that should call another is checked for its calls and the
+  stack's depth; a function that runs off its end does not count as returning.
+- **The capstone needs the stack**: besides the three functions, one function of the learner's
+  calls the other three and keeps what it needs through the calls, tested alone. As first built,
+  the capstone passed without a push, a kept register or a nested call, so the module's hardest
+  part went unused in the lesson that ends it.
