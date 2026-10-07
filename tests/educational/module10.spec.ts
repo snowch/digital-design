@@ -215,6 +215,27 @@ test.describe("Module 10's figures", () => {
       .locator("table.compare-seen tr")
       .filter({ has: figure.page().locator("th", { hasText: new RegExp(`^${name}$`) }) });
 
+  test("the opening table reads each machine's parts from its circuit", async ({ page }) => {
+    await openLesson(page, "instruction-set");
+    const figure = page.locator("#ix-parts");
+    await figure.scrollIntoViewIfNeeded();
+    const row = (part: string) => figure.locator(`tr[data-part=${part}]`);
+    await expect(row("ir").locator("td").first()).toHaveText(
+      format(T.forms.romOutput, { width: 32 }),
+    );
+    await expect(row("ir").locator("td").last()).toHaveText(
+      format(T.forms.register, { width: 32 }),
+    );
+    await expect(row("hr").locator("td").first()).toHaveText(T.forms.none);
+    await expect(row("state").locator("td").last()).toHaveText(
+      format(T.forms.register, { width: 3 }),
+    );
+    await expect(row("registers").locator("td")).toHaveText([
+      format(T.forms.registers, { count: 16, width: 64 }),
+      format(T.forms.registers, { count: 16, width: 64 }),
+    ]);
+  });
+
   test("the prediction in the middle of a load is answered by the two simulators", async ({
     page,
   }) => {

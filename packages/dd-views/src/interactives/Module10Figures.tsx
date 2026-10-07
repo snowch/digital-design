@@ -2,6 +2,7 @@
 
 // Module 10's figures, each a view of the implementation:
 //
+// - `machine-parts`: each part lesson 1 names, as each machine's circuit has it.
 // - `machine-compare`: Module 8's machine and Module 9's run one program side by side, from
 //   reset, in two simulators (packages/dd-model: machine-compare.ts). The learner moves Module 9's
 //   machine an edge or an instruction at a time; Module 8's takes its one edge when Module 9's
@@ -43,11 +44,14 @@ import {
   startPair,
   type MachineInputs,
   type MachinePair,
+  machineParts,
+  type PartForm,
 } from "@dd/dd-model";
 import { Prose, useSlot, type InteractiveProps } from "@platform/lesson-runtime";
 import { FaultInjector, PredictionChallenge } from "@platform/primitives";
 
 import { format, useViewStrings } from "../strings";
+import type { Machine10Strings } from "../strings10";
 import { FaultSpec, toFault } from "./FaultLab";
 import { withProps } from "./props";
 
@@ -1185,6 +1189,64 @@ export const ProgramCompare = withProps(
         )}
         {committed && ran && data.outcomes && <Prose markdown={data.outcomes} />}
         {asking && committed && ran && data.explain && <Prose markdown={data.explain} />}
+      </div>
+    );
+  },
+);
+
+// `machine-parts`: each part lesson 1 names, as Module 8's machine and Module 9's have it, read
+// from the two circuits (machine-compare.ts, machineParts). It takes no props.
+
+function partText(t: Machine10Strings, form: PartForm): string {
+  switch (form.kind) {
+    case "registers":
+      return format(t.forms.registers, { count: form.count, width: form.width });
+    case "register":
+      return format(t.forms.register, { width: form.width });
+    case "rom-output":
+      return format(t.forms.romOutput, { width: form.width });
+    case "memory":
+      return t.forms.memory;
+    case "devices":
+      return format(t.forms.devices, {
+        names: form.names
+          .map((n) => t.deviceNames[n as keyof typeof t.deviceNames] ?? n)
+          .join(", "),
+      });
+    case "none":
+      return t.forms.none;
+  }
+}
+
+export const MachineParts = withProps(
+  z.object({}),
+  function MachineParts({ interactive }: InteractiveProps & { data: Record<string, never> }) {
+    const strings = useViewStrings();
+    const t = strings.machine10;
+    const rows = useMemo(() => machineParts(), []);
+    return (
+      <div className="machine-figure machine-parts" data-interactive={interactive.id}>
+        <div className="truth-table-wrap">
+          <table className="truth-table datapath-table parts-table">
+            <caption>{t.partsCaption}</caption>
+            <thead>
+              <tr>
+                <th scope="col">{t.part}</th>
+                <th scope="col">{t.singleName}</th>
+                <th scope="col">{t.multiName}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.part} data-part={r.part}>
+                  <th scope="row">{t.partNames[r.part]}</th>
+                  <td>{partText(t, r.single)}</td>
+                  <td>{partText(t, r.multi)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   },

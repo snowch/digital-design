@@ -150,6 +150,20 @@ export interface Machine10Strings {
   readonly programAnswer: string;
   /** After a prediction of a kind's edges, on `kind-edges`: {answer}. */
   readonly edgesAnswer: string;
+
+  /** `machine-parts`: each part the lesson names, as each machine's circuit has it. */
+  readonly partsCaption: string;
+  readonly partNames: Readonly<
+    Record<
+      "registers" | "pc" | "memory" | "devices" | "ir" | "ha" | "hb" | "hr" | "hm" | "state",
+      string
+    >
+  >;
+  /** {count} and {width} in registers; {width} in register and romOutput; {names}, devices. */
+  readonly forms: Readonly<
+    Record<"registers" | "register" | "romOutput" | "memory" | "devices" | "none", string>
+  >;
+  readonly deviceNames: Readonly<Record<"display" | "lamps" | "timer", string>>;
 }
 
 export const MACHINE10_STRINGS: Machine10Strings = {
@@ -300,4 +314,27 @@ export const MACHINE10_STRINGS: Machine10Strings = {
   address: "Address",
   programAnswer: "The run gives {answer}.",
   edgesAnswer: "The controller takes {answer}.",
+
+  partsCaption: "Each machine's parts",
+  partNames: {
+    registers: "R0 to R15",
+    pc: "PC",
+    memory: "memory",
+    devices: "the shop's devices",
+    ir: "IR",
+    ha: "HA",
+    hb: "HB",
+    hr: "HR",
+    hm: "HM",
+    state: "the controller's state",
+  },
+  forms: {
+    registers: "{count} registers of {width} bits each",
+    register: "a register of {width} bits",
+    romOutput: "not a register: a bus, the ROM's output at the PC, {width} bits",
+    memory: "the ROM and the RAM",
+    devices: "{names}",
+    none: "none",
+  },
+  deviceNames: { display: "display", lamps: "lamps", timer: "timer" },
 };

@@ -7,7 +7,14 @@
 import { describe, expect, it } from "vitest";
 
 import { stuckAt } from "./faults";
-import { edgePair, instructionPair, pairView, runPair, startPair } from "./machine-compare";
+import {
+  edgePair,
+  instructionPair,
+  machineParts,
+  pairView,
+  runPair,
+  startPair,
+} from "./machine-compare";
 
 const COLDER = `R2 <= word[sensorA]
 R3 <= word[sensorB]
@@ -52,5 +59,29 @@ describe("two machines, one program", () => {
     instructionPair(broken);
     expect(broken.log[0]?.edges).toBe(1);
     expect(broken.log[0]?.differ).toContain("R2");
+  });
+});
+
+describe("machineParts", () => {
+  const rows = Object.fromEntries(machineParts().map((r) => [r.part, r]));
+
+  it("both machines have sixteen 64-bit registers, a PC, the memory and the shop's devices", () => {
+    for (const m of ["single", "multi"] as const) {
+      expect(rows.registers?.[m]).toEqual({ kind: "registers", count: 16, width: 64 });
+      expect(rows.pc?.[m]).toEqual({ kind: "register", width: 64 });
+      expect(rows.memory?.[m]).toEqual({ kind: "memory" });
+      expect(rows.devices?.[m]).toEqual({ kind: "devices", names: ["display", "lamps", "timer"] });
+    }
+  });
+
+  it("Module 8's IR is the ROM's output; Module 9 keeps it, the held words and a state", () => {
+    expect(rows.ir?.single).toEqual({ kind: "rom-output", width: 32 });
+    expect(rows.ir?.multi).toEqual({ kind: "register", width: 32 });
+    for (const p of ["ha", "hb", "hr", "hm"] as const) {
+      expect(rows[p]?.single).toEqual({ kind: "none" });
+      expect(rows[p]?.multi).toEqual({ kind: "register", width: 64 });
+    }
+    expect(rows.state?.single).toEqual({ kind: "none" });
+    expect(rows.state?.multi).toEqual({ kind: "register", width: 3 });
   });
 });

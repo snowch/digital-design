@@ -48,7 +48,20 @@ export const instructionSet: LessonInput = {
   introduces: ["instruction set", "microarchitecture"],
   sections: [
     { kind: "question", title: LABELS.titles.question, prose: PROSE.question },
-    { kind: "motivation", title: LABELS.titles.motivation, prose: PROSE.motivation },
+    {
+      kind: "motivation",
+      title: LABELS.titles.motivation,
+      prose: PROSE.motivation,
+      interactives: [
+        {
+          id: "parts",
+          kind: "machine-parts",
+          timeModel: "none",
+          caption: LABELS.captions.parts,
+          props: {},
+        },
+      ],
+    },
     {
       kind: "prediction",
       title: LABELS.titles.prediction,

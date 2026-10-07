@@ -212,3 +212,98 @@ export function runPair(pair: MachinePair, limit = 200): void {
 export function pairCircuits(pair: MachinePair): { single: Circuit; multi: Circuit } {
   return { single: pair.single.circuit, multi: pair.multi.circuit };
 }
+
+/** What one machine has for a part, read from its circuit. */
+export type PartForm =
+  | { readonly kind: "registers"; readonly count: number; readonly width: number }
+  | { readonly kind: "register"; readonly width: number }
+  | { readonly kind: "rom-output"; readonly width: number }
+  | { readonly kind: "memory" }
+  | { readonly kind: "devices"; readonly names: readonly string[] }
+  | { readonly kind: "none" };
+
+/** The parts the lesson names, in the order it names them. */
+export const MACHINE_PARTS = [
+  "registers",
+  "pc",
+  "memory",
+  "devices",
+  "ir",
+  "ha",
+  "hb",
+  "hr",
+  "hm",
+  "state",
+] as const;
+export type MachinePart = (typeof MACHINE_PARTS)[number];
+
+export interface PartRow {
+  readonly part: MachinePart;
+  /** Module 8's machine. */
+  readonly single: PartForm;
+  /** Module 9's machine. */
+  readonly multi: PartForm;
+}
+
+const DEVICES = ["display", "lamps", "timer"] as const;
+const HELD: Readonly<Record<string, string>> = { ha: "HA", hb: "HB", hr: "HR", hm: "HM" };
+
+/** What a circuit has for one part: the component that keeps it, found by its net or its path. */
+function partOf(circuit: Circuit, part: MachinePart): PartForm {
+  const leaf = (path: string, end: string) => path === end || path.endsWith(`/${end}`);
+  const kept = circuit.components.filter((c) => c.kind === "memory");
+  const driver = (name: string) => {
+    const net = circuit.nets.find((n) => leaf(n.name, name));
+    if (!net) return undefined;
+    const by = circuit.components.find((c) => Object.values(c.outputs).includes(net.id));
+    return by ? { by, width: net.width } : undefined;
+  };
+  const byNet = (name: string): PartForm => {
+    const d = driver(name);
+    if (!d) return { kind: "none" };
+    if (d.by.kind === "memory") return { kind: "register", width: d.width };
+    if (d.by.kind === "rom") return { kind: "rom-output", width: d.width };
+    return { kind: "none" };
+  };
+  switch (part) {
+    case "registers": {
+      const halves = kept.filter((c) => /registers\/(low|high)$/.test(c.path));
+      const first = halves[0];
+      if (!first) return { kind: "none" };
+      const width = halves.reduce((sum, c) => sum + Number(c.params?.width ?? 0), 0);
+      return { kind: "registers", count: Number(first.params?.words ?? 0), width };
+    }
+    case "pc":
+      return byNet("PC");
+    case "ir":
+      return byNet("IR");
+    case "memory": {
+      const rom = circuit.components.some((c) => c.kind === "rom" && leaf(c.path, "memory/rom"));
+      const ram = kept.some((c) => /memory\/bank\d+$/.test(c.path));
+      return rom && ram ? { kind: "memory" } : { kind: "none" };
+    }
+    case "devices": {
+      const names = DEVICES.filter((d) => kept.some((c) => leaf(c.path, `memory/${d}/register`)));
+      return names.length ? { kind: "devices", names } : { kind: "none" };
+    }
+    case "state": {
+      const state = kept.find((c) => leaf(c.path, "controller/state/register"));
+      return state
+        ? { kind: "register", width: Number(state.params?.width ?? 0) }
+        : { kind: "none" };
+    }
+    default:
+      return byNet(HELD[part] ?? part);
+  }
+}
+
+/** Each part the lesson names, as Module 8's machine and Module 9's have it. */
+export function machineParts(): readonly PartRow[] {
+  const single = datapathCircuit({ stage: "full" });
+  const multi = multicycleCircuit();
+  return MACHINE_PARTS.map((part) => ({
+    part,
+    single: partOf(single, part),
+    multi: partOf(multi, part),
+  }));
+}

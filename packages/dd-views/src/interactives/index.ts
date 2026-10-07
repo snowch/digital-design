@@ -45,6 +45,7 @@ import {
   EncodingExplorer,
   LayoutCompare,
   MachineCompare,
+  MachineParts,
   ProgramCompare,
   SwapCompare,
 } from "./Module10Figures";
@@ -89,6 +90,7 @@ export const INTERACTIVES: Readonly<Record<string, ComponentType<InteractiveProp
   "kind-map": KindMap,
   "kind-edges": KindEdges,
   // Module 10, the instruction set
+  "machine-parts": MachineParts,
   "machine-compare": MachineCompare,
   "layout-compare": LayoutCompare,
   "encoding-explorer": EncodingExplorer,
@@ -125,6 +127,7 @@ export {
   ControlTable,
   KindMap,
   KindEdges,
+  MachineParts,
   MachineCompare,
   LayoutCompare,
   EncodingExplorer,

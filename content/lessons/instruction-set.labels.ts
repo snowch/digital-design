@@ -29,6 +29,7 @@ export const LABELS = {
     c2: "Jobs, three edges",
   },
   captions: {
+    parts: "The parts of the two machines, read from their circuits.",
     predictMid: "Predict what the machines differ on, then check.",
     sideBySide: "Run both machines and compare them.",
     sortParts: "Sort each part and run the tests.",

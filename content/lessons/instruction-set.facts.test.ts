@@ -5,7 +5,15 @@
 
 import { describe, expect, it } from "vitest";
 
-import { assemble, edgePair, pairView, runPair, startPair, stuckAt } from "@dd/dd-model";
+import {
+  assemble,
+  edgePair,
+  machineParts,
+  pairView,
+  runPair,
+  startPair,
+  stuckAt,
+} from "@dd/dd-model";
 import { grade, machineCompareAnswer } from "@dd/dd-views";
 import { parseLesson, testCount } from "@platform/lesson-schema";
 
@@ -21,6 +29,14 @@ const props = (id: string) =>
   lesson.sections.flatMap((s) => s.interactives).find((x) => x.id === id)!.props as never;
 
 describe("facts for the instruction-set lesson", () => {
+  it("the motivation: only Module 9 keeps the IR, the held words and the controller's state", () => {
+    const rows = machineParts();
+    const own = rows.filter((r) => r.single.kind !== r.multi.kind).map((r) => r.part);
+    expect(own).toEqual(["ir", "ha", "hb", "hr", "hm", "state"]);
+    expect(rows.find((r) => r.part === "ir")?.single.kind).toBe("rom-output");
+    expect(PROSE.motivation).toContain("Its IR is a bus: the ROM's output at the PC.");
+  });
+
   it("the prediction: mid-load the machines differ on nothing; IR holds the load, HR 7D8", () => {
     expect(machineCompareAnswer(props("predict-mid"))).toBe("nothing");
     const p = startPair(COLDER, ROOMS);
