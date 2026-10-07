@@ -60,7 +60,7 @@ export const PROSE = {
     "The whole answer, as a code block:\n\n```\nalu a1 (.A(B), .B(A), .OP2(1'b0), .OP1(1'b1), .OP0(1'b1), .MINUS(M), .OVER(V));\nassign GT = M ^ V;\n```",
   ],
   reflection:
-    "The swap gives every comparison.\n\nOn the course's machine, kinds 0 and 9 to F name no instruction.\n\nWhat does the machine do with an instruction's 32 bits that name no instruction? What else does the instruction set leave out, and what would each cost to add?",
+    "The swap gives every comparison.\n\nOn the course's machine, kinds 0 and 9 to F name no instruction.\n\nWhat room is left in the instruction set, and what would a missing instruction cost?",
   modelVsReality:
     "The programs in this lesson's figures run on a model of the machine that runs one instruction at a time (lesson 1's). It leaves out the clock edges and the parts a program cannot see: the IR, the held words, the controller's state.\n\nMany real machines have constants wider than 12 bits and memories far larger than 2 KB. On them, not every address fits in one instruction. A program builds a large address in several.",
   p2Question:

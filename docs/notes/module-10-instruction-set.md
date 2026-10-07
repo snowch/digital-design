@@ -104,6 +104,12 @@ subagent that wrote every learner-facing sentence from a brief of checked facts.
   devices row lists the waiting bits (item 11). The fault counts are pinned by what a program can
   see. Brief 1R, drafted in two parts, dropped one fact and added one; my own brief had one wrong
   fact (Module 9's PC at the halt with PCEN stuck: `01C`, not `018`), caught by the facts test.
+- 09:20 to 10:10 The findings for 10.4 (eleven, with decisions B, E to I), the lesson rebuilt
+  around what is new. Code: `runProgram` no longer counts a refused instruction; `program-compare`
+  can hide the ROM's bytes, show one listing for one program on two machines, and ask where a run
+  halts, and its counts say "halt" where a run ends with a cause; the kind map fills its card.
+  Brief 4R, the whole lesson, drafted in three parts: one fact dropped, decimals put in
+  backticks, labels' case and stops. Lesson 3's reflection ends on 10.4's new question (I).
 
 ## The outline
 
@@ -133,11 +139,12 @@ rely on, and why the instructions and their layout are what they are.
    number a constant job puts in a register, a branch's constant and a branch's reach (answers);
    "greater than" written as text from the ALU's subtraction with its inputs swapped. Introduces
    **immediate** (the books' word for the constant).
-4. `room-to-grow`, "What room is left in the instruction set?": the illegal kinds and jobs, an all-zero word
+4. `room-to-grow`, "What room is left in the instruction set, and what would a missing instruction cost?": the illegal kinds and jobs, an all-zero word
    that stops a program that runs off its end, the free kinds, and what each instruction
    `docs/isa.md` leaves out would cost the circuit and save a program, counted by runs of the
-   reference. Challenges: what the machine does with each of six words (answers); the instructions
-   the loop for 7 × n runs, counted for 7 × 9 and 7 × 50 (answers). Introduces nothing.
+   reference. Challenges: six codes sorted as free, taken or kept refused (answers); a program of
+   two calls through a register, its instructions run counted with and without that instruction
+   (answers). Introduces nothing.
 5. `design-an-instruction`, the capstone, "How do you add a new instruction?":
    set if, `RY ← 1` if `RA cond RB`, else 0, at kind A, the job digit a branch's condition. It
    needs what Module 9's capstone did not: a change to the datapath, the condition MET carried as a
@@ -157,6 +164,22 @@ Decisions the managing session took after the reading review, each changing
   what the page compares, and the question says why the fields are whole digits: sixteen
   registers, kinds and jobs need 4 bits each, so cutting by bits buys room only where a field is
   unused, which the packed layout shows.
+
+- **10.4 counts cost and saving on the instructions `docs/isa.md` leaves out other than set if**
+  (decision B). The call through a register carries the with-and-without challenge; 10.4 names
+  set if only as the instruction lesson 5 designs, in one clause.
+- **The compatibility point is made once, in 10.4** (decision E): old programs run unchanged on a
+  machine that takes only refused codes, shown by the colder-room program on both machines.
+- **The kind map's layout is fixed in the shared component** (decision F): equal columns across
+  its card, which changes 9.2's figure too. No stored screenshot holds the map, so no baseline
+  changed; 9.2's figure was checked at both widths.
+- **`runProgram` counts the stop as run and a refused instruction as not** (decisions G and K),
+  as 9.3 counts; the counts every figure states were checked again.
+- **`docs/isa.md`'s "runs its data as instructions"** (decision H) is the author's file and is not
+  edited here. The runs show what happens: the machine runs data after a program as
+  instructions until one is refused, which is usually its first (5000 puts `00001388` at `008`,
+  kind 0; -250 puts `FFFFFF06`, kind F), while `12345678` runs as an add and the halt comes at
+  the word's top half, at `00C`. The managing session will raise it with the author.
 
 ## The capstone's instruction, and the machine it changes
 

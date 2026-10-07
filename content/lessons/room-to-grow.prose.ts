@@ -3,60 +3,60 @@
 // The words of the lesson room-to-grow.
 //
 // Drafted by the course's prose process from briefs of checked facts
-// (docs/notes/module-10-instruction-set/briefs), checked against the simulator, and placed
-// here by the lesson's structure. Edit a fact here only after checking it; the lesson's
+// (docs/notes/module-10-instruction-set/briefs, brief 4R), checked against the simulator, and
+// placed here by the lesson's structure. Edit a fact here only after checking it; the lesson's
 // facts test holds the numbers.
 
 export const PROSE = {
-  mapLead:
-    "The map runs every kind and job through the decoder, with the constants 0 and 5. A ✓ marks an instruction. A dot marks a word that is not one. A c marks an instruction only for some constants.",
-  prediction:
-    'The program has two instructions: R1 ← 66, then memory[`7C0`] ← R1, which shows R1 on the display. It has no stop. After it, the ROM holds 0s. Choose an answer and press "Check my prediction". Then press "Run the programs" to run it.',
-  p1Question: "After the store at `004`, how does the run end?",
-  p1Explain:
-    "It stops at `008` with cause `21`. The word at `008` is `00000000`, kind 0: an illegal instruction. The display shows 66: both instructions ran. A word of all zeros is illegal on purpose: a program that runs off its end stops at the first word of zeros. If data followed the program in the ROM, the machine would run the data's words as instructions first.",
   question:
-    "Lesson 3 ended: on the course's machine, kinds 0 and 9 to F name no instruction. What does the machine do with an instruction's 32 bits that name no instruction? What else does the instruction set leave out, and what would each cost to add?",
+    "Module 8's lesson 3 ran a program with no stop into the ROM's zeros. Module 9's lesson 2 mapped the kinds and jobs the decoder refuses, and why.\n\nThis lesson asks what is left. Why is an instruction of zeros refused on purpose? What does the machine do with data placed after a program? Why refuse unused codes at all, and how much room do they leave? What would each instruction the machine leaves out cost, and save?",
   motivation:
-    "A word is an illegal instruction when its kind is 0, or 9 to F; when its job is one its kind does not define; or when it is a system job 2 or 3 naming a control register outside 0 to 4. Of the 256 pairs of kind and job, 37 are instructions whatever the constant. Two more, kind 8's jobs 2 and 3, are instructions only when the constant is 0 to 4. At an illegal instruction the machine stops with cause `21` (Module 9). A word of all zeros, `00000000`, is kind 0: illegal. After a program and its data, every byte of the ROM is 0.",
+    "The map is Module 9's lesson 2's: every kind and job, run through the decoder.\n\nOf the 256 pairs of kind and job, 37 are instructions, and 2 more (kind 8's jobs 2 and 3) are instructions for some constants.\n\nKinds 1 to 8 leave 89 jobs undefined. Kinds 9 to F, seven kinds, are free on the course's machine.\n\nThe instruction of all zeros, `00000000`, is kind 0, refused on purpose. A program that runs off its end into the ROM's zeros halts at the first of them, with cause `21`.",
+  mapLead:
+    "The map runs every kind and job through the decoder, with the constants 0 and 5. A ✓ marks an instruction, a dot an instruction the decoder refuses, a c an instruction only for some constants.",
+  prediction:
+    'The program has two instructions: R1 ← 66 at `000`, and memory[`7C0`] ← R1 at `004`, which shows R1 on the display. It has no stop.\n\nAfter them, at `008`, the program puts data: the word `12345678` in hexadecimal.\n\nThe machine fetches whatever 32 bits are at the PC.\n\nChoose an answer and press "Check my prediction". Then press "Run the programs".',
+  p1Question: "After the store at `004`, where does the run halt?",
+  p1Explain:
+    "The run halts at `00C` with cause `21`, after one more instruction.\n\nThe word's low 32 bits, at `008`, are `12345678`: kind 1, job 2, so the machine runs it as R5 ← R3 + R4. The next 32 bits, at `00C`, are the word's top half, `00000000`: kind 0, refused.\n\nThe display shows 66, and 3 instructions ran.\n\nOther data halts sooner: 5000 puts `00001388` at `008`, kind 0; -250 puts `FFFFFF06`, kind F. Both halt at `008`.",
   investigation:
-    "The machine has no multiplication. The figure compares two programs that work out 7 × 5.",
+    "The machine has no multiplication; the figure runs two programs that work out 7 × 5.",
   multiplyLead:
-    'The first program adds 7 into R3 five times, in a loop. R2 counts down from 5, and the branch goes back while R2 differs from R0. R0 holds 0. The machine has no comparison with zero, so the program keeps 0 in a register. The second program doubles 7 twice and adds 7 once: 7 + 7 is 14, 14 + 14 is 28, 28 + 7 is 35. It works only for a factor known when the program is written. Press "Run the programs".',
+    'The first program adds 7 into R3 five times, in a loop. R2 counts down from 5, and the branch goes back while R2 differs from R0, which holds 0: the machine has no comparison with zero, so the program keeps 0 in a register.\n\nThe second doubles 7 twice and adds 7 once: 7 + 7 is 14, 14 + 14 is 28, 28 + 7 is 35. It works only for a factor known when the program is written.\n\nPress "Run the programs".',
   multiplyAfter:
-    "Both programs display 35. The loop approach writes 9 instructions but runs 21 when the program executes. The doubling approach writes 6 instructions and runs 6. The loop runs 3 instructions each time it goes around. For 7 × n, it runs 4 + 3n + 2 instructions total, the stop among them.",
+    "Both programs display 35.\n\nThe loop has 9 instructions and runs 21: 3 each time round. For 7 × n it runs 4 + 3n + 2, the stop among them.\n\nThe doubling has 6 instructions and runs 6.",
   construction:
-    "In the course's machine, kinds 9 to F are free: seven kinds. In your copy of Module 9's machine, kind 9 holds the call through a register, and kinds A to F are free. Every word of a free kind is illegal today.",
-  sortWordsLead: "For each word, say what the course's machine does when it reaches it.",
+    "A code the machine refuses today is room for an instruction later. A later instruction can take any refused code except the instruction of zeros, which must stay refused to halt a program that runs off its end.\n\nA code an instruction has today is taken: an old program may use it, and giving it a new meaning would change what that program does.\n\nOn the course's machine, kind 9 is free. In your copy, the call through a register took it.",
+  sortCodesLead: "For each code, say whether a later instruction could take it.",
   c1Task:
-    "For each of the six words below, choose what the course's machine does when it reaches that word. You have three options: the machine runs it; the machine stops as `stop`; or the machine stops with cause `21`. The words are `00000000`; `9040F000` (your copy's call through R4); `18123000`; `51000000`; `84000000`; `22102064`. There is one test for each word.",
+    "For each of six codes, choose: free, a later instruction can take it; taken, an old program may use it; or kept refused, it halts a program that runs off its end.\n\nThe codes are `18123000`, `00000000`, `51000000`, `B1230000`, `84000000` and `9040F000`, each on the course's machine.\n\nThere is one test for each code.",
   c1Hints: [
-    "Read K, then J. For each word, check: is the kind one of 1 to 8? Is the job one its kind defines?",
-    "`9040F000` runs in your copy of the machine, not in the course's machine, which refuses kind 9.",
-    "`00000000` is kind 0, so the machine stops with cause `21`.",
-    '`51000000` is a branch whose job, 1, is "never". It runs and does nothing. `18123000` is a register job with job 8, which kind 1 does not define.',
-    "The whole answer: cause `21`, cause `21`, cause `21`, runs, `stop`, runs.",
+    "Read K, then J. Is the code an instruction on the course's machine today?",
+    "A common mistake: calling `51000000` free because it does nothing. It is a branch with job 1, never: an instruction an old program may use.",
+    "A smaller example: `13123000` is a register job that subtracts, so it is taken.",
+    "Part of the answer: `00000000` is kept refused; `18123000` is free, a job kind 1 does not define.",
+    "The whole answer: free, kept refused, taken, free, taken, free.",
   ],
-  newWordsLead:
-    "The program that chooses a room, from Module 9's last lesson, uses your copy's call through a register at address `004`: the word `9040F000`. The figure runs this program on both machines. First it runs on your copy, which knows about kind 9. Then it runs on the course's machine, which does not know kind 9. Before you run them, predict what each machine displays. Then press \"Run the programs\" to check.",
-  newWordsAfter:
-    "Your copy displays -184, room A's reading. R15 holds the address `008`, and it stops at its stop instruction. The course's machine stops at `004` with cause `21`, and its display shows 0. A new instruction makes words an older machine would refuse. Programs written for the course's machine run on your copy. Every word they use means the same thing there.",
+  oldProgramLead:
+    "The colder-room program from Module 8 uses only the course's instructions.\n\nThe figure runs it on the course's machine and on your copy, which adds kind 9, the call through a register.\n\nPredict what each displays, then press \"Run the programs\".",
+  oldProgramAfter:
+    "Both display -250, room B's reading. Both run 6 instructions and halt at the stop at `014`.\n\nYour copy took only codes the course's machine refused, so every instruction of the old program means the same on both.",
   explanation:
-    "Every instruction the machine leaves out would cost the circuit something, and would save programs something.\n\n| Left out | What the circuit would need | What a program does without it |\n| --- | --- | --- |\n| Multiplication | a new part beside the ALU | adds in a loop, 3 instructions run each time round |\n| A shift | a new part beside the ALU: a shift is not a chain of one-bit slices | doubles a number by adding it to itself, one instruction a place |\n| Set if less | a new source for register Y, the condition as a word, and a control signal | a branch and a count around each comparison |\n| Call through a register | a decoder column and two terms of the checks (Module 9) | chooses among fixed calls with branches |\n| Comparison with zero | a 0 on the ALU's B, as AZERO gives a 0 on A | keeps 0 in a register: one instruction, once |\n| A wider constant | a second layout, with selectors (lesson 2) | a word in the ROM and one load, or sums of constants |\n\nAn instruction pays for itself where many programs run it often and the circuit needs little.",
+    "Every instruction the machine leaves out would cost the circuit something and save programs something. Each needs a decoder column and a place in the checks, as every instruction does; the table gives what more it needs.\n\n| Left out | What the circuit would need besides | What a program does without it |\n| --- | --- | --- |\n| Multiplication | a multiplier beside the ALU: two 64-bit words multiplied by adding up to 64 shifted copies takes 63 adders of 64 bits, where the ALU has one; and a new source for register Y's word, with a control signal to choose it | adds in a loop, 3 instructions run each time round |\n| A left shift by any number of places | a shifter beside the ALU: 6 layers of 64 two-way selectors, one layer for each bit of the number of places; and a new source for register Y's word, with a control signal | adds a number to itself, one instruction for each place |\n| A call through a register | nothing more: register Y already takes PC + 4 for a call (Module 9's lesson 5) | sets the return address with one constant job and jumps through the register: one more instruction run, and 4 more bytes of ROM, for each call |\n| A comparison with zero, `if RA < 0` or `if RA >= 0` | a 0 on the ALU's B; AZERO's 0 on A gives 0 - RB, which compares RB with 0 the other way round | keeps 0 in a register: one instruction, once |\n| A wider constant | a second layout, with selectors (lesson 2) | a word in the ROM and one load, or sums of constants (lesson 3) |\n\nLesson 5 designs one more: set if less, which writes 1 to a register when one register is less than another, and 0 when it is not.",
   generalisation:
-    "The free kinds are room for instructions not yet thought of. A new instruction takes a free kind, so every old word keeps its meaning. Old programs run unchanged on the new machine.\n\nA word the machine refuses today stops the program with cause `21`. Why does the machine refuse an unused word? If unused words did something today, a later instruction could not take them without changing what old programs do. The machine refuses them instead. That way, the unused codes stay free for new instructions.",
-  countLoopLead: "Count the instructions the loop runs.",
+    "The machine refuses every code it does not define. If an unused code did anything, a program could rely on it, and a later instruction could not take that code without changing what the program does.\n\nRefused codes stay free. A new instruction takes one. Every old instruction keeps its meaning. Old programs run unchanged on the new machine.\n\nA program that uses the new instruction needs the new machine. On the course's machine, your copy's kind 9 halts with cause `21`.",
+  countCallsLead: "Count the instructions each run makes, then run the tests.",
   c2Task:
-    "The loop that calculates 7 × n runs 4 instructions before the loop starts, 3 instructions each time round the loop, and 2 instructions after the loop ends: the store and the stop.\n\nHow many instructions does the machine run in total, including the stop, for 7 × 9? How many for 7 × 50? Count each instruction that runs, even if it runs more than once.\n\nThere are 2 tests, one for each answer: one for 7 × 9 and one for 7 × 50.",
+    "Your copy runs this program, which shows room A's reading, then room B's, each by a routine called through R4.\n\n```\nR4 <= showA\ncall R4, R15\nR4 <= showB\ncall R4, R15\nstop\nshowA: R2 <= word[sensorA]\nword[display] <= R2\ngoto R15\nshowB: R3 <= word[sensorB]\nword[display] <= R3\ngoto R15\n```\n\nThe course's machine has no call through a register. Each call becomes two instructions: a constant job puts the return address in R15, and a jump through R4.\n\nHow many instructions does each run, the stop among them: the program above on your copy, and the same program without the call through a register on the course's machine?\n\nThere are 2 tests, one for each count.",
   c2Hints: [
-    "The idea: count the instructions run once, and the instructions run each time round.",
-    "A common mistake: counting the instructions written, 9, not the instructions run.",
-    "A smaller example: 7 × 5 runs 4 + 15 + 2, which is 21.",
-    "Part of the answer: 7 × 9 runs 4 + 27 + 2.",
-    "The whole answer: 33 and 156.",
+    "The idea: follow the run, instruction by instruction, through each routine and back.",
+    "A common mistake: counting the instructions written, not those run.",
+    "A smaller example: one call, to a routine of three instructions, then the stop: 1 + 1 + 3 + 1 is 6 with the call through a register.",
+    "Part of the answer: without the call through a register, each call runs one instruction more.",
+    "The whole answer: 11 with the call, 13 without.",
   ],
   reflection:
-    "A free kind can hold a new instruction.\n\nWhich one would you add? How would you show it is worth what it costs the circuit?\n\nThe next lesson shows one way to answer these questions. It designs a new instruction. It justifies the new instruction with a program it shortens. Then it builds the new instruction into your copy of the machine.",
+    "A free kind can hold a new instruction.\n\nWhich one would you add? How would you show it is worth what it costs the circuit?\n\nThe next lesson answers both for one instruction: it designs set if less, justifies it with a program it shortens, and builds it into your copy.",
   modelVsReality:
-    "Real instruction sets grow over many years. A maker adds new instructions by using codes the older machines refused. That way, old programs keep running on the new machine.\n\nA program that uses a new instruction needs a machine that has it. A program using kind 9 needs a machine like your copy here, which has kind 9. The course's machine still refuses it.",
+    "The course's ROM holds 0s after a program, so a program that runs off its end halts at once.\n\nA real flash memory, erased and not written, reads all 1s. On the course's machine `FFFFFFFF` is kind F, refused as well. A real machine must refuse whatever its unwritten memory reads.",
 } as const;

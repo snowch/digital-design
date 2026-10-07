@@ -1,68 +1,68 @@
 // Copyright © 2026 Christopher Snow
 
 // Titles, objectives, captions and labels of the lesson room-to-grow, drafted by the prose
-// process from a brief of facts (docs/notes/module-10-instruction-set/briefs) and checked
-// against the lesson.
+// process from a brief of facts (docs/notes/module-10-instruction-set/briefs, brief 4R) and
+// checked against the lesson.
 
 export const LABELS = {
-  title: "What room is left in the instruction set?",
+  title: "What room is left in the instruction set, and what would a missing instruction cost?",
   objectives: [
-    "Say which instruction words are illegal and why they are rejected.",
-    "Predict what happens when a program runs without a stop instruction.",
-    "Weigh what a left-out instruction costs and saves.",
-    "Count how many instructions a loop runs.",
+    "Say why a machine refuses instructions it does not define, a word of zeros among them.",
+    "Predict what the machine does with data placed after a program.",
+    "Weigh what a left-out instruction costs the circuit and saves a program.",
+    "Count a program's instructions with and without a left-out instruction.",
   ],
   titles: {
-    question: "Words with no instruction",
-    motivation: "Illegal words",
-    prediction: "Program with no stop",
+    question: "What is left",
+    motivation: "Codes the machine refuses",
+    prediction: "Data after a program",
     investigation: "Multiplying without multiply",
-    construction: "The free kinds",
-    failureExperiment: "New kind on old machine",
-    explanation: "Cost of each left-out instruction",
-    generalisation: "Room for later",
-    challenge: "Counting a loop",
+    construction: "Codes for later",
+    failureExperiment: "An old program on the new machine",
+    explanation: "What each left-out instruction costs",
+    generalisation: "Why refuse",
+    challenge: "Calls counted",
     reflection: "Choosing an instruction",
   },
   challengeTitles: {
-    c1: "Words checked, decoded",
-    c2: "Loop counted",
+    c1: "Codes, sorted",
+    c2: "Calls, counted",
   },
   captions: {
-    map: "Every kind and job the decoder recognises.",
-    predictNoStop: "Predict how the run ends without a stop, then check.",
-    multiply: "Run both programs that calculate 7 × 5.",
-    sortWords: "For each word, choose what the machine does.",
-    newWords: "Run the same program on the copy and on the course's machine.",
-    countLoop: "Count the loop's instructions, then run the tests.",
-  },
-  does: {
-    runs: "Runs it",
-    stop: "Stops at it: stop",
-    illegal: "Stops with cause 21",
+    map: "Every kind and job the decoder knows.",
+    predictData: "Predict where the run halts, then run it.",
+    multiply: "Run both programs that work out 7 × 5.",
+    sortCodes: "Sort each code and run the tests.",
+    oldProgram: "Run an old program on the course's machine and on your copy.",
+    countCalls: "Count both runs and run the tests.",
   },
   options: {
-    p1Illegal: "It stops at 008, cause 21",
-    p1RomEnd: "It runs to the ROM's end and stops, cause 11",
-    p1Never: "It never stops",
+    p1At008: "a halt at 008, cause 21",
+    p1At00C: "one more instruction, then a halt at 00C, cause 21",
+    p1Never: "no halt",
   },
   programs: {
-    noStop: "Two instructions, no stop",
+    dataAfter: "Two instructions, then data",
     loop: "7 × 5 in a loop",
     doubling: "7 × 5 by doubling",
-    copy: "The copy with kind 9",
     course: "The course's machine",
+    copy: "Your copy, with kind 9",
   },
-  words: {
+  fates: {
+    free: "Free: a later instruction can take it",
+    taken: "Taken: an old program may use it",
+    refused: "Kept refused: it halts a program that runs off its end",
+  },
+  codes: {
+    kind1job8: "18123000 (kind 1, job 8)",
     zeros: "00000000",
-    kind9: "9040F000 (call through R4)",
-    job8: "18123000",
-    never: "51000000",
-    stop: "84000000",
-    add: "22102064",
+    never: "51000000 (a branch, never)",
+    kindB: "B1230000 (kind B)",
+    stop: "84000000 (the stop)",
+    kind9: "9040F000 (kind 9, on the course's machine)",
   },
   counts: {
-    times9: "Instructions run for 7 × 9",
-    times50: "Instructions run for 7 × 50",
+    withCall: "Instructions run with the call through a register",
+    withoutCall: "Instructions run without it",
   },
 } as const;
