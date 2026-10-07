@@ -46,6 +46,8 @@ export const hexText = (v: bigint | undefined) =>
 
 /** A refusal in the course's words: its sentence with its values filled in. */
 export function refusalText(t: Machine11Strings, p: AssemblyProblem): string {
+  // Line 0 is no line of the learner's: the tests' own call, which the sentence names.
+  if (p.line === 0) return format(t.refusals[p.code], p.values as Record<string, string>);
   return format(t.refusedLine, {
     line: p.line,
     sentence: format(t.refusals[p.code], p.values as Record<string, string>),
@@ -704,7 +706,11 @@ export function ProgramText({
       <div className="hdl-messages" role="status">
         {problems.length ? (
           <>
-            <p className="hdl-errors">{format(t.refusedTitle, { n: problems.length })}</p>
+            <p className="hdl-errors">
+              {problems.length === 1
+                ? t.refusedTitleOne
+                : format(t.refusedTitle, { n: problems.length })}
+            </p>
             <ul className="hdl-errors">
               {problems.map((p) => (
                 <li key={`${p.line}-${p.code}`}>{refusalText(t, p)}</li>

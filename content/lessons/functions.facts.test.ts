@@ -6,7 +6,7 @@
 import { describe, expect, it } from "vitest";
 
 import { MODULE_9, assembleChecked, runProgram } from "@dd/dd-model";
-import { listingAnswer, runAnswer } from "@dd/dd-views";
+import { DEFAULT_VIEW_STRINGS, format, gradeProgram, listingAnswer, runAnswer } from "@dd/dd-views";
 import { parseLesson } from "@platform/lesson-schema";
 
 import { LARGER_RUNS, RANGE_CALLS, RANGE_RUNS, functions, larger, outOfRange } from "./functions";
@@ -72,5 +72,12 @@ describe("facts for the functions lesson", () => {
   it("the challenge's specification", () => {
     expect(RANGE_CALLS.map(([r, l, h]) => outOfRange(r, l, h))).toEqual([10, 10, 0, 0, 0, 35, 35]);
     expect(RANGE_RUNS.map((r) => outOfRange(r, 20, 50))).toEqual([10, 0, 25]);
+  });
+
+  it("a program with no outOfRange is told the tests call it, not that it does not assemble", () => {
+    const t = DEFAULT_VIEW_STRINGS.machine11;
+    const c = lesson.challenges.find((x) => x.id === "out-of-range")!;
+    const v = gradeProgram(c, { text: "again: goto again" });
+    expect(v.blocked).toBe(format(t.refusals.noFunction, { name: "outOfRange" }));
   });
 });

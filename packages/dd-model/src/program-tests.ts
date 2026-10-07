@@ -73,7 +73,7 @@ export function runScenario(source: string, scenario: ProgramScenario = {}): Sce
         problems: [
           {
             line: 0,
-            code: "unknownName",
+            code: "noFunction",
             values: { name: scenario.call },
             message: `the program has no ${scenario.call}`,
           },

@@ -92,7 +92,11 @@ export function gradeProgram(
         passed: false,
         total: cases.length,
         failures: [],
-        blocked: [t.notAssembled, ...r.problems.map((p) => refusalText(t, p))].join("\n"),
+        // A problem on line 0 is the tests' call, not the learner's text, which does assemble.
+        blocked: [
+          ...(r.problems.some((p) => p.line > 0) ? [t.notAssembled] : []),
+          ...r.problems.map((p) => refusalText(t, p)),
+        ].join("\n"),
       };
     if (r.pass) continue;
     // What the program left for every check of the case, then how the run ended, then the

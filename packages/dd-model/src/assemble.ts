@@ -70,6 +70,8 @@ export type AssemblyProblemCode =
   | "unreadable"
   | "romFull"
   | "unknownName"
+  /** Not the assembler's: a test calls a function no line of the program names. */
+  | "noFunction"
   | "twice"
   | "dataTarget"
   | "wordTooWide"

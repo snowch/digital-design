@@ -197,6 +197,7 @@ test.describe("Module 11's wrong programs", () => {
     await openLesson(page, "assembly");
     const section = challenge(page, "warmer-room");
     await writeText(section, "R2 <= word[sensorA]\nR3 <= 5000\nstop");
+    await expect(section.locator(".program-text p.hdl-errors")).toHaveText(T.refusedTitleOne);
     await expect(section.locator(".program-text .hdl-errors li")).toHaveText([
       format(T.refusedLine, {
         line: 2,

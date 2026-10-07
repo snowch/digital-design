@@ -15,6 +15,8 @@ export interface Machine11Strings {
   readonly assembled: string;
   /** {n}: how many lines the assembler refuses. */
   readonly refusedTitle: string;
+  /** The same, for one line. */
+  readonly refusedTitleOne: string;
   /** {line}: the line's number; {sentence}: why. */
   readonly refusedLine: string;
   /** One sentence per refusal, with the values it names in braces. */
@@ -147,6 +149,8 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   assembled:
     "The assembler made {n} instructions; the program and its data take {bytes} bytes of ROM.",
   refusedTitle: "The assembler refuses {n} lines.",
+  // Brief 8L.
+  refusedTitleOne: "The assembler refuses 1 line.",
   refusedLine: "Line {line}: {sentence}",
   refusals: {
     notNumber: "{text} is not a number.",
@@ -176,6 +180,9 @@ export const MACHINE11_STRINGS: Machine11Strings = {
     addressForm:
       "An address is a register, plus or minus a number, or a name. It cannot add two registers.",
     reservedName: "{name} is a word the language uses, so it cannot name a line.",
+    // Brief 8L.
+    noFunction:
+      "The tests call the function {name}, but no line of your program starts with {name}:, so start the function's first line with {name}: to give it that name.",
   },
   listingCaption: "The program as the assembler made it",
   address: "Address",
