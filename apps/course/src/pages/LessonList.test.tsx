@@ -90,7 +90,9 @@ describe("the course's front page: the cover", () => {
 
   it("uses no term that a lesson introduces, since a reader meets it before every lesson", () => {
     const cover = [
+      STRINGS.cover.tagline,
       STRINGS.cover.lead,
+      STRINGS.cover.description,
       STRINGS.cover.heroTitle,
       STRINGS.cover.heroCaption,
       STRINGS.cover.journeyHeading,

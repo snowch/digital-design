@@ -1,9 +1,12 @@
 // Copyright © 2026 Christopher Snow
 
 // Hash routes, so the site works from GitHub Pages without server rules: `#/` is the lesson
-// list, `#/start` the page before the first lesson and `#/lesson/<id>` a lesson.
+// list, `#/start` the page before the first lesson and `#/lesson/<id>` a lesson. Each route also
+// names its page in the browser's tab.
 
 import { useEffect, useState } from "react";
+
+import { STRINGS } from "./strings";
 
 export type Route =
   | { kind: "list" }
@@ -25,6 +28,23 @@ export function parseRoute(hash: string): Route {
 
 export function lessonHref(id: string): string {
   return `#/lesson/${id}`;
+}
+
+/**
+ * The name a page gives the browser's tab, so a reader with several lessons open can tell them
+ * apart: the front page the course's full title, every other page its own name and then the
+ * course's short one. `lessonTitle` gives a lesson's title by its id.
+ */
+export function pageTitle(
+  route: Route,
+  courseTitle: string,
+  lessonTitle: (id: string) => string | undefined,
+): string {
+  if (route.kind === "list") return courseTitle;
+  if (route.kind === "preface") return STRINGS.pageTitle(STRINGS.preface.title);
+  if (route.kind === "lesson")
+    return STRINGS.pageTitle(lessonTitle(route.id) ?? STRINGS.noLesson(route.id));
+  return STRINGS.pageTitle(STRINGS.missing(route.path));
 }
 
 export function useRoute(): Route {

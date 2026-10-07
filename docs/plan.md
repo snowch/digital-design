@@ -171,6 +171,18 @@ lesson the button names starts open, so a new reader sees Module 1's lessons and
 the module they are in; so does the module of a lesson the reader has just left. The author then
 found the five stages running on into the list, and a rule across the page now parts them.
 
+On 7 October the author forwarded a first-time visitor's review, made by a program that reads a
+page without running its scripts. It saw only the line that the course needs JavaScript, and asked
+that a newcomer know within 30 seconds that they will build a computer, and how the course
+teaches. The page now says so before any script runs: its title is the course's, and the build
+writes the cover's own words into it, as the description a search result shows, as what a shared
+link's preview shows, and as the cover itself for a browser that runs no scripts, so they cannot
+drift from the cover. On the cover, the opening's first sentence stands apart, larger: "You build a
+working computer from its parts, starting from two voltages on a wire." The rest says, in short
+sentences, that each idea and each name arrives when the circuit raises the question that needs
+it, and that every simulation runs the real circuit. Each of the five stages now says what you
+build in it, and each page names itself in the browser's tab. The words went through brief C3.
+
 ### 6 October 2026: a calculator of the course's own, in Module 10
 
 The author asked whether to bundle their programmer's calculator, `snowch/programmer-calculator`,

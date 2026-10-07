@@ -12,7 +12,7 @@ import { browserStorage, LessonView } from "@platform/lesson-runtime";
 import { LessonList } from "./pages/LessonList";
 import { LessonPager } from "./pages/LessonPager";
 import { Preface } from "./pages/Preface";
-import { PREFACE_HREF, lessonHref, useRoute } from "./route";
+import { PREFACE_HREF, lessonHref, pageTitle, useRoute } from "./route";
 import { STRINGS } from "./strings";
 import { useTheme, type Theme } from "./theme";
 
@@ -26,6 +26,14 @@ export function App() {
   useEffect(() => {
     if (route.kind === "lesson") setLastLesson(route.id);
   }, [route]);
+  // The tab names the page, so a reader with several lessons open can tell them apart.
+  useEffect(() => {
+    document.title = pageTitle(
+      route,
+      book.title,
+      (id) => book.lessons.find((l) => l.id === id)?.title,
+    );
+  }, [route, book]);
 
   let page: React.ReactNode;
   if (route.kind === "list")
