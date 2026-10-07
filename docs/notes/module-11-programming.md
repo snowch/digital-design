@@ -371,6 +371,13 @@ The mechanical walk was repeated on the rebuilt pages, at 1280 and 768 in the li
 in the dark: no console error, no sideways scroll. The drawing and look tests pass for every Module
 11 figure; the ten stored screenshots that fail in this container fail on `main` too.
 
+## The full check
+
+`npm run check` at b01177b (after merging `main` at 014094c), 19:00 to 19:35 UTC: Prettier, the
+copyright lines, the platform copy, `tsc`, Vitest (118 files, 1185 tests), the build and Playwright
+all pass, except the ten stored screenshots that fail in this container on `main` as well (Modules
+2, 5, 6 and the cover's figures; none Module 11's): 776 passed, 10 failed, 48 skipped.
+
 ## What the build would change
 
 - The debugger re-runs a program from the start on every edit. Programs here are short; a longer
