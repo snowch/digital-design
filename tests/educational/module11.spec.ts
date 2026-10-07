@@ -24,7 +24,15 @@ import {
 
 const T = DEFAULT_VIEW_STRINGS.machine11;
 
-const MODULE_11 = ["assembly", "lists", "functions", "stack", "recursion", "debugging"] as const;
+const MODULE_11 = [
+  "assembly",
+  "lists",
+  "functions",
+  "stack",
+  "recursion",
+  "debugging",
+  "log-report",
+] as const;
 
 async function answerAll(
   section: Locator,
@@ -144,6 +152,14 @@ const WRONG: readonly {
     fails: "Room A 25, room B -210",
     left: "the display 0",
   },
+  {
+    lesson: "log-report",
+    id: "day-report",
+    from: "          R5 <= word[R1]        // the highest so far: the first reading",
+    to: "          R5 <= 0",
+    fails: "Log 1: the whole program",
+    left: "the word at 408 0",
+  },
 ];
 
 test.describe("Module 11's wrong programs", () => {
@@ -192,6 +208,18 @@ test.describe("Module 11's wrong programs", () => {
 });
 
 test.describe("Module 11's lab", () => {
+  test("the capstone offers the skeleton or an empty program to start from", async ({ page }) => {
+    await openLesson(page, "log-report");
+    const section = challenge(page, "day-report");
+    await section.scrollIntoViewIfNeeded();
+    const box = section.locator("textarea.program-source");
+    await expect(box).toHaveValue(/lowest:/);
+    await section.getByRole("button", { name: T.startEmpty }).click();
+    await expect(box).not.toHaveValue(/lowest:/);
+    await section.getByRole("button", { name: T.startSkeleton }).click();
+    await expect(box).toHaveValue(/lowest:/);
+  });
+
   test("a breakpoint pauses the loop each time round, and the watch shows R1 moving", async ({
     page,
   }) => {

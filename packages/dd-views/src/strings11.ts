@@ -275,10 +275,19 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   notAssembled: "The program does not assemble.",
   failedLeft: "Your program left {left}.",
   checkRegister: "{name}",
-  checkWord: "Word at {address}",
+  checkWord: "the word at {address}",
   checkValue: "{name} {value}",
   details: {
     // Module 11, lesson 1 (brief 1L).
+    // Module 11, lesson 7 (brief 7L).
+    report:
+      "The report must show the warm count on the display, ALARM when it is not 0, and the lowest and highest at 400 and 408.",
+    "report-lowest":
+      "R1 must hold the list's lowest reading (or 0 for an empty list), with R10 to R14 as they were and a return through R15.",
+    "report-highest":
+      "R1 must hold the list's highest reading (or 0), with R10 to R14 as they were and a return through R15.",
+    "report-warmer":
+      "R1 must hold how many readings are warmer than the limit in R3, with R10 to R14 as they were and a return through R15.",
     // Module 11, lesson 6 (brief 6L).
     warmerCount: "The display must show how many readings are warmer than the limit.",
     mendTotal: "The display must show the total of both rooms' amounts above their limits.",
