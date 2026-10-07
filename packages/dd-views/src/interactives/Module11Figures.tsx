@@ -396,7 +396,7 @@ export const LogResults = withProps(
               <li key={log.label} className="log-card" aria-label={log.label}>
                 <p className="layout-title">{log.label}</p>
                 <p className="memory-word log-readings">
-                  {`${t.readingsCol}: ${log.readings.length ? log.readings.join(", ") : t.empty}`}
+                  {`${t.readingsCol}: ${log.readings.length ? log.readings.join(", ") : t.emptyLog}`}
                   {log.limit !== undefined ? ` ${format(t.limitNote, { limit: log.limit })}` : ""}
                 </p>
                 <table className="truth-table datapath-table log-table">

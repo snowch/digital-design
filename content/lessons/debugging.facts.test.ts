@@ -97,6 +97,11 @@ describe("facts for the debugging lesson", () => {
     const empty = runScenario(OFF_BY_ONE_MENDED, { data: logData([], -180) }).state!;
     expect(empty.cpu.display).toBe(0n);
   });
+
+  it("the counting program as first given walks off an empty log into words nothing has set", () => {
+    const run = runScenario(OFF_BY_ONE, { data: logData([], -180) }).state!;
+    expect(endOf(run.stopped).key).toBe("unknown-branch");
+  });
 });
 
 function start(src: string) {

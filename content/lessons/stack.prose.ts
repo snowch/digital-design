@@ -9,7 +9,7 @@
 
 export const PROSE = {
   question:
-    "Lesson 3 asked: what must a function that calls another keep, and where? The figure's program adds both rooms' amounts above their limits. Its function `sumOver` takes room A's reading in R1 and room B's in R2, calls `overBy` twice, and returns the sum in R1. It keeps the words it needs between the calls in R10. The main program calls `sumOver` from `008`, shows R1 on the display and stops. Room A reads -170 and room B -190: each is 10 above its limit, so the display should show 20.",
+    "Lesson 3 asked: what must a function that calls another keep, and where? The figure's program adds both rooms' amounts above their limits. Its function `sumOver` takes room A's reading in R1 and room B's in R2, calls `overBy` twice, and gives the sum as its result in R1. It keeps the words it needs between the calls in R10. The main program calls `sumOver` from `008`, shows R1 on the display and stops. Room A reads -170 and room B -190: each is 10 above its limit, so the display should show 20.",
   lostLead: 'Predict what the display shows, then press "Run to the end".',
   lostAfter:
     "The debugger cuts the run off after 5000 instructions. The display still shows 0.\n\nThe call at `008` put `00C` into R15, the return address in the main program. When `sumOver` calls `overBy`, that call overwrites R15. After the second call at `030`, R15 holds `034` instead of `00C`. When `sumOver` does `goto R15` at `038`, it goes to `034`. The instruction there adds R10 to R1, then comes back to `038`. But R15 still holds `034`, so `goto R15` goes there again. Each time, R1 grows by 10. The run never goes back to the main program.",
@@ -19,7 +19,7 @@ export const PROSE = {
     'The figure shows the new program with its addresses. The main program calls `sumOver` from `010`. Choose an answer and press "Check my prediction". The listing\'s words then show.',
   p1Question: "While `overBy` runs for the first time, what does the word at `7B8` hold?",
   p1Explain:
-    "The word at `7B8` holds `014`: the address of the next instruction after the call at `010`. The call put `014` in R15. `sumOver`'s first push wrote R15 to `7B8`. The address `010` is where the call is, not the return address. `sumOver`'s second push wrote R10, which held 1, to `7B0`. When `sumOver` made its call to `overBy`, R15 became `044`. But `014` stays safe at `7B8`. The next figure runs the program so you can watch the pushes.",
+    "The word at `7B8` holds `014`: the address of the next instruction after the call at `010`. The call put `014` in R15. The first push of `sumOver` wrote R15 to `7B8`. The address `010` is where the call is, not the return address. The second push of `sumOver` wrote R10, which held 1, to `7B0`. When `sumOver` made its call to `overBy`, R15 became `044`. But `014` stays safe at `7B8`. The next figure runs the program so you can watch the pushes.",
   investigation:
     "The program runs with room A at -170 and room B at -190. The figure shows a breakpoint on `overBy`, with the stack visible.",
   pushedLead:

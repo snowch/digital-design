@@ -95,9 +95,13 @@ program must:
 - light ALARM when any is, and no lamp otherwise;
 - leave the lowest reading at `400` and the highest at `408` (0 for an empty log);
 - end with `stop`;
-- do the work through three functions the tests also call directly, each with the list's address
-  in R1 and its count in R2 (`warmer` takes the limit in R3): `warmer`, `lowest` and `highest`,
-  each returning its result in R1, putting back R10 to R13 and R14, and returning to R15.
+- do the work through four functions, each tested alone as well: `report`, which the main
+  program calls with the list's address in R1, its count in R2 and the limit in R3, stores the
+  lowest and highest, and gives in R1 how many readings are warmer; and the three it calls,
+  `lowestOf`, `highestOf` and `warmCount` (the last takes the limit in R3). Each gives its result
+  in R1, puts back R10 to R14 and returns through R15. `report` calls, so it pushes R15, and keeps
+  the address, the count and the limit in R10 to R12 through its calls (decision 6 of the reading
+  review, below). The office's own computer reads `400` and `408` each morning.
 
 Graded over several logs (an ordinary day, a warm day, one reading, an empty log, readings of both
 signs), each log a test of the whole program and a test of each function called alone. The
@@ -253,7 +257,7 @@ a function's caller sees it: R10 to R14 hold, after the return, what they held b
 
 ## Decisions taken inside the plan
 
-- The capstone's three tiers are three ways into one challenge (the starting text, the
+- The capstone's three tiers are three ways into one challenge (the outline, the
   specification with an empty program, the requirements alone), as the outline says.
 - The plan's lesson 6 mistake "a signed comparison on unsigned values" was first built as an
   unsigned comparison on signed readings, since no program in the shop holds a value meant
@@ -266,14 +270,14 @@ a function's caller sees it: R10 to R14 hold, after the return, what they held b
   by a loop that walks backwards.
 - `overBy` works in R5, a free register, as the convention allows. That makes 11.3's construction
   honest: a caller that keeps room A's result in R5 loses it, on readings the tests include.
-- Module 10's `program-compare` says a run "halted at the stop"; Module 11 says a run *stops* at
-  `stop`, *halts* only for a trap cause, *pauses* at a breakpoint, and is *cut off* at 5000
-  instructions. The two figures keep their own strings; 11.2 and 11.3 use `program-compare` only
-  for runs that end at their `stop`, where its sentence is true.
+- One word for each way a run ends, course-wide since the reading review (decision 4): a run
+  *stops* at `stop`, *halts* only for a trap cause, *pauses* only at a breakpoint, is *cut off* at
+  5000 instructions, and the debugger *ends* it before an instruction that needs a register nothing
+  has set. Module 10's `program-compare` now says "The run stopped at its stop, at …".
 - The watch compares each register with its value when the run last paused, not one instruction
   back: after "Run to a breakpoint" that is the change a learner asked to see.
-- A register nothing has set reads X, and the debugger pauses before an address, branch or jump
-  that would use it, naming the register. The grader reports the same as a run's end
+- A register nothing has set reads X, and the debugger ends the run before an address, branch or
+  jump that would use it, naming the register. The grader reports the same as a run's end
   (`unknown-…`). This is what a learner meets most often, a forgotten `R0 <= 0` or a missing
   `R14 <= 0x7C0`, and the machine model already carries X.
 
@@ -370,6 +374,119 @@ and 2R's generalisation (an invented sentence).
 The mechanical walk was repeated on the rebuilt pages, at 1280 and 768 in the light theme and 375
 in the dark: no console error, no sideways scroll. The drawing and look tests pass for every Module
 11 figure; the ten stored screenshots that fail in this container fail on `main` too.
+
+## The reading review of 7b2a194, and what was done
+
+The review is kept verbatim in `module-11-programming/review-1.md`. Its order of work was kept:
+code, then the lessons' content, then the words through the prose process (briefs `1R` to `7R2`,
+`8M` and `8N`; drafts and fixes in `drafts/`), then the second pass, the walk and the check. Every
+blocking and should-fix item is done. Two minor points were judged to cost more than they give,
+and are marked "not done" below.
+
+### The decisions across the module
+
+1. Addresses. Values from 10 to 7FF show decimal and three-digit hexadecimal at one size; the PC,
+   R14 and R15, and a watch a figure names as an address (11.2's and 11.5's R1), show hexadecimal
+   first. The watch reads decimal, or hexadecimal after `0x`, and a refused entry says why (a name
+   it does not know, an address not a multiple of 8, or outside the memory). *Not done:* values
+   below 10 show decimal only, since their hexadecimal is the same digit.
+2. The views a lead points at. On a phone the order is the buttons, the ▶ line, the watch, the
+   view, then the rest; on a desk the view sits beside the listing. Only the devices a program's
+   lines name are shown. On a phone the listing, a long region of memory and the stack are short
+   boxes that keep their current row in view, and the watch's line of help is kept for a screen
+   reader only, so the four fit an 812-pixel screen. The browser test checks 11.2's and 11.6's log
+   views and 11.4's and 11.5's stack views at both widths.
+3. The stack view draws the word R14 names first, only words a push stored, and folds a run of
+   more than three like groups.
+4. The words for a run's end, course-wide, as in "Decisions taken inside the plan" above.
+5. The grader: one sentence per failed check; the tests' return point sits after a guard word a
+   fall-through cannot reach, and is never named; the tasks say what a call test sets; a missing
+   function fails only its own tests; the empty log's placeholder is 99; 11.3's tests' `overBy`
+   spoils R0 and R2 to R9 and the tests count 2 calls; 11.4's tests count calls and the stack's
+   depth; "Run with" offers the call tests.
+6. The capstone needs the stack: `report`, as in "The capstone" above, tested alone with 3 calls
+   and at least 1 word on the stack; in the requirements, the outline, the specification and the
+   hints. A facts test grades the last hint pasted over the outline's stubs.
+7. Names and words: no possessive on a function's name; "return" for going back, "result" for
+   the value; singular forms for 1; "38 instructions run"; `check` renamed `sumKept`.
+
+### 11.1 assembly
+
+1, 2. Bare options `002`, `003`, `00C`, `014`. 3. Its own verdict for a question the assembler
+answers. 4. Decision 5. 5. The devices before the registers on a phone, only R2 to R4 shown, and the
+lead names the devices. 6. The lead names "Put back the program" and says when it appears.
+7. Decision 7. 8. "The first time", "the model it runs", and captions without the terms. 9. The
+mended run's text no longer repeats the generalisation. 10. Decision 4; this note updated.
+11. Comments shortened; the refused lines stay at 3, 4 and 7. 12. Narrowed to debuggers that sit
+on the circuit.
+
+### 11.2 lists
+
+1. Decision 1, and the page says how the watch reads a number. 2. The opening figure ends at the
+sixth reading. 3. The lead says what `word[R1]` holds at `next` and where the counted reading
+shows. 4. Decision 2. 5. "The count is kept before the log." 6. Decision 4; "Move on" for the
+explanation's fourth part; the listing's column is "Instruction". 7. The 070 sentence cut from the
+walk; R4 in the set-up. *Not done:* the signed rule stays in both the failure experiment (why) and
+the generalisation (the rule). 8. The reflection says the checks sit in different places and lead
+to different work. 9. The opening figure names the program it runs, is one column, and says "1
+instruction run". 10. The placeholder's comment says it is not a reading.
+
+### 11.3 functions
+
+1. Decision 5: free and argument registers fail, and two returned calls are checked. 2. Decision 1.
+3. Decision 5. 4. The construction says R10 to R13 are kept and R14 gets its role in lesson 4; the
+challenge asks R14 left as it was for that reason. 5. The two programs differ only by the calls
+and returns (20 written, 18 run; 18 written, 22 run); the ALARM claim is gone. 6. "Pauses", "a
+main program" introduced, "put back" throughout. 7. The repeats cut. 8. Decision 5 (994812f).
+
+### 11.4 stack
+
+1. Decision 5. 2. Decision 1, watch first on a phone. 3. Options `010`, `014`, `044`, `001`; the
+listing's words show after the check. 4. Decision 3. 5. Decision 5. 6. The generalisation's
+first paragraph redrafted from a corrected fact. 7. `sumKept`. 8. The construction asks where R11's
+and R12's words go (`7A8`, `7A0`). 9. Call marks 10 pixels long and 2 wide, and a line under the
+chart says what they are. 10. The clause cut. 11. "The push halts the machine". 12. Decision 7.
+
+### 11.5 recursion
+
+1. The explanation says a call's room and count sit in the group of the call it made. 2. Decision
+1; the R14 field's feedback says hexadecimal. 3. Decision 2, the challenge's debugger too. 4. The
+rooms named in words where they appear; `store` and `deep` renamed `vault` and `icebox`; the other
+layouts' rooms `annexA` to `annexC`. 5. Decision 3: the failure experiment's figure is short, and
+3F8 is never drawn. 6. One feedback sentence per field (brief 7R2). 7. The memory view names each
+address. 8. "Then" put back. 9. The note replaced. 10. The repeats cut; the chart says what its 13
+marks are. 11. Reworded; decision 7. 12. Decision 5.
+
+### 11.6 debugging
+
+1. The explanation's list as asked, with a facts test for the walk off an empty log. 2, 8. A new
+failure experiment: a store of the result through R6, which holds the log's address, halts with
+cause 34 at `034`; the wrong line is at `000`. No stack panel; the note has its own point. 3. "On
+the figure's five logs"; "one of its lines is wrong". 4. Log 4, two readings, the shortest that
+goes round the loop. 5. c2's hints hold in either order. 6. Decision 1 and 2; hint 4 says 96 is
+`060`. 7. "count" only for the word; "the counting program". 9. The edge-log question, a -180
+reading in both challenges' tests, and the reworded edge. 10. Decision 4; no "task". 11. Hint 2
+names a wrong line to keep. 12. The header comment; the tasks no longer list the logs.
+
+### 11.7 log-report
+
+1. Hint 5's labels; the facts test. 2. The prediction asks R2 after `lowestOf` returns (0), which
+the page has not shown. 3. Decision 5. 4. Decision 6. 5. Hint 1 says to run the call test from
+"Run with"; the empty start suggests stubs. 6. Decision 5. 7. Lesson 5's reason. 8. The tier
+buttons ask before replacing a changed program; "the outline" everywhere. 9. The task and the
+specification write `0x400` and say why. 10. Both sentences corrected. 11. The question introduces
+the outline; the functions are named in the motivation. 12. The restatement and one devices
+paragraph cut; "looking right on one log is not enough"; "Run all" above the cards. 13. Decision 4
+and 7; hint 3 is lesson 4's `sumOver`.
+
+### The second pass and the walk
+
+Each lesson was read whole on the rebuilt text. Cut: a brief's instruction Haiku copied into 11.7's
+hint 5, the repeated `R14 <= 0x7C0` in 11.7's specification, 11.1's repeat (item 9). Words fixed:
+"pauses" for 11.2's opening figure, "result" where 11.3 to 11.5 said a function "returns" a value,
+and three possessives on function names. The empty log's card read "Readings: None"; it now reads
+"none, an empty log" (brief 8N). The walk at 1280 and 768 light and 375 dark: no console error, no
+sideways scroll.
 
 ## The full check
 

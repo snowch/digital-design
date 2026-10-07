@@ -31,7 +31,7 @@ export const LABELS = {
   captions: {
     depth: "The words on the stack over the whole run from the hall.",
     predict: "The program's listing, with a question about its calls.",
-    frames: "warmRooms's calls and the stack, in the debugger.",
+    frames: "The calls of warmRooms and the stack, in the debugger.",
     rooms: "The cold store's rooms as words in memory.",
     longStore: "The second store's rooms as words in memory.",
     storeDepth: "Three questions about a run on the second store.",

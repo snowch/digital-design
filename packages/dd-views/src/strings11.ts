@@ -115,6 +115,8 @@ export interface Machine11Strings {
   // A program over several logs.
   readonly logCol: string;
   readonly readingsCol: string;
+  /** What follows "Readings: " for a log with no readings. */
+  readonly emptyLog: string;
   readonly asks: string;
   readonly left: string;
   readonly empty: string;
@@ -297,6 +299,8 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   asks: "Should show",
   left: "Program left",
   empty: "None",
+  // Brief 8N.
+  emptyLog: "none, an empty log",
   results: {},
   matches: "The program left what the log should show.",
   differs: "The program left something else.",

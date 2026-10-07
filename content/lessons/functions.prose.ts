@@ -26,7 +26,7 @@ export const PROSE = {
   callLead:
     '1. The watch shows R1, R2, R15 and the PC.\n2. Press "Run to a breakpoint": the program pauses at `overBy` with the first call\'s arguments in R1 and R2, and R15 holding `00C`.\n3. Press "Step" until the PC is back in the program that made the call, and watch R1 take the result.\n4. Do the same for the second call.',
   callAfter:
-    "The first call gives `overBy` -170 and -180. It returns 10, shown on the display. The second call gives -190 and -200. It returns 10 too, so ALARM turns on. The program runs 22 instructions and stops at `02C`.",
+    "The first call gives `overBy` -170 and -180. Its result is 10, shown on the display. The second call gives -190 and -200. Its result is 10 too, so ALARM turns on. The program runs 22 instructions and stops at `02C`.",
   construction:
     "Which registers carry a function's arguments, which carries the result, and which a function may change is not up to each function. It is an agreement every program on the machine keeps: a **calling convention**.\n\nThe course's calling convention:\n\n- R1 to R4 carry a function's arguments, and R1 carries the result back. A function may change R1 to R4.\n- R5 to R9 are free: a function may change them, so a caller cannot rely on what they hold after a call.\n- R10 to R13 are kept: a function that changes one puts it back before it returns, so a caller can keep a word in one through a call.\n- R15 holds the return address. R14 gets its role in lesson 4. R0 is free.",
   c1Task:
