@@ -90,6 +90,9 @@ const Props = z.object({
    * order given (`focus.ts`). A fault the learner chooses comes first, then these.
    */
   focus: z.array(z.string()).optional(),
+  /** Module 10: parts to mark on the drawing, by path, and what the marks say. */
+  highlight: z.array(z.string()).default([]),
+  highlightLabel: z.string().optional(),
   /** Faults the learner may put in, one at a time; the figure starts again with each. */
   faults: z.array(FaultSpec).default([]),
   /** Shown once the learner has made an edge, so the results do not answer the lead's question. */
@@ -442,6 +445,8 @@ export const DatapathFigure = withProps(
           overview={data.overview}
           {...(focus ? { focus } : {})}
           {...(data.canOpen ? { onScope: setScope } : {})}
+          highlight={data.highlight}
+          {...(data.highlightLabel ? { highlightLabel: data.highlightLabel } : {})}
         />
         {committed && status && (
           <p role="status" className="datapath-status">

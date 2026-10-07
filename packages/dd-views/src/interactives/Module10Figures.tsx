@@ -46,6 +46,7 @@ import {
   type MachinePair,
   machineParts,
   type PartForm,
+  type PartRow,
 } from "@dd/dd-model";
 import { Prose, useSlot, type InteractiveProps } from "@platform/lesson-runtime";
 import { FaultInjector, PredictionChallenge } from "@platform/primitives";
@@ -1340,28 +1341,45 @@ export const MachineParts = withProps(
     const strings = useViewStrings();
     const t = strings.machine10;
     const rows = useMemo(() => machineParts(), []);
+    // A part both circuits keep in the same form is one a program can see: the shared band. Any
+    // other part is one circuit's own, in its machine's band; a machine without it shows nothing.
+    const shared = rows.filter((r) => r.single.kind === r.multi.kind && r.single.kind !== "none");
+    const own = (side: "single" | "multi") =>
+      rows.filter((r) => !shared.includes(r) && r[side].kind !== "none");
+    const item = (r: PartRow, form: PartForm) => (
+      <li key={r.part} className="parts-item" data-part={r.part}>
+        <span className="parts-name">{t.partNames[r.part]}</span>
+        <span className="parts-form">{partText(t, form)}</span>
+      </li>
+    );
+    const band = (side: "single" | "multi") => {
+      const machine = side === "single" ? t.singleName : t.multiName;
+      return (
+        <section
+          className={`parts-band parts-own parts-${side}`}
+          aria-label={`${machine}: ${t.partsOwn}`}
+        >
+          <p className="parts-title">{t.partsOwn}</p>
+          <ul>{own(side).map((r) => item(r, r[side]))}</ul>
+        </section>
+      );
+    };
     return (
       <div className="machine-figure machine-parts" data-interactive={interactive.id}>
-        <div className="truth-table-wrap">
-          <table className="truth-table datapath-table parts-table">
-            <caption>{t.partsCaption}</caption>
-            <thead>
-              <tr>
-                <th scope="col">{t.part}</th>
-                <th scope="col">{t.singleName}</th>
-                <th scope="col">{t.multiName}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r.part} data-part={r.part}>
-                  <th scope="row">{t.partNames[r.part]}</th>
-                  <td>{partText(t, r.single)}</td>
-                  <td>{partText(t, r.multi)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <p className="layout-title">{t.partsCaption}</p>
+        <div className="parts-drawing">
+          <div className="parts-outline parts-outline-single" aria-hidden="true">
+            <span>{t.singleName}</span>
+          </div>
+          <div className="parts-outline parts-outline-multi" aria-hidden="true">
+            <span>{t.multiName}</span>
+          </div>
+          {band("single")}
+          <section className="parts-band parts-shared" aria-label={t.partsShared}>
+            <p className="parts-title">{t.partsShared}</p>
+            <ul>{shared.map((r) => item(r, r.single))}</ul>
+          </section>
+          {band("multi")}
         </div>
       </div>
     );

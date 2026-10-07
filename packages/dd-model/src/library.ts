@@ -6,7 +6,7 @@
 // data and the circuit stays testable here. Each entry is a function, so every caller gets a fresh
 // netlist to simulate, break or compare.
 
-import { yWordSetCircuit } from "./capstone10";
+import { conditionUsesCircuit, joinPlacesCircuit, yWordSetCircuit } from "./capstone10";
 import { ALU_INSIDE, aluLibrary } from "./library-alu";
 import { CircuitBuilder, type Circuit, type NetId } from "@dd/sim";
 
@@ -463,6 +463,45 @@ export const LIBRARY: Readonly<Record<string, () => Circuit>> = {
       widenMet: [14, 12],
       pickSet: [23, 8],
       "out:YIN": [29, 9],
+    }),
+  "join-places": () =>
+    placed(joinPlacesCircuit(), {
+      "in:QB": [0, 1],
+      "in:WIDE": [0, 3],
+      "in:BCONST": [0, 5],
+      "in:QA": [0, 8],
+      "in:OP2": [0, 11],
+      "in:OP1": [0, 13],
+      "in:OP0": [0, 15],
+      "in:MQ": [0, 18],
+      "in:LOAD": [0, 20],
+      "in:PC": [0, 23],
+      "in:CALL": [0, 26],
+      pickB: [7, 1],
+      alu: [14, 6],
+      plus4: [14, 22],
+      yWord: [24, 16],
+      "out:YIN": [32, 17],
+    }),
+  "condition-uses": () =>
+    placed(conditionUsesCircuit(), {
+      "in:J": [0, 1],
+      "in:ZERO": [0, 3],
+      "in:MINUS": [0, 5],
+      "in:COUT": [0, 7],
+      "in:OVER": [0, 9],
+      "in:BRANCH": [0, 12],
+      "in:PC4": [0, 15],
+      "in:TARGET": [0, 17],
+      "in:HR": [0, 23],
+      "in:SET": [0, 25],
+      condition: [7, 3],
+      andTake: [15, 11],
+      pickTake: [21, 14],
+      widenMet: [15, 20],
+      pickSet: [21, 22],
+      "out:NEXT": [28, 15],
+      "out:YIN": [28, 23],
     }),
 };
 

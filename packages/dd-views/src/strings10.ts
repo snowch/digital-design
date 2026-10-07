@@ -163,6 +163,9 @@ export interface Machine10Strings {
 
   /** `machine-parts`: each part the lesson names, as each machine's circuit has it. */
   readonly partsCaption: string;
+  /** The band of parts both machines share, and each machine's own (inside its outline). */
+  readonly partsShared: string;
+  readonly partsOwn: string;
   readonly partNames: Readonly<
     Record<
       "registers" | "pc" | "memory" | "devices" | "ir" | "ha" | "hb" | "hr" | "hm" | "state",
@@ -332,6 +335,8 @@ export const MACHINE10_STRINGS: Machine10Strings = {
   edgesAnswer: "The controller takes {answer}.",
 
   partsCaption: "Each machine's parts",
+  partsShared: "What a program can see: both machines have these",
+  partsOwn: "Its own parts",
   partNames: {
     registers: "R0 to R15",
     pc: "PC",

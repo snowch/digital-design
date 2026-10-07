@@ -61,6 +61,7 @@ export const PROSE = {
     "**SET stuck at 1**\n\nThe set if cases are right. The register job gives 1, not `42`, and the load 1, not `7`. Every instruction that writes register Y writes the condition instead.",
   explanation:
     "The decoder gains a column for kind A, with the new line SET. WRITEY, OP1 and OP0 take kind A into their ORs. ILLEGAL learns kind A and refuses its jobs 8 to F.\n\nThe controller does not change. Set if takes a register job's 4 edges: FETCH, READ, ALU and WRITE. At the WRITE edge, MET is worked out again from the held words.\n\nThe datapath gains a source for the word register Y takes. MET is widened by met-word and chosen by SET.\n\nThe instruction set changed in your copy only. The course's machine still refuses kind A, with cause `21`.",
+  conditionUsesLead: "PROVISIONAL: the condition block and its two uses.",
   generalisation:
     "Set if reads its job digit exactly as a branch does. The condition block takes J and the ALU's flags and gives MET for both kinds. The condition block needs no change.\n\nA field that keeps one meaning in every kind that uses it lets a new instruction reuse a part whole. A field that meant something else in the new kind would need a selector in front of that part.",
   writeMachineLead: "Join SET to the datapath and run the whole machine.",

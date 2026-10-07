@@ -229,25 +229,26 @@ test.describe("Module 10's figures", () => {
       .locator("table.compare-seen tr")
       .filter({ has: figure.page().locator("th", { hasText: new RegExp(`^${name}$`) }) });
 
-  test("the opening table reads each machine's parts from its circuit", async ({ page }) => {
+  test("the opening drawing puts the parts a program can see inside both machines", async ({
+    page,
+  }) => {
     await openLesson(page, "instruction-set");
     const figure = page.locator("#ix-parts");
     await figure.scrollIntoViewIfNeeded();
-    const row = (part: string) => figure.locator(`tr[data-part=${part}]`);
-    await expect(row("ir").locator("td").first()).toHaveText(
+    const band = (cls: string) => figure.locator(`.${cls} [data-part]`);
+    await expect(band("parts-shared")).toHaveCount(4);
+    await expect(figure.locator(".parts-shared [data-part=registers] .parts-form")).toHaveText(
+      format(T.forms.registers, { count: 16, width: 64 }),
+    );
+    // Module 8's IR is a bus; Module 9 keeps the IR, the held words and the controller's state.
+    await expect(band("parts-single")).toHaveCount(1);
+    await expect(figure.locator(".parts-single [data-part=ir] .parts-form")).toHaveText(
       format(T.forms.romOutput, { width: 32 }),
     );
-    await expect(row("ir").locator("td").last()).toHaveText(
-      format(T.forms.register, { width: 32 }),
-    );
-    await expect(row("hr").locator("td").first()).toHaveText(T.forms.none);
-    await expect(row("state").locator("td").last()).toHaveText(
+    await expect(band("parts-multi")).toHaveCount(6);
+    await expect(figure.locator(".parts-multi [data-part=state] .parts-form")).toHaveText(
       format(T.forms.register, { width: 3 }),
     );
-    await expect(row("registers").locator("td")).toHaveText([
-      format(T.forms.registers, { count: 16, width: 64 }),
-      format(T.forms.registers, { count: 16, width: 64 }),
-    ]);
   });
 
   test("the prediction in the middle of a load is answered by the two simulators", async ({
