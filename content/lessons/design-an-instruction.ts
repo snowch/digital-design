@@ -278,6 +278,7 @@ export const designAnInstruction: LessonInput = {
             libraryId: "condition-uses",
             writtenWidth: 4,
             initial: { PC4: "0x10", TARGET: "0x40", HR: "0x42" },
+            focus: ["andTake", "widenMet", "pickTake", "pickSet"],
             highlight: ["condition"],
             highlightLabel: LABELS.conditionMark,
           },

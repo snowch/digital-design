@@ -54,6 +54,23 @@ export interface Part {
   };
   /** How many bits a pin carries, or a gate works on, when more than one. */
   readonly width?: number;
+  /**
+   * Module 10: lines a lesson writes under a block's name, saying what the block is there for in
+   * this figure. Words a wire keeps clear of, as of a part's name (`withNotes`).
+   */
+  readonly note?: readonly string[];
+}
+
+/** A drawing whose parts carry the lines a figure writes under them, by part id. */
+export function withNotes(
+  drawing: Drawing,
+  notes: Readonly<Record<string, readonly string[]>> | undefined,
+): Drawing {
+  if (!notes || Object.keys(notes).length === 0) return drawing;
+  return {
+    ...drawing,
+    parts: drawing.parts.map((p) => (notes[p.id] ? { ...p, note: notes[p.id] } : p)),
+  };
 }
 
 export interface PortRef {
