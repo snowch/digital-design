@@ -437,8 +437,10 @@ ol {
     color: var(--fg-muted);
   }
 }
-.contents-heading {
-  margin-top: var(--space-6);
+/* The list's heading is for readers who move by headings, and is not shown (strings.ts): the rule
+   above ends the stages, and each module names itself. Its gap under the rule stays. */
+.contents-heading + .module {
+  margin-top: var(--space-5);
 }
 /* Each module is one line until it is pressed: its name and its summary beside a chevron that turns
    when its lessons show (the author: the front page had grown long with every lesson shown). A
