@@ -473,36 +473,38 @@ export function DebuggerView({
               })}
             </dl>
           </section>
-          <section className="debugger-panel" aria-label={t.devicesCaption}>
-            <p className="layout-title">{t.devicesCaption}</p>
-            <dl className="debugger-devices">
-              <div>
-                <dt>{t.display}</dt>
-                <dd className="memory-word debugger-display">{signedText(state.cpu.display)}</dd>
-              </div>
-              <div>
-                <dt>{t.lamps}</dt>
-                <dd className="debugger-lamps">
-                  {t.lampNames.map((name, bit) => {
-                    const on = (state.cpu.lamps >> bit) & 1;
-                    return (
-                      <span key={name} className={`lamp-chip${on ? " lamp-on" : ""}`}>
-                        {`${name} ${on ? t.lampOn : t.lampOff}`}
-                      </span>
-                    );
-                  })}
-                </dd>
-              </div>
-              <div>
-                <dt>{t.sensorA}</dt>
-                <dd className="memory-word">{signedText(inputs.sensorA)}</dd>
-              </div>
-              <div>
-                <dt>{t.sensorB}</dt>
-                <dd className="memory-word">{signedText(inputs.sensorB)}</dd>
-              </div>
-            </dl>
-          </section>
+          {options.listing !== false && (
+            <section className="debugger-panel" aria-label={t.devicesCaption}>
+              <p className="layout-title">{t.devicesCaption}</p>
+              <dl className="debugger-devices">
+                <div>
+                  <dt>{t.display}</dt>
+                  <dd className="memory-word debugger-display">{signedText(state.cpu.display)}</dd>
+                </div>
+                <div>
+                  <dt>{t.lamps}</dt>
+                  <dd className="debugger-lamps">
+                    {t.lampNames.map((name, bit) => {
+                      const on = (state.cpu.lamps >> bit) & 1;
+                      return (
+                        <span key={name} className={`lamp-chip${on ? " lamp-on" : ""}`}>
+                          {`${name} ${on ? t.lampOn : t.lampOff}`}
+                        </span>
+                      );
+                    })}
+                  </dd>
+                </div>
+                <div>
+                  <dt>{t.sensorA}</dt>
+                  <dd className="memory-word">{signedText(inputs.sensorA)}</dd>
+                </div>
+                <div>
+                  <dt>{t.sensorB}</dt>
+                  <dd className="memory-word">{signedText(inputs.sensorB)}</dd>
+                </div>
+              </dl>
+            </section>
+          )}
         </div>
         {(options.memory ?? []).map((region) => (
           <MemoryPanel key={region.from} region={region} program={program} state={state} t={t} />

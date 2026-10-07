@@ -86,7 +86,7 @@ export const recursion: LessonInput = {
           props: {
             program: WARM_ROOMS,
             memoryOnly: true,
-            memory: [{ from: HALL, words: 18, title: LABELS.roomsTitle }],
+            memory: [{ from: "hall", words: 18, title: LABELS.roomsTitle }],
           },
         },
       ],
@@ -163,7 +163,7 @@ export const recursion: LessonInput = {
           props: {
             program: warmRoomsOn(LONG_STORE),
             memoryOnly: true,
-            memory: [{ from: HALL, words: 21, title: LABELS.longStoreTitle }],
+            memory: [{ from: "hall", words: 21, title: LABELS.longStoreTitle }],
           },
         },
         {

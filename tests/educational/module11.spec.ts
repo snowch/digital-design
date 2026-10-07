@@ -317,6 +317,15 @@ test.describe("Module 11's lab", () => {
     }
   });
 
+  test("lesson 5 opens on the cold store's rooms as words, the hall's reading first", async ({
+    page,
+  }) => {
+    await openLesson(page, "recursion");
+    const figure = page.locator('[data-interactive="rooms"]');
+    await expect(figure.locator(".debugger-memory tbody tr")).toHaveCount(18);
+    await expect(figure.locator(".debugger-memory tbody tr").first()).toContainText("-150");
+  });
+
   test("the opening figure of lesson 2 moves R1 down the log, one reading a press", async ({
     page,
   }) => {
