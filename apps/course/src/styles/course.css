@@ -2772,7 +2772,8 @@ svg.stack-depth {
     "calt" 0,
     "liga" 0;
 }
-.debugger-listing td:nth-child(-n + 3) {
+/* The address and the word stay whole; the line wraps between its words. */
+.debugger-listing td.memory-word:not(.debugger-line) {
   white-space: nowrap;
 }
 /* A line breaks only between its words, never inside a name; on a phone the listing's text is a
