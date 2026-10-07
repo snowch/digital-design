@@ -64,6 +64,8 @@ const encode = (k: number, j: number, a: number, b: number, y: number, c: number
 /** Module 9's capstone: the kind a call through a register is written at, `call R3 + 8, R15`. */
 export interface AssemblyOptions {
   readonly callThroughRegister?: number;
+  /** Module 10's capstone: the kind "set if" is written at, `R5 <= R1 < R2 signed`. */
+  readonly setIf?: number;
 }
 
 /** Assembles a program. Labels may be used before they are defined. */
@@ -267,6 +269,23 @@ function instruction(
   if (!m) throw new AssemblyError(line, `cannot read ${JSON.stringify(text)}`);
   const y = register(m[1] as string, line);
   const right = (m[2] as string).trim();
+  const set = /^(R\d{1,2}) (==|!=|<|>=) (R\d{1,2})(?: (signed|unsigned))?$/.exec(right);
+  if (set) {
+    if (options.setIf === undefined) throw new AssemblyError(line, "this machine has no set if");
+    const op = set[2] as string;
+    const key = op === "==" || op === "!=" ? op : `${op} ${set[4] ?? ""}`;
+    const j = CONDITIONS[key];
+    if (j === undefined)
+      throw new AssemblyError(line, "write `signed` or `unsigned` after `<` or `>=`");
+    return encode(
+      options.setIf,
+      j,
+      register(set[1] as string, line),
+      register(set[3] as string, line),
+      y,
+      0,
+    );
+  }
   let r = /^(word|byte)\[(.+)\]$/.exec(right);
   if (r) {
     const { reg, c } = addressOf(r[2] as string, labels, line);

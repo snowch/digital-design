@@ -34,6 +34,8 @@ const TABLES: Record<string, RefTable> = {
 
 const Props = z.object({
   libraryId: z.string(),
+  /** Module 10: the widest word written on the drawing; wider words show in the table only. */
+  writtenWidth: z.number().int().min(1).optional(),
   clock: z.string().optional(),
   showSteps: z.boolean().default(false),
   /** A reference table by name, or "circuit": every row of this circuit, from the simulator (Module 2). */
@@ -142,6 +144,7 @@ export const CircuitExplorer = withProps(
           circuit={circuit}
           values={shown}
           title={strings.explorer.title}
+          {...(data.writtenWidth !== undefined ? { writtenWidth: data.writtenWidth } : {})}
           onToggleInput={(name) => sim.toggle(name)}
           // The circuit's own table marks the row of the values now, so the signal list would
           // say the same thing twice.

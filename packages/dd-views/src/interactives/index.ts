@@ -43,6 +43,15 @@ import {
 } from "./MachineFigures";
 // Module 9, control
 import { ControlTable, KindEdges, KindMap } from "./ControlViews";
+// Module 10, the instruction set
+import {
+  EncodingExplorer,
+  LayoutCompare,
+  MachineCompare,
+  MachineParts,
+  ProgramCompare,
+  SwapCompare,
+} from "./Module10Figures";
 
 /** The interactives lessons may name by kind. */
 export const INTERACTIVES: Readonly<Record<string, ComponentType<InteractiveProps>>> = {
@@ -83,6 +92,13 @@ export const INTERACTIVES: Readonly<Record<string, ComponentType<InteractiveProp
   "control-table": ControlTable,
   "kind-map": KindMap,
   "kind-edges": KindEdges,
+  // Module 10, the instruction set
+  "machine-parts": MachineParts,
+  "machine-compare": MachineCompare,
+  "layout-compare": LayoutCompare,
+  "encoding-explorer": EncodingExplorer,
+  "swap-compare": SwapCompare,
+  "program-compare": ProgramCompare,
   // Module 0, meet the machine
   "machine-at-work": MachineAtWork,
   ladder: Ladder,
@@ -117,9 +133,21 @@ export {
   ControlTable,
   KindMap,
   KindEdges,
+  MachineParts,
+  MachineCompare,
+  LayoutCompare,
+  EncodingExplorer,
+  SwapCompare,
+  ProgramCompare,
   MachineAtWork,
   Ladder,
 };
+export {
+  compareAnswer as machineCompareAnswer,
+  layoutAnswer,
+  programAnswer,
+  swapAnswer,
+} from "./Module10Figures";
 export { digitsText } from "./Ladder";
 export { lineText } from "./MachineAtWork";
 export { kindMap, kindSequences, signalCell, opText, edgeText } from "./ControlViews";

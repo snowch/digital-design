@@ -168,7 +168,8 @@ describe("the course's lessons", () => {
               ? c.initial
               : { circuit: compileDrawing(emptyDrawing(c.interface)).circuit };
           expect(grade(c, start).passed).toBe(false);
-        });
+          // A whole machine's text graded edge by edge, on several runs, takes seconds.
+        }, 60_000);
       }
 
       it("renders every section and figure without a problem note", () => {

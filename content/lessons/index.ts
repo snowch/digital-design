@@ -47,6 +47,11 @@ import { illegalInstructions } from "./illegal-instructions";
 import { severalEdges } from "./several-edges";
 import { microOperations } from "./micro-operations";
 import { newInstruction } from "./new-instruction";
+import { instructionSet } from "./instruction-set";
+import { encoding } from "./encoding";
+import { immediates } from "./immediates";
+import { roomToGrow } from "./room-to-grow";
+import { designAnInstruction } from "./design-an-instruction";
 
 const INPUTS: readonly LessonInput[] = [
   // Module 0, meet the machine.
@@ -91,6 +96,12 @@ const INPUTS: readonly LessonInput[] = [
   severalEdges,
   microOperations,
   newInstruction,
+  // Module 10, the instruction set
+  instructionSet,
+  encoding,
+  immediates,
+  roomToGrow,
+  designAnInstruction,
 ];
 
 export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(

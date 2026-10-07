@@ -906,6 +906,19 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
     text-align: center;
   }
 }
+/* The map of every kind and job: seventeen equal columns across its card, so the job heads stand
+   apart at any width (9.2 and 10.4). */
+.truth-table.kind-map-table {
+  width: 100%;
+  table-layout: fixed;
+}
+.truth-table.kind-map-table th,
+.truth-table.kind-map-table td {
+  text-align: center;
+}
+.kind-map .truth-table-wrap {
+  margin-bottom: var(--space-3);
+}
 .truth-table-note {
   color: var(--fg-muted);
   font-size: var(--text-sm);
@@ -1062,6 +1075,10 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
   gap: var(--space-3);
   align-items: center;
   min-height: 2.75rem;
+}
+/* A long label wraps; its radio button keeps its size (10.5's design choices on a phone). */
+.fault-choice input[type="radio"] {
+  flex-shrink: 0;
 }
 .prediction-outcome {
   margin-top: var(--space-3);
@@ -2149,6 +2166,114 @@ button.bit {
   min-height: 2.75rem;
   display: flex;
   align-items: center;
+}
+
+/* Module 10: the two machines compared, the layouts compared, the encoding explorer and the
+   calculator. Colours and sizes from tokens.css. */
+.compare-note {
+  margin: var(--space-1) 0 var(--space-3);
+  color: var(--fg-muted);
+}
+.compare-address {
+  color: var(--fg-muted);
+}
+.layout-row {
+  margin: var(--space-2) 0;
+}
+.layout-title {
+  font-weight: 650;
+  margin: 0 0 var(--space-1);
+}
+.layout-digits {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 4px;
+}
+.layout-field {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+  padding: var(--space-1) 0;
+  min-width: 0;
+}
+.layout-field.moved {
+  outline: 2px solid var(--sig-cursor);
+  outline-offset: -1px;
+}
+.layout-name {
+  font-weight: 700;
+}
+.layout-value {
+  font-family: var(--font-mono);
+  letter-spacing: 0.15em;
+}
+.layout-range,
+.layout-moved {
+  margin: var(--space-1) 0 0;
+}
+.explorer-help,
+.explorer-meaning-heading,
+.calculator-heading {
+  margin: var(--space-1) 0;
+}
+.explorer-meaning-heading,
+.calculator-heading {
+  font-weight: 650;
+}
+.explorer-meaning {
+  font-family: var(--font-mono);
+  margin: 0 0 var(--space-2);
+}
+.calculator {
+  margin-top: var(--space-3);
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-2);
+}
+.calculator select {
+  min-height: 40px;
+  font: inherit;
+}
+.calculator-bits {
+  margin: 2px 0;
+}
+.calculator-bits code,
+.calculator-y code {
+  overflow-wrap: anywhere;
+}
+.calculator-y,
+.calculator-flags,
+.calculator-took {
+  margin: var(--space-1) 0;
+}
+.program-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+@media (min-width: 720px) {
+  .program-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.program-counts {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-5);
+}
+
+/* Module 10, lesson 3: the flags of a branch's subtraction under its branch; the pairs' caption. */
+.swap-table .swap-flags {
+  display: block;
+  font-size: 0.85em;
+  color: var(--fg-muted);
+}
+.swap-pairs caption {
+  white-space: nowrap;
 }
 
 /* Module 0, meet the machine: the machine at work and the ladder, and a choice in an answer. */

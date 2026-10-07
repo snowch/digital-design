@@ -9,7 +9,7 @@
 import type { Circuit, Simulator } from "@dd/sim";
 
 import { assemble } from "./assemble";
-import { edgesOfKind, type ControlOptions } from "./control";
+import { SET_IF_KIND, edgesOfKind, type ControlOptions } from "./control";
 import {
   datapathState,
   resetDatapath,
@@ -50,7 +50,19 @@ export interface MulticycleComparison extends DatapathComparison {
 
 /** The reference's options for Module 9's machine, with the capstone's instruction if built. */
 export function referenceFor(options: ControlOptions): MachineOptions {
-  return options.callThroughRegister ? { ...MODULE_9, callThroughRegister: 9 } : MODULE_9;
+  return {
+    ...MODULE_9,
+    ...(options.callThroughRegister ? { callThroughRegister: 9 } : {}),
+    ...(options.setIf ? { setIf: SET_IF_KIND } : {}),
+  };
+}
+
+/** The assembler's options for a machine: the kinds its capstones added. */
+export function assemblyFor(options: ControlOptions) {
+  return {
+    ...(options.callThroughRegister ? { callThroughRegister: 9 } : {}),
+    ...(options.setIf ? { setIf: SET_IF_KIND } : {}),
+  };
 }
 
 /**
@@ -66,7 +78,7 @@ export function compareMulticycle(
   limit = 400,
   build: (rom: Uint8Array) => Circuit = (rom) => multicycleCircuit({ ...options, rom }),
 ): MulticycleComparison {
-  const program = assemble(source, options.callThroughRegister ? { callThroughRegister: 9 } : {});
+  const program = assemble(source, assemblyFor(options));
   const circuit = build(program.rom);
   const sim = resetDatapath(circuit, inputs);
   const refOptions = referenceFor(options);

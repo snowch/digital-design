@@ -178,6 +178,11 @@ export interface MachineOptions {
   readonly registerCheck?: boolean;
   /** Module 9's capstone: this kind, job 0, is a call through a register, `RY ← PC + 4` and `PC ← RA + c`. */
   readonly callThroughRegister?: number;
+  /**
+   * Module 10's capstone: this kind is "set if", `RY ← 1` if `RA cond RB`, else `RY ← 0`, with the
+   * job digit a branch's condition (jobs 0 to 7; 8 to F illegal).
+   */
+  readonly setIf?: number;
 }
 
 /** Module 9's machine: the decoder checks a control register's number. */
@@ -187,6 +192,7 @@ export const MODULE_9: MachineOptions = { registerCheck: true };
 export function isIllegal(f: Fields, options: MachineOptions = {}): boolean {
   if (options.callThroughRegister !== undefined && f.k === options.callThroughRegister)
     return f.j !== 0;
+  if (options.setIf !== undefined && f.k === options.setIf) return f.j >= 8;
   switch (f.k) {
     case 1:
     case 2:
@@ -425,6 +431,17 @@ export function step(
       write(f.y, pc4);
       nextPc = (ra + c) & MASK64;
       break;
+    case options.setIf: {
+      // Module 10's capstone: a branch's condition on RA - RB, kept as the word 1 or 0.
+      const flags =
+        f.j < 2
+          ? { zero: 0, minus: 0, cout: 0, over: 0 }
+          : ra !== undefined && rb !== undefined
+            ? alu64(3, ra, rb)
+            : undefined;
+      write(f.y, flags ? (branchTaken(f.j, flags) ? 1n : 0n) : undefined);
+      break;
+    }
   }
   // The timer counts instructions: down by one as each finishes, while its count is not 0. A
   // write replaces the count. Bit 0 of "waiting" is set as the count goes from 1 to 0.

@@ -5,6 +5,8 @@
 
 import { createContext, useContext } from "react";
 
+import { MACHINE10_STRINGS, type Machine10Strings } from "./strings10";
+
 export interface ViewStrings {
   readonly circuit: {
     readonly where: string;
@@ -366,6 +368,8 @@ export interface ViewStrings {
   readonly machine8: MachineFigureStrings;
   /** Module 9: the decoder's table and map, each kind's edges, and the views of an edge. */
   readonly control: ControlStrings;
+  /** Module 10: the machines compared, the encoding explorer and calculator, programs compared. */
+  readonly machine10: Machine10Strings;
 }
 
 /** Module 8: the words of the instruction-fields, widening, edges, memory-map and branches figures. */
@@ -1003,6 +1007,31 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       slicesHigh: "The slices worth 128, 64, 32 and 16 do not give {actual}.",
       slicesLow: "The slices worth 8, 4, 2 and 1 do not give {actual}.",
       slices: "The eight slices do not give {actual}.",
+      // Module 10 (decision A): the rule a wrong answer misses, never the right one
+      // (docs/notes/module-10-instruction-set/briefs/6X.md).
+      partSeen:
+        "A program can see a part through a field that names it, an address a load or store reaches, or the PC.",
+      reachLargest:
+        "The constant is 12 bits, read signed; {actual} is not the largest number it can hold.",
+      reachBack:
+        "A branch's constant is its target's address less its own, divided by 4, written as 12 bits read signed; {actual} is not that for this branch.",
+      reachFurthest:
+        "A branch at 000 can reach 000 + 4 × the largest constant; {actual} is not that address.",
+      codeFate:
+        "A code is taken if K and J name an instruction the course's machine accepts today; a refused code is free, except all zeros, which must stay refused.",
+      countWith:
+        "Count every instruction in the run, including those in routines you call and return from; {actual} is not that count.",
+      countWithout:
+        "Without the call through a register, each call takes two instructions: a constant job and a jump through R4; {actual} is not that count.",
+      designKind:
+        "A code is free for your design only if your copy of the machine refuses it today.",
+      designField:
+        "The register an instruction writes must be named in the place every instruction gives it.",
+      designCondition:
+        "The condition must come from a field that means the same thing in every kind that uses it.",
+      designProgram:
+        "Count the instructions each program runs with the new instruction; the one with fewer is shortened.",
+      designCost: "The circuit must gain hardware or a control signal it does not already have.",
     },
     invalidFor: {
       slices:
@@ -1168,6 +1197,8 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       "7": "7 jump",
       "8": "8 system job",
       "9": "9 call through a register",
+      // Module 10's capstone, in the learner's copy (strings10.ts's brief, 6V).
+      "10": "A set if",
     },
     jobBitNote: "J2 means bit 2 of the job digit.",
     mapCaption: "Which kinds and jobs are instructions",
@@ -1212,6 +1243,8 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     statesTitle: "Controller states",
     timingTitle: "Edges so far",
   },
+  // Module 10 (strings10.ts).
+  machine10: MACHINE10_STRINGS,
   // Module 0. Drafted by the prose process (docs/notes/module-0-machine/briefs/6V.md).
   meet: {
     lines: {

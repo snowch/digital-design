@@ -79,7 +79,8 @@ export function modulesOption(challenge: Challenge): { modules?: Record<string, 
   // Module 9: "machine9" is the machine of several edges an instruction, whose memory has one
   // port; "machine9-call" is the same with the capstone's call through a register, which the
   // program is assembled with.
-  const sets = ["machine", "machine9", "machine9-call"];
+  // Module 10: "machine9-set" is the learner's copy with the call through a register and set if.
+  const sets = ["machine", "machine9", "machine9-call", "machine9-set"];
   if (!given || !sets.includes(given.set)) return {};
   let modules = MODULES.get(challenge);
   if (!modules) {
@@ -87,7 +88,12 @@ export function modulesOption(challenge: Challenge): { modules?: Record<string, 
       const v = given.registers?.[`R${k}`];
       return v === undefined ? undefined : wordOf(v, 64).value;
     });
-    const assembly = given.set === "machine9-call" ? { callThroughRegister: 9 } : {};
+    const assembly =
+      given.set === "machine9-call"
+        ? { callThroughRegister: 9 }
+        : given.set === "machine9-set"
+          ? { callThroughRegister: 9, setIf: 10 }
+          : {};
     const context = {
       ...(given.program !== undefined ? { rom: assemble(given.program, assembly).rom } : {}),
       registers,

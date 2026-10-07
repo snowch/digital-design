@@ -256,6 +256,110 @@ function exposes(
   };
 }
 
+// ---- Module 10 -----------------------------------------------------------------------------
+
+/**
+ * A choice among options. A case gives the `field` and expects its option's `value`. A case may
+ * name a `detail`, the sentence the book shows on a failure in place of the values, which would
+ * give the right option away; otherwise the learner's choice and the expected option are reported,
+ * each by its option's words.
+ */
+function choices(
+  answers: Readonly<Record<string, string>>,
+  given: Readonly<Record<string, string | number>>,
+  expect: Readonly<Record<string, string | number>>,
+): AnswerResult | AnswerProblem {
+  const field = String(given["field"]);
+  const gone = missing(answers, [field]);
+  if (gone) return gone;
+  const chosen = (answers[field] ?? "").trim();
+  const want = String(expect["value"]);
+  return {
+    pass: chosen === want,
+    inputs: {},
+    actual: { [field]: chosen },
+    expected: { [field]: want },
+    ...ruleOf(given, field, chosen),
+  };
+}
+
+/**
+ * Module 10: the sentence a case names (`given.detail`), shown in place of the values, which would
+ * hand over the answer; it says which rule a wrong answer misses, with the learner's own answer.
+ */
+function ruleOf(
+  given: Readonly<Record<string, string | number>>,
+  field: string,
+  actual: string,
+): Pick<AnswerResult, "detail"> {
+  const key = given["detail"];
+  return typeof key === "string" ? { detail: { key, field, values: { actual } } } : {};
+}
+
+/**
+ * An instruction's word, typed as eight hexadecimal digits. A case gives the `field` and `shown`,
+ * the instruction as the task writes it, and expects its `word`. A wrong word is reported as the
+ * fields it holds, digit by digit, beside the instruction asked for, so the answer is not printed.
+ */
+function instructionWord(
+  answers: Readonly<Record<string, string>>,
+  given: Readonly<Record<string, string | number>>,
+  expect: Readonly<Record<string, string | number>>,
+): AnswerResult | AnswerProblem {
+  const field = String(given["field"]);
+  const gone = missing(answers, [field]);
+  if (gone) return gone;
+  const h = parseHex(answers[field]);
+  if (h === undefined || h.length > 8) return { invalid: field };
+  const typed = h.padStart(8, "0");
+  const d = (k: number) => typed[k] ?? "0";
+  const c = Number.parseInt(typed.slice(5), 16);
+  const read = `K ${d(0)}, J ${d(1)}, A ${d(2)}, B ${d(3)}, Y ${d(4)}, C ${typed.slice(5)} (${c >= 0x800 ? c - 0x1000 : c})`;
+  return {
+    pass: typed === String(expect["word"]).toUpperCase(),
+    inputs: {},
+    actual: { [field]: read },
+    expected: { [field]: String(given["shown"]) },
+  };
+}
+
+/**
+ * A number or a few hexadecimal digits worked out by hand. A case gives the `field` and its
+ * `form`, `number` (decimal, read signed) or `hex` (digits, either case, no prefix needed), and
+ * expects its `value`. A case may name a `detail`, as `choices` does.
+ */
+function exact(
+  answers: Readonly<Record<string, string>>,
+  given: Readonly<Record<string, string | number>>,
+  expect: Readonly<Record<string, string | number>>,
+): AnswerResult | AnswerProblem {
+  const field = String(given["field"]);
+  const gone = missing(answers, [field]);
+  if (gone) return gone;
+  const want = String(expect["value"]);
+  if (given["form"] === "hex") {
+    const h = parseHex(answers[field]);
+    if (h === undefined) return { invalid: field };
+    const typed = h.replace(/^0+(?=.)/, "");
+    return {
+      pass: typed === want.toUpperCase().replace(/^0+(?=.)/, ""),
+      inputs: {},
+      actual: { [field]: h },
+      expected: { [field]: want },
+      ...ruleOf(given, field, h),
+    };
+  }
+  const n = parseNumber(answers[field]);
+  if (n === undefined) return { invalid: field };
+  return {
+    pass: String(n) === want,
+    inputs: {},
+    actual: { [field]: String(n) },
+    expected: { [field]: want },
+    ...ruleOf(given, field, String(n)),
+  };
+}
+
 /** The graders lessons may name in an answers challenge's tests. */
 export const ANSWER_GRADERS: Readonly<Record<string, AnswerGrader>> = {
   threshold,
@@ -264,6 +368,10 @@ export const ANSWER_GRADERS: Readonly<Record<string, AnswerGrader>> = {
   "memory-read": memoryRead,
   // Module 7
   exposes,
+  // Module 10
+  choices,
+  "instruction-word": instructionWord,
+  exact,
   // Module 0: graded by running the finished machine (meet.ts).
   "machine-run": machineRun,
   "machine-step": machineStep,
