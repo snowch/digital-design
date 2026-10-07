@@ -2248,3 +2248,13 @@ button.bit {
   margin: var(--space-2) 0 0;
   padding-left: var(--space-5);
 }
+
+/* Module 10, lesson 3: the flags of a branch's subtraction under its branch; the pairs' caption. */
+.swap-table .swap-flags {
+  display: block;
+  font-size: 0.85em;
+  color: var(--fg-muted);
+}
+.swap-pairs caption {
+  white-space: nowrap;
+}

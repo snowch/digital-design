@@ -325,19 +325,48 @@ test.describe("Module 10's figures", () => {
     const figure = page.locator("#ix-predict-greater");
     await figure.scrollIntoViewIfNeeded();
     await expect(figure.locator("table.swap-table")).toHaveCount(0);
+    await expect(figure.locator("table.swap-pairs tbody tr")).toHaveCount(3);
     await figure.getByRole("radio").first().check();
     await figure.getByRole("button", { name: V.prediction.commit }).click();
     await expect(figure.locator("[role=status]").first()).toContainText(V.prediction.match);
-    await expect(figure.locator("table.swap-table tbody tr")).toHaveCount(8);
+    // Only the rows asked about: R1 > R2, then each option's branch, for each pair.
+    await expect(figure.locator("table.swap-pairs")).toHaveCount(0);
+    await expect(figure.locator("table.swap-asked tbody tr")).toHaveCount(4);
+    await expect(figure.locator("table.swap-asked tbody tr").first()).toContainText(
+      [T.yes, T.no, T.no].join(""),
+    );
+    await expect(figure.locator("table.swap-table")).toHaveCount(0);
   });
 
-  test("the programs run on the reference and show their counts only once run", async ({
+  test("each comparison shows the subtraction its branch makes, and the overflow", async ({
+    page,
+  }) => {
+    await openLesson(page, "immediates");
+    const figure = page.locator("#ix-comparisons");
+    await figure.scrollIntoViewIfNeeded();
+    await figure.getByRole("radio").last().check();
+    const rows = figure.locator("table.swap-table tbody tr");
+    await expect(rows).toHaveCount(8);
+    await expect(rows.nth(0)).toContainText(
+      format(T.flagsSigned, { x: "R1", y: "R2", minus: 1, over: 1 }),
+    );
+    await expect(rows.nth(2)).toContainText(
+      format(T.flagsSigned, { x: "R2", y: "R1", minus: 1, over: 0 }),
+    );
+  });
+
+  test("the programs run on the reference, once the count is predicted, and show their counts", async ({
     page,
   }) => {
     await openLesson(page, "immediates");
     const figure = page.locator("#ix-wide");
     await figure.scrollIntoViewIfNeeded();
     await expect(figure.locator(".program-counts")).toHaveCount(0);
+    await expect(figure.getByRole("button", { name: T.runBoth })).toHaveCount(0);
+    // The sums run 5 instructions: the second option.
+    await figure.getByRole("radio").nth(1).check();
+    await figure.getByRole("button", { name: V.prediction.commit }).click();
+    await expect(figure.locator("[role=status]").first()).toContainText(V.prediction.match);
     await figure.getByRole("button", { name: T.runBoth }).click();
     await expect(figure.locator(".program-counts").first()).toContainText(
       format(T.romBytes, { n: 20 }),

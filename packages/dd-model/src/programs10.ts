@@ -37,6 +37,13 @@ export interface BranchComparison {
   readonly taken: boolean;
   /** Whether the comparison holds, worked out on the numbers themselves. */
   readonly holds: boolean;
+  /** The flags of the subtraction the branch makes: RA - RB, or R2 - R1 when swapped. */
+  readonly flags: {
+    readonly zero: number;
+    readonly minus: number;
+    readonly cout: number;
+    readonly over: number;
+  };
 }
 
 const MASK = (1n << 64n) - 1n;
@@ -67,11 +74,13 @@ export function comparisons(a: bigint, b: bigint): BranchComparison[] {
     for (const relation of ["<", ">=", ">", "<="] as const) {
       const { job, swapped } = branchFor(relation, reading);
       const [x, y] = swapped ? [b, a] : [a, b];
-      const taken = branchTaken(job, alu64(3, x & MASK, y & MASK));
+      const { zero, minus, cout, over } = alu64(3, x & MASK, y & MASK);
+      const flags = { zero, minus, cout, over };
+      const taken = branchTaken(job, flags);
       const [p, q] = reading === "signed" ? [signed(a), signed(b)] : [a & MASK, b & MASK];
       const holds =
         relation === "<" ? p < q : relation === ">=" ? p >= q : relation === ">" ? p > q : p <= q;
-      out.push({ relation, reading, job, swapped, taken, holds });
+      out.push({ relation, reading, job, swapped, taken, holds, flags });
     }
   return out;
 }

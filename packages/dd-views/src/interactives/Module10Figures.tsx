@@ -648,6 +648,8 @@ export const EncodingExplorer = withProps(
     const [bText, setBText] = useState("-250");
     const [job, setJob] = useState(3);
     const [took, setTook] = useState<string | undefined>();
+    /** Whether B is still the word's constant, as the button took it. */
+    const [tookB, setTookB] = useState(false);
     const parse = (s: string) =>
       form === "hex" ? parseHexWord(s, width) : parseNumberWord(s, width);
     const a = parse(aText);
@@ -659,18 +661,28 @@ export const EncodingExplorer = withProps(
       return (v >= top ? v - (1n << BigInt(width)) : v).toString();
     };
     const showWord = (v: bigint) => (form === "hex" ? v.toString(16).toUpperCase() : signedOf(v));
+    /** A switch of form converts the words typed, so A and B keep their values. */
+    const switchForm = (to: "hex" | "signed") => {
+      const shown = (e: Entry, was: string) =>
+        "value" in e
+          ? to === "hex"
+            ? e.value.toString(16).toUpperCase()
+            : signedOf(e.value)
+          : was;
+      setAText(shown(a, aText));
+      setBText(shown(b, bText));
+      setForm(to);
+    };
     const takeFromWord = () => {
       if (!f || (f.k !== 1 && f.k !== 2) || f.j > 7) {
         setTook(t.fromWordNone);
+        setTookB(false);
         return;
       }
       setJob(f.j);
-      let note = format(t.tookJob, { job: `${f.j} ${t.jobNames[String(f.j)] ?? ""}`.trim() });
-      if (f.k === 2 && wide) {
-        setBText(showWord(BigInt.asUintN(width, wide.w)));
-        note += ` ${t.tookB}`;
-      }
-      setTook(note);
+      setTook(format(t.tookJob, { job: `${f.j} ${t.jobNames[String(f.j)] ?? ""}`.trim() }));
+      setTookB(f.k === 2 && wide !== undefined);
+      if (f.k === 2 && wide) setBText(showWord(BigInt.asUintN(width, wide.w)));
     };
     const rows: number[] = [];
     for (let hi = width - 1; hi >= 0; hi -= 16) rows.push(hi);
@@ -765,7 +777,7 @@ export const EncodingExplorer = withProps(
                     type="radio"
                     name={`${interactive.id}-form`}
                     checked={form === k}
-                    onChange={() => setForm(k)}
+                    onChange={() => switchForm(k)}
                   />
                   <span>{k === "hex" ? t.formHex : t.formSigned}</span>
                 </label>
@@ -774,7 +786,15 @@ export const EncodingExplorer = withProps(
             {(
               [
                 [t.aLabel, aText, setAText, a],
-                [t.bLabel, bText, setBText, b],
+                [
+                  t.bLabel,
+                  bText,
+                  (v: string) => {
+                    setBText(v);
+                    setTookB(false);
+                  },
+                  b,
+                ],
               ] as const
             ).map(([label, value, set, entry]) => (
               <label key={label} className="answer-field">
@@ -811,7 +831,7 @@ export const EncodingExplorer = withProps(
                 {t.fromWord}
               </button>
             </div>
-            {took && <p className="calculator-took">{took}</p>}
+            {took && <p className="calculator-took">{tookB ? `${took} ${t.tookB}` : took}</p>}
             {result && (
               <div className="calculator-result" role="group" aria-label={t.yHeading}>
                 <p className="calculator-y">
@@ -946,7 +966,81 @@ export const SwapCompare = withProps(
             />
           </div>
         )}
-        {committed && (
+        {asking && !committed && (
+          <div className="truth-table-wrap">
+            <table className="truth-table datapath-table swap-pairs">
+              <caption>{t.pairsCaption}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">R1</th>
+                  <th scope="col">R2</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.cases.map((c) => (
+                  <tr key={c.label}>
+                    <td>{c.a}</td>
+                    <td>{c.b}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        {asking && committed && (
+          <div className="truth-table-wrap">
+            <table className="truth-table datapath-table swap-asked">
+              <caption>{t.askedCaption}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">{t.branch}</th>
+                  {data.cases.map((c) => (
+                    <th scope="col" key={c.label}>
+                      {format(t.pairHeading, { a: c.a, b: c.b })}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">
+                    {format(t.relationForm, {
+                      rel: t.relations[">"] ?? ">",
+                      reading: data.reading === "signed" ? t.signedWord : t.unsignedWord,
+                    })}
+                  </th>
+                  {data.cases.map((c) => (
+                    <td key={c.label}>
+                      {comparisons(BigInt(c.a), BigInt(c.b)).find(
+                        (x) => x.relation === ">" && x.reading === data.reading,
+                      )?.holds
+                        ? t.yes
+                        : t.no}
+                    </td>
+                  ))}
+                </tr>
+                {(data.options ?? []).map((o) => {
+                  const [job, order] = o.value.split(":");
+                  return (
+                    <tr key={o.value} className={o.value === answer ? "row-current" : ""}>
+                      <th scope="row" className="memory-word">
+                        {branchText(Number(job), order === "swap")}
+                      </th>
+                      {data.cases.map((c) => (
+                        <td key={c.label}>
+                          {branchSays(Number(job), order === "swap", BigInt(c.a), BigInt(c.b))
+                            ? t.yes
+                            : t.no}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+        {!asking && (
           <>
             {data.cases.length > 1 && (
               <fieldset className="carry-cases">
@@ -986,7 +1080,18 @@ export const SwapCompare = withProps(
                           reading: r.reading === "signed" ? t.signedWord : t.unsignedWord,
                         })}
                       </th>
-                      <td className="memory-word">{branchText(r.job, r.swapped)}</td>
+                      <td className="memory-word">
+                        {branchText(r.job, r.swapped)}
+                        <span className="swap-flags">
+                          {format(r.reading === "signed" ? t.flagsSigned : t.flagsUnsigned, {
+                            x: r.swapped ? "R2" : "R1",
+                            y: r.swapped ? "R1" : "R2",
+                            minus: r.flags.minus,
+                            over: r.flags.over,
+                            cout: r.flags.cout,
+                          })}
+                        </span>
+                      </td>
                       <td>{r.taken ? t.yes : t.no}</td>
                     </tr>
                   ))}
