@@ -100,8 +100,10 @@ export function runProgram(
   inputs: MachineInputs = QUIET_INPUTS,
   options: MachineOptions = {},
   limit = 2000,
+  /** The kinds the program is written with, where they are not the machine's own. */
+  written?: AssemblyOptions,
 ): ProgramRun {
-  const assembly: AssemblyOptions = {
+  const assembly: AssemblyOptions = written ?? {
     ...(options.callThroughRegister !== undefined
       ? { callThroughRegister: options.callThroughRegister }
       : {}),

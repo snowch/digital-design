@@ -2234,3 +2234,17 @@ button.bit {
 .calculator-took {
   margin: var(--space-1) 0;
 }
+.program-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+@media (min-width: 720px) {
+  .program-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.program-counts {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-5);
+}

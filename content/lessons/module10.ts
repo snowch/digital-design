@@ -270,3 +270,84 @@ export function packedY(word: number): number {
   const digit = k === 2 || k === 3 ? 4 : k === 6 ? 5 : 3;
   return (word >>> (digit * 4)) & 15;
 }
+
+// Lesson 10.3: what one instruction can say.
+
+/** 5000, too wide for a constant, built from three constant jobs. */
+export const WIDE_SUMS = `R1 <= 2047
+R1 <= R1 + 2047
+R1 <= R1 + 906
+word[display] <= R1
+stop`;
+
+/** 5000 kept as a word in the ROM after the program, read by one absolute load. */
+export const WIDE_WORD = `R1 <= word[big]
+word[display] <= R1
+stop
+big: word 5000`;
+
+/** How many rooms are warmer than the limit in R1: a room equal to the limit is not warmer. */
+export const COUNT_WARM = `R1 <= -200
+R2 <= word[sensorA]
+R3 <= word[sensorB]
+R4 <= 0
+if R1 >= R2 signed goto roomB
+R4 <= R4 + 1
+roomB: if R1 >= R3 signed goto show
+R4 <= R4 + 1
+show: word[display] <= R4
+stop`;
+
+/** The same with "not warmer" read as "colder": a room equal to the limit is counted. */
+export const COUNT_WARM_WRONG = COUNT_WARM.replace(
+  "if R1 >= R2 signed goto roomB",
+  "if R2 < R1 signed goto roomB",
+).replace("roomB: if R1 >= R3 signed goto show", "roomB: if R3 < R1 signed goto show");
+
+const GREATER_HEADER = `module greater(
+  input logic [63:0] A,
+  input logic [63:0] B,
+  output logic GT
+);
+  logic M, V;`;
+
+/** The start: A less than B, read signed, from the ALU's subtraction A - B. */
+export const GREATER_START = `${GREATER_HEADER}
+  alu a1 (.A(A), .B(B), .OP2(1'b0), .OP1(1'b1), .OP0(1'b1), .MINUS(M), .OVER(V));
+  assign GT = M ^ V;
+endmodule
+`;
+
+/** A greater than B is B less than A: the same subtraction with its inputs swapped. */
+export const GREATER_REFERENCE = `${GREATER_HEADER}
+  alu a1 (.A(B), .B(A), .OP2(1'b0), .OP1(1'b1), .OP0(1'b1), .MINUS(M), .OVER(V));
+  assign GT = M ^ V;
+endmodule
+`;
+
+// Lesson 10.4: what the machine leaves out.
+
+/** A program that forgets its stop: the ROM's next word is all zeros. */
+export const NO_STOP = `R1 <= 66
+word[display] <= R1`;
+
+/** 7 × n by adding 7 n times: no multiplication, and a register kept at 0 to compare with. */
+export function multiplyLoop(n: number): string {
+  return `R0 <= 0
+R1 <= 7
+R2 <= ${n}
+R3 <= 0
+again: R3 <= R3 + R1
+R2 <= R2 - 1
+if R2 != R0 goto again
+word[display] <= R3
+stop`;
+}
+
+/** 7 × 5 by doubling twice and adding once: a factor known when the program is written. */
+export const TIMES_FIVE = `R1 <= 7
+R2 <= R1 + R1
+R2 <= R2 + R2
+R2 <= R2 + R1
+word[display] <= R2
+stop`;

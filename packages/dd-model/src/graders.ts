@@ -296,6 +296,41 @@ function instructionWord(
   };
 }
 
+/**
+ * A number or a few hexadecimal digits worked out by hand. A case gives the `field` and its
+ * `form`, `number` (decimal, read signed) or `hex` (digits, either case, no prefix needed), and
+ * expects its `value`.
+ */
+function exact(
+  answers: Readonly<Record<string, string>>,
+  given: Readonly<Record<string, string | number>>,
+  expect: Readonly<Record<string, string | number>>,
+): AnswerResult | AnswerProblem {
+  const field = String(given["field"]);
+  const gone = missing(answers, [field]);
+  if (gone) return gone;
+  const want = String(expect["value"]);
+  if (given["form"] === "hex") {
+    const h = parseHex(answers[field]);
+    if (h === undefined) return { invalid: field };
+    const typed = h.replace(/^0+(?=.)/, "");
+    return {
+      pass: typed === want.toUpperCase().replace(/^0+(?=.)/, ""),
+      inputs: {},
+      actual: { [field]: h },
+      expected: { [field]: want },
+    };
+  }
+  const n = parseNumber(answers[field]);
+  if (n === undefined) return { invalid: field };
+  return {
+    pass: String(n) === want,
+    inputs: {},
+    actual: { [field]: String(n) },
+    expected: { [field]: want },
+  };
+}
+
 /** The graders lessons may name in an answers challenge's tests. */
 export const ANSWER_GRADERS: Readonly<Record<string, AnswerGrader>> = {
   threshold,
@@ -307,4 +342,5 @@ export const ANSWER_GRADERS: Readonly<Record<string, AnswerGrader>> = {
   // Module 10
   choices,
   "instruction-word": instructionWord,
+  exact,
 };

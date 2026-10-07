@@ -73,7 +73,9 @@ export interface Machine10Strings {
   readonly jobs: Readonly<Record<string, string>>;
   /** The ALU's eight jobs by their code, as Module 7 names them. */
   readonly jobNames: Readonly<Record<string, string>>;
+  /** A branch condition's sign, by job, and its reading after the second register. */
   readonly conds: Readonly<Record<string, string>>;
+  readonly condReadings: Readonly<Record<string, string>>;
   readonly systemJobs: Readonly<Record<string, string>>;
   readonly illegal: Readonly<Record<string, string>>;
   /** {c}: the constant's digits, {w}: its 64-bit word, {n}: its value read signed. */
@@ -125,7 +127,7 @@ export interface Machine10Strings {
   readonly relationForm: string;
   readonly signedWord: string;
   readonly unsignedWord: string;
-  /** {a}, {b} registers, {cond} the condition. */
+  /** {a}, {b} registers, {cond} the condition's sign, {reading} its reading. */
   readonly branchForm: string;
   readonly yes: string;
   readonly no: string;
@@ -143,6 +145,11 @@ export interface Machine10Strings {
   readonly registerAfter: string;
   readonly displayAfter: string;
   readonly runBoth: string;
+  /** {address}: where a run stopped at `stop`. */
+  readonly stoppedAtStop: string;
+  /** {address}, {cause}: where a run stopped, and the cause. */
+  readonly stoppedCause: string;
+  readonly notStopped: string;
   readonly address: string;
   /** After a prediction: {answer}. */
   readonly programAnswer: string;
@@ -210,13 +217,14 @@ export const MACHINE10_STRINGS: Machine10Strings = {
     loadByte: "R{y} ← the byte at memory[{address}]",
     storeWord: "memory[{address}] ← R{b}",
     storeByte: "the byte at memory[{address}] ← R{b}'s low byte",
-    branch: "if R{a} {cond} R{b}: PC ← PC + 4 × {c}",
+    branch: "if R{a} {cond} R{b}{reading}: PC ← PC + 4 × {c}",
     branchAlways: "PC ← PC + 4 × {c}",
     branchNever: "nothing: the PC moves on",
     call: "R{y} ← PC + 4, PC ← PC + 4 × {c}",
     jump: "PC ← R{a} + {c}",
-    setIf: "R{y} ← 1 if R{a} {cond} R{b}, else 0",
+    setIf: "R{y} ← 1 if R{a} {cond} R{b}{reading}, else 0",
     callRegister: "R{y} ← PC + 4, PC ← R{a} + {c}",
+    setIfFixed: "R{y} ← {n}",
   },
   jobs: { "0": "AND", "1": "XOR", "2": "+", "3": "-", "4": "OR" },
   jobNames: {
@@ -229,16 +237,8 @@ export const MACHINE10_STRINGS: Machine10Strings = {
     "6": "count up",
     "7": "count down",
   },
-  conds: {
-    "0": "always",
-    "1": "never",
-    "2": "==",
-    "3": "!=",
-    "4": "< (unsigned)",
-    "5": ">= (unsigned)",
-    "6": "< (signed)",
-    "7": ">= (signed)",
-  },
+  conds: { "2": "==", "3": "!=", "4": "<", "5": ">=", "6": "<", "7": ">=" },
+  condReadings: { "4": " unsigned", "5": " unsigned", "6": " signed", "7": " signed" },
   systemJobs: {
     "0": "call system",
     "1": "resume",
@@ -288,7 +288,7 @@ export const MACHINE10_STRINGS: Machine10Strings = {
   relationForm: "{rel}, {reading}",
   signedWord: "signed",
   unsignedWord: "unsigned",
-  branchForm: "if {a} {cond} {b}",
+  branchForm: "if {a} {cond} {b}{reading}",
   yes: "yes",
   no: "no",
   swapKey: "A marked row names its registers swapped.",
@@ -301,6 +301,9 @@ export const MACHINE10_STRINGS: Machine10Strings = {
   registerAfter: "R{n} at the stop: {value}",
   displayAfter: "Display at the stop: {value}",
   runBoth: "Run the programs",
+  stoppedAtStop: "Stopped at the stop, {address}",
+  stoppedCause: "Stopped at {address}, cause {cause}",
+  notStopped: "Did not stop",
   address: "Address",
   programAnswer: "The run gives: {answer}.",
 };

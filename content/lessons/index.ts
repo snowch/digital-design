@@ -46,6 +46,8 @@ import { microOperations } from "./micro-operations";
 import { newInstruction } from "./new-instruction";
 import { instructionSet } from "./instruction-set";
 import { encoding } from "./encoding";
+import { immediates } from "./immediates";
+import { roomToGrow } from "./room-to-grow";
 
 const INPUTS: readonly LessonInput[] = [
   signals,
@@ -90,6 +92,8 @@ const INPUTS: readonly LessonInput[] = [
   // Module 10, the instruction set
   instructionSet,
   encoding,
+  immediates,
+  roomToGrow,
 ];
 
 export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(

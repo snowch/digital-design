@@ -25,7 +25,7 @@ import {
   writeText,
 } from "./helpers";
 
-const MODULE_10 = ["instruction-set", "encoding"] as const;
+const MODULE_10 = ["instruction-set", "encoding", "immediates"] as const;
 
 /** Fills an answers challenge's fields: a choice by its option's words, any other by typing. */
 async function answerAll(
@@ -101,6 +101,19 @@ const WRONG: readonly {
     from: "      4'h3: WA = IR[19:16];\n",
     to: "",
     why: "a load's Y left in digit 3",
+  },
+  {
+    lesson: "immediates",
+    id: "reach",
+    answers: { back: "FEC" },
+    why: "a branch's distance counted in bytes",
+  },
+  {
+    lesson: "immediates",
+    id: "greater-text",
+    from: "  assign GT = M ^ V;",
+    to: "  assign GT = ~(M ^ V);",
+    why: "less than turned over, which is 1 for equal words",
   },
 ];
 
@@ -244,5 +257,34 @@ test.describe("Module 10's figures", () => {
     await figure.getByRole("button", { name: T.fromWord }).click();
     await expect(figure.getByRole("textbox", { name: T.bLabel })).toHaveValue("100");
     await expect(figure.locator(".calculator-y")).toContainText("-84");
+  });
+
+  test("the branch that says greater than is the swapped less than; the table holds for all", async ({
+    page,
+  }) => {
+    await openLesson(page, "immediates");
+    const figure = page.locator("#ix-predict-greater");
+    await figure.scrollIntoViewIfNeeded();
+    await expect(figure.locator("table.swap-table")).toHaveCount(0);
+    await figure.getByRole("radio").first().check();
+    await figure.getByRole("button", { name: V.prediction.commit }).click();
+    await expect(figure.locator("[role=status]").first()).toContainText(V.prediction.match);
+    await expect(figure.locator("table.swap-table tbody tr")).toHaveCount(8);
+  });
+
+  test("the programs run on the reference and show their counts only once run", async ({
+    page,
+  }) => {
+    await openLesson(page, "immediates");
+    const figure = page.locator("#ix-wide");
+    await figure.scrollIntoViewIfNeeded();
+    await expect(figure.locator(".program-counts")).toHaveCount(0);
+    await figure.getByRole("button", { name: T.runBoth }).click();
+    await expect(figure.locator(".program-counts").first()).toContainText(
+      format(T.romBytes, { n: 20 }),
+    );
+    await expect(figure.locator(".program-counts").nth(1)).toContainText(
+      format(T.registerAfter, { n: 1, value: "5000" }),
+    );
   });
 });

@@ -36,6 +36,7 @@ import {
   type Layout,
   type MachineOptions,
   type Meaning,
+  type StopReason,
   instructionPair,
   pairView,
   runPair,
@@ -378,7 +379,9 @@ const LayoutProps = z.object({
 });
 
 /** The question's answer: the fields the packed layout moves for the first instruction. */
-export function layoutAnswer(data: { instructions: readonly { text: string }[] }): string {
+export function layoutAnswer(data: {
+  readonly instructions: readonly { readonly text: string }[];
+}): string {
   const moved = packedLayout(wordOfText(data.instructions[0]?.text ?? "0x00000000")).moved;
   return moved.length ? moved.join(", ") : "none";
 }
@@ -577,7 +580,11 @@ function meaningText(
     case "branch":
       if (m.cond === 0) return format(M["branchAlways"] ?? "", m);
       if (m.cond === 1) return M["branchNever"] ?? "";
-      return format(M["branch"] ?? "", { ...m, cond: cond(m.cond) });
+      return format(M["branch"] ?? "", {
+        ...m,
+        cond: cond(m.cond),
+        reading: t.condReadings[String(m.cond)] ?? "",
+      });
     case "call":
       return format(M["call"] ?? "", m);
     case "jump":
@@ -585,7 +592,13 @@ function meaningText(
     case "system":
       return format(t.systemJobs[String(m.job)] ?? "", m);
     case "setIf":
-      return format(M["setIf"] ?? "", { ...m, cond: cond(m.cond) });
+      if (m.cond === 0 || m.cond === 1)
+        return format(M["setIfFixed"] ?? "", { y: m.y, n: m.cond === 0 ? 1 : 0 });
+      return format(M["setIf"] ?? "", {
+        ...m,
+        cond: cond(m.cond),
+        reading: t.condReadings[String(m.cond)] ?? "",
+      });
     case "callRegister":
       return format(M["callRegister"] ?? "", m);
     case "illegal":
@@ -859,7 +872,8 @@ const SwapProps = z.object({
 });
 
 /** The question's answer: the option whose branch is taken exactly when R1 > R2 in every case. */
-export function swapAnswer(data: z.infer<typeof SwapProps>): string {
+export function swapAnswer(given: z.input<typeof SwapProps>): string {
+  const data = SwapProps.parse(given);
   const says = (value: string) => {
     const [job, order] = value.split(":");
     return data.cases.every((c) => {
@@ -895,6 +909,7 @@ export const SwapCompare = withProps(
         a: swapped ? "R2" : "R1",
         b: swapped ? "R1" : "R2",
         cond: t.conds[String(job)] ?? "",
+        reading: t.condReadings[String(job)] ?? "",
       });
     return (
       <div className="machine-figure swap-compare" data-interactive={interactive.id}>
@@ -996,6 +1011,11 @@ const ProgramProps = z.object({
         program: z.string(),
         /** Module 10's capstone: the learner's copy, with set if at kind A. */
         capstone: z.boolean().default(false),
+        /**
+         * Written with the learner's copy's kinds, but run on the course's machine, which refuses
+         * them (lesson 10.4).
+         */
+        copyWordsOnCourse: z.boolean().default(false),
       }),
     )
     .min(1)
@@ -1011,26 +1031,46 @@ const ProgramProps = z.object({
   explain: z.string().default(""),
   /** What the question asks: a program's instructions run or written, by its index. */
   ask: z
-    .object({ program: z.number().int().min(0), what: z.enum(["ran", "written", "display"]) })
+    .object({
+      program: z.number().int().min(0),
+      what: z.enum(["ran", "written", "display", "stop"]),
+    })
     .optional(),
 });
 type ProgramData = z.infer<typeof ProgramProps>;
+
+/** Why a run stopped, as a key: `stop`, `later`, a trap's cause in hexadecimal, or `none`. */
+function stopKey(reason: StopReason | undefined): string {
+  if (!reason) return "none";
+  return reason.kind === "trap" ? reason.cause.toString(16).toUpperCase() : reason.kind;
+}
 
 const CAPSTONE: MachineOptions = { ...MODULE_9, callThroughRegister: 9, setIf: 10 };
 
 function runsOf(data: Pick<ProgramData, "programs" | "inputs">) {
   return data.programs.map((p) => ({
-    run: runProgram(p.program, shop(data.inputs), p.capstone ? CAPSTONE : MODULE_9),
-    lines: assemble(p.program, p.capstone ? { callThroughRegister: 9, setIf: 10 } : {}).lines,
+    run: runProgram(
+      p.program,
+      shop(data.inputs),
+      p.capstone ? CAPSTONE : MODULE_9,
+      2000,
+      p.copyWordsOnCourse ? { callThroughRegister: 9, setIf: 10 } : undefined,
+    ),
+    lines: assemble(
+      p.program,
+      p.capstone || p.copyWordsOnCourse ? { callThroughRegister: 9, setIf: 10 } : {},
+    ).lines,
   }));
 }
 
 /** The question's answer, read off the reference's runs. */
-export function programAnswer(data: ProgramData): string {
+export function programAnswer(given: z.input<typeof ProgramProps>): string {
+  const data = ProgramProps.parse(given);
   if (!data.ask) return "";
   const r = runsOf(data)[data.ask.program]?.run;
   if (!r) return "";
   if (data.ask.what === "display") return BigInt.asIntN(64, r.state.display).toString();
+  if (data.ask.what === "stop") return stopKey(r.stopped);
   return String(data.ask.what === "ran" ? r.ran : r.written);
 }
 
@@ -1120,6 +1160,16 @@ export const ProgramCompare = withProps(
                     {data.display && (
                       <li>{format(t.displayAfter, { value: signed(r.run.state.display) })}</li>
                     )}
+                    <li>
+                      {r.run.state.stopped
+                        ? stopKey(r.run.stopped) === "stop"
+                          ? format(t.stoppedAtStop, { address: hex3(r.run.state.stopped.pc) })
+                          : format(t.stoppedCause, {
+                              address: hex3(r.run.state.stopped.pc),
+                              cause: stopKey(r.run.stopped),
+                            })
+                        : t.notStopped}
+                    </li>
                   </ul>
                 )}
               </section>
