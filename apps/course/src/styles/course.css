@@ -2486,6 +2486,8 @@ button.bit {
   paint-order: stroke;
   stroke: var(--canvas);
   stroke-width: 4px;
+}
+
 /* Module 11: the assembler and the debugger, the listing, the stack's depth and the logs. */
 .debugger-status {
   font-weight: 600;
