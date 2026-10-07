@@ -259,8 +259,10 @@ function exposes(
 // ---- Module 10 -----------------------------------------------------------------------------
 
 /**
- * A choice among options. A case gives the `field` and expects its option's `value`; the learner's
- * choice and the expected option are reported, and the book shows each by its option's words.
+ * A choice among options. A case gives the `field` and expects its option's `value`. A case may
+ * name a `detail`, the sentence the book shows on a failure in place of the values, which would
+ * give the right option away; otherwise the learner's choice and the expected option are reported,
+ * each by its option's words.
  */
 function choices(
   answers: Readonly<Record<string, string>>,
@@ -277,7 +279,21 @@ function choices(
     inputs: {},
     actual: { [field]: chosen },
     expected: { [field]: want },
+    ...ruleOf(given, field, chosen),
   };
+}
+
+/**
+ * Module 10: the sentence a case names (`given.detail`), shown in place of the values, which would
+ * hand over the answer; it says which rule a wrong answer misses, with the learner's own answer.
+ */
+function ruleOf(
+  given: Readonly<Record<string, string | number>>,
+  field: string,
+  actual: string,
+): Pick<AnswerResult, "detail"> {
+  const key = given["detail"];
+  return typeof key === "string" ? { detail: { key, field, values: { actual } } } : {};
 }
 
 /**
@@ -310,7 +326,7 @@ function instructionWord(
 /**
  * A number or a few hexadecimal digits worked out by hand. A case gives the `field` and its
  * `form`, `number` (decimal, read signed) or `hex` (digits, either case, no prefix needed), and
- * expects its `value`.
+ * expects its `value`. A case may name a `detail`, as `choices` does.
  */
 function exact(
   answers: Readonly<Record<string, string>>,
@@ -330,6 +346,7 @@ function exact(
       inputs: {},
       actual: { [field]: h },
       expected: { [field]: want },
+      ...ruleOf(given, field, h),
     };
   }
   const n = parseNumber(answers[field]);
@@ -339,6 +356,7 @@ function exact(
     inputs: {},
     actual: { [field]: String(n) },
     expected: { [field]: want },
+    ...ruleOf(given, field, String(n)),
   };
 }
 

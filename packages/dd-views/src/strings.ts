@@ -1007,6 +1007,31 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       slicesHigh: "The slices worth 128, 64, 32 and 16 do not give {actual}.",
       slicesLow: "The slices worth 8, 4, 2 and 1 do not give {actual}.",
       slices: "The eight slices do not give {actual}.",
+      // Module 10 (decision A): the rule a wrong answer misses, never the right one
+      // (docs/notes/module-10-instruction-set/briefs/6X.md).
+      partSeen:
+        "A program can see a part through a field that names it, an address a load or store reaches, or the PC.",
+      reachLargest:
+        "The constant is 12 bits, read signed; {actual} is not the largest number it can hold.",
+      reachBack:
+        "A branch's constant is its target's address less its own, divided by 4, written as 12 bits read signed; {actual} is not that for this branch.",
+      reachFurthest:
+        "A branch at 000 can reach 000 + 4 × the largest constant; {actual} is not that address.",
+      codeFate:
+        "A code is taken if K and J name an instruction the course's machine accepts today; a refused code is free, except all zeros, which must stay refused.",
+      countWith:
+        "Count every instruction in the run, including those in routines you call and return from; {actual} is not that count.",
+      countWithout:
+        "Without the call through a register, each call takes two instructions: a constant job and a jump through R4; {actual} is not that count.",
+      designKind:
+        "A code is free for your design only if your copy of the machine refuses it today.",
+      designField:
+        "The register an instruction writes must be named in the place every instruction gives it.",
+      designCondition:
+        "The condition must come from a field that means the same thing in every kind that uses it.",
+      designProgram:
+        "Count the instructions each program runs with the new instruction; the one with fewer is shortened.",
+      designCost: "The circuit must gain hardware or a control signal it does not already have.",
     },
     invalidFor: {
       slices:

@@ -33,13 +33,23 @@ import { MACHINE9_CONSTRUCTS } from "./module9";
 /** The rooms as Module 1 read them, and the program's limit of -200 between them. */
 export const ROOMS = { DOOR: 0, WARM: 0, SENSORA: "-184", SENSORB: "-250" };
 
-/** The design's choices, each with the one that keeps the layout's rules. */
+/** The design's choices, each with the one that answers its question, and the rule a wrong one misses. */
 export const DESIGN = [
-  { id: "kind", options: ["0", "5", "9", "A"], answer: "A" },
-  { id: "result", options: ["y", "b", "new"], answer: "y" },
-  { id: "condition", options: ["job", "constant", "new"], answer: "job" },
-  { id: "program", options: ["count", "colder", "times"], answer: "count" },
-  { id: "cost", options: ["column", "source", "part"], answer: "source" },
+  { id: "kind", options: ["0", "5", "9", "A"], answer: "A", detail: "designKind" },
+  { id: "result", options: ["y", "b", "new"], answer: "y", detail: "designField" },
+  {
+    id: "condition",
+    options: ["job", "constant", "new"],
+    answer: "job",
+    detail: "designCondition",
+  },
+  {
+    id: "program",
+    options: ["count", "colder", "times"],
+    answer: "count",
+    detail: "designProgram",
+  },
+  { id: "cost", options: ["column", "source", "part"], answer: "source", detail: "designCost" },
 ] as const;
 
 const hex = (n: number, d: number) => n.toString(16).toUpperCase().padStart(d, "0");
@@ -290,7 +300,7 @@ export const designAnInstruction: LessonInput = {
         grader: "choices",
         cases: DESIGN.map((d) => ({
           label: LABELS.design[d.id],
-          given: { field: d.id },
+          given: { field: d.id, detail: d.detail },
           expect: { value: d.answer },
         })),
       },

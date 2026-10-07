@@ -117,6 +117,11 @@ subagent that wrote every learner-facing sentence from a brief of checked facts.
   the fault lab writes wide words in hexadecimal (`radix`); radios keep their size on a phone.
   Brief 5R, the whole lesson, in three parts: numbers spelled as words, two facts dropped,
   headings with full stops; my brief had one wrong fact (lesson 4 had not weighed the colder room).
+- 10:55 to 11:40 Main merged with Module 0 (conflicts in the graders, the answer editor, the
+  registries, the strings and the CSS, each side's additions kept; for the editor's choice field,
+  Module 0's drawing, a list to choose from, kept alone). Decision A: the graders' sentences, brief
+  6X, drafted once; the drafts inverted one rule and drifted on another, both put back. A test
+  grades a wrong answer to every such case and checks the sentence names no answer.
 
 ## The outline
 
@@ -197,6 +202,11 @@ Decisions the managing session took after the reading review, each changing
   the reference. Showing its edges on the drawn machine needs the circuit itself to gain the new
   source for register Y and a drawing placed and routed for it, a new circuit rather than new
   props, so it is left out. The prediction's `kind-edges` and the explanation carry the edges.
+
+- **Answers that do not give the answer away** (decision A). Module 10's `choices` and `exact`
+  graders return Module 0's `detail`, keyed by each case's `given.detail`: a sentence on the rule a
+  wrong answer misses, never the right option or value (brief 6X). The answer editor draws a
+  choice as Module 0 does, one implementation; `docs/authoring.md` says so.
 
 ## The capstone's instruction, and the machine it changes
 

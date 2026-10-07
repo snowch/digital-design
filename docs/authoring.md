@@ -48,8 +48,14 @@ has:
   a short text), tests of kind `answers` that name a grader the book supplies
   (`ANSWER_GRADERS` in `packages/dd-model/src/graders.ts`) and list cases (`label`, `given`,
   `expect`), and a reference of `answers` by field id. A failure names the case, the answers'
-  values and what was expected; the runner, the hints, the re-grading on load and the reset are
-  the same as for a circuit.
+  values and what was expected, a choice by its option's words; the runner, the hints, the
+  re-grading on load and the reset are the same as for a circuit. Where the expected value would
+  hand over the answer, the grader returns a `detail` instead: the key of a sentence in the book's
+  strings (`answers.details`), shown in place of the values (Module 0's machine graders). Module
+  10's `choices` and `exact` graders take the key from each case's `given.detail`: one sentence per
+  case, saying which rule or fact a wrong answer misses and never the right option or value, with
+  the learner's own answer as `{actual}`; `content/lessons/module10-feedback.test.ts` grades a
+  wrong answer to every such case and holds the book to it.
 - `modelVsReality`: how the simulator differs from hardware, said once. The box's heading names
   the simulator only where some figure runs it; a lesson whose figures all have
   `timeModel: "none"` gets "How the model differs from hardware".

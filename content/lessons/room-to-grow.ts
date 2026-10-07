@@ -46,8 +46,16 @@ const ROOMS = {
 
 /** The counts the second challenge asks for, each read off a run of the reference. */
 export const COUNTS = [
-  { id: "withCall", value: String(runProgram(CALL_TWICE, ROOMS, COPY).ran) },
-  { id: "withoutCall", value: String(runProgram(CALL_TWICE_WITHOUT, ROOMS, MODULE_9).ran) },
+  {
+    id: "withCall",
+    value: String(runProgram(CALL_TWICE, ROOMS, COPY).ran),
+    detail: "countWith",
+  },
+  {
+    id: "withoutCall",
+    value: String(runProgram(CALL_TWICE_WITHOUT, ROOMS, MODULE_9).ran),
+    detail: "countWithout",
+  },
 ] as const;
 
 const SHOP = { DOOR: 0, WARM: 0, SENSORA: SENSORS.SENSORA, SENSORB: SENSORS.SENSORB };
@@ -199,7 +207,7 @@ export const roomToGrow: LessonInput = {
         grader: "choices",
         cases: CODES.map((w) => ({
           label: LABELS.codes[w.id],
-          given: { field: w.id },
+          given: { field: w.id, detail: "codeFate" },
           expect: { value: w.fate },
         })),
       },
@@ -224,7 +232,7 @@ export const roomToGrow: LessonInput = {
         grader: "exact",
         cases: COUNTS.map((c) => ({
           label: LABELS.counts[c.id],
-          given: { field: c.id, form: "number" },
+          given: { field: c.id, form: "number", detail: c.detail },
           expect: { value: c.value },
         })),
       },

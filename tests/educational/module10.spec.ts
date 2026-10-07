@@ -183,6 +183,13 @@ test.describe("Module 10's wrong attempts are rejected with the failing test nam
         timeout: 180_000,
       });
       await expect(section.locator(".challenge-complete")).toHaveCount(0);
+      // A wrong choice or number is answered by the rule it misses, not by the right answer.
+      if (
+        wrong === undefined &&
+        c.tests.kind === "answers" &&
+        c.tests.grader !== "instruction-word"
+      )
+        await expect(section.locator(".verdict-failure .verdict-detail").first()).toBeVisible();
     });
   }
 });

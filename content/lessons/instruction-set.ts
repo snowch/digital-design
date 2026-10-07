@@ -195,7 +195,7 @@ export const instructionSet: LessonInput = {
         grader: "choices",
         cases: PARTS.map((p) => ({
           label: LABELS.parts[p.id],
-          given: { field: p.id },
+          given: { field: p.id, detail: "partSeen" },
           expect: { value: p.set ? "set" : "own" },
         })),
       },

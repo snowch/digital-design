@@ -35,9 +35,9 @@ export const PAIRS = [
 
 /** The numbers the first challenge asks for, each worked out by hand. */
 export const REACH = [
-  { id: "largest", form: "number", value: "2047" },
-  { id: "back", form: "hex", value: "FFB" },
-  { id: "furthest", form: "hex", value: "1FFC" },
+  { id: "largest", form: "number", value: "2047", detail: "reachLargest" },
+  { id: "back", form: "hex", value: "FFB", detail: "reachBack" },
+  { id: "furthest", form: "hex", value: "1FFC", detail: "reachFurthest" },
 ] as const;
 
 const h = (v: bigint) => `0x${BigInt.asUintN(64, v).toString(16).toUpperCase()}`;
@@ -235,7 +235,7 @@ export const immediates: LessonInput = {
         grader: "exact",
         cases: REACH.map((r) => ({
           label: LABELS.reach[r.id],
-          given: { field: r.id, form: r.form },
+          given: { field: r.id, form: r.form, detail: r.detail },
           expect: { value: r.value },
         })),
       },
