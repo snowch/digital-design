@@ -99,6 +99,9 @@ describe("facts for the instruction-set lesson", () => {
     expect(PROSE.faultPcen).toContain("`01C`");
   });
 
+  // Each grade of the short-jobs challenge runs its 73 tests on the machine of several edges, 2 to
+  // 3 seconds alone; this test grades it twice (6 seconds alone, past Vitest's 5), and the next two
+  // once each, so the three have the time branches.facts gives its long runs.
   it("the challenges: 9 and 73 tests; the second's start fails 48, first at an ALU edge", () => {
     expect(testCount(challenge("sort-parts"))).toBe(9);
     expect(testCount(challenge("short-jobs"))).toBe(73);
@@ -108,14 +111,14 @@ describe("facts for the instruction-set lesson", () => {
       "Margin: 004, edge 3 (ALU): FETCH after it, PC 008",
     ]);
     for (const c of lesson.challenges) expect(grade(c, c.reference).passed, c.id).toBe(true);
-  });
+  }, 60_000);
 
   it("hint 2: changing only the next state writes nothing; R6 is unknown at the branch at 008", () => {
     const c = challenge("short-jobs");
     const only = c.initial!.hdl!.replace(SHORT_JOBS_FROM.alu, SHORT_JOBS_TO.alu);
     const g = grade(c, { hdl: only });
     expect(g.failures[0]?.label).toBe("Margin: 008, edge 3 (ALU): FETCH after it, PC 00C");
-  });
+  }, 60_000);
 
   it("the refused load: a WREG without ~MEM writes R3 at its ALU edge, and only the third run sees it", () => {
     const c = challenge("short-jobs");
@@ -126,5 +129,5 @@ describe("facts for the instruction-set lesson", () => {
     expect(grade(c, { hdl: wrong }).failures.map((f) => f.label)).toEqual([
       "R3 shown: at the stop: HALT is 1, the display shows 66",
     ]);
-  });
+  }, 60_000);
 });
