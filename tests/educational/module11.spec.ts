@@ -24,7 +24,7 @@ import {
 
 const T = DEFAULT_VIEW_STRINGS.machine11;
 
-const MODULE_11 = ["assembly", "lists"] as const;
+const MODULE_11 = ["assembly", "lists", "functions"] as const;
 
 async function answerAll(
   section: Locator,
@@ -96,11 +96,29 @@ const WRONG: readonly {
     fails: "Log -190, -195, -200",
     left: "the display 0",
   },
+  {
+    lesson: "functions",
+    id: "above",
+    from: "above: if R2 < R1 signed goto over",
+    to: "above: if R2 < R1 unsigned goto over",
+    fails: "Call R1 25, R2 -180",
+    left: "R1 0",
+  },
+  {
+    lesson: "functions",
+    id: "above",
+    from: "over:  R1 <= R1 - R2",
+    to: "over:  R10 <= R1 - R2\n       R1 <= R10",
+    fails: "Call R1 -170, R2 -180",
+    left: "registers the function did not put back R10",
+  },
 ];
 
 test.describe("Module 11's wrong programs", () => {
   for (const w of WRONG) {
-    test(`${w.id}: a plausible wrong program fails ${w.fails}`, async ({ page }) => {
+    test(`${w.id}: a plausible wrong program fails ${w.fails}, leaving ${w.left}`, async ({
+      page,
+    }) => {
       const c = lessonData(w.lesson).challenges.find((x) => x.id === w.id)!;
       await openLesson(page, w.lesson);
       const section = challenge(page, w.id);

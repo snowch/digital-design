@@ -1020,6 +1020,11 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
         "A branch's constant is its target's address less its own, divided by 4, written as 12 bits read signed; {actual} is not that for this branch.",
       reachFurthest:
         "A branch at 000 can reach 000 + 4 × the largest constant; {actual} is not that address.",
+      // Module 11, lesson 3 (brief 3L).
+      registerRole:
+        "The calling convention gives R1 to R4, R5 to R9, and R10 to R13 each one role, with R1 carrying the result.",
+      // Module 11, lesson 4 (brief 4L).
+      stackAddress: "STACKADDRESS",
       // Module 11, lesson 1 (brief 1L).
       asmAddress:
         "{actual} is not the address. Each instruction takes 4 bytes from 000; a word starts at a multiple of 8.",

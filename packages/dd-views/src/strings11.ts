@@ -279,6 +279,11 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   checkValue: "{name} {value}",
   details: {
     // Module 11, lesson 1 (brief 1L).
+    // Module 11, lesson 3 (brief 3L).
+    aboveCall:
+      "The function sets R1 to how far the reading in R1 is above the limit in R2, or 0; keeps R10 to R14 unchanged; and returns through R15.",
+    twoRooms:
+      "The display shows room A's amount above -180, or 0, and ALARM is on only when room B is above -200.",
     // Module 11, lesson 2 (brief 2L).
     firstWarmer:
       "The display must show the position, from 1, of the first reading warmer than the limit, or 0 when none is.",

@@ -378,13 +378,7 @@ export function DebuggerView({
                     {changed && <span className="visually-hidden">{` (${t.changed})`}</span>}
                   </dt>
                   <dd className="memory-word">
-                    {signedText(v)}
-                    {v !== undefined && v > 9n && v < 1n << 63n && (
-                      <span className="register-hex">
-                        <span className="visually-hidden">{` ${t.hex} `}</span>
-                        {hexText(v)}
-                      </span>
-                    )}
+                    <WordValue value={v} t={t} />
                   </dd>
                 </div>
               );
@@ -494,6 +488,21 @@ export function DebuggerView({
   );
 }
 
+/** A word as the debugger shows it: read signed, and in hexadecimal too where it may be an address. */
+function WordValue({ value, t }: { value: bigint | undefined; t: Machine11Strings }) {
+  return (
+    <>
+      {signedText(value)}
+      {value !== undefined && value > 9n && value < 1n << 63n && (
+        <span className="register-hex">
+          <span className="visually-hidden">{` ${t.hex} `}</span>
+          {hexText(value)}
+        </span>
+      )}
+    </>
+  );
+}
+
 function MemoryPanel({
   region,
   program,
@@ -528,7 +537,9 @@ function MemoryPanel({
               return (
                 <tr key={address} className={pointing.length ? "row-current" : ""}>
                   <td className="memory-word">{hex3(address)}</td>
-                  <td className="memory-word">{signedText(memoryWord(state.cpu, address))}</td>
+                  <td className="memory-word">
+                    <WordValue value={memoryWord(state.cpu, address)} t={t} />
+                  </td>
                   <td className="memory-pointer">
                     {pointing.length
                       ? `← ${format(t.pointsHere, { names: pointing.join(", ") })}`
@@ -610,9 +621,7 @@ function StackPanel({
                   <li key={r.address} className="stack-word">
                     <span className="memory-word">{hex3(r.address)}</span>
                     <span className="memory-word">
-                      {names.get(Number(r.value ?? -1n)) && r.value !== undefined
-                        ? `${hexText(r.value)} (${names.get(Number(r.value))})`
-                        : signedText(r.value)}
+                      <WordValue value={r.value} t={t} />
                     </span>
                     {BigInt(r.address) === sp && <span className="stack-top">{"← R14"}</span>}
                   </li>

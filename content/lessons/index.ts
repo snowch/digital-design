@@ -54,6 +54,7 @@ import { roomToGrow } from "./room-to-grow";
 import { designAnInstruction } from "./design-an-instruction";
 import { assembly } from "./assembly";
 import { lists } from "./lists";
+import { functions } from "./functions";
 
 const INPUTS: readonly LessonInput[] = [
   // Module 0, meet the machine.
@@ -107,6 +108,7 @@ const INPUTS: readonly LessonInput[] = [
   // Module 11, programming and debugging
   assembly,
   lists,
+  functions,
 ];
 
 export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(
