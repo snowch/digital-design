@@ -24,8 +24,10 @@ export interface PairedInstruction {
   readonly address: number;
   readonly text: string;
   readonly kind: number;
-  /** Module 9's edges for it; Module 8's machine takes 1. */
+  /** Module 9's edges for it; a stop takes 2, its fetch and the edge at which it halts (9.3). */
   readonly edges: number;
+  /** Module 8's edges for it: 1, or 0 where Module 8's machine had already halted. */
+  readonly singleEdges: number;
   /** What the two machines differ on after it, by name; empty when they agree. */
   readonly differ: readonly string[];
   /** Whether it stopped the machines. */
@@ -42,6 +44,8 @@ export interface MachinePair {
   readonly log: PairedInstruction[];
   /** Module 9's edges into the instruction it is running. */
   edgesIn: number;
+  /** Where Module 9's machine last fetched an instruction. */
+  fetchedAt: number;
 }
 
 /** The two machines from reset, with one program and the shop's inputs. */
@@ -53,7 +57,7 @@ export function startPair(
   const program = assemble(source);
   const single = resetDatapath(datapathCircuit({ stage: "full", rom: program.rom }), inputs);
   const multi = resetDatapath(applyFaults(multicycleCircuit({ rom: program.rom }), faults), inputs);
-  return { program, single, multi, log: [], edgesIn: 0 };
+  return { program, single, multi, log: [], edgesIn: 0, fetchedAt: 0 };
 }
 
 /** The state an instruction set names: what a program can see. */
@@ -165,27 +169,46 @@ export function edgePair(pair: MachinePair): boolean {
   const line = lineAt(pair.program, pc);
   const kind = line?.instruction === undefined ? 0 : fieldsOf(line.instruction).k;
   if (view.halted.multi) {
-    if (!pair.log.at(-1)?.stops)
-      pair.log.push({
-        address: pc,
-        text: line?.text ?? "",
-        kind,
-        edges: pair.edgesIn,
-        differ: view.differ,
-        stops: true,
-      });
+    if (pair.log.at(-1)?.stops) return false;
+    // The edge at which the stop halts the machine: it changes nothing a program can see.
+    pair.multi.clockCycle("CLK");
+    let edges = pair.edgesIn + 1;
+    // The stop is logged at the address it was fetched from. Where a fault ended an instruction at
+    // the stop's fetch edge, that fetch was logged on its own; it is the stop's first edge.
+    const fetched = pair.fetchedAt;
+    const last = pair.log.at(-1);
+    if (last && !last.stops && last.address === fetched && pair.edgesIn === 0) {
+      pair.log.pop();
+      edges = last.edges + 1;
+    }
+    const at = lineAt(pair.program, fetched);
+    const after = pairView(pair);
+    pair.log.push({
+      address: fetched,
+      text: at?.text ?? "",
+      kind: at?.instruction === undefined ? 0 : fieldsOf(at.instruction).k,
+      edges,
+      // Module 8's machine takes its one edge for the stop when it halts on the same one.
+      singleEdges: after.halted.single && Number(after.single.pc ?? -1n) === fetched ? 1 : 0,
+      differ: after.differ,
+      stops: true,
+    });
+    pair.edgesIn = 0;
     return false;
   }
+  if (view.own.state === "FETCH") pair.fetchedAt = pc;
   const ends = bitOf(pair.multi, "PCEN") === 1;
   pair.multi.clockCycle("CLK");
   pair.edgesIn++;
   if (!ends) return true;
-  if (!view.halted.single) pair.single.clockCycle("CLK");
+  const singleRan = !view.halted.single;
+  if (singleRan) pair.single.clockCycle("CLK");
   pair.log.push({
     address: pc,
     text: line?.text ?? "",
     kind,
     edges: pair.edgesIn,
+    singleEdges: singleRan ? 1 : 0,
     differ: pairView(pair).differ,
     stops: false,
   });
@@ -245,7 +268,7 @@ export interface PartRow {
   readonly multi: PartForm;
 }
 
-const DEVICES = ["display", "lamps", "timer"] as const;
+const DEVICES = ["display", "lamps", "timer", "waiting"] as const;
 const HELD: Readonly<Record<string, string>> = { ha: "HA", hb: "HB", hr: "HR", hm: "HM" };
 
 /** What a circuit has for one part: the component that keeps it, found by its net or its path. */
@@ -283,7 +306,10 @@ function partOf(circuit: Circuit, part: MachinePart): PartForm {
       return rom && ram ? { kind: "memory" } : { kind: "none" };
     }
     case "devices": {
-      const names = DEVICES.filter((d) => kept.some((c) => leaf(c.path, `memory/${d}/register`)));
+      // The waiting bits are two registers of one bit each, waiting0 and waiting1.
+      const names = DEVICES.filter((d) =>
+        kept.some((c) => leaf(c.path, `memory/${d}/register`) || leaf(c.path, `memory/${d}0`)),
+      );
       return names.length ? { kind: "devices", names } : { kind: "none" };
     }
     case "state": {

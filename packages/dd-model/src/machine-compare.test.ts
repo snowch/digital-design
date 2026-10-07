@@ -28,17 +28,33 @@ describe("two machines, one program", () => {
   it("agree after every instruction, each in its own count of edges", () => {
     const pair = startPair(COLDER, ROOMS);
     runPair(pair);
-    expect(pair.log.map((l) => [l.address, l.edges, l.differ.length, l.stops])).toEqual([
-      [0x000, 5, 0, false],
-      [0x004, 5, 0, false],
-      [0x008, 3, 0, false],
-      [0x00c, 4, 0, false],
-      [0x010, 4, 0, false],
-      [0x014, 1, 0, true],
+    // The stop takes 2 edges, its fetch and the edge at which it halts (9.3): 23 against 6.
+    expect(
+      pair.log.map((l) => [l.address, l.edges, l.singleEdges, l.differ.length, l.stops]),
+    ).toEqual([
+      [0x000, 5, 1, 0, false],
+      [0x004, 5, 1, 0, false],
+      [0x008, 3, 1, 0, false],
+      [0x00c, 4, 1, 0, false],
+      [0x010, 4, 1, 0, false],
+      [0x014, 2, 1, 0, true],
     ]);
     const v = pairView(pair);
     expect(BigInt.asIntN(64, v.single.display ?? 0n)).toBe(-250n);
     expect(v.multi.display).toBe(v.single.display);
+  });
+  it("PCEN stuck at 1: every edge ends an instruction; the stop is logged where it was fetched", () => {
+    const pair = startPair(COLDER, ROOMS, [stuckAt("control/PCEN", 1)]);
+    runPair(pair);
+    expect(pair.log.map((l) => [l.address, l.edges, l.singleEdges, l.stops])).toEqual([
+      [0x000, 1, 1, false],
+      [0x004, 1, 1, false],
+      [0x008, 1, 1, false],
+      [0x00c, 1, 1, false],
+      [0x010, 1, 1, false],
+      [0x014, 2, 1, true],
+    ]);
+    expect(pair.log[0]?.differ).toEqual(["R2"]);
   });
   it("keep their seen state between the edges of one instruction", () => {
     const pair = startPair(COLDER, ROOMS);
@@ -70,7 +86,10 @@ describe("machineParts", () => {
       expect(rows.registers?.[m]).toEqual({ kind: "registers", count: 16, width: 64 });
       expect(rows.pc?.[m]).toEqual({ kind: "register", width: 64 });
       expect(rows.memory?.[m]).toEqual({ kind: "memory" });
-      expect(rows.devices?.[m]).toEqual({ kind: "devices", names: ["display", "lamps", "timer"] });
+      expect(rows.devices?.[m]).toEqual({
+        kind: "devices",
+        names: ["display", "lamps", "timer", "waiting"],
+      });
     }
   });
 

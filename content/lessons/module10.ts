@@ -59,6 +59,48 @@ export function shortJobsText(): string {
   return text;
 }
 
+/**
+ * The second circuit's program: the margin with both of the shop's signals at 0; with DOOR at 1, a
+ * load the memory refuses at its memory edge (cause 33), into R3; with WARM at 1, R3 to the
+ * display. The registers keep their words through a reset, so the third run shows whether the
+ * refused load wrote R3, which a job written at the ALU edge must not let it do.
+ */
+export const SHORT_JOBS_PROGRAM = `R5 <= word[signals]
+R6 <= 1
+if R5 == R6 goto refused
+R6 <= 2
+if R5 == R6 goto show
+R1 <= -184
+R2 <= -250
+R3 <= R1 - R2
+word[display] <= R3
+stop
+refused: R3 <= word[0x404]
+stop
+show: word[display] <= R3
+stop`;
+
+/** The short-jobs tests: the margin edge by edge, then the refused load, then R3 shown. */
+export function shortJobsSteps(): MachineStep[] {
+  const quiet = { door: 0, warm: 0, sensorA: 0n, sensorB: 0n } as const;
+  const margin = run(resetMachine(assemble(SHORT_JOBS_PROGRAM).rom), 200, quiet).state;
+  return [
+    ...machineSteps(SHORT_JOBS_PROGRAM, quiet, { shortJobs: true }, { name: "Margin" }),
+    ...machineSteps(
+      SHORT_JOBS_PROGRAM,
+      { ...quiet, door: 1 },
+      { shortJobs: true },
+      { name: "Refused load" },
+    ),
+    ...machineSteps(
+      SHORT_JOBS_PROGRAM,
+      { ...quiet, warm: 1 },
+      { shortJobs: true },
+      { name: "R3 shown", display: margin.regs[3] ?? 0n },
+    ),
+  ];
+}
+
 // Lesson 10.5: set if, at kind A.
 
 /** The capstone's arm: set if writes Y, subtracts as a branch does, and raises SET. */
@@ -164,18 +206,23 @@ const h3 = (v: bigint) => v.toString(16).toUpperCase().padStart(3, "0");
 /**
  * The tests of a whole machine's text: a reset, then each instruction's edges with the state after
  * each and the PC after the last, as the reference and each kind's sequence give them (the
- * machine's options say which sequence); then the stop's fetch, HALT and the display.
+ * machine's options say which sequence); then the stop's fetch, HALT and the display. A run that
+ * a word stops with a cause ends instead at that word's last edge, with HALT and CAUSE. A run may
+ * be named, to tell several in one test apart, and may expect a display the reference's run from
+ * reset cannot know: a word a register kept through the reset.
  */
 export function machineSteps(
   source: string,
   inputs: MachineInputs,
   options: ControlOptions,
+  run1: { name?: string; display?: bigint } = {},
 ): MachineStep[] {
   const program = assemble(source, assemblyFor(options));
   const { records, state } = run(resetMachine(program.rom), 200, inputs, referenceFor(options));
+  const at = (label: string) => (run1.name ? `${run1.name}: ${label}` : label);
   const steps: MachineStep[] = [
     {
-      label: "RST 1, clock low",
+      label: at("RST 1, clock low"),
       set: {
         CLK: 0,
         RST: 1,
@@ -185,35 +232,57 @@ export function machineSteps(
         SENSORB: h64(inputs.sensorB),
       },
     },
-    { label: "edge with RST 1: PC 000, FETCH", set: { CLK: 1 }, expect: { PC: h64(0n), S: 0 } },
-    { label: "clock low, RST 0", set: { CLK: 0, RST: 0 } },
+    { label: at("edge with RST 1: PC 000, FETCH"), set: { CLK: 1 }, expect: { PC: h64(0n), S: 0 } },
+    { label: at("clock low, RST 0"), set: { CLK: 0, RST: 0 } },
   ];
   const code = (s: ControlState) => parseInt(CONTROL_STATES[s], 2);
-  for (const r of records.filter((x) => !x.stopped)) {
-    const seq = stateSequence(r.fields?.k ?? 0, options);
-    seq.forEach((st, i) => {
+  /** An instruction's edges, the first `count` of them (all, unless a word stops the machine). */
+  const edges = (pc: bigint, nextPc: bigint, seq: readonly ControlState[], count = seq.length) =>
+    seq.slice(0, count).forEach((st, i) => {
       const last = i === seq.length - 1;
       const next = seq[i + 1] ?? "FETCH";
       steps.push({
-        label: `${h3(r.pc)}, edge ${i + 1} (${st}): ${next} after it${last ? `, PC ${h3(r.nextPc)}` : ""}`,
+        label: at(
+          `${h3(pc)}, edge ${i + 1} (${st}): ${next} after it${last ? `, PC ${h3(nextPc)}` : ""}`,
+        ),
         set: { CLK: 1 },
-        expect: { S: code(next), PC: h64(last ? r.nextPc : r.pc) },
+        expect: { S: code(next), PC: h64(last ? nextPc : pc) },
       });
-      steps.push({ label: "clock low", set: { CLK: 0 } });
+      steps.push({ label: at("clock low"), set: { CLK: 0 } });
     });
-  }
+  for (const r of records.filter((x) => !x.stopped))
+    edges(r.pc, r.nextPc, stateSequence(r.fields?.k ?? 0, options));
   const stopPc = state.stopped?.pc ?? 0n;
+  const reason = state.stopped?.reason;
+  if (reason?.kind === "trap") {
+    // A load or a store refused at its memory edge: its edges up to MEMORY, then the halt.
+    const k = records.at(-1)?.fields?.k ?? 0;
+    const seq = stateSequence(k, options);
+    const upTo = seq.indexOf("MEMORY");
+    edges(stopPc, stopPc, seq, upTo);
+    steps.push(
+      { label: at(`${h3(stopPc)}, edge ${upTo + 1} (MEMORY): the machine halts`), set: { CLK: 1 } },
+      { label: at("clock low"), set: { CLK: 0 } },
+      {
+        label: at(`HALT is 1, CAUSE ${reason.cause.toString(16).toUpperCase()}`),
+        set: {},
+        expect: { HALT: 1, CAUSE: reason.cause },
+      },
+    );
+    return steps;
+  }
+  const display = run1.display ?? state.display;
   steps.push(
     {
-      label: `${h3(stopPc)}, edge 1 (FETCH): READ after it`,
+      label: at(`${h3(stopPc)}, edge 1 (FETCH): READ after it`),
       set: { CLK: 1 },
       expect: { S: code("READ"), PC: h64(stopPc) },
     },
-    { label: "clock low: the stop halts the machine", set: { CLK: 0 } },
+    { label: at("clock low: the stop halts the machine"), set: { CLK: 0 } },
     {
-      label: `at the stop: HALT is 1, the display shows ${BigInt.asIntN(64, state.display)}`,
+      label: at(`at the stop: HALT is 1, the display shows ${BigInt.asIntN(64, display)}`),
       set: {},
-      expect: { HALT: 1, DISPLAY: h64(state.display) },
+      expect: { HALT: 1, DISPLAY: h64(display) },
     },
   );
   return steps;

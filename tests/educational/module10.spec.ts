@@ -266,7 +266,10 @@ test.describe("Module 10's figures", () => {
     const log = figure.locator("table.compare-log tbody tr");
     await expect(log).toHaveCount(6);
     await expect(log.nth(0).locator("td").nth(2)).toHaveText("5");
-    await expect(figure.getByText(/21 in all/)).toBeVisible();
+    // The stop: Module 8's one edge, Module 9's two (its fetch, and the edge at which it halts).
+    await expect(log.nth(5).locator("td").nth(1)).toHaveText("1");
+    await expect(log.nth(5).locator("td").nth(2)).toHaveText("2");
+    await expect(figure.getByText(/23 in all/)).toBeVisible();
   });
 
   test("PCEN stuck at 1 breaks the agreement at R2; its outcome shows only after its run", async ({

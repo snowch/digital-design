@@ -171,7 +171,7 @@ export interface Machine10Strings {
   readonly forms: Readonly<
     Record<"registers" | "register" | "romOutput" | "memory" | "devices" | "none", string>
   >;
-  readonly deviceNames: Readonly<Record<"display" | "lamps" | "timer", string>>;
+  readonly deviceNames: Readonly<Record<"display" | "lamps" | "timer" | "waiting", string>>;
 }
 
 export const MACHINE10_STRINGS: Machine10Strings = {
@@ -349,5 +349,5 @@ export const MACHINE10_STRINGS: Machine10Strings = {
     devices: "{names}",
     none: "none",
   },
-  deviceNames: { display: "display", lamps: "lamps", timer: "timer" },
+  deviceNames: { display: "display", lamps: "lamps", timer: "timer", waiting: "waiting bits" },
 };

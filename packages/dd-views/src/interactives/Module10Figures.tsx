@@ -337,7 +337,7 @@ export const MachineCompare = withProps(
                         <td className="memory-word">
                           <span className="compare-address">{hex3(l.address)}</span> {l.text}
                         </td>
-                        <td>{l.stops ? "0" : "1"}</td>
+                        <td>{l.singleEdges}</td>
                         <td>{l.edges}</td>
                         <td>
                           {l.stops
