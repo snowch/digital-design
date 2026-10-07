@@ -71,3 +71,14 @@ describe("the question's figure", () => {
     expect(meetRun(lesson, "box")).toMatchObject({ display: "66" });
   }, 30_000);
 });
+
+describe("grading is quick, for the cover and every page re-grade saved work", () => {
+  it("grades each challenge's reference in well under 100 ms", () => {
+    for (const c of parsed.challenges) {
+      grade(c, c.reference);
+      const t = performance.now();
+      grade(c, c.reference);
+      expect(performance.now() - t, c.id).toBeLessThan(100);
+    }
+  });
+});

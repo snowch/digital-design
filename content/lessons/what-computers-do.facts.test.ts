@@ -53,11 +53,22 @@ describe("facts for the lesson on what a computer does", () => {
     expect(start.failures.length).toBe(2);
     expect(grade(c, { answers: { limit: "51" } }).passed).toBe(false);
     expect(grade(c, { answers: { limit: "49" } }).passed).toBe(false);
-  }, 30_000);
+  });
 
   it("the last challenge: rooms at -100 and -250 show 150 and light CLASH, in 2 tests", () => {
     const c = challenge("in-your-head");
     expect(grade(c, c.reference)).toMatchObject({ passed: true });
     expect(grade(c, { answers: { display: "150", lamp: "dark" } }).failures.length).toBe(1);
+  });
+});
+
+describe("grading is quick, for the cover and every page re-grade saved work", () => {
+  it("grades each challenge's reference in well under 100 ms", () => {
+    for (const c of parsed.challenges) {
+      grade(c, c.reference);
+      const t = performance.now();
+      grade(c, c.reference);
+      expect(performance.now() - t, c.id).toBeLessThan(100);
+    }
   });
 });

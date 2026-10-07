@@ -50,9 +50,16 @@ again.
   checked against, read off a copy of the simulator; the slices of the part that adds; the
   programs, places and stuck wires by plain keys, so a lesson's props carry no rationed word (its
   props are held to the term gate: the program's text says `word` and `signed`, and a drawing's
-  path says `alu` and `bit1`); and three graders that run the machine on its gates
-  (`machine-run`, `machine-step`, `machine-slices`). A grader keeps one unplaced machine per
-  program with its state after the reset, and each outcome, so cases that share a setup run once.
+  path says `alu` and `bit1`); and three graders (`machine-run`, `machine-step`, `machine-slices`).
+  The graders work their answers out with the instruction-level reference (`machine.ts`), which
+  the drawn machine is tested against after every instruction; the figures stay on the
+  simulator. They first ran the gates, about half a second a case; the managing session found
+  that the cover and every lesson page re-grade saved work as they render, so a returning learner
+  paid over two seconds for Module 0 on each render, and asked for the reference. Each Module 0
+  challenge now grades in well under 100 ms (a test holds it), and a test holds the reference to
+  the gates for the part that adds' output and the next line at every pause of the module's
+  program, for four pairs of readings. The plan's line "graded by a copy of the simulator after a
+  real step, not by the reference" changed with it, at the managing session's word.
 - **`machine-at-work`** (`MachineAtWork.tsx`): the program with its line numbers, plain English
   and (on request) the number each line is kept as, written in decimal so no new digits are
   needed; the line it runs next marked; the numbers the program names, with the last line's
@@ -84,8 +91,8 @@ No lesson on `main` changed. Shared files, each change a short block of its own:
 - `apps/course/src/strings.ts`: `moduleNames` read from `@dd/content`.
 - `apps/course/src/pages/LessonList.tsx` and its test: the returning reader; the test that the
   first lesson is in Module 1 now says Module 0.
-- `content/lessons/lessons.test.tsx`: the reference test allows 15 seconds (a Module 0 case runs
-  the whole machine on its gates, about half a second); a Module 0 scene names no signal.
+- `content/lessons/lessons.test.tsx`: a Module 0 scene names no signal. (The reference test and
+  the cover's test keep Vitest's default time: the graders are quick.)
 - `packages/dd-model/src/graders.ts`, `index.ts`; `packages/dd-views/src/strings.ts` (the `meet`
   block and four answer terms), `interactives/index.ts`, `AnswerEditor.tsx`.
 - `packages/dd-model/src/library-alu.ts`: an inside placement for kind `alu8`, the 64-bit ALU as
@@ -156,8 +163,8 @@ brief's words and "word" is rationed.
 
 - **The term gate** caught the program's text and the drawings' paths in the figures' props
   ("word", "signed", "bit1", "ALU"); both moved into the model behind plain keys.
-- **The unit tests**: grading took about 0.7 s a case on the placed machine; a cached unplaced
-  machine and kept outcomes brought a lesson's reference test from over 5 s to about 2 s.
+- **The unit tests**: grading took about 0.7 s a case on the gates; the cover's test of a
+  returning reader timed out once under load. The graders now use the reference (above).
 - **The browser**: the part that adds and a slice, never drawn first before, failed the wire rules
   (carries stepping half a cell; B stepping into the selector; a slice too crowded for the
   roomy-wire rules). The ALU's inside was placed by hand; the slice's B pin moved; and the stuck
@@ -190,8 +197,9 @@ subpath of their own, `@dd/content/module-names`.
 
 ## What the module added to the check's time
 
-Unit tests: 25 new (`meet.test.ts`, two facts tests, the strings gate, the cover), about 20
-seconds of machine runs, mostly in parallel with the rest. Browser: `module0.spec.ts`, 20 tests
+Unit tests: about 30 new (`meet.test.ts`, two facts tests, the strings gate, the cover), about
+20 seconds of gate-level runs for the facts and the agreement test, mostly in parallel with the
+rest. Browser: `module0.spec.ts`, 20 tests
 (10 at each width), about two minutes, and one diagrams test, about 20 seconds; the generic
 lesson, diagram and look tests now cover two more lessons.
 
@@ -204,8 +212,6 @@ as the plan says.
 
 ## Not done, and what the build would change
 
-- The cover re-grades saved work as it loads: a learner who has passed Module 0's challenges pays
-  about a second a challenge there, as Module 8's and 9's whole-machine texts already cost.
 - The slice opened whole is legible but busy; a hand layout that passes the roomy-wire rules would
   let a page open on it.
 - "Run" could offer a speed; 450 ms a line suits nine lines.

@@ -11,10 +11,13 @@ import {
   meetLines,
   meetMachine,
   meetStart,
+  adderOutput,
   plainLine,
   runToStop,
   sliceDigits,
 } from "./meet";
+import { assemble as assembleProgram } from "./assemble";
+import { resetMachine, step as refStep } from "./machine";
 
 /** Module 0's program: how much warmer room A is than room B, and CLASH at 10.0 apart. */
 const GAP = `R1 <= word[sensorA]
@@ -161,4 +164,35 @@ describe("Module 0's graders run the machine", () => {
     expect(slices({ slices: "01000010" }, given, {})).toMatchObject({ pass: false });
     expect(slices({ slices: "0100" }, given, {})).toEqual({ invalid: "slices" });
   });
+});
+
+describe("the graders' reference agrees with the drawn machine", () => {
+  // The graders use the instruction-level reference; the figures use the gates. For every pause in
+  // Module 0's program and four pairs of readings, the two give the same slices and the same line.
+  it("gives the part that adds' output and the next line the gates give, at every line", () => {
+    const pairs = [
+      ["-184", "-250"],
+      ["-180", "-250"],
+      ["-120", "-250"],
+      ["-184", "-50"],
+    ];
+    for (const [a, b] of pairs) {
+      const inputs = { SENSORA: a!, SENSORB: b! };
+      const sim = meetStart(meetMachine({ program: GAP }), { program: GAP, inputs });
+      let state = resetMachine(assembleProgram(GAP).rom);
+      const shop = { door: 0 as const, warm: 0 as const, sensorA: BigInt(a!), sensorB: BigInt(b!) };
+      for (let line = 0; line < 7; line++) {
+        const out = adderOutput(state);
+        // Where the reference finds an unknown word in (the stop reads R0, never set), the
+        // slices give X too.
+        const want = out === undefined ? /X/ : (out & 255n).toString(2).padStart(8, "0");
+        if (typeof want === "string")
+          expect(sliceDigits(sim, 8), `${a} ${b} at ${line}`).toBe(want);
+        else expect(sliceDigits(sim, 8), `${a} ${b} at ${line}`).toMatch(want);
+        state = refStep(state, shop).state;
+        sim.clockCycle("CLK");
+        expect(datapathState(sim.circuit, sim.snapshotValues()).pc).toBe(state.pc);
+      }
+    }
+  }, 60_000);
 });

@@ -12,14 +12,24 @@
 //
 // Every value is read off the simulator's nets, as in every figure of the course.
 
-import type { Simulator, Snapshot, Word } from "@dd/sim";
+import type { Simulator, Word } from "@dd/sim";
 
 import { assemble } from "./assemble";
-import { datapathCircuit } from "./datapath";
 import { buildDatapath, startDatapath, wordOf, type BuiltDatapath } from "./datapath-figure";
 import { datapathState, registersOf, type DatapathState } from "./datapath-run";
 import { applyFaults, stuckAt } from "./faults";
-import { DEVICES, fieldsOf } from "./machine";
+import {
+  DEVICES,
+  MASK64,
+  alu64,
+  fieldsOf,
+  resetMachine,
+  run,
+  step,
+  widen,
+  type CpuState,
+  type MachineInputs,
+} from "./machine";
 import type { AnswerProblem, AnswerResult } from "./graders";
 
 /** The machine Module 0 shows: Module 8's, finished, one line of the program an edge. */
@@ -406,52 +416,52 @@ function missingOf(answers: Readonly<Record<string, string>>, ids: readonly stri
 const placeholders = (text: string) => [...text.matchAll(/\{(\w+)\}/g)].map((m) => m[1] as string);
 
 /**
- * The graders run the machine many times: every case of every challenge, and again each time a
- * page checks saved work. A machine is built once per program, unplaced (a grader draws nothing),
- * and kept with its state just after the reset; a case starts from that state with its inputs
- * set. A case's outcome is kept too, so cases that share a setup run it once.
+ * The graders work their answers out with the instruction-level reference (`machine.ts`), which
+ * the drawn machine is tested against after every instruction (`datapath.test.ts`), so its
+ * answers are the simulator's. The figures stay on the simulator. A grade runs whenever a page
+ * checks saved work, and Module 0 comes first, so it must be quick: a run of the gates takes
+ * about half a second a case; the reference takes well under a millisecond.
  */
-const MACHINES = new Map<string, { sim: Simulator; reset: Snapshot }>();
-const OUTCOMES = new Map<string, unknown>();
-const KEEP = 16;
-
-function remember<T>(cache: Map<string, T>, key: string, make: () => T): T {
-  const had = cache.get(key);
-  if (had !== undefined) return had;
-  const made = make();
-  if (cache.size >= KEEP) cache.delete(cache.keys().next().value as string);
-  cache.set(key, made);
-  return made;
-}
-
-/** A simulator for a grader: the program's machine after the reset, inputs set, lines run. */
-function gradingSim(
+function referenceStart(
   program: string,
   inputs: Readonly<Record<string, string>>,
   lines = 0,
-): Simulator {
-  const { sim, reset } = remember(MACHINES, program, () => {
-    const circuit = datapathCircuit({ stage: "full", rom: assemble(program).rom });
-    const s = startDatapath({ circuit, stage: "full" }, {});
-    return { sim: s, reset: s.snapshot() };
-  });
-  sim.restore(reset);
-  for (const [name, value] of Object.entries(inputs)) setShopInput(sim, name, value);
-  sim.settle();
-  for (let k = 0; k < lines; k++) sim.clockCycle("CLK");
-  return sim;
+): { state: CpuState; inputs: MachineInputs } {
+  const shop: MachineInputs = {
+    door: inputs["DOOR"] === "1" ? 1 : 0,
+    warm: inputs["WARM"] === "1" ? 1 : 0,
+    sensorA: BigInt(inputs["SENSORA"] ?? 0) & MASK64,
+    sensorB: BigInt(inputs["SENSORB"] ?? 0) & MASK64,
+  };
+  let state = resetMachine(assemble(program).rom);
+  for (let k = 0; k < lines; k++) state = step(state, shop).state;
+  return { state, inputs: shop };
 }
 
-/** A case's outcome, worked out once per program, inputs and lines. */
-function outcome<T>(
-  what: string,
-  program: string,
-  inputs: Readonly<Record<string, string>>,
-  lines: number,
-  work: (sim: Simulator) => T,
-): T {
-  const key = JSON.stringify([what, program, inputs, lines]);
-  return remember(OUTCOMES, key, () => work(gradingSim(program, inputs, lines))) as T;
+/**
+ * What the part that adds gives for the line at the PC, by the line's kind: a job's result, an
+ * address for a load or a store (A is 0 for an absolute one), A minus B for a branch, A plus the
+ * constant for a jump. The datapath's selectors in front of the part choose these same words.
+ */
+export function adderOutput(state: CpuState): bigint | undefined {
+  const at = Number(state.pc);
+  const instruction =
+    (state.rom[at] ?? 0) |
+    ((state.rom[at + 1] ?? 0) << 8) |
+    ((state.rom[at + 2] ?? 0) << 16) |
+    ((state.rom[at + 3] ?? 0) << 24);
+  const f = fieldsOf(instruction >>> 0);
+  const reg = (n: number) => state.regs[n];
+  const c = widen(f.raw);
+  const absolute = (f.k === 3 || f.k === 4) && (f.j & 8) !== 0;
+  const a = absolute ? 0n : reg(f.a);
+  const b = f.k === 1 || f.k === 5 ? reg(f.b) : c;
+  const job = f.k === 1 || f.k === 2 ? f.j : f.k === 5 ? 3 : 2;
+  // Copying B reads no A, and counting reads no B: an unknown word there changes nothing.
+  const aIn = job === 5 ? (a ?? 0n) : a;
+  const bIn = job === 6 || job === 7 ? (b ?? 0n) : b;
+  if (aIn === undefined || bIn === undefined) return undefined;
+  return alu64(job, aIn, bIn).y;
 }
 
 /**
@@ -476,11 +486,8 @@ export function machineRun(
     const v = clean(answers[id]);
     if (!WHOLE.test(v) || Number(v) < -2048 || Number(v) > 2047) return { invalid: id };
   }
-  const state = outcome("run", filled(program, answers), inputsOf(given), 0, (sim) => {
-    runToStop(sim);
-    const after = datapathState(sim.circuit, sim.snapshotValues());
-    return { display: after.display, lamps: after.lamps };
-  });
+  const start = referenceStart(filled(program, answers), inputsOf(given));
+  const state = run(start.state, 500, start.inputs).state;
   const lampName = String(given["lamp"] ?? "CLASH");
   const actual: Record<string, string> = {};
   const expected: Record<string, string> = {};
@@ -510,7 +517,7 @@ export function machineRun(
  * `lines` run first, and `check`, one of the four answers: `changed` (a register's name, or
  * `none`), `value` (that register's number after the line), `next` (the line after it) and `part`
  * (`memory` when the number comes from memory, `adder` when the part that adds works it out). The
- * expected answer is read off a copy of the simulator after a real edge, never off the reference.
+ * expected answer is the reference's, one line on (see `referenceStart`).
  */
 export function machineStep(
   answers: Readonly<Record<string, string>>,
@@ -522,17 +529,17 @@ export function machineStep(
   const answer = clean(answers[check]);
   if ((check === "value" || check === "next") && !WHOLE.test(answer)) return { invalid: check };
   const program = programText(String(given["program"] ?? ""));
-  const traced = outcome("step", program, inputsOf(given), Number(given["lines"] ?? 0), (sim) => {
-    const changed = meetAnswer(sim, "changed");
-    const register = Number(/^R(\d+)/.exec(changed)?.[1] ?? 0);
-    return {
-      changed,
-      value: meetAnswer(sim, "value", register),
-      next: meetAnswer(sim, "next"),
-      part: sim.read("LOAD").value === 1n ? "memory" : "adder",
-    };
-  });
-  const expected = traced[check as keyof typeof traced] ?? "";
+  const { state, inputs } = referenceStart(program, inputsOf(given), Number(given["lines"] ?? 0));
+  const { record } = step(state, inputs);
+  const wrote = record.wrote;
+  const changes = wrote !== undefined && wrote.value !== state.regs[wrote.reg];
+  const traced: Record<string, string> = {
+    changed: changes ? r(wrote.reg) : "none",
+    value: changes ? (numberOf(wrote.value) ?? "X") : "none",
+    next: String(lineOfAddress(record.nextPc)),
+    part: record.fields?.k === 3 ? "memory" : "adder",
+  };
+  const expected = traced[check] ?? "";
   return {
     pass: answer === expected,
     inputs: shownInputs(given),
@@ -544,8 +551,8 @@ export function machineStep(
 /**
  * Module 0: the 1s and 0s on the lowest slices of the part that adds, typed as text (`0100 0010`,
  * spaces allowed). A case gives the program, the shop's inputs, how many `lines` run first and
- * how many `slices` to read; the expected digits are the slices' own outputs, read off the
- * simulator at that moment.
+ * how many `slices` to read; the expected digits are the low places of what the part that adds
+ * gives for the line (`adderOutput`), which the slices give on the drawn machine.
  */
 export function machineSlices(
   answers: Readonly<Record<string, string>>,
@@ -558,9 +565,12 @@ export function machineSlices(
   const said = (answers[field] ?? "").replace(/\s/g, "");
   if (!new RegExp(`^[01]{${count}}$`).test(said)) return { invalid: field };
   const program = programText(String(given["program"] ?? ""));
-  const digits = outcome("slices", program, inputsOf(given), Number(given["lines"] ?? 0), (sim) =>
-    sliceDigits(sim, count),
-  );
+  const { state } = referenceStart(program, inputsOf(given), Number(given["lines"] ?? 0));
+  const out = adderOutput(state);
+  const digits =
+    out === undefined
+      ? "X".repeat(count)
+      : (out & ((1n << BigInt(count)) - 1n)).toString(2).padStart(count, "0");
   return {
     pass: said === digits,
     inputs: shownInputs(given),

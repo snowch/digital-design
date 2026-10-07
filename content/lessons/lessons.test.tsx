@@ -168,8 +168,7 @@ describe("the course's lessons", () => {
               ? c.initial
               : { circuit: compileDrawing(emptyDrawing(c.interface)).circuit };
           expect(grade(c, start).passed).toBe(false);
-          // Module 0's challenges run the whole machine on its gates, a run a case.
-        }, 15_000);
+        });
       }
 
       it("renders every section and figure without a problem note", () => {
