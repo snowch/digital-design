@@ -2439,3 +2439,40 @@ button.bit {
   font-size: var(--text-sm);
   color: var(--fg-muted);
 }
+
+/* Lesson 10.3: the constants as addresses, one block per run, the runs no part answers dashed. */
+.constant-runs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.constant-run {
+  display: grid;
+  gap: 2px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--accent-soft);
+}
+.constant-run.constant-none {
+  border-style: dashed;
+  background: transparent;
+}
+.constant-negative {
+  margin-top: 12px;
+}
+.constant-part {
+  font-weight: 600;
+}
+.constant-c,
+.constant-w {
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}
+.constant-w,
+.constant-stop {
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
+}

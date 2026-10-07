@@ -29,6 +29,7 @@ export const LABELS = {
     c2: "Greater than, written",
   },
   captions: {
+    constantMap: "PROVISIONAL: the memory map, read from the constant.",
     range: "Choose a constant and see how it widens.",
     predictGreater: "Predict which branch is taken, then verify.",
     comparisons: "Choose a pair and read each comparison's branch.",

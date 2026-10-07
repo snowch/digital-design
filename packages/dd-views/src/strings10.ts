@@ -166,6 +166,17 @@ export interface Machine10Strings {
   /** The band of parts both machines share, and each machine's own (inside its outline). */
   readonly partsShared: string;
   readonly partsOwn: string;
+  /** Lesson 10.3's map of the constants used as addresses. */
+  readonly constantsCaption: string;
+  /** A run of constants: {first} and {last}, three hex digits. */
+  readonly constantsRun: string;
+  /** The addresses they widen to: {first} and {last}, 16 hex digits. */
+  readonly constantsWiden: string;
+  readonly constantsParts: Readonly<
+    Record<"rom" | "ram" | "devices" | "none" | "negative", string>
+  >;
+  /** A run no part answers: {cause}. */
+  readonly constantsStop: string;
   readonly partNames: Readonly<
     Record<
       "registers" | "pc" | "memory" | "devices" | "ir" | "ha" | "hb" | "hr" | "hm" | "state",
@@ -337,6 +348,17 @@ export const MACHINE10_STRINGS: Machine10Strings = {
   partsCaption: "Each machine's parts",
   partsShared: "What a program can see: both machines have these",
   partsOwn: "Its own parts",
+  constantsCaption: "PROVISIONAL constants as addresses",
+  constantsRun: "{first} to {last}",
+  constantsWiden: "PROVISIONAL widen to {first} to {last}",
+  constantsParts: {
+    rom: "the ROM",
+    ram: "the RAM",
+    devices: "the shop's devices",
+    none: "no memory",
+    negative: "no memory",
+  },
+  constantsStop: "PROVISIONAL stops, cause {cause}",
   partNames: {
     registers: "R0 to R15",
     pc: "PC",

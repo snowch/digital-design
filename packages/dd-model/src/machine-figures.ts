@@ -111,6 +111,46 @@ export function memoryMapParts(): MapPart[] {
   ];
 }
 
+/** Lesson 10.3: a run of 12-bit constants, the addresses they widen to, and what answers there. */
+export interface ConstantRange {
+  /** `rom`, `ram`, `devices`, `none` (the map's last word), or `negative` (bit 11 set). */
+  readonly part: string;
+  readonly first: number;
+  readonly last: number;
+  /** The widen block's 64-bit words for the first and last constant, simulated. */
+  readonly firstAddress: bigint;
+  readonly lastAddress: bigint;
+  /** The machine's check on a word load at the first address: the cause, or 0 if it is allowed. */
+  readonly cause: number;
+}
+
+/**
+ * Every 12-bit constant, used as an address (AZERO's 0 + the constant): `000` to `7FF` widen to
+ * the memory map's own addresses, part by part; `800` to `FFF` widen to negative words, which no
+ * part answers.
+ */
+export function constantRanges(): ConstantRange[] {
+  const parts = memoryMapParts();
+  const devices = parts.filter((p) => p.part !== "rom" && p.part !== "ram" && p.part !== "none");
+  const runs = [
+    ...parts.filter((p) => p.part === "rom" || p.part === "ram"),
+    { part: "devices", first: devices[0]?.first ?? 0, last: devices.at(-1)?.last ?? 0 },
+    ...parts.filter((p) => p.part === "none"),
+    { part: "negative", first: 0x800, last: 0xfff },
+  ];
+  return runs.map((r) => {
+    const firstAddress = widening(r.first).w;
+    return {
+      part: r.part,
+      first: r.first,
+      last: r.last,
+      firstAddress,
+      lastAddress: widening(r.last).w,
+      cause: memoryCheck(firstAddress, false, false) ?? 0,
+    };
+  });
+}
+
 export type Access = "load-word" | "load-byte" | "store-word" | "store-byte";
 export const ACCESSES: readonly Access[] = ["load-word", "load-byte", "store-word", "store-byte"];
 

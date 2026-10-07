@@ -10,6 +10,9 @@
 //   differs marked, what Module 9's machine keeps of its own, and every instruction run with the
 //   edges each machine took. A fault may be put into Module 9's machine.
 //
+// - `constant-map`: every 12-bit constant used as an address, widened by the widen block
+//   (simulated), and the part of the memory map that answers there, or the cause that stops a load.
+//
 // The words are in strings10.ts; the lesson gives what only it knows (the program, the registers
 // to show, the faults and their outcomes, the question).
 
@@ -45,6 +48,7 @@ import {
   type MachineInputs,
   type MachinePair,
   machineParts,
+  constantRanges,
   type PartForm,
   type PartRow,
 } from "@dd/dd-model";
@@ -1381,6 +1385,48 @@ export const MachineParts = withProps(
           </section>
           {band("multi")}
         </div>
+      </div>
+    );
+  },
+);
+
+const hex16 = (v: bigint) => v.toString(16).toUpperCase().padStart(16, "0");
+
+export const ConstantMap = withProps(
+  z.object({}),
+  function ConstantMap({ interactive }: InteractiveProps & { data: Record<string, never> }) {
+    const t = useViewStrings().machine10;
+    const runs = useMemo(() => constantRanges(), []);
+    return (
+      <div className="machine-figure constant-map" data-interactive={interactive.id}>
+        <p className="layout-title">{t.constantsCaption}</p>
+        <ol className="constant-runs">
+          {runs.map((r) => (
+            <li
+              key={r.part}
+              className={`constant-run constant-${r.part}${r.cause ? " constant-none" : ""}`}
+              data-part={r.part}
+            >
+              <span className="constant-part">
+                {t.constantsParts[r.part as keyof typeof t.constantsParts]}
+              </span>
+              <span className="constant-c">
+                {format(t.constantsRun, { first: hex3(r.first), last: hex3(r.last) })}
+              </span>
+              <span className="constant-w">
+                {format(t.constantsWiden, {
+                  first: hex16(r.firstAddress),
+                  last: hex16(r.lastAddress),
+                })}
+              </span>
+              {r.cause !== 0 && (
+                <span className="constant-stop">
+                  {format(t.constantsStop, { cause: r.cause.toString(16) })}
+                </span>
+              )}
+            </li>
+          ))}
+        </ol>
       </div>
     );
   },
