@@ -50,14 +50,9 @@ export interface Machine10Strings {
   readonly layoutWord: string;
   /** {bits}, {min}, {max}: the constant's width and range in a layout. */
   readonly layoutRange: string;
-  readonly layoutUnused: string;
   /** {names}: the fields that sit in other digits than in the course's layout. */
   readonly layoutMoved: string;
   readonly layoutStill: string;
-  /** A digit's accessible name: {n} its place, {field} its field, {digit} its value. */
-  readonly digitLabel: string;
-  readonly digitPlace: string;
-  readonly unusedField: string;
   /** After a prediction: the fields the packed layout moves, {answer}. */
   readonly layoutAnswer: string;
 
@@ -184,7 +179,7 @@ export const MACHINE10_STRINGS: Machine10Strings = {
   run: "Run until it stops",
   reset: "Start again",
   statusIn: "Module 9's machine has made {k} edges of the instruction at {address}.",
-  statusBetween: "Both machines are between instructions.",
+  statusBetween: "Both machines are between two instructions.",
   statusStopped: "Both machines have stopped.",
   statusGaveUp: "{n} instructions have run and the machines have not stopped.",
   answer: "The machines differ on: {answer}.",
@@ -194,12 +189,8 @@ export const MACHINE10_STRINGS: Machine10Strings = {
   packedLayout: "A packed layout",
   layoutWord: "Word: {word}",
   layoutRange: "Constant: {bits} bits, {min} to {max}.",
-  layoutUnused: "Constant: not used by this kind.",
   layoutMoved: "Moved: {names}.",
   layoutStill: "No field moves.",
-  digitLabel: "digit {n}, {field}, {digit}",
-  digitPlace: "digit {n}",
-  unusedField: "unused",
   layoutAnswer: "The packed layout moves: {answer}.",
 
   wordLabel: "Instruction (8 hexadecimal digits)",
@@ -249,11 +240,11 @@ export const MACHINE10_STRINGS: Machine10Strings = {
     "4": "stop",
   },
   illegal: {
-    kind: "Not an instruction: kind {k} is not one of the machine's kinds. The machine stops with cause 21.",
-    job: "Not an instruction: kind {k} has no job {j}. The machine stops with cause 21.",
-    number: "Not an instruction: C{c} is no control register. The machine stops with cause 21.",
+    kind: "Not an instruction: kind {k} is not one of the machine's kinds; the machine stops with cause 21.",
+    job: "Not an instruction: kind {k} has no job {j}; the machine stops with cause 21.",
+    number: "Not an instruction: C{c} is not a control register; the machine stops with cause 21.",
   },
-  widened: "The constant {c} widens to {w}, which reads {n}.",
+  widened: "The constant {c} widens to the 64-bit word {w}, which read signed is {n}.",
   calcHeading: "The calculator: Module 7's ALU",
   widthLegend: "Width",
   widthOption: "{n} bits",
@@ -266,7 +257,7 @@ export const MACHINE10_STRINGS: Machine10Strings = {
   jobOption: "{k} {name}",
   fromWord: "Take the job and B from the word",
   fromWordNone: "Only a register job or a constant job gives the ALU a job.",
-  tookJob: "The job is the word's J: {job}.",
+  tookJob: "The job is the word's J, {job}.",
   tookB: "B is the word's constant, widened.",
   yHeading: "Y",
   yHex: "hexadecimal",
@@ -294,7 +285,7 @@ export const MACHINE10_STRINGS: Machine10Strings = {
   yes: "yes",
   no: "no",
   swapKey: "A marked row names its registers swapped.",
-  swapAnswer: "The branch that says it: {answer}.",
+  swapAnswer: "The branch that says it is {answer}.",
 
   listingCaption: "The program",
   written: "Instructions written: {n}",
@@ -303,10 +294,10 @@ export const MACHINE10_STRINGS: Machine10Strings = {
   registerAfter: "R{n} at the stop: {value}",
   displayAfter: "Display at the stop: {value}",
   runBoth: "Run the programs",
-  stoppedAtStop: "Stopped at the stop, {address}",
-  stoppedCause: "Stopped at {address}, cause {cause}",
-  notStopped: "Did not stop",
+  stoppedAtStop: "The run stopped at the stop, at {address}.",
+  stoppedCause: "The run stopped at {address}, with cause {cause}.",
+  notStopped: "The run did not stop.",
   address: "Address",
-  programAnswer: "The run gives: {answer}.",
-  edgesAnswer: "The controller takes: {answer}.",
+  programAnswer: "The run gives {answer}.",
+  edgesAnswer: "The controller takes {answer}.",
 };
