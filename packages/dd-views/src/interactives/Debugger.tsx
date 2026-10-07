@@ -13,7 +13,7 @@
 //
 // `debugger` is the lesson's figure; `DebuggerView` is also the challenge editor's "Try it".
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { z } from "zod";
 
 import {
@@ -221,6 +221,19 @@ export function DebuggerView({
     setFrom(0);
   };
   const pc = state.cpu.pc;
+  // The listing sits in a box of its own height; the line about to run is kept in view inside it,
+  // without moving the page.
+  const boxRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const box = boxRef.current;
+    const row = box?.querySelector<HTMLElement>("tr[aria-current]");
+    if (!box || !row) return;
+    const head = box.querySelector("thead")?.getBoundingClientRect().height ?? 0;
+    const top = row.getBoundingClientRect().top - box.getBoundingClientRect().top;
+    const bottom = top + row.getBoundingClientRect().height;
+    if (top < head || bottom > box.clientHeight)
+      box.scrollTop += top - head - (box.clientHeight - head) / 3;
+  }, [pc, at]);
   const names = useMemo(() => namesByAddress(program), [program]);
   const wrote = state.last?.wrote?.reg;
   const shownRegs = options.registers ?? Array.from({ length: 16 }, (_, k) => k);
@@ -260,161 +273,105 @@ export function DebuggerView({
       </div>
     );
   return (
-    <div className="debugger" data-debugger={id}>
-      <div className="explorer-actions debugger-actions">
-        <button
-          type="button"
-          className="button"
-          disabled={!live || (!!state.stopped && at === history.length - 1)}
-          onClick={onStep}
-        >
-          {t.step}
-        </button>
-        <button
-          type="button"
-          className="button secondary"
-          disabled={!live || at === 0}
-          onClick={() => {
-            setFrom(Math.max(0, at - 2));
-            setAt(at - 1);
-          }}
-        >
-          {t.back}
-        </button>
-        <button
-          type="button"
-          className="button secondary"
-          disabled={!live || !!state.stopped}
-          onClick={onRun}
-        >
-          {options.breakpoints && pauses.size ? t.runToPause : t.run}
-        </button>
-        <button
-          type="button"
-          className="button secondary"
-          disabled={!live || (at === 0 && history.length === 1)}
-          onClick={onReset}
-        >
-          {t.reset}
-        </button>
-      </div>
-      <p className="debugger-status" role="status">
-        {status}
-        {state.ran > 0 || at > 0 ? ` ${format(t.ran, { n: state.ran })}` : ""}
-      </p>
-      <div className="truth-table-wrap debugger-listing-wrap">
-        <table className="truth-table datapath-table debugger-listing">
-          <caption>{t.listingCaption}</caption>
-          <thead>
-            <tr>
-              {options.breakpoints && <th scope="col" aria-label={t.pauseBefore.split(" ")[0]} />}
-              <th scope="col">{t.address}</th>
-              <th scope="col">{t.word}</th>
-              <th scope="col">{t.line}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {program.lines.map((l) => {
-              const isNext = l.instruction !== undefined && BigInt(l.address) === pc;
-              const paused = pauses.has(l.address);
-              return (
-                <tr
-                  key={l.address}
-                  className={`${isNext ? "row-current" : ""}${paused ? " row-paused" : ""}`}
-                  aria-current={isNext ? "step" : undefined}
-                >
-                  {options.breakpoints && (
-                    <td className="debugger-pause">
-                      {l.instruction !== undefined && (
-                        <button
-                          type="button"
-                          className="pause-toggle"
-                          aria-pressed={paused}
-                          aria-label={format(t.pauseBefore, { address: hex3(l.address) })}
-                          disabled={!live}
-                          onClick={() => togglePause(l.address)}
-                        >
-                          <span aria-hidden="true">{paused ? "●" : "○"}</span>
-                        </button>
-                      )}
+    <div className="debugger debugger-body" data-debugger={id}>
+      <div className="debugger-run">
+        <div className="explorer-actions debugger-actions">
+          <button
+            type="button"
+            className="button"
+            disabled={!live || (!!state.stopped && at === history.length - 1)}
+            onClick={onStep}
+          >
+            {t.step}
+          </button>
+          <button
+            type="button"
+            className="button secondary"
+            disabled={!live || at === 0}
+            onClick={() => {
+              setFrom(Math.max(0, at - 2));
+              setAt(at - 1);
+            }}
+          >
+            {t.back}
+          </button>
+          <button
+            type="button"
+            className="button secondary"
+            disabled={!live || !!state.stopped}
+            onClick={onRun}
+          >
+            {options.breakpoints && pauses.size ? t.runToPause : t.run}
+          </button>
+          <button
+            type="button"
+            className="button secondary"
+            disabled={!live || (at === 0 && history.length === 1)}
+            onClick={onReset}
+          >
+            {t.reset}
+          </button>
+        </div>
+        <p className="debugger-status" role="status">
+          {status}
+          {state.ran > 0 || at > 0 ? ` ${format(t.ran, { n: state.ran })}` : ""}
+        </p>
+        <div className="truth-table-wrap debugger-listing-wrap" ref={boxRef}>
+          <table className="truth-table datapath-table debugger-listing">
+            <caption>{t.listingCaption}</caption>
+            <thead>
+              <tr>
+                {options.breakpoints && <th scope="col" aria-label={t.pauseBefore.split(" ")[0]} />}
+                <th scope="col">{t.address}</th>
+                <th scope="col">{t.word}</th>
+                <th scope="col">{t.line}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {program.lines.map((l) => {
+                const isNext = l.instruction !== undefined && BigInt(l.address) === pc;
+                const paused = pauses.has(l.address);
+                return (
+                  <tr
+                    key={l.address}
+                    className={`${isNext ? "row-current" : ""}${paused ? " row-paused" : ""}`}
+                    aria-current={isNext ? "step" : undefined}
+                  >
+                    {options.breakpoints && (
+                      <td className="debugger-pause">
+                        {l.instruction !== undefined && (
+                          <button
+                            type="button"
+                            className="pause-toggle"
+                            aria-pressed={paused}
+                            aria-label={format(t.pauseBefore, { address: hex3(l.address) })}
+                            disabled={!live}
+                            onClick={() => togglePause(l.address)}
+                          >
+                            <span aria-hidden="true">{paused ? "●" : "○"}</span>
+                          </button>
+                        )}
+                      </td>
+                    )}
+                    <td className="memory-word">
+                      {isNext && <span className="next-mark">{`▶ `}</span>}
+                      {hex3(l.address)}
                     </td>
-                  )}
-                  <td className="memory-word">
-                    {isNext && <span className="next-mark">{`▶ `}</span>}
-                    {hex3(l.address)}
-                  </td>
-                  <td className="memory-word">
-                    {l.instruction !== undefined ? instructionHex(l.instruction) : t.data}
-                  </td>
-                  <td className="memory-word debugger-line">
-                    {l.label ? `${l.label}: ` : ""}
-                    {l.text}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                    <td className="memory-word">
+                      {l.instruction !== undefined ? instructionHex(l.instruction) : t.data}
+                    </td>
+                    <td className="memory-word debugger-line">
+                      {l.label ? `${l.label}: ` : ""}
+                      {l.text}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
-      <div className="debugger-panels">
-        <section className="debugger-panel" aria-label={t.registersCaption}>
-          <p className="layout-title">{t.registersCaption}</p>
-          <dl className="debugger-registers">
-            <div className="debugger-register">
-              <dt>{t.pc}</dt>
-              <dd className="memory-word">{hex3(pc)}</dd>
-            </div>
-            {shownRegs.map((k) => {
-              const v = state.cpu.regs[k];
-              const changed = wrote === k && at > 0;
-              return (
-                <div
-                  key={k}
-                  className={`debugger-register${changed ? " register-changed" : ""}`}
-                  data-register={k}
-                >
-                  <dt>
-                    {`R${k}`}
-                    {changed && <span className="visually-hidden">{` (${t.changed})`}</span>}
-                  </dt>
-                  <dd className="memory-word">
-                    <WordValue value={v} t={t} />
-                  </dd>
-                </div>
-              );
-            })}
-          </dl>
-        </section>
-        <section className="debugger-panel" aria-label={t.devicesCaption}>
-          <p className="layout-title">{t.devicesCaption}</p>
-          <dl className="debugger-devices">
-            <div>
-              <dt>{t.display}</dt>
-              <dd className="memory-word debugger-display">{signedText(state.cpu.display)}</dd>
-            </div>
-            <div>
-              <dt>{t.lamps}</dt>
-              <dd className="debugger-lamps">
-                {t.lampNames.map((name, bit) => {
-                  const on = (state.cpu.lamps >> bit) & 1;
-                  return (
-                    <span key={name} className={`lamp-chip${on ? " lamp-on" : ""}`}>
-                      {`${name} ${on ? t.lampOn : t.lampOff}`}
-                    </span>
-                  );
-                })}
-              </dd>
-            </div>
-            <div>
-              <dt>{t.sensorA}</dt>
-              <dd className="memory-word">{signedText(inputs.sensorA)}</dd>
-            </div>
-            <div>
-              <dt>{t.sensorB}</dt>
-              <dd className="memory-word">{signedText(inputs.sensorB)}</dd>
-            </div>
-          </dl>
-        </section>
+      <div className="debugger-values">
         {options.watch && (
           <section className="debugger-panel" aria-label={t.watchCaption}>
             <p className="layout-title">{t.watchCaption}</p>
@@ -479,11 +436,71 @@ export function DebuggerView({
             )}
           </section>
         )}
+        <div className="debugger-panels">
+          <section className="debugger-panel" aria-label={t.registersCaption}>
+            <p className="layout-title">{t.registersCaption}</p>
+            <dl className="debugger-registers">
+              <div className="debugger-register">
+                <dt>{t.pc}</dt>
+                <dd className="memory-word">{hex3(pc)}</dd>
+              </div>
+              {shownRegs.map((k) => {
+                const v = state.cpu.regs[k];
+                const changed = wrote === k && at > 0;
+                return (
+                  <div
+                    key={k}
+                    className={`debugger-register${changed ? " register-changed" : ""}`}
+                    data-register={k}
+                  >
+                    <dt>
+                      {`R${k}`}
+                      {changed && <span className="visually-hidden">{` (${t.changed})`}</span>}
+                    </dt>
+                    <dd className="memory-word">
+                      <WordValue value={v} t={t} />
+                    </dd>
+                  </div>
+                );
+              })}
+            </dl>
+          </section>
+          <section className="debugger-panel" aria-label={t.devicesCaption}>
+            <p className="layout-title">{t.devicesCaption}</p>
+            <dl className="debugger-devices">
+              <div>
+                <dt>{t.display}</dt>
+                <dd className="memory-word debugger-display">{signedText(state.cpu.display)}</dd>
+              </div>
+              <div>
+                <dt>{t.lamps}</dt>
+                <dd className="debugger-lamps">
+                  {t.lampNames.map((name, bit) => {
+                    const on = (state.cpu.lamps >> bit) & 1;
+                    return (
+                      <span key={name} className={`lamp-chip${on ? " lamp-on" : ""}`}>
+                        {`${name} ${on ? t.lampOn : t.lampOff}`}
+                      </span>
+                    );
+                  })}
+                </dd>
+              </div>
+              <div>
+                <dt>{t.sensorA}</dt>
+                <dd className="memory-word">{signedText(inputs.sensorA)}</dd>
+              </div>
+              <div>
+                <dt>{t.sensorB}</dt>
+                <dd className="memory-word">{signedText(inputs.sensorB)}</dd>
+              </div>
+            </dl>
+          </section>
+        </div>
+        {(options.memory ?? []).map((region) => (
+          <MemoryPanel key={region.from} region={region} program={program} state={state} t={t} />
+        ))}
+        {options.stack && <StackPanel program={program} state={state} names={names} t={t} />}
       </div>
-      {(options.memory ?? []).map((region) => (
-        <MemoryPanel key={region.from} region={region} program={program} state={state} t={t} />
-      ))}
-      {options.stack && <StackPanel program={program} state={state} names={names} t={t} />}
     </div>
   );
 }

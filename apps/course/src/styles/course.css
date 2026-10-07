@@ -2791,3 +2791,62 @@ svg.stack-depth {
     padding-right: var(--space-2);
   }
 }
+/* The debugger: the listing in a box of its own height that keeps the line about to run in view,
+   so the buttons, that line and the values it changes fit one screen. On a desk the values sit
+   beside the listing; on a phone under it, the watch first. */
+.debugger-body {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: minmax(0, 1fr);
+}
+.debugger-run,
+.debugger-values {
+  min-width: 0;
+}
+.debugger-listing-wrap {
+  max-height: 17rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.debugger-listing-wrap .debugger-listing {
+  margin: 0;
+}
+.debugger-listing thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg-raised);
+}
+.debugger-listing td {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+.debugger-values .debugger-panels {
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+}
+.debugger-values > .debugger-panel:first-child {
+  margin-bottom: var(--space-3);
+}
+@media (min-width: 481px) {
+  .pause-toggle {
+    min-width: 2rem;
+    min-height: 1.75rem;
+  }
+  .debugger-listing-wrap {
+    max-height: 20rem;
+  }
+}
+@media (min-width: 60rem) {
+  .debugger-body {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: start;
+  }
+  .debugger-listing-wrap {
+    max-height: 26rem;
+  }
+  .debugger-values .debugger-panels {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

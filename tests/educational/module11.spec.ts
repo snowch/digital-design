@@ -24,6 +24,9 @@ import {
 
 const T = DEFAULT_VIEW_STRINGS.machine11;
 
+/** Debuggers with breakpoints and a watch on a program longer than the listing's box. */
+const LONG_DEBUGGERS = [["lists", "walk"]] as const;
+
 const MODULE_11 = [
   "assembly",
   "lists",
@@ -246,6 +249,45 @@ test.describe("Module 11's lab", () => {
     await expect(figure.locator(".debugger-status")).toContainText(
       format(T.stops.stop!, { address: "034" }),
     );
+  });
+
+  test("the buttons, the line about to run and the watch stay on one screen as the run moves", async ({
+    page,
+  }) => {
+    const height = page.viewportSize()?.height ?? 0;
+    const inView = async (what: Locator) => {
+      const box = await what.boundingBox();
+      expect(box, "the element is drawn").not.toBeNull();
+      expect(box!.y, "its top is on the screen").toBeGreaterThanOrEqual(0);
+      expect(box!.y + box!.height, "its bottom is on the screen").toBeLessThanOrEqual(height);
+    };
+    for (const [lessonId, id] of LONG_DEBUGGERS) {
+      await openLesson(page, lessonId);
+      const figure = page.locator(`[data-interactive="${id}"]`);
+      const actions = figure.locator(".debugger-actions");
+      await actions.evaluate((e) => {
+        e.scrollIntoView({ block: "start" });
+        window.scrollBy(0, -16);
+      });
+      const listing = figure.locator(".debugger-listing-wrap");
+      const check = async () => {
+        await inView(actions);
+        await inView(figure.locator(".watch-list"));
+        // The line about to run is inside the listing's box, not scrolled out of it.
+        const row = await figure.locator("tr[aria-current]").boundingBox();
+        const wrap = await listing.boundingBox();
+        expect(row!.y).toBeGreaterThanOrEqual(wrap!.y);
+        expect(row!.y + row!.height).toBeLessThanOrEqual(wrap!.y + wrap!.height);
+        await inView(figure.locator("tr[aria-current]"));
+      };
+      const step = figure.getByRole("button", { name: T.step, exact: true });
+      for (let k = 0; k < 12; k++) await step.click();
+      await check();
+      await figure.getByRole("button", { name: T.runToPause, exact: true }).click();
+      await check();
+      await figure.getByRole("button", { name: T.back, exact: true }).click();
+      await check();
+    }
   });
 
   test("the debugger steps a program and says why it stopped", async ({ page }) => {
