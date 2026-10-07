@@ -1,37 +1,25 @@
 [
- [
-  "failureExperiment",
-  "Two programs both add room A's amount",
-  "Two programs, with room A at -170 and room B at -150, both add room A's amount"
- ],
- [
-  "failureExperiment",
-  " The function changes a register the calling convention says it must keep.",
-  ""
- ],
- [
-  "explanation",
-  "it puts the address of the next instruction into R15",
-  "it puts the address of the next instruction into the register its Y digit names, here R15,"
- ],
- [
-  "c2Task",
-  "The test suite includes seven calls to `outOfRange` alone with different values for R1, R2 and R3, checking",
-  "There are 10 tests. Seven call `outOfRange` alone, with R1, R2 and R3 at 60, 20, 50; 10, 20, 50; 30, 20, 50; 20, 20, 50; 50, 20, 50; -15, 20, 50; and 75, 0, 40. Each checks"
- ],
- [
-  "twoWaysLead",
-  "Press Run the programs",
-  "Press \"Run the programs\""
- ],
- [
-  "prediction",
-  "press Check my prediction",
-  "press \"Check my prediction\""
- ],
- [
-  "c1Hints.1",
-  "The second call puts",
-  "The idea: the second call puts"
- ]
+  [
+    "failureExperiment",
+    "Two programs both add room A's amount",
+    "Two programs, with room A at -170 and room B at -150, both add room A's amount"
+  ],
+  [
+    "failureExperiment",
+    " The function changes a register the calling convention says it must keep.",
+    ""
+  ],
+  [
+    "explanation",
+    "it puts the address of the next instruction into R15",
+    "it puts the address of the next instruction into the register its Y digit names, here R15,"
+  ],
+  [
+    "c2Task",
+    "The test suite includes seven calls to `outOfRange` alone with different values for R1, R2 and R3, checking",
+    "There are 10 tests. Seven call `outOfRange` alone, with R1, R2 and R3 at 60, 20, 50; 10, 20, 50; 30, 20, 50; 20, 20, 50; 50, 20, 50; -15, 20, 50; and 75, 0, 40. Each checks"
+  ],
+  ["twoWaysLead", "Press Run the programs", "Press \"Run the programs\""],
+  ["prediction", "press Check my prediction", "press \"Check my prediction\""],
+  ["c1Hints.1", "The second call puts", "The idea: the second call puts"]
 ]

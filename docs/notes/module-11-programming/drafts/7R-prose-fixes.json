@@ -1,157 +1,37 @@
 [
- [
-  "prediction",
-  "Press \"Check my prediction\" to see the listing.",
-  "Choose an answer and press \"Check my prediction\". The listing's words then show."
- ],
- [
-  "asksAfter",
-  "`lowest`",
-  "`lowestOf`"
- ],
- [
-  "asksAfter",
-  "`highest`",
-  "`highestOf`"
- ],
- [
-  "asksAfter",
-  "`warmer`",
-  "`warmCount`"
- ],
- [
-  "motivation",
-  "`lowest`",
-  "`lowestOf`"
- ],
- [
-  "motivation",
-  "`highest`",
-  "`highestOf`"
- ],
- [
-  "motivation",
-  "`warmer`",
-  "`warmCount`"
- ],
- [
-  "p1Question",
-  "`lowest`",
-  "`lowestOf`"
- ],
- [
-  "investigation",
-  "`lowest`",
-  "`lowestOf`"
- ],
- [
-  "construction",
-  "`lowest`",
-  "`lowestOf`"
- ],
- [
-  "construction",
-  "`lowest`",
-  "`lowestOf`"
- ],
- [
-  "construction",
-  "`highest`",
-  "`highestOf`"
- ],
- [
-  "construction",
-  "`highest`",
-  "`highestOf`"
- ],
- [
-  "construction",
-  "`warmer`",
-  "`warmCount`"
- ],
- [
-  "construction",
-  "`warmer`",
-  "`warmCount`"
- ],
- [
-  "construction",
-  "`warmer`",
-  "`warmCount`"
- ],
- [
-  "failureExperiment",
-  "Its `highest` function",
-  "Its function `highestOf`"
- ],
- [
-  "fromZeroAfter",
-  "`lowest`",
-  "`lowestOf`"
- ],
- [
-  "generalisation",
-  "`lowest`",
-  "`lowestOf`"
- ],
- [
-  "challenge",
-  "the `lowest` function",
-  "the function `lowestOf`"
- ],
- [
-  "challenge",
-  "`highest`",
-  "`highestOf`"
- ],
- [
-  "challenge",
-  "`warmer`",
-  "`warmCount`"
- ],
- [
-  "c1Task",
-  "`lowest`",
-  "`lowestOf`"
- ],
- [
-  "c1Task",
-  "`highest`",
-  "`highestOf`"
- ],
- [
-  "c1Task",
-  "`warmer`",
-  "`warmCount`"
- ],
- [
-  "c1Task",
-  "`warmer`",
-  "`warmCount`"
- ],
- [
-  "c1Hints.3",
-  "`lowest`",
-  "`lowestOf`"
- ],
- [
-  "c1Hints.3",
-  "`highest`",
-  "`highestOf`"
- ],
- [
-  "c1Hints.4",
-  "`lowest`",
-  "`lowestOf`"
- ],
- [
-  "c1Hints.4",
-  "`highest`",
-  "`highestOf`"
- ],
- [
-  "c1Hints.4",
-  "`warmer`",
-  "`warmCount`"
- ]
+  [
+    "prediction",
+    "Press \"Check my prediction\" to see the listing.",
+    "Choose an answer and press \"Check my prediction\". The listing's words then show."
+  ],
+  ["asksAfter", "`lowest`", "`lowestOf`"],
+  ["asksAfter", "`highest`", "`highestOf`"],
+  ["asksAfter", "`warmer`", "`warmCount`"],
+  ["motivation", "`lowest`", "`lowestOf`"],
+  ["motivation", "`highest`", "`highestOf`"],
+  ["motivation", "`warmer`", "`warmCount`"],
+  ["p1Question", "`lowest`", "`lowestOf`"],
+  ["investigation", "`lowest`", "`lowestOf`"],
+  ["construction", "`lowest`", "`lowestOf`"],
+  ["construction", "`lowest`", "`lowestOf`"],
+  ["construction", "`highest`", "`highestOf`"],
+  ["construction", "`highest`", "`highestOf`"],
+  ["construction", "`warmer`", "`warmCount`"],
+  ["construction", "`warmer`", "`warmCount`"],
+  ["construction", "`warmer`", "`warmCount`"],
+  ["failureExperiment", "Its `highest` function", "Its function `highestOf`"],
+  ["fromZeroAfter", "`lowest`", "`lowestOf`"],
+  ["generalisation", "`lowest`", "`lowestOf`"],
+  ["challenge", "the `lowest` function", "the function `lowestOf`"],
+  ["challenge", "`highest`", "`highestOf`"],
+  ["challenge", "`warmer`", "`warmCount`"],
+  ["c1Task", "`lowest`", "`lowestOf`"],
+  ["c1Task", "`highest`", "`highestOf`"],
+  ["c1Task", "`warmer`", "`warmCount`"],
+  ["c1Task", "`warmer`", "`warmCount`"],
+  ["c1Hints.3", "`lowest`", "`lowestOf`"],
+  ["c1Hints.3", "`highest`", "`highestOf`"],
+  ["c1Hints.4", "`lowest`", "`lowestOf`"],
+  ["c1Hints.4", "`highest`", "`highestOf`"],
+  ["c1Hints.4", "`warmer`", "`warmCount`"]
 ]

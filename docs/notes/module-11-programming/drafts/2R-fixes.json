@@ -1,27 +1,19 @@
 [
- [
-  "logLead",
-  "holds the readings themselves, each one word",
-  "holds the readings themselves, oldest first, each one word"
- ],
- [
-  "prediction",
-  "The figure lists the program as eight-digit words. When the program stops, what address will R1 hold? Make your prediction",
-  "The figure lists the program. Make your prediction"
- ],
- [
-  "p1Explain",
-  "`068` is the last reading's address.",
-  "`068` is the last reading's address, where R1 was while that reading was loaded."
- ],
- [
-  "investigation",
-  "The log shows its words",
-  "A view of the log shows its six words"
- ],
- [
-  "generalisation",
-  " Everything else stays the same.",
-  ""
- ]
+  [
+    "logLead",
+    "holds the readings themselves, each one word",
+    "holds the readings themselves, oldest first, each one word"
+  ],
+  [
+    "prediction",
+    "The figure lists the program as eight-digit words. When the program stops, what address will R1 hold? Make your prediction",
+    "The figure lists the program. Make your prediction"
+  ],
+  [
+    "p1Explain",
+    "`068` is the last reading's address.",
+    "`068` is the last reading's address, where R1 was while that reading was loaded."
+  ],
+  ["investigation", "The log shows its words", "A view of the log shows its six words"],
+  ["generalisation", " Everything else stays the same.", ""]
 ]

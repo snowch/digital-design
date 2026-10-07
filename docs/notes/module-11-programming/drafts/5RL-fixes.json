@@ -1,22 +1,6 @@
 [
- [
-  "objectives.1",
-  "calls nothing",
-  "calls nothing."
- ],
- [
-  "objectives.2",
-  "on the stack",
-  "on the stack."
- ],
- [
-  "objectives.3",
-  "longest way in",
-  "longest way in."
- ],
- [
-  "objectives.4",
-  "when a loop is",
-  "when a loop is."
- ]
+  ["objectives.1", "calls nothing", "calls nothing."],
+  ["objectives.2", "on the stack", "on the stack."],
+  ["objectives.3", "longest way in", "longest way in."],
+  ["objectives.4", "when a loop is", "when a loop is."]
 ]
