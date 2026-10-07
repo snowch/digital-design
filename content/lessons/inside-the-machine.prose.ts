@@ -15,18 +15,17 @@ export const PROSE = {
   p1Question: "When the part that adds gives 66, which of its slices give a 1?",
   p1Explain:
     '66 is 64 + 2. So the slice worth 64 and the slice worth 2 give 1. The other 62 give 0. No slice is worth 66: each slice gives one 1 or 0, and the number is the pattern of all 64. Press "Down a level" to see the four lowest slices give `0010`.',
-  levelLine: "This is line 3, which gives the number 66.",
+  levelLine: "This is line 3.",
   levelParts:
     'The whole machine\'s drawing. It is wide: on a small screen, a strip above shows all of it, and you can press "Make smaller" to zoom out. The part that adds is marked.',
-  levelAdder:
-    "The part that adds, opened into four boxes of 16 slices each. Their 1s and 0s give 66: `00000000 00000000 00000000 00000000 00000000 00000000 00000000 01000010`.",
-  levelFour: "The four lowest slices, worth 8, 4, 2 and 1. Their 1s and 0s: `0010`.",
+  levelAdder: "The part that adds, opened into four boxes of 16 slices each.",
+  levelFour: "The four lowest slices, worth 8, 4, 2 and 1.",
   levelSlice:
-    "The slice worth 2, opened. It has a part that adds and parts that choose which result goes out. It gives 1.",
+    "The slice worth 2, opened. It has a part that adds and parts that choose which result goes out.",
   levelSmallest:
-    "Inside the slice's adding part: the two smallest parts that make its sum. Module 2 builds these smallest parts. It gives 1.",
+    "Inside the slice's adding part: the two smallest parts that make its sum. Module 2 builds these smallest parts.",
   levelWire:
-    "One wire from the slice's adding part, named SUM. It is high, and a high voltage stands for 1. A low one stands for 0.",
+    "One wire from the slice's adding part, named SUM. A high voltage stands for 1. A low one stands for 0.",
   ladderLead:
     'The figure starts at line 3. Each press of "Down a level" goes one level down, to one wire at the bottom.\n\nAt each level, find the number. It is the same number all the way down: 66, then its 1s and 0s, then the 1 of one slice, then one wire.',
   ladderAfter:

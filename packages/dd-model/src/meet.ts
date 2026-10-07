@@ -325,7 +325,8 @@ export function sliceDigits(sim: Simulator, count: number): string {
  * The places Module 0's figures open the machine at, by a plain key, so a lesson's props carry no
  * part's name (its props are held to the term gate, and the parts' names are the circuit's). Each
  * gives the block opened (`scope`, absent for the line itself), the net whose value the level
- * shows and how, the parts the drawing opens on, and the block to open next, marked.
+ * shows and how, the parts the drawing opens on (full paths from the top, as `focus` takes them),
+ * and the block to open next, marked.
  */
 export interface MeetPlace {
   readonly scope?: string;
@@ -343,25 +344,25 @@ export const MEET_WIRE = `${SLICE}/SUM`;
 export const MEET_PLACES: Readonly<Record<string, MeetPlace>> = {
   line: { net: "RESULT", show: "number" },
   parts: { scope: "", net: "RESULT", show: "number", focus: ["alu"], highlight: ["alu"] },
-  adder: { scope: "alu", net: "RESULT", show: "digits", focus: ["g0"], highlight: ["alu/g0"] },
+  adder: { scope: "alu", net: "RESULT", show: "digits", focus: ["alu/g0"], highlight: ["alu/g0"] },
   four: {
     scope: "alu/g0/q0",
     net: "alu/g0/Y0",
     show: "digits",
-    focus: ["bit1"],
+    focus: [SLICE],
     highlight: [SLICE],
   },
   slice: {
     scope: SLICE,
     net: "alu/g0/q0/Y1",
     show: "digits",
-    focus: ["fa"],
+    focus: [`${SLICE}/fa`],
     highlight: [`${SLICE}/fa`],
   },
   smallest: { scope: `${SLICE}/fa/ha2`, net: MEET_WIRE, show: "digits" },
   // The slice's adding part, where the wire leaves it as SUM: a small drawing, clear as first
   // drawn, where the slice whole is too busy to open a page on.
-  wire: { scope: `${SLICE}/fa`, net: MEET_WIRE, show: "level", focus: ["SUM"] },
+  wire: { scope: `${SLICE}/fa`, net: MEET_WIRE, show: "level", focus: [MEET_WIRE] },
 };
 
 /** The wires a Module 0 figure may hold stuck, by a plain key. */

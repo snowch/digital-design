@@ -167,5 +167,47 @@
     "",
     "the scene drops its wire counts to fit a phone, so the sentence about them goes"
   ],
-  ["1L", "scene.machine", "The machine", "Machine", "shorter, so the scene fits a phone's card"]
+  ["1L", "scene.machine", "The machine", "Machine", "shorter, so the scene fits a phone's card"],
+  [
+    "2A",
+    "levelLine",
+    ", which gives the number 66.",
+    ".",
+    "second pass: the figure reads this level's number off the simulator under the caption; the caption repeated it"
+  ],
+  [
+    "2A",
+    "levelAdder",
+    " Their 1s and 0s give 66: `00000000 00000000 00000000 00000000 00000000 00000000 00000000 01000010`.",
+    "",
+    "second pass: the figure reads this level's number off the simulator under the caption; the caption repeated it"
+  ],
+  [
+    "2A",
+    "levelFour",
+    " Their 1s and 0s: `0010`.",
+    "",
+    "second pass: the figure reads this level's number off the simulator under the caption; the caption repeated it"
+  ],
+  [
+    "2A",
+    "levelSlice",
+    " It gives 1.",
+    "",
+    "second pass: the figure reads this level's number off the simulator under the caption; the caption repeated it"
+  ],
+  [
+    "2A",
+    "levelSmallest",
+    " It gives 1.",
+    "",
+    "second pass: the figure reads this level's number off the simulator under the caption; the caption repeated it"
+  ],
+  [
+    "2A",
+    "levelWire",
+    "It is high, and a high voltage stands for 1.",
+    "A high voltage stands for 1.",
+    "second pass: the figure reads this level's number off the simulator under the caption; the caption repeated it"
+  ]
 ]
