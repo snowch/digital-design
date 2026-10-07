@@ -198,3 +198,12 @@ as the plan says.
 `branches.facts.test.ts`, "the loop: 15 on the display after 20 edges", timed out at 5 s in this
 container on a clean checkout of `main` as well; `main` has since given it the time its neighbours
 have, and the merge brought that in.
+
+## The full check on the branch
+
+`npm run check` on the merged head (06:04 to about 06:50 UTC; the browser stage took 40.7 minutes
+in this container): formatting, copyright, the platform copy, types, 937 unit tests and the build
+pass; 592 browser tests pass and 10 fail, all ten the screenshot comparisons of figures Module 0
+does not touch (the figures that matter most, registers, state machines, signals, the scenes,
+Module 2's pairs), the set Modules 8 and 9 recorded failing on a clean `main` in build containers
+from this one's text rendering. Not re-run on a clean `main` here; the baselines were not updated.
