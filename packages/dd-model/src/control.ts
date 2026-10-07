@@ -30,12 +30,28 @@ export interface ControlOptions {
    * decoder lessons 9.1 and 9.2 draw it without. Given unless false.
    */
   readonly mem?: boolean;
+  /**
+   * Module 10's capstone: kind A is "set if", `RY ← 1` if `RA cond RB`, else 0. Its kind line is
+   * the new control signal SET, which gives register Y the condition as a word.
+   */
+  readonly setIf?: boolean;
+  /**
+   * Module 10, lesson 1: a second circuit for the same instructions, whose register and constant
+   * jobs write register Y at the ALU edge and take 3 edges, not 4.
+   */
+  readonly shortJobs?: boolean;
 }
 
 /** The decoder's outputs, with MEM or without. */
 export function decoderOutputs(options: ControlOptions = {}): readonly string[] {
-  return options.mem === false ? DECODER9_OUTPUTS.filter((n) => n !== "MEM") : DECODER9_OUTPUTS;
+  const outs: string[] =
+    options.mem === false ? DECODER9_OUTPUTS.filter((n) => n !== "MEM") : [...DECODER9_OUTPUTS];
+  if (options.setIf) outs.splice(outs.indexOf("STOP"), 0, "SET");
+  return outs;
 }
+
+/** The kind Module 10's capstone gives "set if": the first kind free in the learner's copy. */
+export const SET_IF_KIND = 0xa;
 
 /** The kind the capstone's call through a register uses: the first kind `docs/isa.md` leaves free. */
 export const CALL_REGISTER_KIND = 9;
@@ -84,12 +100,25 @@ export function kindLineNames(options: ControlOptions = {}): Record<number, stri
     names[7] = "KIND7";
     names[CALL_REGISTER_KIND] = `KIND${CALL_REGISTER_KIND}`;
   }
+  // Module 10's capstone: kind A's line is a control signal on its own, SET.
+  if (options.setIf) names[SET_IF_KIND] = "SET";
   return names;
 }
 
 /** The kinds the decoder knows: 1 to 8, and the capstone's. */
 export function knownKinds(options: ControlOptions = {}): number[] {
-  return [1, 2, 3, 4, 5, 6, 7, 8, ...(options.callThroughRegister ? [CALL_REGISTER_KIND] : [])];
+  return [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    ...(options.callThroughRegister ? [CALL_REGISTER_KIND] : []),
+    ...(options.setIf ? [SET_IF_KIND] : []),
+  ];
 }
 
 /**
@@ -176,17 +205,19 @@ export function signalGates(
   const k = (n: number) => line[n] as NetId;
   const out = (name: string) => outs[name] as NetId;
   const extra = options.callThroughRegister ? [k(CALL_REGISTER_KIND)] : [];
+  // Module 10's capstone: set if writes register Y and subtracts, as a branch does.
+  const set = options.setIf ? [k(SET_IF_KIND)] : [];
   const jobs = b.or([k(1), k(2)], { name: "orJobs", output: b.net("JOBS") });
   const mem = b.or([k(3), k(4)], { name: "orMem", output: outs["MEM"] ?? b.net("MEM") });
-  b.or([jobs, k(3), k(6), ...extra], { name: "orWritey", output: out("WRITEY") });
+  b.or([jobs, k(3), k(6), ...extra, ...set], { name: "orWritey", output: out("WRITEY") });
   b.or([k(2), mem, k(7), ...extra], { name: "orBconst", output: out("BCONST") });
   b.and([mem, j.J3], { name: "andAzero", output: out("AZERO") });
   b.and([mem, j.J0], { name: "andByte", output: out("BYTE") });
   b.and([jobs, j.J2], { name: "andOp2", output: out("OP2") });
   const op1 = b.and([jobs, j.J1], { name: "andOp1", output: b.net("JOB1") });
-  b.or([op1, mem, k(5), k(7), ...extra], { name: "orOp1", output: out("OP1") });
+  b.or([op1, mem, k(5), k(7), ...extra, ...set], { name: "orOp1", output: out("OP1") });
   const op0 = b.and([jobs, j.J0], { name: "andOp0", output: b.net("JOB0") });
-  b.or([op0, k(5)], { name: "orOp0", output: out("OP0") });
+  b.or([op0, k(5), ...set], { name: "orOp0", output: out("OP0") });
   if (options.callThroughRegister) {
     b.or([k(6), k(CALL_REGISTER_KIND)], { name: "orCall", output: out("CALL") });
     b.or([k(7), k(CALL_REGISTER_KIND)], { name: "orJump", output: out("JUMP") });
@@ -218,7 +249,11 @@ export function checkGates(
   const noKind = b.net("NOKIND");
   b.scope(
     "kindCheck",
-    options.callThroughRegister ? "kind-check-call" : "kind-check",
+    options.setIf
+      ? "kind-check-set"
+      : options.callThroughRegister
+        ? "kind-check-call"
+        : "kind-check",
     (bb) => {
       bb.nor(
         known.map((n) => k(n)),
@@ -238,17 +273,21 @@ export function checkGates(
     7,
     8,
     ...(options.callThroughRegister ? [CALL_REGISTER_KIND] : []),
+    ...(options.setIf ? [SET_IF_KIND] : []),
   ];
   b.scope(
     "jobCheck",
-    options.callThroughRegister ? "job-check-call" : "job-check",
+    options.setIf ? "job-check-set" : options.callThroughRegister ? "job-check-call" : "job-check",
     (bb) => {
       const anyJob = bb.or([j.J3, j.J2, j.J1, j.J0], {
         name: "orAnyJob",
         output: bb.net("ANYJOB"),
       });
-      // Kinds 1, 2 and 5 have jobs 0 to 7: job bit 3 is never 1.
-      const eight = bb.or([k(1), k(2), k(5)], { name: "orEight", output: bb.net("EIGHTJOBS") });
+      // Kinds 1, 2 and 5 have jobs 0 to 7: job bit 3 is never 1; so has the capstone's set if.
+      const eight = bb.or([k(1), k(2), k(5), ...(options.setIf ? [k(SET_IF_KIND)] : [])], {
+        name: "orEight",
+        output: bb.net("EIGHTJOBS"),
+      });
       const badEight = bb.and([eight, j.J3], { name: "andBadEight", output: bb.net("BADEIGHT") });
       // Loads and stores have jobs 0, 1, 8 and 9: job bits 2 and 1 are never 1.
       const mem = bb.or([k(3), k(4)], { name: "orMemKinds", output: bb.net("MEMKINDS") });
@@ -369,11 +408,13 @@ export function controlDecoder(
     given.scoped ?? true,
     "decoder",
     // Each variant has a kind of its own, since each is drawn by hand with its own ports.
-    options.callThroughRegister
-      ? "control-decoder-call"
-      : options.mem === false
-        ? "control-decoder"
-        : "control-decoder-mem",
+    options.setIf
+      ? "control-decoder-set"
+      : options.callThroughRegister
+        ? "control-decoder-call"
+        : options.mem === false
+          ? "control-decoder"
+          : "control-decoder-mem",
     (bb) => {
       const names = kindLineNames(options);
       const lines: Record<number, NetId> = Object.fromEntries(
@@ -394,7 +435,11 @@ export function controlDecoder(
       );
       bb.scope(
         "signals",
-        options.callThroughRegister ? "control-signals-call" : "control-signals",
+        options.setIf
+          ? "control-signals-set"
+          : options.callThroughRegister
+            ? "control-signals-call"
+            : "control-signals",
         (sb) =>
           signalGates(
             sb,
@@ -411,7 +456,11 @@ export function controlDecoder(
       const illegal = bb.net("ILLEGAL");
       bb.scope(
         "checks",
-        options.callThroughRegister ? "decode-checks-call" : "decode-checks",
+        options.setIf
+          ? "decode-checks-set"
+          : options.callThroughRegister
+            ? "decode-checks-call"
+            : "decode-checks",
         (cb) =>
           checkGates(
             cb,
@@ -559,6 +608,10 @@ export function controllerMachine(): Machine {
 /** The states each kind passes through, from its fetch, one edge each (the table above). */
 export function stateSequence(kind: number, options: ControlOptions = {}): ControlState[] {
   if (options.callThroughRegister && kind === CALL_REGISTER_KIND) return ["FETCH", "READ", "WRITE"];
+  // Module 10's capstone: set if takes a register job's edges, and writes its condition at WRITE.
+  if (options.setIf && kind === SET_IF_KIND) return ["FETCH", "READ", "ALU", "WRITE"];
+  // Module 10, lesson 1: the second circuit writes a job's result at the ALU edge.
+  if (options.shortJobs && (kind === 1 || kind === 2)) return ["FETCH", "READ", "ALU"];
   const sequences: Readonly<Record<number, ControlState[]>> = {
     1: ["FETCH", "READ", "ALU", "WRITE"],
     2: ["FETCH", "READ", "ALU", "WRITE"],
@@ -573,7 +626,9 @@ export function stateSequence(kind: number, options: ControlOptions = {}): Contr
 
 /** The edges each kind takes, from its fetch to the edge that ends it (the sequence above). */
 export function edgesOfKind(kind: number, options: ControlOptions = {}): number | undefined {
-  if (!(options.callThroughRegister && kind === CALL_REGISTER_KIND) && (kind < 1 || kind > 7))
-    return undefined;
+  const added =
+    (options.callThroughRegister && kind === CALL_REGISTER_KIND) ||
+    (options.setIf && kind === SET_IF_KIND);
+  if (!added && (kind < 1 || kind > 7)) return undefined;
   return stateSequence(kind, options).length;
 }
