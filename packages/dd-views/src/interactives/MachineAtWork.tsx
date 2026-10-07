@@ -75,7 +75,10 @@ const Props = z.object({
       }),
     )
     .default([]),
-  /** The machine's drawing, opened at a place (a key of the model's `MEET_PLACES`). */
+  /**
+   * The machine's drawing, opened at a place (a key of the model's `MEET_PLACES`), showing the
+   * values of the moment the figure starts at.
+   */
   drawing: z.string().optional(),
   /** Shown once the learner has run a line (or, with faults, once every fault has run). */
   outcomes: z.string().optional(),
@@ -166,6 +169,10 @@ export const MachineAtWork = withProps(
     const [stoppedChanged, setStoppedChanged] = useState(false);
     const [stored, setStored] = useSlot<Stored>(store, interactive.id);
     const live = useMemo(() => sim.snapshotValues(), [sim, generation]);
+    // The drawing shows the machine as the figure starts it (paused before a line), whatever the
+    // run has done since: later lines move the part's numbers on, to numbers the page does not
+    // talk about, and the stop line reads a number nothing set (X).
+    const paused = useMemo(() => sim.snapshotValues(), [sim]);
     const state = datapathState(circuit, live);
 
     const asking = data.question !== undefined && data.options !== undefined;
@@ -506,7 +513,7 @@ export const MachineAtWork = withProps(
         {drawing && (
           <CircuitView
             circuit={circuit}
-            {...(committed ? { values: live } : {})}
+            {...(committed ? { values: paused } : {})}
             title={t.drawingTitle}
             scope={drawing.scope ?? ""}
             table={false}
