@@ -19,8 +19,9 @@ import {
   memoryWord,
   type DebugState,
   type DebugStop,
+  type InputPlan,
 } from "./debugger";
-import { QUIET_INPUTS, type MachineInputs } from "./machine";
+import { MODULE_12, QUIET_INPUTS, type MachineInputs, type MachineOptions } from "./machine";
 
 /** What a test gives a run: data after the program, the shop's inputs, a function to call. */
 export interface ProgramScenario {
@@ -32,6 +33,10 @@ export interface ProgramScenario {
   /** Registers set before a call: a number, or a label's address. */
   readonly registers?: Readonly<Record<number, string>>;
   readonly limit?: number;
+  /** Module 12: the machine with traps (`MODULE_12`), and a door that opens before an instruction. */
+  readonly traps?: boolean;
+  readonly doorOpensAt?: number;
+  readonly doorClosesAt?: number;
 }
 
 /** The label the test's own `stop` carries, where a called function returns to. */
@@ -91,7 +96,13 @@ export function callStart(
 export function runScenario(source: string, scenario: ProgramScenario = {}): ScenarioRun {
   const { program, problems } = assembleChecked(withData(source, scenario));
   if (!program) return { problems };
-  const inputs = { ...QUIET_INPUTS, ...(scenario.inputs ?? {}) };
+  const inputs: InputPlan = {
+    ...QUIET_INPUTS,
+    ...(scenario.inputs ?? {}),
+    ...(scenario.doorOpensAt !== undefined ? { doorOpensAt: scenario.doorOpensAt } : {}),
+    ...(scenario.doorClosesAt !== undefined ? { doorClosesAt: scenario.doorClosesAt } : {}),
+  };
+  const options: MachineOptions | undefined = scenario.traps ? MODULE_12 : undefined;
   let start: DebugState;
   if (scenario.call !== undefined) {
     const at = program.labels[scenario.call];
@@ -109,13 +120,15 @@ export function runScenario(source: string, scenario: ProgramScenario = {}): Sce
     const call = callStart(program, scenario);
     start = debugStartAt(program.rom, call?.at ?? at, call?.registers ?? {});
   } else start = debugStart(program.rom);
-  const state = debugFinish(start, inputs, undefined, scenario.limit ?? RUN_LIMIT);
+  const state = debugFinish(start, inputs, options, scenario.limit ?? RUN_LIMIT);
   return { program, problems, state };
 }
 
 const signedText = (v: bigint | undefined) =>
   v === undefined ? "X" : BigInt.asIntN(64, v).toString();
 const hex3 = (v: bigint) => v.toString(16).toUpperCase().padStart(3, "0");
+/** A control register's word as the pages write it: two digits for a cause or a mode. */
+const hex2 = (v: bigint) => v.toString(16).toUpperCase().padStart(2, "0");
 
 /** How a run ended, as a short key and the values a sentence names. */
 export function endOf(stop: DebugStop | undefined): {
@@ -167,6 +180,9 @@ export function scenarioOf(given: Readonly<Record<string, string | number>>): Pr
     ...(given.call !== undefined ? { call: String(given.call) } : {}),
     registers,
     ...(given.limit !== undefined ? { limit: Number(given.limit) } : {}),
+    ...(given.traps !== undefined ? { traps: given.traps === "yes" || given.traps === 1 } : {}),
+    ...(given.doorOpensAt !== undefined ? { doorOpensAt: Number(given.doorOpensAt) } : {}),
+    ...(given.doorClosesAt !== undefined ? { doorClosesAt: Number(given.doorClosesAt) } : {}),
   };
 }
 
@@ -195,6 +211,19 @@ function leftFor(key: string, run: ScenarioRun): string {
     return changed.join(", ");
   }
   if (key === "calls") return String(s.returns);
+  // Module 12: the control registers, the mode, and the traps that went to the handler.
+  const creg = /^C([0-4])$/.exec(key);
+  if (creg) {
+    const n = Number(creg[1]);
+    const v = cpu.control[n] ?? 0n;
+    // C2 and C4 hold addresses, written in three digits; C0, C1 and C3 in two.
+    return n === 2 || n === 4 ? hex3(v) : hex2(v);
+  }
+  if (key === "mode") return (cpu.control[0] & 1n) === 1n ? "system" : "user";
+  if (key === "traps") return String(s.traps.length);
+  if (key === "causes") return s.traps.map((t) => hex2(BigInt(t.cause))).join(", ");
+  if (key === "waiting") return String(cpu.waiting);
+  if (key === "timer") return String(cpu.timer);
   if (key === "returned") {
     const back = run.program?.labels[RETURN_LABEL];
     return s.stopped?.kind === "machine" &&

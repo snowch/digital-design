@@ -197,6 +197,8 @@ export const MACHINE11_STRINGS: Machine11Strings = {
     addressForm:
       "An address is a register, plus or minus a number, or a name. It cannot add two registers.",
     reservedName: "{name} is a word the language uses, so it cannot name a line.",
+    // Module 12.
+    controlRegister: "[draft] {name} control register outside C0 to C4",
     // Brief 8L.
     noFunction:
       "The tests call the function {name}, but no line of your program starts with {name}:, so start the function's first line with {name}: to give it that name.",
