@@ -36,13 +36,6 @@
     "dropped: where to check"
   ],
   [
-    "1C",
-    "modelVsReality",
-    "Each press of Run runs one line.",
-    "Each press of Run one line runs one line.",
-    "wrong: Run runs to the stop"
-  ],
-  [
     "1A",
     "question",
     "How does the machine decide",
@@ -216,5 +209,26 @@
     "the sixteen numbers it keeps",
     "the numbers it keeps",
     "wrong: the figure shows R1 to R5, the numbers the program names"
+  ],
+  [
+    "F1",
+    "motivation",
+    "The display shows how much",
+    "The display shows how much",
+    "placed: the drafter returned the new paragraph alone; the managing model put it before the list, as the brief said"
+  ],
+  [
+    "F1L",
+    "titles.reflection",
+    "Inside the box",
+    "A program, run exactly",
+    "drifted: the body is about running a program exactly; inside the box is the next lesson's"
+  ],
+  [
+    "F1",
+    "explanation",
+    "So changing the limit changed one kept number.",
+    "So changing the limit, as you did in the construction, changed one kept number.",
+    "dropped: the link to the construction"
   ]
 ]

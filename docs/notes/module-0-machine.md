@@ -230,3 +230,28 @@ pass; 592 browser tests pass and 10 fail, all ten the screenshot comparisons of 
 does not touch (the figures that matter most, registers, state machines, signals, the scenes,
 Module 2's pairs), the set Modules 8 and 9 recorded failing on a clean `main` in build containers
 from this one's text rendering. Not re-run on a clean `main` here; the baselines were not updated.
+
+## The review of lesson 0.1
+
+The managing session's reviewer and sceptic found seven things; each was acted on, code first,
+then fix brief F1 to the drafter, then the lesson read once more.
+
+1. The model note claimed every number on the page came from the simulator; the degrees are the
+   tenths written by hand. It now says what the figures read, the "Kept as" column included, and
+   that the machine works in tenths. Its heading, "How the model differs from hardware", is the
+   runtime's string for a lesson whose figures take `timeModel: "none"`; the book cannot give a
+   lesson a heading of its own, so a heading in plain words waits for a platform change.
+2. The texts under the investigation's and the explanation's figures showed at the first press.
+   They now wait for the run they describe: a stop, and for the second half a stop after the
+   learner changed a reading (`outcomesChanged`).
+3. The motivation now says what the display shows and what the shop wants CLASH for (the rooms
+   10.0 degrees or more apart), as the shop means it, before the prediction.
+4. The explanation tied "changing the program" to every kept number. It now says it of line 5,
+   whose kept number carries its 100 (101 gives 620773477), and gives line 6's 3 as a part not
+   kept as written; the explanation's figure has a box for line 5's number, so the learner sees
+   the kept number move.
+5. "Memory" now holds the lines only; R0 to R15 are kept apart and the readings come in from the
+   sensors. The generalisation says a machine changes jobs by its program, between runs.
+6. The reflection's heading matches its body; the model note quotes "Run one line".
+7. The generalisation no longer says a phone runs one line at a time: a phone runs many programs
+   and does several things at once, and each program's lines take effect in their order.

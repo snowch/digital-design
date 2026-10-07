@@ -5,11 +5,11 @@
 import { describe, expect, it } from "vitest";
 
 import { grade } from "@dd/dd-views";
-import { meetLines } from "@dd/dd-model";
+import { meetLines, programText } from "@dd/dd-model";
 import { parseLesson } from "@platform/lesson-schema";
 
 import { meetFigureAnswer, meetRun } from "./module0-facts";
-import { GAP } from "./module0";
+import { GAP, GAP_LIMIT } from "./module0";
 import { whatComputersDo as lesson } from "./what-computers-do";
 
 const parsed = parseLesson(lesson);
@@ -43,6 +43,12 @@ describe("facts for the lesson on what a computer does", () => {
       939530200, 939534304, 319959040, 1208158144, 620773476, 1446248451, 620777476, 1208289224,
       2214592512,
     ]);
+  });
+
+  it("line 5 with 101 is kept as 620773477; line 6 keeps its way to line 9 as 3", () => {
+    const with101 = meetLines(programText(GAP_LIMIT).replace("{limit}", "101"));
+    expect(with101[4]?.stored).toBe(620773477);
+    expect(meetLines(GAP)[5]!.stored & 0xfff).toBe(3);
   });
 
   it("the limit challenge: 50 passes all 3 tests; the start, 100, fails two; 51 and 49 fail", () => {

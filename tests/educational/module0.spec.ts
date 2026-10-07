@@ -171,6 +171,19 @@ test.describe("the machine at work", () => {
   });
 });
 
+test.describe("lines kept as numbers", () => {
+  test("changing line 5's number changes line 5's kept number, and only that", async ({ page }) => {
+    await openLesson(page, FIRST.id);
+    const figure = page.locator("#ix-kept");
+    await figure.scrollIntoViewIfNeeded();
+    const row = figure.locator(".meet-program tbody tr").nth(4);
+    await expect(row).toContainText("620773476");
+    await figure.getByRole("spinbutton", { name: M.limitLabel }).fill("101");
+    await expect(row).toContainText("620773477");
+    await expect(figure.locator(".meet-program tbody tr").nth(5)).toContainText("1446248451");
+  });
+});
+
 test.describe("the ladder", () => {
   test("goes down from line 3 to one wire, high, a level at a time", async ({ page }) => {
     test.setTimeout(120_000);

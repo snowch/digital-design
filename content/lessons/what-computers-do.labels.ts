@@ -23,7 +23,7 @@ export const LABELS = {
     explanation: "Lines kept as numbers",
     generalisation: "What every computer does",
     challenge: "Work it out by hand",
-    reflection: "Reading, keeping, running, setting",
+    reflection: "A program, run exactly",
   },
   challengeTitles: {
     c1: "Changing the limit",
