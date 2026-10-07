@@ -28,7 +28,7 @@ export const PROSE = {
   levelWire:
     "One wire from the slice's adding part, named SUM. It is high, and a high voltage stands for 1. A low one stands for 0.",
   ladderLead:
-    'The figure starts at line 3. Each press of "Down a level" goes one level down, and you go down the machine to one wire.\n\nAt each level, find the number. It is the same number all the way down: 66, then its 1s and 0s, then the 1 of one slice, then one wire.',
+    'The figure starts at line 3. Each press of "Down a level" goes one level down, to one wire at the bottom.\n\nAt each level, find the number. It is the same number all the way down: 66, then its 1s and 0s, then the 1 of one slice, then one wire.',
   ladderAfter:
     "The 66 at the top is the 1s and 0s on 64 slices' outputs. One of those, the slice worth 2, is one wire, high.\n\nEvery level is the same machine, seen from nearer. The course builds it from that wire upwards.",
   construction:
@@ -46,7 +46,7 @@ export const PROSE = {
   stuckLead:
     'Choose the stuck wire. It is at the bottom of the ladder, inside the slice worth 2, and it stays at 0 whatever the slice works out.\n\nBefore you run it, decide: what will the shop\'s display show? Then press "Run".',
   stuckAfter:
-    "The display shows 64, not 66. The slice worth 2 gives 0, so the part that adds gives 64.\n\nEvery line ran as before. The program stopped normally, and nothing on the page says anything is wrong. 6.4 degrees looks like a reasonable gap. One wire, four levels down, changed what the shop sees.",
+    "The display shows 64, not 66. The slice worth 2 gives 0, so the part that adds gives 64.\n\nEvery line ran as before. The program stopped normally, and nothing on the page says anything is wrong. 6.4 degrees looks like a reasonable gap. One wire, deep inside the part that adds, changed what the shop sees.",
   explanation:
     "Each level is the level below seen from further away. The 66 in R3 is the 1s and 0s on 64 slices' outputs, and each of those is a wire, high or low.\n\nSo a fault at the bottom shows at the top as a wrong number, and nothing at the top can tell. The display had no way to know that the 2 was missing.\n\nThis is why the course tests every part it builds before it uses that part as a box. A part used as a box must do what its outside promises.",
   generalisation:

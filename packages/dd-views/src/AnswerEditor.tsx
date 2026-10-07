@@ -122,6 +122,23 @@ export const AnswerEditor: ComponentType<ChallengeEditorProps> = ({
             </div>
           );
         }
+        // Module 0: a choice among options, the first lesson's that needs one.
+        if (f.kind === "choice")
+          return (
+            <label key={f.id} className="answer-field" data-field={f.id}>
+              <span className="answer-label">{f.label}</span>
+              <span className="answer-input">
+                <select id={id} value={value} onChange={(e) => set(f.id, e.target.value)}>
+                  <option value="" />
+                  {(f.options ?? []).map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </span>
+            </label>
+          );
         return (
           <label key={f.id} className="answer-field" data-field={f.id}>
             <span className="answer-label">{f.label}</span>

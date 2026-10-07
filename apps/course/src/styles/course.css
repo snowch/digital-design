@@ -2150,3 +2150,75 @@ button.bit {
   display: flex;
   align-items: center;
 }
+
+/* Module 0, meet the machine: the machine at work and the ladder, and a choice in an answer. */
+.answer-input select,
+.meet-reading input {
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  min-height: 2.75rem;
+  width: 12rem;
+  max-width: 100%;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+  color: var(--fg);
+}
+.answer-input select {
+  font-family: var(--font-sans);
+}
+.meet-readings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  border: 0;
+  padding: 0;
+  margin: 0 0 var(--space-3);
+}
+.meet-readings legend {
+  font-weight: 650;
+  margin-bottom: var(--space-1);
+}
+.meet-reading {
+  display: grid;
+  gap: var(--space-1);
+}
+.meet-reading input {
+  width: 8rem;
+}
+.meet-reading input:disabled {
+  opacity: 0.6;
+}
+.meet-program td:nth-child(2) {
+  font-family: var(--font-sans);
+}
+.ladder-line {
+  font-family: var(--font-mono);
+  margin: var(--space-2) 0;
+}
+.ladder-steps {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-2) 0;
+}
+.ladder-position {
+  font-weight: 650;
+}
+.ladder-level {
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-2);
+}
+.ladder-title {
+  margin: 0;
+}
+.ladder-module {
+  color: var(--fg-muted);
+  margin: var(--space-1) 0;
+}
+.ladder-reading {
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}

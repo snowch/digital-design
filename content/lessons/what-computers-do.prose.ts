@@ -29,11 +29,11 @@ export const PROSE = {
   c1Task:
     "Type the number line 5 should give R4 so that CLASH lights when room A is 5.0 degrees or more warmer than room B, and stays dark when the gap is less.\n\nThe tests run the machine with your number in line 5 and room B at -250, for three readings of room A: -190 (gap 60), -200 (50) and -201 (49). CLASH must light for gaps 60 and 50, and stay dark for 49. The box starts at 100. With 100, two of the 3 tests fail.",
   c1Hints: [
-    "line 6 goes to line 9, past the lamp, when R3 is less than R4. CLASH lights only when R3 is not less than R4.",
-    "a gap exactly equal to the limit is not less than it, so the lamp lights. Think about the gap of 50.",
-    "with 100 in line 5, a gap of 100 lights CLASH and a gap of 99 does not.",
+    "Line 6 goes to line 9, past the lamp, when R3 is less than R4. CLASH lights only when R3 is not less than R4.",
+    "A gap exactly equal to the limit is not less than it, so the lamp lights. Think about the gap of 50.",
+    "With 100 in line 5, a gap of 100 lights CLASH and a gap of 99 does not.",
     "5.0 degrees is 50 tenths of a degree.",
-    "50.",
+    "The limit is 50.",
   ],
   roomBFailsLead:
     "Room B's freezer fails. It warms to -5.0 degrees, so its sensor reads -50. Room A stays at -184.\n\nRoom B is now 13.4 degrees warmer than room A. The shop would want CLASH to light: the two rooms are far apart. The figure runs the same program with these readings. Read the program again before you answer.",
@@ -60,7 +60,7 @@ export const PROSE = {
     "The display shows 150. CLASH is lit, because 150 is not less than 100.",
   ],
   reflection:
-    "A computer runs a program. The lines are kept as numbers in its memory. It runs them one at a time. It reads numbers from outside, the rooms. It keeps sixteen numbers, R0 to R15. It sets the display and the lamps.\n\nThe machine follows the lines exactly. The program decides what the display means. When the program is wrong, the machine is wrong with it. The machine is a box. It runs lines. But what is inside the box, and how does it work out 66?",
+    "A computer runs a program. The lines are kept as numbers in its memory. It runs them one at a time.\n\nThe machine follows the lines exactly. The program decides what the display means. When the program is wrong, the machine is wrong with it. The machine is a box. It runs lines. But what is inside the box, and how does it work out 66?",
   modelVsReality:
     "The machine on this page runs in the course's simulator. Each press of Run one line runs one line. Every number on the page is read from the simulator.\n\nA real computer runs many millions of lines a second. Here you see one line at a time. The course is about how each line works.\n\nThe rooms' readings here are numbers you type. A real sensor's reading changes on its own. A real shop's computer would also run lines for many other jobs. This machine runs one program, nine lines long, and stops.",
 } as const;

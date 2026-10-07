@@ -184,7 +184,9 @@ export function aluLibrary(place: Place): Readonly<Record<string, () => Circuit>
 
 const SLICE_AT: At = {
   "in:A": [0, 1],
-  "in:B": [0, 4],
+  // Half a cell down, level with the bit-by-bit selector's D, so B runs into it straight (Module
+  // 0's ladder is the first figure to draw a slice opened).
+  "in:B": [0, 4.5],
   "in:OP2": [0, 18],
   "in:OP1": [0, 21],
   "in:OP0": [0, 24],
@@ -212,6 +214,33 @@ const SLICE_AT: At = {
 
 /** Hand-placed insides of Module 7's blocks, by kind, for a view that opens one. */
 export const ALU_INSIDE: Readonly<Record<string, At>> = {
+  // Module 0: the 64-bit ALU with flags as Module 8's machine holds it, a closed block, opened
+  // as Module 7's own top level is placed. A closed ALU of another width holds other parts, and
+  // is laid out automatically as before.
+  alu8: shifted(
+    {
+      "in:A": [0, 1],
+      "in:B": [0, 4],
+      "in:OP2": [0, 40],
+      "in:OP1": [0, 43],
+      "in:OP0": [0, 46],
+      xorC0: [6, 50],
+      andC0: [10, 49.5],
+      one: [8, 37],
+      g0: [14, 30],
+      g1: [23, 21],
+      g2: [32, 12],
+      g3: [41, 3],
+      joinY: [50, 30],
+      topBit: [56, 30],
+      "out:Y": [61, 31],
+      "out:MINUS": [61, 27],
+      "out:ZERO": [61, 4],
+      "out:COUT": [61, 7],
+      "out:OVER": [61, 10],
+    },
+    5,
+  ),
   // One slice: the bit-by-bit jobs along the top, the adder and its second input below, the
   // flags on the right.
   "alu-flag-slice": SLICE_AT,

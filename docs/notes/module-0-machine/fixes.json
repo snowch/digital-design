@@ -80,17 +80,6 @@
   ],
   ["2A", "levelParts", "press Make smaller", "press \"Make smaller\"", "as above"],
   [
-    "1B",
-    "c1Hints.1",
-    "The concept: ",
-    "",
-    "the runtime names each rung itself; the label repeated it"
-  ],
-  ["1B", "c1Hints.2", "The mistake: ", "", "as above"],
-  ["1B", "c1Hints.3", "A smaller example: ", "", "as above"],
-  ["1B", "c1Hints.4", "Part of the answer: ", "", "as above"],
-  ["1B", "c1Hints.5", "The answer: ", "", "as above"],
-  [
     "2B",
     "c1Task",
     "reads the eight slices.",
@@ -133,5 +122,49 @@
     "Press \"Down a level\" to go down",
     "button names in double quotation marks; plain word"
   ],
-  ["2L", "titles.prediction", "Which slices give 1", "Which slices give a 1", "the brief's wording"]
+  [
+    "2L",
+    "titles.prediction",
+    "Which slices give 1",
+    "Which slices give a 1",
+    "the brief's wording"
+  ],
+  [
+    "1B",
+    "c1Hints.1",
+    "The concept: line",
+    "Line",
+    "the runtime names each rung itself; the label repeated it"
+  ],
+  ["1B", "c1Hints.2", "The mistake: a gap", "A gap", "as above"],
+  ["1B", "c1Hints.3", "A smaller example: with", "With", "as above"],
+  ["1B", "c1Hints.4", "Part of the answer: 5.0", "5.0", "as above"],
+  [
+    "1B",
+    "c1Hints.5",
+    "The answer: 50.",
+    "The limit is 50.",
+    "as above; a hint of one number alone read as a fragment"
+  ],
+  [
+    "1C",
+    "reflection",
+    " It reads numbers from outside, the rooms. It keeps sixteen numbers, R0 to R15. It sets the display and the lamps.",
+    "",
+    "second pass: a repeat of the generalisation's four things, a paragraph above"
+  ],
+  [
+    "2B",
+    "stuckAfter",
+    "One wire, four levels down, changed",
+    "One wire, deep inside the part that adds, changed",
+    "wrong: four levels is no count the ladder gives"
+  ],
+  [
+    "2A",
+    "ladderLead",
+    "goes one level down, and you go down the machine to one wire.",
+    "goes one level down, to one wire at the bottom.",
+    "second pass: a broken join from the fix above"
+  ]
 ]

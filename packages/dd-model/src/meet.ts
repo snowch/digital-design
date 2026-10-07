@@ -359,7 +359,9 @@ export const MEET_PLACES: Readonly<Record<string, MeetPlace>> = {
     highlight: [`${SLICE}/fa`],
   },
   smallest: { scope: `${SLICE}/fa/ha2`, net: MEET_WIRE, show: "digits" },
-  wire: { scope: SLICE, net: MEET_WIRE, show: "level", focus: ["SUM"] },
+  // The slice's adding part, where the wire leaves it as SUM: a small drawing, clear as first
+  // drawn, where the slice whole is too busy to open a page on.
+  wire: { scope: `${SLICE}/fa`, net: MEET_WIRE, show: "level", focus: ["SUM"] },
 };
 
 /** The wires a Module 0 figure may hold stuck, by a plain key. */

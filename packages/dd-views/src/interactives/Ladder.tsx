@@ -185,7 +185,8 @@ export const Ladder = withProps(
             <p className="ladder-module">
               {format(t.ladder.builtIn, { module: level.module, name: level.moduleName })}
             </p>
-            <Prose markdown={level.caption} />
+            {/* A level's words state its number, which would answer the prediction. */}
+            {committed && <Prose markdown={level.caption} />}
             {committed && reading && (
               <p role="status" className="ladder-reading">
                 {reading}
