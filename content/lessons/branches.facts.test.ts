@@ -40,6 +40,8 @@ describe("facts for the branches lesson", () => {
     expect(signed(r.state.display)).toBe("-250");
   });
 
+  // Twenty edges of the 64-bit machine: 4.6 seconds alone, past Vitest's 5 when the check's
+  // other workers share the machine, so it has the time its neighbours have.
   it("the loop: 15 on the display after 20 edges", () => {
     const r = runToStop(branches, "sum");
     expect([r.reason, r.edges, r.state.pc, signed(r.state.display)]).toEqual([
@@ -48,7 +50,7 @@ describe("facts for the branches lesson", () => {
       0x1cn,
       "15",
     ]);
-  });
+  }, 60_000);
 
   it("the faults: MET at 1 never stops; MET at 0 shows 5 after 8 edges", () => {
     const high = runToStop(branches, "branch-faults", 0, 40);

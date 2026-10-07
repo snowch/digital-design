@@ -10,13 +10,18 @@ export const STRINGS = {
   themeLight: "Light",
   themeDark: "Dark",
   footer: "Everything runs in your browser. Nothing is sent anywhere.",
+  /** For a browser that runs no scripts, under the cover's words (static-page.ts). */
+  noScript:
+    "This course runs a circuit simulator in your browser, so it needs JavaScript. Nothing is sent anywhere: everything runs here.",
+  /** A page's name in the browser's tab, after its own name; the front page keeps the full title. */
+  pageTitle: (page: string) => `${page} / Digital Design`,
   /** Under the footer's line, on every page. */
   copyright: "© 2026 Christopher Snow",
   noLessons: "No lessons are published yet.",
   noChallenges: "No challenges",
   /** Under the course title: what the course takes as known before Module 1. */
   assumes:
-    "The course assumes you can turn a binary number into decimal and a decimal number into binary.",
+    "The course assumes you can turn binary numbers to decimal and back. It assumes everyday arithmetic, but nothing about electronics, circuits or programming.",
   /** Under the line above: the link to the page before the first lesson. */
   prefaceLink: "Check if you are ready and see how a lesson works.",
   preface: {
@@ -52,8 +57,16 @@ export const STRINGS = {
    * term a lesson introduces (a test holds it to the term gate).
    */
   cover: {
-    /** Under the course title: what the course is. */
-    lead: "You build a working computer from its parts, starting from two voltages on a wire, and for each circuit you predict what will happen, build it, run it, break it, and explain what happened. Everything runs in your browser, your work stays in your browser, and every simulation shows the real circuit, not an animation.",
+    /**
+     * What a search result and a shared link's preview show under the course's title, at most 155
+     * characters (brief C3; static-page.ts writes it into the page).
+     */
+    description:
+      "Build a working computer from its parts, starting from two voltages. For each circuit, predict, build, run, break and explain, all in your browser.",
+    /** Under the course title, larger than the rest: what you do in the course (brief C3). */
+    tagline: "You build a working computer from its parts, starting from two voltages on a wire.",
+    /** Under the tagline: how the course goes about it. */
+    lead: "By Module 8, reused parts form one machine that runs programs. For each circuit you predict, build, run, break and explain. Each idea and each name arrives when the circuit you are building raises a question that needs it. Every simulation runs the real circuit, not an animation. Everything runs and stays in your browser.",
     /** The way in, on two lines: the module, then its first lesson's question under it. */
     startLine: (module: number) => `Start with Module ${module}`,
     continueLine: (module: number) => `Continue with Module ${module}`,
@@ -69,32 +82,36 @@ export const STRINGS = {
     stages: [
       {
         name: "Signals",
-        about: "Voltages become numbers. Combine signals with AND, OR, NOT; choose, compare, add.",
+        about:
+          "Turn voltages into numbers; build logic circuits with AND, OR, NOT; choose, compare, add.",
         from: 1,
         to: 3,
       },
       {
         name: "Memory",
-        about: "Circuits keep values. They count, step through sequences, store many numbers.",
+        about:
+          "Build circuits that remember values; count and step through sequences; store and find numbers.",
         from: 4,
         to: 6,
       },
       {
         name: "Machine",
         about:
-          "Parts join into one machine. It performs arithmetic and logic. Control takes each step.",
+          "Build the arithmetic and logic circuit; join parts into one machine; build the control for each step.",
         from: 7,
         to: 9,
       },
       {
         name: "Programming",
-        about: "Learn the machine's vocabulary. Write programs and find their mistakes.",
+        about:
+          "Learn why the machine's vocabulary is as it is; write programs for it; find their mistakes.",
         from: 10,
         to: 11,
       },
       {
         name: "The whole machine",
-        about: "The whole machine responds to errors. Programs run from start to finish.",
+        about:
+          "Make the machine respond when errors occur; run complete programs from start to end.",
         from: 12,
         to: 13,
       },

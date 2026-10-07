@@ -164,6 +164,7 @@ export function LessonList({
             {titleMain}
             {titleSub && <span className="hero-title-sub">{titleSub}</span>}
           </h1>
+          <p className="cover-tagline">{STRINGS.cover.tagline}</p>
           <p className="cover-lead">{STRINGS.cover.lead}</p>
           {next && (
             <p className="cover-start">
