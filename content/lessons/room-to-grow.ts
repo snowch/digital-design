@@ -186,9 +186,10 @@ export const roomToGrow: LessonInput = {
         {
           id: "join-places",
           kind: "circuit-explorer",
-          timeModel: "settle",
+          timeModel: "none",
           caption: LABELS.captions.joinPlaces,
           lead: PROSE.joinPlacesLead,
+          after: PROSE.explanationList,
           props: {
             libraryId: "join-places",
             writtenWidth: 4,
@@ -196,6 +197,8 @@ export const roomToGrow: LessonInput = {
             still: true,
             canOpen: false,
             highlightLabel: LABELS.joinMark,
+            notes: LABELS.joinNotes,
+            focus: ["alu", "yWord"],
           },
         },
       ],

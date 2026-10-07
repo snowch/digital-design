@@ -151,6 +151,10 @@ function crowds([a, b]: Segment, [c, d]: Segment): boolean {
  * beside it, a block's label above it and a part's name below it (CircuitView places both; about
  * 7.2 pixels a character in the drawing's 12-pixel mono face). The body comes first.
  */
+/** The height of a line of a figure's note under a part, in the drawing's pixels. */
+export const NOTE_LINE = 15;
+export const NOTE_GAP = 8;
+
 export function obstaclesOf(b: PartBox): Obstacle[] {
   const isPin = b.part.kind === "input" || b.part.kind === "output";
   const around = (text: string, y1: number, y2: number) => {
@@ -158,10 +162,16 @@ export function obstaclesOf(b: PartBox): Obstacle[] {
     return { x1: b.x + b.w / 2 - half, y1, x2: b.x + b.w / 2 + half, y2 };
   };
   const named = !nameRepeatsKind(b.part.id, b.part.kind) && !b.part.id.startsWith("fault/");
+  // Module 10: a figure's note, a line each under the name (CircuitView writes them).
+  // It starts clear of the dashed outline a marked part carries (6 pixels out, CircuitView).
+  const noteTop = b.y + b.h + (named ? 16 : 1) + NOTE_GAP;
+  const note = b.part.note ?? [];
+  const longest = note.reduce((m, l) => (l.length > m.length ? l : m), "");
   return [
     { x1: b.x + 1, y1: b.y + 1, x2: b.x + b.w - 1, y2: b.y + b.h - 1 },
     ...(!isPin && !isShaped(b.part.kind) ? [around(b.label, b.y - 20, b.y - 4)] : []),
     ...(!isPin && named ? [around(b.part.id, b.y + b.h + 1, b.y + b.h + 16)] : []),
+    ...(note.length ? [around(longest, noteTop, noteTop + NOTE_LINE * note.length)] : []),
   ];
 }
 

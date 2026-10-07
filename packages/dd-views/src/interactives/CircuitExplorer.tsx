@@ -67,6 +67,8 @@ const Props = z.object({
   highlightLabel: z.string().optional(),
   /** Module 10: the drawing alone, where the figure shows where parts sit, not what they carry. */
   still: z.boolean().default(false),
+  /** Module 10: lines written under parts of the drawing, by path. */
+  notes: z.record(z.string(), z.array(z.string())).optional(),
 });
 
 /** The reference table restricted to the inputs the circuit has, with a wildcard for X. */
@@ -157,6 +159,7 @@ export const CircuitExplorer = withProps(
           scope={scope}
           {...(data.focus ? { focus: data.focus } : {})}
           highlight={data.highlight}
+          {...(data.notes ? { notes: data.notes } : {})}
           {...(data.highlightLabel ? { highlightLabel: data.highlightLabel } : {})}
           {...(data.canOpen ? { onScope: setScope } : {})}
           readings={data.readings}

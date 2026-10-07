@@ -22,6 +22,7 @@ import {
   sceneProblems,
   straighten,
   toFault,
+  withNotes,
 } from "@dd/dd-views";
 import { LessonView, memoryStorage } from "@platform/lesson-runtime";
 import { termProblems } from "@platform/lesson-schema";
@@ -61,6 +62,7 @@ describe("the course's lessons", () => {
       circuit: ReturnType<typeof libraryCircuit>,
       open = true,
       first = "",
+      notes?: Readonly<Record<string, readonly string[]>>,
     ) => {
       // Module 6: a sealed block (a word selector, a memory as a component) never opens, so
       // neither it nor anything inside it is a drawing a learner sees.
@@ -75,7 +77,9 @@ describe("the course's lessons", () => {
         return true;
       });
       for (const scope of new Set(["", first, ...scopes.map((c) => c.path)])) {
-        const scene = sceneOf(straighten(drawingAt(circuit, scope).drawing));
+        // Module 10: a figure's notes are written on the drawing it first shows, as the page does.
+        const drawn = drawingAt(circuit, scope).drawing;
+        const scene = sceneOf(straighten(scope === "" ? withNotes(drawn, notes) : drawn));
         // A figure as first drawn is held to half a cell between wires and no crossing a better
         // order of turns would avoid; the inside of a block, to the rest. Module 9: a figure may
         // first show a block opened (`scope`), which is then held to them too, as the browser
@@ -96,6 +100,7 @@ describe("the course's lessons", () => {
             scope?: string;
             circuits?: readonly { libraryId?: unknown }[];
             faults?: readonly Parameters<typeof toFault>[0][];
+            notes?: Readonly<Record<string, readonly string[]>>;
           };
           // Module 7's carry-stepping and suite figures run a circuit but never draw it.
           if (x.kind === "carry-steps" || x.kind === "suite-lab") continue;
@@ -103,7 +108,7 @@ describe("the course's lessons", () => {
           for (const id of ids) {
             if (typeof id !== "string") continue;
             const open = p.canOpen !== false && x.kind !== "prediction";
-            check(`${l.id} ${x.id}`, libraryCircuit(id), open, p.scope);
+            check(`${l.id} ${x.id}`, libraryCircuit(id), open, p.scope, p.notes);
             for (const f of p.faults ?? [])
               check(
                 `${l.id} ${x.id} with a fault`,

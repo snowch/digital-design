@@ -478,13 +478,19 @@ test.describe("Module 10's figures", () => {
     const figure = page.locator("#ix-join-places");
     const props = lessonData("room-to-grow")
       .sections.flatMap((s) => s.interactives)
-      .find((x) => x.id === "join-places")?.props as { highlightLabel: string };
+      .find((x) => x.id === "join-places")?.props as {
+      highlightLabel: string;
+      notes: Record<string, string[]>;
+    };
     const mark = props.highlightLabel;
     await figure.scrollIntoViewIfNeeded();
     await expect(figure.locator("svg title", { hasText: mark })).toHaveCount(4);
     await expect(figure.getByRole("button", { name: / = [01]\./ })).toHaveCount(0);
     await expect(figure.getByRole("button", { name: V.explorer.reset })).toHaveCount(0);
     await expect(figure.locator("table.signal-table")).toHaveCount(0);
+    // Each outline is labelled with what joins there; a still drawing carries no timing badge.
+    await expect(figure.locator("[data-path=plus4] .part-note")).toHaveText(props.notes["plus4"]!);
+    await expect(figure.locator(".time-model-toggle, .badge")).toHaveCount(0);
   });
 
   test("one MET picks the branch's next PC and, with SET, register Y's word", async ({ page }) => {

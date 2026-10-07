@@ -2476,3 +2476,14 @@ button.bit {
   font-size: var(--text-sm);
   color: var(--fg-muted);
 }
+
+/* Module 10: what a marked block is there for in this figure, under its name, over the canvas's
+   halo as the name is. */
+.circuit .part-note {
+  fill: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  paint-order: stroke;
+  stroke: var(--canvas);
+  stroke-width: 4px;
+}
