@@ -42,7 +42,7 @@ export const LABELS = {
     roomA: "Room A",
     roomB: "Room B",
     sensor: "Sensor",
-    machine: "The machine",
+    machine: "Machine",
     display: "Display",
     title: "The shop and the machine",
     summary:

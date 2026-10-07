@@ -57,16 +57,16 @@ export const whatComputersDo: LessonInput = {
             sources: [
               {
                 room: LABELS.scene.roomA,
-                items: [{ kind: "sensor", label: LABELS.scene.sensor, width: 64 }],
+                items: [{ kind: "sensor", label: LABELS.scene.sensor }],
               },
               {
                 room: LABELS.scene.roomB,
-                items: [{ kind: "sensor", label: LABELS.scene.sensor, width: 64 }],
+                items: [{ kind: "sensor", label: LABELS.scene.sensor }],
               },
             ],
             circuit: LABELS.scene.machine,
             outputs: [
-              { kind: "readout", label: LABELS.scene.display, width: 64 },
+              { kind: "readout", label: LABELS.scene.display },
               { kind: "lamp", label: "ALARM" },
               { kind: "lamp", label: "NIGHT" },
               { kind: "lamp", label: "CLASH" },

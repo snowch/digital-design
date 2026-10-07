@@ -9,7 +9,7 @@ export const PROSE = {
   question:
     "A shop has two freezer rooms, A and B. Each has a sensor. The office has a display and three lamps: ALARM, NIGHT and CLASH.\n\nA machine sits between the sensors and the office. It reads the rooms and decides what the display shows and which lamps light. The figure below draws them: the sensors on the left, the machine in the middle, the display and the lamps on the right.\n\nHow does the machine decide what the display shows?",
   shopAfter:
-    "Room A at -18.4 degrees sends -184. Room B, kept colder at -25.0 degrees, sends -250. Each number is in tenths of a degree. The 64 beside each connection shows how many wires take the number.",
+    "Room A at -18.4 degrees sends -184. Room B, kept colder at -25.0 degrees, sends -250. Each number is in tenths of a degree.",
   motivation:
     "The machine does not decide anything by itself. It runs a program: a list of lines, numbered from 1. It runs one line at a time, in order, unless a line tells it to go to another line.\n\nThe machine keeps sixteen numbers, named R0 to R15. A line can set one of them, read a room, show a number on the display, or set the lamps.\n\nThe shop's program has 9 lines:\n\n1. R1 becomes room A's reading\n2. R2 becomes room B's reading\n3. R3 becomes R1 minus R2\n4. Show R3 on the display\n5. R4 becomes 100\n6. If R3 is less than R4, go to line 9\n7. R5 becomes 4\n8. Set the lamps from R5\n9. Stop\n\nRunning these lines is all the machine does. The next figure asks you which of them it runs.",
   prediction:

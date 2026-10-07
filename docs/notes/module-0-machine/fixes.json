@@ -51,13 +51,6 @@
   ],
   [
     "1A",
-    "shopAfter",
-    "how many wires carry the number",
-    "how many wires take the number",
-    "vocabulary: carry is rationed (Module 3)"
-  ],
-  [
-    "1A",
     "prediction",
     "Work out what line 3",
     "Its numbers and buttons stay hidden until you choose an answer. Work out what line 3",
@@ -166,5 +159,13 @@
     "goes one level down, and you go down the machine to one wire.",
     "goes one level down, to one wire at the bottom.",
     "second pass: a broken join from the fix above"
-  ]
+  ],
+  [
+    "1A",
+    "shopAfter",
+    " The 64 beside each connection shows how many wires carry the number.",
+    "",
+    "the scene drops its wire counts to fit a phone, so the sentence about them goes"
+  ],
+  ["1L", "scene.machine", "The machine", "Machine", "shorter, so the scene fits a phone's card"]
 ]
