@@ -5,11 +5,12 @@
 
 import { describe, expect, it } from "vitest";
 
-import { edgePair, pairView, runPair, startPair, stuckAt } from "@dd/dd-model";
+import { assemble, edgePair, pairView, runPair, startPair, stuckAt } from "@dd/dd-model";
 import { grade, machineCompareAnswer } from "@dd/dd-views";
 import { parseLesson, testCount } from "@platform/lesson-schema";
 
 import { instructionSet } from "./instruction-set";
+import { PROSE } from "./instruction-set.prose";
 import { COLDER } from "./module9";
 import { SHORT_JOBS_FROM, SHORT_JOBS_TO } from "./module10";
 
@@ -63,6 +64,11 @@ describe("facts for the instruction-set lesson", () => {
     runPair(broken);
     expect(broken.log[0]?.differ).toEqual(["R2"]);
     expect(broken.log.slice(0, -1).every((l) => l.edges === 1)).toBe(true);
+    // The load at 000 ends with the PC at 014, the stop: the instructions between never run.
+    const lines = assemble(COLDER).lines.filter((l) => l.instruction !== undefined);
+    const skipped = lines.filter((l) => l.address > 0x000 && l.address < 0x014).length;
+    expect(skipped).toBe(4);
+    expect(PROSE.faultPcen).toContain("skips the four instructions between");
     const v = pairView(broken);
     expect([v.multi.regs[2], v.multi.regs[3], v.multi.display, v.single.pc, v.multi.pc]).toEqual([
       -184n & ((1n << 64n) - 1n),

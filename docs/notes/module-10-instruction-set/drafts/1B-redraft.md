@@ -20,6 +20,6 @@ The machines differ after the first edge, on R2.
 
 The controller still takes the load's 5 edges, FETCH to WRITE. But the PC moves on at every one of them. Each of those edges ends an instruction, so Module 8's machine runs one instruction for each.
 
-Module 9's machine writes R2, -184, at the load's WRITE edge. By then its PC is at `014`, so it fetches the stop next and skips the three instructions between. R3 stays X on Module 9's machine. Its display shows 0, where Module 8's shows -250.
+Module 9's machine writes R2, -184, at the load's WRITE edge. By then its PC is at `014`, so it fetches the stop next and skips the four instructions between. R3 stays X on Module 9's machine. Its display shows 0, where Module 8's shows -250.
 
 Module 8's machine halts at the stop, at `014`. Module 9's PC has moved to `018` when its machine halts. Every one of Module 8's 37 programs differs with this fault.
