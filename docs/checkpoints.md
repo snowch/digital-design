@@ -322,3 +322,165 @@ The author took every recommendation the same day, asking for the best reader an
 experience, and asked for the gaps above that a learner meets to be closed: words typed in "Try
 it", a fault lab's outcomes one fault at a time, and a wide drawing opened at the part its words
 name. `docs/plan.md` records the decision.
+
+## Course checkpoint 4: the assembler and the debugger
+
+The plan's fourth checkpoint (`docs/plan.md`, "When a module is done, and the checkpoints") comes
+after Module 11, the assembler and the debugger. The managing session wrote this report on 7
+October 2026, after merging Module 11.
+
+### What exists since checkpoint 3
+
+Checkpoint 3 came after Module 9, on 6 October 2026, with 32 lessons in Modules 1 to 9. Since then:
+
+- **Module 0, meet the machine** (`what-computers-do`, `inside-the-machine`): the finished machine
+  run a line at a time in plain words, then opened down to one wire, before the build begins. The
+  cover says Module 0 comes first.
+- **Module 10, the instruction set** (`instruction-set`, `encoding`, `immediates`, `room-to-grow`,
+  `design-an-instruction`):
+  - why the instruction set is as it is;
+  - the encoding explorer, with the calculator built from the learner's ALU;
+  - the constant's range and the reach of a branch;
+  - what an instruction left out costs a program;
+  - a designed instruction, "set if less", added to the learner's machine.
+
+  Four drawings came after its review: the agreement between programs and circuits, the cost of
+  what is left out, the condition block and the memory map, each readable on a phone.
+- **Module 11, programming and debugging** (`assembly`, `lists`, `functions`, `stack`, `recursion`,
+  `debugging`, `log-report`), below.
+- **The site**:
+  - an icon for tabs and home screens, with a web app manifest;
+  - the cover's path to Module 0;
+  - a heading for the model note that the first pages can read ("How the page differs from
+    hardware"), on pages with no clocked figure;
+  - the list of modules without a heading on screen.
+
+The course now has 46 lessons, in Modules 0 to 11. Modules 12 and 13 are still to be written.
+
+### What the learner can now do
+
+After Module 11 a learner can:
+
+- write a program for the course machine as text, with names for addresses, and mend the lines the
+  assembler refuses from its sentences;
+- step a program, set breakpoints, watch registers and words, and read every way a run ends. It
+  stops at its `stop`, the machine halts with a cause, the debugger pauses at a breakpoint or ends
+  the run before a register nothing has set, or the run is cut off after 5000 instructions;
+- walk a list in memory with a loop, and compare readings signed;
+- write functions that keep the calling convention, call one from another with the stack, and
+  write one that calls itself on work that nests (the cold store's rooms);
+- find the mistake in a program that runs and gives a wrong answer, by a method, and choose test
+  logs that reach the edges;
+- write the shop's daily report from a log through four functions, each tested alone, one of which
+  calls the other three and keeps what it needs on the stack.
+
+### What was built
+
+- **The learner's assembler.** It uses the authors' assembler's parsing, so every program assembles
+  alike. Each refusal is a drafted sentence that names its line and what to change. A `word` may
+  now hold a name, which the cold store's rooms need (`docs/isa.md`).
+- **A debugger** that runs the instruction set on the instruction-level model, as lesson 10.1
+  taught a program relies on.
+  - It offers step, step back, run to a breakpoint or to the end, a watch, a view of a list, a
+    view of the stack grouped by call, and the cut-off.
+  - The line about to run stays in view, and the buttons, the watch and the view a lesson's steps
+    name share one screen at both widths.
+  - An address shows as the pages write it, in three hexadecimal digits beside its decimal.
+- **Program challenges**, graded by running the learner's text over several logs and readings.
+  - The tests check what a program can see: the display, the lamps, registers, words and how the
+    run ended.
+  - A function is also called alone, with the convention, its calls and the stack's depth checked.
+  - Feedback says what the program left and how the run ended, never the answer.
+- **Figures**: the listing, the debugger, the stack's depth over a run, and a program run over
+  several logs. Module 10's program comparison is reused.
+
+### What was decided
+
+- **The assembly language** is `docs/isa.md`'s proposal with two refinements: a `word` may hold a
+  name, and the assembler's refusals are listed in `docs/isa.md`.
+- **The calling convention** is `docs/isa.md`'s, unchanged.
+- **One word for each way a run ends**, course-wide; Module 10's program comparison now says a run
+  stopped at its stop.
+- **Recursion is taught on the cold store's rooms**, each opening onto up to two more, since a loop
+  could follow them only by keeping a stack of its own. The first build's example, the log shown
+  newest first, is done more simply by a loop.
+- **The capstone has a function that calls the other three** and keeps what it needs on the stack.
+  As first built it passed without a push, so the module's hardest part went unused in the lesson
+  that ends it.
+- **The SystemVerilog testbench constructs** (`initial`, `#`, `$display`) wait for Module 12: no
+  Module 11 lesson needed them.
+
+### What the managing session checked before merging
+
+- **An early read** of lessons 11.1 to 11.5 at both widths, with eight notes the build acted on:
+  - a debugger the learner can follow while it steps;
+  - results that show only after their runs;
+  - predictions and challenges that the page does not answer;
+  - recursion on work that nests;
+  - and four more.
+- **A reading review.** Each of the seven lessons was read by its own reviewer as its learner, and
+  a sceptic attacked each review against the page, the source and the built site. 79 findings were
+  upheld or narrowed, 6 of them blocking. The build did every blocking and should-fix item, and
+  every minor one but two. The module note records each one (`docs/notes/module-11-programming.md`).
+- **The walk.** Every challenge was run with its starting text, with a line the assembler refuses
+  and with a loop that never stops. No page showed a console error or scrolled sideways.
+- **The full check** on the merged head: 1,191 unit and integration tests and 790 browser tests
+  passed, 48 were skipped, and none failed. A first run found one fault that the build's container
+  measured smaller: lesson 11.2's listing was 8 pixels wider than a phone. The build's fix is
+  merged, and the check ran again on it.
+
+### What the author should look at
+
+1. **The seven lessons, as a learner.** Start at
+   <https://snowch.github.io/digital-design/#/lesson/assembly>, then `lists`, `functions`, `stack`,
+   `recursion`, `debugging` and `log-report`. Lesson 11.4
+   carries the stack; 11.7 is the capstone.
+2. **Module 12's plan** (`docs/notes/module-12-plan.md`). Its build starts from it now, and your
+   answers can change it as it goes. Its decisions, each with a recommendation:
+   - **Which control registers a program writes.** `docs/isa.md` lets `Cc <= Rm` write all five.
+     `docs/machine.md`'s datapath gives the register A only to C0 and C4, yet its own text needs C1
+     and C2 written back: to skip a faulting instruction, and to restore them before `resume` once
+     a handler has turned interrupts on. Recommendation: all five, and correct `docs/machine.md`.
+   - **Where the trap hardware goes.** Recommendation: the machine of several edges, as a step of
+     its controller (Module 5's state machine, Module 9's control). Build it in Module 12's own
+     copy, so Modules 8 to 11 do not change; Module 13 takes that copy.
+   - **"Vector".** Checkpoint 2's decision 6 gives the word to C4, but the course already uses it
+     for a bus of bits (lessons 6.2 and 6.4). Recommendation: keep it off Module 12's pages, and
+     call C4 the handler's address.
+   - **The services of a system call** start from `docs/isa.md`'s proposal: show a number, read a
+     sensor, set the lamps, end the program. The build may change them and say why.
+   - **The learner's assembler** refuses a control register outside C0 to C4 with a sentence.
+3. **Module 13** is planned once Module 12's shape is settled. Checkpoint 5 comes before it is
+   built, as the plan says.
+4. **Two extraction candidates** wait for your approval under the rule of two:
+   - Module 10's program comparison, now used by Modules 10 and 11; it is a course-side part;
+   - the prediction gate: choose an answer, check it, and the figure's result appears.
+
+### Costs and known gaps
+
+- The full check takes about 45 minutes in the managing session's container and about 25 in CI.
+  Module 11 added 78 unit tests and 93 browser tests.
+- Ten stored screenshots fail in a build container on `main` too (text rendering). The managing
+  session's container and CI pass them, and CI is the authority.
+- The platform's verdict line has no form for one test ("0 of 1 tests passed"). One challenge has
+  one test, 11.6's edge log; the build is giving it a second question.
+- The learning platform's `main` has three commits that this course has not synced: role
+  badges, details a reader opens, and a model's note stated once at the foot. Syncing them is a
+  change to review on its own.
+- Branches from finished work remain on GitHub for you to delete, among them `module-0-machine`,
+  `module-10-instruction-set` and `module-11-programming`.
+
+### What comes next
+
+Module 12, traps and interrupts, from its plan:
+
+- a handler instead of a stop;
+- saving state;
+- user and system mode;
+- system calls;
+- the timer's and the door's interrupts;
+- nesting;
+- the trap hardware, with a trap timeline pausable at every transition.
+
+Its capstone is a minimal system-call mechanism. Then come checkpoint 5 and Module 13, the final
+machine.
