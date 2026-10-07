@@ -57,6 +57,7 @@ import { lists } from "./lists";
 import { functions } from "./functions";
 import { stack } from "./stack";
 import { recursion } from "./recursion";
+import { debugging } from "./debugging";
 
 const INPUTS: readonly LessonInput[] = [
   // Module 0, meet the machine.
@@ -113,6 +114,7 @@ const INPUTS: readonly LessonInput[] = [
   functions,
   stack,
   recursion,
+  debugging,
 ];
 
 export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(

@@ -279,6 +279,9 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   checkValue: "{name} {value}",
   details: {
     // Module 11, lesson 1 (brief 1L).
+    // Module 11, lesson 6 (brief 6L).
+    warmerCount: "The display must show how many readings are warmer than the limit.",
+    mendTotal: "The display must show the total of both rooms' amounts above their limits.",
     // Module 11, lesson 5 (brief 5L).
     colderNewest:
       "The display must show the readings below the limit, newest first, from a function that calls itself once for each reading.",

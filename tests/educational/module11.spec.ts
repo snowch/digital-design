@@ -24,7 +24,7 @@ import {
 
 const T = DEFAULT_VIEW_STRINGS.machine11;
 
-const MODULE_11 = ["assembly", "lists", "functions", "stack", "recursion"] as const;
+const MODULE_11 = ["assembly", "lists", "functions", "stack", "recursion", "debugging"] as const;
 
 async function answerAll(
   section: Locator,
@@ -127,6 +127,22 @@ const WRONG: readonly {
     to: "",
     fails: "Log -190, -181, -205, -170, -210; limit -200",
     left: "what the display showed, in order -210, -170, -205, -181, -190",
+  },
+  {
+    lesson: "debugging",
+    id: "mend-count",
+    from: "       R2 <= R2 - 1\n",
+    to: "",
+    fails: "Log -190, -181, -175, -170; limit -180",
+    left: "the branch compares R5, which is not set",
+  },
+  {
+    lesson: "debugging",
+    id: "mend-total",
+    from: "above: if R2 < R1 signed goto over",
+    to: "above: if R2 < R1 unsigned goto over",
+    fails: "Room A 25, room B -210",
+    left: "the display 0",
   },
 ];
 

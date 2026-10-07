@@ -464,3 +464,126 @@ export const STACK_IN_ROM = TOTAL.replace(
   "        R14 <= 0x7C0         // the stack starts at the top of the RAM",
   "        R14 <= 0x400         // the stack starts in the RAM",
 );
+
+// ---------------------------------------------------------------------------------------------
+// 11.7 the day's report (the capstone)
+
+const REPORT_MAIN = `// The day's report on the log the tests add: count, limit and log.
+        R14 <= 0x7C0
+        R1 <= log
+        R2 <= word[count]
+        call lowest, R15
+        word[0x400] <= R1       // the lowest reading
+        R1 <= log
+        R2 <= word[count]
+        call highest, R15
+        word[0x408] <= R1       // the highest reading
+        R1 <= log
+        R2 <= word[count]
+        R3 <= word[limit]
+        call warmer, R15
+        word[display] <= R1     // how many are warmer than the limit
+        R0 <= 0
+        if R1 == R0 goto quiet
+        R4 <= 1
+        word[lamps] <= R4       // ALARM
+quiet:  stop`;
+
+/** The worked function the guided start gives whole. */
+export const LOWEST = `// lowest: R1 the address of a list, R2 how many readings.
+// The lowest reading in R1, or 0 for an empty list.
+lowest:   R0 <= 0
+          if R2 == R0 goto lowNone
+          R5 <= word[R1]        // the lowest so far: the first reading
+lowNext:  R1 <= R1 + 8
+          R2 <= R2 - 1
+          if R2 == R0 goto lowDone
+          R6 <= word[R1]
+          if R5 < R6 signed goto lowNext
+          R5 <= R6
+          goto lowNext
+lowDone:  R1 <= R5
+          goto R15
+lowNone:  R1 <= 0
+          goto R15`;
+
+const HIGHEST = `// highest: R1 the address of a list, R2 how many readings.
+// The highest reading in R1, or 0 for an empty list.
+highest:  R0 <= 0
+          if R2 == R0 goto highNone
+          R5 <= word[R1]        // the highest so far: the first reading
+highNext: R1 <= R1 + 8
+          R2 <= R2 - 1
+          if R2 == R0 goto highDone
+          R6 <= word[R1]
+          if R6 < R5 signed goto highNext
+          R5 <= R6
+          goto highNext
+highDone: R1 <= R5
+          goto R15
+highNone: R1 <= 0
+          goto R15`;
+
+const WARMER = `// warmer: R1 the address of a list, R2 how many readings, R3 the limit.
+// How many readings are warmer than the limit, in R1.
+warmer:   R0 <= 0
+          R5 <= 0               // how many so far
+warmNext: if R2 == R0 goto warmDone
+          R6 <= word[R1]
+          if R3 >= R6 signed goto warmSkip
+          R5 <= R5 + 1
+warmSkip: R1 <= R1 + 8
+          R2 <= R2 - 1
+          goto warmNext
+warmDone: R1 <= R5
+          goto R15`;
+
+export const REPORT_REFERENCE = `${REPORT_MAIN}
+
+${LOWEST}
+
+${HIGHEST}
+
+${WARMER}`;
+
+/** The guided start: the main program and lowest whole, highest and warmer to write. */
+export const REPORT_SKELETON = `${REPORT_MAIN}
+
+${LOWEST}
+
+// highest: R1 the address of a list, R2 how many readings.
+// The highest reading in R1, or 0 for an empty list.
+highest:  R1 <= 0
+          goto R15
+
+// warmer: R1 the address of a list, R2 how many readings, R3 the limit.
+// How many readings are warmer than the limit, in R1.
+warmer:   R1 <= 0
+          goto R15`;
+
+/** The empty start: the requirements as comments. */
+export const REPORT_EMPTY = `// The day's report. The tests add count, limit and log after this program.
+// Write lowest, highest and warmer (R1 the list's address, R2 its count,
+// R3 the limit for warmer; each result in R1), and a main program that
+// shows the report: the display, ALARM, and the words at 400 and 408.
+`;
+
+/** A report whose highest starts its highest so far at 0: wrong on any log below 0. */
+export const REPORT_HIGHEST_FROM_ZERO = REPORT_REFERENCE.replace(
+  "          R5 <= word[R1]        // the highest so far: the first reading",
+  "          R5 <= 0               // the highest so far",
+).replace(
+  "highNext: R1 <= R1 + 8\n          R2 <= R2 - 1\n          if R2 == R0 goto highDone\n          R6 <= word[R1]",
+  "highNext: if R2 == R0 goto highDone\n          R6 <= word[R1]\n          R1 <= R1 + 8\n          R2 <= R2 - 1",
+);
+
+/** The main program with lowest alone, for the worked function's figures. */
+export const LOWEST_DEMO = (log: readonly number[]) => `// lowest on today's log.
+        R1 <= log
+        R2 <= word[count]
+        call lowest, R15
+        word[display] <= R1
+        stop
+
+${LOWEST}
+${logData(log)}`;
