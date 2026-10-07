@@ -2727,7 +2727,7 @@ svg.stack-depth {
 }
 .stack-depth .depth-label {
   fill: var(--fg-muted);
-  font-size: 12px;
+  font-size: 13px;
   font-family: var(--font-mono);
 }
 .log-cards {
