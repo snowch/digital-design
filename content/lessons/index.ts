@@ -44,6 +44,7 @@ import { illegalInstructions } from "./illegal-instructions";
 import { severalEdges } from "./several-edges";
 import { microOperations } from "./micro-operations";
 import { newInstruction } from "./new-instruction";
+import { instructionSet } from "./instruction-set";
 
 const INPUTS: readonly LessonInput[] = [
   signals,
@@ -85,6 +86,8 @@ const INPUTS: readonly LessonInput[] = [
   severalEdges,
   microOperations,
   newInstruction,
+  // Module 10, the instruction set
+  instructionSet,
 ];
 
 export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(

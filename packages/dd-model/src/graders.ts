@@ -245,6 +245,30 @@ function exposes(
   };
 }
 
+// ---- Module 10 -----------------------------------------------------------------------------
+
+/**
+ * A choice among options. A case gives the `field` and expects its option's `value`; the learner's
+ * choice and the expected option are reported, and the book shows each by its option's words.
+ */
+function choices(
+  answers: Readonly<Record<string, string>>,
+  given: Readonly<Record<string, string | number>>,
+  expect: Readonly<Record<string, string | number>>,
+): AnswerResult | AnswerProblem {
+  const field = String(given["field"]);
+  const gone = missing(answers, [field]);
+  if (gone) return gone;
+  const chosen = (answers[field] ?? "").trim();
+  const want = String(expect["value"]);
+  return {
+    pass: chosen === want,
+    inputs: {},
+    actual: { [field]: chosen },
+    expected: { [field]: want },
+  };
+}
+
 /** The graders lessons may name in an answers challenge's tests. */
 export const ANSWER_GRADERS: Readonly<Record<string, AnswerGrader>> = {
   threshold,
@@ -253,4 +277,6 @@ export const ANSWER_GRADERS: Readonly<Record<string, AnswerGrader>> = {
   "memory-read": memoryRead,
   // Module 7
   exposes,
+  // Module 10
+  choices,
 };

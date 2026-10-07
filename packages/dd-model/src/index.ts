@@ -40,3 +40,4 @@ export * from "./control";
 export * from "./multicycle";
 export * from "./multicycle-run";
 export * from "./multicycle-view";
+export * from "./machine-compare";

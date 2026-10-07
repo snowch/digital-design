@@ -180,6 +180,13 @@ export const newInstruction: LessonInput = {
   order: 5,
   objectives: [...LABELS.objectives],
   introduces: [],
+  termExemptions: [
+    {
+      term: "instruction set",
+      reason:
+        '"The new instruction sets CALL": the verb, an instruction setting a control signal; lesson 10.1 introduces the instruction set.',
+    },
+  ],
   sections: [
     { kind: "question", title: LABELS.titles.question, prose: PROSE.question },
     {

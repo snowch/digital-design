@@ -45,6 +45,9 @@ export function gradeAnswers(
   const answers = answersOf(challenge, artifact);
   const labelOf = (id: string) => challenge.fields.find((f) => f.id === id)?.label ?? id;
   const term = (key: string) => strings.answers.terms[key] ?? labelOf(key);
+  // Module 10: a choice is reported by the words of its option, not its value.
+  const optionOf = (key: string, v: string) =>
+    challenge.fields.find((f) => f.id === key)?.options?.find((o) => o.value === v)?.label ?? v;
   const named = (values: Readonly<Record<string, string>>) =>
     Object.fromEntries(
       Object.entries(values).map(([k, v]) => [
@@ -55,7 +58,7 @@ export function gradeAnswers(
             ? strings.answers.ofTheMemory
             : v.startsWith(OTHER_THAN)
               ? format(strings.answers.otherThan, { value: v.slice(OTHER_THAN.length) })
-              : v,
+              : optionOf(k, v),
       ]),
     );
   const failures: VerdictFailure[] = [];
@@ -122,6 +125,25 @@ export const AnswerEditor: ComponentType<ChallengeEditorProps> = ({
             </div>
           );
         }
+        // Module 10: a choice among options, one radio button each.
+        if (f.kind === "choice" && f.options)
+          return (
+            <fieldset key={f.id} className="answer-field answer-choice" data-field={f.id}>
+              <legend className="answer-label">{f.label}</legend>
+              {f.options.map((o) => (
+                <label key={o.value} className="fault-choice">
+                  <input
+                    type="radio"
+                    name={id}
+                    value={o.value}
+                    checked={value === o.value}
+                    onChange={() => set(f.id, o.value)}
+                  />
+                  <span>{o.label}</span>
+                </label>
+              ))}
+            </fieldset>
+          );
         return (
           <label key={f.id} className="answer-field" data-field={f.id}>
             <span className="answer-label">{f.label}</span>

@@ -5,6 +5,8 @@
 
 import { createContext, useContext } from "react";
 
+import { MACHINE10_STRINGS, type Machine10Strings } from "./strings10";
+
 export interface ViewStrings {
   readonly circuit: {
     readonly where: string;
@@ -360,6 +362,8 @@ export interface ViewStrings {
   readonly machine8: MachineFigureStrings;
   /** Module 9: the decoder's table and map, each kind's edges, and the views of an edge. */
   readonly control: ControlStrings;
+  /** Module 10: the machines compared, the encoding explorer and calculator, programs compared. */
+  readonly machine10: Machine10Strings;
 }
 
 /** Module 8: the words of the instruction-fields, widening, edges, memory-map and branches figures. */
@@ -1105,6 +1109,8 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     statesTitle: "Controller states",
     timingTitle: "Edges so far",
   },
+  // Module 10 (strings10.ts).
+  machine10: MACHINE10_STRINGS,
 };
 
 export const ViewStringsContext = createContext<ViewStrings>(DEFAULT_VIEW_STRINGS);

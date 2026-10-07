@@ -40,6 +40,8 @@ import {
 } from "./MachineFigures";
 // Module 9, control
 import { ControlTable, KindEdges, KindMap } from "./ControlViews";
+// Module 10, the instruction set
+import { MachineCompare } from "./Module10Figures";
 
 /** The interactives lessons may name by kind. */
 export const INTERACTIVES: Readonly<Record<string, ComponentType<InteractiveProps>>> = {
@@ -80,6 +82,8 @@ export const INTERACTIVES: Readonly<Record<string, ComponentType<InteractiveProp
   "control-table": ControlTable,
   "kind-map": KindMap,
   "kind-edges": KindEdges,
+  // Module 10, the instruction set
+  "machine-compare": MachineCompare,
 };
 
 export {
@@ -111,7 +115,9 @@ export {
   ControlTable,
   KindMap,
   KindEdges,
+  MachineCompare,
 };
+export { compareAnswer as machineCompareAnswer } from "./Module10Figures";
 export { kindMap, kindSequences, signalCell, opText, edgeText } from "./ControlViews";
 export { carryRun, carryAnswer } from "./CarrySteps";
 export { runAluSuite, firstCatch } from "./SuiteLab";

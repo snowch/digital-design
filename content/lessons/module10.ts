@@ -14,6 +14,19 @@
 // Each text is Module 9's (module9.ts) with the lines named here changed, so a learner's start and
 // the reference differ only in the lines a lesson asks for.
 
+import {
+  CONTROL_STATES,
+  assemble,
+  assemblyFor,
+  referenceFor,
+  resetMachine,
+  run,
+  stateSequence,
+  type ControlOptions,
+  type ControlState,
+  type MachineInputs,
+} from "@dd/dd-model";
+
 import { CALL_REGISTER_ARM, decoderText, machineText } from "./module9";
 
 /** Replaces one line of a text, and fails loudly if the line is not there. */
@@ -135,3 +148,93 @@ R6 <= R3 < R1 signed
 R4 <= R5 + R6
 word[display] <= R4
 stop`;
+
+// Tests a machine's text edge by edge, as lesson 9.5's second challenge does.
+
+/** One step of a sequence test. */
+export interface MachineStep {
+  readonly label: string;
+  readonly set: Record<string, string | number>;
+  readonly expect?: Record<string, string | number>;
+}
+
+const h64 = (v: bigint) => `0x${BigInt.asUintN(64, v).toString(16).toUpperCase()}`;
+const h3 = (v: bigint) => v.toString(16).toUpperCase().padStart(3, "0");
+
+/**
+ * The tests of a whole machine's text: a reset, then each instruction's edges with the state after
+ * each and the PC after the last, as the reference and each kind's sequence give them (the
+ * machine's options say which sequence); then the stop's fetch, HALT and the display.
+ */
+export function machineSteps(
+  source: string,
+  inputs: MachineInputs,
+  options: ControlOptions,
+): MachineStep[] {
+  const program = assemble(source, assemblyFor(options));
+  const { records, state } = run(resetMachine(program.rom), 200, inputs, referenceFor(options));
+  const steps: MachineStep[] = [
+    {
+      label: "RST 1, clock low",
+      set: {
+        CLK: 0,
+        RST: 1,
+        DOOR: inputs.door,
+        WARM: inputs.warm,
+        SENSORA: h64(inputs.sensorA),
+        SENSORB: h64(inputs.sensorB),
+      },
+    },
+    { label: "edge with RST 1: PC 000, FETCH", set: { CLK: 1 }, expect: { PC: h64(0n), S: 0 } },
+    { label: "clock low, RST 0", set: { CLK: 0, RST: 0 } },
+  ];
+  const code = (s: ControlState) => parseInt(CONTROL_STATES[s], 2);
+  for (const r of records.filter((x) => !x.stopped)) {
+    const seq = stateSequence(r.fields?.k ?? 0, options);
+    seq.forEach((st, i) => {
+      const last = i === seq.length - 1;
+      const next = seq[i + 1] ?? "FETCH";
+      steps.push({
+        label: `${h3(r.pc)}, edge ${i + 1} (${st}): ${next} after it${last ? `, PC ${h3(r.nextPc)}` : ""}`,
+        set: { CLK: 1 },
+        expect: { S: code(next), PC: h64(last ? r.nextPc : r.pc) },
+      });
+      steps.push({ label: "clock low", set: { CLK: 0 } });
+    });
+  }
+  const stopPc = state.stopped?.pc ?? 0n;
+  steps.push(
+    {
+      label: `${h3(stopPc)}, edge 1 (FETCH): READ after it`,
+      set: { CLK: 1 },
+      expect: { S: code("READ"), PC: h64(stopPc) },
+    },
+    { label: "clock low: the stop halts the machine", set: { CLK: 0 } },
+    {
+      label: `at the stop: HALT is 1, the display shows ${BigInt.asIntN(64, state.display)}`,
+      set: {},
+      expect: { HALT: 1, DISPLAY: h64(state.display) },
+    },
+  );
+  return steps;
+}
+
+/** The ports of the machine's text, which every challenge on it shares. */
+export const MACHINE_INTERFACE = {
+  inputs: [
+    { name: "CLK" },
+    { name: "RST" },
+    { name: "DOOR" },
+    { name: "WARM" },
+    { name: "SENSORA", width: 64 },
+    { name: "SENSORB", width: 64 },
+  ],
+  outputs: [
+    { name: "PC", width: 64 },
+    { name: "S", width: 3 },
+    { name: "HALT" },
+    { name: "CAUSE", width: 8 },
+    { name: "DISPLAY", width: 64 },
+    { name: "LAMPS", width: 3 },
+  ],
+};
