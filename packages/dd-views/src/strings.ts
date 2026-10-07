@@ -1020,6 +1020,15 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
         "A branch's constant is its target's address less its own, divided by 4, written as 12 bits read signed; {actual} is not that for this branch.",
       reachFurthest:
         "A branch at 000 can reach 000 + 4 × the largest constant; {actual} is not that address.",
+      // Module 11, lessons 5 and 6 (brief 7R2).
+      storeCalls:
+        "{actual} is not it; warmRooms is called once for the hall, then once for what lies behind each door of every room it finds, a room or nothing.",
+      storeWords:
+        "{actual} is not it; a call that finds a room pushes 4 words, and the words of every call not yet returned are on the stack together.",
+      storeR14:
+        "{actual} is not it; R14 starts at 7C0, and each word pushed takes 8 off it; give the address as three hexadecimal digits.",
+      edgeLog:
+        "On that log, the program and a right one show the same number, so that log cannot show the mistake.",
       // Module 11, lesson 5 (brief 5L).
       recursionDepth:
         "{actual} is not it; a call that finds a room pushes 4 words, a call for a door that leads nowhere pushes none, and R14 starts at 7C0.",

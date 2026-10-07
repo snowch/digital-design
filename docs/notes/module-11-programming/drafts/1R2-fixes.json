@@ -1,9 +1,21 @@
 [
- ["investigation", "Both of your circuits were tested against this same model (lesson 10.1).", "Both of your circuits were tested against the model it runs (lesson 10.1)."],
- ["explanation", "because the first reading has found every address", "because the first pass has found every address"],
- ["mistakesAfter", " The assembler checks the form of each line, not what you meant.", ""],
- ["modelVsReality", "A debugger for a real machine sits on the circuit itself:", "Some debuggers for a real machine sit on the circuit itself:"],
- ["modelVsReality", "it stops the clock, or sets", "they stop the clock, or set"],
- ["modelVsReality", "and reads the registers out.", "and read the registers out."],
- ["modelVsReality", "the debugger pauses and names it.", "the debugger ends the run and names it."]
+  [
+    "investigation",
+    "Both of your circuits were tested against this same model (lesson 10.1).",
+    "Both of your circuits were tested against the model it runs (lesson 10.1)."
+  ],
+  [
+    "explanation",
+    "because the first reading has found every address",
+    "because the first pass has found every address"
+  ],
+  ["mistakesAfter", " The assembler checks the form of each line, not what you meant.", ""],
+  [
+    "modelVsReality",
+    "A debugger for a real machine sits on the circuit itself:",
+    "Some debuggers for a real machine sit on the circuit itself:"
+  ],
+  ["modelVsReality", "it stops the clock, or sets", "they stop the clock, or set"],
+  ["modelVsReality", "and reads the registers out.", "and read the registers out."],
+  ["modelVsReality", "the debugger pauses and names it.", "the debugger ends the run and names it."]
 ]

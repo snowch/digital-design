@@ -50,7 +50,7 @@ function pauses(src: string) {
 describe("facts for the recursion lesson", () => {
   it("the rooms at 0A0 to 118, 24 bytes apart, the hall's doors holding 0B8 and 0D0", () => {
     const p = assembleChecked(WARM_ROOMS).program!;
-    const at = ["hall", "prep", "store", "chillA", "chillB", "deep"].map((n) => hex(p.labels[n]));
+    const at = ["hall", "prep", "vault", "chillA", "chillB", "icebox"].map((n) => hex(p.labels[n]));
     expect(at).toEqual([HALL, "0B8", "0D0", "0E8", "100", "118"]);
     const s = debugStart(p.rom);
     expect([memoryWord(s.cpu, 0xa8), memoryWord(s.cpu, 0xb0)]).toEqual([0xb8n, 0xd0n]);

@@ -1,12 +1,40 @@
 [
- ["logLead", "The figure runs the program and stops each time", "The figure runs the program this lesson builds, and stops each time"],
- ["logLead", "watch R1 move down the log.", "watch R1 move down the log, to the last reading."],
- ["investigation", "If a value changed since the run last paused, the watch shows what it was before.", "If a value changed since the run last paused, the watch shows what it was before. A number in a watch is read as a program reads one: decimal, or hexadecimal after `0x`, as in `word[0x048]`."],
- ["generalisation", "In this program, the count comes first in the log.", "In this program, the count is kept before the log."],
- ["explanation", "4. Step. `R1 <= R1 + 8`", "4. Move on. `R1 <= R1 + 8`"],
- ["explanation", "R2 the count of readings, R3 the answer so far (0), and R0 holds 0 for comparison.", "R2 the count of readings, R3 the answer so far (0), R4 the limit, -180, and R0 holds 0 for comparison."],
- ["explanation", "\n\nThe program's length does not depend on the log's. Six readings or sixty: the same lines run each time.", ""],
- ["signsAfter", "\n\nThe readings are signed, so every comparison of readings must say `signed`.", ""],
- ["walkAfter", " At the end R1 holds `070`, the address just past the log.", ""],
- ["reflection", "with only the reading and the limit changed.", "with only the reading and the limit changed. But the two checks sit in different places in the program, and each leads to different work after it, so one loop cannot run them both."]
+  [
+    "logLead",
+    "The figure runs the program and stops each time",
+    "The figure runs the program this lesson builds, and stops each time"
+  ],
+  ["logLead", "watch R1 move down the log.", "watch R1 move down the log, to the last reading."],
+  [
+    "investigation",
+    "If a value changed since the run last paused, the watch shows what it was before.",
+    "If a value changed since the run last paused, the watch shows what it was before. A number in a watch is read as a program reads one: decimal, or hexadecimal after `0x`, as in `word[0x048]`."
+  ],
+  [
+    "generalisation",
+    "In this program, the count comes first in the log.",
+    "In this program, the count is kept before the log."
+  ],
+  ["explanation", "4. Step. `R1 <= R1 + 8`", "4. Move on. `R1 <= R1 + 8`"],
+  [
+    "explanation",
+    "R2 the count of readings, R3 the answer so far (0), and R0 holds 0 for comparison.",
+    "R2 the count of readings, R3 the answer so far (0), R4 the limit, -180, and R0 holds 0 for comparison."
+  ],
+  [
+    "explanation",
+    "\n\nThe program's length does not depend on the log's. Six readings or sixty: the same lines run each time.",
+    ""
+  ],
+  [
+    "signsAfter",
+    "\n\nThe readings are signed, so every comparison of readings must say `signed`.",
+    ""
+  ],
+  ["walkAfter", " At the end R1 holds `070`, the address just past the log.", ""],
+  [
+    "reflection",
+    "with only the reading and the limit changed.",
+    "with only the reading and the limit changed. But the two checks sit in different places in the program, and each leads to different work after it, so one loop cannot run them both."
+  ]
 ]

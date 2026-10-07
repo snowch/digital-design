@@ -1,12 +1,40 @@
 [
- ["twoWaysAfter", " Both turn ALARM on, as room B is 10 above -200.", ""],
- ["twoWaysAfter", "Written twice, the program has 15 instructions and runs 13. Written once, it has 18 and runs 22: each use of `overBy` runs a call and a jump back.", "Written twice, the program has 20 instructions and runs 18. Written once, it has 18 and runs 22: the same lines, with a call and a jump back for each use of `overBy`."],
- ["investigation", "A breakpoint stops the program on the first line of `overBy`.", "A breakpoint pauses the run on the first line of `overBy`."],
- ["callLead", "until the PC is back in the main program", "until the PC is back in the program that made the call"],
- ["failureExperiment", "and does not restore it before returning.", "and does not put it back before it returns."],
- ["spoiledAfter", "a register the calling convention says it must preserve.", "a register the calling convention says it must put back."],
- ["explanation", "whether a function preserves R10 to R13", "whether a function puts back R10 to R13"],
- ["explanation", " R15 is chosen only because programs agree on it.", ""],
- ["modelVsReality", " written down for its programs and tools, so functions from different authors and tools work together.", " written down for its programs and tools."],
- ["generalisation", " A mistake in it is fixed in one place.", ""]
+  ["twoWaysAfter", " Both turn ALARM on, as room B is 10 above -200.", ""],
+  [
+    "twoWaysAfter",
+    "Written twice, the program has 15 instructions and runs 13. Written once, it has 18 and runs 22: each use of `overBy` runs a call and a jump back.",
+    "Written twice, the program has 20 instructions and runs 18. Written once, it has 18 and runs 22: the same lines, with a call and a jump back for each use of `overBy`."
+  ],
+  [
+    "investigation",
+    "A breakpoint stops the program on the first line of `overBy`.",
+    "A breakpoint pauses the run on the first line of `overBy`."
+  ],
+  [
+    "callLead",
+    "until the PC is back in the main program",
+    "until the PC is back in the program that made the call"
+  ],
+  [
+    "failureExperiment",
+    "and does not restore it before returning.",
+    "and does not put it back before it returns."
+  ],
+  [
+    "spoiledAfter",
+    "a register the calling convention says it must preserve.",
+    "a register the calling convention says it must put back."
+  ],
+  [
+    "explanation",
+    "whether a function preserves R10 to R13",
+    "whether a function puts back R10 to R13"
+  ],
+  ["explanation", " R15 is chosen only because programs agree on it.", ""],
+  [
+    "modelVsReality",
+    " written down for its programs and tools, so functions from different authors and tools work together.",
+    " written down for its programs and tools."
+  ],
+  ["generalisation", " A mistake in it is fixed in one place.", ""]
 ]

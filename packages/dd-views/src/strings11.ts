@@ -329,9 +329,11 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   checkValue: "{name} {value}",
   details: {
     // Module 11, lesson 1 (brief 1L).
-    // Module 11, lesson 7 (brief 7L).
+    // Module 11, lesson 7 (briefs 7L and 7R2).
     report:
-      "The report must show the warm count on the display, ALARM when it is not 0, and the lowest and highest at 400 and 408.",
+      "The display must show how many readings are warmer than the limit, ALARM must be on when that is not 0, and the words at 400 and 408 must hold the lowest and highest readings.",
+    "report-report":
+      "R1 must hold how many readings are warmer than the limit in R3, the words at 400 and 408 must hold the lowest and highest readings, 3 calls must return, R10 to R14 must be as they were, and the return must go through R15.",
     "report-lowestOf":
       "R1 must hold the list's lowest reading (or 0 for an empty list), with R10 to R14 as they were and a return through R15.",
     "report-highestOf":

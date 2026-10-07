@@ -650,8 +650,8 @@ export const COUNT_OVER_MISTAKES = COUNT_OVER_REFERENCE.replace(
  * from the line that is wrong.
  */
 export const COUNT_TO_LOG = `// How many of the log's readings are warmer than the limit?
-// The count is kept in the RAM, and shown on the display.
-       R6 <= log            // where the count is kept
+// The number of warm readings is kept in the RAM, and shown on the display.
+       R6 <= log            // where the number is kept
        R1 <= log
        R2 <= word[count]
        R3 <= 0
@@ -664,7 +664,7 @@ next:  if R2 == R0 goto done
 skip:  R1 <= R1 + 8
        R2 <= R2 - 1
        goto next
-done:  word[R6] <= R3       // keep the count
+done:  word[R6] <= R3       // keep the number
        word[display] <= R3
        stop`;
 

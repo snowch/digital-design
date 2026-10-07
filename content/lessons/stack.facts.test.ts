@@ -77,7 +77,7 @@ describe("facts for the stack lesson", () => {
     expect([d.deepest, d.calls.length, d.depths.at(-1)]).toEqual([2, 3, 0]);
   });
 
-  it("the construction's answers, read off a run of check", () => {
+  it("the construction's answers, read off a run of sumKept", () => {
     const p = assembleChecked(STACK_QUIZ).program!;
     let s = debugStart(p.rom);
     let inOverBy: bigint | undefined;
@@ -93,9 +93,10 @@ describe("facts for the stack lesson", () => {
       "word[R14] <= R11",
       "word[R14] <= R12",
     ]);
+    // R15 at 7B8, R10 at 7B0, R11 at 7A8, R12 at 7A0.
     expect(STACK_ANSWERS.map((a) => a.value)).toEqual([
-      "7B8",
-      "7B0",
+      "7A8",
+      "7A0",
       hex(inOverBy),
       hex(memoryWord(s.cpu, 0x7b8)),
     ]);

@@ -1,6 +1,6 @@
 // Copyright © 2026 Christopher Snow
 
-// Facts the functions lesson's prose states (briefs 3A to 3C), read off the learner's assembler
+// Facts the functions lesson's prose states (briefs 3A to 3C, then 3R4), read off the learner's assembler
 // and runs of the reference.
 
 import { describe, expect, it } from "vitest";
@@ -14,6 +14,7 @@ import {
   KEEPS_R10,
   KEEPS_R10_BROKEN,
   LARGER_REFERENCE,
+  OVER_BY_TESTS,
   TWO_ROOMS,
   TWO_ROOMS_WRITTEN_TWICE,
 } from "./module11";
@@ -37,10 +38,10 @@ describe("facts for the functions lesson", () => {
     expect(calls).toEqual([0x8, 0x18]);
   });
 
-  it("two ways: written twice 15 and run 13; once 18 and run 22; both show 10 with ALARM", () => {
+  it("two ways: written twice 20 and run 18; once 18 and run 22; both show 10 with ALARM", () => {
     const twice = runProgram(TWO_ROOMS_WRITTEN_TWICE, rooms(-170, -190), MODULE_9);
     const once = runProgram(TWO_ROOMS, rooms(-170, -190), MODULE_9);
-    expect([twice.written, twice.ran, once.written, once.ran]).toEqual([15, 13, 18, 22]);
+    expect([twice.written, twice.ran, once.written, once.ran]).toEqual([20, 18, 18, 22]);
     for (const r of [twice, once])
       expect([signed(r.state.display), r.state.lamps]).toEqual([10n, 1]);
   });
@@ -65,8 +66,16 @@ describe("facts for the functions lesson", () => {
 
   it("the construction: kept in R5, room A's result is lost on -160 and -195", () => {
     expect(LARGER_RUNS.map(([a, b]) => larger(a, b))).toEqual([10, 20, 30, 0, 205]);
-    const inR5 = runProgram(LARGER_REFERENCE.replaceAll("R10", "R5"), rooms(-160, -195), MODULE_9);
-    expect(signed(inR5.state.display)).toBe(5n);
+    // The overBy the tests add changes R0 and R2 to R9 before it returns.
+    const withOverBy = (src: string) => `${src}\n${OVER_BY_TESTS}`;
+    const right = runProgram(withOverBy(LARGER_REFERENCE), rooms(-160, -195), MODULE_9);
+    const inR5 = runProgram(
+      withOverBy(LARGER_REFERENCE.replaceAll("R10", "R5")),
+      rooms(-160, -195),
+      MODULE_9,
+    );
+    expect(signed(right.state.display)).toBe(20n);
+    expect(signed(inR5.state.display)).not.toBe(20n);
   });
 
   it("the challenge's specification", () => {
@@ -78,6 +87,12 @@ describe("facts for the functions lesson", () => {
     const t = DEFAULT_VIEW_STRINGS.machine11;
     const c = lesson.challenges.find((x) => x.id === "out-of-range")!;
     const v = gradeProgram(c, { text: "again: goto again" });
-    expect(v.blocked).toBe(format(t.refusals.noFunction, { name: "outOfRange" }));
+    expect(v.blocked).toBeUndefined();
+    const calls = c.tests.kind === "answers" ? c.tests.cases.filter((k) => k.given["call"]) : [];
+    expect(calls.length).toBeGreaterThan(0);
+    for (const k of calls)
+      expect(v.failures.find((f) => f.label === k.label)?.detail).toBe(
+        format(t.refusals.noFunction, { name: "outOfRange" }),
+      );
   });
 });

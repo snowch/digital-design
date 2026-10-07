@@ -1,22 +1,22 @@
 // Copyright © 2026 Christopher Snow
 
 // Titles, objectives, captions and labels of the lesson log-report, drafted by the prose process
-// from a brief of facts (docs/notes/module-11-programming/briefs, brief 7L) and checked against
+// from a brief of facts (docs/notes/module-11-programming/briefs, briefs 7L and 7R2) and checked against
 // the lesson.
 
 export const LABELS = {
   title: "Can you write a program the shop can use?",
   objectives: [
     "Write a program from requirements and tests.",
-    "Build it from functions that keep the calling convention.",
-    "Test each function alone and the whole program on logs that reach the edges.",
+    "Build it from functions that keep the calling convention, one of which calls the others and keeps what it needs on the stack.",
+    "Test each function alone, and the whole program, on logs that reach the edges.",
     "Find and mend mistakes with the debugger.",
   ],
   titles: {
     question: "The day's report",
     motivation: "What the report must show",
-    prediction: "The lowest of log 5",
-    investigation: "The given function at work",
+    prediction: "R2 after lowestOf returns",
+    investigation: "lowestOf at work",
     construction: "The specification",
     failureExperiment: "A highest started at 0",
     explanation: "The module's lessons in one program",
@@ -28,12 +28,11 @@ export const LABELS = {
     c1: "The day's report",
   },
   captions: {
-    asks: "Run the starting text on six logs to see what each report shows.",
-    predict:
-      "The listing of lowestOf on log 5 shows the program and asks you to predict the result.",
-    walk: "The debugger runs lowestOf on log 5 and pauses at a breakpoint with a watch showing values.",
+    asks: "The outline runs on six logs, beside the report each log asks for.",
+    predict: "The listing of a program that calls lowestOf on log 5, with a question about R2.",
+    walk: "The same program in the debugger, with a breakpoint on lowNext and a watch.",
     fromZero: "A report whose highestOf starts at 0, run on the six logs.",
-    report: "Write the report and run the tests.",
+    report: "The day's report, with its tests.",
   },
   checks: {
     display: "Display",

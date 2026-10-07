@@ -1,12 +1,8 @@
 [
- [
-  "captions.wayBack",
-  "on rooms where the deep freeze leads back to ",
-  "on rooms where the icebox leads back to "
- ],
- [
-  "captions.wayBack",
-  " leads back to the store.",
-  " leads back to the vault."
- ]
+  [
+    "captions.wayBack",
+    "on rooms where the deep freeze leads back to ",
+    "on rooms where the icebox leads back to "
+  ],
+  ["captions.wayBack", " leads back to the store.", " leads back to the vault."]
 ]

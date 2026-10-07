@@ -253,8 +253,7 @@ export function endOfRun(run: ScenarioRun): {
     const pc = Number(s.stopped.pc);
     if (end.key === "stop" && pc === at(RETURN_LABEL)) return { key: "returned", values: {} };
     const guard = at(GUARD_LABEL);
-    if (guard !== undefined && pc >= guard && pc < guard + 8)
-      return { key: "fellOff", values: {} };
+    if (guard !== undefined && pc >= guard && pc < guard + 8) return { key: "fellOff", values: {} };
   }
   return end;
 }

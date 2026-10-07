@@ -4,13 +4,13 @@
 
 import { describe, expect, it } from "vitest";
 
-import { assembleChecked, debugFinish, debugStart, debugStep } from "@dd/dd-model";
+import { assembleChecked, debugFinish, debugStart, debugStep, runScenario } from "@dd/dd-model";
 import { listingAnswer, resultsOf } from "@dd/dd-views";
 import { grade } from "@dd/dd-views";
 import { parseLesson, testCount } from "@platform/lesson-schema";
 
 import { REPORT_LOGS, logReport, reportOf } from "./log-report";
-import { LOWEST_DEMO, REPORT_EMPTY } from "./module11";
+import { LOWEST_DEMO, REPORT_EMPTY, REPORT_REFERENCE, REPORT_SKELETON, logData } from "./module11";
 
 const lesson = parseLesson(logReport);
 const props = (id: string) =>
@@ -29,30 +29,47 @@ describe("facts for the log-report lesson", () => {
     ]);
   });
 
-  it("the starting text: the lowest right on every log; highest, display and lamps 0", () => {
+  it("the outline: display 0 and no lamp on every log, X at 400 and 408; no log right as a whole", () => {
     const rows = resultsOf(props("asks"));
-    for (const { log, left } of rows) {
-      expect(left["word:400"]).toBe(log.asks["word:400"]);
-      expect([left["word:408"], left["display"], left["lamps"]]).toEqual(["0", "0", "0"]);
+    for (const { left } of rows) {
+      expect([left["display"], left["lamps"], left["word:400"], left["word:408"]]).toEqual([
+        "0",
+        "0",
+        "X",
+        "X",
+      ]);
     }
-    // Right only for the empty log, log 4, and for the counts of logs 2 and 6.
-    const whole = rows.map(({ log, left }) =>
-      Object.keys(log.asks).every((k) => left[k] === log.asks[k]),
-    );
-    expect(whole).toEqual([false, false, false, true, false, false]);
+    // The display and the lamps are right only for logs 2, 4 and 6.
+    expect(rows.map(({ log, left }) => left.display === log.asks.display)).toEqual([
+      false,
+      true,
+      false,
+      true,
+      false,
+      true,
+    ]);
+    expect(
+      rows.some(({ log, left }) => Object.keys(log.asks).every((k) => left[k] === log.asks[k])),
+    ).toBe(false);
   });
 
-  it("lowestOf on log 5 returns -190, keeping -184 past 35, -176 and 12", () => {
-    expect(listingAnswer(props("predict-lowest"))).toBe("-190");
-    let s = debugStart(assembleChecked(LOWEST_DEMO(DEFROST)).program!.rom);
-    const lowest: bigint[] = [];
+  it("lowestOf on log 5 leaves R2 at 0 and -190 in R1; five pauses at lowNext, 35 run", () => {
+    expect(listingAnswer(props("predict-lowest"))).toBe("0");
+    const program = assembleChecked(LOWEST_DEMO(DEFROST)).program!;
+    const at = BigInt(program.labels["lowNext"]!);
+    let s = debugStart(program.rom);
+    const pauses: string[] = [];
+    const sg = (v: bigint | undefined) => (v === undefined ? "X" : String(BigInt.asIntN(64, v)));
     while (!s.stopped) {
+      if (s.cpu.pc === at)
+        pauses.push(`${sg(s.cpu.regs[5])} ${sg(s.cpu.regs[6])} ${sg(s.cpu.regs[2])}`);
       s = debugStep(s);
-      const r5 = s.cpu.regs[5];
-      if (r5 !== undefined && lowest.at(-1) !== r5) lowest.push(r5);
     }
-    expect(lowest.map((v) => BigInt.asIntN(64, v))).toEqual([-184n, -190n]);
-    expect(BigInt.asIntN(64, debugFinish(s).cpu.display)).toBe(-190n);
+    expect(pauses).toEqual(["-184 X 5", "-184 35 4", "-184 -176 3", "-184 12 2", "-190 -190 1"]);
+    const end = debugFinish(s);
+    expect(BigInt.asIntN(64, end.cpu.display)).toBe(-190n);
+    expect(end.cpu.regs[2]).toBe(0n);
+    expect(end.ran).toBe(35);
   });
 
   it("a highest started at 0 leaves 0 at 408 for logs 1, 2, 3 and 6, and is right for 4 and 5", () => {
@@ -67,9 +84,30 @@ describe("facts for the log-report lesson", () => {
     ]);
   });
 
-  it("15 tests: six whole runs and nine calls; the empty start fails them", () => {
+  it("18 tests: six whole runs and twelve calls; the empty start and the outline fail them", () => {
     const c = lesson.challenges[0]!;
-    expect(testCount(c)).toBe(15);
+    expect(testCount(c)).toBe(18);
     expect(grade(c, { text: REPORT_EMPTY }).passed).toBe(false);
+    expect(grade(c, { text: REPORT_SKELETON }).passed).toBe(false);
+  });
+
+  it("the last hint, pasted over the outline's three stubs, passes every test", () => {
+    const c = lesson.challenges[0]!;
+    const hint = c.hints.at(-1)!;
+    const code = /```\n([\s\S]*?)```/.exec(hint)![1]!;
+    // The outline's stubs: two lines each, under a comment.
+    let text = REPORT_SKELETON;
+    for (const name of ["report", "highestOf", "warmCount"]) {
+      const stub = new RegExp(`${name}:\\s+R1 <= 0\\n\\s+goto R15`);
+      expect(stub.test(text)).toBe(true);
+      text = text.replace(stub, "");
+    }
+    expect(grade(c, { text: `${text}\n${code}` }).passed).toBe(true);
+  });
+
+  it("report keeps what it needs: 4 words pushed, 3 calls, R14 back at 7C0", () => {
+    const run = runScenario(REPORT_REFERENCE, { data: logData([-184, 35, -176, 12, -190], -180) });
+    expect(run.state!.deepest).toBe(0x7a0n);
+    expect(run.state!.cpu.regs[14]).toBe(0x7c0n);
   });
 });

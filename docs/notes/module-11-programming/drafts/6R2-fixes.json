@@ -1,12 +1,12 @@
 [
- [
-  "prediction",
-  "The first time the run reaches `next`, how many instructions have run?",
-  "The first time the run reaches `next`, 6 instructions have run."
- ],
- [
-  "explanation",
-  "(the counting program, with the wrong `R2 <= R2 - 1` deleted, walks off an empty log this way). [Check: with the line at `008` deleted, an empty log has 0 in R2 and ends at once. It walks off only with the line at `008` present. The brief may mean another line.]",
-  "(the counting program as first given walks off an empty log this way: its line at `008` makes R2 start below 0)."
- ]
+  [
+    "prediction",
+    "The first time the run reaches `next`, how many instructions have run?",
+    "The first time the run reaches `next`, 6 instructions have run."
+  ],
+  [
+    "explanation",
+    "(the counting program, with the wrong `R2 <= R2 - 1` deleted, walks off an empty log this way). [Check: with the line at `008` deleted, an empty log has 0 in R2 and ends at once. It walks off only with the line at `008` present. The brief may mean another line.]",
+    "(the counting program as first given walks off an empty log this way: its line at `008` makes R2 start below 0)."
+  ]
 ]
