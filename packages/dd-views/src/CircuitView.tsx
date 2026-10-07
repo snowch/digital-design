@@ -37,6 +37,8 @@ export interface CircuitViewProps {
   readonly values?: readonly Word[];
   /** Full component paths to mark, as the diagnosis names them. */
   readonly highlight?: readonly string[];
+  /** What a mark means, for its accessible name; by default, where a test first disagreed. */
+  readonly highlightLabel?: string;
   /** The composite being looked inside; empty for the whole circuit. */
   readonly scope?: string;
   readonly onScope?: (path: string) => void;
@@ -184,6 +186,7 @@ export function CircuitView({
   circuit,
   values,
   highlight = [],
+  highlightLabel,
   scope = "",
   onScope,
   onToggleInput,
@@ -526,7 +529,9 @@ export function CircuitView({
                     : { role: "img", "aria-label": `${box.label} ${part.id}` })}
                 >
                   <title>
-                    {marked ? `${part.id}: ${strings.circuit.marked}` : `${box.label} ${part.id}`}
+                    {marked
+                      ? `${part.id}: ${highlightLabel ?? strings.circuit.marked}`
+                      : `${box.label} ${part.id}`}
                   </title>
                   {marked && (
                     <rect

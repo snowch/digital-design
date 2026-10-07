@@ -15,7 +15,7 @@ import {
   stuckAt,
 } from "@dd/dd-model";
 import { grade, kindSequences, outputsPerStep } from "@dd/dd-views";
-import { formatWord } from "@dd/sim";
+import { Simulator, formatWord, word } from "@dd/sim";
 import { parseLesson, testCount } from "@platform/lesson-schema";
 
 import { designAnInstruction } from "./design-an-instruction";
@@ -28,6 +28,25 @@ const SHOP = { door: 0, warm: 0, sensorA: -184n, sensorB: -250n } as const;
 const COPY = { registerCheck: true, callThroughRegister: 9, setIf: 10 };
 
 describe("facts for the design-an-instruction lesson", () => {
+  it("the condition's two uses: MET picks the branch's next PC, and with SET it is Y's word", () => {
+    const sim = new Simulator(libraryCircuit("condition-uses"));
+    const run = (set: Record<string, number>) => {
+      for (const [n, v] of Object.entries({ PC4: 0x10, TARGET: 0x40, HR: 0x42, ...set }))
+        sim.setInput(
+          n,
+          word(["J"].includes(n) ? 4 : ["PC4", "TARGET", "HR"].includes(n) ? 64 : 1, v),
+        );
+      sim.settle();
+      return [sim.read("NEXT").value, sim.read("YIN").value];
+    };
+    // Job 0 is met always, job 1 never.
+    expect(run({ J: 0, BRANCH: 1, SET: 0 })).toEqual([0x40n, 0x42n]);
+    expect(run({ J: 1, BRANCH: 1, SET: 0 })).toEqual([0x10n, 0x42n]);
+    expect(run({ J: 0, BRANCH: 0, SET: 0 })).toEqual([0x10n, 0x42n]);
+    expect(run({ J: 0, BRANCH: 0, SET: 1 })).toEqual([0x10n, 1n]);
+    expect(run({ J: 1, BRANCH: 0, SET: 1 })).toEqual([0x10n, 0n]);
+  });
+
   it("the word for R5 <- 1 if R2 < R1 signed is A6215000", () => {
     const line = assemble(COUNT_COLD_SET, { callThroughRegister: 9, setIf: 10 }).lines[3]!;
     expect([line.text, instructionHex(line.instruction!)]).toEqual([

@@ -20,6 +20,14 @@ import { LABELS } from "./room-to-grow.labels";
 import { PROSE } from "./room-to-grow.prose";
 import { SENSORS } from "./memory-access";
 
+/**
+ * The parts of Module 8's datapath that a left-out instruction would join: the ALU, beside which a
+ * multiplier or a shifter would sit; register Y's word selector, which a new part's result would
+ * reach through a new source; the selector of the ALU's B, where a comparison with zero needs a 0;
+ * and the +4 block, whose PC + 4 the call through a register already gives register Y.
+ */
+export const JOIN_PLACES = ["alu", "yWord", "pickB", "plus4"] as const;
+
 /** The words the first challenge asks about, and whether a later instruction could take each. */
 export const CODES = [
   { id: "kind1job8", word: "18123000", fate: "free" },
@@ -170,7 +178,28 @@ export const roomToGrow: LessonInput = {
         },
       ],
     },
-    { kind: "explanation", title: LABELS.titles.explanation, prose: PROSE.explanation },
+    {
+      kind: "explanation",
+      title: LABELS.titles.explanation,
+      prose: PROSE.explanation,
+      interactives: [
+        {
+          id: "join-places",
+          kind: "circuit-explorer",
+          timeModel: "settle",
+          caption: LABELS.captions.joinPlaces,
+          lead: PROSE.joinPlacesLead,
+          props: {
+            libraryId: "join-places",
+            writtenWidth: 4,
+            highlight: [...JOIN_PLACES],
+            still: true,
+            canOpen: false,
+            highlightLabel: LABELS.joinMark,
+          },
+        },
+      ],
+    },
     { kind: "generalisation", title: LABELS.titles.generalisation, prose: PROSE.generalisation },
     {
       kind: "challenge",

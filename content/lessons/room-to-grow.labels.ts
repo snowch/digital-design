@@ -35,6 +35,7 @@ export const LABELS = {
     sortCodes: "Sort each code and run the tests.",
     oldProgram: "Run an old program on the course's machine and on your copy.",
     countCalls: "Count both runs and run the tests.",
+    joinPlaces: "Part of the datapath: where left-out instructions join.",
   },
   options: {
     p1At008: "a halt at 008, cause 21",
@@ -48,6 +49,7 @@ export const LABELS = {
     course: "The course's machine",
     copy: "Your copy, with kind 9",
   },
+  joinMark: "a place where a left-out instruction would join",
   fates: {
     free: "Free: a later instruction can take it",
     taken: "Taken: an old program may use it",

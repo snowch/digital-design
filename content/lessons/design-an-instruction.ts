@@ -263,7 +263,27 @@ export const designAnInstruction: LessonInput = {
         },
       ],
     },
-    { kind: "explanation", title: LABELS.titles.explanation, prose: PROSE.explanation },
+    {
+      kind: "explanation",
+      title: LABELS.titles.explanation,
+      prose: PROSE.explanation,
+      interactives: [
+        {
+          id: "condition-uses",
+          kind: "circuit-explorer",
+          timeModel: "settle",
+          caption: LABELS.captions.conditionUses,
+          lead: PROSE.conditionUsesLead,
+          props: {
+            libraryId: "condition-uses",
+            writtenWidth: 4,
+            initial: { PC4: "0x10", TARGET: "0x40", HR: "0x42" },
+            highlight: ["condition"],
+            highlightLabel: LABELS.conditionMark,
+          },
+        },
+      ],
+    },
     { kind: "generalisation", title: LABELS.titles.generalisation, prose: PROSE.generalisation },
     {
       kind: "challenge",

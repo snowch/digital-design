@@ -92,6 +92,14 @@ export const immediates: LessonInput = {
             ],
           },
         },
+        {
+          id: "constant-map",
+          kind: "constant-map",
+          timeModel: "none",
+          caption: LABELS.captions.constantMap,
+          lead: PROSE.constantMapLead,
+          props: {},
+        },
       ],
     },
     {

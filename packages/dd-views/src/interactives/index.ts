@@ -45,6 +45,7 @@ import {
 import { ControlTable, KindEdges, KindMap } from "./ControlViews";
 // Module 10, the instruction set
 import {
+  ConstantMap,
   EncodingExplorer,
   LayoutCompare,
   MachineCompare,
@@ -94,6 +95,7 @@ export const INTERACTIVES: Readonly<Record<string, ComponentType<InteractiveProp
   "kind-edges": KindEdges,
   // Module 10, the instruction set
   "machine-parts": MachineParts,
+  "constant-map": ConstantMap,
   "machine-compare": MachineCompare,
   "layout-compare": LayoutCompare,
   "encoding-explorer": EncodingExplorer,
@@ -134,6 +136,7 @@ export {
   KindMap,
   KindEdges,
   MachineParts,
+  ConstantMap,
   MachineCompare,
   LayoutCompare,
   EncodingExplorer,

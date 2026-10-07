@@ -29,7 +29,9 @@ export const LABELS = {
     c2: "Decoder, kind A",
     c3: "Machine, set if",
   },
+  conditionMark: "the condition block, which both uses share",
   captions: {
+    conditionUses: "The condition block and its two paths: to branch, and to set if.",
     need: "Run the count of cold rooms on the course's machine.",
     shorter: "Run the count of cold rooms two ways.",
     predictEdges: "Predict set if's edges, then check.",

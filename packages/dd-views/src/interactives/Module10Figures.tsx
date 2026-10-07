@@ -10,6 +10,9 @@
 //   differs marked, what Module 9's machine keeps of its own, and every instruction run with the
 //   edges each machine took. A fault may be put into Module 9's machine.
 //
+// - `constant-map`: every 12-bit constant used as an address, widened by the widen block
+//   (simulated), and the part of the memory map that answers there, or the cause that stops a load.
+//
 // The words are in strings10.ts; the lesson gives what only it knows (the program, the registers
 // to show, the faults and their outcomes, the question).
 
@@ -45,7 +48,9 @@ import {
   type MachineInputs,
   type MachinePair,
   machineParts,
+  constantRanges,
   type PartForm,
+  type PartRow,
 } from "@dd/dd-model";
 import { Prose, useSlot, type InteractiveProps } from "@platform/lesson-runtime";
 import { FaultInjector, PredictionChallenge } from "@platform/primitives";
@@ -1340,29 +1345,88 @@ export const MachineParts = withProps(
     const strings = useViewStrings();
     const t = strings.machine10;
     const rows = useMemo(() => machineParts(), []);
+    // A part both circuits keep in the same form is one a program can see: the shared band. Any
+    // other part is one circuit's own, in its machine's band; a machine without it shows nothing.
+    const shared = rows.filter((r) => r.single.kind === r.multi.kind && r.single.kind !== "none");
+    const own = (side: "single" | "multi") =>
+      rows.filter((r) => !shared.includes(r) && r[side].kind !== "none");
+    const item = (r: PartRow, form: PartForm) => (
+      <li key={r.part} className="parts-item" data-part={r.part}>
+        <span className="parts-name">{t.partNames[r.part]}</span>
+        <span className="parts-form">{partText(t, form)}</span>
+      </li>
+    );
+    const band = (side: "single" | "multi") => {
+      const machine = side === "single" ? t.singleName : t.multiName;
+      return (
+        <section
+          className={`parts-band parts-own parts-${side}`}
+          aria-label={`${machine}: ${t.partsOwn}`}
+        >
+          <p className="parts-title">{t.partsOwn}</p>
+          <ul>{own(side).map((r) => item(r, r[side]))}</ul>
+        </section>
+      );
+    };
     return (
       <div className="machine-figure machine-parts" data-interactive={interactive.id}>
-        <div className="truth-table-wrap">
-          <table className="truth-table datapath-table parts-table">
-            <caption>{t.partsCaption}</caption>
-            <thead>
-              <tr>
-                <th scope="col">{t.part}</th>
-                <th scope="col">{t.singleName}</th>
-                <th scope="col">{t.multiName}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r.part} data-part={r.part}>
-                  <th scope="row">{t.partNames[r.part]}</th>
-                  <td>{partText(t, r.single)}</td>
-                  <td>{partText(t, r.multi)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <p className="layout-title">{t.partsCaption}</p>
+        <div className="parts-drawing">
+          <div className="parts-outline parts-outline-single" aria-hidden="true">
+            <span>{t.singleName}</span>
+          </div>
+          <div className="parts-outline parts-outline-multi" aria-hidden="true">
+            <span>{t.multiName}</span>
+          </div>
+          {band("single")}
+          <section className="parts-band parts-shared" aria-label={t.partsShared}>
+            <p className="parts-title">{t.partsShared}</p>
+            <ul>{shared.map((r) => item(r, r.single))}</ul>
+          </section>
+          {band("multi")}
         </div>
+      </div>
+    );
+  },
+);
+
+const hex16 = (v: bigint) => v.toString(16).toUpperCase().padStart(16, "0");
+
+export const ConstantMap = withProps(
+  z.object({}),
+  function ConstantMap({ interactive }: InteractiveProps & { data: Record<string, never> }) {
+    const t = useViewStrings().machine10;
+    const runs = useMemo(() => constantRanges(), []);
+    return (
+      <div className="machine-figure constant-map" data-interactive={interactive.id}>
+        <p className="layout-title">{t.constantsCaption}</p>
+        <ol className="constant-runs">
+          {runs.map((r) => (
+            <li
+              key={r.part}
+              className={`constant-run constant-${r.part}${r.cause ? " constant-none" : ""}`}
+              data-part={r.part}
+            >
+              <span className="constant-part">
+                {t.constantsParts[r.part as keyof typeof t.constantsParts]}
+              </span>
+              <span className="constant-c">
+                {format(t.constantsRun, { first: hex3(r.first), last: hex3(r.last) })}
+              </span>
+              <span className="constant-w">
+                {format(t.constantsWiden, {
+                  first: hex16(r.firstAddress),
+                  last: hex16(r.lastAddress),
+                })}
+              </span>
+              {r.cause !== 0 && (
+                <span className="constant-stop">
+                  {format(t.constantsStop, { cause: r.cause.toString(16) })}
+                </span>
+              )}
+            </li>
+          ))}
+        </ol>
       </div>
     );
   },

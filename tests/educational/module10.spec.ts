@@ -229,25 +229,26 @@ test.describe("Module 10's figures", () => {
       .locator("table.compare-seen tr")
       .filter({ has: figure.page().locator("th", { hasText: new RegExp(`^${name}$`) }) });
 
-  test("the opening table reads each machine's parts from its circuit", async ({ page }) => {
+  test("the opening drawing puts the parts a program can see inside both machines", async ({
+    page,
+  }) => {
     await openLesson(page, "instruction-set");
     const figure = page.locator("#ix-parts");
     await figure.scrollIntoViewIfNeeded();
-    const row = (part: string) => figure.locator(`tr[data-part=${part}]`);
-    await expect(row("ir").locator("td").first()).toHaveText(
+    const band = (cls: string) => figure.locator(`.${cls} [data-part]`);
+    await expect(band("parts-shared")).toHaveCount(4);
+    await expect(figure.locator(".parts-shared [data-part=registers] .parts-form")).toHaveText(
+      format(T.forms.registers, { count: 16, width: 64 }),
+    );
+    // Module 8's IR is a bus; Module 9 keeps the IR, the held words and the controller's state.
+    await expect(band("parts-single")).toHaveCount(1);
+    await expect(figure.locator(".parts-single [data-part=ir] .parts-form")).toHaveText(
       format(T.forms.romOutput, { width: 32 }),
     );
-    await expect(row("ir").locator("td").last()).toHaveText(
-      format(T.forms.register, { width: 32 }),
-    );
-    await expect(row("hr").locator("td").first()).toHaveText(T.forms.none);
-    await expect(row("state").locator("td").last()).toHaveText(
+    await expect(band("parts-multi")).toHaveCount(6);
+    await expect(figure.locator(".parts-multi [data-part=state] .parts-form")).toHaveText(
       format(T.forms.register, { width: 3 }),
     );
-    await expect(row("registers").locator("td")).toHaveText([
-      format(T.forms.registers, { count: 16, width: 64 }),
-      format(T.forms.registers, { count: 16, width: 64 }),
-    ]);
   });
 
   test("the prediction in the middle of a load is answered by the two simulators", async ({
@@ -455,5 +456,49 @@ test.describe("Module 10's figures", () => {
     await figure.getByRole("button", { name: V.prediction.commit }).click();
     await expect(figure.locator("[role=status]").first()).toContainText(V.prediction.match);
     await expect(figure.locator("table.kind-edges-table tbody tr").first()).toContainText("4");
+  });
+
+  test("the constant map widens every constant; 800 to FFF reach no part", async ({ page }) => {
+    await openLesson(page, "immediates");
+    const figure = page.locator("#ix-constant-map");
+    await figure.scrollIntoViewIfNeeded();
+    await expect(figure.locator("[data-part]")).toHaveCount(5);
+    const negative = figure.locator("[data-part=negative]");
+    await expect(negative).toContainText(
+      format(T.constantsWiden, { first: "FFFFFFFFFFFFF800", last: "FFFFFFFFFFFFFFFF" }),
+    );
+    await expect(negative).toContainText(format(T.constantsStop, { cause: "31" }));
+    await expect(figure.locator("[data-part=rom]")).not.toContainText(
+      format(T.constantsStop, { cause: "31" }),
+    );
+  });
+
+  test("the places drawing marks four blocks and offers nothing to press", async ({ page }) => {
+    await openLesson(page, "room-to-grow");
+    const figure = page.locator("#ix-join-places");
+    const props = lessonData("room-to-grow")
+      .sections.flatMap((s) => s.interactives)
+      .find((x) => x.id === "join-places")?.props as { highlightLabel: string };
+    const mark = props.highlightLabel;
+    await figure.scrollIntoViewIfNeeded();
+    await expect(figure.locator("svg title", { hasText: mark })).toHaveCount(4);
+    await expect(figure.getByRole("button", { name: / = [01]\./ })).toHaveCount(0);
+    await expect(figure.getByRole("button", { name: V.explorer.reset })).toHaveCount(0);
+    await expect(figure.locator("table.signal-table")).toHaveCount(0);
+  });
+
+  test("one MET picks the branch's next PC and, with SET, register Y's word", async ({ page }) => {
+    await openLesson(page, "design-an-instruction");
+    const figure = page.locator("#ix-condition-uses");
+    await figure.scrollIntoViewIfNeeded();
+    const row = (name: string) =>
+      figure.locator("table.signal-table tr", { has: page.locator(`th:text-is("${name}")`) });
+    // Job 0 is met always: a branch takes TARGET, and set if writes 1.
+    await expect(row("NEXT")).toContainText("0000000000000010");
+    await figure.getByRole("button", { name: /^BRANCH = 0\./ }).click();
+    await expect(row("NEXT")).toContainText("0000000000000040");
+    await expect(row("YIN")).toContainText("0000000000000042");
+    await figure.getByRole("button", { name: /^SET = 0\./ }).click();
+    await expect(row("YIN")).toContainText("0000000000000001");
   });
 });

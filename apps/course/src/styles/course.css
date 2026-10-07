@@ -2347,3 +2347,132 @@ button.bit {
   font-family: var(--font-mono);
   overflow-wrap: anywhere;
 }
+
+/* Module 10, lesson 1: the two machines' parts drawn. Three bands in one column: Module 8's own
+   parts, the parts a program can see, Module 9's own. Each machine's outline spans its own band
+   and the shared one, so the overlap is the agreement; the outlines are inset differently so both
+   borders show where they run side by side. */
+.parts-drawing {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto auto;
+  position: relative;
+  padding: var(--space-2) 0;
+}
+.parts-outline {
+  grid-column: 1;
+  position: relative;
+  z-index: 1;
+  border: 2px solid var(--fg-muted);
+  border-radius: var(--radius-lg);
+  pointer-events: none;
+}
+.parts-outline span {
+  display: inline-block;
+  font-weight: 650;
+  background: var(--bg-raised);
+  padding: 0 var(--space-1);
+  position: relative;
+}
+.parts-outline-single {
+  grid-row: 1 / 3;
+  margin: 0 var(--space-2);
+}
+.parts-outline-single span {
+  top: -0.8em;
+  left: var(--space-2);
+}
+.parts-outline-multi {
+  grid-row: 2 / 4;
+  margin: 0;
+  border-style: dashed;
+  display: flex;
+  align-items: flex-end;
+}
+.parts-outline-multi span {
+  bottom: -0.8em;
+  left: var(--space-2);
+}
+.parts-band {
+  grid-column: 1;
+  padding: var(--space-3) var(--space-4);
+}
+.parts-single {
+  grid-row: 1;
+  padding-top: var(--space-4);
+}
+.parts-shared {
+  grid-row: 2;
+  background: var(--accent-soft);
+  margin: 0 var(--space-2);
+}
+.parts-multi {
+  grid-row: 3;
+  padding-bottom: var(--space-4);
+}
+.parts-title {
+  margin: 0 0 var(--space-2);
+  font-weight: 650;
+}
+.parts-band ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.parts-item {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+  padding: var(--space-1) var(--space-2);
+  min-width: 6rem;
+}
+.parts-name {
+  font-family: var(--font-mono);
+  font-weight: 650;
+}
+.parts-form {
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
+}
+
+/* Lesson 10.3: the constants as addresses, one block per run, the runs no part answers dashed. */
+.constant-runs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.constant-run {
+  display: grid;
+  gap: 2px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--accent-soft);
+}
+.constant-run.constant-none {
+  border-style: dashed;
+  background: transparent;
+}
+.constant-negative {
+  margin-top: 12px;
+}
+.constant-part {
+  font-weight: 600;
+}
+.constant-c,
+.constant-w {
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}
+.constant-w,
+.constant-stop {
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
+}

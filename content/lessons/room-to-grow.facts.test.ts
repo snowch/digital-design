@@ -5,7 +5,15 @@
 
 import { describe, expect, it } from "vitest";
 
-import { MODULE_9, assemble, isIllegal, fieldsOf, meaningOf, runProgram } from "@dd/dd-model";
+import {
+  MODULE_9,
+  assemble,
+  isIllegal,
+  fieldsOf,
+  libraryCircuit,
+  meaningOf,
+  runProgram,
+} from "@dd/dd-model";
 import { kindMap, programAnswer } from "@dd/dd-views";
 import { parseLesson, testCount } from "@platform/lesson-schema";
 
@@ -18,7 +26,7 @@ import {
   multiplyLoop,
 } from "./module10";
 import { COLDER } from "./module9";
-import { CODES, roomToGrow } from "./room-to-grow";
+import { CODES, JOIN_PLACES, roomToGrow } from "./room-to-grow";
 
 const lesson = parseLesson(roomToGrow);
 const props = (id: string) =>
@@ -27,6 +35,18 @@ const SHOP = { door: 0, warm: 0, sensorA: -184n, sensorB: -250n } as const;
 const COPY = { ...MODULE_9, callThroughRegister: 9, setIf: 10 };
 
 describe("facts for the room-to-grow lesson", () => {
+  it("the places drawing: the ALU, the B selector, the +4 block and register Y's word", () => {
+    const kinds = Object.fromEntries(
+      libraryCircuit("join-places").composites.map((c) => [c.path, c.kind]),
+    );
+    expect(JOIN_PLACES.map((p) => kinds[p])).toEqual([
+      expect.stringMatching(/alu/i),
+      "yWord",
+      expect.stringMatching(/selector/i),
+      "plus4",
+    ]);
+  });
+
   it("the map: 37 instructions, 2 that depend on the constant; kinds 1 to 8 refuse 89 jobs", () => {
     const map = kindMap(false);
     const rows = map.slice(1, 9).flat();

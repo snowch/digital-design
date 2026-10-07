@@ -5,7 +5,14 @@
 
 import { describe, expect, it } from "vitest";
 
-import { assemble, branchSays, comparisons, runProgram, widening } from "@dd/dd-model";
+import {
+  assemble,
+  branchSays,
+  comparisons,
+  constantRanges,
+  runProgram,
+  widening,
+} from "@dd/dd-model";
 import { grade, programAnswer, swapAnswer } from "@dd/dd-views";
 import { parseLesson, testCount } from "@platform/lesson-schema";
 
@@ -21,6 +28,25 @@ const props = (id: string) =>
 const ROOMS = { door: 0, warm: 0, sensorA: -200n, sensorB: -250n } as const;
 
 describe("facts for the immediates lesson", () => {
+  it("the constants as addresses: 000 to 7FF reach the map, 800 to FFF widen past it", () => {
+    expect(
+      constantRanges().map((r) => [
+        r.part,
+        r.first,
+        r.last,
+        r.firstAddress.toString(16),
+        r.lastAddress.toString(16),
+        r.cause,
+      ]),
+    ).toEqual([
+      ["rom", 0x000, 0x3ff, "0", "3ff", 0],
+      ["ram", 0x400, 0x7bf, "400", "7bf", 0],
+      ["devices", 0x7c0, 0x7f7, "7c0", "7f7", 0],
+      ["none", 0x7f8, 0x7ff, "7f8", "7ff", 0x31],
+      ["negative", 0x800, 0xfff, "fffffffffffff800", "ffffffffffffffff", 0x31],
+    ]);
+  });
+
   it("the constant's range: 7FF is 2047, 800 is -2048, FFF is -1", () => {
     expect([0x7ff, 0x800, 0xfff].map((c) => widening(c).wSigned)).toEqual([2047n, -2048n, -1n]);
   });

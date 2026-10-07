@@ -62,6 +62,11 @@ const Props = z.object({
   wordInputs: z.boolean().default(true),
   /** The parts, by name, a drawing wider than its box opens on (`CircuitView`'s `focus`). */
   focus: z.array(z.string()).optional(),
+  /** Module 10: parts to mark on the drawing, by path, and what the marks say. */
+  highlight: z.array(z.string()).default([]),
+  highlightLabel: z.string().optional(),
+  /** Module 10: the drawing alone, where the figure shows where parts sit, not what they carry. */
+  still: z.boolean().default(false),
 });
 
 /** The reference table restricted to the inputs the circuit has, with a wildcard for X. */
@@ -145,37 +150,41 @@ export const CircuitExplorer = withProps(
           values={shown}
           title={strings.explorer.title}
           {...(data.writtenWidth !== undefined ? { writtenWidth: data.writtenWidth } : {})}
-          onToggleInput={(name) => sim.toggle(name)}
+          {...(data.still ? {} : { onToggleInput: (name: string) => sim.toggle(name) })}
           // The circuit's own table marks the row of the values now, so the signal list would
           // say the same thing twice.
-          table={own === undefined}
+          table={own === undefined && !data.still}
           scope={scope}
           {...(data.focus ? { focus: data.focus } : {})}
+          highlight={data.highlight}
+          {...(data.highlightLabel ? { highlightLabel: data.highlightLabel } : {})}
           {...(data.canOpen ? { onScope: setScope } : {})}
           readings={data.readings}
         />
-        {scope === "" && data.wordInputs && (
+        {scope === "" && data.wordInputs && !data.still && (
           <WordInputs circuit={circuit} values={sim.values} onSet={(n, v) => sim.set(n, v)} />
         )}
-        <div className="explorer-actions">
-          {data.clock && (
-            <button
-              type="button"
-              className="button secondary"
-              onClick={() => sim.clock(data.clock as string)}
-            >
-              {format(strings.explorer.clock, { name: data.clock })}
+        {!data.still && (
+          <div className="explorer-actions">
+            {data.clock && (
+              <button
+                type="button"
+                className="button secondary"
+                onClick={() => sim.clock(data.clock as string)}
+              >
+                {format(strings.explorer.clock, { name: data.clock })}
+              </button>
+            )}
+            {data.releaseAll && (
+              <button type="button" className="button secondary" onClick={() => sim.releaseAll()}>
+                {strings.explorer.releaseAll}
+              </button>
+            )}
+            <button type="button" className="button secondary" onClick={() => sim.reset()}>
+              {strings.explorer.reset}
             </button>
-          )}
-          {data.releaseAll && (
-            <button type="button" className="button secondary" onClick={() => sim.releaseAll()}>
-              {strings.explorer.releaseAll}
-            </button>
-          )}
-          <button type="button" className="button secondary" onClick={() => sim.reset()}>
-            {strings.explorer.reset}
-          </button>
-        </div>
+          </div>
+        )}
         {data.showSteps && (
           <Stepper
             step={step}
