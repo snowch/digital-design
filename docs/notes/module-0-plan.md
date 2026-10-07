@@ -93,9 +93,12 @@ the note and leaves the lesson as it is; the managing session decides.
   faults; the managing session recommends this as the module's failure experiment.
 - **The capstone: trace one step.** The machine paused before a line; the learner says which
   numbers the line changes and to what, and which line runs next, then runs it and compares. An
-  `answers` challenge (number and choice fields), graded by a copy of the simulator after a real
-  step, not by the reference. The build decides whether the trace also follows the line down the
-  ladder to the part that made the number.
+  `answers` challenge (number and choice fields), graded by the reference, which the simulator is
+  tested against after every instruction; the figures stay on the simulator. (This plan first said
+  "graded by a copy of the simulator after a real step, not by the reference". The managing session
+  changed it during the build: the front page re-grades saved work as it renders, and grading on
+  the gates made every render cost a returning learner seconds.) The build decides whether the
+  trace also follows the line down the ladder to the part that made the number.
 
 ## Using the lab
 

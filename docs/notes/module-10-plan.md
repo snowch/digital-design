@@ -207,3 +207,21 @@ lesson differs, in the same commit as the lesson.
   capstone's instruction with every part of the machine it changed and how each change was tested,
   and what the build would change.
 - **Checkpoint 4 follows Module 11**, not this module (`docs/plan.md`).
+
+## Changes after the reading review
+
+The managing session changed this plan on 7 October 2026, after each lesson's reading review and
+its sceptic. The module note (`docs/notes/module-10-instruction-set.md`) records every decision,
+A to K, and what the build did with each; these three change what the plan above says.
+
+- **The layout as a design** compares the course's layout, every field in one place in every
+  instruction, with one whose fields move, not with a layout packed by bits. Sixteen registers,
+  sixteen kinds and sixteen jobs each need exactly 4 bits, one hexadecimal digit, so cutting by
+  bits buys room only where a field is unused, which the moving layout already shows.
+- **What a machine leaves out** counts the cost and the saving of each instruction `docs/isa.md`
+  leaves out except "set if less", which it only names; the learner counts both on calls, with
+  and without the call through a register.
+- **The capstone** has the learner design "set if less" before the page shows the course's
+  design: the question and the motivation state the need, the design challenge comes next, and
+  its saving and its cost are on no page before it. The decoder half applies Module 9's
+  capstone; the new source for register Y is the new work.
