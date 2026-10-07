@@ -20,11 +20,11 @@ export const PROSE = {
     'The figure is the debugger on the program, with log 1 after it. The first time the run reaches `next`, 6 instructions have run. Choose an answer and press "Check my prediction". The buttons then work.',
   p1Question: "When the run first reaches `next`, what does R2 hold?",
   p1Explain:
-    "R2 holds 3, where the count is 4. Step 2 of the method says R2 should hold the count, 4. It holds 3, so the mistake is before `next`. Line `008`, `R2 <= R2 - 1`, takes one off. Its comment says the readings are numbered from 0, but R2 is a count of readings, not a reading's number. With 3 left to count, the loop stops one reading early.",
+    "R2 holds 3, where the count is 4. Step 2 of the method says R2 should hold the count, 4. It holds 3, so the mistake is before `next`. Line `008`, `R2 <= R2 - 1`, takes one off. Its comment says the readings are numbered from 0, but R2 is a count of readings, not a reading's number. With 3 left to count, the loop ends one reading early.",
   investigation:
     "The figure runs log 1 with a breakpoint on `next` and watches on R1, R2 and R3. It shows the log and which reading R1 points to.",
   findLead:
-    'Press "Run to a breakpoint" again and again. Before each press, predict where in the log R1 should point and what value R2 should hold. After each pause, watch the readings carefully. Which readings does R1 reach, and does it advance?',
+    'Press "Run to a breakpoint" again and again. Before each press, predict where in the log R1 should point and what value R2 should hold. After each pause, watch the readings. Which readings does R1 reach, and does it advance?',
   findAfter:
     "At each pause at `next`, R1 and R2 change. At the four pauses, R1 holds `050`, `058`, `060` and `068`, and R2 holds 3, 2, 1 and 0. At the fourth pause, R2 is already 0, so the loop ends. R1 points at the last reading, -170, but no instruction loads it. The display shows 1, from -175. The program runs 28 instructions and stops at `038`.",
   construction:
@@ -40,7 +40,7 @@ export const PROSE = {
     "The whole answer: delete the line `R2 <= R2 - 1         // the readings are numbered from 0`.",
   ],
   failureExperiment:
-    "Some mistakes stop the run instead of giving a wrong answer. The figure shows lesson 4's `total` program with one change: the first line is `R14 <= 0x400` instead of `R14 <= 0x7C0`. `400` is the start of the RAM. Run it to see what happens.",
+    "Some mistakes halt the run instead of giving a wrong answer. The figure shows lesson 4's `total` program with one change: the first line is `R14 <= 0x400` instead of `R14 <= 0x7C0`. `400` is the start of the RAM. Run it to see what happens.",
   stackInRomLead: 'Predict how the run ends, then press "Run to the end".',
   stackInRomAfter:
     "The machine halts with cause `34` at `01C` after 5 instructions: a store to the ROM. `01C` is `total`'s first push. R14 holds `3F8`: the push took 8 off `400` before it stored, and `3F8` is the ROM's last word. The halt is at `01C`, but the mistake is at `000`. The stack must start past the RAM's last word, at `7C0`, because it grows down. Which earlier line set the value that the halting instruction used?",

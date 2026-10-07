@@ -23,7 +23,7 @@ export const PROSE = {
   investigation:
     "The figure runs the new program with room A at -170 and room B at -190. A breakpoint is set on `above`. The stack is shown under the registers.",
   pushedLead:
-    '1. The watch shows R14, R15 and `word[R14]`, the word on top of the stack.\n2. Press Step through the first four lines of `total` and watch what happens at each push: R14 decreases by 8 and the word goes into the RAM.\n3. Then press "Run to a breakpoint" to reach each call of `above`.\n4. Step through the two pops at the end of `total` and watch R15 take back `010`.',
+    '1. The watch shows R14, R15 and `word[R14]`, the word on top of the stack.\n2. Press \"Step\" through the first four lines of `total` and watch what happens at each push: R14 decreases by 8 and the word goes into the RAM.\n3. Then press "Run to a breakpoint" to reach each call of `above`.\n4. Step through the two pops at the end of `total` and watch R15 take back `010`.',
   pushedAfter:
     "1. `7B8` holds `010`: the address after the main program's call to `total`. When `total` returns, it will jump back to `010`.\n2. `7B0` holds what R10 contained when `total` started. The main program never set R10, so it holds X. The pop restores that value.\n3. The display shows 20 as the result. 30 instructions run before the program stops at `014`.\n4. At the end of the run, R14 returns to `7C0` where it started.",
   construction:
@@ -40,7 +40,7 @@ export const PROSE = {
   ],
   failureExperiment:
     "The figure shows the new program without its first line, which sets R14. R14 holds X, making the push's address unknown. When the first store tries to run, it has no valid address in R14.",
-  noStartLead: "Predict where the run pauses, then press Run to the end.",
+  noStartLead: 'Predict where the run pauses, then press "Run to the end".',
   noStartAfter:
     "The debugger pauses before running `word[R14] <= R15` at `018`. This store needs an address in R14, which nothing has set. Four instructions ran, the last `R14 <= R14 - 8` at `014`. Since R14 held X, it still held X. Every program using the stack starts by setting R14.",
   explanation:

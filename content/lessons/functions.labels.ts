@@ -29,7 +29,7 @@ export const LABELS = {
     c2: "The function above",
   },
   captions: {
-    twoWays: "The same work: written twice, then written once as a function.",
+    twoWays: "The same work: written twice, then written once and called twice.",
     predict: "Predict what R15 holds after the second call, then run the program.",
     callReturn: "The function above, called twice, shown in the debugger.",
     roles: "Choose each register's role and run the tests.",
@@ -38,7 +38,7 @@ export const LABELS = {
   },
   programs: {
     twice: "Written out twice",
-    once: "Written once as a function",
+    once: "Written once, called twice",
     keeps: "Its function keeps R10",
     spoils: "Its function changes R10",
   },

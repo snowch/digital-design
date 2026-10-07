@@ -19,7 +19,7 @@ export const LABELS = {
     investigation: "The given function at work",
     construction: "The specification",
     failureExperiment: "A highest started at 0",
-    explanation: "Every lesson in one program",
+    explanation: "The module's lessons in one program",
     generalisation: "A program the shop can rely on",
     challenge: "Three ways in",
     reflection: "When a program does wrong",
