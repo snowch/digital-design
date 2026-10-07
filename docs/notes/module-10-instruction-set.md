@@ -122,6 +122,13 @@ subagent that wrote every learner-facing sentence from a brief of checked facts.
   Module 0's drawing, a list to choose from, kept alone). Decision A: the graders' sentences, brief
   6X, drafted once; the drafts inverted one rule and drifted on another, both put back. A test
   grades a wrong answer to every such case and checks the sentence names no answer.
+- 11:40 to 12:20 The full check on `b40ad81`, here: 29 minutes; 681 browser tests passed and the
+  same 10 stored screenshots failed as at `421cce7`, none of them Module 10's (this container's
+  text rendering, above). CI's Check #293 on `b40ad81` passed, every screenshot included. Check
+  #290 on `ad25ab5` had failed in the unit tests (the set-machine grade, now four runs, outlasted
+  a shared test's 5 seconds under load); `f4a05cb` gave that test 60 seconds. The held wire
+  Module 0 draws (`50e2f0d`) was looked at in 10.5's fault lab: SET stuck reads as a dashed wire
+  into pickSet's S, and the report writes YIN in hexadecimal.
 
 ## The outline
 
