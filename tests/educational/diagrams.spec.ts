@@ -515,6 +515,48 @@ test.describe("the diagrams", () => {
     expect(await textCollisions(page)).toEqual([]);
   });
 
+  // Module 0's ladder draws the machine at a new level at each press, so each level is checked as
+  // it is drawn, and the stuck wire's drawing once the machine has run with it.
+  test("Module 0: every level of the ladder, and the stuck wire's drawing, is clear", async ({
+    page,
+  }) => {
+    test.setTimeout(240_000);
+    await openLesson(page, "inside-the-machine");
+    const ladder = page.locator("#ix-ladder");
+    await ladder.scrollIntoViewIfNeeded();
+    const down = ladder.getByRole("button", { name: V.meet.ladder.down });
+    // Each level as the learner opens it, held to what every opened block is held to; the
+    // roomy-wire rules hold for the page as first drawn, which the tests below check.
+    for (let level = 1; ; level++) {
+      expect(await textCollisions(page), `level ${level}`).toEqual([]);
+      expect(await wireFaults(page), `level ${level}`).toEqual([]);
+      if (await down.isDisabled()) break;
+      await down.click();
+    }
+    const stuck = page.locator("#ix-stuck");
+    await stuck.scrollIntoViewIfNeeded();
+    // Its prediction first (64, read off the stuck machine), then the stuck wire.
+    const props = LESSONS.find((l) => l.id === "inside-the-machine")!
+      .sections.flatMap((s) => s.interactives)
+      .find((x) => x.id === "stuck")!.props as {
+      options: { value: string; label: string }[];
+      faults: { label: string }[];
+    };
+    await stuck
+      .getByRole("radio", { name: props.options.find((o) => o.value === "64")!.label, exact: true })
+      .check();
+    await stuck.getByRole("button", { name: V.prediction.commit }).click();
+    await stuck.getByRole("radio", { name: props.faults[0]!.label, exact: true }).check();
+    await stuck.getByRole("button", { name: V.meet.run, exact: true }).click();
+    await expect(stuck.locator(".datapath-status")).toHaveText(
+      format(V.meet.status.stopped, { line: 9 }),
+      { timeout: 30_000 },
+    );
+    expect(await textCollisions(page)).toEqual([]);
+    expect(await wireFaults(page)).toEqual([]);
+    expect(await crowding(page)).toEqual([]);
+  });
+
   test("every wire meets its gate on the gate's body and runs straight or turns by a cell", async ({
     page,
   }) => {

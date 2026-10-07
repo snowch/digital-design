@@ -1,0 +1,304 @@
+[
+  [
+    "1L",
+    "options.p1Skip",
+    "Skip to line 9",
+    "Lines 1 to 6, then line 9",
+    "drifted: the brief's option names the lines run"
+  ],
+  ["1L", "options.p1Stop", "Stop at line 6", "Lines 1 to 6, then it stops", "drifted: as above"],
+  [
+    "1L",
+    "options.p1All",
+    "All nine lines",
+    "All nine lines, 1 to 9",
+    "the three options in one shape"
+  ],
+  [
+    "1B",
+    "construction",
+    "5.0 degrees warmer than room B",
+    "5.0 degrees or more warmer than room B",
+    "dropped: or more"
+  ],
+  [
+    "1C",
+    "c2Task",
+    "with your answers.",
+    "with your answers. There are 2 tests.",
+    "dropped: the count of tests"
+  ],
+  [
+    "1C",
+    "inYourHeadLead",
+    "from the program first.",
+    "from the program first. Then check it in the investigation's figure if you like.",
+    "dropped: where to check"
+  ],
+  [
+    "1A",
+    "question",
+    "How does the machine decide",
+    "The figure below draws them: the sensors on the left, the machine in the middle, the display and the lamps on the right.\n\nHow does the machine decide",
+    "dropped: what the figure draws (paragraph break kept as the brief's two paragraphs)"
+  ],
+  [
+    "1A",
+    "prediction",
+    "Work out what line 3",
+    "Its numbers and buttons stay hidden until you choose an answer. Work out what line 3",
+    "dropped: values hidden until the commit"
+  ],
+  [
+    "2A",
+    "prediction",
+    "press Check my prediction.",
+    "press \"Check my prediction\".",
+    "the button's name in quotation marks, as elsewhere"
+  ],
+  ["2A", "p1Explain", "Press Down a level", "Press \"Down a level\"", "as above"],
+  [
+    "2A",
+    "ladderLead",
+    "Press Down a level at each step,",
+    "Each press of \"Down a level\" goes one level down,",
+    "\"step\" names a stepping figure elsewhere; one level a press is the fact"
+  ],
+  ["2A", "levelParts", "press Make smaller", "press \"Make smaller\"", "as above"],
+  [
+    "2B",
+    "c1Task",
+    "reads the eight slices.",
+    "reads the eight slices. There is 1 test.",
+    "dropped: the count of tests"
+  ],
+  [
+    "2B",
+    "stuckLead",
+    "inside the slice worth 2 and stays",
+    "inside the slice worth 2, and it stays",
+    "a join that read as a list"
+  ],
+  [
+    "6V",
+    "status.running",
+    "Running: line {line}.",
+    "Running. Next: line {line}.",
+    "wrong: {line} is the line it runs next"
+  ],
+  [
+    "6V",
+    "status.trapped",
+    "Cannot run line {line}.",
+    "Stopped: it cannot run line {line}.",
+    "dropped: that it stopped"
+  ],
+  [
+    "6V",
+    "ladder.number",
+    "{value}",
+    "The number here: {value}",
+    "dropped: the label, which the brief gave"
+  ],
+  ["6V", "ladder.digits", "{digits}", "Its 1s and 0s: {digits}", "as above"],
+  [
+    "2L",
+    "captions.ladder",
+    "Press 'Down a level' to descend",
+    "Press \"Down a level\" to go down",
+    "button names in double quotation marks; plain word"
+  ],
+  [
+    "2L",
+    "titles.prediction",
+    "Which slices give 1",
+    "Which slices give a 1",
+    "the brief's wording"
+  ],
+  [
+    "1B",
+    "c1Hints.1",
+    "The concept: line",
+    "Line",
+    "the runtime names each rung itself; the label repeated it"
+  ],
+  ["1B", "c1Hints.2", "The mistake: a gap", "A gap", "as above"],
+  ["1B", "c1Hints.3", "A smaller example: with", "With", "as above"],
+  ["1B", "c1Hints.4", "Part of the answer: 5.0", "5.0", "as above"],
+  [
+    "1B",
+    "c1Hints.5",
+    "The answer: 50.",
+    "The limit is 50.",
+    "as above; a hint of one number alone read as a fragment"
+  ],
+  [
+    "1C",
+    "reflection",
+    " It reads numbers from outside, the rooms. It keeps sixteen numbers, R0 to R15. It sets the display and the lamps.",
+    "",
+    "second pass: a repeat of the generalisation's four things, a paragraph above"
+  ],
+  [
+    "2B",
+    "stuckAfter",
+    "One wire, four levels down, changed",
+    "One wire, deep inside the part that adds, changed",
+    "wrong: four levels is no count the ladder gives"
+  ],
+  [
+    "2A",
+    "ladderLead",
+    "goes one level down, and you go down the machine to one wire.",
+    "goes one level down, to one wire at the bottom.",
+    "second pass: a broken join from the fix above"
+  ],
+  [
+    "1A",
+    "shopAfter",
+    " The 64 beside each connection shows how many wires carry the number.",
+    "",
+    "the scene drops its wire counts to fit a phone, so the sentence about them goes"
+  ],
+  ["1L", "scene.machine", "The machine", "Machine", "shorter, so the scene fits a phone's card"],
+  [
+    "2A",
+    "levelLine",
+    ", which gives the number 66.",
+    ".",
+    "second pass: the figure reads this level's number off the simulator under the caption; the caption repeated it"
+  ],
+  [
+    "2A",
+    "levelAdder",
+    " Their 1s and 0s give 66: `00000000 00000000 00000000 00000000 00000000 00000000 00000000 01000010`.",
+    "",
+    "second pass: the figure reads this level's number off the simulator under the caption; the caption repeated it"
+  ],
+  [
+    "2A",
+    "levelFour",
+    " Their 1s and 0s: `0010`.",
+    "",
+    "second pass: the figure reads this level's number off the simulator under the caption; the caption repeated it"
+  ],
+  [
+    "2A",
+    "levelSlice",
+    " It gives 1.",
+    "",
+    "second pass: the figure reads this level's number off the simulator under the caption; the caption repeated it"
+  ],
+  [
+    "2A",
+    "levelSmallest",
+    " It gives 1.",
+    "",
+    "second pass: the figure reads this level's number off the simulator under the caption; the caption repeated it"
+  ],
+  [
+    "2A",
+    "levelWire",
+    "It is high, and a high voltage stands for 1.",
+    "A high voltage stands for 1.",
+    "second pass: the figure reads this level's number off the simulator under the caption; the caption repeated it"
+  ],
+  [
+    "2Q",
+    "questionAfter",
+    "the sixteen numbers it keeps",
+    "the numbers it keeps",
+    "wrong: the figure shows R1 to R5, the numbers the program names"
+  ],
+  [
+    "F1",
+    "motivation",
+    "The display shows how much",
+    "The display shows how much",
+    "placed: the drafter returned the new paragraph alone; the managing model put it before the list, as the brief said"
+  ],
+  [
+    "F1L",
+    "titles.reflection",
+    "Inside the box",
+    "A program, run exactly",
+    "drifted: the body is about running a program exactly; inside the box is the next lesson's"
+  ],
+  [
+    "F1",
+    "explanation",
+    "So changing the limit changed one kept number.",
+    "So changing the limit, as you did in the construction, changed one kept number.",
+    "dropped: the link to the construction"
+  ],
+  [
+    "F2V",
+    "details.traceChanged",
+    "Line 3 does not change {actual}.",
+    "Your answer, {actual}, is not the number line 3 changes.",
+    "the brief's shape: with None chosen the draft read \"does not change none\""
+  ],
+  [
+    "F2V",
+    "invalidFor.slices",
+    "Eight 1s and 0s,",
+    "Type eight 1s and 0s,",
+    "dropped: the sentence's verb"
+  ],
+  [
+    "F2L",
+    "fields.slices",
+    "Eight 1s and 0s, one for each slice.",
+    "Eight 1s and 0s, the slice worth 128 first",
+    "dropped: the order"
+  ],
+  [
+    "F2A",
+    "prediction",
+    "The part that adds has already worked out 66.",
+    "The part that adds has already worked out 66: it works all the time on whatever numbers reach it, and R1 and R2 already reach it. R3 is not set yet; when line 3 runs, R3 takes the 66.",
+    "dropped: why the part already gives 66, and where the 66 goes"
+  ],
+  [
+    "F2A",
+    "levelFour",
+    "The four lowest slices, worth",
+    "The four slices of least worth:",
+    "\"low\" is a wire's voltage only on this page"
+  ],
+  [
+    "F2B",
+    "construction",
+    "Now go the other way: from new readings to what the slices give.",
+    "Now do it for new readings: from the readings to what the slices give.",
+    "wrong: the prediction went the same way; the brief said not \"the other way\""
+  ],
+  [
+    "F2B",
+    "c1Task",
+    "from the eight lowest slices of the part that adds",
+    "from the eight slices of least worth in the part that adds",
+    "\"low\" is a wire's voltage only on this page"
+  ],
+  [
+    "F2B",
+    "stuckLead",
+    "Before you run it, decide: what will the shop's display show? Then press \"Run\".",
+    "The drawing is the half of that slice's adding part that makes the sum. Look before you run: the part that makes the sum gives 1, and the wire SUM stays low. Then answer the question above the drawing.",
+    "dropped: what the drawing is and what to look at; wrong: Run comes after the answer"
+  ],
+  [
+    "F2B",
+    "explanation",
+    "This is why the course tests every part it builds before a later lesson uses it as a box.",
+    "This is why the course has you test each part you build before a later lesson uses it as a box.",
+    "drifted: the brief's claim, which the course can stand behind"
+  ],
+  [
+    "F2B",
+    "reflection",
+    " One number at the top is 1s and 0s on wires at the bottom.",
+    "",
+    "second pass: a repeat of the ladder's closing text"
+  ]
+]

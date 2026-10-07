@@ -15,12 +15,23 @@ import { Simulator, formatWord, parseWord, word as wordOf } from "@dd/sim";
 import { aluResult, hexWord, opBits } from "./alu";
 import { applyFaults, stuckAt } from "./faults";
 import { libraryCircuit } from "./library";
+import { machineRun, machineSlices, machineStep } from "./meet";
 
 export interface AnswerResult {
   readonly pass: boolean;
   readonly inputs: Readonly<Record<string, string>>;
   readonly actual: Readonly<Record<string, string>>;
   readonly expected: Readonly<Record<string, string>>;
+  /**
+   * Module 0: a sentence the book shows in place of the values, by its key in the book's strings,
+   * with values to fill it, for a failure whose expected value would hand over the answer.
+   */
+  readonly detail?: {
+    readonly key: string;
+    /** The field whose answer `actual` is, so a choice is said by its label. */
+    readonly field?: string;
+    readonly values?: Readonly<Record<string, string>>;
+  };
 }
 
 /** Why a case could not be graded: fields with nothing in them, or one that does not parse. */
@@ -253,4 +264,8 @@ export const ANSWER_GRADERS: Readonly<Record<string, AnswerGrader>> = {
   "memory-read": memoryRead,
   // Module 7
   exposes,
+  // Module 0: graded by running the finished machine (meet.ts).
+  "machine-run": machineRun,
+  "machine-step": machineStep,
+  "machine-slices": machineSlices,
 };

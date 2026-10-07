@@ -6,6 +6,7 @@
   "type": "module",
   "description": "The course content: one module per lesson, typed by the lesson schema, prose as Markdown strings.",
   "exports": {
-    ".": "./lessons/index.ts"
+    ".": "./lessons/index.ts",
+    "./module-names": "./lessons/module-names.ts"
   }
 }
