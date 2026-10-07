@@ -63,3 +63,11 @@ describe("facts for the lesson on what the machine is made of", () => {
     ).toBe(1);
   });
 });
+
+describe("the question's figure", () => {
+  it("shows the last lesson's run paused before line 9, with 66 on the display", () => {
+    const sim = meetFigure(lesson, "box");
+    expect(meetAnswer(sim, "next")).toBe("9");
+    expect(meetRun(lesson, "box")).toMatchObject({ display: "66" });
+  }, 30_000);
+});

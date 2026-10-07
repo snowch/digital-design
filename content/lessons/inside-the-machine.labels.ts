@@ -24,6 +24,7 @@ export const LABELS = {
     stuck: "Choose the stuck wire and decide what the display will show before you run.",
     tracePaused: "The machine is paused before line 3.",
     trace: "Trace the next line from what the machine shows, then run the tests.",
+    question: "The machine from the last lesson, with 66 on the display.",
   },
   levels: {
     line: "The line",

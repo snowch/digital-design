@@ -209,5 +209,12 @@
     "It is high, and a high voltage stands for 1.",
     "A high voltage stands for 1.",
     "second pass: the figure reads this level's number off the simulator under the caption; the caption repeated it"
+  ],
+  [
+    "2Q",
+    "questionAfter",
+    "the sixteen numbers it keeps",
+    "the numbers it keeps",
+    "wrong: the figure shows R1 to R5, the numbers the program names"
   ]
 ]

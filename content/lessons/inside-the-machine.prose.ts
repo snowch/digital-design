@@ -65,4 +65,6 @@ export const PROSE = {
     "The machine is parts inside parts. One number at the top is 1s and 0s on wires at the bottom. One stuck wire changes what the shop sees.\n\nThe course climbs the ladder from the bottom. Module 1 starts from one question: how does a voltage on one wire become a 1 or a 0, and many of them a number?",
   modelVsReality:
     "The drawings on this page show the circuit the simulator runs, opened a level at a time. A real chip is laid out by tools to fit a small area, and its parts are not in the tidy rows the drawings show.\n\nA real wire's voltage moves between high and low, and noise moves it. A real fault like the stuck wire happens when a chip is damaged or made wrong. Chip makers test each chip for such faults before they sell it.",
+  questionAfter:
+    "Everything here shows the box from outside: its program with nine lines, the numbers it keeps, and the display. Nothing here shows what is inside the box.",
 } as const;

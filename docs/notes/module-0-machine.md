@@ -91,10 +91,27 @@ No lesson on `main` changed. Shared files, each change a short block of its own:
 - `packages/dd-model/src/library-alu.ts`: an inside placement for kind `alu8`, the 64-bit ALU as
   the machine holds it closed, copied from Module 7's own top level; and a slice's B pin half a
   cell lower, so B meets the bit-by-bit selector's D straight. The ladder is the first figure to
-  open either; no first-drawn figure changes.
+  open either; no figure changes as first drawn, and the full check bore that out: no Module 7
+  screenshot or wire test failed, and no baseline was updated.
 - `apps/course/src/styles/course.css`: a block for Module 0's figures and the choice field.
 - `tests/educational/diagrams.spec.ts`: a Module 0 test of every ladder level as opened and of the
   stuck wire's drawing after a run.
+
+## CLASH, and the lessons' openings
+
+The lamps are the machine's three (`docs/machine.md`): ALARM, NIGHT and CLASH. CLASH means what
+the program that sets it makes it mean, so the lessons describe it by what this program does:
+it lights when room A is 10.0 degrees or more warmer than room B. Elsewhere it means other
+things: in Module 2's `gates` it lights when the freezer room's two warm sensors, WARM1 and
+WARM2, disagree, and in Module 8's `memory-access` the program lights it with no condition. The
+learner who meets CLASH in Module 2 meets it as a new circuit's lamp, with no claim from Module 0
+to unlearn.
+
+At the author's word (through the managing session), each lesson's opening has a figure where one
+helps: the first lesson's question has the shop's scene; the second's has the machine of the
+first, stopped before its last line with 66 on the display, the box seen from outside before the
+lesson opens it (brief 2Q). The first lesson's motivation lists the program in its words, and the
+figure under it, the prediction, shows it beside the display.
 
 ## Terms
 

@@ -54,6 +54,17 @@ export const insideTheMachine: LessonInput = {
       kind: "question",
       title: LABELS.titles.question,
       prose: PROSE.question,
+      interactives: [
+        {
+          id: "box",
+          kind: "machine-at-work",
+          timeModel: "none",
+          caption: LABELS.captions.question,
+          after: PROSE.questionAfter,
+          // The last lesson's run, paused before its last line: 66 on the display, no buttons.
+          props: { program: GAP, inputs: ROOMS, lines: 6, readings: [], controls: false },
+        },
+      ],
     },
     { kind: "motivation", title: LABELS.titles.motivation, prose: PROSE.motivation },
     {
