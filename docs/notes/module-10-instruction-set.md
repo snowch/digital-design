@@ -23,7 +23,10 @@ subagent that wrote every learner-facing sentence from a brief of checked facts.
 - 04:40 Faults on the machine of several edges, each run against the reference on the colder-room
   program and Module 8's 37 programs: HOLDR stuck at 1 and HOLDM stuck at 1 change only the
   machine's own held words, and every program still agrees with the reference after every
-  instruction; PCEN stuck at 1 disagrees at the first instruction (all 37 fail).
+  instruction; PCEN stuck at 1 disagrees at the first instruction (all 37 fail). (Corrected after
+  the review: `compareMulticycle`'s first PCEN difference is the edge count, which the agreement
+  leaves out. By what a program can see, two machines side by side, HOLDR stuck at 1 differs on 0
+  programs, PCEN stuck at 1 on all 37, HOLDR stuck at 0 on 29: `instruction-set.suite.test.ts`.)
 - 04:41 to 04:44 The capstone and lesson 1's second circuit, in the model and as text, before any
   lesson: the reference, the assembler and the decoder take "set if" at kind A
   (`MachineOptions.setIf`, `ControlOptions.setIf`); `ControlOptions.shortJobs` gives the register
@@ -94,6 +97,13 @@ subagent that wrote every learner-facing sentence from a brief of checked facts.
   5 is recorded above as the managing session's. Findings for 10.1, 10.4 and 10.5 arrived
   meanwhile, with decisions A to K; `runProgram`'s count of a refused word (G, K) is held for
   10.4's round, where it changes a stated count.
+- 08:35 to 09:20 Main merged (c3015c7, the verdict cache; no conflict). The findings for 10.1
+  (eleven, with decisions J and K). Code: the short-jobs tests gained the refused load (item 1);
+  the pair takes the stop's halting edge, so the stop takes 2 edges as 9.3 says (23 against 6),
+  logs Module 8's edges row by row, and logs the stop where it was fetched (items 4, 5); the
+  devices row lists the waiting bits (item 11). The fault counts are pinned by what a program can
+  see. Brief 1R, drafted in two parts, dropped one fact and added one; my own brief had one wrong
+  fact (Module 9's PC at the halt with PCEN stuck: `01C`, not `018`), caught by the facts test.
 
 ## The outline
 
@@ -194,7 +204,9 @@ aesthetic rules at both widths.
   found from the component that drives the part's net or keeps it. It holds no question: it shows
   what the motivation's words say, before the investigation runs the two machines.
 - `machine-compare` (new, 10.1): Module 8's machine (`datapath-full`) and Module 9's
-  (`multicycleCircuit`) in two simulators, compared after every instruction: what a program can
+  (`multicycleCircuit`) in two simulators, compared with each other after every instruction
+  (`pairView`: the differences between what a program can see on each; the course's tests, not
+  the figure, compare Module 9's machine with the reference): what a program can
   see on each, what Module 9's keeps of its own, every instruction with the edges each machine
   took; Module 9's moves an edge at a time, Module 8's takes its edge when Module 9's instruction
   ends; faults on Module 9's machine; a question before the tables show.
@@ -273,6 +285,13 @@ constant jobs written at the ALU edge in 3 edges (three lines: the ALU arm of th
 logic, WREG, and YIN's default from HR to RESULT). Module 8's 37 programs run through it as the
 reference runs them, each job in 3 edges (`module10.test.ts`). It is the plan's "how a circuit
 keeps that agreement is its own business", done rather than said.
+
+After the review, the challenge's tests run one program three times from a reset, the shop's
+signals choosing the path: the margin program edge by edge; a load the memory refuses at its
+memory edge (cause 33); and R3 stored to the display. The registers keep their words through a
+reset (checked on the simulated circuit: R1 holds 5 after a reset that sets the PC to 0), so the
+third run shows whether the refused load wrote R3. A WREG without `~MEM`, which the margin program
+alone could not tell apart, fails that one test. 73 tests; the start fails 48.
 
 ## The claim in docs/isa.md about wide constants
 

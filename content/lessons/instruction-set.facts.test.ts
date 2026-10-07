@@ -57,11 +57,12 @@ describe("facts for the instruction-set lesson", () => {
     ]);
   });
 
-  it("side by side: 5 instructions in 5, 5, 3, 4, 4 edges, the stop in 1; they agree; -250", () => {
+  it("side by side: 6 instructions in 5, 5, 3, 4, 4 and 2 edges, 23 against 6; they agree; -250", () => {
     const p = startPair(COLDER, ROOMS);
     runPair(p);
-    expect(p.log.map((l) => l.edges)).toEqual([5, 5, 3, 4, 4, 1]);
-    expect(p.log.slice(0, 5).reduce((n, l) => n + l.edges, 0)).toBe(21);
+    expect(p.log.map((l) => l.edges)).toEqual([5, 5, 3, 4, 4, 2]);
+    expect(p.log.reduce((n, l) => n + l.edges, 0)).toBe(23);
+    expect(p.log.reduce((n, l) => n + l.singleEdges, 0)).toBe(6);
     expect(p.log.every((l) => l.differ.length === 0)).toBe(true);
     expect(p.log.at(-1)?.stops).toBe(true);
     const v = pairView(p);
@@ -80,6 +81,8 @@ describe("facts for the instruction-set lesson", () => {
     runPair(broken);
     expect(broken.log[0]?.differ).toEqual(["R2"]);
     expect(broken.log.slice(0, -1).every((l) => l.edges === 1)).toBe(true);
+    // Both halt on the stop at 014; Module 9's PC, moved at every edge, ends at 01C.
+    expect([broken.log.at(-1)?.address, broken.log.at(-1)?.stops]).toEqual([0x14, true]);
     // The load at 000 ends with the PC at 014, the stop: the instructions between never run.
     const lines = assemble(COLDER).lines.filter((l) => l.instruction !== undefined);
     const skipped = lines.filter((l) => l.address > 0x000 && l.address < 0x014).length;
@@ -91,27 +94,37 @@ describe("facts for the instruction-set lesson", () => {
       undefined,
       0n,
       0x14n,
-      0x18n,
+      0x1cn,
     ]);
+    expect(PROSE.faultPcen).toContain("`01C`");
   });
 
-  it("the challenges: 9 and 16 tests; the second's start fails 13, first at the ALU edge", () => {
+  it("the challenges: 9 and 73 tests; the second's start fails 48, first at an ALU edge", () => {
     expect(testCount(challenge("sort-parts"))).toBe(9);
-    expect(testCount(challenge("short-jobs"))).toBe(16);
+    expect(testCount(challenge("short-jobs"))).toBe(73);
     const start = grade(challenge("short-jobs"), challenge("short-jobs").initial!);
     expect([start.failures.length, start.failures[0]?.label]).toEqual([
-      13,
-      "000, edge 3 (ALU): FETCH after it, PC 004",
+      48,
+      "Margin: 004, edge 3 (ALU): FETCH after it, PC 008",
     ]);
     for (const c of lesson.challenges) expect(grade(c, c.reference).passed, c.id).toBe(true);
   });
 
-  it("hint 2: changing only the next state leaves the display unknown, not 66", () => {
+  it("hint 2: changing only the next state writes nothing; R6 is unknown at the branch at 008", () => {
     const c = challenge("short-jobs");
     const only = c.initial!.hdl!.replace(SHORT_JOBS_FROM.alu, SHORT_JOBS_TO.alu);
     const g = grade(c, { hdl: only });
-    expect(g.failures.map((f) => f.label)).toEqual([
-      "at the stop: HALT is 1, the display shows 66",
+    expect(g.failures[0]?.label).toBe("Margin: 008, edge 3 (ALU): FETCH after it, PC 00C");
+  });
+
+  it("the refused load: a WREG without ~MEM writes R3 at its ALU edge, and only the third run sees it", () => {
+    const c = challenge("short-jobs");
+    const wrong = c.reference.hdl!.replace(
+      SHORT_JOBS_TO.wreg,
+      "  assign WREG = ((state == WRITE) | (state == ALU)) & WRITEY & GO;",
+    );
+    expect(grade(c, { hdl: wrong }).failures.map((f) => f.label)).toEqual([
+      "R3 shown: at the stop: HALT is 1, the display shows 66",
     ]);
   });
 });

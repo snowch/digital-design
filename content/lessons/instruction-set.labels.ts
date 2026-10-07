@@ -51,7 +51,7 @@ export const LABELS = {
     ir: "The IR",
     hr: "HR",
     state: "The controller's state",
-    ram: "The word at `400`",
+    ram: "The word at 400",
     display: "The display",
     ha: "HA",
     timer: "The timer's count",

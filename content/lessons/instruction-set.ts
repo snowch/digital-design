@@ -15,8 +15,8 @@ import type { LessonInput } from "@platform/lesson-schema";
 
 import { LABELS } from "./instruction-set.labels";
 import { PROSE } from "./instruction-set.prose";
-import { MACHINE_INTERFACE, machineSteps, shortJobsText } from "./module10";
-import { COLDER, MACHINE9_CONSTRUCTS, MARGIN, machineText } from "./module9";
+import { MACHINE_INTERFACE, SHORT_JOBS_PROGRAM, shortJobsSteps, shortJobsText } from "./module10";
+import { COLDER, MACHINE9_CONSTRUCTS, machineText } from "./module9";
 
 /** The shop's two rooms, as Module 1 read them, in tenths of a degree. */
 export const ROOMS10 = { DOOR: 0, WARM: 0, SENSORA: "-184", SENSORB: "-250" };
@@ -210,16 +210,12 @@ export const instructionSet: LessonInput = {
       feedback: "words",
       interface: MACHINE_INTERFACE,
       allowedConstructs: MACHINE9_CONSTRUCTS,
-      courseModules: { set: "machine9", program: MARGIN },
+      courseModules: { set: "machine9", program: SHORT_JOBS_PROGRAM },
       tryIt: "pins",
       initial: { hdl: machineText(false) },
       tests: {
         kind: "sequence",
-        steps: machineSteps(
-          MARGIN,
-          { door: 0, warm: 0, sensorA: 0n, sensorB: 0n },
-          { shortJobs: true },
-        ),
+        steps: shortJobsSteps(),
       },
       hints: [...PROSE.c2Hints],
       reference: { hdl: shortJobsText() },
