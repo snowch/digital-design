@@ -24,7 +24,7 @@ import {
 
 const T = DEFAULT_VIEW_STRINGS.machine11;
 
-const MODULE_11 = ["assembly"] as const;
+const MODULE_11 = ["assembly", "lists"] as const;
 
 async function answerAll(
   section: Locator,
@@ -80,6 +80,22 @@ const WRONG: readonly {
     fails: "Room A -30, room B 15",
     left: "the display -30",
   },
+  {
+    lesson: "lists",
+    id: "first-warmer",
+    from: "if R3 < R5 signed goto found",
+    to: "if R3 < R5 unsigned goto found",
+    fails: "Log -200, 25, -150, 30; limit -150",
+    left: "the display 0",
+  },
+  {
+    lesson: "lists",
+    id: "largest-rise",
+    from: "R3 <= R6 - R5         // the largest rise so far: the first pair's",
+    to: "R3 <= 0",
+    fails: "Log -190, -195, -200",
+    left: "the display 0",
+  },
 ];
 
 test.describe("Module 11's wrong programs", () => {
@@ -126,6 +142,34 @@ test.describe("Module 11's wrong programs", () => {
 });
 
 test.describe("Module 11's lab", () => {
+  test("a breakpoint pauses the loop each time round, and the watch shows R1 moving", async ({
+    page,
+  }) => {
+    await openLesson(page, "lists");
+    const figure = page.locator('[data-interactive="walk"]');
+    await figure.scrollIntoViewIfNeeded();
+    const run = figure.getByRole("button", { name: T.runToPause, exact: true });
+    await run.click();
+    await expect(figure.locator(".debugger-status")).toContainText(
+      format(T.paused, { address: "014" }),
+    );
+    await run.click();
+    await expect(figure.locator(".watch-list li").first()).toContainText("72");
+    await expect(figure.locator(".watch-list li").first()).toContainText(
+      format(T.watchWas, { value: "64" }),
+    );
+    await expect(figure.locator(".debugger-memory .row-current")).toContainText("048");
+    await figure.getByRole("textbox", { name: T.watchLabel }).fill("word[log + 8]");
+    await figure.getByRole("button", { name: T.watchAdd, exact: true }).click();
+    await expect(figure.locator(".watch-list li")).toHaveCount(5);
+    await figure.getByRole("button", { name: format(T.pauseBefore, { address: "014" }) }).click();
+    // With no breakpoint left, the button runs to the end.
+    await figure.getByRole("button", { name: T.run, exact: true }).click();
+    await expect(figure.locator(".debugger-status")).toContainText(
+      format(T.stops.stop!, { address: "034" }),
+    );
+  });
+
   test("the debugger steps a program and says why it stopped", async ({ page }) => {
     await openLesson(page, "assembly");
     const figure = page.locator('[data-interactive="room-a"]');

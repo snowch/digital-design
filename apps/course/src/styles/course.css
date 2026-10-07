@@ -2752,3 +2752,30 @@ svg.stack-depth {
   font-family: var(--font-mono);
   font-size: var(--text-sm);
 }
+/* Module 11's listings write a program's lines in table cells, which app.css's rule against the
+   mono face's ligatures does not reach: <= would read as one glyph. */
+.memory-word,
+.watch-input {
+  font-variant-ligatures: none;
+  font-feature-settings:
+    "calt" 0,
+    "liga" 0;
+}
+.debugger-listing td:nth-child(-n + 3) {
+  white-space: nowrap;
+}
+/* A line breaks only between its words, never inside a name; on a phone the listing's text is a
+   size smaller so the address, the word and most lines fit beside each other. */
+.debugger-listing .debugger-line {
+  overflow-wrap: normal;
+  word-break: normal;
+}
+@media (max-width: 480px) {
+  .debugger-listing .memory-word {
+    font-size: var(--text-xs);
+  }
+  .debugger-listing th,
+  .debugger-listing td {
+    padding-right: var(--space-2);
+  }
+}

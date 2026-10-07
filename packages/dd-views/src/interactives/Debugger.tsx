@@ -165,6 +165,8 @@ export function DebuggerView({
   const start = useMemo(() => debugStart(program.rom), [program]);
   const [history, setHistory] = useState<DebugState[]>([start]);
   const [at, setAt] = useState(0);
+  // Where the run last paused before this one: the watch says what changed since.
+  const [from, setFrom] = useState(0);
   const initialPauses = useMemo(
     () =>
       new Set(
@@ -181,10 +183,11 @@ export function DebuggerView({
   useEffect(() => {
     setHistory([start]);
     setAt(0);
+    setFrom(0);
     setPauses(initialPauses);
   }, [start, initialPauses, inputs]);
   const state = history[at] ?? start;
-  const before = at > 0 ? history[at - 1] : undefined;
+  const before = at > 0 ? history[Math.min(from, at - 1)] : undefined;
   const { onState } = options;
   useEffect(() => {
     onState?.(state);
@@ -196,11 +199,14 @@ export function DebuggerView({
     const all = [...history.slice(0, at + 1), ...next];
     const drop = Math.max(0, all.length - 1000);
     setHistory(all.slice(drop));
+    setFrom(Math.max(0, at - drop));
     setAt(all.length - 1 - drop);
   };
   const onStep = () => {
-    if (at < history.length - 1) setAt(at + 1);
-    else if (!state.stopped) {
+    if (at < history.length - 1) {
+      setFrom(at);
+      setAt(at + 1);
+    } else if (!state.stopped) {
       if (state.ran >= limit) keep([{ ...state, stopped: { kind: "cutOff", ran: state.ran } }]);
       else keep([debugStep(state, inputs)]);
     }
@@ -212,6 +218,7 @@ export function DebuggerView({
   const onReset = () => {
     setHistory([start]);
     setAt(0);
+    setFrom(0);
   };
   const pc = state.cpu.pc;
   const names = useMemo(() => namesByAddress(program), [program]);
@@ -267,7 +274,10 @@ export function DebuggerView({
           type="button"
           className="button secondary"
           disabled={!live || at === 0}
-          onClick={() => setAt(at - 1)}
+          onClick={() => {
+            setFrom(Math.max(0, at - 2));
+            setAt(at - 1);
+          }}
         >
           {t.back}
         </button>

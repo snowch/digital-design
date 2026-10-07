@@ -279,6 +279,11 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   checkValue: "{name} {value}",
   details: {
     // Module 11, lesson 1 (brief 1L).
+    // Module 11, lesson 2 (brief 2L).
+    firstWarmer:
+      "The display must show the position, from 1, of the first reading warmer than the limit, or 0 when none is.",
+    largestRise:
+      "The display must show the largest of the rises from each reading to the next, which may be below 0.",
     warmerDisplay: "The display must show the higher of the two readings, read as signed numbers.",
   },
   nothingWritten: "No program yet.",

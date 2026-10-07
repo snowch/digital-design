@@ -40,15 +40,15 @@ export const LABELS = {
     beAssembler: "Work out the address and word for each line, then run the tests.",
   },
   options: {
-    c003: "`003` instructions from the branch to `fine`",
-    c014: "`014` the address `fine` names",
-    c005: "`005` the position of `fine` counting from `000`'s line as 1",
+    c003: "003: instructions from the branch to fine",
+    c014: "014: the address fine names",
+    c005: "005: the position of fine counting from 000's line as 1",
   },
   fields: {
-    cold: "the address `cold` names",
-    limit: "the address `limit` names",
-    branch: "the word of `if R2 < R1 signed goto cold`",
-    load: "the word of `R1 <= word[limit]`",
+    cold: "the address cold names",
+    limit: "the address limit names",
+    branch: "the word of if R2 < R1 signed goto cold",
+    load: "the word of R1 <= word[limit]",
   },
   runs: [
     "Room A -184, room B -250",
