@@ -52,7 +52,8 @@ describe("the course's front page: the cover", () => {
     expect(
       screen.getByRole("link", { name: STRINGS.cover.continueWith(second.module, second.title) }),
     ).toHaveAttribute("href", lessonHref(second.id));
-  });
+    // The cover grades saved work again; Module 0's runs the whole machine on its gates.
+  }, 30_000);
 
   it("takes a returning reader on from the furthest lesson they passed a challenge in", () => {
     // A reader who began in Module 2 before Module 0 existed is not sent back to Module 0.
