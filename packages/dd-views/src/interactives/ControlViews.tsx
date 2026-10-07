@@ -20,7 +20,8 @@ import {
   type EdgeView,
   type MicroOp,
 } from "@dd/dd-model";
-import type { InteractiveProps } from "@platform/lesson-runtime";
+import { Prose, useSlot, type InteractiveProps } from "@platform/lesson-runtime";
+import { PredictionChallenge } from "@platform/primitives";
 import { Simulator, word, type Circuit } from "@dd/sim";
 
 import { format, useViewStrings, type ControlStrings } from "../strings";
@@ -65,6 +66,8 @@ const TableProps = z.object({
   kinds: z.array(z.number().int().min(1).max(15)).default([1, 2, 3, 4, 5, 6, 7, 8]),
   signals: z.array(z.string()).default([...CONTROL_SIGNALS]),
   callThroughRegister: z.boolean().default(false),
+  /** Module 10's capstone: the learner's copy with set if at kind A. */
+  setIf: z.boolean().default(false),
 });
 
 export const ControlTable = withProps(
@@ -75,9 +78,11 @@ export const ControlTable = withProps(
   }: InteractiveProps & { data: z.infer<typeof TableProps> }) {
     const t = useViewStrings().control;
     const cells = useMemo(() => {
-      const sim = new Simulator(decoderCircuit({ callThroughRegister: data.callThroughRegister }));
+      const sim = new Simulator(
+        decoderCircuit({ callThroughRegister: data.callThroughRegister, setIf: data.setIf }),
+      );
       return data.signals.map((s) => data.kinds.map((k) => signalCell(sim, k, s)));
-    }, [data.kinds, data.signals, data.callThroughRegister]);
+    }, [data.kinds, data.signals, data.callThroughRegister, data.setIf]);
     const shown = (v: string) => (v.startsWith("J") ? format(t.jobBit, { bit: v.slice(1) }) : v);
     return (
       <div className="control-table" data-interactive={interactive.id}>
@@ -195,10 +200,16 @@ export const KindMap = withProps(
 const EdgesProps = z.object({
   kinds: z.array(z.number().int().min(1).max(15)).default([1, 2, 3, 4, 5, 6, 7]),
   callThroughRegister: z.boolean().default(false),
+  /** Module 10's capstone: the learner's copy with set if at kind A. */
+  setIf: z.boolean().default(false),
+  /** Module 10: commit to the first kind's count of edges before the table shows. */
+  question: z.string().optional(),
+  options: z.array(z.object({ value: z.string(), label: z.string() })).optional(),
+  explain: z.string().default(""),
 });
 
 /** A job of each kind the sequences run: one the kind defines. */
-const SAMPLE_JOB: Readonly<Record<number, number>> = { 1: 2, 2: 2, 3: 0, 4: 0, 5: 2 };
+const SAMPLE_JOB: Readonly<Record<number, number>> = { 1: 2, 2: 2, 3: 0, 4: 0, 5: 2, 10: 6 };
 
 /**
  * Each kind's states, from the fetch until the controller is back at the fetch: the decoder's
@@ -208,8 +219,9 @@ const SAMPLE_JOB: Readonly<Record<number, number>> = { 1: 2, 2: 2, 3: 0, 4: 0, 5
 export function kindSequences(
   kinds: readonly number[],
   callThroughRegister = false,
+  setIf = false,
 ): { kind: number; states: ControlState[] }[] {
-  const decoder = new Simulator(decoderCircuit({ callThroughRegister }));
+  const decoder = new Simulator(decoderCircuit({ callThroughRegister, setIf }));
   const m = controllerMachine();
   const controller = new Simulator(machineCircuit(m));
   const names = Object.fromEntries(
@@ -245,15 +257,53 @@ export const KindEdges = withProps(
   function KindEdges({
     data,
     interactive,
+    store,
   }: InteractiveProps & { data: z.infer<typeof EdgesProps> }) {
-    const t = useViewStrings().control;
+    const strings = useViewStrings();
+    const t = strings.control;
     const rows = useMemo(
-      () => kindSequences(data.kinds, data.callThroughRegister),
-      [data.kinds, data.callThroughRegister],
+      () => kindSequences(data.kinds, data.callThroughRegister, data.setIf),
+      [data.kinds, data.callThroughRegister, data.setIf],
     );
+    // Module 10: a question on the first kind's edges, answered by the controller's own run.
+    const [stored, setStored] = useSlot<{ readonly choice?: string }>(store, interactive.id);
+    const asking = data.question !== undefined && data.options !== undefined;
+    const committed = !asking || stored?.choice !== undefined;
+    const answer = String(rows[0]?.states.length ?? "");
+    const optionLabel = (v: string) =>
+      (data.options?.find((o) => o.value === v)?.label ?? v).replace(/\.$/, "");
     return (
       <div className="kind-edges" data-interactive={interactive.id}>
-        <div className="truth-table-wrap">
+        {asking && (
+          <div className="carry-question">
+            <Prose markdown={data.question ?? ""} />
+            <PredictionChallenge
+              name={`${interactive.id}-question`}
+              options={data.options ?? []}
+              committed={stored?.choice}
+              onCommit={(choice) => setStored({ choice })}
+              onAgain={() => setStored(undefined)}
+              legend={strings.prediction.legend}
+              commitLabel={strings.prediction.commit}
+              againLabel={strings.prediction.again}
+              verdict={
+                stored?.choice !== undefined && (
+                  <p
+                    role="status"
+                    className={stored.choice === answer ? "prediction-match" : "prediction-nomatch"}
+                  >
+                    {format(strings.prediction.youSaid, { choice: optionLabel(stored.choice) })}{" "}
+                    {format(strings.machine10.edgesAnswer, { answer: optionLabel(answer) })}{" "}
+                    {stored.choice === answer
+                      ? strings.prediction.match
+                      : strings.prediction.noMatch}
+                  </p>
+                )
+              }
+            />
+          </div>
+        )}
+        <div className="truth-table-wrap" hidden={!committed}>
           <table className="truth-table kind-edges-table">
             <caption>{t.edgesCaption}</caption>
             <thead>
@@ -274,6 +324,7 @@ export const KindEdges = withProps(
             </tbody>
           </table>
         </div>
+        {asking && committed && data.explain && <Prose markdown={data.explain} />}
       </div>
     );
   },

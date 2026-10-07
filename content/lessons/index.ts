@@ -48,6 +48,7 @@ import { instructionSet } from "./instruction-set";
 import { encoding } from "./encoding";
 import { immediates } from "./immediates";
 import { roomToGrow } from "./room-to-grow";
+import { designAnInstruction } from "./design-an-instruction";
 
 const INPUTS: readonly LessonInput[] = [
   signals,
@@ -94,6 +95,7 @@ const INPUTS: readonly LessonInput[] = [
   encoding,
   immediates,
   roomToGrow,
+  designAnInstruction,
 ];
 
 export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(

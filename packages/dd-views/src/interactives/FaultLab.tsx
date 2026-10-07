@@ -50,6 +50,8 @@ export const FaultSpec = z.discriminatedUnion("kind", [
 
 const Props = z.object({
   libraryId: z.string(),
+  /** Module 10: the widest word written on the drawing; wider words show in the checks only. */
+  writtenWidth: z.number().int().min(1).optional(),
   faults: z.array(FaultSpec).min(1),
   run: z.array(Step).min(1),
   scope: z.string().default(""),
@@ -165,6 +167,7 @@ export const FaultLab = withProps(
           circuit={circuit}
           values={sim.values}
           title={strings.fault.title}
+          {...(data.writtenWidth !== undefined ? { writtenWidth: data.writtenWidth } : {})}
           onToggleInput={(n) => sim.toggle(n)}
           scope={scope}
           {...(spec ? { focus: [faultPlace(spec)] } : {})}

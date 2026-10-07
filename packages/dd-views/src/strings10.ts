@@ -153,6 +153,8 @@ export interface Machine10Strings {
   readonly address: string;
   /** After a prediction: {answer}. */
   readonly programAnswer: string;
+  /** After a prediction of a kind's edges, on `kind-edges`: {answer}. */
+  readonly edgesAnswer: string;
 }
 
 export const MACHINE10_STRINGS: Machine10Strings = {
@@ -306,4 +308,5 @@ export const MACHINE10_STRINGS: Machine10Strings = {
   notStopped: "Did not stop",
   address: "Address",
   programAnswer: "The run gives: {answer}.",
+  edgesAnswer: "The controller takes: {answer}.",
 };

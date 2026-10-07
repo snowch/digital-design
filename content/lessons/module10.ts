@@ -351,3 +351,25 @@ R2 <= R2 + R2
 R2 <= R2 + R1
 word[display] <= R2
 stop`;
+
+// Lesson 10.5: the capstone's tests.
+
+/** The learner's copy's decoder: K, J and C in; the control signals, SET, MEM, STOP and CAUSED. */
+export const SET_DECODER_OUTPUTS = [
+  "WRITEY",
+  "LOAD",
+  "STORE",
+  "BYTE",
+  "AZERO",
+  "BCONST",
+  "OP2",
+  "OP1",
+  "OP0",
+  "BRANCH",
+  "CALL",
+  "JUMP",
+  "MEM",
+  "SET",
+  "STOP",
+  "CAUSED",
+] as const;

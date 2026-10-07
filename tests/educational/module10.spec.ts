@@ -25,7 +25,13 @@ import {
   writeText,
 } from "./helpers";
 
-const MODULE_10 = ["instruction-set", "encoding", "immediates", "room-to-grow"] as const;
+const MODULE_10 = [
+  "instruction-set",
+  "encoding",
+  "immediates",
+  "room-to-grow",
+  "design-an-instruction",
+] as const;
 
 /** Fills an answers challenge's fields: a choice by its option's words, any other by typing. */
 async function answerAll(
@@ -126,6 +132,26 @@ const WRONG: readonly {
     id: "count-loop",
     answers: { times9: "9" },
     why: "the instructions written counted, not those run",
+  },
+  {
+    lesson: "design-an-instruction",
+    id: "design",
+    answers: { kind: "9" },
+    why: "kind 9, which the copy's call through a register holds",
+  },
+  {
+    lesson: "design-an-instruction",
+    id: "set-decoder",
+    from: "(K == 4'h5) | (K == 4'hA)) & J[3])",
+    to: "(K == 4'h5)) & J[3])",
+    why: "kind A's jobs 8 to F left legal",
+  },
+  {
+    lesson: "design-an-instruction",
+    id: "set-machine",
+    from: "    if (SET) YIN = {63'h0, MET};\n",
+    to: "",
+    why: "SET joined but no new source for register Y",
   },
 ];
 
@@ -320,5 +346,18 @@ test.describe("Module 10's figures", () => {
     await expect(words.locator(".program-counts").nth(1)).toContainText(
       format(T.stoppedCause, { address: "004", cause: "21" }),
     );
+  });
+
+  test("set if's edges are predicted, then read off the decoder and controller", async ({
+    page,
+  }) => {
+    await openLesson(page, "design-an-instruction");
+    const figure = page.locator("#ix-predict-edges");
+    await figure.scrollIntoViewIfNeeded();
+    await expect(figure.locator("table.kind-edges-table")).toBeHidden();
+    await figure.getByRole("radio").nth(1).check();
+    await figure.getByRole("button", { name: V.prediction.commit }).click();
+    await expect(figure.locator("[role=status]").first()).toContainText(V.prediction.match);
+    await expect(figure.locator("table.kind-edges-table tbody tr").first()).toContainText("4");
   });
 });

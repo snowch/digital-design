@@ -6,6 +6,7 @@
 // data and the circuit stays testable here. Each entry is a function, so every caller gets a fresh
 // netlist to simulate, break or compare.
 
+import { yWordSetCircuit } from "./capstone10";
 import { ALU_INSIDE, aluLibrary } from "./library-alu";
 import { CircuitBuilder, type Circuit, type NetId } from "@dd/sim";
 
@@ -447,6 +448,22 @@ export const LIBRARY: Readonly<Record<string, () => Circuit>> = {
   ...datapathLibrary(placed),
   // Module 9, control: the decoder opened, and the machine of several edges an instruction.
   ...controlLibrary(placed),
+  // Module 10, the instruction set: the capstone's change to the datapath.
+  "y-word-set": () =>
+    placed(yWordSetCircuit(), {
+      "in:HR": [0, 1],
+      "in:HM": [0, 3],
+      "in:LOAD": [0, 5],
+      "in:PC4": [0, 8],
+      "in:CALL": [0, 10],
+      "in:MET": [0, 13],
+      "in:SET": [0, 17],
+      pickLoad: [8, 0],
+      pickCall: [16, 4],
+      widenMet: [16, 12],
+      pickSet: [32, 8],
+      "out:YIN": [40, 9],
+    }),
 };
 
 export function libraryCircuit(id: string): Circuit {

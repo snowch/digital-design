@@ -43,3 +43,4 @@ export * from "./multicycle-view";
 export * from "./machine-compare";
 export * from "./encoding";
 export * from "./programs10";
+export * from "./capstone10";

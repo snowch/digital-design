@@ -6,7 +6,15 @@
 
 import { describe, expect, it } from "vitest";
 
-import { SET_IF_KIND, compareMulticycle, machineSuite } from "@dd/dd-model";
+import {
+  SET_IF_KIND,
+  compareMulticycle,
+  decoderCircuit,
+  fieldsOf,
+  isIllegal,
+  machineSuite,
+} from "@dd/dd-model";
+import { Simulator, word } from "@dd/sim";
 
 import { machineFromText } from "./module9.test";
 import { COUNT_COLD_BRANCHES, COUNT_COLD_SET, setMachineText, shortJobsText } from "./module10";
@@ -82,4 +90,23 @@ describe("the capstone's machine: set if at kind A", () => {
   it("runs the program written with branches, on the course's machine too", () => {
     expect(compareMulticycle(COUNT_COLD_BRANCHES, COLD).differences).toEqual([]);
   }, 60_000);
+});
+
+describe("the decoder with set if against the reference", () => {
+  it("refuses exactly the words the reference refuses, for every kind and job", () => {
+    const sim = new Simulator(decoderCircuit({ callThroughRegister: true, setIf: true }));
+    for (let k = 0; k < 16; k++)
+      for (let j = 0; j < 16; j++)
+        for (const c of [0, 4, 5, 0xfff]) {
+          sim.setInput("K", word(4, k));
+          sim.setInput("J", word(4, j));
+          sim.setInput("C", word(12, c));
+          sim.settle();
+          const refused = sim.outputs()["CAUSED"]?.value === 0x21n;
+          const f = fieldsOf(((k << 28) | (j << 24) | c) >>> 0);
+          expect(refused, `K ${k} J ${j} C ${c}`).toBe(
+            isIllegal(f, { registerCheck: true, callThroughRegister: 9, setIf: 10 }),
+          );
+        }
+  });
 });

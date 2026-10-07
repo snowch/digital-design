@@ -1065,6 +1065,8 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       "7": "7 jump",
       "8": "8 system job",
       "9": "9 call through a register",
+      // Module 10's capstone, in the learner's copy (strings10.ts's brief, 6V).
+      "10": "A set if",
     },
     jobBitNote: "J2 means bit 2 of the job digit.",
     mapCaption: "Which kinds and jobs are instructions",
