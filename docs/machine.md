@@ -170,8 +170,11 @@ go in, the register the result goes to, and the constant. The parts, and where t
 - **A 5-way selector for the next PC**: PC + 4, the target, the ALU's result (a jump), C2
   (`resume`) or C4 (a trap). Made of Module 3's selectors.
 - **The control registers** and the selectors in front of them: C0 takes `01` on a trap, C1 on
-  `resume`, or the register A on a write; C1 takes C0 on a trap; C2 takes the return point; C3
-  takes the cause; C4 takes the register A.
+  `resume`, or the register A on a write; C1 takes C0 on a trap; C2 takes the return point on a
+  trap; C3 takes the cause on a trap; and each of the five takes the register A on a write,
+  `Cc <= Rm` (`docs/isa.md`, "System jobs"). A handler writes C2 to skip the instruction that
+  faulted, and writes C1 and C2 back before `resume` when it has let interrupts in (Module 12's
+  correction: this bullet first gave the register A to C0 and C4 alone).
 - **The decoder**: the kind and job digits, the constant (for a control register's number) and
   C0's mode in; the control signals and the decode causes (`21`, `22`) out.
 - **The trap logic**: every cause, the interrupts waiting and C0's bit 1 in; whether this edge
