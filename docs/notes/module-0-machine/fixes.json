@@ -230,5 +230,26 @@
     "So changing the limit changed one kept number.",
     "So changing the limit, as you did in the construction, changed one kept number.",
     "dropped: the link to the construction"
+  ],
+  [
+    "F2V",
+    "details.traceChanged",
+    "Line 3 does not change {actual}.",
+    "Your answer, {actual}, is not the number line 3 changes.",
+    "the brief's shape: with None chosen the draft read \"does not change none\""
+  ],
+  [
+    "F2V",
+    "invalidFor.slices",
+    "Eight 1s and 0s,",
+    "Type eight 1s and 0s,",
+    "dropped: the sentence's verb"
+  ],
+  [
+    "F2L",
+    "fields.slices",
+    "Eight 1s and 0s, one for each slice.",
+    "Eight 1s and 0s, the slice worth 128 first",
+    "dropped: the order"
   ]
 ]
