@@ -13,8 +13,8 @@ import {
   endOf,
   runScenario,
 } from "@dd/dd-model";
-import { listingAnswer, resultsOf } from "@dd/dd-views";
-import { parseLesson } from "@platform/lesson-schema";
+import { grade, listingAnswer, resultsOf } from "@dd/dd-views";
+import { parseLesson, testCount } from "@platform/lesson-schema";
 
 import { COUNT_RUNS, EDGE_LOGS, OVER_RUNS, debugging, warmerCount } from "./debugging";
 import {
@@ -74,6 +74,15 @@ describe("facts for the debugging lesson", () => {
       expect(shown === BigInt(warmerCount(log, -180))).toBe(value !== "equal");
       if (value === "equal") expect(shown).toBe(1n);
     }
+  });
+
+  it("the edge-log question: 2 tests; a right program shows 0 on -180 and -190; the reference passes, no answer fails", () => {
+    const c = lesson.challenges.find((x) => x.id === "edge-log")!;
+    expect(testCount(c)).toBe(2);
+    expect(c.reference.answers).toEqual({ log: "equal", shows: "0" });
+    expect(grade(c, { answers: c.reference.answers! }).passed).toBe(true);
+    expect(grade(c, { answers: {} }).passed).toBe(false);
+    expect(grade(c, { answers: { log: "equal", shows: "1" } }).passed).toBe(false);
   });
 
   it("two mistakes: cause 33 at 018 with R10 074; mended, R11 starts at 96 and the run stops", () => {

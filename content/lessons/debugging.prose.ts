@@ -64,9 +64,10 @@ export const PROSE = {
     "The machine halts with cause `34` at `034`, after 33 instructions. `034` is `word[R6] <= R3`, a store to the ROM. R6 holds `050`, the log's address, which is in the ROM.\n\nThe halt is at `034`, but the line that is wrong is at `000`. `R6 <= log` should put a word of the RAM in R6, such as `0x400`.\n\nThe display still shows 0. The store to the display comes after the halt.\n\nThe instruction that halts used a value an earlier line set. Find the line that set it.",
   edgeListingLead:
     "Another counting program, with one line wrong: it counts a reading equal to the limit as warmer. Its branch skips a reading only when the reading is colder than the limit.",
-  edgeLogLead: "Choose the log that shows its mistake, then run the test.",
+  edgeLogLead:
+    "Choose the log that shows the mistake, say what a right program shows on it, then run the tests.",
   edgeTask:
-    "Four logs, each with the limit -180:\n- -190 and -185\n- -170, -175 and -160\n- -180 and -190\n- an empty log\n\nWhich one log would show the mistake, by making the program show a wrong number? There is 1 test.",
+    "Each log has the limit -180. Choose one of these four:\n\n1. A log of -190 and -185.\n2. A log of -170, -175 and -160.\n3. A log of -180 and -190.\n4. An empty log.\n\nThe question asks two things:\n\n1. Which one log would show the mistake?\n2. What should a right program show on the log you chose?\n\nThe second question matters because a tester chooses an input and says what the right answer is before the run.\n\nThere are 2 tests, one for each answer.",
   edgeHints: [
     "The idea: a mistake shows only on a log whose right answer differs from the program's.",
     "A common mistake: choosing a long log. Length does not matter here; the reading's value does.",

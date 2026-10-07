@@ -488,6 +488,15 @@ and three possessives on function names. The empty log's card read "Readings: No
 "none, an empty log" (brief 8N). The walk at 1280 and 768 light and 375 dark: no console error, no
 sideways scroll.
 
+### After the merge to `main`
+
+The managing session asked for one more change: 11.6's edge-log question had a single test, and
+the platform's verdict line has no singular ("All 1 tests passed"). The question now also asks
+what a right program shows on the log the learner chose (0 on -180 and -190), as a tester says the
+right answer before a run (brief 6RL3). The course's `exact` grader takes a choice field
+(`form: "choice"`) so one challenge can ask both; a facts test pins the 0, and the reference
+passes while no answer, or 1, fails.
+
 ## The full check
 
 After the reading review, `npm run check` at c892850 (`main` at 014094c already merged), 22:19 to

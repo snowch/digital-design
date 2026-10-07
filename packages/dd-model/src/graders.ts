@@ -325,8 +325,9 @@ function instructionWord(
 
 /**
  * A number or a few hexadecimal digits worked out by hand. A case gives the `field` and its
- * `form`, `number` (decimal, read signed) or `hex` (digits, either case, no prefix needed), and
- * expects its `value`. A case may name a `detail`, as `choices` does.
+ * `form`, `number` (decimal, read signed), `hex` (digits, either case, no prefix needed) or
+ * `choice` (an option's value, so one challenge can ask a choice and a number), and expects its
+ * `value`. A case may name a `detail`, as `choices` does.
  */
 function exact(
   answers: Readonly<Record<string, string>>,
@@ -337,6 +338,7 @@ function exact(
   const gone = missing(answers, [field]);
   if (gone) return gone;
   const want = String(expect["value"]);
+  if (given["form"] === "choice") return choices(answers, given, expect);
   if (given["form"] === "hex") {
     const h = parseHex(answers[field]);
     if (h === undefined) return { invalid: field };
