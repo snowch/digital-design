@@ -37,6 +37,13 @@ export interface ProgramScenario {
 /** The label the test's own `stop` carries, where a called function returns to. */
 export const RETURN_LABEL = "test_return";
 
+/**
+ * A word of 0s the tests put straight after the program when they call a function, before their
+ * own `stop`: a function that runs off its end reaches it and halts, so it never counts as having
+ * returned through R15.
+ */
+export const GUARD_LABEL = "test_fell";
+
 /** The words the registers a function must keep start with when a test calls it. */
 export const KEPT_START: Readonly<Record<number, bigint>> = {
   10: 0x1010n,
@@ -55,9 +62,29 @@ export interface ScenarioRun {
 /** The program and the scenario's data as one text. */
 export function withData(source: string, scenario: ProgramScenario): string {
   const parts = [source.replace(/\s+$/, "")];
+  if (scenario.call) parts.push(`${GUARD_LABEL}: word 0`, `${RETURN_LABEL}: stop`);
   if (scenario.data) parts.push(scenario.data);
-  if (scenario.call) parts.push(`${RETURN_LABEL}: stop`);
   return parts.join("\n");
+}
+
+/**
+ * Where a test that calls a function starts the run, and the registers it sets first: R10 to R13
+ * at their own words, R14 at the top of the stack, R15 at the tests' own `stop`, and the
+ * arguments the scenario gives (a number, or a name's address). Undefined for a whole run, or a
+ * name the program lacks.
+ */
+export function callStart(
+  program: Program,
+  scenario: ProgramScenario,
+): { readonly at: number; readonly registers: Readonly<Record<number, bigint>> } | undefined {
+  if (scenario.call === undefined) return undefined;
+  const at = program.labels[scenario.call];
+  if (at === undefined) return undefined;
+  const registers: Record<number, bigint> = { ...KEPT_START, 14: STACK_START };
+  registers[15] = BigInt(program.labels[RETURN_LABEL] ?? 0);
+  for (const [k, v] of Object.entries(scenario.registers ?? {}))
+    registers[Number(k)] = BigInt.asUintN(64, BigInt(program.labels[v] ?? v));
+  return { at, registers };
 }
 
 /** Assembles the program with the scenario's data and runs it to its end. */
@@ -79,11 +106,8 @@ export function runScenario(source: string, scenario: ProgramScenario = {}): Sce
           },
         ],
       };
-    const regs: Record<number, bigint> = { ...KEPT_START, 14: STACK_START };
-    regs[15] = BigInt(program.labels[RETURN_LABEL] ?? 0);
-    for (const [k, v] of Object.entries(scenario.registers ?? {}))
-      regs[Number(k)] = BigInt.asUintN(64, BigInt(program.labels[v] ?? v));
-    start = debugStartAt(program.rom, at, regs);
+    const call = callStart(program, scenario);
+    start = debugStartAt(program.rom, call?.at ?? at, call?.registers ?? {});
   } else start = debugStart(program.rom);
   const state = debugFinish(start, inputs, undefined, scenario.limit ?? RUN_LIMIT);
   return { program, problems, state };
@@ -210,6 +234,27 @@ export function gradeProgramCase(
     problems: [],
     actual,
     wrong,
-    end: endOf(run.state.stopped),
+    end: endOfRun(run),
   };
+}
+
+/**
+ * How a scenario's run ended, in the learner's terms: the tests' own `stop` is `returned`, never
+ * a stop of the program's, and the guard after a function is `fellOff`, never cause 21.
+ */
+export function endOfRun(run: ScenarioRun): {
+  key: string;
+  values: Record<string, string>;
+} {
+  const s = run.state;
+  const end = endOf(s?.stopped);
+  const at = (name: string) => run.program?.labels[name];
+  if (s?.stopped?.kind === "machine") {
+    const pc = Number(s.stopped.pc);
+    if (end.key === "stop" && pc === at(RETURN_LABEL)) return { key: "returned", values: {} };
+    const guard = at(GUARD_LABEL);
+    if (guard !== undefined && pc >= guard && pc < guard + 8)
+      return { key: "fellOff", values: {} };
+  }
+  return end;
 }

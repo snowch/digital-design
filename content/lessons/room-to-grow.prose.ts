@@ -40,7 +40,7 @@ export const PROSE = {
   oldProgramLead:
     "The colder-room program from Module 8 uses only the course's instructions.\n\nThe figure runs it on the course's machine and on your copy, which adds kind 9, the call through a register.\n\nPredict what each displays, then press \"Run the programs\".",
   oldProgramAfter:
-    "Both display -250, room B's reading. Both run 6 instructions and halt at the stop at `014`.\n\nYour copy took only codes the course's machine refused, so every instruction of the old program means the same on both.",
+    "Both display -250, room B's reading. Both run 6 instructions and stop at their stop, at `014`.\n\nYour copy took only codes the course's machine refused, so every instruction of the old program means the same on both.",
   explanation:
     "Every instruction the machine leaves out would cost the circuit something and save programs something. Each needs a decoder column and a place in the checks, as every instruction does; the drawing below shows where each would join; the list below shows what more each needs.",
   explanationList:

@@ -22,6 +22,7 @@ import {
   assembleChecked,
   debugRun,
   debugStart,
+  debugStartAt,
   debugStep,
   endOf,
   instructionHex,
@@ -61,26 +62,48 @@ export function stopText(t: Machine11Strings, s: DebugState): string | undefined
   return format(t.stops[key] ?? key, values);
 }
 
-/** The value a watch names: `R3`, `PC`, or a word at an address written as the assembler reads it. */
+/** Why a watch cannot show what was typed: its form, a name nothing defines, or its address. */
+export type WatchProblem =
+  | { readonly problem: "form" }
+  | { readonly problem: "name"; readonly name: string }
+  | { readonly problem: "align" | "outside"; readonly address: number };
+
+/**
+ * The value a watch names: `R3`, `PC`, or a word at an address written as a program writes one (a
+ * number is decimal, or hexadecimal after `0x`; a name; a register plus or minus a number); or why
+ * it cannot be shown.
+ */
+export function watchCheck(
+  expr: string,
+  cpu: DebugState["cpu"],
+  labels: Readonly<Record<string, number>>,
+): { readonly value: bigint | undefined } | WatchProblem {
+  const t = expr.trim();
+  const reg = /^R(\d{1,2})$/i.exec(t);
+  if (reg) {
+    const n = Number(reg[1]);
+    return n <= 15 ? { value: cpu.regs[n] } : { problem: "form" };
+  }
+  if (/^pc$/i.test(t)) return { value: cpu.pc };
+  const word = /^word\[(.+)\]$/.exec(t);
+  if (!word) return { problem: "form" };
+  const address = addressValue(word[1] as string, cpu, labels);
+  if (address === undefined) return { problem: "form" };
+  if (typeof address === "object") return address;
+  if (address === "unknown") return { value: undefined };
+  if (address < 0 || address >= MAP.deviceStart) return { problem: "outside", address };
+  if (address % 8 !== 0) return { problem: "align", address };
+  return { value: memoryWord(cpu, address) };
+}
+
+/** The value a watch names, or undefined where it cannot be shown. */
 export function watchValue(
   expr: string,
   cpu: DebugState["cpu"],
   labels: Readonly<Record<string, number>>,
 ): { value: bigint | undefined } | undefined {
-  const t = expr.trim();
-  const reg = /^R(\d{1,2})$/i.exec(t);
-  if (reg) {
-    const n = Number(reg[1]);
-    return n <= 15 ? { value: cpu.regs[n] } : undefined;
-  }
-  if (/^pc$/i.test(t)) return { value: cpu.pc };
-  const word = /^word\[(.+)\]$/.exec(t);
-  if (!word) return undefined;
-  const address = addressValue(word[1] as string, cpu, labels);
-  if (address === undefined) return undefined;
-  if (address === "unknown") return { value: undefined };
-  if (address % 8 !== 0 || address < 0 || address >= MAP.deviceStart) return undefined;
-  return { value: memoryWord(cpu, address) };
+  const r = watchCheck(expr, cpu, labels);
+  return "value" in r ? r : undefined;
 }
 
 function termValue(t: string, labels: Readonly<Record<string, number>>): number | undefined {
@@ -95,19 +118,24 @@ function addressValue(
   text: string,
   cpu: DebugState["cpu"],
   labels: Readonly<Record<string, number>>,
-): number | "unknown" | undefined {
+): number | "unknown" | WatchProblem | undefined {
   const m = /^\s*(\w+)\s*(?:([+-])\s*(\S+))?\s*$/.exec(text);
   if (!m) return undefined;
+  const nameOf = (x: string) =>
+    /^[A-Za-z_]\w*$/.test(x) && !/^R\d{1,2}$/i.test(x) && labels[x] === undefined
+      ? ({ problem: "name", name: x } as const)
+      : undefined;
   const reg = /^R(\d{1,2})$/i.exec(m[1] as string);
   let base: number | "unknown" | undefined;
   if (reg) {
     const v = cpu.regs[Number(reg[1])];
     base = v === undefined ? "unknown" : Number(BigInt.asIntN(64, v));
   } else base = termValue(m[1] as string, labels);
-  if (base === undefined || base === "unknown") return base;
+  if (base === undefined) return nameOf(m[1] as string);
+  if (base === "unknown") return base;
   if (!m[3]) return base;
   const n = termValue(m[3], labels);
-  if (n === undefined) return undefined;
+  if (n === undefined) return nameOf(m[3]);
   return m[2] === "-" ? base - n : base + n;
 }
 
@@ -131,6 +159,8 @@ export interface DebuggerOptions {
   readonly pause?: readonly string[];
   readonly watch?: boolean;
   readonly watched?: readonly string[];
+  /** Watches that hold addresses, shown hexadecimal first (the PC, R14 and R15 always are). */
+  readonly watchAddresses?: readonly string[];
   readonly memory?: readonly MemoryRegion[];
   readonly stack?: boolean;
   /** Which registers to show; all sixteen when not given. */
@@ -144,6 +174,8 @@ export interface DebuggerOptions {
   readonly memoryOnly?: boolean;
   /** Whether the controls answer: false while a question waits for its answer. */
   readonly live?: boolean;
+  /** Where the run starts and the registers it starts with: a test's call of a function. */
+  readonly start?: { readonly at: number; readonly registers: Readonly<Record<number, bigint>> };
   /** Called with the latest state, so a figure can show what follows a stop. */
   readonly onState?: (s: DebugState) => void;
 }
@@ -168,7 +200,12 @@ export function DebuggerView({
   id: string;
 }) {
   const t = useViewStrings().machine11;
-  const start = useMemo(() => debugStart(program.rom), [program]);
+  const startAt = options.start;
+  const start = useMemo(
+    () =>
+      startAt ? debugStartAt(program.rom, startAt.at, startAt.registers) : debugStart(program.rom),
+    [program, startAt],
+  );
   const [history, setHistory] = useState<DebugState[]>([start]);
   const [at, setAt] = useState(0);
   // Where the run last paused before this one: the watch says what changed since.
@@ -227,6 +264,16 @@ export function DebuggerView({
     setFrom(0);
   };
   const pc = state.cpu.pc;
+  // Without its listing, the figure walks from pause to pause only, and ends at the last pause
+  // before the program's end: its run never reaches the stop.
+  const compact = options.listing === false && options.runLabel !== undefined;
+  const pausesAhead = useMemo(() => {
+    if (!compact) return true;
+    const ahead = debugRun(state, { breakpoints: pauses, inputs, limit }).at(-1);
+    return !ahead?.stopped;
+  }, [compact, state, pauses, inputs, limit]);
+  // A figure shows the devices its program reaches, and only those.
+  const uses = useMemo(() => devicesUsed(program), [program]);
   // The listing sits in a box of its own height; the line about to run is kept in view inside it,
   // without moving the page.
   const boxRef = useRef<HTMLDivElement>(null);
@@ -261,8 +308,18 @@ export function DebuggerView({
   const addWatch = () => {
     const text = watchText.trim();
     if (!text) return;
-    if (!watchValue(text, state.cpu, program.labels)) {
-      setWatchNote(format(t.watchBad, { text }));
+    const checked = watchCheck(text, state.cpu, program.labels);
+    if (!("value" in checked)) {
+      setWatchNote(
+        checked.problem === "form"
+          ? format(t.watchBad, { text })
+          : checked.problem === "name"
+            ? format(t.watchName, { name: checked.name })
+            : format(checked.problem === "align" ? t.watchAlign : t.watchOutside, {
+                address: hex3(checked.address),
+                decimal: String(checked.address),
+              }),
+      );
       return;
     }
     setWatchNote("");
@@ -279,32 +336,39 @@ export function DebuggerView({
       </div>
     );
   return (
-    <div className="debugger debugger-body" data-debugger={id}>
+    <div
+      className={`debugger debugger-body${compact ? " debugger-compact" : ""}`}
+      data-debugger={id}
+    >
       <div className="debugger-run">
         <div className="explorer-actions debugger-actions">
+          {!compact && (
+            <button
+              type="button"
+              className="button"
+              disabled={!live || (!!state.stopped && at === history.length - 1)}
+              onClick={onStep}
+            >
+              {t.step}
+            </button>
+          )}
+          {!compact && (
+            <button
+              type="button"
+              className="button secondary"
+              disabled={!live || at === 0}
+              onClick={() => {
+                setFrom(Math.max(0, at - 2));
+                setAt(at - 1);
+              }}
+            >
+              {t.back}
+            </button>
+          )}
           <button
             type="button"
-            className="button"
-            disabled={!live || (!!state.stopped && at === history.length - 1)}
-            onClick={onStep}
-          >
-            {t.step}
-          </button>
-          <button
-            type="button"
-            className="button secondary"
-            disabled={!live || at === 0}
-            onClick={() => {
-              setFrom(Math.max(0, at - 2));
-              setAt(at - 1);
-            }}
-          >
-            {t.back}
-          </button>
-          <button
-            type="button"
-            className="button secondary"
-            disabled={!live || !!state.stopped}
+            className={compact ? "button" : "button secondary"}
+            disabled={!live || !!state.stopped || (compact && !pausesAhead)}
             onClick={onRun}
           >
             {options.runLabel ?? (options.breakpoints && pauses.size ? t.runToPause : t.run)}
@@ -318,9 +382,11 @@ export function DebuggerView({
             {t.reset}
           </button>
         </div>
-        <p className="debugger-status" role="status">
+        <p className={`debugger-status${compact ? " visually-hidden" : ""}`} role="status">
           {status}
-          {state.ran > 0 || at > 0 ? ` ${format(t.ran, { n: state.ran })}` : ""}
+          {state.ran > 0 || at > 0
+            ? ` ${format(state.ran === 1 ? t.ranOne : t.ran, { n: state.ran })}`
+            : ""}
         </p>
         {options.listing !== false && (
           <div className="truth-table-wrap debugger-listing-wrap" ref={boxRef}>
@@ -422,13 +488,16 @@ export function DebuggerView({
                   const now = watchValue(w, state.cpu, program.labels)?.value;
                   const was = before ? watchValue(w, before.cpu, program.labels)?.value : now;
                   const changed = before !== undefined && now !== was;
+                  const address = watchIsAddress(w, options.watchAddresses);
                   return (
                     <li key={w} className={changed ? "watch-changed" : ""}>
                       <span className="memory-word">{w}</span>
-                      <span className="memory-word">{signedText(now)}</span>
+                      <span className="memory-word">
+                        <WordValue value={now} t={t} address={address} />
+                      </span>
                       {changed && (
                         <span className="watch-was">
-                          {format(t.watchWas, { value: signedText(was) })}
+                          {format(t.watchWas, { value: valueText(was, address) })}
                         </span>
                       )}
                       <button
@@ -446,13 +515,61 @@ export function DebuggerView({
             )}
           </section>
         )}
+        {(options.memory ?? []).map((region) => (
+          <MemoryPanel key={region.from} region={region} program={program} state={state} t={t} />
+        ))}
+        {options.stack && <StackPanel program={program} state={state} names={names} t={t} />}
         <div className="debugger-panels">
+          {uses.devices && (
+            <section className="debugger-panel" aria-label={t.devicesCaption}>
+              <p className="layout-title">{t.devicesCaption}</p>
+              <dl className="debugger-devices">
+                {uses.display && (
+                  <div>
+                    <dt>{t.display}</dt>
+                    <dd className="memory-word debugger-display">
+                      {signedText(state.cpu.display)}
+                    </dd>
+                  </div>
+                )}
+                {uses.lamps && (
+                  <div>
+                    <dt>{t.lamps}</dt>
+                    <dd className="debugger-lamps">
+                      {t.lampNames.map((name, bit) => {
+                        const on = (state.cpu.lamps >> bit) & 1;
+                        return (
+                          <span key={name} className={`lamp-chip${on ? " lamp-on" : ""}`}>
+                            {`${name} ${on ? t.lampOn : t.lampOff}`}
+                          </span>
+                        );
+                      })}
+                    </dd>
+                  </div>
+                )}
+                {uses.sensorA && (
+                  <div>
+                    <dt>{t.sensorA}</dt>
+                    <dd className="memory-word">{signedText(inputs.sensorA)}</dd>
+                  </div>
+                )}
+                {uses.sensorB && (
+                  <div>
+                    <dt>{t.sensorB}</dt>
+                    <dd className="memory-word">{signedText(inputs.sensorB)}</dd>
+                  </div>
+                )}
+              </dl>
+            </section>
+          )}
           <section className="debugger-panel" aria-label={t.registersCaption}>
             <p className="layout-title">{t.registersCaption}</p>
             <dl className="debugger-registers">
               <div className="debugger-register">
                 <dt>{t.pc}</dt>
-                <dd className="memory-word">{hex3(pc)}</dd>
+                <dd className="memory-word">
+                  <WordValue value={pc} t={t} address />
+                </dd>
               </div>
               {shownRegs.map((k) => {
                 const v = state.cpu.regs[k];
@@ -468,68 +585,77 @@ export function DebuggerView({
                       {changed && <span className="visually-hidden">{` (${t.changed})`}</span>}
                     </dt>
                     <dd className="memory-word">
-                      <WordValue value={v} t={t} />
+                      <WordValue value={v} t={t} address={ADDRESS_REGISTERS.has(k)} />
                     </dd>
                   </div>
                 );
               })}
             </dl>
           </section>
-          {options.listing !== false && (
-            <section className="debugger-panel" aria-label={t.devicesCaption}>
-              <p className="layout-title">{t.devicesCaption}</p>
-              <dl className="debugger-devices">
-                <div>
-                  <dt>{t.display}</dt>
-                  <dd className="memory-word debugger-display">{signedText(state.cpu.display)}</dd>
-                </div>
-                <div>
-                  <dt>{t.lamps}</dt>
-                  <dd className="debugger-lamps">
-                    {t.lampNames.map((name, bit) => {
-                      const on = (state.cpu.lamps >> bit) & 1;
-                      return (
-                        <span key={name} className={`lamp-chip${on ? " lamp-on" : ""}`}>
-                          {`${name} ${on ? t.lampOn : t.lampOff}`}
-                        </span>
-                      );
-                    })}
-                  </dd>
-                </div>
-                <div>
-                  <dt>{t.sensorA}</dt>
-                  <dd className="memory-word">{signedText(inputs.sensorA)}</dd>
-                </div>
-                <div>
-                  <dt>{t.sensorB}</dt>
-                  <dd className="memory-word">{signedText(inputs.sensorB)}</dd>
-                </div>
-              </dl>
-            </section>
-          )}
         </div>
-        {(options.memory ?? []).map((region) => (
-          <MemoryPanel key={region.from} region={region} program={program} state={state} t={t} />
-        ))}
-        {options.stack && <StackPanel program={program} state={state} names={names} t={t} />}
       </div>
     </div>
   );
 }
 
-/** A word as the debugger shows it: read signed, and in hexadecimal too where it may be an address. */
-function WordValue({ value, t }: { value: bigint | undefined; t: Machine11Strings }) {
-  return (
+/**
+ * A word as the debugger shows it. A value from 10 to 7FF, which may be an address, shows both
+ * ways at one size: decimal first, or hexadecimal first where the word is an address (the PC, R14,
+ * R15, or a watch a figure names as one). Other values are decimal only, read signed.
+ */
+export function valueText(value: bigint | undefined, address = false): string {
+  if (value === undefined || value < 10n || value > 0x7ffn) return signedText(value);
+  return address ? `${hex3(value)} ${value}` : `${value} ${hex3(value)}`;
+}
+
+function WordValue({
+  value,
+  t,
+  address = false,
+}: {
+  value: bigint | undefined;
+  t: Machine11Strings;
+  address?: boolean;
+}) {
+  if (value === undefined || value < 10n || value > 0x7ffn) return <>{signedText(value)}</>;
+  const hex = (
+    <span className="value-hex">
+      <span className="visually-hidden">{`${t.hex} `}</span>
+      {hex3(value)}
+    </span>
+  );
+  const dec = <span className="value-dec">{value.toString()}</span>;
+  return address ? (
     <>
-      {signedText(value)}
-      {value !== undefined && value > 9n && value < 1n << 63n && (
-        <span className="register-hex">
-          <span className="visually-hidden">{` ${t.hex} `}</span>
-          {hexText(value)}
-        </span>
-      )}
+      {hex} {dec}
+    </>
+  ) : (
+    <>
+      {dec} {hex}
     </>
   );
+}
+
+/** The devices a program's lines name: the panel shows those, the display wherever it is written. */
+export function devicesUsed(program: Program) {
+  const text = program.lines.map((l) => l.text).join("\n");
+  const has = (name: string) => new RegExp(`\\b${name}\\b`).test(text);
+  const out = {
+    display: has("display"),
+    lamps: has("lamps"),
+    sensorA: has("sensorA"),
+    sensorB: has("sensorB"),
+  };
+  return { ...out, devices: out.display || out.lamps || out.sensorA || out.sensorB };
+}
+
+/** The registers that hold addresses by the course's convention, shown hexadecimal first. */
+const ADDRESS_REGISTERS = new Set([14, 15]);
+
+/** Whether a watch shows its value hexadecimal first: the PC, R14, R15, or one a figure names. */
+function watchIsAddress(expr: string, named: readonly string[] = []): boolean {
+  const t = expr.trim().toUpperCase();
+  return t === "PC" || t === "R14" || t === "R15" || named.some((n) => n.toUpperCase() === t);
 }
 
 function MemoryPanel({
@@ -546,6 +672,8 @@ function MemoryPanel({
   const first = placeOf(region.from, program.labels);
   if (first === undefined) return null;
   const rows = Array.from({ length: region.words }, (_, k) => first + 8 * k);
+  // The name a line gives an address, beside it: the rooms and the log by the program's names.
+  const nameAt = namesByAddress(program);
   return (
     <section className="debugger-panel debugger-memory" aria-label={region.title}>
       <div className="truth-table-wrap">
@@ -565,7 +693,12 @@ function MemoryPanel({
                 .filter((x): x is string => x !== undefined);
               return (
                 <tr key={address} className={pointing.length ? "row-current" : ""}>
-                  <td className="memory-word">{hex3(address)}</td>
+                  <td className="memory-word">
+                    {hex3(address)}
+                    {nameAt.get(address) && (
+                      <span className="memory-name">{` ${nameAt.get(address)}`}</span>
+                    )}
+                  </td>
                   <td className="memory-word">
                     <WordValue value={memoryWord(state.cpu, address)} t={t} />
                   </td>
@@ -585,28 +718,59 @@ function MemoryPanel({
 }
 
 /**
- * The stack from the top of the RAM down to R14, each word in the frame of the call that pushed it
- * (the words below the stack's address when that call was made), the main program's above them.
+ * The stack's words: those a push wrote, from the word R14 names up to the top of the RAM, lowest
+ * address first, so the top of the stack is drawn at the top as every memory view draws addresses
+ * rising downwards. Each word sits in the group of the call that pushed it (the latest call made
+ * with the stack's address above it); the main program's words come last.
  */
 export function stackRows(
   state: DebugState,
 ): { address: number; value: bigint | undefined; frame: number }[] {
   const sp = state.cpu.regs[14];
-  if (sp === undefined || sp > 0x7c0n || sp < BigInt(MAP.romStart)) return [];
-  const out: { address: number; value: bigint | undefined; frame: number }[] = [];
-  for (let a = 0x7c0 - 8; a >= Number(sp); a -= 8) {
-    // The frame is the latest call made with the stack's address above this word.
-    let frame = -1;
-    state.calls.forEach((c, k) => {
-      if (c.stack !== undefined && BigInt(a) < c.stack) frame = k;
+  if (sp === undefined || sp > 0x7c0n) return [];
+  return state.pushed
+    .filter((a) => BigInt(a) >= sp && a < 0x7c0)
+    .map((a) => {
+      let frame = -1;
+      state.calls.forEach((c, k) => {
+        if (c.stack !== undefined && BigInt(a) < c.stack) frame = k;
+      });
+      return { address: a, value: memoryWord(state.cpu, a), frame };
     });
-    out.push({ address: a, value: memoryWord(state.cpu, a), frame });
+}
+
+/** Groups of words by call, a run of more than three like calls folded to its first and last. */
+export function stackGroups(state: DebugState, names: Map<number, string>) {
+  const rows = stackRows(state);
+  const groups: { frame: number; key: string; rows: typeof rows }[] = [];
+  for (const r of rows) {
+    const last = groups.at(-1);
+    if (last && last.frame === r.frame) last.rows.push(r);
+    else {
+      const c = state.calls[r.frame];
+      const key = c ? `${names.get(Number(c.to)) ?? c.to}@${c.at}` : "main";
+      groups.push({ frame: r.frame, key, rows: [r] });
+    }
+  }
+  const out: (
+    | { kind: "group"; group: (typeof groups)[number] }
+    | { kind: "fold"; n: number; group: (typeof groups)[number] }
+  )[] = [];
+  for (let i = 0; i < groups.length;) {
+    let j = i;
+    while (j + 1 < groups.length && groups[j + 1]!.key === groups[i]!.key) j++;
+    const run = j - i + 1;
+    if (run > 3) {
+      out.push({ kind: "group", group: groups[i]! });
+      out.push({ kind: "fold", n: run - 2, group: groups[i + 1]! });
+      out.push({ kind: "group", group: groups[j]! });
+    } else for (let k = i; k <= j; k++) out.push({ kind: "group", group: groups[k]! });
+    i = j + 1;
   }
   return out;
 }
 
 function StackPanel({
-  program,
   state,
   names,
   t,
@@ -617,47 +781,54 @@ function StackPanel({
   t: Machine11Strings;
 }) {
   const sp = state.cpu.regs[14];
-  const rows = stackRows(state);
-  const groups: { frame: number; rows: typeof rows }[] = [];
-  for (const r of rows) {
-    const last = groups.at(-1);
-    if (last && last.frame === r.frame) last.rows.push(r);
-    else groups.push({ frame: r.frame, rows: [r] });
-  }
+  const items = stackGroups(state, names);
+  const callOf = (k: number) => state.calls[k];
   const frameName = (k: number) => {
-    const c = state.calls[k];
+    const c = callOf(k);
     if (!c) return t.frameMain;
     return format(t.frameCall, {
       name: names.get(Number(c.to)) ?? hex3(c.to),
       address: hex3(c.at),
     });
   };
-  void program;
   return (
     <section className="debugger-panel debugger-stack" aria-label={t.stackCaption}>
       <p className="layout-title">{t.stackCaption}</p>
       {sp === undefined ? (
         <p className="watch-note">{t.stackUnset}</p>
-      ) : rows.length === 0 ? (
+      ) : items.length === 0 ? (
         <p className="watch-note">{t.stackEmpty}</p>
       ) : (
         <ol className="stack-frames">
-          {groups.map((g) => (
-            <li key={`${g.frame}-${g.rows[0]?.address}`} className="stack-frame">
-              <p className="stack-frame-name">{frameName(g.frame)}</p>
-              <ul className="stack-words">
-                {g.rows.map((r) => (
-                  <li key={r.address} className="stack-word">
-                    <span className="memory-word">{hex3(r.address)}</span>
-                    <span className="memory-word">
-                      <WordValue value={r.value} t={t} />
-                    </span>
-                    {BigInt(r.address) === sp && <span className="stack-top">{"← R14"}</span>}
-                  </li>
-                ))}
-              </ul>
-            </li>
-          ))}
+          {items.map((item) =>
+            item.kind === "fold" ? (
+              <li key={`fold-${item.group.rows[0]?.address}`} className="stack-fold">
+                {format(t.stackFolded, {
+                  n: item.n,
+                  name: frameName(item.group.frame),
+                  words: item.n * item.group.rows.length,
+                })}
+              </li>
+            ) : (
+              <li
+                key={`${item.group.frame}-${item.group.rows[0]?.address}`}
+                className="stack-frame"
+              >
+                <p className="stack-frame-name">{frameName(item.group.frame)}</p>
+                <ul className="stack-words">
+                  {item.group.rows.map((r) => (
+                    <li key={r.address} className="stack-word">
+                      <span className="memory-word">{hex3(r.address)}</span>
+                      <span className="memory-word">
+                        <WordValue value={r.value} t={t} />
+                      </span>
+                      {BigInt(r.address) === sp && <span className="stack-top">{"← R14"}</span>}
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ),
+          )}
         </ol>
       )}
     </section>
@@ -783,6 +954,7 @@ const DebuggerProps = z.object({
   pause: z.array(z.string()).default([]),
   watch: z.boolean().default(false),
   watched: z.array(z.string()).default([]),
+  watchAddresses: z.array(z.string()).default([]),
   memory: z.array(Region).default([]),
   stack: z.boolean().default(false),
   memoryOnly: z.boolean().default(false),
@@ -868,6 +1040,7 @@ export const DebuggerFigure = withProps(
       pause: data.pause,
       watch: data.watch,
       watched: data.watched,
+      watchAddresses: data.watchAddresses,
       memory: data.memory,
       stack: data.stack,
       memoryOnly: data.memoryOnly,

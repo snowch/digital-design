@@ -2,10 +2,12 @@
 
 // Lesson: Module 11, lesson 6, finding the mistake in a program that runs and gives a wrong
 // answer. A program counting warm readings, one short, is run over several logs beside what each
-// should give; a method (a failing log, what each part should leave, a breakpoint before the part,
-// step and watch to the first value that differs, mend and run every log) finds the line. Every
-// way a run can end is read in plain words. The learner mends the count, and a function with two
-// mistakes: a forgotten push of R15, and an unsigned comparison of signed readings.
+// should give; a method (the smallest failing log, what each part should leave, a breakpoint before
+// the part, step and watch to the first value that differs, mend and run every log) finds the
+// line. A count kept at an address taken from the wrong name halts far from its mistake, with a
+// store to the log in the ROM. Every way a run can end is read in plain words. The learner chooses
+// the log that shows a mistake at the limit, mends the count, and mends a count over the limit
+// with two mistakes: the list stepped by 4, and the count read as the address of `count`.
 //
 // The structure is here; the words are in debugging.prose.ts and debugging.labels.ts. The numbers
 // the prose states are pinned by debugging.facts.test.ts.
@@ -19,7 +21,8 @@ import {
   COUNT_OVER_REFERENCE,
   OFF_BY_ONE,
   OFF_BY_ONE_MENDED,
-  STACK_IN_ROM,
+  COUNT_TO_LOG,
+  COUNT_WITH_LIMIT,
   logData,
 } from "./module11";
 
@@ -44,6 +47,7 @@ export const COUNT_RUNS = [
   { log: [-170], limit: -180 },
   { log: [], limit: -180 },
   { log: [-200, 25, -150, 30], limit: -180 },
+  { log: [-190, -180, -170], limit: -180 },
 ] as const;
 
 /** The second challenge's logs and limits. */
@@ -53,9 +57,22 @@ export const OVER_RUNS = [
   { log: [-170], limit: -180 },
   { log: [-200, 25, -150, 30], limit: -180 },
   { log: [-185, -190], limit: -180 },
+  { log: [-180, -170], limit: -180 },
 ] as const;
 
-const FAILING = [-190, -181, -175, -170] as const;
+/** The smallest of the opening figure's logs that fails, two readings: the method's first step. */
+const FAILING = [-190, -170] as const;
+
+/** The failure experiment's log: the count is kept, and the store goes to the log. */
+const KEPT_LOG = [-190, -181, -175, -170] as const;
+
+/** The edge-log question: logs to try on the count that counts a reading equal to the limit. */
+export const EDGE_LOGS = [
+  { value: "below", log: [-190, -185] },
+  { value: "above", log: [-170, -175, -160] },
+  { value: "equal", log: [-180, -190] },
+  { value: "empty", log: [] },
+] as const;
 const runLabel = (log: readonly number[], limit: number) =>
   `${LABELS.logPrefix} ${log.length ? log.join(", ") : LABELS.emptyLog}; ${LABELS.limitPrefix} ${limit}`;
 
@@ -107,9 +124,9 @@ export const debugging: LessonInput = {
             program: `${OFF_BY_ONE}\n${logData(FAILING, -180)}`,
             question: PROSE.p1Question,
             options: [
-              { value: "5", label: "5" },
-              { value: "4", label: "4" },
               { value: "3", label: "3" },
+              { value: "2", label: "2" },
+              { value: "1", label: "1" },
               { value: "0", label: "0" },
             ],
             ask: { what: "run", run: { after: 6, what: "register", reg: 2 } },
@@ -136,7 +153,8 @@ export const debugging: LessonInput = {
             breakpoints: true,
             pause: ["next"],
             watch: true,
-            watched: ["R1", "R2", "R3"],
+            watched: ["R1", "word[R1]", "R2", "R3"],
+            watchAddresses: ["R1"],
             memory: [{ from: "log", words: FAILING.length, title: LABELS.logTitle }],
           },
         },
@@ -163,23 +181,43 @@ export const debugging: LessonInput = {
       prose: PROSE.failureExperiment,
       interactives: [
         {
-          id: "stack-in-rom",
+          id: "count-to-log",
           kind: "debugger",
           timeModel: "none",
-          caption: LABELS.captions.stackInRom,
-          lead: PROSE.stackInRomLead,
+          caption: LABELS.captions.countToLog,
+          lead: PROSE.countToLogLead,
           props: {
-            program: STACK_IN_ROM,
-            inputs: { SENSORA: "-170", SENSORB: "-190" },
-            registers: [1, 2, 10, 14, 15],
-            stack: true,
-            outcomes: PROSE.stackInRomAfter,
+            program: `${COUNT_TO_LOG}\n${logData(KEPT_LOG, -180)}`,
+            registers: [1, 2, 3, 6],
+            outcomes: PROSE.countToLogAfter,
           },
         },
       ],
     },
     { kind: "explanation", title: LABELS.titles.explanation, prose: PROSE.explanation },
-    { kind: "generalisation", title: LABELS.titles.generalisation, prose: PROSE.generalisation },
+    {
+      kind: "generalisation",
+      title: LABELS.titles.generalisation,
+      prose: PROSE.generalisation,
+      interactives: [
+        {
+          id: "edge-listing",
+          kind: "program-listing",
+          timeModel: "none",
+          caption: LABELS.captions.edgeListing,
+          lead: PROSE.edgeListingLead,
+          props: { program: COUNT_WITH_LIMIT, names: false },
+        },
+        {
+          id: "edge-log",
+          kind: "challenge",
+          timeModel: "none",
+          caption: LABELS.captions.edgeLog,
+          lead: PROSE.edgeLogLead,
+          props: { challengeId: "edge-log" },
+        },
+      ],
+    },
     {
       kind: "challenge",
       title: LABELS.titles.challenge,
@@ -207,7 +245,14 @@ export const debugging: LessonInput = {
       interface: { inputs: [], outputs: [] },
       initial: {
         text: OFF_BY_ONE,
-        data: { debugger: { breakpoints: true, watch: true, watched: ["R1", "R2", "R3"] } },
+        data: {
+          debugger: {
+            breakpoints: true,
+            watch: true,
+            watched: ["R1", "R2", "R3"],
+            watchAddresses: ["R1"],
+          },
+        },
       },
       tests: {
         kind: "answers",
@@ -222,6 +267,34 @@ export const debugging: LessonInput = {
       reference: { text: OFF_BY_ONE_MENDED },
     },
     {
+      id: "edge-log",
+      title: LABELS.challengeTitles.edge,
+      task: PROSE.edgeTask,
+      gradedDirection: "answer",
+      interface: { inputs: [], outputs: [] },
+      fields: [
+        {
+          id: "log",
+          label: LABELS.edgeField,
+          kind: "choice" as const,
+          options: EDGE_LOGS.map((e) => ({ value: e.value, label: LABELS.edgeLogs[e.value] })),
+        },
+      ],
+      tests: {
+        kind: "answers",
+        grader: "choices",
+        cases: [
+          {
+            label: LABELS.edgeField,
+            given: { field: "log", detail: "edgeLog" },
+            expect: { value: "equal" },
+          },
+        ],
+      },
+      hints: [...PROSE.edgeHints],
+      reference: { answers: { log: "equal" } },
+    },
+    {
       id: "mend-over",
       title: LABELS.challengeTitles.c2,
       task: PROSE.c2Task,
@@ -231,7 +304,12 @@ export const debugging: LessonInput = {
       initial: {
         text: COUNT_OVER_MISTAKES,
         data: {
-          debugger: { breakpoints: true, watch: true, watched: ["R10", "R11", "R13"] },
+          debugger: {
+            breakpoints: true,
+            watch: true,
+            watched: ["R10", "R11", "R13"],
+            watchAddresses: ["R10"],
+          },
         },
       },
       tests: {

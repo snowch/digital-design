@@ -72,13 +72,23 @@ export interface DebugState {
   /** How many calls have run, and how many of them returned. */
   readonly callsMade: number;
   readonly returns: number;
+  /** The RAM addresses a push wrote (a store through R14), lowest first: the stack's words. */
+  readonly pushed: readonly number[];
   /** The last instruction's record. */
   readonly last?: StepRecord;
 }
 
 /** A fresh run from reset, with a ROM image. */
 export function debugStart(rom: Uint8Array | readonly number[]): DebugState {
-  return { cpu: resetMachine(rom), ran: 0, calls: [], shown: [], callsMade: 0, returns: 0 };
+  return {
+    cpu: resetMachine(rom),
+    ran: 0,
+    calls: [],
+    shown: [],
+    callsMade: 0,
+    returns: 0,
+    pushed: [],
+  };
 }
 
 /** A run that starts at an address with chosen registers: a function called by a test. */
@@ -162,6 +172,15 @@ export function debugStep(
     record.memory?.store && record.memory.address === 0x7c0n && !record.stopped
       ? [...s.shown, record.memory.value ?? 0n]
       : s.shown;
+  // A store through R14 is a push; a trapped one wrote nothing.
+  const pushedAt =
+    record.memory?.store && !record.stopped && f?.k === 4 && f.a === 14
+      ? Number(record.memory.address)
+      : undefined;
+  const pushed =
+    pushedAt === undefined || s.pushed.includes(pushedAt)
+      ? s.pushed
+      : [...s.pushed, pushedAt].sort((a, b) => a - b);
   const sp = cpu.regs[14];
   const deepest =
     sp === undefined ? s.deepest : s.deepest === undefined || sp < s.deepest ? sp : s.deepest;
@@ -172,6 +191,7 @@ export function debugStep(
     shown,
     callsMade,
     returns,
+    pushed,
     last: record,
     ...(deepest !== undefined ? { deepest } : {}),
     ...(cpu.stopped

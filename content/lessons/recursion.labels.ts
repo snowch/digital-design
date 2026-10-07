@@ -35,7 +35,7 @@ export const LABELS = {
     rooms: "The cold store's rooms as words in memory.",
     longStore: "The second store's rooms as words in memory.",
     storeDepth: "Three questions about a run on the second store.",
-    wayBack: "warmRooms on rooms where the deep freeze leads back to the store.",
+    wayBack: "warmRooms on rooms where the icebox leads back to the vault.",
     farthest: "The function farthest and its tests.",
   },
   fields: {

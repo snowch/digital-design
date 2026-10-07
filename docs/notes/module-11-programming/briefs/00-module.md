@@ -120,6 +120,9 @@ for nothing else.
 - **halt**: what the machine does when it cannot go on, with a cause: "the machine halts with cause
   `34`".
 - **pause**: what the debugger does at a breakpoint, or when you step. A paused run can go on.
+- **end the run**: what the debugger does before an instruction that needs a register nothing has
+  set (for an address, a branch's comparison or a jump): "the debugger ends the run before `018`".
+  The run cannot go on. Never "pause" for this.
 - **cut off**: what the debugger does to a run that has not stopped after a set number of
   instructions.
 - **step**: in the debugger, run one instruction. (Not an edge: the debugger never shows edges.)
@@ -144,9 +147,20 @@ Module 11's own terms, each allowed only from the lesson that introduces it:
 ## Functions' names, and words that read two ways
 
 The module's functions are named so that a sentence cannot read them as English: `overBy`,
-`sumOver`, `roomsOver`, `outOfRange`, `warmRooms`, `farthest`, `lowestOf`, `highestOf`,
-`warmCount`. Always write a function's name in backticks, in headings too, and never use it as an
-ordinary word. Write "the function `overBy`", never "the overBy function" or "overBy's check".
+`sumOver`, `sumKept`, `roomsOver`, `outOfRange`, `warmRooms`, `farthest`, `lowestOf`,
+`highestOf`, `warmCount`, `report`. Always write a function's name in backticks, in headings too,
+and never use it as an ordinary word. Write "the function `overBy`", never "the overBy function".
+Never put a possessive on a function's name: "the first line of `warmRooms`", not "`warmRooms`'s
+first line".
+
+"Return" means going back after a call. Where a sentence means a function's answer, say "result":
+"`overBy` returns, with its result in R1", never "`overBy` returns 10" unless the sentence says
+"returns with 10 in R1". Write 1 as "1 instruction", "1 line" (singular).
+
+Addresses in prose are three hexadecimal digits (`7B8`). The debugger shows a value from 10 to
+`7FF` both ways at one size: decimal first, or hexadecimal first for the PC, R14, R15 and any watch
+a figure names as an address (for example "7B0 1968"). The watch reads a number typed into it as a
+program does: decimal, or hexadecimal after `0x`.
 
 Words a reader takes the wrong way on these pages:
 

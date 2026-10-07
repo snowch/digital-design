@@ -20,6 +20,7 @@ import {
   KEEPS_R10_BROKEN,
   LARGER_REFERENCE,
   LARGER_START,
+  OVER_BY_TESTS,
   RANGE_REFERENCE,
   RANGE_START,
   TWO_ROOMS,
@@ -223,8 +224,8 @@ export const functions: LessonInput = {
         grader: "program",
         cases: LARGER_RUNS.map(([a, b]) => ({
           label: `${LABELS.roomPrefixA} ${a}, ${LABELS.roomPrefixB} ${b}`,
-          given: { sensorA: a, sensorB: b, detail: "larger" },
-          expect: { display: String(larger(a, b)), end: "stop" },
+          given: { sensorA: a, sensorB: b, data: OVER_BY_TESTS, detail: "larger" },
+          expect: { display: String(larger(a, b)), calls: "2", end: "stop" },
         })),
       },
       hints: [...PROSE.c1Hints],

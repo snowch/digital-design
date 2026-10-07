@@ -2723,7 +2723,8 @@ svg.stack-depth {
   stroke-width: 2;
 }
 .stack-depth .depth-call {
-  stroke: var(--fg-muted);
+  stroke: var(--fg);
+  stroke-width: 2;
 }
 .stack-depth .depth-label {
   fill: var(--fg-muted);
@@ -2849,4 +2850,19 @@ svg.stack-depth {
   .debugger-values .debugger-panels {
     grid-template-columns: minmax(0, 1fr);
   }
+  .debugger-body.debugger-compact {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.stack-fold {
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-2);
+}
+.value-hex,
+.value-dec {
+  white-space: nowrap;
+}
+.memory-name {
+  color: var(--fg-muted);
 }

@@ -1,0 +1,97 @@
+[
+ [
+  "framesAfter",
+  " prep room and the deep freeze are warmer tha",
+  " prep room and the icebox are warmer tha"
+ ],
+ [
+  "framesAfter",
+  " the calls for the deep freeze's doors: the h",
+  " the calls for the icebox's doors: the h"
+ ],
+ [
+  "framesAfter",
+  "ore, `chillA`, `deep` and `chillB`, ",
+  "ore, `chillA`, `icebox` and `chillB`, "
+ ],
+ [
+  "framesAfter",
+  ", `chillA` and `deep` each had 4 wor",
+  ", `chillA` and `icebox` each had 4 wor"
+ ],
+ [
+  "framesAfter",
+  "the prep room, the store, `chillA`, `ic",
+  "the prep room, the vault, `chillA`, `ic"
+ ],
+ [
+  "framesAfter",
+  "ors: the hall, the store, `chillA` and ",
+  "ors: the hall, the vault, `chillA` and "
+ ],
+ [
+  "failureExperiment",
+  "Someone writes the deep freeze's first door a",
+  "Someone writes the icebox's first door a"
+ ],
+ [
+  "failureExperiment",
+  " In the words, the deep freeze now leads back",
+  " In the words, the icebox now leads back"
+ ],
+ [
+  "failureExperiment",
+  "ngly as `0D0`, the store, instead of 0.",
+  "ngly as `0D0`, the vault, instead of 0."
+ ],
+ [
+  "failureExperiment",
+  " leads back to the store. The figure ru",
+  " leads back to the vault. The figure ru"
+ ],
+ [
+  "explanation",
+  "Rooms` follows the deep freeze's doors, the c",
+  "Rooms` follows the icebox's doors, the c"
+ ],
+ [
+  "explanation",
+  " for the hall, the store and `chillA` h",
+  " for the hall, the vault and `chillA` h"
+ ],
+ [
+  "c2Task",
+  ", `chillA` and the deep freeze. From `chillB`",
+  ", `chillA` and the icebox. From `chillB`"
+ ],
+ [
+  "c2Task",
+  "s 4: the hall, the store, `chillA` and ",
+  "s 4: the hall, the vault, `chillA` and "
+ ],
+ [
+  "c2Task",
+  "'s store (from the store, from `chillB`",
+  "'s store (from the vault, from `chillB`"
+ ],
+ [
+  "roomsLead",
+  "om, and `0D0`, the store.",
+  "om, and `0D0`, the vault."
+ ],
+ [
+  "wayBackAfter",
+  "uctions.\n\nFrom the deep freeze, the calls go ",
+  "uctions.\n\nFrom the icebox, the calls go "
+ ],
+ [
+  "wayBackAfter",
+  "`chillA`, then the deep freeze, round and rou",
+  "`chillA`, then the icebox, round and rou"
+ ],
+ [
+  "wayBackAfter",
+  "lls go back to the store, then `chillA`",
+  "lls go back to the vault, then `chillA`"
+ ]
+]

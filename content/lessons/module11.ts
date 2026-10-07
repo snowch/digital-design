@@ -12,7 +12,13 @@
 export function logData(readings: readonly number[], limit?: number): string {
   const lines = [`count: word ${readings.length}`];
   if (limit !== undefined) lines.push(`limit: word ${limit}`);
-  lines.push(readings.length ? `log: word ${readings.join(", ")}` : "log: word 0");
+  // An empty log still needs `log` to name an address: its one word is 99, which no right answer
+  // to any of the module's questions could be, so a program that reads it shows the mistake.
+  lines.push(
+    readings.length
+      ? `log: word ${readings.join(", ")}`
+      : "log: word 99   // not a reading: the log is empty",
+  );
   return lines.join("\n");
 }
 
@@ -20,7 +26,7 @@ export function logData(readings: readonly number[], limit?: number): string {
 // 11.1 assembly
 
 /** Room A against its limit: ALARM when warmer, and its reading on the display. */
-export const ROOM_A_LIMIT = `// Room A's reading against its limit, -18.0 degrees.
+export const ROOM_A_LIMIT = `// Room A against -18.0 degrees.
       R2 <= word[sensorA]
       R3 <= -180
       if R2 < R3 signed goto fine   // colder than the limit: no alarm
@@ -30,7 +36,7 @@ fine: word[display] <= R2
       stop`;
 
 /** The same program with four mistakes the assembler refuses. */
-export const ROOM_A_MISTAKES = `// Room A's reading against its limit, -18.0 degrees.
+export const ROOM_A_MISTAKES = `// Room A against -18.0 degrees.
       R2 <= word[sensorA]
       R3 <= -18000
       if R2 < R3 goto fine
@@ -39,13 +45,13 @@ export const ROOM_A_MISTAKES = `// Room A's reading against its limit, -18.0 deg
 fine: word[dispaly] <= R2
       stop`;
 
-export const WARMER_START = `// Show the warmer room's reading on the display.
+export const WARMER_START = `// The warmer room's reading.
 R2 <= word[sensorA]
 R3 <= word[sensorB]
 word[display] <= R2
 stop`;
 
-export const WARMER_REFERENCE = `// Show the warmer room's reading on the display.
+export const WARMER_REFERENCE = `// The warmer room's reading.
       R2 <= word[sensorA]
       R3 <= word[sensorB]
       if R3 < R2 signed goto show   // room A is warmer: show it
@@ -186,34 +192,62 @@ done:   stop`;
 export const TWO_ROOMS = `${TWO_ROOMS_MAIN}
 ${OVER_BY}`;
 
-/** The same work with the check written out twice. */
+/** The same work with overBy's lines written out twice: it differs only by the calls and returns. */
 export const TWO_ROOMS_WRITTEN_TWICE = `// The same work, with the check written out twice.
         R1 <= word[sensorA]
         R2 <= -180
         R5 <= R1 - R2
         R0 <= 0
-        if R0 < R5 signed goto showA
+        if R0 < R5 signed goto overA
         R5 <= 0
-showA:  word[display] <= R5
+overA:  R1 <= R5
+        word[display] <= R1
         R1 <= word[sensorB]
         R2 <= -200
         R5 <= R1 - R2
-        if R0 < R5 signed goto alarm
-        goto done
-alarm:  R3 <= 1
+        R0 <= 0
+        if R0 < R5 signed goto overB
+        R5 <= 0
+overB:  R1 <= R5
+        R0 <= 0
+        if R1 == R0 goto done
+        R3 <= 1
         word[lamps] <= R3
 done:   stop`;
 
+/**
+ * overBy as the construction's tests add it after the learner's program: the same result, and then
+ * every register the calling convention lets a function change (R0 and R2 to R9) changed before it
+ * returns, so a caller that keeps a word in one of them through a call loses it.
+ */
+export const OVER_BY_TESTS = `// overBy, as the tests add it. It changes R0 and R2 to R9, as the calling convention allows.
+overBy: R5 <= R1 - R2
+        R0 <= 0
+        if R0 < R5 signed goto overBy_up
+        R5 <= 0
+overBy_up: R1 <= R5
+        R0 <= 77
+        R2 <= 77
+        R3 <= 77
+        R4 <= 77
+        R5 <= 77
+        R6 <= 77
+        R7 <= 77
+        R8 <= 77
+        R9 <= 77
+        goto R15`;
+
 /** The construction: the caller's side, the larger of the two rooms' amounts. */
 export const LARGER_START = `// The larger of room A's amount above -180 and room B's above -200.
+// The tests add overBy after this program.
         R1 <= word[sensorA]
         R2 <= -180
         call overBy, R15
         word[display] <= R1
-        stop
-${OVER_BY}`;
+        stop`;
 
 export const LARGER_REFERENCE = `// The larger of room A's amount above -180 and room B's above -200.
+// The tests add overBy after this program.
         R1 <= word[sensorA]
         R2 <= -180
         call overBy, R15
@@ -224,8 +258,7 @@ export const LARGER_REFERENCE = `// The larger of room A's amount above -180 and
         if R10 < R1 signed goto show
         R1 <= R10
 show:   word[display] <= R1
-        stop
-${OVER_BY}`;
+        stop`;
 
 /** A caller that keeps room A's amount in R10 through a call. */
 export const KEEPS_R10 = `// Room A's and room B's amounts above their limits, added, on the display.
@@ -356,11 +389,11 @@ export const STACK_QUIZ = `// Both rooms' amounts above their limits, and how ma
         R14 <= 0x7C0
         R1 <= word[sensorA]
         R2 <= word[sensorB]
-        call check, R15
+        call sumKept, R15
         word[display] <= R1
         stop
-// check: R1 room A's reading, R2 room B's. Keeps R10, R11 and R12.
-check:  R14 <= R14 - 8
+// sumKept: R1 room A's reading, R2 room B's. Keeps R10, R11 and R12.
+sumKept: R14 <= R14 - 8
         word[R14] <= R15
         R14 <= R14 - 8
         word[R14] <= R10
@@ -437,20 +470,20 @@ ${OVER_BY}`;
 
 /**
  * The cold store: each room is three words, its reading and the addresses of the rooms behind
- * its two doors (0 where a door leads nowhere). The hall opens onto the prep room and the store;
- * the store onto two chillers; the first chiller onto the deep freeze.
+ * its two doors (0 where a door leads nowhere). The hall opens onto the prep room and the vault;
+ * the vault onto two chillers; the first chiller onto the icebox.
  */
-export const COLD_STORE = `hall:   word -150, prep, store
+export const COLD_STORE = `hall:   word -150, prep, vault
 prep:   word -175, 0, 0
-store:  word -190, chillA, chillB
-chillA: word -182, deep, 0
+vault:  word -190, chillA, chillB
+chillA: word -182, icebox, 0
 chillB: word -205, 0, 0
-deep:   word -178, 0, 0`;
+icebox: word -178, 0, 0`;
 
-/** The same rooms with the deep freeze's door leading back to the store: a way round for ever. */
+/** The same rooms with the icebox's door leading back to the vault: a way round for ever. */
 export const COLD_STORE_LOOP = COLD_STORE.replace(
-  "deep:   word -178, 0, 0",
-  "deep:   word -178, store, 0",
+  "icebox: word -178, 0, 0",
+  "icebox: word -178, vault, 0",
 );
 
 const WARM_ROOMS_BODY = `// warmRooms: R1 a room's address (0 for none), R2 the limit. The result in R1:
@@ -611,11 +644,46 @@ export const COUNT_OVER_MISTAKES = COUNT_OVER_REFERENCE.replace(
   "R11 <= count        // how many readings are left",
 ).replace("skip:   R10 <= R10 + 8", "skip:   R10 <= R10 + 4");
 
-/** The stack started at the RAM's first word, not past its last: the first push reaches the ROM. */
-export const STACK_IN_ROM = SUM_OVER.replace(
-  "        R14 <= 0x7C0         // the stack starts at the top of the RAM",
-  "        R14 <= 0x400         // the stack starts in the RAM",
-);
+/**
+ * The count kept at an address taken from the wrong name: R6 takes the log's address, not the
+ * RAM's 400, so the store at the end goes to the log, in the ROM, and halts with cause 34 far
+ * from the line that is wrong.
+ */
+export const COUNT_TO_LOG = `// How many of the log's readings are warmer than the limit?
+// The count is kept in the RAM, and shown on the display.
+       R6 <= log            // where the count is kept
+       R1 <= log
+       R2 <= word[count]
+       R3 <= 0
+       R4 <= word[limit]
+       R0 <= 0
+next:  if R2 == R0 goto done
+       R5 <= word[R1]
+       if R4 >= R5 signed goto skip
+       R3 <= R3 + 1
+skip:  R1 <= R1 + 8
+       R2 <= R2 - 1
+       goto next
+done:  word[R6] <= R3       // keep the count
+       word[display] <= R3
+       stop`;
+
+/** A count that counts a reading equal to the limit as warmer: the edge log shows it. */
+export const COUNT_WITH_LIMIT = `// How many of the log's readings are warmer than the limit?
+       R1 <= log
+       R2 <= word[count]
+       R3 <= 0
+       R4 <= word[limit]
+       R0 <= 0
+next:  if R2 == R0 goto done
+       R5 <= word[R1]
+       if R5 < R4 signed goto skip   // colder than the limit
+       R3 <= R3 + 1
+skip:  R1 <= R1 + 8
+       R2 <= R2 - 1
+       goto next
+done:  word[display] <= R3
+       stop`;
 
 // ---------------------------------------------------------------------------------------------
 // 11.7 the day's report (the capstone)
@@ -624,22 +692,58 @@ const REPORT_MAIN = `// The day's report on the log the tests add: count, limit 
         R14 <= 0x7C0
         R1 <= log
         R2 <= word[count]
-        call lowestOf, R15
-        word[0x400] <= R1       // the lowest reading
-        R1 <= log
-        R2 <= word[count]
-        call highestOf, R15
-        word[0x408] <= R1       // the highest reading
-        R1 <= log
-        R2 <= word[count]
         R3 <= word[limit]
-        call warmCount, R15
+        call report, R15
         word[display] <= R1     // how many are warmer than the limit
         R0 <= 0
         if R1 == R0 goto quiet
         R4 <= 1
         word[lamps] <= R4       // ALARM
 quiet:  stop`;
+
+/**
+ * report: the function that calls the other three, keeping the list's address, its count and the
+ * limit through their calls in R10 to R12, and its own return address on the stack.
+ */
+const REPORT = `// report: R1 the address of a list, R2 how many readings, R3 the limit.
+// Leaves the lowest reading at 0x400 and the highest at 0x408, and
+// returns in R1 how many readings are warmer than the limit.
+report:   R14 <= R14 - 8
+          word[R14] <= R15      // push R15
+          R14 <= R14 - 8
+          word[R14] <= R10      // push R10
+          R14 <= R14 - 8
+          word[R14] <= R11      // push R11
+          R14 <= R14 - 8
+          word[R14] <= R12      // push R12
+          R10 <= R1             // the list's address, kept
+          R11 <= R2             // its count, kept
+          R12 <= R3             // the limit, kept
+          call lowestOf, R15
+          word[0x400] <= R1
+          R1 <= R10
+          R2 <= R11
+          call highestOf, R15
+          word[0x408] <= R1
+          R1 <= R10
+          R2 <= R11
+          R3 <= R12
+          call warmCount, R15
+          R12 <= word[R14]      // pop R12
+          R14 <= R14 + 8
+          R11 <= word[R14]      // pop R11
+          R14 <= R14 + 8
+          R10 <= word[R14]      // pop R10
+          R14 <= R14 + 8
+          R15 <= word[R14]      // pop R15
+          R14 <= R14 + 8
+          goto R15`;
+
+const REPORT_STUB = `// report: R1 the address of a list, R2 how many readings, R3 the limit.
+// Leaves the lowest reading at 0x400 and the highest at 0x408, and
+// returns in R1 how many readings are warmer than the limit.
+report:   R1 <= 0
+          goto R15`;
 
 /** The worked function the guided start gives whole. */
 export const LOWEST = `// lowestOf: R1 the address of a list, R2 how many readings.
@@ -692,6 +796,8 @@ warmDone: R1 <= R5
 
 export const REPORT_REFERENCE = `${REPORT_MAIN}
 
+${REPORT}
+
 ${LOWEST}
 
 ${HIGHEST}
@@ -700,6 +806,8 @@ ${WARMER}`;
 
 /** The guided start: the main program and lowestOf whole, highestOf and warmCount to write. */
 export const REPORT_SKELETON = `${REPORT_MAIN}
+
+${REPORT_STUB}
 
 ${LOWEST}
 
@@ -715,9 +823,12 @@ warmCount: R1 <= 0
 
 /** The empty start: the requirements as comments. */
 export const REPORT_EMPTY = `// The day's report. The tests add count, limit and log after this program.
-// Write lowestOf, highestOf and warmCount (R1 the list's address, R2 its count,
-// R3 the limit for warmCount; each result in R1), and a main program that
-// shows the report: the display, ALARM, and the words at 400 and 408.
+// Write report, which calls lowestOf, highestOf and warmCount, and a main
+// program that sets R14, calls report and shows its result. Each function
+// takes the list's address in R1 and its count in R2 (warmCount and report
+// also the limit in R3), and returns its result in R1. report leaves the
+// lowest reading at 0x400 and the highest at 0x408.
+// Start each function as R1 <= 0 and goto R15, then fill it in.
 `;
 
 /** A report whose highestOf starts its highest so far at 0: wrong on any log below 0. */

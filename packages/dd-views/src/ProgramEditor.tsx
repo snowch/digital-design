@@ -18,6 +18,7 @@ import {
   assembleChecked,
   gradeProgramCase,
   scenarioOf,
+  callStart,
   withData,
   type MachineInputs,
 } from "@dd/dd-model";
@@ -87,26 +88,40 @@ export function gradeProgram(
   const failures: VerdictFailure[] = [];
   for (const [index, c] of cases.entries()) {
     const r = gradeProgramCase(text, c.given, c.expect);
-    if (r.problems.length)
+    // The tests' call to a name the program lacks fails that case alone; the program assembles.
+    const missing = r.problems.filter((p) => p.code === "noFunction");
+    if (r.problems.length > missing.length)
       return {
         passed: false,
         total: cases.length,
         failures: [],
-        // A problem on line 0 is the tests' call, not the learner's text, which does assemble.
-        blocked: [
-          ...(r.problems.some((p) => p.line > 0) ? [t.notAssembled] : []),
-          ...r.problems.map((p) => refusalText(t, p)),
-        ].join("\n"),
+        blocked: [t.notAssembled, ...r.problems.map((p) => refusalText(t, p))].join("\n"),
       };
+    if (missing.length) {
+      failures.push({
+        index,
+        label: c.label,
+        inputs: {},
+        actual: {},
+        expected: {},
+        detail: missing.map((p) => refusalText(t, p)).join(" "),
+      });
+      continue;
+    }
     if (r.pass) continue;
-    // What the program left for every check of the case, then how the run ended, then the
-    // sentence naming the part of the task that is not met.
-    const keys = Object.keys(c.expect).filter((k) => k !== "end");
-    const parts = [format(t.failedLeft, { left: leftText(strings, r.actual, keys) })];
-    if (r.end) parts.push(format(t.stops[r.end.key] ?? r.end.key, r.end.values));
+    // One sentence for each check that failed: what the program left; how the run ended, when that
+    // was not a stop of the program's or a return; the task's own sentence for what was wrong.
+    const wrongLeft = r.wrong.filter((k) => k !== "end");
+    const parts: string[] = [];
+    if (wrongLeft.length)
+      parts.push(format(t.failedLeft, { left: leftText(strings, r.actual, wrongLeft) }));
+    const endKey = r.end?.key;
+    if (r.end && (r.wrong.includes("end") || (endKey !== "stop" && endKey !== "returned")))
+      parts.push(format(t.stops[r.end.key] ?? r.end.key, r.end.values));
     const key = c.given["detail"];
     const sentence = key !== undefined ? t.details[String(key)] : undefined;
-    if (sentence) parts.push(sentence);
+    if (sentence && wrongLeft.length) parts.push(sentence);
+    if (r.wrong.includes("end") && endKey !== "stop") parts.push(t.mustStop);
     failures.push({
       index,
       label: c.label,
@@ -132,12 +147,14 @@ export function ProgramEditor({ challenge, artifact, onChange }: ChallengeEditor
   const t = strings.machine11;
   const start = (challenge.initial.data ?? {}) as ProgramStart;
   const text = artifact.text ?? challenge.initial.text ?? "";
-  // The runs a learner can try: each case that runs the whole program, by its label.
+  // The runs a learner can try: every case, a whole run or a test's call of a function, by its
+  // label, so a function can be tried alone as its tests call it.
   const runs = useMemo(() => {
     if (challenge.tests.kind !== "answers") return [];
-    return challenge.tests.cases.filter((c) => c.given["call"] === undefined);
+    return challenge.tests.cases;
   }, [challenge]);
   const [chosen, setChosen] = useState(0);
+  const [asking, setAsking] = useState<"skeleton" | "empty" | undefined>(undefined);
   const run = runs[chosen] ?? runs[0];
   const scenario = useMemo(() => (run ? scenarioOf(run.given) : {}), [run]);
   const checked = useMemo(() => assembleChecked(withData(text, scenario)), [text, scenario]);
@@ -150,26 +167,61 @@ export function ProgramEditor({ challenge, artifact, onChange }: ChallengeEditor
     }),
     [scenario],
   );
+  const callAt = useMemo(
+    () => (checked.program ? callStart(checked.program, scenario) : undefined),
+    [checked.program, scenario],
+  );
   // Assembled with the data the tests add, since a program names it (`log`, `count`).
   const problems = checked.problems;
   return (
     <div className="write-editor program-editor">
       {start.tiers && (
         <div className="explorer-actions">
-          <button
-            type="button"
-            className="button secondary"
-            onClick={() => onChange({ ...artifact, text: challenge.initial.text ?? "" })}
-          >
-            {t.startSkeleton}
-          </button>
-          <button
-            type="button"
-            className="button secondary"
-            onClick={() => onChange({ ...artifact, text: start.empty ?? "" })}
-          >
-            {t.startEmpty}
-          </button>
+          {(
+            [
+              ["skeleton", t.startSkeleton, challenge.initial.text ?? ""],
+              ["empty", t.startEmpty, start.empty ?? ""],
+            ] as const
+          ).map(([which, label, next]) =>
+            asking === which ? (
+              <span key={which} className="challenge-reset-confirm" role="group" aria-label={label}>
+                <button
+                  type="button"
+                  className="button danger"
+                  onClick={() => {
+                    setAsking(undefined);
+                    onChange({ ...artifact, text: next });
+                  }}
+                >
+                  {t.replaceConfirm}
+                </button>
+                <button
+                  type="button"
+                  className="button secondary"
+                  onClick={() => setAsking(undefined)}
+                >
+                  {t.replaceCancel}
+                </button>
+              </span>
+            ) : (
+              <button
+                key={which}
+                type="button"
+                className="button secondary"
+                onClick={() =>
+                  // Replacing a program the learner has changed asks first, as clearing work does.
+                  text.trim() &&
+                  text !== next &&
+                  text !== challenge.initial.text &&
+                  text !== start.empty
+                    ? setAsking(which)
+                    : onChange({ ...artifact, text: next })
+                }
+              >
+                {label}
+              </button>
+            ),
+          )}
         </div>
       )}
       <ProgramText
@@ -202,7 +254,10 @@ export function ProgramEditor({ challenge, artifact, onChange }: ChallengeEditor
           <DebuggerView
             program={checked.program}
             inputs={inputs}
-            options={start.debugger ?? {}}
+            options={{
+              ...(start.debugger ?? {}),
+              ...(callAt ? { start: callAt } : {}),
+            }}
             id={challenge.id}
           />
         </details>

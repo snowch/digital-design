@@ -85,9 +85,10 @@ export const assembly: LessonInput = {
             names: false,
             question: PROSE.p1Question,
             options: [
-              { value: "003", label: LABELS.options.c003 },
-              { value: "014", label: LABELS.options.c014 },
-              { value: "005", label: LABELS.options.c005 },
+              { value: "002", label: "002" },
+              { value: "003", label: "003" },
+              { value: "00C", label: "00C" },
+              { value: "014", label: "014" },
             ],
             ask: { what: "constant", line: "if R2 < R3 signed goto fine" },
             explain: PROSE.p1Explain,
@@ -109,6 +110,7 @@ export const assembly: LessonInput = {
           props: {
             program: ROOM_A_LIMIT,
             inputs: { SENSORA: "-170", SENSORB: "-250" },
+            registers: [2, 3, 4],
             outcomes: PROSE.debuggerAfter,
           },
         },

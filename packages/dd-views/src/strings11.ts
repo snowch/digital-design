@@ -45,6 +45,7 @@ export interface Machine11Strings {
   readonly atStart: string;
   /** {n}: instructions run so far. */
   readonly ran: string;
+  readonly ranOne: string;
   /** {address}: the instruction about to run. */
   readonly next: string;
   /** {address}: a breakpoint. */
@@ -75,6 +76,10 @@ export interface Machine11Strings {
   readonly watchRemove: string;
   /** {text}: what the learner typed. */
   readonly watchBad: string;
+  /** Why a watch is refused: a name nothing defines, an address off a word, an address with no word. */
+  readonly watchName: string;
+  readonly watchAlign: string;
+  readonly watchOutside: string;
   /** {value}: the value before the last instruction. */
   readonly watchWas: string;
   readonly watchNone: string;
@@ -84,6 +89,8 @@ export interface Machine11Strings {
   /** {names}: registers that hold this word's address. */
   readonly pointsHere: string;
   readonly stackCaption: string;
+  /** A run of like calls folded: {n} calls, {name} the group's name, {words} the words they hold. */
+  readonly stackFolded: string;
   readonly stackEmpty: string;
   readonly stackUnset: string;
   readonly frameMain: string;
@@ -93,11 +100,14 @@ export interface Machine11Strings {
   // The question.
   /** {answer}: what the run gave. */
   readonly answer: string;
+  /** The verdict of a question about what the assembler made, not about a run. */
+  readonly assemblerAnswer: string;
 
   // The stack's depth over a run.
   readonly depthCaption: string;
   readonly depthAxis: string;
   readonly depthRan: string;
+  readonly depthRanOne: string;
   /** {n}: the deepest, in words. */
   readonly depthMost: string;
   readonly depthCalls: string;
@@ -120,12 +130,17 @@ export interface Machine11Strings {
   readonly dataAdded: string;
   readonly startSkeleton: string;
   readonly startEmpty: string;
+  /** Asking before a start replaces a program the learner changed. */
+  readonly replaceConfirm: string;
+  readonly replaceCancel: string;
 
   // A failed test.
   /** What each checked value is called, by the case's key. */
   readonly checks: Readonly<Record<string, string>>;
   readonly end: string;
   readonly notAssembled: string;
+  /** A failed case whose run did not end at the program's stop. */
+  readonly mustStop: string;
   /** {left}: each checked value the program left, named. */
   readonly failedLeft: string;
   /** {name}: a register; {address}: a word of the RAM, as a failed test names them. */
@@ -186,7 +201,7 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   },
   listingCaption: "The program as the assembler made it",
   address: "Address",
-  word: "Word",
+  word: "Instruction",
   line: "Line",
   data: "data",
   pauseBefore: "Pause before {address}",
@@ -201,6 +216,8 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   reset: "Reset",
   atStart: "Ready to run",
   ran: "{n} instructions run.",
+  // Brief 8M.
+  ranOne: "1 instruction run.",
   next: "The next instruction is at {address}.",
   paused: "Paused at the breakpoint before {address}.",
   stops: {
@@ -218,11 +235,14 @@ export const MACHINE11_STRINGS: Machine11Strings = {
     cause41:
       "The machine halted with cause 41: the instruction at {address} is call system, which Module 12 builds.",
     "unknown-address":
-      "The debugger paused before the instruction at {address}: the address needs {reg}, which is not set.",
+      "The debugger ended the run before the instruction at {address}: the address needs {reg}, which nothing has set.",
     "unknown-branch":
-      "The debugger paused before the instruction at {address}: the branch compares {reg}, which is not set.",
+      "The debugger ended the run before the instruction at {address}: the branch compares {reg}, which nothing has set.",
     "unknown-jump":
-      "The debugger paused before the instruction at {address}: the jump targets {reg}, which is not set.",
+      "The debugger ended the run before the instruction at {address}: the jump goes to the address in {reg}, which nothing has set.",
+    // Brief 8M: the tests' own guard after a called function.
+    fellOff:
+      "A test called a function, and the function ran past its last line without a return through R15. The machine halted there, at a word that is not an instruction.",
     cutOff: "The debugger cut the run off after {n} instructions: the program may never stop.",
     running: "",
   },
@@ -243,30 +263,42 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   watchLabel: "A register or a word to watch, such as R1 or word[R1].",
   watchAdd: "Watch",
   watchRemove: "Stop watching {name}",
+  // Brief 8M.
+  watchName: "A watch names {name}, and no line of the program names it.",
+  watchAlign:
+    "A watch's address, {address} ({decimal} in decimal), is not a multiple of 8, so no word starts there.",
+  watchOutside:
+    "A watch's address, {address} ({decimal} in decimal), has no word of memory: the ROM and the RAM run from 000 to 7BF.",
   watchBad:
-    "The debugger cannot read {text} as a register or a word. Write R1, PC, or word[...] with an address.",
+    "The debugger cannot read {text}: write a register (R1, PC) or word[...] with an address; a number is decimal, or hexadecimal after 0x, as in a program.",
   watchWas: "was {value}",
   watchNone: "Nothing watched yet.",
   memoryValue: "Memory value",
   pointsHere: "{names} holds this word's address.",
   stackCaption: "Stack",
+  // Brief 8M.
+  stackFolded: "{n} more calls, each {name}, holding {words} words between them.",
   stackEmpty: "Nothing on the stack.",
   stackUnset: "R14 not set, so no stack yet.",
   frameMain: "Main program",
   frameCall: "{name}, called from {address}",
   answer: "The run gives {answer}.",
+  // Brief 8M.
+  assemblerAnswer: "The assembler gives {answer}.",
   depthCaption: "Words on the stack after each instruction.",
   depthAxis: "Words",
-  depthRan: "Instructions run",
+  // Brief 8M.
+  depthRan: "{n} instructions run",
+  depthRanOne: "1 instruction run",
   depthMost: "At most, the stack held {n} words.",
-  depthCalls: "Calls",
+  depthCalls: "The marks under the chart's axis are the {n} calls the run made.",
   logCol: "What is checked",
   readingsCol: "Readings",
-  asks: "Task expects",
+  asks: "Should show",
   left: "Program left",
   empty: "None",
   results: {},
-  matches: "The program left what the task asks.",
+  matches: "The program left what the log should show.",
   differs: "The program left something else.",
   runAll: "Run all",
   limitNote: "(limit {limit})",
@@ -274,6 +306,9 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   dataAdded: "The tests add these lines after your program:",
   startSkeleton: "Start from the outline",
   startEmpty: "Start from an empty program",
+  // Brief 8M.
+  replaceConfirm: "Replace my program",
+  replaceCancel: "Keep my program",
   checks: {
     display: "the display",
     lamps: "the lamps",
@@ -286,6 +321,8 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   },
   end: "How the run ended",
   notAssembled: "The program does not assemble.",
+  // Brief 8M.
+  mustStop: "A whole run must end at the program's own stop.",
   failedLeft: "Your program left {left}.",
   checkRegister: "{name}",
   checkWord: "the word at {address}",

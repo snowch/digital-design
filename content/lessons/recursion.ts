@@ -34,24 +34,24 @@ export const LAYOUTS = [
   { id: "hall", rooms: "hall:   word -150, 0, 0", farthest: 1 },
   {
     id: "second",
-    rooms: `hall:   word -150, 0, roomA
-roomA:  word -160, 0, roomB
-roomB:  word -170, 0, 0`,
+    rooms: `hall:   word -150, 0, annexA
+annexA:  word -160, 0, annexB
+annexB:  word -170, 0, 0`,
     farthest: 3,
   },
   {
     id: "both",
-    rooms: `hall:   word -150, roomA, roomB
-roomA:  word -160, 0, 0
-roomB:  word -170, roomC, 0
-roomC:  word -175, 0, 0`,
+    rooms: `hall:   word -150, annexA, annexB
+annexA:  word -160, 0, 0
+annexB:  word -170, annexC, 0
+annexC:  word -175, 0, 0`,
     farthest: 3,
   },
 ] as const;
 
 /** The tests that call farthest alone: the rooms, the room in R1 (0 for none), the answer. */
 export const FARTHEST_CALLS = [
-  { rooms: COLD_STORE, room: "store", farthest: 3 },
+  { rooms: COLD_STORE, room: "vault", farthest: 3 },
   { rooms: COLD_STORE, room: "chillB", farthest: 1 },
   { rooms: COLD_STORE, room: "0", farthest: 0 },
   { rooms: LONG_STORE, room: "lobby", farthest: 4 },
@@ -59,9 +59,9 @@ export const FARTHEST_CALLS = [
 
 /** The construction's answers, for a run of warmRooms on the longer store from its hall. */
 export const STORE_ANSWERS = [
-  { id: "calls", value: "15", form: "number" },
-  { id: "words", value: "20", form: "number" },
-  { id: "lowest", value: "720", form: "hex" },
+  { id: "calls", value: "15", form: "number", detail: "storeCalls" },
+  { id: "words", value: "20", form: "number", detail: "storeWords" },
+  { id: "lowest", value: "720", form: "hex", detail: "storeR14" },
 ] as const;
 
 export const recursion: LessonInput = {
@@ -135,6 +135,7 @@ export const recursion: LessonInput = {
             pause: ["warmRooms"],
             watch: true,
             watched: ["R1", "R11", "R14"],
+            watchAddresses: ["R1"],
             stack: true,
             outcomes: PROSE.framesAfter,
           },
@@ -233,7 +234,7 @@ export const recursion: LessonInput = {
         grader: "exact",
         cases: STORE_ANSWERS.map((a) => ({
           label: LABELS.fields[a.id],
-          given: { field: a.id, form: a.form, detail: "recursionDepth" },
+          given: { field: a.id, form: a.form, detail: a.detail },
           expect: { value: a.value },
         })),
       },
@@ -250,7 +251,13 @@ export const recursion: LessonInput = {
       initial: {
         text: FARTHEST_START,
         data: {
-          debugger: { breakpoints: true, watch: true, watched: ["R1", "R11", "R14"], stack: true },
+          debugger: {
+            breakpoints: true,
+            watch: true,
+            watched: ["R1", "R11", "R14"],
+            watchAddresses: ["R1"],
+            stack: true,
+          },
         },
       },
       tests: {

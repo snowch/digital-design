@@ -30,7 +30,7 @@ export const LABELS = {
   },
   captions: {
     listing:
-      "The listing shows each line of the colder-room program with its address and eight-digit word.",
+      "Each line of the colder-room program beside its address and the eight-digit word the machine runs.",
     predictListing:
       "Predict the constant this branch needs, then check the words the assembler made.",
     debugger: "Room A's program runs in the debugger, one instruction at a time.",
@@ -38,11 +38,6 @@ export const LABELS = {
     mistakes: "Mend the lines the assembler refuses.",
     dataListing: "A word of data follows the program, and the assembler places it at an address.",
     beAssembler: "Work out the address and word for each line, then run the tests.",
-  },
-  options: {
-    c003: "003: instructions from the branch to fine",
-    c014: "014: the address fine names",
-    c005: "005: the position of fine counting from 000's line as 1",
   },
   fields: {
     cold: "the address cold names",

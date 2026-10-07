@@ -136,6 +136,7 @@ export const lists: LessonInput = {
             pause: ["next"],
             watch: true,
             watched: ["R1", "R2", "R3", "word[R1]"],
+            watchAddresses: ["R1"],
             registers: [0, 1, 2, 3, 4, 5],
             memory: [{ from: "log", words: DAY_LOG.length, title: LABELS.logTitle }],
           },

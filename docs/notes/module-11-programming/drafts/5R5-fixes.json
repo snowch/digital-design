@@ -1,0 +1,32 @@
+[
+ [
+  "prediction",
+  "The listing shows the program's words alongside the room data.",
+  "The listing then shows the program's words alongside the room data."
+ ],
+ [
+  "motivation",
+  "Every way in ends at one, so the calls stop.",
+  "Every way in ends at one, so every call returns."
+ ],
+ [
+  "construction",
+  "How deep the stack goes depends on the longest way in, not on how many rooms there are.\n\n",
+  ""
+ ],
+ [
+  "c2Task",
+  "Return in R1 how many rooms lie on the longest way in from that room, counting the room itself. Return 0 for no room.",
+  "Its result, in R1, is how many rooms lie on the longest way in from that room, counting the room itself. It is 0 for no room."
+ ],
+ [
+  "c2Task",
+  "`farthest` from the hall is 4: the hall,",
+  "the longest way in from the hall is 4 rooms: the hall,"
+ ],
+ [
+  "c2Task",
+  "Four call `farthest` alone,",
+  "Four call `farthest` alone. Before each, the test puts its own words in R10 to R13, `7C0` in R14, and in R15 the address of a `stop` it adds after your program, where the call returns. They test"
+ ]
+]

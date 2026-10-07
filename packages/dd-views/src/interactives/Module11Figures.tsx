@@ -129,7 +129,9 @@ export const ProgramListing = withProps(
                     className={stored.choice === answer ? "prediction-match" : "prediction-nomatch"}
                   >
                     {format(strings.prediction.youSaid, { choice: optionLabel(stored.choice) })}{" "}
-                    {format(t.answer, { answer: optionLabel(answer) })}{" "}
+                    {format(data.ask?.what === "run" ? t.answer : t.assemblerAnswer, {
+                      answer: optionLabel(answer),
+                    })}{" "}
                     {stored.choice === answer
                       ? strings.prediction.match
                       : strings.prediction.noMatch}
@@ -294,7 +296,7 @@ export const StackDepth = withProps(
               x1={x(i)}
               x2={x(i)}
               y1={H - bottom}
-              y2={H - bottom + 6}
+              y2={H - bottom + 10}
             />
           ))}
           <path className="depth-line" d={d} fill="none" />
@@ -302,11 +304,12 @@ export const StackDepth = withProps(
             0
           </text>
           <text className="depth-label" x={W - right} y={H - 8} textAnchor="end">
-            {`${n} ${t.depthRan}`}
+            {format(n === 1 ? t.depthRanOne : t.depthRan, { n })}
           </text>
         </svg>
         <ul className="program-counts">
           <li>{format(t.depthMost, { n: run.deepest })}</li>
+          {run.calls.length > 0 && <li>{format(t.depthCalls, { n: run.calls.length })}</li>}
           <li>{format(t.stops[end.key] ?? end.key, end.values)}</li>
         </ul>
       </div>
@@ -379,6 +382,13 @@ export const LogResults = withProps(
     const [ran, setRan] = useState(false);
     return (
       <div className="machine-figure log-results" data-interactive={interactive.id}>
+        {/* The button and what the run showed come first, near the lead: the logs follow. */}
+        <div className="explorer-actions">
+          <button type="button" className="button" disabled={ran} onClick={() => setRan(true)}>
+            {t.runAll}
+          </button>
+        </div>
+        {ran && data.outcomes && <Prose markdown={data.outcomes} />}
         <ol className="log-cards">
           {rows.map(({ log, left }) => {
             const all = data.checks.every((c) => left[c.key] === log.asks[c.key]);
@@ -415,12 +425,6 @@ export const LogResults = withProps(
             );
           })}
         </ol>
-        <div className="explorer-actions">
-          <button type="button" className="button" disabled={ran} onClick={() => setRan(true)}>
-            {t.runAll}
-          </button>
-        </div>
-        {ran && data.outcomes && <Prose markdown={data.outcomes} />}
       </div>
     );
   },

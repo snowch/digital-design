@@ -84,6 +84,10 @@ const FUNCTIONS = [
     name: "warmCount",
     result: (log: readonly number[], limit: number) => reportOf(log, limit).warm,
   },
+  {
+    name: "report",
+    result: (log: readonly number[], limit: number) => reportOf(log, limit).warm,
+  },
 ] as const;
 
 export const logReport: LessonInput = {
@@ -129,12 +133,12 @@ export const logReport: LessonInput = {
             program: LOWEST_DEMO(DEFROST),
             question: PROSE.p1Question,
             options: [
-              { value: "-184", label: "-184" },
-              { value: "-190", label: "-190" },
-              { value: "12", label: "12" },
-              { value: "35", label: "35" },
+              { value: "0", label: "0" },
+              { value: "1", label: "1" },
+              { value: "4", label: "4" },
+              { value: "5", label: "5" },
             ],
-            ask: { what: "run", run: { what: "display" } },
+            ask: { what: "run", run: { what: "register", reg: 2 } },
             explain: PROSE.p1Explain,
           },
         },
@@ -179,7 +183,7 @@ export const logReport: LessonInput = {
           props: {
             program: REPORT_HIGHEST_FROM_ZERO,
             logs: resultsLogs,
-            checks: CHECKS,
+            checks: CHECKS.filter((c) => c.key === "word:408"),
             outcomes: PROSE.fromZeroAfter,
           },
         },
@@ -250,10 +254,25 @@ export const logReport: LessonInput = {
                   call: f.name,
                   R1: "log",
                   R2: log.length,
-                  ...(f.name === "warmCount" ? { R3: limit } : {}),
+                  ...(f.name === "warmCount" || f.name === "report" ? { R3: limit } : {}),
                   detail: `report-${f.name}`,
                 },
-                expect: { R1: String(f.result(log, limit)), kept: "", returned: "yes" },
+                expect: (f.name === "report"
+                  ? {
+                      // report calls the other three and keeps what it needs on the stack.
+                      R1: String(f.result(log, limit)),
+                      "word:400": String(r.lowest),
+                      "word:408": String(r.highest),
+                      calls: "3",
+                      stackWords: "1",
+                      kept: "",
+                      returned: "yes",
+                    }
+                  : {
+                      R1: String(f.result(log, limit)),
+                      kept: "",
+                      returned: "yes",
+                    }) as Record<string, string>,
               }))
             : [];
           return [whole, ...calls];

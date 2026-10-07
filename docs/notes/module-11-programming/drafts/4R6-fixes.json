@@ -1,0 +1,42 @@
+[
+ [
+  "prediction",
+  "The listing shows what instruction each line becomes.",
+  "The listing's words then show."
+ ],
+ [
+  "construction",
+  "a function `check` that keeps",
+  "a function `sumKept` that keeps"
+ ],
+ [
+  "checkListingLead",
+  "the program with `check`",
+  "the program with `sumKept`"
+ ],
+ [
+  "reflection",
+  " So a function's calls do not get in each other's way, even when one call of a function is still in progress as another call of the same function starts.",
+  " So a function's calls do not get in each other's way."
+ ],
+ [
+  "modelVsReality",
+  "and the store halts the machine with cause `34`.",
+  "and the push halts the machine with cause `34`."
+ ],
+ [
+  "pushedAfter",
+  "The program executed 38 instructions",
+  "The program ran 38 instructions"
+ ],
+ [
+  "explanation",
+  "`sumOver`'s two words sit under it:",
+  "the two words `sumOver` pushed stay on the stack:"
+ ],
+ [
+  "generalisation",
+  "The last word pushed is the first popped. So a call made inside another ends first, and its words lie on top of the words of the call that made it.",
+  "A call made inside another call starts later and returns sooner. The inner function returns before the outer one goes on. The stack keeps the same order. The last word pushed is the first word popped, so the inner call's words sit on top of the outer call's and come off first."
+ ]
+]

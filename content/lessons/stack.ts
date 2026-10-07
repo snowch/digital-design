@@ -43,10 +43,10 @@ export const ROOMS_RUNS = [
   [-170, -210],
 ] as const;
 
-/** What the construction asks of a run of `check`, which the lesson does not run. */
+/** What the construction asks of a run of `sumKept`, which the lesson does not run. */
 export const STACK_ANSWERS = [
-  { id: "returnAt", value: "7B8", detail: "stackAddress" },
-  { id: "r10At", value: "7B0", detail: "stackAddress" },
+  { id: "r11At", value: "7A8", detail: "stackAddress" },
+  { id: "r12At", value: "7A0", detail: "stackAddress" },
   { id: "inOverBy", value: "7A0", detail: "stackAddress" },
   { id: "leftAt7B8", value: "010", detail: "stackWord" },
 ] as const;
@@ -99,7 +99,7 @@ export const stack: LessonInput = {
             options: [
               { value: "010", label: "010" },
               { value: "014", label: "014" },
-              { value: "028", label: "028" },
+              { value: "044", label: "044" },
               { value: "001", label: "001" },
             ],
             ask: {
@@ -264,7 +264,13 @@ export const stack: LessonInput = {
           ...ROOMS_CALLS.map(([a, b]) => ({
             label: `${LABELS.callPrefix} R1 ${a}, R2 ${b}`,
             given: { call: "roomsOver", R1: a, R2: b, detail: "roomsCall" },
-            expect: { R1: String(roomsOver(a, b)), kept: "", returned: "yes" },
+            expect: {
+              R1: String(roomsOver(a, b)),
+              calls: "2",
+              stackWords: "3",
+              kept: "",
+              returned: "yes",
+            },
           })),
           ...ROOMS_RUNS.map(([a, b]) => ({
             label: `${LABELS.roomPrefixA} ${a}, ${LABELS.roomPrefixB} ${b}`,
