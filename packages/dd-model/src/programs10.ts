@@ -95,7 +95,7 @@ export function branchSays(job: number, swapped: boolean, a: bigint, b: bigint):
 export interface ProgramRun {
   /** Instructions written: lines that are instructions, not data. */
   readonly written: number;
-  /** Instructions run from reset, the one the machine stops at among them. */
+  /** Instructions run from reset: the stop among them, a word the machine refuses not. */
   readonly ran: number;
   /** The ROM's bytes the program and its data take, from address 000. */
   readonly romBytes: number;
@@ -124,7 +124,8 @@ export function runProgram(
   const size = last ? (last.instruction !== undefined ? 4 : dataSize(last.text)) : 0;
   return {
     written: program.lines.filter((l) => l.instruction !== undefined).length,
-    ran: records.length,
+    // A word the machine refuses, with a cause, did not run; the stop did (lesson 9.3).
+    ran: state.stopped?.reason.kind === "trap" ? records.length - 1 : records.length,
     romBytes: last ? last.address + size : 0,
     state,
     ...(state.stopped ? { stopped: state.stopped.reason } : {}),

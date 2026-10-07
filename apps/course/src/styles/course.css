@@ -906,6 +906,19 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
     text-align: center;
   }
 }
+/* The map of every kind and job: seventeen equal columns across its card, so the job heads stand
+   apart at any width (9.2 and 10.4). */
+.truth-table.kind-map-table {
+  width: 100%;
+  table-layout: fixed;
+}
+.truth-table.kind-map-table th,
+.truth-table.kind-map-table td {
+  text-align: center;
+}
+.kind-map .truth-table-wrap {
+  margin-bottom: var(--space-3);
+}
 .truth-table-note {
   color: var(--fg-muted);
   font-size: var(--text-sm);

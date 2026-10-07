@@ -143,6 +143,8 @@ export interface Machine10Strings {
   /** {n} in each. */
   readonly written: string;
   readonly ran: string;
+  /** {n}: instructions run by a program that halted with a cause, at no stop. */
+  readonly ranNoStop: string;
   readonly romBytes: string;
   /** {n} the register, {value} its word read signed. */
   readonly registerAfter: string;
@@ -317,13 +319,14 @@ export const MACHINE10_STRINGS: Machine10Strings = {
   listingCaption: "The program",
   written: "Instructions written: {n}",
   ran: "Instructions run, the stop among them: {n}",
+  ranNoStop: "Instructions run: {n}",
   romBytes: "ROM used: {n} bytes",
-  registerAfter: "R{n} at the stop: {value}",
-  displayAfter: "Display at the stop: {value}",
+  registerAfter: "R{n} at the halt: {value}",
+  displayAfter: "Display at the halt: {value}",
   runBoth: "Run the programs",
-  stoppedAtStop: "The run stopped at the stop, at {address}.",
-  stoppedCause: "The run stopped at {address}, with cause {cause}.",
-  notStopped: "The run did not stop.",
+  stoppedAtStop: "The run halted at the stop, at {address}.",
+  stoppedCause: "The run halted at {address}, with cause {cause}.",
+  notStopped: "The run did not halt.",
   address: "Address",
   programAnswer: "The run gives {answer}.",
   edgesAnswer: "The controller takes {answer}.",

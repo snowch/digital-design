@@ -1133,6 +1133,10 @@ const ProgramProps = z.object({
   /** The registers to show after each run, by number. */
   shown: z.array(z.number().int().min(0).max(15)).default([]),
   display: z.boolean().default(true),
+  /** Whether each run's count of the ROM's bytes shows. */
+  romBytes: z.boolean().default(true),
+  /** One program run on two machines: its listing shows once, above the first run's counts. */
+  oneListing: z.boolean().default(false),
   /** Shown once the learner has run the programs. */
   outcomes: z.string().optional(),
   question: z.string().optional(),
@@ -1142,7 +1146,7 @@ const ProgramProps = z.object({
   ask: z
     .object({
       program: z.number().int().min(0),
-      what: z.enum(["ran", "written", "display", "stop"]),
+      what: z.enum(["ran", "written", "display", "stop", "where"]),
     })
     .optional(),
 });
@@ -1180,6 +1184,7 @@ export function programAnswer(given: z.input<typeof ProgramProps>): string {
   if (!r) return "";
   if (data.ask.what === "display") return BigInt.asIntN(64, r.state.display).toString();
   if (data.ask.what === "stop") return stopKey(r.stopped);
+  if (data.ask.what === "where") return r.state.stopped ? hex3(r.state.stopped.pc) : "none";
   return String(data.ask.what === "ran" ? r.ran : r.written);
 }
 
@@ -1234,33 +1239,39 @@ export const ProgramCompare = withProps(
             return (
               <section key={p.label} className="program-column" aria-label={p.label}>
                 <p className="layout-title">{p.label}</p>
-                <div className="truth-table-wrap">
-                  <table className="truth-table datapath-table program-listing">
-                    <caption>{t.listingCaption}</caption>
-                    <thead>
-                      <tr>
-                        <th scope="col">{t.address}</th>
-                        <th scope="col">{t.instruction}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {r.lines.map((l) => (
-                        <tr key={l.address}>
-                          <td className="memory-word">{hex3(l.address)}</td>
-                          <td className="memory-word">
-                            {l.label ? `${l.label}: ` : ""}
-                            {l.text}
-                          </td>
+                {(!data.oneListing || k === 0) && (
+                  <div className="truth-table-wrap">
+                    <table className="truth-table datapath-table program-listing">
+                      <caption>{t.listingCaption}</caption>
+                      <thead>
+                        <tr>
+                          <th scope="col">{t.address}</th>
+                          <th scope="col">{t.instruction}</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {r.lines.map((l) => (
+                          <tr key={l.address}>
+                            <td className="memory-word">{hex3(l.address)}</td>
+                            <td className="memory-word">
+                              {l.label ? `${l.label}: ` : ""}
+                              {l.text}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
                 {committed && ran && (
                   <ul className="program-counts">
                     <li>{format(t.written, { n: r.run.written })}</li>
-                    <li>{format(t.ran, { n: r.run.ran })}</li>
-                    <li>{format(t.romBytes, { n: r.run.romBytes })}</li>
+                    <li>
+                      {format(stopKey(r.run.stopped) === "stop" ? t.ran : t.ranNoStop, {
+                        n: r.run.ran,
+                      })}
+                    </li>
+                    {data.romBytes && <li>{format(t.romBytes, { n: r.run.romBytes })}</li>}
                     {data.shown.map((n) => (
                       <li key={n}>
                         {format(t.registerAfter, { n, value: signed(r.run.state.regs[n]) })}

@@ -400,6 +400,39 @@ endmodule
 export const NO_STOP = `R1 <= 66
 word[display] <= R1`;
 
+/** A program with no stop and a word of data after it, which runs as an instruction (10.4). */
+export const DATA_AFTER = `R1 <= 66
+word[display] <= R1
+data: word 0x12345678`;
+
+/** Room A's reading, then room B's, each shown by a routine called through R4 (the copy's kind 9). */
+export const CALL_TWICE = `R4 <= showA
+call R4, R15
+R4 <= showB
+call R4, R15
+stop
+showA: R2 <= word[sensorA]
+word[display] <= R2
+goto R15
+showB: R3 <= word[sensorB]
+word[display] <= R3
+goto R15`;
+
+/** The same without the call through a register: each call a constant job and a jump. */
+export const CALL_TWICE_WITHOUT = `R4 <= showA
+R15 <= back1
+goto R4
+back1: R4 <= showB
+R15 <= back2
+goto R4
+back2: stop
+showA: R2 <= word[sensorA]
+word[display] <= R2
+goto R15
+showB: R3 <= word[sensorB]
+word[display] <= R3
+goto R15`;
+
 /** 7 × n by adding 7 n times: no multiplication, and a register kept at 0 to compare with. */
 export function multiplyLoop(n: number): string {
   return `R0 <= 0

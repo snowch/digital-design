@@ -123,15 +123,15 @@ const WRONG: readonly {
   },
   {
     lesson: "room-to-grow",
-    id: "word-fates",
-    answers: { kind9: "runs" },
-    why: "the copy's kind 9 thought to run on the course's machine",
+    id: "code-fates",
+    answers: { never: "free" },
+    why: "a branch that never branches thought free, though an old program may use it",
   },
   {
     lesson: "room-to-grow",
-    id: "count-loop",
-    answers: { times9: "9" },
-    why: "the instructions written counted, not those run",
+    id: "count-calls",
+    answers: { withoutCall: "11" },
+    why: "the call through a register counted on the course's machine, which has none",
   },
   {
     lesson: "design-an-instruction",
@@ -401,26 +401,33 @@ test.describe("Module 10's figures", () => {
     );
   });
 
-  test("a program with no stop ends at the ROM's zeros, cause 21; the copy's call is refused", async ({
+  test("data after a program runs as one more instruction; an old program runs the same on the copy", async ({
     page,
   }) => {
     await openLesson(page, "room-to-grow");
-    const figure = page.locator("#ix-predict-no-stop");
+    const figure = page.locator("#ix-predict-data");
     await figure.scrollIntoViewIfNeeded();
     await expect(figure.getByRole("button", { name: T.runBoth })).toHaveCount(0);
-    await figure.getByRole("radio").first().check();
+    // It halts at 00C: the second option.
+    await figure.getByRole("radio").nth(1).check();
     await figure.getByRole("button", { name: V.prediction.commit }).click();
     await expect(figure.locator("[role=status]").first()).toContainText(V.prediction.match);
     await figure.getByRole("button", { name: T.runBoth }).click();
     await expect(figure.locator(".program-counts")).toContainText(
-      format(T.stoppedCause, { address: "008", cause: "21" }),
+      format(T.stoppedCause, { address: "00C", cause: "21" }),
     );
-    const words = page.locator("#ix-new-words");
-    await words.scrollIntoViewIfNeeded();
-    await words.getByRole("button", { name: T.runBoth }).click();
-    await expect(words.locator(".program-counts").nth(1)).toContainText(
-      format(T.stoppedCause, { address: "004", cause: "21" }),
+    await expect(figure.locator(".program-counts")).toContainText(format(T.ranNoStop, { n: 3 }));
+    await expect(figure.locator(".program-counts")).not.toContainText(
+      format(T.romBytes, { n: 16 }),
     );
+    const old = page.locator("#ix-old-program");
+    await old.scrollIntoViewIfNeeded();
+    await expect(old.locator("table.program-listing")).toHaveCount(1);
+    await old.getByRole("button", { name: T.runBoth }).click();
+    for (const k of [0, 1])
+      await expect(old.locator(".program-counts").nth(k)).toContainText(
+        format(T.displayAfter, { value: "-250" }),
+      );
   });
 
   test("set if's edges are predicted, then read off the decoder and controller", async ({
