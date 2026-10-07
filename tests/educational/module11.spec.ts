@@ -24,11 +24,15 @@ import {
 
 const T = DEFAULT_VIEW_STRINGS.machine11;
 
-/** Debuggers with breakpoints and a watch on a program longer than the listing's box. */
+/**
+ * Debuggers with breakpoints and a watch on a program longer than the listing's box, each with the
+ * view its lead points at: the log in memory, or the stack.
+ */
 const LONG_DEBUGGERS = [
-  ["lists", "walk"],
-  ["stack", "pushed"],
-  ["recursion", "frames"],
+  ["lists", "walk", ".debugger-memory"],
+  ["debugging", "find-it", ".debugger-memory"],
+  ["stack", "pushed", ".debugger-stack"],
+  ["recursion", "frames", ".debugger-stack"],
 ] as const;
 
 const MODULE_11 = [
@@ -120,7 +124,7 @@ const WRONG: readonly {
     to: "R5",
     all: true,
     fails: "Room A -160, room B -195",
-    left: "the display 5",
+    left: "the display 77",
   },
   {
     lesson: "functions",
@@ -152,7 +156,7 @@ const WRONG: readonly {
     from: "       R2 <= R2 - 1\n",
     to: "",
     fails: "Log -190, -181, -175, -170; limit -180",
-    left: "the branch compares R5, which is not set",
+    left: "the branch compares R5, which nothing has set",
   },
   {
     lesson: "debugging",
@@ -208,6 +212,17 @@ test.describe("Module 11's wrong programs", () => {
     await expect(section.locator(".verdict-blocked")).toContainText(T.notAssembled);
   });
 
+  test("the edge-log question: a log the program gets right is rejected", async ({ page }) => {
+    const c = lessonData("debugging").challenges.find((x) => x.id === "edge-log")!;
+    await openLesson(page, "debugging");
+    const section = challenge(page, c.id);
+    await section.scrollIntoViewIfNeeded();
+    await answerAll(section, c, { log: "above" });
+    await runTests(section);
+    await expect(section.locator(".verdict-failure")).toHaveCount(1);
+    await expect(section.locator(".challenge-complete")).toHaveCount(0);
+  });
+
   test("saved work is graded again on load", async ({ page }) => {
     const c = lessonData("assembly").challenges.find((x) => x.id === "warmer-room")!;
     await openLesson(page, "assembly");
@@ -230,6 +245,14 @@ test.describe("Module 11's lab", () => {
     await expect(box).not.toHaveValue(/lowestOf:/);
     await section.getByRole("button", { name: T.startSkeleton }).click();
     await expect(box).toHaveValue(/lowestOf:/);
+    // A changed program is replaced only once the learner says so.
+    await writeText(section, "// mine");
+    await section.getByRole("button", { name: T.startSkeleton }).click();
+    await section.getByRole("button", { name: T.replaceCancel }).click();
+    await expect(box).toHaveValue("// mine");
+    await section.getByRole("button", { name: T.startSkeleton }).click();
+    await section.getByRole("button", { name: T.replaceConfirm }).click();
+    await expect(box).toHaveValue(/lowestOf:/);
   });
 
   test("a breakpoint pauses the loop each time round, and the watch shows R1 moving", async ({
@@ -244,9 +267,10 @@ test.describe("Module 11's lab", () => {
       format(T.paused, { address: "014" }),
     );
     await run.click();
-    await expect(figure.locator(".watch-list li").first()).toContainText("72");
+    // R1 holds an address: hexadecimal first.
+    await expect(figure.locator(".watch-list li").first()).toContainText("048 72");
     await expect(figure.locator(".watch-list li").first()).toContainText(
-      format(T.watchWas, { value: "64" }),
+      format(T.watchWas, { value: "040 64" }),
     );
     await expect(figure.locator(".debugger-memory .row-current")).toContainText("048");
     await figure.getByRole("textbox", { name: T.watchLabel }).fill("word[log + 8]");
@@ -260,17 +284,19 @@ test.describe("Module 11's lab", () => {
     );
   });
 
-  test("the buttons, the line about to run and the watch stay on one screen as the run moves", async ({
+  test("the buttons, the line about to run, the watch and the view the lead points at stay on one screen as the run moves", async ({
     page,
   }) => {
     const height = page.viewportSize()?.height ?? 0;
-    const inView = async (what: Locator) => {
+    const inView = async (what: Locator, name = "") => {
       const box = await what.boundingBox();
-      expect(box, "the element is drawn").not.toBeNull();
-      expect(box!.y, "its top is on the screen").toBeGreaterThanOrEqual(0);
-      expect(box!.y + box!.height, "its bottom is on the screen").toBeLessThanOrEqual(height);
+      expect(box, `${name} is drawn`).not.toBeNull();
+      expect(box!.y, `${name}: its top is on the screen`).toBeGreaterThanOrEqual(0);
+      expect(box!.y + box!.height, `${name}: its bottom is on the screen`).toBeLessThanOrEqual(
+        height,
+      );
     };
-    for (const [lessonId, id] of LONG_DEBUGGERS) {
+    for (const [lessonId, id, view] of LONG_DEBUGGERS) {
       await openLesson(page, lessonId);
       const figure = page.locator(`[data-interactive="${id}"]`);
       const actions = figure.locator(".debugger-actions");
@@ -280,8 +306,9 @@ test.describe("Module 11's lab", () => {
       });
       const listing = figure.locator(".debugger-listing-wrap");
       const check = async () => {
-        await inView(actions);
-        await inView(figure.locator(".watch-list"));
+        await inView(actions, `${lessonId}'s buttons`);
+        await inView(figure.locator(".watch-list"), `${lessonId}'s watch`);
+        await inView(figure.locator(view).first(), `${lessonId}'s ${view}`);
         // The line about to run is inside the listing's box, not scrolled out of it.
         const row = await figure.locator("tr[aria-current]").boundingBox();
         const wrap = await listing.boundingBox();
@@ -333,6 +360,7 @@ test.describe("Module 11's lab", () => {
     await openLesson(page, "lists");
     const figure = page.locator('[data-interactive="log-in-memory"]');
     await expect(figure.locator(".debugger-listing")).toHaveCount(0);
+    await expect(figure.getByRole("button", { name: T.step, exact: true })).toHaveCount(0);
     const next = figure.getByRole("button", {
       name: lessonData("lists").sections[0]!.interactives[0]!.props!["runLabel"] as string,
     });

@@ -277,16 +277,7 @@ export function DebuggerView({
   // The listing sits in a box of its own height; the line about to run is kept in view inside it,
   // without moving the page.
   const boxRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const box = boxRef.current;
-    const row = box?.querySelector<HTMLElement>("tr[aria-current]");
-    if (!box || !row) return;
-    const head = box.querySelector("thead")?.getBoundingClientRect().height ?? 0;
-    const top = row.getBoundingClientRect().top - box.getBoundingClientRect().top;
-    const bottom = top + row.getBoundingClientRect().height;
-    if (top < head || bottom > box.clientHeight)
-      box.scrollTop += top - head - (box.clientHeight - head) / 3;
-  }, [pc, at]);
+  useEffect(() => keepInView(boxRef.current, "tr[aria-current]"), [pc, at]);
   const names = useMemo(() => namesByAddress(program), [program]);
   const wrote = state.last?.wrote?.reg;
   const shownRegs = options.registers ?? Array.from({ length: 16 }, (_, k) => k);
@@ -658,6 +649,20 @@ function watchIsAddress(expr: string, named: readonly string[] = []): boolean {
   return t === "PC" || t === "R14" || t === "R15" || named.some((n) => n.toUpperCase() === t);
 }
 
+/**
+ * Scrolls a box of its own height, not the page, so that the row the selector finds is in view,
+ * a third of the way down, below the box's sticky head.
+ */
+function keepInView(box: HTMLElement | null, selector: string) {
+  const row = box?.querySelector<HTMLElement>(selector);
+  if (!box || !row) return;
+  const head = box.querySelector("thead")?.getBoundingClientRect().height ?? 0;
+  const top = row.getBoundingClientRect().top - box.getBoundingClientRect().top;
+  const bottom = top + row.getBoundingClientRect().height;
+  if (top < head || bottom > box.clientHeight)
+    box.scrollTop += top - head - (box.clientHeight - head) / 3;
+}
+
 function MemoryPanel({
   region,
   program,
@@ -669,6 +674,9 @@ function MemoryPanel({
   state: DebugState;
   t: Machine11Strings;
 }) {
+  // A long region sits in a box of its own height that keeps the word a register points at in view.
+  const boxRef = useRef<HTMLDivElement>(null);
+  useEffect(() => keepInView(boxRef.current, "tr.row-current"), [state]);
   const first = placeOf(region.from, program.labels);
   if (first === undefined) return null;
   const rows = Array.from({ length: region.words }, (_, k) => first + 8 * k);
@@ -676,9 +684,12 @@ function MemoryPanel({
   const nameAt = namesByAddress(program);
   return (
     <section className="debugger-panel debugger-memory" aria-label={region.title}>
-      <div className="truth-table-wrap">
+      <p className="layout-title" aria-hidden="true">
+        {region.title}
+      </p>
+      <div className="truth-table-wrap memory-box" ref={boxRef}>
         <table className="truth-table datapath-table">
-          <caption>{region.title}</caption>
+          <caption className="visually-hidden">{region.title}</caption>
           <thead>
             <tr>
               <th scope="col">{t.address}</th>

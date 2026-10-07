@@ -2783,7 +2783,59 @@ svg.stack-depth {
   overflow-wrap: normal;
   word-break: normal;
 }
+/* The watch's box and its button on one line. */
+.watch-input {
+  width: 100%;
+  min-width: 0;
+}
+/* On a phone the listing's box and a long region of memory are short boxes of their own, each
+   keeping its current row in view, so the buttons, the line about to run, the watch and the view
+   a lead points at fit one screen. */
+.memory-box {
+  overscroll-behavior: contain;
+}
+.memory-box td:first-child {
+  white-space: nowrap;
+}
+.memory-box thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg-raised);
+}
 @media (max-width: 480px) {
+  .memory-box {
+    max-height: 8.5rem;
+    overflow-y: auto;
+  }
+  /* The watch's box keeps its name for a screen reader; on a phone its line of help is not shown,
+     and the button beside the box says what it does. */
+  .watch-add label > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .memory-box th,
+  .memory-box td {
+    padding-top: var(--space-1);
+    padding-bottom: var(--space-1);
+  }
+  .debugger-values > .debugger-panel:first-child,
+  .debugger-memory,
+  .debugger-stack {
+    margin: 0 0 var(--space-2);
+  }
+  .debugger-stack .stack-frames {
+    max-height: 8rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .debugger-status {
+    font-size: var(--text-sm);
+  }
   .debugger-listing .memory-word {
     font-size: var(--text-xs);
   }
@@ -2805,7 +2857,7 @@ svg.stack-depth {
   min-width: 0;
 }
 .debugger-listing-wrap {
-  max-height: 17rem;
+  max-height: 9rem;
   overflow-y: auto;
   overscroll-behavior: contain;
   border: 1px solid var(--border);
