@@ -47,6 +47,7 @@ describe("the page before any script runs", () => {
     expect(shown).toContain(STRINGS.cover.tagline);
     expect(shown).toContain(STRINGS.cover.lead);
     expect(shown).toContain(STRINGS.cover.journeyHeading);
+    expect(shown).toContain(STRINGS.cover.journeyIntro);
     for (const s of STRINGS.cover.stages) {
       expect(shown).toContain(s.name);
       expect(shown).toContain(STRINGS.cover.stageModules(s.from, s.to));

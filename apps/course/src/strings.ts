@@ -33,7 +33,7 @@ export const STRINGS = {
     what: "You build a working computer from its parts, one module at a time, starting from two voltages on a wire. You test everything you build in the page, with tests you can read. Everything runs in your browser, and your work stays there. Each new browser or device starts from nothing.",
     needHeading: "What you should know",
     /** What the learner needs, above the self-check. */
-    need: "You need to know how to turn a binary number into decimal, and a decimal number into binary. The course uses both from its first lesson and does not teach them. You need everyday arithmetic. You do not need to know anything about electronics, circuits or programming.\n\nThe check below takes a minute or two. If it takes you longer, learn binary first, then come back.",
+    need: "You need to know how to turn a binary number into decimal, and a decimal number into binary. The course uses both from Module 0 and does not teach them. You need everyday arithmetic. You do not need to know anything about electronics, circuits or programming.\n\nThe check below takes a minute or two. If it takes you longer, learn binary first, then come back.",
     lessonsHeading: "How a lesson works",
     /** How a lesson works, under the self-check. */
     lessons:
@@ -82,6 +82,9 @@ export const STRINGS = {
       "This real circuit from Module 2 lights a lamp when the room is warm and the door is shut. Press WARM and DOOR to see it change.",
     /** The path through the course, in order: five stages, each over the modules it names. */
     journeyHeading: "Signals to computer in five stages",
+    /** Under the heading, above the stages: where Module 0, the way in, sits (brief C4). */
+    journeyIntro:
+      "Module 0 comes first, 2 lessons where you run a finished machine and explore it down to one wire. The five stages that follow build the machine from there.",
     stages: [
       {
         name: "Signals",
@@ -143,6 +146,13 @@ export const STRINGS = {
   missing: (path: string) => `There is no page at ${path}.`,
   noLesson: (id: string) => `There is no lesson called ${id}.`,
   backToLessons: "Back to the lessons",
+  /**
+   * The heading over a lesson's note on how what it shows differs from a real machine, on a page
+   * with no clocked figure (runtime-strings.ts). The platform's own says "the model", a word the
+   * course's first page has not given its reader, over notes that are about the simulator.
+   * Drafted from brief N1 (docs/notes/cover/briefs).
+   */
+  modelNoteHeading: "How the page differs from hardware",
   /** The links at the bottom of a lesson to the lesson before it and the lesson after it. */
   pager: {
     /** What a screen reader calls the links' bar; the bar at the top of the page is "Lessons". */

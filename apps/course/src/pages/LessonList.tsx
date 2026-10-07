@@ -69,6 +69,7 @@ function Journey({ written }: { written: (module: number) => boolean }) {
   return (
     <section className="journey" aria-labelledby="journey-heading">
       <h2 id="journey-heading">{STRINGS.cover.journeyHeading}</h2>
+      <p className="journey-intro">{STRINGS.cover.journeyIntro}</p>
       <ol className="journey-stages">
         {STRINGS.cover.stages.map((stage, i) => {
           const modules = Array.from(

@@ -55,6 +55,7 @@ export function staticPage(html: string, base = "/"): string {
     `<p><strong>${escape(cover.tagline)}</strong></p>`,
     `<p>${escape(cover.lead)}</p>`,
     `<h2>${escape(cover.journeyHeading)}</h2>`,
+    `<p>${escape(cover.journeyIntro)}</p>`,
     `<ol>${stages.join("")}</ol>`,
     `<p>${escape(STRINGS.assumes)}</p>`,
     `<p>${escape(STRINGS.noScript)}</p>`,

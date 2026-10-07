@@ -115,6 +115,7 @@ describe("the course's front page: the cover", () => {
       STRINGS.cover.heroTitle,
       STRINGS.cover.heroCaption,
       STRINGS.cover.journeyHeading,
+      STRINGS.cover.journeyIntro,
       ...STRINGS.cover.stages.flatMap((s) => [s.name, s.about]),
       STRINGS.cover.stageToWrite,
       STRINGS.cover.contents(STRINGS.moduleNames.length),

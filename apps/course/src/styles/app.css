@@ -338,6 +338,12 @@ ol {
 .journey h2 {
   margin-top: var(--space-6);
 }
+/* Where Module 0, the way in, sits: a line between the heading and the stages. */
+.journey-intro {
+  max-width: var(--measure);
+  margin: 0 0 var(--space-5);
+  color: var(--fg-muted);
+}
 .journey-stages {
   list-style: none;
   padding: 0;

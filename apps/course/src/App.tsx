@@ -13,6 +13,7 @@ import { LessonList } from "./pages/LessonList";
 import { LessonPager } from "./pages/LessonPager";
 import { Preface } from "./pages/Preface";
 import { PREFACE_HREF, lessonHref, pageTitle, useRoute } from "./route";
+import { RUNTIME_STRINGS } from "./runtime-strings";
 import { STRINGS } from "./strings";
 import { useTheme, type Theme } from "./theme";
 
@@ -51,6 +52,7 @@ export function App() {
           lesson={lesson}
           storage={storage}
           lessonHref={lessonHref}
+          strings={RUNTIME_STRINGS}
         />
         <LessonPager book={book} lessonId={lesson.id} />
       </>
