@@ -279,6 +279,10 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   checkValue: "{name} {value}",
   details: {
     // Module 11, lesson 1 (brief 1L).
+    // Module 11, lesson 4 (brief 4L).
+    bothCall:
+      "R1 must hold how many rooms are above their limits, with R10 to R14 as they were and a return through R15.",
+    bothRun: "The display must show how many rooms are above their limits.",
     // Module 11, lesson 3 (brief 3L).
     aboveCall:
       "The function sets R1 to how far the reading in R1 is above the limit in R2, or 0; keeps R10 to R14 unchanged; and returns through R15.",

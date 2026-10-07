@@ -21,7 +21,7 @@ async function textCollisions(page: Page): Promise<Collision[]> {
   return page.evaluate(() => {
     const out: { figure: string; problem: string }[] = [];
     const svgs = document.querySelectorAll<SVGSVGElement>(
-      "svg.timing-diagram, svg.timing-lanes, svg.circuit:not(.circuit-overview), svg.signal-plot, svg.signal-path, svg.scene, svg.column-sum, svg.state-diagram",
+      "svg.timing-diagram, svg.timing-lanes, svg.circuit:not(.circuit-overview), svg.signal-plot, svg.signal-path, svg.scene, svg.column-sum, svg.state-diagram, svg.stack-depth",
     );
     for (const svg of svgs) {
       const figure = svg.closest("figure")?.id ?? svg.className.baseVal;

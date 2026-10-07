@@ -55,6 +55,7 @@ import { designAnInstruction } from "./design-an-instruction";
 import { assembly } from "./assembly";
 import { lists } from "./lists";
 import { functions } from "./functions";
+import { stack } from "./stack";
 
 const INPUTS: readonly LessonInput[] = [
   // Module 0, meet the machine.
@@ -109,6 +110,7 @@ const INPUTS: readonly LessonInput[] = [
   assembly,
   lists,
   functions,
+  stack,
 ];
 
 export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(

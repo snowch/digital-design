@@ -1024,7 +1024,8 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       registerRole:
         "The calling convention gives R1 to R4, R5 to R9, and R10 to R13 each one role, with R1 carrying the result.",
       // Module 11, lesson 4 (brief 4L).
-      stackAddress: "STACKADDRESS",
+      stackAddress:
+        "{actual} is not that address; R14 starts at 7C0 and each push takes 8 off it before it stores.",
       // Module 11, lesson 1 (brief 1L).
       asmAddress:
         "{actual} is not the address. Each instruction takes 4 bytes from 000; a word starts at a multiple of 8.",

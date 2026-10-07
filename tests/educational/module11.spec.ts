@@ -24,7 +24,7 @@ import {
 
 const T = DEFAULT_VIEW_STRINGS.machine11;
 
-const MODULE_11 = ["assembly", "lists", "functions"] as const;
+const MODULE_11 = ["assembly", "lists", "functions", "stack"] as const;
 
 async function answerAll(
   section: Locator,
@@ -111,6 +111,14 @@ const WRONG: readonly {
     to: "over:  R10 <= R1 - R2\n       R1 <= R10",
     fails: "Call R1 -170, R2 -180",
     left: "registers the function did not put back R10",
+  },
+  {
+    lesson: "stack",
+    id: "both",
+    from: "        R14 <= R14 - 8\n        word[R14] <= R11     // push R11\n",
+    to: "",
+    fails: "Call R1 -170, R2 -190",
+    left: "registers the function did not put back R10, R11, R14",
   },
 ];
 
