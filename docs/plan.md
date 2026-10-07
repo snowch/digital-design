@@ -183,6 +183,12 @@ sentences, that each idea and each name arrives when the circuit raises the ques
 it, and that every simulation runs the real circuit. Each of the five stages now says what you
 build in it, and each page names itself in the browser's tab. The words went through brief C3.
 
+The same day the author chose the course's icon from four drafts: an AND gate, white, its leads in
+the cover's light blue, on the cover's blue. It shows in a browser's tab and on a phone's home
+screen, and the build writes a manifest beside the page, so a browser can install the course under
+its own name, "Digital Design", with the cover's description. The icon is drawn once, as
+`apps/course/public/icon.svg`; `scripts/icons.mjs` draws the PNGs the platforms ask for from it.
+
 ### 6 October 2026: a calculator of the course's own, in Module 10
 
 The author asked whether to bundle their programmer's calculator, `snowch/programmer-calculator`,

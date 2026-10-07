@@ -1,6 +1,7 @@
 // Copyright © 2026 Christopher Snow
 
-// What the page says before any script runs, and what each page calls itself in the browser's tab.
+// What the page says before any script runs, what each page calls itself in the browser's tab,
+// and the icon and name a browser shows for the course, in a tab and once it is installed.
 
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -11,8 +12,9 @@ import { INTERACTIVES, createBook } from "@dd/dd-views";
 import { LESSONS } from "@dd/content";
 
 import { pageTitle } from "./route";
-import { staticPage } from "./static-page";
+import { courseTitle, staticPage } from "./static-page";
 import { STRINGS } from "./strings";
+import { ICONS, MANIFEST_FILE, webManifest } from "./web-manifest";
 
 const book = createBook(LESSONS, INTERACTIVES);
 const template = readFileSync(resolve(process.cwd(), "apps/course/index.html"), "utf8");
@@ -89,5 +91,50 @@ describe("a page's name in the browser's tab", () => {
       pageTitle({ kind: "lesson", id: l.id }, book.title, lessonTitle),
     );
     expect(new Set(titles).size).toBe(book.lessons.length);
+  });
+});
+
+describe("the course's icon, and the course installed", () => {
+  const base = "/digital-design/";
+  const built = staticPage(template, base);
+  const manifest = webManifest(courseTitle(template));
+  const folder = resolve(process.cwd(), "apps/course/public");
+  /** A PNG's width and height, from its header. */
+  const sizeOf = (file: string) => {
+    const png = readFileSync(resolve(folder, file));
+    return `${png.readUInt32BE(16)}x${png.readUInt32BE(20)}`;
+  };
+
+  it("names its icons and its manifest in the head, under the site's base", () => {
+    expect(built).toContain(
+      `<link rel="icon" href="${base}icon-32.png" sizes="32x32" type="image/png" />`,
+    );
+    expect(built).toContain(`<link rel="icon" href="${base}icon.svg" type="image/svg+xml" />`);
+    expect(built).toContain(`<link rel="apple-touch-icon" href="${base}apple-touch-icon.png" />`);
+    expect(built).toContain(`<link rel="manifest" href="${base}${MANIFEST_FILE}" />`);
+    expect(staticPage(template)).toContain(`<link rel="manifest" href="/${MANIFEST_FILE}" />`);
+  });
+
+  it("has every icon it names, each at the size it is named for", () => {
+    expect(readFileSync(resolve(folder, ICONS.tab), "utf8")).toContain("<svg");
+    expect(sizeOf(ICONS.tabPng.src)).toBe("32x32");
+    expect(sizeOf(ICONS.homeScreen.src)).toBe("180x180");
+    const pngs = manifest.icons.filter((i) => i.type === "image/png");
+    expect(pngs).toHaveLength(3);
+    for (const icon of pngs) expect(sizeOf(icon.src)).toBe(icon.sizes);
+  });
+
+  it("installs under the course's own name, with the cover's description", () => {
+    expect(manifest.name).toBe(book.title);
+    // The shorter name under the icon is the one every tab after the front page ends with.
+    expect(STRINGS.pageTitle("A page")).toBe(`A page / ${manifest.short_name}`);
+    expect(built).toContain(
+      `<meta name="apple-mobile-web-app-title" content="${manifest.short_name}" />`,
+    );
+    expect(manifest.description).toBe(STRINGS.cover.description);
+    // Paths relative to the manifest, so whatever base the site is served from holds them.
+    expect(manifest.start_url).toBe("./");
+    expect(manifest.scope).toBe("./");
+    expect(manifest.icons.some((i) => "purpose" in i && i.purpose === "maskable")).toBe(true);
   });
 });
