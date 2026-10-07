@@ -158,7 +158,7 @@ export const designAnInstruction: LessonInput = {
           caption: LABELS.captions.yWord,
           lead: PROSE.yWordLead,
           after: PROSE.yWordAfter,
-          props: { libraryId: "y-word-set", writtenWidth: 4 },
+          props: { libraryId: "y-word-set", writtenWidth: 4, focus: ["pickSet", "widenMet"] },
         },
         {
           id: "new-column",

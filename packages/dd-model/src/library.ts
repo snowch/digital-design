@@ -458,11 +458,11 @@ export const LIBRARY: Readonly<Record<string, () => Circuit>> = {
       "in:CALL": [0, 10],
       "in:MET": [0, 13],
       "in:SET": [0, 17],
-      pickLoad: [8, 0],
-      pickCall: [16, 4],
-      widenMet: [16, 12],
-      pickSet: [32, 8],
-      "out:YIN": [40, 9],
+      pickLoad: [7, 0],
+      pickCall: [14, 4],
+      widenMet: [14, 12],
+      pickSet: [23, 8],
+      "out:YIN": [29, 9],
     }),
 };
 
