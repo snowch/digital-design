@@ -25,7 +25,7 @@ import {
   writeText,
 } from "./helpers";
 
-const MODULE_10 = ["instruction-set", "encoding", "immediates"] as const;
+const MODULE_10 = ["instruction-set", "encoding", "immediates", "room-to-grow"] as const;
 
 /** Fills an answers challenge's fields: a choice by its option's words, any other by typing. */
 async function answerAll(
@@ -114,6 +114,18 @@ const WRONG: readonly {
     from: "  assign GT = M ^ V;",
     to: "  assign GT = ~(M ^ V);",
     why: "less than turned over, which is 1 for equal words",
+  },
+  {
+    lesson: "room-to-grow",
+    id: "word-fates",
+    answers: { kind9: "runs" },
+    why: "the copy's kind 9 thought to run on the course's machine",
+  },
+  {
+    lesson: "room-to-grow",
+    id: "count-loop",
+    answers: { times9: "9" },
+    why: "the instructions written counted, not those run",
   },
 ];
 
@@ -285,6 +297,28 @@ test.describe("Module 10's figures", () => {
     );
     await expect(figure.locator(".program-counts").nth(1)).toContainText(
       format(T.registerAfter, { n: 1, value: "5000" }),
+    );
+  });
+
+  test("a program with no stop ends at the ROM's zeros, cause 21; the copy's call is refused", async ({
+    page,
+  }) => {
+    await openLesson(page, "room-to-grow");
+    const figure = page.locator("#ix-predict-no-stop");
+    await figure.scrollIntoViewIfNeeded();
+    await expect(figure.getByRole("button", { name: T.runBoth })).toHaveCount(0);
+    await figure.getByRole("radio").first().check();
+    await figure.getByRole("button", { name: V.prediction.commit }).click();
+    await expect(figure.locator("[role=status]").first()).toContainText(V.prediction.match);
+    await figure.getByRole("button", { name: T.runBoth }).click();
+    await expect(figure.locator(".program-counts")).toContainText(
+      format(T.stoppedCause, { address: "008", cause: "21" }),
+    );
+    const words = page.locator("#ix-new-words");
+    await words.scrollIntoViewIfNeeded();
+    await words.getByRole("button", { name: T.runBoth }).click();
+    await expect(words.locator(".program-counts").nth(1)).toContainText(
+      format(T.stoppedCause, { address: "004", cause: "21" }),
     );
   });
 });
