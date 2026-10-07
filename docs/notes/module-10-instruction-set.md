@@ -135,6 +135,12 @@ subagent that wrote every learner-facing sentence from a brief of checked facts.
   itself on the constants that reach a part (`000` to `7FF`, then `7F8` to `7FF` reaching none)
   and dropped "opening", "only" and where 10.5's words are read; each fixed by adding words.
 
+- 16:00 to 17:30, 7 October. The managing session's walk of `7e5bb92` at 390 and 1280 pixels:
+  10.1 and 10.3 kept; 10.4 and 10.5 reworked for a phone (below, "Four drawings", the follow-up).
+  Brief 7G drafted once; the draft dropped the drawing from the opening sentence, the blocks'
+  names from the lead, and what two labels say (Y's selector's read as the ALU's; the call's lost
+  "already"); each fixed by adding words.
+
 ## The outline
 
 Five lessons, as Modules 8 and 9 had (titles and challenges as they stand on the pages): each answers the question the one before ends on, and each
@@ -338,6 +344,22 @@ the content tests' wire rules and the browser's diagram and look tests at both w
 
 Facts tests pin the constant map's runs, the four places' blocks and the condition's two uses;
 the browser suite presses BRANCH and SET and checks the words the map gives.
+
+The follow-up, after the managing session walked the drawings at 390 pixels:
+
+- **10.4's drawing comes first.** The section's prose is now the opening paragraph alone; the
+  drawing follows with its lead, and the list of costs is the figure's `after`, so each cost is
+  read against the drawing. The figure runs no model (`timeModel: "none"`), so it carries no badge.
+- **Each outline says what joins there.** A drawing's part may carry a `note`, lines written under
+  its name (`withNotes`, CircuitView's `notes`). A note is an obstacle the router keeps wires off
+  and the content tests check, as a part's name is, and straightening leaves room under it. Lines
+  are held to 14 characters; at 20 they reached into the ALU's job wires and crossed them.
+- **Both open where their words point on a phone.** 10.4's Y selector moved two cells nearer the
+  ALU, and the drawing opens on the two (`focus`); the four blocks span 17 cells, more than a
+  phone's 13. 10.5's paths moved under the condition block, and the drawing opens on them, with
+  MET leaving the condition block at the left edge: the block and both selectors span 16 cells. A
+  layout that fits 375 pixels whole would need the inputs and the block stacked above the paths,
+  which the router does not draw.
 
 ## The capstone: set if, and every part it changed
 

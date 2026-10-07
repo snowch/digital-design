@@ -23,8 +23,8 @@ import { formatWord, type Circuit, type Word } from "@dd/sim";
 import { focusSpan, scrollToCentre } from "./focus";
 import { BOX_PADDING, LARGE_DRAWING, OverviewStrip, useZoom } from "./Overview";
 import { labelFor, nameRepeatsKind } from "./parts";
-import { circuitToDrawing } from "./drawing";
-import { drawingAt, netOfWire, sceneOf, type PartBox } from "./scene";
+import { circuitToDrawing, withNotes } from "./drawing";
+import { NOTE_GAP, NOTE_LINE, drawingAt, netOfWire, sceneOf, type PartBox } from "./scene";
 import { straighten } from "./straighten";
 import { GateSymbol, isShaped } from "./symbols";
 import { useOverflows, useWidth } from "./useWidth";
@@ -39,6 +39,8 @@ export interface CircuitViewProps {
   readonly highlight?: readonly string[];
   /** What a mark means, for its accessible name; by default, where a test first disagreed. */
   readonly highlightLabel?: string;
+  /** Module 10: lines written under a part, by path, saying what it is there for in this figure. */
+  readonly notes?: Readonly<Record<string, readonly string[]>>;
   /** The composite being looked inside; empty for the whole circuit. */
   readonly scope?: string;
   readonly onScope?: (path: string) => void;
@@ -187,6 +189,7 @@ export function CircuitView({
   values,
   highlight = [],
   highlightLabel,
+  notes,
   scope = "",
   onScope,
   onToggleInput,
@@ -203,6 +206,12 @@ export function CircuitView({
   const strings = useViewStrings();
   const id = useId();
   // A read-only drawing is straightened: parts nudged up or down so its wires run straight.
+  // A figure's notes are written on the drawing it first shows; a block opened shows its own.
+  const notesKey = JSON.stringify(notes ?? {});
+  const scopedNotes = useMemo(
+    () => (scope === "" ? (JSON.parse(notesKey) as Record<string, readonly string[]>) : undefined),
+    [notesKey, scope],
+  );
   const {
     drawing,
     circuit: sub,
@@ -223,7 +232,11 @@ export function CircuitView({
       if (base && !driven.has(base.id)) cuts.set(n.id, base.id);
     }
     if (cuts.size === 0)
-      return { ...at, drawing: straighten(at.drawing), heldOutside: new Set<number>() };
+      return {
+        ...at,
+        drawing: straighten(withNotes(at.drawing, scopedNotes)),
+        heldOutside: new Set<number>(),
+      };
     const joined = {
       ...at.circuit,
       components: at.circuit.components.map((c) => ({
@@ -235,10 +248,10 @@ export function CircuitView({
     };
     return {
       circuit: at.circuit,
-      drawing: straighten(circuitToDrawing(joined)),
+      drawing: straighten(withNotes(circuitToDrawing(joined), scopedNotes)),
       heldOutside: new Set(cuts.keys()),
     };
-  }, [circuit, scope]);
+  }, [circuit, scope, scopedNotes]);
   const scene = useMemo(() => sceneOf(drawing), [drawing]);
   const highlighted = new Set(highlight);
   // The nets a stuck-at fault holds, and the nets it cut from their old drivers, each mapped to
@@ -571,6 +584,22 @@ export function CircuitView({
                       {part.id}
                     </text>
                   )}
+                  {(part.note ?? []).map((line, k) => (
+                    <text
+                      key={`note-${k}`}
+                      x={box.w / 2}
+                      y={
+                        box.h +
+                        12 +
+                        NOTE_GAP +
+                        NOTE_LINE * (k + (nameRepeatsKind(part.id, part.kind) ? 0 : 1))
+                      }
+                      textAnchor="middle"
+                      className="part-note"
+                    >
+                      {line}
+                    </text>
+                  ))}
                   {!isShaped(part.kind) &&
                     part.kind !== "const" &&
                     part.kind !== "open" &&

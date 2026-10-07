@@ -45,6 +45,9 @@ describe("facts for the room-to-grow lesson", () => {
       expect.stringMatching(/selector/i),
       "plus4",
     ]);
+    // Each marked block carries the label of what joins there, and only those blocks do.
+    const { notes } = props("join-places") as { notes: Record<string, string[]> };
+    expect(Object.keys(notes).sort()).toEqual([...JOIN_PLACES].sort());
   });
 
   it("the map: 37 instructions, 2 that depend on the constant; kinds 1 to 8 refuse 89 jobs", () => {

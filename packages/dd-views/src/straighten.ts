@@ -11,7 +11,7 @@
 // Only read-only drawings are straightened. In the builder a part stays where the learner put it.
 
 import type { Drawing, Part, Wire } from "./drawing";
-import { partBox, type PartBox } from "./scene";
+import { NOTE_GAP, NOTE_LINE, partBox, type PartBox } from "./scene";
 import { CELL, isShaped } from "./symbols";
 
 /** The rows a part may move to, in cells, the smallest move first, so ties keep it near home. */
@@ -32,7 +32,11 @@ function clearance(box: PartBox): { top: number; bottom: number; left: number; r
   const isPin = box.part.kind === "input" || box.part.kind === "output";
   return {
     top: box.y - MARGIN,
-    bottom: box.y + box.h + (isPin ? MARGIN : NAME_BELOW),
+    bottom:
+      box.y +
+      box.h +
+      (isPin ? MARGIN : NAME_BELOW) +
+      (box.part.note?.length ? NOTE_GAP + NOTE_LINE * box.part.note.length : 0),
     left: box.x - MARGIN,
     right: box.x + box.w + MARGIN,
   };

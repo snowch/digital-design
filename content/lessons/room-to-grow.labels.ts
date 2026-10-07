@@ -49,6 +49,12 @@ export const LABELS = {
     course: "The course's machine",
     copy: "Your copy, with kind 9",
   },
+  joinNotes: {
+    pickB: ["compare", "with zero"],
+    alu: ["multiply", "shift"],
+    yWord: ["multiply and", "shift results"],
+    plus4: ["call via", "register", "already here"],
+  },
   joinMark: "a place where a left-out instruction would join",
   fates: {
     free: "Free: a later instruction can take it",
