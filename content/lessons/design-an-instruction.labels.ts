@@ -5,23 +5,22 @@
 // against the lesson.
 
 export const LABELS = {
-  title: "How do you add a new instruction?",
+  title: "How do you design, justify and build a new instruction?",
   objectives: [
-    "Justify a new instruction by showing a program it shortens.",
-    "Predict the edges that a new instruction takes.",
-    "Check a design against the layout's rules.",
-    "Add a kind to the decoder's text.",
-    "Give the datapath a new source for register Y.",
+    "Design an instruction against the questions a design must answer.",
+    "Justify it by a program it shortens.",
+    "Predict the edges a new instruction takes.",
+    "Add it to a decoder's text and a datapath's text.",
   ],
   titles: {
     question: "One instruction to add",
-    motivation: "Two ways to count",
-    prediction: "Set if's edges",
-    investigation: "A source for register Y",
-    construction: "The instruction and its column",
+    motivation: "A program that needs it",
+    prediction: "The course's design and its edges",
+    investigation: "What set if shortens, and the parts it needs",
+    construction: "The decoder",
     failureExperiment: "SET stuck",
-    explanation: "How set if works",
-    generalisation: "Adding an instruction",
+    explanation: "How set if runs",
+    generalisation: "A field read the same way twice",
     challenge: "The whole machine",
     reflection: "Programs to write",
   },
@@ -31,6 +30,7 @@ export const LABELS = {
     c3: "Machine, set if",
   },
   captions: {
+    need: "Run the count of cold rooms on the course's machine.",
     shorter: "Run the count of cold rooms two ways.",
     predictEdges: "Predict set if's edges, then check.",
     yWord: "Press the inputs and watch the word register Y takes.",
@@ -47,7 +47,7 @@ export const LABELS = {
   },
   programs: {
     branches: "Branches, on the course's machine",
-    setIf: "Set if, on the copy with kind A",
+    setIf: "Set if, on your copy",
   },
   faults: {
     setLow: "SET stuck at 0",

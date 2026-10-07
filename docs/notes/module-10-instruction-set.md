@@ -110,6 +110,13 @@ subagent that wrote every learner-facing sentence from a brief of checked facts.
   halts, and its counts say "halt" where a run ends with a cause; the kind map fills its card.
   Brief 4R, the whole lesson, drafted in three parts: one fact dropped, decimals put in
   backticks, labels' case and stops. Lesson 3's reflection ends on 10.4's new question (I).
+- 10:10 to 10:55 The findings for 10.5 (eleven, with decisions B to E). Code: the machine
+  challenge runs the count four times from a reset, with readings that tell the condition from
+  MINUS, COUT and the condition turned over (39 tests; each plausible wrong source fails); the
+  design challenge moved into the motivation (C); the Y figure opens on three different words;
+  the fault lab writes wide words in hexadecimal (`radix`); radios keep their size on a phone.
+  Brief 5R, the whole lesson, in three parts: numbers spelled as words, two facts dropped,
+  headings with full stops; my brief had one wrong fact (lesson 4 had not weighed the colder room).
 
 ## The outline
 
@@ -145,7 +152,7 @@ rely on, and why the instructions and their layout are what they are.
    reference. Challenges: six codes sorted as free, taken or kept refused (answers); a program of
    two calls through a register, its instructions run counted with and without that instruction
    (answers). Introduces nothing.
-5. `design-an-instruction`, the capstone, "How do you add a new instruction?":
+5. `design-an-instruction`, the capstone, "How do you design, justify and build a new instruction?":
    set if, `RY ← 1` if `RA cond RB`, else 0, at kind A, the job digit a branch's condition. It
    needs what Module 9's capstone did not: a change to the datapath, the condition MET carried as a
    word to register Y, through a new control signal SET. Challenges: the design, checked against
@@ -180,6 +187,16 @@ Decisions the managing session took after the reading review, each changing
   instructions until one is refused, which is usually its first (5000 puts `00001388` at `008`,
   kind 0; -250 puts `FFFFFF06`, kind F), while `12345678` runs as an add and the halt comes at
   the word's top half, at `00C`. The managing session will raise it with the author.
+
+- **The capstone's order** (decision C): the question and the motivation state the need only;
+  the design challenge sits in the motivation, before any section states one of its answers; the
+  course's design (kind A, job 6, `A6215000`) follows, then the build. The decoder half stays, as
+  an application of 9.5: the task says what the decoder must do, the hints give the edits.
+- **No stepped view of set if's four edges** (decision D). Module 9's `machine-edges` draws
+  `multicycleCircuit`, which has no set-if source: set if exists only in the learner's text and in
+  the reference. Showing its edges on the drawn machine needs the circuit itself to gain the new
+  source for register Y and a drawing placed and routed for it, a new circuit rather than new
+  props, so it is left out. The prediction's `kind-edges` and the explanation carry the edges.
 
 ## The capstone's instruction, and the machine it changes
 
@@ -389,10 +406,10 @@ Extraction waits for the author's approval.
 
 ## What I would change
 
-- The capstone's motivation gives set if's word, `A6215000`, before the design challenge, and the
-  prediction's legend names kind A, so three of the design's five answers are on the page before
-  it. The design is graded as reasons the learner must choose among, not discovered; a fuller
-  design challenge would let the learner pick any free kind and test the decoder at that kind.
+- (Superseded after the review.) The capstone's first version gave set if's word, the kind, the
+  fields, the condition's source and the cost on the page before the design challenge, so all
+  five of the design's answers, not three, were readable before it, and its feedback named them.
+  The lesson now asks for the design first (decision C, below); the feedback is decision A's.
 - The calculator could also take a register's word from a run, so a learner checks a branch's
   flags against the machine without retyping.
 - The two machines side by side could draw Module 9's state as its diagram, as lesson 9.3 does.

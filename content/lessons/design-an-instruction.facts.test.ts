@@ -19,6 +19,7 @@ import { formatWord } from "@dd/sim";
 import { parseLesson, testCount } from "@platform/lesson-schema";
 
 import { designAnInstruction } from "./design-an-instruction";
+import { PROSE } from "./design-an-instruction.prose";
 import { COUNT_COLD_BRANCHES, COUNT_COLD_SET } from "./module10";
 
 const lesson = parseLesson(designAnInstruction);
@@ -72,18 +73,35 @@ describe("facts for the design-an-instruction lesson", () => {
     expect(yin([stuckAt("SET", 1)])).toEqual(["1", "0", "1", "1"]);
   });
 
-  it("the challenges: 5, 262 and 33 tests; the decoder's start fails 16, the machine's 1", () => {
+  it("the challenges: 5, 262 and 39 tests; the decoder's start fails 16, the machine's 4", () => {
     expect([testCount(challenge("design")), testCount(challenge("set-decoder"))]).toEqual([5, 262]);
-    expect(testCount(challenge("set-machine"))).toBe(33);
+    expect(testCount(challenge("set-machine"))).toBe(39);
     const d = grade(challenge("set-decoder"), challenge("set-decoder").initial!);
     expect([d.failures.length, d.failures[0]?.label]).toEqual([16, "K A, J 0"]);
     const m = grade(challenge("set-machine"), challenge("set-machine").initial!);
     expect([m.failures.length, m.failures[0]?.label]).toEqual([
-      1,
-      "at the stop: HALT is 1, the display shows 1",
+      4,
+      "Room B colder: at the stop: HALT is 1, the display shows 1",
     ]);
     // The start shows R5 + R6 with each the subtraction: (-184 + 200) + (-250 + 200) = -34.
     expect(BigInt.asIntN(64, BigInt(`0b${m.failures[0]?.actual["DISPLAY"]}`))).toBe(-34n);
     for (const c of lesson.challenges) expect(grade(c, c.reference).passed, c.id).toBe(true);
-  });
+  }, 120_000);
+
+  it("the machine's runs: 1, 2, 0 and 1 colder; each plausible wrong source fails one", () => {
+    const c = challenge("set-machine");
+    const shows =
+      c.tests.kind === "sequence" ? c.tests.steps.filter((x) => x.expect?.["DISPLAY"]) : [];
+    expect(shows.map((x) => x.label)).toEqual([
+      "Room B colder: at the stop: HALT is 1, the display shows 1",
+      "Both colder: at the stop: HALT is 1, the display shows 2",
+      "Neither colder: at the stop: HALT is 1, the display shows 0",
+      "Room A at the largest word: at the stop: HALT is 1, the display shows 1",
+    ]);
+    const ref = c.reference.hdl!;
+    for (const wrong of ["{63'h0, ~MET}", "{63'h0, MINUS}", "{63'h0, COUT}", "{63'h0, HR[63]}"])
+      expect(grade(c, { hdl: ref.replace("{63'h0, MET}", wrong) }).passed, wrong).toBe(false);
+    // The explanation does not give the answer's line, which hint 4 gives as part of it.
+    expect(PROSE.explanation).not.toContain("YIN = {63'h0, MET}");
+  }, 120_000);
 });

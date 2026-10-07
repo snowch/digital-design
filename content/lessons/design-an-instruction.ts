@@ -24,7 +24,7 @@ import {
   COUNT_COLD_SET,
   MACHINE_INTERFACE,
   SET_DECODER_OUTPUTS,
-  machineSteps,
+  setMachineSteps,
   setDecoderText,
   setMachineText,
 } from "./module10";
@@ -105,19 +105,25 @@ export const designAnInstruction: LessonInput = {
       prose: PROSE.motivation,
       interactives: [
         {
-          id: "shorter",
+          id: "need",
           kind: "program-compare",
           timeModel: "none",
-          caption: LABELS.captions.shorter,
-          lead: PROSE.shorterLead,
+          caption: LABELS.captions.need,
+          lead: PROSE.needLead,
           props: {
-            programs: [
-              { label: LABELS.programs.branches, program: COUNT_COLD_BRANCHES },
-              { label: LABELS.programs.setIf, program: COUNT_COLD_SET, capstone: true },
-            ],
+            programs: [{ label: LABELS.programs.branches, program: COUNT_COLD_BRANCHES }],
             inputs: ROOMS,
-            outcomes: PROSE.shorterAfter,
+            romBytes: false,
+            outcomes: PROSE.needAfter,
           },
+        },
+        {
+          id: "design",
+          kind: "challenge",
+          timeModel: "none",
+          caption: LABELS.captions.design,
+          lead: PROSE.designLead,
+          props: { challengeId: "design" },
         },
       ],
     },
@@ -152,13 +158,34 @@ export const designAnInstruction: LessonInput = {
       prose: "",
       interactives: [
         {
+          id: "shorter",
+          kind: "program-compare",
+          timeModel: "none",
+          caption: LABELS.captions.shorter,
+          lead: PROSE.shorterLead,
+          props: {
+            programs: [
+              { label: LABELS.programs.branches, program: COUNT_COLD_BRANCHES },
+              { label: LABELS.programs.setIf, program: COUNT_COLD_SET, capstone: true },
+            ],
+            inputs: ROOMS,
+            shown: [5, 6],
+            romBytes: false,
+            outcomes: PROSE.shorterAfter,
+          },
+        },
+        {
           id: "y-word",
           kind: "circuit-explorer",
           timeModel: "settle",
           caption: LABELS.captions.yWord,
           lead: PROSE.yWordLead,
           after: PROSE.yWordAfter,
-          props: { libraryId: "y-word-set", writtenWidth: 4, focus: ["pickSet", "widenMet"] },
+          props: {
+            libraryId: "y-word-set",
+            writtenWidth: 4,
+            initial: { HR: "0x42", HM: "0x7", PC4: "0x10" },
+          },
         },
         {
           id: "new-column",
@@ -180,14 +207,6 @@ export const designAnInstruction: LessonInput = {
       title: LABELS.titles.construction,
       prose: PROSE.construction,
       interactives: [
-        {
-          id: "design",
-          kind: "challenge",
-          timeModel: "none",
-          caption: LABELS.captions.design,
-          lead: PROSE.designLead,
-          props: { challengeId: "design" },
-        },
         {
           id: "write-decoder",
           kind: "challenge",
@@ -212,6 +231,7 @@ export const designAnInstruction: LessonInput = {
           props: {
             libraryId: "y-word-set",
             writtenWidth: 4,
+            radix: 16,
             faults: [
               {
                 kind: "stuck-at",
@@ -313,11 +333,7 @@ export const designAnInstruction: LessonInput = {
       initial: { hdl: setMachineText(false) },
       tests: {
         kind: "sequence",
-        steps: machineSteps(
-          COUNT_COLD_SET,
-          { door: 0, warm: 0, sensorA: -184n, sensorB: -250n },
-          { callThroughRegister: true, setIf: true },
-        ),
+        steps: setMachineSteps(),
       },
       hints: [...PROSE.c3Hints],
       reference: { hdl: setMachineText(true) },
