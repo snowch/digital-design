@@ -2,7 +2,8 @@
 
 // The shell's own words. Drafted by the prose process; see CLAUDE.md.
 
-import { MODULE_NAMES } from "@dd/content";
+// The names alone, not the lessons: the build reads these strings in Node (static-page.ts).
+import { MODULE_NAMES } from "@dd/content/module-names";
 
 export const STRINGS = {
   skip: "Skip to content",
