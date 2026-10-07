@@ -1,0 +1,11 @@
+[
+  ["c1Hints.2", "A pop does not clear the word it takes. It copies", "It copies"],
+  ["c1Task", "In this run of the program", "In a run of the program"],
+  ["generalisation", " Calls can go as deep", "\n\nCalls can go as deep"],
+  ["generalisation", " A function that calls nothing", "\n\nA function that calls nothing"],
+  ["reflection", " The shop's cold store", "\n\nThe shop's cold store"],
+  ["reflection", " Can a function call itself?", "\n\nCan a function call itself?"],
+  ["modelVsReality", " A real stack can grow", "\n\nA real stack can grow"],
+  ["lostAfter", " The call at `008`", "\n\nThe call at `008`"],
+  ["popsSwappedAfter", " The pushes put", "\n\nThe pushes put"]
+]

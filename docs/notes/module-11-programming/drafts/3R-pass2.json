@@ -1,0 +1,26 @@
+[
+  ["motivation", " A **function**", "\n\nA **function**"],
+  ["motivation", " The values a function", "\n\nThe values a function"],
+  ["motivation", " Before each call,", "\n\nBefore each call,"],
+  [
+    "construction",
+    "\n\nThe construction's program calls `overBy` twice and needs room A's result after the second call.",
+    ""
+  ],
+  ["explanation", " `goto R15` is a jump", "\n\n`goto R15` is a jump"],
+  ["explanation", " The machine does not check", "\n\nThe machine does not check"],
+  [
+    "explanation",
+    " A calling convention is an agreement",
+    "\n\nA calling convention is an agreement"
+  ],
+  ["generalisation", " A function can be tested", "\n\nA function can be tested"],
+  ["generalisation", "The challenge tests do that.", "The challenge's tests do that."],
+  ["generalisation", " Each call costs", "\n\nEach call costs"],
+  ["c2Task", " The starting program's", "\n\nThe starting program's"],
+  ["c2Task", " Write `outOfRange`.", "\n\nWrite `outOfRange`."],
+  ["c2Task", " Keep the calling convention", "\n\nKeep the calling convention"],
+  ["c2Task", " There are 10 tests.", "\n\nThere are 10 tests."],
+  ["reflection", " Its own call", "\n\nIts own call"],
+  ["reflection", " What must a function", "\n\nWhat must a function"]
+]

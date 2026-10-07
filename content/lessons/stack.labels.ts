@@ -8,7 +8,7 @@ export const LABELS = {
   objectives: [
     "Say why a function that calls another loses its return address.",
     "Push and pop words on a stack in the RAM with R14.",
-    "Say what a function's frame holds.",
+    "Say what each word a function pushes holds, and where.",
     "Write a function that keeps R15 and kept registers through its calls.",
   ],
   titles: {
