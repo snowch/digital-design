@@ -6,6 +6,9 @@
 
 import { parseLesson, type Lesson, type LessonInput } from "@platform/lesson-schema";
 
+// Module 0, meet the machine.
+import { whatComputersDo } from "./what-computers-do";
+import { insideTheMachine } from "./inside-the-machine";
 import { registers } from "./registers";
 import { remember } from "./remember";
 // Module 3, combinational design.
@@ -51,6 +54,9 @@ import { roomToGrow } from "./room-to-grow";
 import { designAnInstruction } from "./design-an-instruction";
 
 const INPUTS: readonly LessonInput[] = [
+  // Module 0, meet the machine.
+  whatComputersDo,
+  insideTheMachine,
   signals,
   // Module 2
   gates,
@@ -105,3 +111,6 @@ export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(
 export function lessonById(id: string): Lesson | undefined {
   return LESSONS.find((l) => l.id === id);
 }
+
+// Module 0: each module's name in plain words, for the cover and for a lesson that names a module.
+export { MODULE_NAMES } from "./module-names";

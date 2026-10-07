@@ -23,6 +23,7 @@ import { formatWord, type Circuit, type Word } from "@dd/sim";
 import { focusSpan, scrollToCentre } from "./focus";
 import { BOX_PADDING, LARGE_DRAWING, OverviewStrip, useZoom } from "./Overview";
 import { labelFor, nameRepeatsKind } from "./parts";
+import { circuitToDrawing } from "./drawing";
 import { drawingAt, netOfWire, sceneOf, type PartBox } from "./scene";
 import { straighten } from "./straighten";
 import { GateSymbol, isShaped } from "./symbols";
@@ -199,9 +200,41 @@ export function CircuitView({
   const strings = useViewStrings();
   const id = useId();
   // A read-only drawing is straightened: parts nudged up or down so its wires run straight.
-  const { drawing, circuit: sub } = useMemo(() => {
+  const {
+    drawing,
+    circuit: sub,
+    heldOutside,
+  } = useMemo(() => {
     const at = drawingAt(circuit, scope);
-    return { ...at, drawing: straighten(at.drawing) };
+    // Module 0: a wire a stuck-at fault holds whose fixed value sits outside the block on show.
+    // Inside the block its old driver now drives the fault's cut net, which nothing reads, and the
+    // held net has no driver, so no wire would be drawn at all. The drawing joins them again: the
+    // wire runs from its old driver, carries what that driver gives, and is drawn as held, so the
+    // driver's value and the held value (at the wire's reader) show side by side.
+    const cuts = new Map<number, number>();
+    const driven = new Set(at.circuit.components.flatMap((c) => Object.values(c.outputs)));
+    for (const c of at.circuit.composites) for (const n of Object.values(c.outputs)) driven.add(n);
+    for (const n of at.circuit.nets) {
+      if (!n.name.endsWith(".cut") || !driven.has(n.id)) continue;
+      const base = at.circuit.nets.find((m) => m.name === n.name.slice(0, -".cut".length));
+      if (base && !driven.has(base.id)) cuts.set(n.id, base.id);
+    }
+    if (cuts.size === 0)
+      return { ...at, drawing: straighten(at.drawing), heldOutside: new Set<number>() };
+    const joined = {
+      ...at.circuit,
+      components: at.circuit.components.map((c) => ({
+        ...c,
+        outputs: Object.fromEntries(
+          Object.entries(c.outputs).map(([port, n]) => [port, cuts.get(n) ?? n]),
+        ),
+      })),
+    };
+    return {
+      circuit: at.circuit,
+      drawing: straighten(circuitToDrawing(joined)),
+      heldOutside: new Set(cuts.keys()),
+    };
   }, [circuit, scope]);
   const scene = useMemo(() => sceneOf(drawing), [drawing]);
   const highlighted = new Set(highlight);
@@ -230,10 +263,11 @@ export function CircuitView({
     () =>
       scene.wires.map((w) => {
         const drawn = netOfWire(sub, w.from);
+        if (drawn !== undefined && heldOutside.has(drawn)) return { net: drawn, held: true };
         const heldBy = drawn !== undefined ? heldNets.get(drawn) : undefined;
         return { net: heldBy ?? drawn, held: heldBy !== undefined };
       }),
-    [scene, sub, heldNets],
+    [scene, sub, heldNets, heldOutside],
   );
   // The net under the pointer, focused, or last pressed: every wire of it lights up together.
   // A wire's name and value show while it is pointed at or focused, and stay after a press or a

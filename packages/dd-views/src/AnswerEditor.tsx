@@ -45,21 +45,23 @@ export function gradeAnswers(
   const answers = answersOf(challenge, artifact);
   const labelOf = (id: string) => challenge.fields.find((f) => f.id === id)?.label ?? id;
   const term = (key: string) => strings.answers.terms[key] ?? labelOf(key);
-  // Module 10: a choice is reported by the words of its option, not its value.
-  const optionOf = (key: string, v: string) =>
+  // A choice is shown by what the learner read for it, not by its value.
+  const shown = (key: string, v: string) =>
     challenge.fields.find((f) => f.id === key)?.options?.find((o) => o.value === v)?.label ?? v;
   const named = (values: Readonly<Record<string, string>>) =>
     Object.fromEntries(
-      Object.entries(values).map(([k, v]) => [
-        term(k),
-        v === OF_YOUR_BITS
-          ? strings.answers.ofYourBits
-          : v === OF_THE_MEMORY
-            ? strings.answers.ofTheMemory
-            : v.startsWith(OTHER_THAN)
-              ? format(strings.answers.otherThan, { value: v.slice(OTHER_THAN.length) })
-              : optionOf(k, v),
-      ]),
+      Object.entries(values)
+        .map(([k, raw]) => [k, shown(k, raw)] as const)
+        .map(([k, v]) => [
+          term(k),
+          v === OF_YOUR_BITS
+            ? strings.answers.ofYourBits
+            : v === OF_THE_MEMORY
+              ? strings.answers.ofTheMemory
+              : v.startsWith(OTHER_THAN)
+                ? format(strings.answers.otherThan, { value: v.slice(OTHER_THAN.length) })
+                : v,
+        ]),
     );
   const failures: VerdictFailure[] = [];
   const results = cases.map((c) => grader(answers, c.given, c.expect));
@@ -76,7 +78,9 @@ export function gradeAnswers(
       const blocked =
         "missing" in r
           ? format(strings.answers.unanswered, { fields: r.missing.map(labelOf).join(", ") })
-          : format(strings.answers.invalid, { field: labelOf(r.invalid) });
+          : strings.answers.invalidFor[r.invalid] !== undefined
+            ? strings.answers.invalidFor[r.invalid]!
+            : format(strings.answers.invalid, { field: labelOf(r.invalid) });
       return { passed: false, total: cases.length, failures: [], blocked };
     }
     if (!r.pass)
@@ -86,6 +90,21 @@ export function gradeAnswers(
         inputs: named(r.inputs),
         actual: named(r.actual),
         expected: named(r.expected),
+        // Module 0: a sentence in place of values that would give the answer away.
+        ...(r.detail && strings.answers.details[r.detail.key] !== undefined
+          ? {
+              detail: format(
+                strings.answers.details[r.detail.key]!,
+                Object.fromEntries(
+                  Object.entries(r.detail.values ?? {}).map(([k, v]) => {
+                    const said = r.detail?.field ? shown(r.detail.field, v) : v;
+                    // Inside a sentence, a choice's label starts in lower case.
+                    return [k, said === v ? v : said.charAt(0).toLowerCase() + said.slice(1)];
+                  }),
+                ),
+              ),
+            }
+          : {}),
       });
   }
   return { passed: failures.length === 0, total: cases.length, failures };
@@ -125,24 +144,22 @@ export const AnswerEditor: ComponentType<ChallengeEditorProps> = ({
             </div>
           );
         }
-        // Module 10: a choice among options, one radio button each.
-        if (f.kind === "choice" && f.options)
+        // Module 0: a choice among options, the first lesson's that needs one.
+        if (f.kind === "choice")
           return (
-            <fieldset key={f.id} className="answer-field answer-choice" data-field={f.id}>
-              <legend className="answer-label">{f.label}</legend>
-              {f.options.map((o) => (
-                <label key={o.value} className="fault-choice">
-                  <input
-                    type="radio"
-                    name={id}
-                    value={o.value}
-                    checked={value === o.value}
-                    onChange={() => set(f.id, o.value)}
-                  />
-                  <span>{o.label}</span>
-                </label>
-              ))}
-            </fieldset>
+            <label key={f.id} className="answer-field" data-field={f.id}>
+              <span className="answer-label">{f.label}</span>
+              <span className="answer-input">
+                <select id={id} value={value} onChange={(e) => set(f.id, e.target.value)}>
+                  <option value="" />
+                  {(f.options ?? []).map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </span>
+            </label>
           );
         return (
           <label key={f.id} className="answer-field" data-field={f.id}>

@@ -45,7 +45,7 @@ async function answerAll(
     const field = section.locator(`[data-field="${f.id}"]`);
     if (f.kind === "choice") {
       const label = f.options?.find((o) => o.value === value)?.label ?? value;
-      await field.getByRole("radio", { name: label, exact: true }).check();
+      await field.locator("select").selectOption({ label });
     } else await field.locator("input").fill(value);
   }
 }

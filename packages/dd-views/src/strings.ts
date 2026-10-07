@@ -336,6 +336,10 @@ export interface ViewStrings {
     readonly ofTheMemory: string;
     /** Module 7: what a test that a fault must change expects, around the right result. */
     readonly otherThan: string;
+    /** Module 0: a sentence per failure in place of values that would give the answer away. */
+    readonly details: Readonly<Record<string, string>>;
+    /** Module 0: what a valid entry is, by field, in place of the general sentence. */
+    readonly invalidFor: Readonly<Record<string, string>>;
   };
   /** Module 6: the memory explorer's table of words. */
   readonly memory: {
@@ -358,6 +362,8 @@ export interface ViewStrings {
   };
   /** Module 8: the datapath figure. */
   readonly datapath: DatapathStrings;
+  /** Module 0: the machine at work and the ladder, for a learner with no terms yet. */
+  readonly meet: MeetStrings;
   /** Module 8: the focused figures of the machine's ideas. */
   readonly machine8: MachineFigureStrings;
   /** Module 9: the decoder's table and map, each kind's edges, and the views of an edge. */
@@ -588,6 +594,86 @@ export interface MachineStrings {
   readonly circuitTitle: string;
   readonly traceTitle: string;
   readonly textLabel: string;
+}
+
+// Module 0, meet the machine. Every string here is shown before the first lesson that rations a
+// term, so a test (`meet-strings.test.ts`) holds each to the term gate against every rationed
+// term, as the cover's test holds the cover's.
+export interface MeetStrings {
+  /** One sentence per kind of line ({y}, {a}, {b}, {n}, {line}, {device} fill it). */
+  readonly lines: Readonly<
+    Record<
+      | "copy"
+      | "set"
+      | "add"
+      | "subtract"
+      | "read"
+      | "show"
+      | "setLamps"
+      | "goto"
+      | "nothing"
+      | "ifEqual"
+      | "ifDiffer"
+      | "ifLess"
+      | "ifNotLess"
+      | "stop",
+      string
+    >
+  >;
+  /** What a line reads from, by the device's name in the model. */
+  readonly devices: Readonly<Record<string, string>>;
+  readonly readingsLegend: string;
+  readonly roomA: string;
+  readonly roomB: string;
+  readonly programCaption: string;
+  readonly line: string;
+  readonly does: string;
+  readonly stored: string;
+  readonly marks: string;
+  readonly next: string;
+  readonly stoppedHere: string;
+  readonly step: string;
+  readonly run: string;
+  readonly pause: string;
+  readonly reset: string;
+  readonly status: {
+    readonly next: string;
+    readonly running: string;
+    readonly stopped: string;
+    readonly trapped: string;
+    readonly gaveUp: string;
+  };
+  readonly numbersCaption: string;
+  readonly name: string;
+  readonly number: string;
+  readonly changed: string;
+  readonly notSet: string;
+  readonly shopCaption: string;
+  readonly display: string;
+  /** A lamp's row: {name} is ALARM, NIGHT or CLASH. */
+  readonly lamp: string;
+  readonly lit: string;
+  readonly dark: string;
+  /** After a committed prediction: {answer} is the machine's. */
+  readonly answer: string;
+  readonly faultLegend: string;
+  readonly healthy: string;
+  readonly drawingTitle: string;
+  /** The box for the number in line 5, which the learner may change. */
+  readonly limitLabel: string;
+  readonly ladder: {
+    readonly paused: string;
+    readonly levelsName: string;
+    readonly up: string;
+    readonly down: string;
+    readonly position: string;
+    readonly builtIn: string;
+    readonly number: string;
+    readonly digits: string;
+    readonly high: string;
+    readonly low: string;
+    readonly drawingTitle: string;
+  };
 }
 
 export const DEFAULT_VIEW_STRINGS: ViewStrings = {
@@ -898,6 +984,11 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       hex: "Hexadecimal",
       // Module 7
       faulty: "The faulty ALU gives",
+      // Module 0
+      roomA: "Room A",
+      roomB: "Room B",
+      display: "The display",
+      lamp: "The CLASH lamp",
     },
     unanswered: "Fill in {fields} to run the tests.",
     invalid: "{field} must be a valid entry.",
@@ -905,6 +996,22 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     ofTheMemory: "What the memory gives",
     // Module 7
     otherThan: "anything other than {value}",
+    // Module 0. Drafted by the prose process (docs/notes/module-0-machine/briefs/F2V.md).
+    details: {
+      runDisplay: "When the program stops, the display does not show {actual}.",
+      runLamp: "When the program stops, CLASH is not {actual}.",
+      traceChanged: "Your answer, {actual}, is not the number line 3 changes.",
+      traceValue: "Line 3 does not give {actual}.",
+      traceNext: "After line 3, the machine does not run line {actual} next.",
+      tracePart: "The number line 3 gives does not come from {actual}.",
+      slicesHigh: "The slices worth 128, 64, 32 and 16 do not give {actual}.",
+      slicesLow: "The slices worth 8, 4, 2 and 1 do not give {actual}.",
+      slices: "The eight slices do not give {actual}.",
+    },
+    invalidFor: {
+      slices:
+        "Type eight 1s and 0s, one for each slice, the slice worth 128 first; a space between the two groups of four is allowed.",
+    },
   },
   // Module 6. Drafted by the prose process (docs/notes/module-6-memory.md).
   memory: {
@@ -1113,6 +1220,82 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
   },
   // Module 10 (strings10.ts).
   machine10: MACHINE10_STRINGS,
+  // Module 0. Drafted by the prose process (docs/notes/module-0-machine/briefs/6V.md).
+  meet: {
+    lines: {
+      copy: "{y} becomes {b}",
+      set: "{y} becomes {n}",
+      add: "{y} becomes {a} plus {b}",
+      subtract: "{y} becomes {a} minus {b}",
+      read: "{y} becomes {device}",
+      show: "Show {b} on the display",
+      setLamps: "Set the lamps from {b}",
+      goto: "Go to line {line}",
+      nothing: "Do nothing",
+      ifEqual: "If {a} equals {b}, go to line {line}",
+      ifDiffer: "If {a} is not equal to {b}, go to line {line}",
+      ifLess: "If {a} is less than {b}, go to line {line}",
+      ifNotLess: "If {a} is not less than {b}, go to line {line}",
+      stop: "Stop",
+    },
+    devices: {
+      sensorA: "room A's reading",
+      sensorB: "room B's reading",
+      signals: "the DOOR and WARM signals",
+      display: "the display's number",
+      lamps: "the lamps",
+      timer: "the timer's count",
+    },
+    readingsLegend: "Room readings, in tenths of a degree",
+    roomA: "Room A",
+    roomB: "Room B",
+    programCaption: "The program",
+    line: "Line",
+    does: "What it does",
+    stored: "Kept as",
+    marks: "Now",
+    next: "Next",
+    stoppedHere: "Stopped",
+    step: "Run one line",
+    run: "Run",
+    pause: "Pause",
+    reset: "Start again",
+    status: {
+      next: "Next: line {line}.",
+      running: "Running. Next: line {line}.",
+      stopped: "Stopped: line {line}.",
+      trapped: "Stopped: it cannot run line {line}.",
+      gaveUp: "Ran {lines} lines; paused before line {line}.",
+    },
+    numbersCaption: "The numbers it keeps",
+    name: "Name",
+    number: "Number",
+    changed: "Changed",
+    notSet: "Not set",
+    shopCaption: "What the shop sees",
+    display: "The display",
+    lamp: "{name} lamp",
+    lit: "lit",
+    dark: "dark",
+    answer: "The machine's answer: {answer}.",
+    faultLegend: "Stuck wire",
+    healthy: "No fault",
+    drawingTitle: "Inside the machine",
+    limitLabel: "Line 5's number",
+    ladder: {
+      paused: "Paused before line {line}: {text}.",
+      levelsName: "Levels",
+      up: "Up a level",
+      down: "Down a level",
+      position: "Level {k} of {n}",
+      builtIn: "Built in Module {module}: {name}",
+      number: "The number here: {value}",
+      digits: "Its 1s and 0s: {digits}",
+      high: "The wire is high and stands for 1.",
+      low: "The wire is low and stands for 0.",
+      drawingTitle: "Inside this part",
+    },
+  },
 };
 
 export const ViewStringsContext = createContext<ViewStrings>(DEFAULT_VIEW_STRINGS);

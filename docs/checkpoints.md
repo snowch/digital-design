@@ -232,7 +232,8 @@ Checkpoint 2 approved `docs/machine.md` and `docs/isa.md` at 04:33 UTC. Since th
 - **A decision**: the course's calculator is designed once, in Module 10's encoding explorer, from
   the learner's ALU (`docs/plan.md`).
 
-The course has 32 lessons in Modules 1 to 9. Module 0 is still to be written.
+At checkpoint 3 the course had 32 lessons, in Modules 1 to 9, and Module 0 was still to be
+written.
 
 ### The instruction added end to end
 

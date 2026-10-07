@@ -1,6 +1,9 @@
 // Copyright © 2026 Christopher Snow
 
 import type { ComponentType } from "react";
+// Module 0, meet the machine
+import { MachineAtWork } from "./MachineAtWork";
+import { Ladder } from "./Ladder";
 
 import type { InteractiveProps } from "@platform/lesson-runtime";
 
@@ -96,6 +99,9 @@ export const INTERACTIVES: Readonly<Record<string, ComponentType<InteractiveProp
   "encoding-explorer": EncodingExplorer,
   "swap-compare": SwapCompare,
   "program-compare": ProgramCompare,
+  // Module 0, meet the machine
+  "machine-at-work": MachineAtWork,
+  ladder: Ladder,
 };
 
 export {
@@ -133,6 +139,8 @@ export {
   EncodingExplorer,
   SwapCompare,
   ProgramCompare,
+  MachineAtWork,
+  Ladder,
 };
 export {
   compareAnswer as machineCompareAnswer,
@@ -140,6 +148,8 @@ export {
   programAnswer,
   swapAnswer,
 } from "./Module10Figures";
+export { digitsText } from "./Ladder";
+export { lineText } from "./MachineAtWork";
 export { kindMap, kindSequences, signalCell, opText, edgeText } from "./ControlViews";
 export { carryRun, carryAnswer } from "./CarrySteps";
 export { runAluSuite, firstCatch } from "./SuiteLab";

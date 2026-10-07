@@ -44,3 +44,5 @@ export * from "./machine-compare";
 export * from "./encoding";
 export * from "./programs10";
 export * from "./capstone10";
+// Module 0, meet the machine: the finished machine read for a learner with no terms yet.
+export * from "./meet";
