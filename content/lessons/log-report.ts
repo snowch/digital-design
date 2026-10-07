@@ -73,14 +73,17 @@ const resultsLogs = REPORT_LOGS.map(({ log, limit }, k) => {
 
 const FUNCTIONS = [
   {
-    name: "lowest",
+    name: "lowestOf",
     result: (log: readonly number[], limit: number) => reportOf(log, limit).lowest,
   },
   {
-    name: "highest",
+    name: "highestOf",
     result: (log: readonly number[], limit: number) => reportOf(log, limit).highest,
   },
-  { name: "warmer", result: (log: readonly number[], limit: number) => reportOf(log, limit).warm },
+  {
+    name: "warmCount",
+    result: (log: readonly number[], limit: number) => reportOf(log, limit).warm,
+  },
 ] as const;
 
 export const logReport: LessonInput = {
@@ -119,19 +122,19 @@ export const logReport: LessonInput = {
       interactives: [
         {
           id: "predict-lowest",
-          kind: "debugger",
+          kind: "program-listing",
           timeModel: "none",
           caption: LABELS.captions.predict,
           props: {
             program: LOWEST_DEMO(DEFROST),
-            registers: [1, 2, 5, 6],
             question: PROSE.p1Question,
             options: [
-              { value: "-184", label: LABELS.options.first },
-              { value: "-190", label: LABELS.options.lowest },
-              { value: "12", label: LABELS.options.nearest },
+              { value: "-184", label: "-184" },
+              { value: "-190", label: "-190" },
+              { value: "12", label: "12" },
+              { value: "35", label: "35" },
             ],
-            ask: { what: "display" },
+            ask: { what: "run", run: { what: "display" } },
             explain: PROSE.p1Explain,
           },
         },
@@ -148,8 +151,8 @@ export const logReport: LessonInput = {
           timeModel: "none",
           caption: LABELS.captions.walk,
           lead: PROSE.walkLead,
-          after: PROSE.walkAfter,
           props: {
+            outcomes: PROSE.walkAfter,
             program: LOWEST_DEMO(DEFROST),
             registers: [1, 2, 5, 6],
             breakpoints: true,
@@ -247,7 +250,7 @@ export const logReport: LessonInput = {
                   call: f.name,
                   R1: "log",
                   R2: log.length,
-                  ...(f.name === "warmer" ? { R3: limit } : {}),
+                  ...(f.name === "warmCount" ? { R3: limit } : {}),
                   detail: `report-${f.name}`,
                 },
                 expect: { R1: String(f.result(log, limit)), kept: "", returned: "yes" },

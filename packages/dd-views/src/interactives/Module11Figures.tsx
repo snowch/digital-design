@@ -28,7 +28,15 @@ import { Prose, useSlot, type InteractiveProps } from "@platform/lesson-runtime"
 import { PredictionChallenge, useWidth } from "@platform/primitives";
 
 import { format, useViewStrings } from "../strings";
-import { ShopInputs, hex3, refusalText, shopInputs, signedText } from "./Debugger";
+import {
+  RunAsk,
+  ShopInputs,
+  hex3,
+  refusalText,
+  runAnswer,
+  shopInputs,
+  signedText,
+} from "./Debugger";
 import { withProps } from "./props";
 
 // ---------------------------------------------------------------------------------------------
@@ -40,8 +48,19 @@ const ListingProps = z.object({
   names: z.boolean().default(true),
   question: z.string().optional(),
   options: z.array(z.object({ value: z.string(), label: z.string() })).optional(),
-  /** What the question asks: a line's word, or a name's address. */
-  ask: z.object({ what: z.enum(["word", "address", "constant"]), line: z.string() }).optional(),
+  /**
+   * What the question asks: a line's word, a name's address or a branch's constant, read off the
+   * assembler; or, with `run`, something about a run from reset, which the lesson's debugger
+   * then shows.
+   */
+  ask: z
+    .object({
+      what: z.enum(["word", "address", "constant", "run"]),
+      line: z.string().default(""),
+      run: RunAsk.optional(),
+      inputs: ShopInputs.optional(),
+    })
+    .optional(),
   explain: z.string().default(""),
 });
 type ListingData = z.infer<typeof ListingProps>;
@@ -52,6 +71,8 @@ export function listingAnswer(given: z.input<typeof ListingProps>): string {
   const program = assembleChecked(data.program).program;
   if (!data.ask || !program) return "";
   const { what, line } = data.ask;
+  if (what === "run")
+    return data.ask.run ? runAnswer(data.program, data.ask.inputs ?? {}, data.ask.run) : "";
   if (what === "address") return hex3(program.labels[line] ?? 0);
   const l = program.lines.find((x) => x.text === line || x.label === line);
   if (!l || l.instruction === undefined) return "";

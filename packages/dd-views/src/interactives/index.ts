@@ -177,6 +177,7 @@ export {
   ProgramText,
   debuggerAnswer,
   refusalText,
+  runAnswer,
   stopText,
   watchValue,
 } from "./Debugger";

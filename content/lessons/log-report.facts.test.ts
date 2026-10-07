@@ -5,7 +5,7 @@
 import { describe, expect, it } from "vitest";
 
 import { assembleChecked, debugFinish, debugStart, debugStep } from "@dd/dd-model";
-import { debuggerAnswer, resultsOf } from "@dd/dd-views";
+import { listingAnswer, resultsOf } from "@dd/dd-views";
 import { grade } from "@dd/dd-views";
 import { parseLesson, testCount } from "@platform/lesson-schema";
 
@@ -42,8 +42,8 @@ describe("facts for the log-report lesson", () => {
     expect(whole).toEqual([false, false, false, true, false, false]);
   });
 
-  it("lowest on log 5 returns -190, keeping -184 past 35, -176 and 12", () => {
-    expect(debuggerAnswer(props("predict-lowest"))).toBe("-190");
+  it("lowestOf on log 5 returns -190, keeping -184 past 35, -176 and 12", () => {
+    expect(listingAnswer(props("predict-lowest"))).toBe("-190");
     let s = debugStart(assembleChecked(LOWEST_DEMO(DEFROST)).program!.rom);
     const lowest: bigint[] = [];
     while (!s.stopped) {

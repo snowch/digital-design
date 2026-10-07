@@ -14,7 +14,7 @@ export const LABELS = {
   titles: {
     question: "A log of readings",
     motivation: "The same lines for every reading",
-    prediction: "Where R1 points",
+    prediction: "Where R1 ends",
     investigation: "Watching the loop go round",
     construction: "Leaving a loop early",
     failureExperiment: "Readings above and below 0",
@@ -28,8 +28,8 @@ export const LABELS = {
     c2: "The largest rise",
   },
   captions: {
-    logInMemory: "Today's log as words in memory, with its count first.",
-    predict: "Predict where R1 points at the fourth pause, then run the program.",
+    logInMemory: "Today's log as words in memory, R1 moving down it one reading at a time.",
+    predict: "The program's listing, with a question about R1.",
     walk: "The loop in the debugger, with a breakpoint, a watch and a view of the log.",
     first: "Write the program and run the tests.",
     signs: "The same loop, comparing signed and unsigned, on a log with a defrost.",
@@ -37,11 +37,6 @@ export const LABELS = {
   },
   memoryTitle: "Memory: count and log",
   logTitle: "Log",
-  options: {
-    at040: "040 (the first reading)",
-    at058: "058 (the fourth reading)",
-    at070: "070 (just past the log)",
-  },
   programs: {
     signed: "Compared signed",
     unsigned: "Compared unsigned",
@@ -49,4 +44,5 @@ export const LABELS = {
   logPrefix: "Log",
   limitPrefix: "limit",
   emptyLog: "empty",
+  nextReading: "Next reading",
 } as const;

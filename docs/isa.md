@@ -182,7 +182,10 @@ One line is one instruction, written as the transfer it makes, with Module 5's a
   other is refused with a sentence that says the range.
 - A label ends with a colon. `//` starts a comment, as in the course's SystemVerilog.
 - `word` and `byte` put fixed values in the ROM: `limits: word -250, -184`. A `word` starts at a
-  multiple of 8, with 0s before it where needed. The assembler fills the ROM after the program
+  multiple of 8, with 0s before it where needed. A word may be written as a name, which the
+  assembler replaces with that name's address on its second pass, so records can hold each
+  other's addresses: `hall: word -150, prep, store` (Module 11's cold store; a name nothing
+  defines is refused). The assembler fills the ROM after the program
   and its data with 0s. A program that runs off its end fetches whatever follows as instructions
   and halts, with cause 21, at the first the machine refuses. That is usually the first word of
   its data, or a 0 placed before it: a small number's low half is kind 0 (5000 is `00001388`), a

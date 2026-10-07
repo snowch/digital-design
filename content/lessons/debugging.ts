@@ -14,13 +14,12 @@ import type { LessonInput } from "@platform/lesson-schema";
 
 import { LABELS } from "./debugging.labels";
 import { PROSE } from "./debugging.prose";
-import { above } from "./functions";
 import {
+  COUNT_OVER_MISTAKES,
+  COUNT_OVER_REFERENCE,
   OFF_BY_ONE,
   OFF_BY_ONE_MENDED,
   STACK_IN_ROM,
-  TWO_MISTAKES,
-  TWO_MISTAKES_MENDED,
   logData,
 } from "./module11";
 
@@ -47,15 +46,14 @@ export const COUNT_RUNS = [
   { log: [-200, 25, -150, 30], limit: -180 },
 ] as const;
 
-/** The second challenge's runs: room A's and room B's readings. */
-export const TOTAL_RUNS = [
-  [-170, -190],
-  [25, -210],
-  [-185, 30],
-  [-185, -210],
+/** The second challenge's logs and limits. */
+export const OVER_RUNS = [
+  { log: [-190, -181, -175, -170], limit: -180 },
+  { log: [], limit: -180 },
+  { log: [-170], limit: -180 },
+  { log: [-200, 25, -150, 30], limit: -180 },
+  { log: [-185, -190], limit: -180 },
 ] as const;
-
-export const total = (a: number, b: number) => above(a, -180) + above(b, -200);
 
 const FAILING = [-190, -181, -175, -170] as const;
 const runLabel = (log: readonly number[], limit: number) =>
@@ -102,19 +100,19 @@ export const debugging: LessonInput = {
       interactives: [
         {
           id: "predict-count",
-          kind: "debugger",
+          kind: "program-listing",
           timeModel: "none",
           caption: LABELS.captions.predict,
           props: {
             program: `${OFF_BY_ONE}\n${logData(FAILING, -180)}`,
-            registers: [1, 2, 3, 4, 5],
             question: PROSE.p1Question,
             options: [
-              { value: "4", label: LABELS.options.four },
-              { value: "3", label: LABELS.options.three },
-              { value: "0", label: LABELS.options.zero },
+              { value: "5", label: "5" },
+              { value: "4", label: "4" },
+              { value: "3", label: "3" },
+              { value: "0", label: "0" },
             ],
-            ask: { after: 6, what: "register", reg: 2 },
+            ask: { what: "run", run: { after: 6, what: "register", reg: 2 } },
             explain: PROSE.p1Explain,
           },
         },
@@ -131,8 +129,8 @@ export const debugging: LessonInput = {
           timeModel: "none",
           caption: LABELS.captions.find,
           lead: PROSE.findLead,
-          after: PROSE.findAfter,
           props: {
+            outcomes: PROSE.findAfter,
             program: `${OFF_BY_ONE}\n${logData(FAILING, -180)}`,
             registers: [1, 2, 3, 4, 5],
             breakpoints: true,
@@ -188,12 +186,12 @@ export const debugging: LessonInput = {
       prose: "",
       interactives: [
         {
-          id: "mend-total",
+          id: "mend-over",
           kind: "challenge",
           timeModel: "none",
-          caption: LABELS.captions.mendTotal,
-          lead: PROSE.mendTotalLead,
-          props: { challengeId: "mend-total" },
+          caption: LABELS.captions.mendOver,
+          lead: PROSE.mendOverLead,
+          props: { challengeId: "mend-over" },
         },
       ],
     },
@@ -224,34 +222,29 @@ export const debugging: LessonInput = {
       reference: { text: OFF_BY_ONE_MENDED },
     },
     {
-      id: "mend-total",
+      id: "mend-over",
       title: LABELS.challengeTitles.c2,
       task: PROSE.c2Task,
       gradedDirection: "write",
       allowedConstructs: ["assembly"],
       interface: { inputs: [], outputs: [] },
       initial: {
-        text: TWO_MISTAKES,
+        text: COUNT_OVER_MISTAKES,
         data: {
-          debugger: {
-            breakpoints: true,
-            watch: true,
-            watched: ["R1", "R14", "R15"],
-            stack: true,
-          },
+          debugger: { breakpoints: true, watch: true, watched: ["R10", "R11", "R13"] },
         },
       },
       tests: {
         kind: "answers",
         grader: "program",
-        cases: TOTAL_RUNS.map(([a, b]) => ({
-          label: `${LABELS.roomPrefixA} ${a}, ${LABELS.roomPrefixB} ${b}`,
-          given: { sensorA: a, sensorB: b, detail: "mendTotal" },
-          expect: { display: String(total(a, b)), end: "stop" },
+        cases: OVER_RUNS.map(({ log, limit }) => ({
+          label: runLabel(log, limit),
+          given: { data: logData(log, limit), detail: "mendOver" },
+          expect: { display: String(warmerCount(log, limit)), end: "stop" },
         })),
       },
       hints: [...PROSE.c2Hints],
-      reference: { text: TWO_MISTAKES_MENDED },
+      reference: { text: COUNT_OVER_REFERENCE },
     },
   ],
   modelVsReality: PROSE.modelVsReality,
@@ -259,6 +252,6 @@ export const debugging: LessonInput = {
     textbookExample:
       "Debugging taught as a tour of a debugger's commands (gdb's break, step, print and backtrace), or as a list of tips; the off-by-one error shown on a C for-loop over an array; the scientific method of debugging in Zeller's Why Programs Fail.",
     howThisDiffers:
-      "The mistakes are the shop's programs from this module's own lessons, each made by a change of one or two lines: the warm-reading count one short, total with its push of R15 forgotten and above comparing unsigned, and a stack started at 400. The method is shown on the course's debugger, which runs the reference: a log that fails, beside what each log should give; a prediction of what one register should hold at a breakpoint, the place the run first differs; then every way a run can end, read in plain words from the course machine's causes. The learner mends two programs, the second with two mistakes that surface one after the other.",
+      "The mistakes are the shop's programs from this module's own lessons, each made by a change of one or two lines: the warm-reading count one short, sumOver's stack started at 400, and a count of readings over the limit with two mistakes the module has not shown, the count read as the address of count and the list stepped by 4. The method is shown on the course's debugger, which runs the reference: a log that fails, beside what each log should give; a prediction of what one register should hold at a breakpoint, the place the run first differs; then every way a run can end, read in plain words from the course machine's causes. The learner mends two programs, the second with two mistakes that surface one after the other: a halt, then a wrong answer.",
   },
 };

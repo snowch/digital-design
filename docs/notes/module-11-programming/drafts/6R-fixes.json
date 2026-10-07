@@ -1,0 +1,6 @@
+[
+ ["prediction", "With log 1 (-190, -181, -175, -170), what value does R2 hold the first time the run reaches `next`?", "The figure lists it with log 1 after it: -190, -181, -175 and -170. The first time the run reaches `next`, 6 instructions have run. Choose an answer and press \"Check my prediction\". The listing's words then show."],
+ ["failureExperiment", "The address `0x400` starts the RAM.", "`400` is the first address of the RAM."],
+ ["stackInRomAfter", "took 8 off `0x400`", "took 8 off `400`"],
+ ["stackInRomAfter", "The mistake is earlier:", "The mistake is earlier, at `000`:"]
+]

@@ -16,41 +16,51 @@ import type { LessonInput } from "@platform/lesson-schema";
 import { LABELS } from "./functions.labels";
 import { PROSE } from "./functions.prose";
 import {
-  ABOVE_REFERENCE,
-  ABOVE_START,
   KEEPS_R10,
   KEEPS_R10_BROKEN,
+  LARGER_REFERENCE,
+  LARGER_START,
+  RANGE_REFERENCE,
+  RANGE_START,
   TWO_ROOMS,
   TWO_ROOMS_WRITTEN_TWICE,
 } from "./module11";
 
-/** The registers the convention challenge asks about, and each one's role. */
-export const ROLES = [
-  { id: "r1", role: "result" },
-  { id: "r3", role: "free" },
-  { id: "r7", role: "free" },
-  { id: "r12", role: "kept" },
-] as const;
+/** How far a reading is above a limit, or 0: overBy's specification. */
+export const overBy = (reading: number, limit: number) => Math.max(0, reading - limit);
 
-/** `above`'s arguments in the tests that call it directly: the reading and the limit. */
-export const ABOVE_CALLS = [
-  [-170, -180],
-  [-190, -180],
-  [-180, -180],
-  [25, -180],
-  [-150, -200],
-  [-205, -200],
-] as const;
-
-/** The whole program's runs: room A's and room B's readings. */
-export const TWO_ROOM_RUNS = [
+/** The construction's runs: room A's and room B's readings. */
+export const LARGER_RUNS = [
   [-170, -190],
-  [-185, -210],
+  [-160, -195],
+  [-175, -170],
+  [-190, -210],
   [25, -150],
 ] as const;
 
-/** How far a reading is above a limit, or 0: the specification. */
-export const above = (reading: number, limit: number) => Math.max(0, reading - limit);
+/** The larger of the two rooms' amounts above their limits: the construction's specification. */
+export const larger = (a: number, b: number) => Math.max(overBy(a, -180), overBy(b, -200));
+
+/** The fridge's range, 2.0 to 5.0 degrees. */
+export const RANGE = [20, 50] as const;
+
+/** How far a reading lies outside a range, or 0: outOfRange's specification. */
+export const outOfRange = (r: number, low: number, high: number) =>
+  r < low ? low - r : r > high ? r - high : 0;
+
+/** outOfRange's arguments in the tests that call it directly: reading, low end, high end. */
+export const RANGE_CALLS = [
+  [60, 20, 50],
+  [10, 20, 50],
+  [30, 20, 50],
+  [20, 20, 50],
+  [50, 20, 50],
+  [-15, 20, 50],
+  [75, 0, 40],
+] as const;
+
+/** The whole program's runs: the fridge's reading. */
+export const RANGE_RUNS = [60, 30, -5] as const;
 
 const ROOMS = { SENSORA: "-170", SENSORB: "-150" };
 
@@ -93,20 +103,23 @@ export const functions: LessonInput = {
       interactives: [
         {
           id: "predict-return",
-          kind: "debugger",
+          kind: "program-listing",
           timeModel: "none",
           caption: LABELS.captions.predict,
           props: {
             program: TWO_ROOMS,
-            inputs: { SENSORA: "-170", SENSORB: "-190" },
-            registers: [1, 2, 15],
             question: PROSE.p1Question,
             options: [
-              { value: "12", label: LABELS.options.r00C },
-              { value: "24", label: LABELS.options.r018 },
-              { value: "28", label: LABELS.options.r01C },
+              { value: "00C", label: "00C" },
+              { value: "018", label: "018" },
+              { value: "01C", label: "01C" },
+              { value: "02C", label: "02C" },
             ],
-            ask: { after: 10, what: "register", reg: 15 },
+            ask: {
+              what: "run",
+              run: { what: "register", reg: 15, hex: true },
+              inputs: { SENSORA: "-170", SENSORB: "-190" },
+            },
             explain: PROSE.p1Explain,
           },
         },
@@ -123,14 +136,14 @@ export const functions: LessonInput = {
           timeModel: "none",
           caption: LABELS.captions.callReturn,
           lead: PROSE.callLead,
-          after: PROSE.callAfter,
           props: {
             program: TWO_ROOMS,
             inputs: { SENSORA: "-170", SENSORB: "-190" },
             breakpoints: true,
-            pause: ["above"],
+            pause: ["overBy"],
             watch: true,
             watched: ["R1", "R2", "R15", "PC"],
+            outcomes: PROSE.callAfter,
           },
         },
       ],
@@ -141,12 +154,12 @@ export const functions: LessonInput = {
       prose: PROSE.construction,
       interactives: [
         {
-          id: "roles",
+          id: "write-larger",
           kind: "challenge",
           timeModel: "none",
-          caption: LABELS.captions.roles,
-          lead: PROSE.rolesLead,
-          props: { challengeId: "register-roles" },
+          caption: LABELS.captions.larger,
+          lead: PROSE.largerLead,
+          props: { challengeId: "larger" },
         },
       ],
     },
@@ -182,12 +195,12 @@ export const functions: LessonInput = {
       prose: "",
       interactives: [
         {
-          id: "write-above",
+          id: "write-range",
           kind: "challenge",
           timeModel: "none",
-          caption: LABELS.captions.above,
-          lead: PROSE.aboveLead,
-          props: { challengeId: "above" },
+          caption: LABELS.captions.range,
+          lead: PROSE.rangeLead,
+          props: { challengeId: "out-of-range" },
         },
       ],
     },
@@ -195,66 +208,61 @@ export const functions: LessonInput = {
   ],
   challenges: [
     {
-      id: "register-roles",
+      id: "larger",
       title: LABELS.challengeTitles.c1,
       task: PROSE.c1Task,
-      gradedDirection: "answer",
+      gradedDirection: "write",
+      allowedConstructs: ["assembly"],
       interface: { inputs: [], outputs: [] },
-      fields: ROLES.map((r) => ({
-        id: r.id,
-        label: LABELS.registers[r.id],
-        kind: "choice" as const,
-        options: [
-          { value: "result", label: LABELS.roles.result },
-          { value: "free", label: LABELS.roles.free },
-          { value: "kept", label: LABELS.roles.kept },
-        ],
-      })),
+      initial: {
+        text: LARGER_START,
+        data: { debugger: { breakpoints: true, watch: true, watched: ["R1", "R5", "R10"] } },
+      },
       tests: {
         kind: "answers",
-        grader: "choices",
-        cases: ROLES.map((r) => ({
-          label: LABELS.registers[r.id],
-          given: { field: r.id, detail: "registerRole" },
-          expect: { value: r.role },
+        grader: "program",
+        cases: LARGER_RUNS.map(([a, b]) => ({
+          label: `${LABELS.roomPrefixA} ${a}, ${LABELS.roomPrefixB} ${b}`,
+          given: { sensorA: a, sensorB: b, detail: "larger" },
+          expect: { display: String(larger(a, b)), end: "stop" },
         })),
       },
       hints: [...PROSE.c1Hints],
-      reference: { answers: Object.fromEntries(ROLES.map((r) => [r.id, r.role])) },
+      reference: { text: LARGER_REFERENCE },
     },
     {
-      id: "above",
+      id: "out-of-range",
       title: LABELS.challengeTitles.c2,
       task: PROSE.c2Task,
       gradedDirection: "write",
       allowedConstructs: ["assembly"],
       interface: { inputs: [], outputs: [] },
       initial: {
-        text: ABOVE_START,
-        data: { debugger: { breakpoints: true, watch: true, watched: ["R1", "R2", "R15"] } },
+        text: RANGE_START,
+        data: { debugger: { breakpoints: true, watch: true, watched: ["R1", "R2", "R3", "R15"] } },
       },
       tests: {
         kind: "answers",
         grader: "program",
         cases: [
-          ...ABOVE_CALLS.map(([r, l]) => ({
-            label: `${LABELS.callPrefix} R1 ${r}, R2 ${l}`,
-            given: { call: "above", R1: r, R2: l, detail: "aboveCall" },
-            expect: { R1: String(above(r, l)), kept: "", returned: "yes" },
+          ...RANGE_CALLS.map(([r, low, high]) => ({
+            label: `${LABELS.callPrefix} R1 ${r}, R2 ${low}, R3 ${high}`,
+            given: { call: "outOfRange", R1: r, R2: low, R3: high, detail: "rangeCall" },
+            expect: { R1: String(outOfRange(r, low, high)), kept: "", returned: "yes" },
           })),
-          ...TWO_ROOM_RUNS.map(([a, b]) => ({
-            label: `${LABELS.roomPrefixA} ${a}, ${LABELS.roomPrefixB} ${b}`,
-            given: { sensorA: a, sensorB: b, detail: "twoRooms" },
+          ...RANGE_RUNS.map((r) => ({
+            label: `${LABELS.fridgePrefix} ${r}`,
+            given: { sensorA: r, detail: "rangeRun" },
             expect: {
-              display: String(above(a, -180)),
-              lamps: above(b, -200) > 0 ? "1" : "0",
+              display: String(outOfRange(r, ...RANGE)),
+              lamps: outOfRange(r, ...RANGE) > 0 ? "1" : "0",
               end: "stop",
             },
           })),
         ],
       },
       hints: [...PROSE.c2Hints],
-      reference: { text: ABOVE_REFERENCE },
+      reference: { text: RANGE_REFERENCE },
     },
   ],
   modelVsReality: PROSE.modelVsReality,
@@ -262,6 +270,6 @@ export const functions: LessonInput = {
     textbookExample:
       "Patterson and Hennessy's leaf procedure (leaf_example, with $a0 to $a3, $v0 and jal/jr $ra) and their register-preservation table; Patt and Patel's subroutines with JSR and RET; a square or max function written as the first example.",
     howThisDiffers:
-      "The function is the shop's own check, how far a reading is above its limit, used for two rooms with two limits, and counted both ways on the reference: written twice it is one instruction longer and runs four fewer. The call and return are the learner's own lesson 8.5 instructions, R15 chosen only by the course's convention, which follows no commercial one (docs/isa.md). The convention's point is shown by a function that uses R10 as a spare and spoils its caller's kept word, counted on the reference; the tests call the learner's function directly with chosen arguments and check the registers it must keep.",
+      "The function is the shop's own check, how far a reading is above its limit (overBy), used for two rooms with two limits, and counted both ways on the reference. The call and return are the learner's own lesson 8.5 instructions, R15 chosen only by the course's convention, which follows no commercial one (docs/isa.md). The learner first writes a caller that must keep a word through a call, and a free register fails it because the given function works in R5; the convention's other side is shown by a function that spoils its caller's kept R10. The learner's own function is the fridge's range check, three arguments and two ways out of range, called directly by the tests with chosen arguments, which also check the registers it must keep.",
   },
 };

@@ -133,6 +133,11 @@ export interface Machine11Strings {
   readonly checkValue: string;
   /** The sentence a failed case adds, by its `detail` key: which part of the task is not met. */
   readonly details: Readonly<Record<string, string>>;
+  /** What a function called alone left of the registers it keeps, and whether it returned. */
+  readonly keptAll: string;
+  readonly keptNot: string;
+  readonly returnedYes: string;
+  readonly returnedNo: string;
   readonly nothingWritten: string;
 }
 
@@ -166,7 +171,8 @@ export const MACHINE11_STRINGS: Machine11Strings = {
     storeRegister: "A store writes a register's word. Put the number in a register first.",
     compareRegisters:
       "A branch compares two registers. Put the number in a register first; to compare with 0, keep 0 in a register.",
-    callRegister: "A call names the register that keeps the return address, as in call above, R15.",
+    callRegister:
+      "A call names the register that keeps the return address, as in call overBy, R15.",
     addressForm:
       "An address is a register, plus or minus a number, or a name. It cannot add two registers.",
     reservedName: "{name} is a word the language uses, so it cannot name a line.",
@@ -282,27 +288,31 @@ export const MACHINE11_STRINGS: Machine11Strings = {
     // Module 11, lesson 7 (brief 7L).
     report:
       "The report must show the warm count on the display, ALARM when it is not 0, and the lowest and highest at 400 and 408.",
-    "report-lowest":
+    "report-lowestOf":
       "R1 must hold the list's lowest reading (or 0 for an empty list), with R10 to R14 as they were and a return through R15.",
-    "report-highest":
+    "report-highestOf":
       "R1 must hold the list's highest reading (or 0), with R10 to R14 as they were and a return through R15.",
-    "report-warmer":
+    "report-warmCount":
       "R1 must hold how many readings are warmer than the limit in R3, with R10 to R14 as they were and a return through R15.",
-    // Module 11, lesson 6 (brief 6L).
+    // Module 11, lesson 6 (briefs 6L and 8R).
     warmerCount: "The display must show how many readings are warmer than the limit.",
-    mendTotal: "The display must show the total of both rooms' amounts above their limits.",
-    // Module 11, lesson 5 (brief 5L).
-    colderNewest:
-      "The display must show the readings below the limit, newest first, from a function that calls itself once for each reading.",
-    // Module 11, lesson 4 (brief 4L).
-    bothCall:
+    mendOver: "The display must show how many readings are above the limit.",
+    // Module 11, lesson 5 (brief 8R).
+    farthestRun:
+      "The display must show how many rooms lie on the longest way in from the hall, counting the hall.",
+    farthestCall:
+      "R1 must hold how many rooms lie on the longest way in from the room in R1, or 0 for none, with R10 to R14 as they were and a return through R15.",
+    // Module 11, lesson 4 (brief 8R).
+    roomsCall:
       "R1 must hold how many rooms are above their limits, with R10 to R14 as they were and a return through R15.",
-    bothRun: "The display must show how many rooms are above their limits.",
-    // Module 11, lesson 3 (brief 3L).
-    aboveCall:
-      "The function sets R1 to how far the reading in R1 is above the limit in R2, or 0; keeps R10 to R14 unchanged; and returns through R15.",
-    twoRooms:
-      "The display shows room A's amount above -180, or 0, and ALARM is on only when room B is above -200.",
+    roomsRun: "The display must show how many rooms are above their limits.",
+    // Module 11, lesson 3 (brief 8R).
+    larger:
+      "The display must show the larger of room A's amount above -180 and room B's amount above -200 from two calls of overBy.",
+    rangeCall:
+      "R1 must hold how far the reading in R1 lies outside the range from R2 to R3, or 0 inside it, with R10 to R14 as they were and a return through R15.",
+    rangeRun:
+      "The display must show how far the fridge's reading lies outside 20 to 50, and ALARM must be on only when that is not 0.",
     // Module 11, lesson 2 (brief 2L).
     firstWarmer:
       "The display must show the position, from 1, of the first reading warmer than the limit, or 0 when none is.",
@@ -311,4 +321,9 @@ export const MACHINE11_STRINGS: Machine11Strings = {
     warmerDisplay: "The display must show the higher of the two readings, read as signed numbers.",
   },
   nothingWritten: "No program yet.",
+  // Brief 8K.
+  keptAll: "R10 to R14 as they were",
+  keptNot: "{names} not put back",
+  returnedYes: "a return through R15",
+  returnedNo: "no return through R15",
 };

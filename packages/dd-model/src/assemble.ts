@@ -173,6 +173,8 @@ function assembleAll(
         line: number;
         address: number;
         bytes: number[];
+        /** Values written as names, put in once every name has its address: index, name. */
+        names: [number, string][];
         label?: string;
       };
   const items: Item[] = [];
@@ -212,7 +214,17 @@ function assembleAll(
         if (data) {
           const size = data[1] === "word" ? 8 : 1;
           if (size === 8) while (address % 8) address++;
-          const values = (data[2] ?? "").split(",").map((t) => bigNumber(t.trim(), lineNo, size));
+          // A word may hold a name's address (a list's next entry, a room's door): it is put in
+          // on the second pass, when every name has one.
+          const names: [number, string][] = [];
+          const values = (data[2] ?? "").split(",").map((t, i) => {
+            const v = t.trim();
+            if (size === 8 && /^[A-Za-z_][A-Za-z0-9_]*$/.test(v)) {
+              names.push([i, v]);
+              return 0n;
+            }
+            return bigNumber(v, lineNo, size);
+          });
           const bytes = values.flatMap((v) =>
             Array.from({ length: size }, (_, i) =>
               Number((BigInt.asUintN(64, v) >> BigInt(8 * i)) & 0xffn),
@@ -228,6 +240,7 @@ function assembleAll(
             line: lineNo,
             address,
             bytes,
+            names,
             ...(label ? { label } : {}),
           });
           address += bytes.length;
@@ -264,6 +277,26 @@ function assembleAll(
   const context: Context = { labels, dataLabels };
   for (const item of items) {
     if (item.kind === "data") {
+      try {
+        attempt(() => {
+          for (const [i, name] of item.names) {
+            const at = labels[name];
+            if (at === undefined)
+              throw new AssemblyError(
+                item.line,
+                `nothing defines the name ${name}`,
+                "unknownName",
+                {
+                  name,
+                },
+              );
+            for (let b = 0; b < 8; b++) item.bytes[8 * i + b] = b < 2 ? (at >> (8 * b)) & 0xff : 0;
+          }
+        });
+      } catch (e) {
+        if (e instanceof AssemblyError) return { problems };
+        throw e;
+      }
       if (item.address + item.bytes.length <= MAP.romEnd) rom.set(item.bytes, item.address);
       lines.push({
         text: item.text,

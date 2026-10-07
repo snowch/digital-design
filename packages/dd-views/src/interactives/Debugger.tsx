@@ -134,6 +134,10 @@ export interface DebuggerOptions {
   /** Which registers to show; all sixteen when not given. */
   readonly registers?: readonly number[];
   readonly limit?: number;
+  /** The run button's own words, for a figure whose run stops at the lines `pause` names. */
+  readonly runLabel?: string;
+  /** Whether the listing shows; without it, the controls drive the memory and the registers. */
+  readonly listing?: boolean;
   /** Only the memory the lesson names, as the program finds it at reset: no listing, no controls. */
   readonly memoryOnly?: boolean;
   /** Whether the controls answer: false while a question waits for its answer. */
@@ -212,7 +216,7 @@ export function DebuggerView({
     }
   };
   const onRun = () => {
-    const pausesNow = options.breakpoints ? pauses : new Set<number>();
+    const pausesNow = options.breakpoints || options.runLabel ? pauses : new Set<number>();
     keep(debugRun(history[at] ?? start, { breakpoints: pausesNow, inputs, limit }));
   };
   const onReset = () => {
@@ -301,7 +305,7 @@ export function DebuggerView({
             disabled={!live || !!state.stopped}
             onClick={onRun}
           >
-            {options.breakpoints && pauses.size ? t.runToPause : t.run}
+            {options.runLabel ?? (options.breakpoints && pauses.size ? t.runToPause : t.run)}
           </button>
           <button
             type="button"
@@ -316,60 +320,64 @@ export function DebuggerView({
           {status}
           {state.ran > 0 || at > 0 ? ` ${format(t.ran, { n: state.ran })}` : ""}
         </p>
-        <div className="truth-table-wrap debugger-listing-wrap" ref={boxRef}>
-          <table className="truth-table datapath-table debugger-listing">
-            <caption>{t.listingCaption}</caption>
-            <thead>
-              <tr>
-                {options.breakpoints && <th scope="col" aria-label={t.pauseBefore.split(" ")[0]} />}
-                <th scope="col">{t.address}</th>
-                <th scope="col">{t.word}</th>
-                <th scope="col">{t.line}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {program.lines.map((l) => {
-                const isNext = l.instruction !== undefined && BigInt(l.address) === pc;
-                const paused = pauses.has(l.address);
-                return (
-                  <tr
-                    key={l.address}
-                    className={`${isNext ? "row-current" : ""}${paused ? " row-paused" : ""}`}
-                    aria-current={isNext ? "step" : undefined}
-                  >
-                    {options.breakpoints && (
-                      <td className="debugger-pause">
-                        {l.instruction !== undefined && (
-                          <button
-                            type="button"
-                            className="pause-toggle"
-                            aria-pressed={paused}
-                            aria-label={format(t.pauseBefore, { address: hex3(l.address) })}
-                            disabled={!live}
-                            onClick={() => togglePause(l.address)}
-                          >
-                            <span aria-hidden="true">{paused ? "●" : "○"}</span>
-                          </button>
-                        )}
+        {options.listing !== false && (
+          <div className="truth-table-wrap debugger-listing-wrap" ref={boxRef}>
+            <table className="truth-table datapath-table debugger-listing">
+              <caption>{t.listingCaption}</caption>
+              <thead>
+                <tr>
+                  {options.breakpoints && (
+                    <th scope="col" aria-label={t.pauseBefore.split(" ")[0]} />
+                  )}
+                  <th scope="col">{t.address}</th>
+                  <th scope="col">{t.word}</th>
+                  <th scope="col">{t.line}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {program.lines.map((l) => {
+                  const isNext = l.instruction !== undefined && BigInt(l.address) === pc;
+                  const paused = pauses.has(l.address);
+                  return (
+                    <tr
+                      key={l.address}
+                      className={`${isNext ? "row-current" : ""}${paused ? " row-paused" : ""}`}
+                      aria-current={isNext ? "step" : undefined}
+                    >
+                      {options.breakpoints && (
+                        <td className="debugger-pause">
+                          {l.instruction !== undefined && (
+                            <button
+                              type="button"
+                              className="pause-toggle"
+                              aria-pressed={paused}
+                              aria-label={format(t.pauseBefore, { address: hex3(l.address) })}
+                              disabled={!live}
+                              onClick={() => togglePause(l.address)}
+                            >
+                              <span aria-hidden="true">{paused ? "●" : "○"}</span>
+                            </button>
+                          )}
+                        </td>
+                      )}
+                      <td className="memory-word">
+                        {isNext && <span className="next-mark">{`▶ `}</span>}
+                        {hex3(l.address)}
                       </td>
-                    )}
-                    <td className="memory-word">
-                      {isNext && <span className="next-mark">{`▶ `}</span>}
-                      {hex3(l.address)}
-                    </td>
-                    <td className="memory-word">
-                      {l.instruction !== undefined ? instructionHex(l.instruction) : t.data}
-                    </td>
-                    <td className="memory-word debugger-line">
-                      {l.label ? `${l.label}: ` : ""}
-                      {l.text}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                      <td className="memory-word">
+                        {l.instruction !== undefined ? instructionHex(l.instruction) : t.data}
+                      </td>
+                      <td className="memory-word debugger-line">
+                        {l.label ? `${l.label}: ` : ""}
+                        {l.text}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
       <div className="debugger-values">
         {options.watch && (
@@ -745,6 +753,18 @@ const Region = z.object({
   title: z.string(),
 });
 
+/** A question about a run from reset, answered by running the reference. */
+export const RunAsk = z.object({
+  /** How many instructions the question is about; the run to its end when not given. */
+  after: z.number().int().min(0).optional(),
+  what: z.enum(["register", "display", "end", "pc", "stack", "shown", "word", "calls"]),
+  reg: z.number().int().min(0).max(15).default(1),
+  /** For `word`: the word's address, in hexadecimal. */
+  address: z.string().default("400"),
+  /** A register or a word as an address, in three hexadecimal digits, not read signed. */
+  hex: z.boolean().default(false),
+});
+
 const DebuggerProps = z.object({
   program: z.string(),
   /** Whether the learner may change the program in the figure. */
@@ -758,18 +778,13 @@ const DebuggerProps = z.object({
   memory: z.array(Region).default([]),
   stack: z.boolean().default(false),
   memoryOnly: z.boolean().default(false),
+  listing: z.boolean().default(true),
+  runLabel: z.string().optional(),
   limit: z.number().int().min(1).max(20000).default(RUN_LIMIT),
   /** A question the learner answers before the controls work, about the run from reset. */
   question: z.string().optional(),
   options: z.array(z.object({ value: z.string(), label: z.string() })).optional(),
-  ask: z
-    .object({
-      /** How many instructions the question is about; the run to its end when not given. */
-      after: z.number().int().min(0).optional(),
-      what: z.enum(["register", "display", "end", "pc", "stack", "shown"]),
-      reg: z.number().int().min(0).max(15).default(1),
-    })
-    .optional(),
+  ask: RunAsk.optional(),
   explain: z.string().default(""),
   /** Shown once the run has ended. */
   outcomes: z.string().optional(),
@@ -780,16 +795,33 @@ type DebuggerData = z.infer<typeof DebuggerProps>;
 export function debuggerAnswer(given: z.input<typeof DebuggerProps>): string {
   const data = DebuggerProps.parse(given);
   if (!data.ask) return "";
-  const { program } = assembleChecked(data.program);
+  return runAnswer(data.program, data.inputs, data.ask, data.limit);
+}
+
+/** A run question's answer: the reference run from reset, read where the question says. */
+export function runAnswer(
+  source: string,
+  given: z.input<typeof ShopInputs>,
+  askGiven: z.input<typeof RunAsk>,
+  limit = RUN_LIMIT,
+): string {
+  const ask = RunAsk.parse(askGiven);
+  const { program } = assembleChecked(source);
   if (!program) return "";
-  const inputs = shopInputs(data.inputs);
+  const inputs = shopInputs(ShopInputs.parse(given));
   let s = debugStart(program.rom);
-  const steps = data.ask.after;
-  if (steps === undefined) s = debugRun(s, { inputs, limit: data.limit }).at(-1) ?? s;
+  const steps = ask.after;
+  if (steps === undefined) s = debugRun(s, { inputs, limit }).at(-1) ?? s;
   else for (let i = 0; i < steps && !s.stopped; i++) s = debugStep(s, inputs);
-  switch (data.ask.what) {
+  const shown = (v: bigint | undefined) =>
+    ask.hex ? (v === undefined ? "X" : hex3(BigInt.asUintN(64, v))) : signedText(v);
+  switch (ask.what) {
     case "register":
-      return signedText(s.cpu.regs[data.ask.reg]);
+      return shown(s.cpu.regs[ask.reg]);
+    case "word":
+      return shown(memoryWord(s.cpu, parseInt(ask.address, 16)));
+    case "calls":
+      return String(s.callsMade);
     case "display":
       return signedText(s.cpu.display);
     case "pc":
@@ -831,6 +863,8 @@ export const DebuggerFigure = withProps(
       memory: data.memory,
       stack: data.stack,
       memoryOnly: data.memoryOnly,
+      listing: data.listing,
+      ...(data.runLabel ? { runLabel: data.runLabel } : {}),
       limit: data.limit,
       live: committed,
       ...(data.registers ? { registers: data.registers } : {}),

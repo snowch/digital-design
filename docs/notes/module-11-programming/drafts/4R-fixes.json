@@ -1,0 +1,57 @@
+[
+ [
+  "lostAfter",
+  "The problem: the call",
+  "The call"
+ ],
+ [
+  "lostAfter",
+  "Code there adds",
+  "The instruction there adds"
+ ],
+ [
+  "motivation",
+  "when the sum is not zero.",
+  "when the sum is not 0."
+ ],
+ [
+  "prediction",
+  " Make your prediction about what will happen.",
+  ""
+ ],
+ [
+  "c1Hints.1",
+  "Start R14",
+  "The idea: start R14"
+ ],
+ [
+  "c1Hints.2",
+  "A pop does not clear",
+  "A common mistake: thinking a pop clears the word it takes. A pop does not clear"
+ ],
+ [
+  "c1Hints.3",
+  "In the lesson's run",
+  "A smaller example: in the lesson's run"
+ ],
+ [
+  "c1Hints.4",
+  "`check` pushes",
+  "Part of the answer: `check` pushes"
+ ],
+ [
+  "c1Hints.5",
+  "The answers are",
+  "The whole answer:"
+ ],
+ [
+  "pushedAfter",
+  "returned the program to where the main program called `sumOver`",
+  "returned to `014`, after the main program's call"
+ ],
+ [
+  "c1Task",
+  "the value at `7B8`",
+  "the word at `7B8`"
+ ]
+]

@@ -25,7 +25,11 @@ import {
 const T = DEFAULT_VIEW_STRINGS.machine11;
 
 /** Debuggers with breakpoints and a watch on a program longer than the listing's box. */
-const LONG_DEBUGGERS = [["lists", "walk"]] as const;
+const LONG_DEBUGGERS = [
+  ["lists", "walk"],
+  ["stack", "pushed"],
+  ["recursion", "frames"],
+] as const;
 
 const MODULE_11 = [
   "assembly",
@@ -80,6 +84,8 @@ const WRONG: readonly {
   id: string;
   from: string;
   to: string;
+  /** Every occurrence of `from`, not only the first. */
+  all?: boolean;
   fails: string;
   left: string;
 }[] = [
@@ -109,35 +115,36 @@ const WRONG: readonly {
   },
   {
     lesson: "functions",
-    id: "above",
-    from: "above: if R2 < R1 signed goto over",
-    to: "above: if R2 < R1 unsigned goto over",
-    fails: "Call R1 25, R2 -180",
-    left: "R1 0",
+    id: "larger",
+    from: "R10",
+    to: "R5",
+    all: true,
+    fails: "Room A -160, room B -195",
+    left: "the display 5",
   },
   {
     lesson: "functions",
-    id: "above",
-    from: "over:  R1 <= R1 - R2",
-    to: "over:  R10 <= R1 - R2\n       R1 <= R10",
-    fails: "Call R1 -170, R2 -180",
-    left: "registers the function did not put back R10",
+    id: "out-of-range",
+    from: "signed goto below",
+    to: "unsigned goto below",
+    fails: "Call R1 -15, R2 20, R3 50",
+    left: "R1 0",
   },
   {
     lesson: "stack",
-    id: "both",
+    id: "rooms-over",
     from: "        R14 <= R14 - 8\n        word[R14] <= R11     // push R11\n",
     to: "",
     fails: "Call R1 -170, R2 -190",
-    left: "registers the function did not put back R10, R11, R14",
+    left: "R10, R11, R14",
   },
   {
     lesson: "recursion",
-    id: "colder-newest",
-    from: "        if R5 >= R3 signed goto none\n",
+    id: "farthest",
+    from: "        R1 <= R11\n",
     to: "",
-    fails: "Log -190, -181, -205, -170, -210; limit -200",
-    left: "what the display showed, in order -210, -170, -205, -181, -190",
+    fails: "The lesson's store",
+    left: "the display 3",
   },
   {
     lesson: "debugging",
@@ -149,11 +156,11 @@ const WRONG: readonly {
   },
   {
     lesson: "debugging",
-    id: "mend-total",
-    from: "above: if R2 < R1 signed goto over",
-    to: "above: if R2 < R1 unsigned goto over",
-    fails: "Room A 25, room B -210",
-    left: "the display 0",
+    id: "mend-over",
+    from: "R11 <= word[count]   //",
+    to: "R11 <= count        //",
+    fails: "Log -190, -181, -175, -170; limit -180",
+    left: "the display 94",
   },
   {
     lesson: "log-report",
@@ -174,7 +181,8 @@ test.describe("Module 11's wrong programs", () => {
       await openLesson(page, w.lesson);
       const section = challenge(page, w.id);
       await section.scrollIntoViewIfNeeded();
-      await writeText(section, c.reference.text!.replace(w.from, w.to));
+      const text = c.reference.text!;
+      await writeText(section, w.all ? text.replaceAll(w.from, w.to) : text.replace(w.from, w.to));
       await runTests(section);
       const failure = section.locator(".verdict-failure").filter({ hasText: w.fails });
       await expect(failure).toHaveCount(1);
@@ -216,11 +224,11 @@ test.describe("Module 11's lab", () => {
     const section = challenge(page, "day-report");
     await section.scrollIntoViewIfNeeded();
     const box = section.locator("textarea.program-source");
-    await expect(box).toHaveValue(/lowest:/);
+    await expect(box).toHaveValue(/lowestOf:/);
     await section.getByRole("button", { name: T.startEmpty }).click();
-    await expect(box).not.toHaveValue(/lowest:/);
+    await expect(box).not.toHaveValue(/lowestOf:/);
     await section.getByRole("button", { name: T.startSkeleton }).click();
-    await expect(box).toHaveValue(/lowest:/);
+    await expect(box).toHaveValue(/lowestOf:/);
   });
 
   test("a breakpoint pauses the loop each time round, and the watch shows R1 moving", async ({
@@ -288,6 +296,40 @@ test.describe("Module 11's lab", () => {
       await figure.getByRole("button", { name: T.back, exact: true }).click();
       await check();
     }
+  });
+
+  test("a figure's result shows only once its run has ended", async ({ page }) => {
+    for (const [lessonId, id] of [
+      ["assembly", "room-a"],
+      ["stack", "pushed"],
+      ["recursion", "way-back"],
+    ] as const) {
+      await openLesson(page, lessonId);
+      const figure = page.locator(`[data-interactive="${id}"]`);
+      const props = lessonData(lessonId)
+        .sections.flatMap((x) => x.interactives)
+        .find((x) => x.id === id)!.props as { outcomes: string };
+      const first = props.outcomes.split(/[.:]/)[0]!.replace(/`/g, "");
+      await expect(figure.getByText(first, { exact: false })).toHaveCount(0);
+      const runs = figure.getByRole("button", { name: /^Run to/ });
+      for (let k = 0; k < 40 && (await runs.isEnabled()); k++) await runs.click();
+      await expect(figure.getByText(first, { exact: false }).first()).toBeVisible();
+    }
+  });
+
+  test("the opening figure of lesson 2 moves R1 down the log, one reading a press", async ({
+    page,
+  }) => {
+    await openLesson(page, "lists");
+    const figure = page.locator('[data-interactive="log-in-memory"]');
+    await expect(figure.locator(".debugger-listing")).toHaveCount(0);
+    const next = figure.getByRole("button", {
+      name: lessonData("lists").sections[0]!.interactives[0]!.props!["runLabel"] as string,
+    });
+    await next.click();
+    await expect(figure.locator(".debugger-memory .row-current")).toContainText("040");
+    await next.click();
+    await expect(figure.locator(".debugger-memory .row-current")).toContainText("048");
   });
 
   test("the debugger steps a program and says why it stopped", async ({ page }) => {

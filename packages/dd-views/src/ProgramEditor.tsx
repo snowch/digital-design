@@ -58,7 +58,8 @@ function leftText(
           ? format(t.checkWord, { address: (word[1] as string).toUpperCase() })
           : (t.checks[key] ?? key);
       if (key === "end") return format(t.checkValue, { name, value: "" }).trim();
-      if (key === "kept" && value === "") return format(t.checkValue, { name, value: t.empty });
+      if (key === "kept") return value === "" ? t.keptAll : format(t.keptNot, { names: value });
+      if (key === "returned") return value === "yes" ? t.returnedYes : t.returnedNo;
       if (key === "lamps")
         return format(t.checkValue, {
           name,

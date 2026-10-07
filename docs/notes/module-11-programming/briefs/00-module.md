@@ -92,14 +92,15 @@ One line is one instruction, written as the transfer it makes:
 | loads | `R3 <= word[R1 + 8]`, `R3 <= word[sensorA]` |
 | stores | `word[R1 + 8] <= R2`, `word[display] <= R2` |
 | branches | `if R1 != R2 goto next`, `if R1 < R2 signed goto colder`, `goto next` |
-| a call | `call above, R15` (R15 takes the return address) |
+| a call | `call overBy, R15` (R15 takes the return address) |
 | a jump | `goto R15` |
 | system jobs | `stop` |
 
 - A name followed by a colon at the start of a line names that line's address: `fine:`. The
   assembler works out the address. A branch to a name gets the constant that reaches it.
 - `word -180` puts a word of data in the ROM, after the program. A `word` starts at a multiple of
-  8, with 0s before it where needed.
+  8, with 0s before it where needed. A `word` line may hold several words, and a word may be a
+  name, which the assembler replaces with that name's address: `hall: word -150, prep, store`.
 - The shop's devices have names: `display`, `lamps`, `sensorA`, `sensorB`.
 - A number is decimal, or hexadecimal after `0x` (`0x7C0`).
 - `//` starts a comment, which the assembler ignores, as in the course's SystemVerilog.
@@ -137,5 +138,33 @@ or "pointer".
 
 Module 11's own terms, each allowed only from the lesson that introduces it:
 **assembly**, **assembler** and **debugger** (lesson 1), **breakpoint** (lesson 2), **function**,
-**argument** and **calling convention** (lesson 3), **stack** and **frame** (lesson 4),
-**recursion** (lesson 5). Your brief says which are allowed.
+**argument** and **calling convention** (lesson 3), **stack** (lesson 4), **recursion** (lesson
+5). Your brief says which are allowed. Never write "frame": say "the words one call pushes".
+
+## Functions' names, and words that read two ways
+
+The module's functions are named so that a sentence cannot read them as English: `overBy`,
+`sumOver`, `roomsOver`, `outOfRange`, `warmRooms`, `farthest`, `lowestOf`, `highestOf`,
+`warmCount`. Always write a function's name in backticks, in headings too, and never use it as an
+ordinary word. Write "the function `overBy`", never "the overBy function" or "overBy's check".
+
+Words a reader takes the wrong way on these pages:
+
+- "reading" is only a sensor's temperature. Never "either reading" for a way of reading bits: say
+  "read signed or unsigned, it gives the same result".
+- "word" is only 64 bits. Never "without a word", "in a word", "word for word".
+- Calls are never "at once" or "at the same time": one call runs at a time. Say "calls not yet
+  returned" or "calls in progress".
+- "above" is a comparison only (a reading above its limit). Never "the figure above" or "shown
+  above": say "the figure before this one".
+
+## The debugger as the page draws it
+
+The debugger's buttons come first, then its listing. The listing is a box of fixed height that scrolls to
+keep the line about to run in view, marked ▶. The registers, the shop's devices, the watch and the
+stack sit beside the listing on a wide screen and below it on a narrow one. Never say "below the
+listing" or "under the registers": say "beside the listing" only if the brief does, or name the
+panel ("the watch", "the stack").
+
+A result a figure's run produces is shown only once the run has ended. A question a figure asks
+comes before its run.

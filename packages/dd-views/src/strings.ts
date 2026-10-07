@@ -1020,13 +1020,12 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
         "A branch's constant is its target's address less its own, divided by 4, written as 12 bits read signed; {actual} is not that for this branch.",
       reachFurthest:
         "A branch at 000 can reach 000 + 4 × the largest constant; {actual} is not that address.",
-      // Module 11, lesson 3 (brief 3L).
-      registerRole:
-        "The calling convention gives R1 to R4, R5 to R9, and R10 to R13 each one role, with R1 carrying the result.",
       // Module 11, lesson 5 (brief 5L).
       recursionDepth:
-        "{actual} is not it; each reading's call pushes 2 words, and the stack has 120 words of RAM.",
+        "{actual} is not it; a call that finds a room pushes 4 words, a call for a door that leads nowhere pushes none, and R14 starts at 7C0.",
       // Module 11, lesson 4 (brief 4L).
+      stackWord:
+        "{actual} is not that word; a pop copies a word, adds 8 to R14, and leaves the word where it was. Give the word as three hexadecimal digits.",
       stackAddress:
         "{actual} is not that address; R14 starts at 7C0 and each push takes 8 off it before it stores.",
       // Module 11, lesson 1 (brief 1L).

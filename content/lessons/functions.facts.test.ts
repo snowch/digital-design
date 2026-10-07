@@ -6,11 +6,17 @@
 import { describe, expect, it } from "vitest";
 
 import { MODULE_9, assembleChecked, runProgram } from "@dd/dd-model";
-import { debuggerAnswer } from "@dd/dd-views";
+import { listingAnswer, runAnswer } from "@dd/dd-views";
 import { parseLesson } from "@platform/lesson-schema";
 
-import { ABOVE_CALLS, TWO_ROOM_RUNS, above, functions } from "./functions";
-import { KEEPS_R10, KEEPS_R10_BROKEN, TWO_ROOMS, TWO_ROOMS_WRITTEN_TWICE } from "./module11";
+import { LARGER_RUNS, RANGE_CALLS, RANGE_RUNS, functions, larger, outOfRange } from "./functions";
+import {
+  KEEPS_R10,
+  KEEPS_R10_BROKEN,
+  LARGER_REFERENCE,
+  TWO_ROOMS,
+  TWO_ROOMS_WRITTEN_TWICE,
+} from "./module11";
 
 const lesson = parseLesson(functions);
 const props = (id: string) =>
@@ -24,26 +30,29 @@ const rooms = (a: number, b: number) => ({
 const signed = (v: bigint) => BigInt.asIntN(64, v);
 
 describe("facts for the functions lesson", () => {
-  it("the calls at 008 and 018, above at 030, the stop at 02C", () => {
+  it("the calls at 008 and 018, overBy at 030, the stop at 02C", () => {
     const p = assembleChecked(TWO_ROOMS).program!;
-    expect([p.labels["above"], p.labels["done"]]).toEqual([0x30, 0x2c]);
+    expect([p.labels["overBy"], p.labels["done"]]).toEqual([0x30, 0x2c]);
     const calls = p.lines.filter((l) => l.text.startsWith("call")).map((l) => l.address);
     expect(calls).toEqual([0x8, 0x18]);
   });
 
-  it("two ways: written twice 18 and run 14; once 17 and run 18; both show 10 with ALARM", () => {
+  it("two ways: written twice 15 and run 13; once 18 and run 22; both show 10 with ALARM", () => {
     const twice = runProgram(TWO_ROOMS_WRITTEN_TWICE, rooms(-170, -190), MODULE_9);
     const once = runProgram(TWO_ROOMS, rooms(-170, -190), MODULE_9);
-    expect([twice.written, twice.ran, once.written, once.ran]).toEqual([18, 14, 17, 18]);
+    expect([twice.written, twice.ran, once.written, once.ran]).toEqual([15, 13, 18, 22]);
     for (const r of [twice, once])
       expect([signed(r.state.display), r.state.lamps]).toEqual([10n, 1]);
   });
 
-  it("after the second call R15 holds 01C", () => {
-    expect(debuggerAnswer(props("predict-return"))).toBe(String(0x1c));
+  it("when the program stops R15 holds 01C; each run stops at 02C", () => {
+    expect(listingAnswer(props("predict-return"))).toBe("01C");
+    expect(runAnswer(TWO_ROOMS, { SENSORA: "-170", SENSORB: "-190" }, { what: "end" })).toBe(
+      "stop",
+    );
   });
 
-  it("the spoiled caller: 60 with R10 kept at 10, 100 when above uses R10", () => {
+  it("the spoiled caller: 60 with R10 kept at 10, 100 when overBy works in R10", () => {
     const good = runProgram(KEEPS_R10, rooms(-170, -150), MODULE_9).state;
     const bad = runProgram(KEEPS_R10_BROKEN, rooms(-170, -150), MODULE_9).state;
     expect([signed(good.display), good.regs[10], signed(bad.display), bad.regs[10]]).toEqual([
@@ -54,12 +63,14 @@ describe("facts for the functions lesson", () => {
     ]);
   });
 
+  it("the construction: kept in R5, room A's result is lost on -160 and -195", () => {
+    expect(LARGER_RUNS.map(([a, b]) => larger(a, b))).toEqual([10, 20, 30, 0, 205]);
+    const inR5 = runProgram(LARGER_REFERENCE.replaceAll("R10", "R5"), rooms(-160, -195), MODULE_9);
+    expect(signed(inR5.state.display)).toBe(5n);
+  });
+
   it("the challenge's specification", () => {
-    expect(ABOVE_CALLS.map(([r, l]) => above(r, l))).toEqual([10, 0, 0, 205, 50, 0]);
-    expect(TWO_ROOM_RUNS.map(([a, b]) => [above(a, -180), above(b, -200) > 0])).toEqual([
-      [10, true],
-      [0, false],
-      [205, true],
-    ]);
+    expect(RANGE_CALLS.map(([r, l, h]) => outOfRange(r, l, h))).toEqual([10, 10, 0, 0, 0, 35, 35]);
+    expect(RANGE_RUNS.map((r) => outOfRange(r, 20, 50))).toEqual([10, 0, 25]);
   });
 });

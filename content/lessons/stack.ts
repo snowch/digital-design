@@ -11,17 +11,24 @@
 
 import type { LessonInput } from "@platform/lesson-schema";
 
-import { above } from "./functions";
-import { BOTH_REFERENCE, BOTH_START, TOTAL, TOTAL_NO_START, TOTAL_NO_STACK } from "./module11";
+import { overBy } from "./functions";
+import {
+  ROOMS_OVER_REFERENCE,
+  ROOMS_OVER_START,
+  STACK_QUIZ,
+  SUM_NO_STACK,
+  SUM_OVER,
+  SUM_POPS_SWAPPED,
+} from "./module11";
 import { LABELS } from "./stack.labels";
 import { PROSE } from "./stack.prose";
 
-/** How many rooms are above their limits: the specification of `both`. */
-export const both = (a: number, b: number) =>
-  (above(a, -180) > 0 ? 1 : 0) + (above(b, -200) > 0 ? 1 : 0);
+/** How many rooms are above their limits: the specification of `roomsOver`. */
+export const roomsOver = (a: number, b: number) =>
+  (overBy(a, -180) > 0 ? 1 : 0) + (overBy(b, -200) > 0 ? 1 : 0);
 
-/** `both`'s arguments in the tests that call it directly: room A's and room B's readings. */
-export const BOTH_CALLS = [
+/** `roomsOver`'s arguments in the tests that call it directly: room A's and room B's readings. */
+export const ROOMS_CALLS = [
   [-170, -190],
   [-185, -210],
   [-170, -210],
@@ -30,18 +37,18 @@ export const BOTH_CALLS = [
   [-180, -200],
 ] as const;
 
-export const BOTH_RUNS = [
+export const ROOMS_RUNS = [
   [-170, -190],
   [-185, -210],
   [-170, -210],
 ] as const;
 
-/** The stack's addresses the second challenge asks for, in the run of `total`. */
+/** What the construction asks of a run of `check`, which the lesson does not run. */
 export const STACK_ANSWERS = [
-  { id: "returnAt", value: "7B8" },
-  { id: "keptAt", value: "7B0" },
-  { id: "inAbove", value: "7B0" },
-  { id: "after", value: "7C0" },
+  { id: "returnAt", value: "7B8", detail: "stackAddress" },
+  { id: "r10At", value: "7B0", detail: "stackAddress" },
+  { id: "inOverBy", value: "7A0", detail: "stackAddress" },
+  { id: "leftAt7B8", value: "010", detail: "stackWord" },
 ] as const;
 
 const ROOMS = { SENSORA: "-170", SENSORB: "-190" };
@@ -66,7 +73,7 @@ export const stack: LessonInput = {
           caption: LABELS.captions.lost,
           lead: PROSE.lostLead,
           props: {
-            program: TOTAL_NO_STACK,
+            program: SUM_NO_STACK,
             inputs: ROOMS,
             registers: [1, 2, 10, 15],
             breakpoints: true,
@@ -82,22 +89,24 @@ export const stack: LessonInput = {
       prose: PROSE.prediction,
       interactives: [
         {
-          id: "predict-r14",
-          kind: "debugger",
+          id: "predict-7b8",
+          kind: "program-listing",
           timeModel: "none",
           caption: LABELS.captions.predict,
           props: {
-            program: TOTAL,
-            inputs: ROOMS,
-            registers: [1, 2, 10, 14, 15],
-            stack: true,
+            program: SUM_OVER,
             question: PROSE.p1Question,
             options: [
-              { value: "1984", label: LABELS.options.at7C0 },
-              { value: "1976", label: LABELS.options.at7B8 },
-              { value: "1968", label: LABELS.options.at7B0 },
+              { value: "010", label: "010" },
+              { value: "014", label: "014" },
+              { value: "028", label: "028" },
+              { value: "001", label: "001" },
             ],
-            ask: { after: 11, what: "register", reg: 14 },
+            ask: {
+              what: "run",
+              run: { after: 12, what: "word", address: "7B8", hex: true },
+              inputs: ROOMS,
+            },
             explain: PROSE.p1Explain,
           },
         },
@@ -114,16 +123,16 @@ export const stack: LessonInput = {
           timeModel: "none",
           caption: LABELS.captions.pushed,
           lead: PROSE.pushedLead,
-          after: PROSE.pushedAfter,
           props: {
-            program: TOTAL,
+            program: SUM_OVER,
             inputs: ROOMS,
-            registers: [1, 2, 5, 10, 14, 15],
+            registers: [1, 2, 10, 14, 15],
             breakpoints: true,
-            pause: ["above"],
+            pause: ["overBy"],
             watch: true,
-            watched: ["R14", "R15", "word[R14]"],
+            watched: ["R10", "R14", "R15", "word[R14]"],
             stack: true,
+            outcomes: PROSE.pushedAfter,
           },
         },
       ],
@@ -134,12 +143,20 @@ export const stack: LessonInput = {
       prose: PROSE.construction,
       interactives: [
         {
-          id: "write-both",
+          id: "check-listing",
+          kind: "program-listing",
+          timeModel: "none",
+          caption: LABELS.captions.checkListing,
+          lead: PROSE.checkListingLead,
+          props: { program: STACK_QUIZ, names: false },
+        },
+        {
+          id: "addresses",
           kind: "challenge",
           timeModel: "none",
-          caption: LABELS.captions.both,
-          lead: PROSE.bothLead,
-          props: { challengeId: "both" },
+          caption: LABELS.captions.addresses,
+          lead: PROSE.addressesLead,
+          props: { challengeId: "stack-addresses" },
         },
       ],
     },
@@ -149,17 +166,18 @@ export const stack: LessonInput = {
       prose: PROSE.failureExperiment,
       interactives: [
         {
-          id: "no-start",
+          id: "pops-swapped",
           kind: "debugger",
           timeModel: "none",
-          caption: LABELS.captions.noStart,
-          lead: PROSE.noStartLead,
+          caption: LABELS.captions.popsSwapped,
+          lead: PROSE.popsSwappedLead,
           props: {
-            program: TOTAL_NO_START,
+            program: SUM_POPS_SWAPPED,
             inputs: ROOMS,
-            registers: [1, 2, 10, 14, 15],
+            registers: [1, 10, 14, 15],
+            breakpoints: true,
             stack: true,
-            outcomes: PROSE.noStartAfter,
+            outcomes: PROSE.popsSwappedAfter,
           },
         },
       ],
@@ -175,7 +193,7 @@ export const stack: LessonInput = {
           timeModel: "none",
           caption: LABELS.captions.depth,
           lead: PROSE.depthLead,
-          props: { program: TOTAL, inputs: ROOMS },
+          props: { program: SUM_OVER, inputs: ROOMS },
         },
       ],
     },
@@ -186,12 +204,12 @@ export const stack: LessonInput = {
       prose: "",
       interactives: [
         {
-          id: "addresses",
+          id: "write-rooms",
           kind: "challenge",
           timeModel: "none",
-          caption: LABELS.captions.addresses,
-          lead: PROSE.addressesLead,
-          props: { challengeId: "stack-addresses" },
+          caption: LABELS.captions.rooms,
+          lead: PROSE.roomsLead,
+          props: { challengeId: "rooms-over" },
         },
       ],
     },
@@ -199,14 +217,37 @@ export const stack: LessonInput = {
   ],
   challenges: [
     {
-      id: "both",
+      id: "stack-addresses",
       title: LABELS.challengeTitles.c1,
       task: PROSE.c1Task,
+      gradedDirection: "answer",
+      interface: { inputs: [], outputs: [] },
+      fields: STACK_ANSWERS.map((a) => ({
+        id: a.id,
+        label: LABELS.fields[a.id],
+        kind: "text" as const,
+      })),
+      tests: {
+        kind: "answers",
+        grader: "exact",
+        cases: STACK_ANSWERS.map((a) => ({
+          label: LABELS.fields[a.id],
+          given: { field: a.id, form: "hex", detail: a.detail },
+          expect: { value: a.value },
+        })),
+      },
+      hints: [...PROSE.c1Hints],
+      reference: { answers: Object.fromEntries(STACK_ANSWERS.map((a) => [a.id, a.value])) },
+    },
+    {
+      id: "rooms-over",
+      title: LABELS.challengeTitles.c2,
+      task: PROSE.c2Task,
       gradedDirection: "write",
       allowedConstructs: ["assembly"],
       interface: { inputs: [], outputs: [] },
       initial: {
-        text: BOTH_START,
+        text: ROOMS_OVER_START,
         data: {
           debugger: {
             breakpoints: true,
@@ -220,43 +261,20 @@ export const stack: LessonInput = {
         kind: "answers",
         grader: "program",
         cases: [
-          ...BOTH_CALLS.map(([a, b]) => ({
+          ...ROOMS_CALLS.map(([a, b]) => ({
             label: `${LABELS.callPrefix} R1 ${a}, R2 ${b}`,
-            given: { call: "both", R1: a, R2: b, detail: "bothCall" },
-            expect: { R1: String(both(a, b)), kept: "", returned: "yes" },
+            given: { call: "roomsOver", R1: a, R2: b, detail: "roomsCall" },
+            expect: { R1: String(roomsOver(a, b)), kept: "", returned: "yes" },
           })),
-          ...BOTH_RUNS.map(([a, b]) => ({
+          ...ROOMS_RUNS.map(([a, b]) => ({
             label: `${LABELS.roomPrefixA} ${a}, ${LABELS.roomPrefixB} ${b}`,
-            given: { sensorA: a, sensorB: b, detail: "bothRun" },
-            expect: { display: String(both(a, b)), end: "stop" },
+            given: { sensorA: a, sensorB: b, detail: "roomsRun" },
+            expect: { display: String(roomsOver(a, b)), end: "stop" },
           })),
         ],
       },
-      hints: [...PROSE.c1Hints],
-      reference: { text: BOTH_REFERENCE },
-    },
-    {
-      id: "stack-addresses",
-      title: LABELS.challengeTitles.c2,
-      task: PROSE.c2Task,
-      gradedDirection: "answer",
-      interface: { inputs: [], outputs: [] },
-      fields: STACK_ANSWERS.map((a) => ({
-        id: a.id,
-        label: LABELS.fields[a.id],
-        kind: "text" as const,
-      })),
-      tests: {
-        kind: "answers",
-        grader: "exact",
-        cases: STACK_ANSWERS.map((a) => ({
-          label: LABELS.fields[a.id],
-          given: { field: a.id, form: "hex", detail: "stackAddress" },
-          expect: { value: a.value },
-        })),
-      },
       hints: [...PROSE.c2Hints],
-      reference: { answers: Object.fromEntries(STACK_ANSWERS.map((a) => [a.id, a.value])) },
+      reference: { text: ROOMS_OVER_REFERENCE },
     },
   ],
   modelVsReality: PROSE.modelVsReality,
@@ -264,6 +282,6 @@ export const stack: LessonInput = {
     textbookExample:
       "Patterson and Hennessy's nested procedure with $sp and $ra saved in a frame (and the stack-frame diagrams of Bryant and O'Hallaron, with a frame pointer and locals); push and pop introduced as abstract operations on a stack of plates; LC-3's R6 stack.",
     howThisDiffers:
-      "The stack arrives as the fix for a failure the learner runs first: the shop's function total, which calls above twice, loses its own return address to the inner call and goes round until the debugger cuts the run off. The stack is the course machine's RAM from 7C0 down, pushed and popped with R14 by two ordinary instructions each; its frames are the debugger's reading of the course's own convention, which the machine does not know. A program that never sets R14 pauses at its first push. The learner writes both, which keeps two words through two calls, and works out the stack's addresses for total by hand. No plates, no frame pointer, no locals.",
+      "The stack arrives as the fix for a failure the learner runs first: the shop's function sumOver, which calls overBy twice, loses its own return address to the inner call and goes round until the debugger cuts the run off. The stack is the course machine's RAM from 7C0 down, pushed and popped with R14 by two ordinary instructions each; its frames are the debugger's reading of the course's own convention, which the machine does not know. The main program keeps ALARM's bit in R10 through the call, so the push visibly saves it; pops in the order of the pushes send the return to 001, where the machine halts. The learner works out the stack's addresses for a function the lesson never runs, then writes roomsOver, which keeps two words through two calls. No plates, no frame pointer, no locals.",
   },
 };

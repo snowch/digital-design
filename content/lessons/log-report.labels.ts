@@ -29,15 +29,11 @@ export const LABELS = {
   },
   captions: {
     asks: "Run the starting text on six logs to see what each report shows.",
-    predict: "Predict what lowest returns for log 5, then run it.",
-    walk: "Step through the lowest function on log 5 with a breakpoint and a watch.",
-    fromZero: "Run this report on the six logs, starting its highest at 0.",
+    predict:
+      "The listing of lowestOf on log 5 shows the program and asks you to predict the result.",
+    walk: "The debugger runs lowestOf on log 5 and pauses at a breakpoint with a watch showing values.",
+    fromZero: "A report whose highestOf starts at 0, run on the six logs.",
     report: "Write the report and run the tests.",
-  },
-  options: {
-    first: "-184: the first reading",
-    lowest: "-190: the last reading",
-    nearest: "12: the reading nearest 0",
   },
   checks: {
     display: "Display",

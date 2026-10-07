@@ -1,0 +1,27 @@
+[
+ [
+  "motivation",
+  "is a **recursion**",
+  "is **recursion**"
+ ],
+ [
+  "prediction",
+  "Choose your answer for how many warm rooms there are",
+  "Choose your answer for how many times `warmRooms` is called"
+ ],
+ [
+  "wayBackAfter",
+  "The next push would go to `3F8`",
+  "The next push went to `3F8`"
+ ],
+ [
+  "c2Hints.1",
+  "The longest way in",
+  "The idea: the longest way in"
+ ],
+ [
+  "c2Hints.3",
+  "For a hall alone",
+  "A smaller example: for a hall alone"
+ ]
+]

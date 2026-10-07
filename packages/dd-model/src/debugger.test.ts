@@ -121,3 +121,12 @@ describe("a program graded by running it", () => {
     expect(r.problems.map((p) => p.code)).toEqual(["constantRange"]);
   });
 });
+
+describe("a word that holds a name's address", () => {
+  it("puts the address in on the second pass, and refuses a name nothing defines", () => {
+    const ok = assembleChecked("stop\nhall: word -170, back, 0\nback: word -180, 0, 0").program;
+    expect(ok && memoryWord(debugStart(ok.rom).cpu, 0x10)).toBe(0x20n);
+    const bad = assembleChecked("stop\nhall: word -170, nowhere, 0");
+    expect(bad.problems.map((p) => [p.line, p.code])).toEqual([[2, "unknownName"]]);
+  });
+});

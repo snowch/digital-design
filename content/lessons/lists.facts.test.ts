@@ -6,10 +6,10 @@
 import { describe, expect, it } from "vitest";
 
 import { assembleChecked, debugStart, debugStep, runProgram, MODULE_9 } from "@dd/dd-model";
-import { debuggerAnswer } from "@dd/dd-views";
+import { listingAnswer } from "@dd/dd-views";
 import { parseLesson } from "@platform/lesson-schema";
 
-import { FIRST_RUNS, RISE_RUNS, firstWarmer, largestRise, lists } from "./lists";
+import { FIRST_RUNS, LOAD_LINE, RISE_RUNS, firstWarmer, largestRise, lists } from "./lists";
 import { COUNT_WARMER, DEFROST_LOG, RISE_REFERENCE, countWarmerOn, logData } from "./module11";
 
 const lesson = parseLesson(lists);
@@ -34,7 +34,10 @@ describe("facts for the lists lesson", () => {
     expect(pauses[0]).toEqual([5, 0x40n, 6n, 0n]);
     expect(pauses[3]).toEqual([24, 0x58n, 3n, 1n]);
     expect(pauses[6]?.[1]).toBe(0x70n);
-    expect(debuggerAnswer(props("predict-address"))).toBe("88");
+    expect(listingAnswer(props("predict-address"))).toBe("070");
+    // The opening figure's run stops before the load, once a reading: R1 at 040 to 068.
+    const p = assembleChecked(COUNT_WARMER).program!;
+    expect(p.lines.find((l) => l.address === Number(LOAD_LINE))?.text).toBe("R5 <= word[R1]");
     // The run: 2 warmer, 46 instructions, the stop at 034.
     expect([BigInt.asIntN(64, s.cpu.display), s.ran]).toEqual([2n, 46]);
     expect(s.stopped).toMatchObject({ kind: "machine", pc: 0x34n });

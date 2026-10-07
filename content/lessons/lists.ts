@@ -54,6 +54,9 @@ export const RISE_RUNS = [
 export const largestRise = (log: readonly number[]) =>
   Math.max(...log.slice(1).map((r, k) => r - (log[k] ?? 0)));
 
+/** The loop's load, `R5 <= word[R1]`: the opening figure's run stops before it, once a reading. */
+export const LOAD_LINE = "0x018";
+
 const runLabel = (log: readonly number[], limit?: number) =>
   limit === undefined
     ? `${LABELS.logPrefix} ${log.join(", ")}`
@@ -80,7 +83,10 @@ export const lists: LessonInput = {
           lead: PROSE.logLead,
           props: {
             program: COUNT_WARMER,
-            memoryOnly: true,
+            listing: false,
+            registers: [1],
+            pause: [LOAD_LINE],
+            runLabel: LABELS.nextReading,
             memory: [{ from: "count", words: DAY_LOG.length + 1, title: LABELS.memoryTitle }],
           },
         },
@@ -94,21 +100,19 @@ export const lists: LessonInput = {
       interactives: [
         {
           id: "predict-address",
-          kind: "debugger",
+          kind: "program-listing",
           timeModel: "none",
           caption: LABELS.captions.predict,
           props: {
             program: COUNT_WARMER,
-            breakpoints: true,
-            pause: ["next"],
-            registers: [0, 1, 2, 3, 4, 5],
             question: PROSE.p1Question,
             options: [
-              { value: "64", label: LABELS.options.at040 },
-              { value: "88", label: LABELS.options.at058 },
-              { value: "112", label: LABELS.options.at070 },
+              { value: "038", label: "038" },
+              { value: "040", label: "040" },
+              { value: "068", label: "068" },
+              { value: "070", label: "070" },
             ],
-            ask: { after: 24, what: "register", reg: 1 },
+            ask: { what: "run", run: { what: "register", reg: 1, hex: true } },
             explain: PROSE.p1Explain,
           },
         },
@@ -125,8 +129,8 @@ export const lists: LessonInput = {
           timeModel: "none",
           caption: LABELS.captions.walk,
           lead: PROSE.walkLead,
-          after: PROSE.walkAfter,
           props: {
+            outcomes: PROSE.walkAfter,
             program: COUNT_WARMER,
             breakpoints: true,
             pause: ["next"],
