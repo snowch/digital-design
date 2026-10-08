@@ -146,5 +146,9 @@ export const MACHINE12_STRINGS: Machine12Strings = {
   },
   details: {
     skip34: "[draft] skip34",
+    saveRegisters: "[draft] saveRegisters",
+    startUser: "[draft] startUser",
+    sensorService: "[draft] sensorService",
+    doorTimer: "[draft] doorTimer",
   },
 };

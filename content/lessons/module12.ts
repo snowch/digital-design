@@ -604,6 +604,12 @@ loop:   R2 <= R2 + 1
         R1 <= 4
         call system             // end the program`;
 
+/** The opening of 12.5: lesson 4's handler and the counting program, interrupts off. */
+export const DOOR_UNSEEN = `// The door opens while a user program counts to 30, with lesson 4's handler.
+${TO_PROGRAM}
+${SERVICES_14}
+${COUNT_PROGRAM}`;
+
 export const DOOR_OPEN = `// The door left open: the program counts to 30 while the handler watches the door.
 ${TO_PROGRAM_EVENTS}
 ${EVENT_HANDLER_HEAD}

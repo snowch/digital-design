@@ -1040,6 +1040,11 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       trapC3: "[draft] {actual} is not C3 after the trap.",
       trapC1: "[draft] {actual} is not C1 after the trap.",
       trapPc: "[draft] {actual} is not the PC after the trap.",
+      // Module 12, lessons 2 to 5.
+      saveChoice: "[draft] saveChoice",
+      userRefusal: "[draft] userRefusal",
+      callRegister: "[draft] callRegister",
+      nextEdge: "[draft] nextEdge",
       // Module 11, lesson 4 (brief 4L).
       stackWord:
         "{actual} is not that word; a pop copies a word, adds 8 to R14, and leaves the word where it was. Give the word as three hexadecimal digits.",
