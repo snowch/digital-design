@@ -323,6 +323,10 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
 }
 .values .value {
   margin-right: var(--space-2);
+  /* A chip moves to the next line whole (NOHANDLER=0, not NOHA / NDLER=0); only one wider than
+     the line, a 64-bit word, breaks inside. */
+  display: inline-block;
+  max-width: 100%;
   overflow-wrap: anywhere;
 }
 .verdict.blocked {
@@ -1731,7 +1735,16 @@ button.bit {
 .state-diagram-wrap {
   overflow-x: auto;
   max-width: 100%;
-  background: var(--canvas);
+  /* A shadow at an edge while more of the drawing lies past it: the covers scroll with the
+     drawing and hide each shadow once its edge is reached, so a drawing that fits shows none. */
+  background:
+    linear-gradient(to right, var(--canvas) 40%, transparent) left / 32px 100% no-repeat local,
+    linear-gradient(to left, var(--canvas) 40%, transparent) right / 32px 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, var(--scroll-shadow), transparent) left / 12px 100%
+      no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, var(--scroll-shadow), transparent) right / 12px 100%
+      no-repeat scroll,
+    var(--canvas);
   border-radius: var(--radius);
   margin: var(--space-3) 0;
 }
@@ -1753,6 +1766,15 @@ button.bit {
   fill: var(--accent-soft);
   stroke: var(--accent);
   stroke-width: 3;
+}
+/* Module 12: the state an edge leads to by a trap or a halt, not by the table. */
+.state-node-next rect {
+  stroke: var(--focus);
+  stroke-width: 3;
+  stroke-dasharray: 6 3;
+}
+.state-note {
+  margin: var(--space-2) var(--space-3);
 }
 .state-name {
   font-weight: 700;
@@ -2917,4 +2939,105 @@ svg.stack-depth {
 }
 .memory-name {
   color: var(--fg-muted);
+}
+
+/* Module 12: the trap timeline's edges, the debugger's control registers and events, the door. */
+/*
+ * One register a row, its job's words beside its name. A long value (the mode in words) goes onto
+ * the next line whole, and breaks only between words, never inside its digits.
+ */
+.debugger-control .debugger-registers {
+  grid-template-columns: minmax(0, 1fr);
+}
+.debugger-control .debugger-register {
+  flex-wrap: wrap;
+  column-gap: var(--space-2);
+  row-gap: 0;
+}
+.debugger-control .debugger-register dd {
+  overflow-wrap: normal;
+}
+/* The timer and the door: two to a row, each value beside its name, so the panel stays short. */
+.debugger-events .debugger-devices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px var(--space-3);
+}
+.debugger-events .debugger-devices > div {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--space-2);
+}
+.trap-edges {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 18rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.trap-edges:empty {
+  display: none;
+}
+.trap-edge {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+}
+.trap-edge:last-child {
+  border-bottom: none;
+}
+.trap-edge[aria-current] {
+  background: var(--accent-soft);
+}
+.trap-edge-trap,
+.trap-edge-resume {
+  border-left: 4px solid var(--accent);
+}
+.trap-edge-halt {
+  border-left: 4px solid var(--bad);
+}
+.trap-edge-head {
+  margin: 0;
+}
+.trap-edge-n {
+  font-weight: 600;
+}
+.trap-transfers {
+  list-style: none;
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  font-variant-ligatures: none;
+}
+.trap-transfers .transfer-control {
+  font-weight: 600;
+}
+.trap-edge-none,
+.trap-edge-mode {
+  margin: var(--space-1) 0 0;
+  color: var(--fg-muted);
+}
+.control-name,
+.control-mode {
+  color: var(--fg-muted);
+  font-weight: 400;
+}
+.door-choice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-2) 0;
+}
+.door-choice select {
+  min-height: 40px;
+}
+@media (min-width: 60rem) {
+  .trap-edges {
+    max-height: 24rem;
+  }
 }

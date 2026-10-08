@@ -257,7 +257,7 @@ test.describe("Module 9's figures", () => {
     await faults.getByRole("radio").nth(1).check();
     await faults.getByRole("button", { name: V.datapath.run }).click();
     await expect(faults.locator(".datapath-status")).toHaveText(
-      format(V.datapath.stopped, { reason: V.datapath.reasons["33"]! }),
+      format(V.datapath.halted, { reason: V.datapath.reasons["33"]! }),
     );
   });
 });

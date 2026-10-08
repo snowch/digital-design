@@ -120,6 +120,8 @@ export interface Machine11Strings {
   readonly asks: string;
   readonly left: string;
   readonly empty: string;
+  /** Inside a sentence, where a check left nothing: "what the display showed, in order" and none. */
+  readonly emptyLeft: string;
   readonly results: Readonly<Record<string, string>>;
   readonly matches: string;
   readonly differs: string;
@@ -197,6 +199,11 @@ export const MACHINE11_STRINGS: Machine11Strings = {
     addressForm:
       "An address is a register, plus or minus a number, or a name. It cannot add two registers.",
     reservedName: "{name} is a word the language uses, so it cannot name a line.",
+    // Module 12.
+    controlRegister:
+      "{name} is not a control register. The machine has five control registers, C0 to C4.",
+    controlTransfer:
+      "A control register is copied only to or from an R register, on a line of its own, such as R5 <= C2 or C2 <= R5. Do the work in the R register.",
     // Brief 8L.
     noFunction:
       "The tests call the function {name}, but no line of your program starts with {name}:, so start the function's first line with {name}: to give it that name.",
@@ -299,6 +306,7 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   asks: "Should show",
   left: "Program left",
   empty: "None",
+  emptyLeft: "nothing",
   // Brief 8N.
   emptyLog: "none, an empty log",
   results: {},
@@ -330,7 +338,7 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   failedLeft: "Your program left {left}.",
   checkRegister: "{name}",
   checkWord: "the word at {address}",
-  checkValue: "{name} {value}",
+  checkValue: "{name}: {value}",
   details: {
     // Module 11, lesson 1 (brief 1L).
     // Module 11, lesson 7 (briefs 7L and 7R2).

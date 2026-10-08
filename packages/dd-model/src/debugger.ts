@@ -41,7 +41,7 @@ export type DebugStop =
   | {
       readonly kind: "unknown";
       readonly reg: number;
-      readonly use: "address" | "branch" | "jump";
+      readonly use: "address" | "branch" | "jump" | "control";
       readonly pc: bigint;
     }
   | { readonly kind: "cutOff"; readonly ran: number };
@@ -76,6 +76,35 @@ export interface DebugState {
   readonly pushed: readonly number[];
   /** The last instruction's record. */
   readonly last?: StepRecord;
+  /** Module 12: every trap that went to the handler, in order: where, why, and the return point. */
+  readonly traps: readonly TrapEvent[];
+}
+
+/** Module 12: one trap that went to the handler. */
+export interface TrapEvent {
+  /** The PC at the edge that trapped: the instruction that faulted, or the one not yet run. */
+  readonly at: bigint;
+  readonly cause: number;
+  readonly returnPoint: bigint;
+  /** Instructions run before the trap. */
+  readonly after: number;
+}
+
+/**
+ * Module 12: the shop's inputs as a run goes on. A door that opens before a chosen instruction
+ * (counted from reset, the first being 0) is open from then on, until it closes, if it does.
+ */
+export interface InputPlan extends MachineInputs {
+  readonly doorOpensAt?: number;
+  readonly doorClosesAt?: number;
+}
+
+/** The inputs an edge sees, for a run that has run `ran` instructions. */
+export function inputsAt(plan: InputPlan, ran: number): MachineInputs {
+  if (plan.doorOpensAt === undefined) return plan;
+  const open =
+    ran >= plan.doorOpensAt && (plan.doorClosesAt === undefined || ran < plan.doorClosesAt);
+  return { ...plan, door: open ? 1 : plan.door };
 }
 
 /** A fresh run from reset, with a ROM image. */
@@ -88,6 +117,7 @@ export function debugStart(rom: Uint8Array | readonly number[]): DebugState {
     callsMade: 0,
     returns: 0,
     pushed: [],
+    traps: [],
   };
 }
 
@@ -119,13 +149,22 @@ export function wordAt(cpu: CpuState, pc: bigint = cpu.pc): number | undefined {
 export function unknownUse(
   cpu: CpuState,
   options: MachineOptions = PROGRAM_MACHINE,
-): { reg: number; use: "address" | "branch" | "jump" } | undefined {
+): { reg: number; use: "address" | "branch" | "jump" | "control" } | undefined {
   const word = wordAt(cpu);
   if (word === undefined) return undefined;
   const f = fieldsOf(word);
   if (isIllegal(f, options)) return undefined;
   if ((f.k === 3 || f.k === 4) && (f.j & 8) === 0 && cpu.regs[f.a] === undefined)
     return { reg: f.a, use: "address" };
+  // Module 12: a word written to a control register, in system mode.
+  if (
+    options.traps &&
+    f.k === 8 &&
+    f.j === 3 &&
+    (cpu.control[0] & 1n) === 1n &&
+    cpu.regs[f.a] === undefined
+  )
+    return { reg: f.a, use: "control" };
   if (f.k === 5 && f.j >= 2) {
     if (cpu.regs[f.a] === undefined) return { reg: f.a, use: "branch" };
     if (cpu.regs[f.b] === undefined) return { reg: f.b, use: "branch" };
@@ -137,19 +176,25 @@ export function unknownUse(
 /** One instruction, with the debugger's reading of it. A stopped run does not change. */
 export function debugStep(
   s: DebugState,
-  inputs: MachineInputs = QUIET_INPUTS,
+  plan: InputPlan = QUIET_INPUTS,
   options: MachineOptions = PROGRAM_MACHINE,
 ): DebugState {
   if (s.stopped) return s;
-  const unknown = unknownUse(s.cpu, options);
+  const inputs = inputsAt(plan, s.ran);
+  // An interrupt is taken before the next instruction, so it needs no register.
+  const interrupt = options.traps && (s.cpu.control[0] & 2n) !== 0n && s.cpu.waiting !== 0;
+  const unknown = interrupt ? undefined : unknownUse(s.cpu, options);
   if (unknown) return { ...s, stopped: { kind: "unknown", ...unknown, pc: s.cpu.pc } };
   const { state: cpu, record } = step(s.cpu, inputs, options);
-  const trapped = record.stopped?.kind === "trap";
+  const trapped = record.stopped?.kind === "trap" || record.trap !== undefined;
+  const traps = record.trap
+    ? [...s.traps, { at: record.pc, ...record.trap, after: s.ran }]
+    : s.traps;
   let calls = s.calls;
   let callsMade = s.callsMade;
   let returns = s.returns;
   const f = record.fields;
-  if (!record.stopped && f) {
+  if (!record.stopped && !record.trap && f) {
     if (
       f.k === 6 ||
       (options.callThroughRegister !== undefined && f.k === options.callThroughRegister)
@@ -169,12 +214,12 @@ export function debugStep(
     }
   }
   const shown =
-    record.memory?.store && record.memory.address === 0x7c0n && !record.stopped
+    record.memory?.store && record.memory.address === 0x7c0n && !record.stopped && !record.trap
       ? [...s.shown, record.memory.value ?? 0n]
       : s.shown;
   // A store through R14 is a push; a trapped one wrote nothing.
   const pushedAt =
-    record.memory?.store && !record.stopped && f?.k === 4 && f.a === 14
+    record.memory?.store && !record.stopped && !record.trap && f?.k === 4 && f.a === 14
       ? Number(record.memory.address)
       : undefined;
   const pushed =
@@ -193,6 +238,7 @@ export function debugStep(
     returns,
     pushed,
     last: record,
+    traps,
     ...(deepest !== undefined ? { deepest } : {}),
     ...(cpu.stopped
       ? { stopped: { kind: "machine", reason: cpu.stopped.reason, pc: cpu.stopped.pc } }
@@ -214,7 +260,7 @@ export function debugRun(
     limit = RUN_LIMIT,
   }: {
     breakpoints?: ReadonlySet<number>;
-    inputs?: MachineInputs;
+    inputs?: InputPlan;
     options?: MachineOptions;
     limit?: number;
   } = {},
@@ -222,7 +268,7 @@ export function debugRun(
   const states: DebugState[] = [];
   let state = s;
   while (!state.stopped) {
-    if (state.ran >= limit) {
+    if (state.ran >= limit || state.traps.length >= limit) {
       state = { ...state, stopped: { kind: "cutOff", ran: state.ran } };
       states.push(state);
       break;
@@ -237,13 +283,14 @@ export function debugRun(
 /** Runs to the end, keeping only the last state. */
 export function debugFinish(
   s: DebugState,
-  inputs: MachineInputs = QUIET_INPUTS,
+  inputs: InputPlan = QUIET_INPUTS,
   options: MachineOptions = PROGRAM_MACHINE,
   limit = RUN_LIMIT,
 ): DebugState {
   let state = s;
   while (!state.stopped) {
-    if (state.ran >= limit) return { ...state, stopped: { kind: "cutOff", ran: state.ran } };
+    if (state.ran >= limit || state.traps.length >= limit)
+      return { ...state, stopped: { kind: "cutOff", ran: state.ran } };
     state = debugStep(state, inputs, options);
   }
   return state;

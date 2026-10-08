@@ -20,6 +20,7 @@ import {
   endOf,
   fieldsOf,
   instructionHex,
+  leftFor,
   runScenario,
   RUN_LIMIT,
   type DebugState,
@@ -46,6 +47,12 @@ const ListingProps = z.object({
   program: z.string(),
   /** Whether the names the program defines are listed with their addresses. */
   names: z.boolean().default(true),
+  /**
+   * Whether each line's machine word, and a branch's "goes to" note, are shown once the question
+   * is answered: a listing whose question uses neither leaves them out.
+   */
+  words: z.boolean().default(true),
+  notes: z.boolean().default(true),
   question: z.string().optional(),
   options: z.array(z.object({ value: z.string(), label: z.string() })).optional(),
   /**
@@ -59,6 +66,9 @@ const ListingProps = z.object({
       line: z.string().default(""),
       run: RunAsk.optional(),
       inputs: ShopInputs.optional(),
+      /** Module 12: the run on the machine with traps, and a door that opens before an instruction. */
+      traps: z.boolean().default(false),
+      doorOpensAt: z.number().int().min(0).optional(),
     })
     .optional(),
   explain: z.string().default(""),
@@ -72,7 +82,12 @@ export function listingAnswer(given: z.input<typeof ListingProps>): string {
   if (!data.ask || !program) return "";
   const { what, line } = data.ask;
   if (what === "run")
-    return data.ask.run ? runAnswer(data.program, data.ask.inputs ?? {}, data.ask.run) : "";
+    return data.ask.run
+      ? runAnswer(data.program, data.ask.inputs ?? {}, data.ask.run, undefined, {
+          traps: data.ask.traps,
+          ...(data.ask.doorOpensAt !== undefined ? { doorOpensAt: data.ask.doorOpensAt } : {}),
+        })
+      : "";
   if (what === "address") return hex3(program.labels[line] ?? 0);
   const l = program.lines.find((x) => x.text === line || x.label === line);
   if (!l || l.instruction === undefined) return "";
@@ -139,6 +154,8 @@ export const ProgramListing = withProps(
                 )
               }
             />
+            {/* The explanation follows its verdict, not the listing below it. */}
+            {committed && data.explain && <Prose markdown={data.explain} />}
           </div>
         )}
         <div className="truth-table-wrap">
@@ -147,20 +164,20 @@ export const ProgramListing = withProps(
             <thead>
               <tr>
                 <th scope="col">{t.address}</th>
-                {committed && <th scope="col">{t.word}</th>}
+                {committed && data.words && <th scope="col">{t.word}</th>}
                 <th scope="col">{t.line}</th>
               </tr>
             </thead>
             <tbody>
               {program.lines.map((l) => {
                 const goes =
-                  committed && l.instruction !== undefined
+                  committed && data.notes && l.instruction !== undefined
                     ? target(l.address, l.instruction)
                     : undefined;
                 return (
                   <tr key={l.address}>
                     <td className="memory-word">{hex3(l.address)}</td>
-                    {committed && (
+                    {committed && data.words && (
                       <td className="memory-word">
                         {l.instruction !== undefined ? instructionHex(l.instruction) : t.data}
                       </td>
@@ -197,7 +214,6 @@ export const ProgramListing = withProps(
             </table>
           </div>
         )}
-        {asking && committed && data.explain && <Prose markdown={data.explain} />}
       </div>
     );
   },
@@ -326,8 +342,14 @@ const ResultsProps = z.object({
     .array(
       z.object({
         label: z.string(),
-        readings: z.array(z.number().int()),
+        readings: z.array(z.number().int()).optional(),
         limit: z.number().int().optional(),
+        /** Module 12: lines added after the program in place of a log, and what they hold. */
+        data: z.string().optional(),
+        note: z.string().optional(),
+        /** Module 12: the rooms' readings for the run, as a test gives them. */
+        sensorA: z.number().int().optional(),
+        sensorB: z.number().int().optional(),
         /** What the task asks this log's run to leave, by the check's key. */
         asks: z.record(z.string(), z.string()),
       }),
@@ -336,6 +358,8 @@ const ResultsProps = z.object({
   /** The checks shown, each a key of `asks` and the words that name it. */
   checks: z.array(z.object({ key: z.string(), label: z.string() })).min(1),
   outcomes: z.string().optional(),
+  /** Module 12: the machine with traps. */
+  traps: z.boolean().default(false),
 });
 type ResultsData = z.infer<typeof ResultsProps>;
 
@@ -350,11 +374,19 @@ const logText = (readings: readonly number[], limit?: number) => {
 export function resultsOf(data: z.input<typeof ResultsProps>) {
   const parsed = ResultsProps.parse(data);
   return parsed.logs.map((log) => {
-    const run = runScenario(parsed.program, { data: logText(log.readings, log.limit) });
+    const run = runScenario(parsed.program, {
+      data: log.data ?? logText(log.readings ?? [], log.limit),
+      ...(parsed.traps ? { traps: true } : {}),
+      inputs: {
+        ...(log.sensorA !== undefined ? { sensorA: BigInt(log.sensorA) } : {}),
+        ...(log.sensorB !== undefined ? { sensorB: BigInt(log.sensorB) } : {}),
+      },
+    });
     const s = run.state;
     const left: Record<string, string> = {};
     for (const c of parsed.checks) {
       if (!s) left[c.key] = "";
+      else if (log.data !== undefined) left[c.key] = leftFor(c.key, run);
       else if (c.key === "display") left[c.key] = signedText(s.cpu.display);
       else if (c.key === "lamps") left[c.key] = String(s.cpu.lamps);
       else if (c.key === "end") left[c.key] = endOf(s.stopped).key;
@@ -377,7 +409,12 @@ export function resultsOf(data: z.input<typeof ResultsProps>) {
 export const LogResults = withProps(
   ResultsProps,
   function LogResults({ data, interactive }: InteractiveProps & { data: ResultsData }) {
-    const t = useViewStrings().machine11;
+    const strings = useViewStrings();
+    const t = strings.machine11;
+    const t12 = strings.machine12;
+    // How a run ended, in the course's words where it has them (a run cut off), else its key.
+    const shown = (key: string, value: string | undefined) =>
+      key === "end" && value !== undefined ? (t12.endWords[value] ?? value) : value;
     const rows = useMemo(() => resultsOf(data), [data]);
     const [ran, setRan] = useState(false);
     return (
@@ -395,16 +432,20 @@ export const LogResults = withProps(
             return (
               <li key={log.label} className="log-card" aria-label={log.label}>
                 <p className="layout-title">{log.label}</p>
-                <p className="memory-word log-readings">
-                  {`${t.readingsCol}: ${log.readings.length ? log.readings.join(", ") : t.emptyLog}`}
-                  {log.limit !== undefined ? ` ${format(t.limitNote, { limit: log.limit })}` : ""}
-                </p>
+                {log.readings ? (
+                  <p className="memory-word log-readings">
+                    {`${t.readingsCol}: ${log.readings.length ? log.readings.join(", ") : t.emptyLog}`}
+                    {log.limit !== undefined ? ` ${format(t.limitNote, { limit: log.limit })}` : ""}
+                  </p>
+                ) : (
+                  log.note && <p className="log-readings">{log.note}</p>
+                )}
                 <table className="truth-table datapath-table log-table">
                   <thead>
                     <tr>
                       <th scope="col" aria-label={t.logCol} />
                       <th scope="col">{t.asks}</th>
-                      {ran && <th scope="col">{t.left}</th>}
+                      {ran && <th scope="col">{log.data !== undefined ? t12.leftCol : t.left}</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -414,13 +455,23 @@ export const LogResults = withProps(
                         className={ran && left[c.key] !== log.asks[c.key] ? "row-differs" : ""}
                       >
                         <th scope="row">{c.label}</th>
-                        <td className="memory-word">{log.asks[c.key]}</td>
-                        {ran && <td className="memory-word">{left[c.key]}</td>}
+                        <td className="memory-word">{shown(c.key, log.asks[c.key])}</td>
+                        {ran && <td className="memory-word">{shown(c.key, left[c.key])}</td>}
                       </tr>
                     ))}
                   </tbody>
                 </table>
-                {ran && <p className="log-verdict">{all ? t.matches : t.differs}</p>}
+                {ran && (
+                  <p className="log-verdict">
+                    {log.data !== undefined
+                      ? all
+                        ? t12.runMatches
+                        : t12.runDiffers
+                      : all
+                        ? t.matches
+                        : t.differs}
+                  </p>
+                )}
               </li>
             );
           })}

@@ -7,6 +7,7 @@ import { createContext, useContext } from "react";
 
 import { MACHINE10_STRINGS, type Machine10Strings } from "./strings10";
 import { MACHINE11_STRINGS, type Machine11Strings } from "./strings11";
+import { MACHINE12_STRINGS, type Machine12Strings } from "./strings12";
 
 export interface ViewStrings {
   readonly circuit: {
@@ -373,6 +374,8 @@ export interface ViewStrings {
   readonly machine10: Machine10Strings;
   /** Module 11: the assembler's refusals, the debugger and the program figures. */
   readonly machine11: Machine11Strings;
+  /** Module 12: the control registers, the shop's events, the trap timeline. */
+  readonly machine12: Machine12Strings;
 }
 
 /** Module 8: the words of the instruction-fields, widening, edges, memory-map and branches figures. */
@@ -468,6 +471,9 @@ export interface DatapathStrings {
   readonly halting: string;
   /** After the edge that stopped it: {reason}. */
   readonly stopped: string;
+  /** A cause, not a `stop`: the machine halts. */
+  readonly halted: string;
+  readonly haltsNext: string;
   /** After a run that reached {edges} edges without stopping, at {pc}. */
   readonly gaveUp: string;
   /** While a run is going: {edges} made so far. */
@@ -1035,6 +1041,44 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       // Module 11, lesson 5 (brief 5L).
       recursionDepth:
         "{actual} is not it; a call that finds a room pushes 4 words, a call for a door that leads nowhere pushes none, and R14 starts at 7C0.",
+      // Module 12, lesson 1.
+      trapC2:
+        "{actual} is not C2 after the trap. After a fault, C2 holds the address of the instruction that faulted.",
+      trapC3:
+        "{actual} is not C3 after the trap. C3 takes the fault's cause, two hexadecimal digits. The first digit says which step failed.",
+      trapC1:
+        "{actual} is not C1 after the trap. C1 takes C0 as it was. In lesson 1, C0 is 01 throughout.",
+      trapPc:
+        "{actual} is not the PC after the trap. The PC takes C4, the handler's address, as three hexadecimal digits.",
+      // Module 12, lessons 2 to 5.
+      saveChoice:
+        '"{actual}" is not it for this handler. Check every register the handler writes: is it saved before it is written, and put back from the same word before resume?',
+      userRefusal:
+        "{actual} is not the cause for this line. User mode refuses a load or store at a device's address (from 7C0) with 32, and resume, the control-register jobs and stop with 22. Give 0 if user mode runs the line.",
+      callLamps:
+        "{actual} is not it. Job 3 sets each lamp from one bit of R2: bit 0 ALARM, bit 1 NIGHT, bit 2 CLASH, as the table of jobs says. R2 is the word with those bits set.",
+      callShown:
+        "{actual} is not what the program shows. Follow R1, R2 and R5 through each call: job 2 leaves the reading of the room R2 names in R1, and job 1 shows R2.",
+      callC2:
+        "{actual} is not C2 after the call. A system call's return point is the instruction after the call, as the prediction showed.",
+      nextEdge:
+        "{actual} is not what the next edge does. The next edge traps only when bit 1 of C0 is 1 and a bit of \"waiting\" is set. The timer's 81 goes before the door's 82. Give 0 if the instruction runs.",
+      nestC1:
+        "{actual} is not C1 after the door's interrupt. C1 takes C0 as it is when the interrupt comes, and job 5 wrote C0 for its loop.",
+      nestC3: "{actual} is not C3 after the door's interrupt. C3 takes the event's cause.",
+      nestSaved:
+        "{actual} is not the word at 418. Job 5 saved C2 there when it began. That word is the return point of the program's call system.",
+      nestC0: "{actual} is not C0 after the door part's resume. resume copies C1 into C0.",
+      bitsForm:
+        "{actual} has the right value, but this page writes C0 and C1 as their two bits, bit 1 first, such as `01`. Give it in that form.",
+      edgesStop:
+        "{actual} is not the number of edges. The decoder refuses stop in user mode. Its cause appears in READ, and that edge ends the instruction.",
+      edgesResume:
+        "{actual} is not the number of edges. In system mode resume does not trap: it goes from READ to WRITE, as a control-register job does.",
+      edgesInterrupt:
+        "{actual} is not the number of edges. An interrupt is taken at the edge that would fetch, and that edge is all it takes.",
+      edgesLoad:
+        "{actual} is not the number of edges. The memory's checks give their cause in MEMORY, and a load that traps there never reaches WRITE.",
       // Module 11, lesson 4 (brief 4L).
       stackWord:
         "{actual} is not that word; a pop copies a word, adds 8 to R14, and leaves the word where it was. Give the word as three hexadecimal digits.",
@@ -1163,13 +1207,17 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     running: "PC is {pc}.",
     halting: "Stops at next edge: {reason}.",
     stopped: "Stopped: {reason}.",
+    halted: "Halted: {reason}.",
+    haltsNext: "Halts at the next edge: {reason}.",
     gaveUp: "The machine did not stop after {edges} edges, so the run gave up; PC is {pc}.",
     runningEdges: "{edges} edges made so far.",
     reasons: {
       "11": "instruction fetch outside the ROM",
       "12": "fetch at an address not a multiple of 4",
       "21": "an illegal instruction",
+      "22": "an instruction that user mode refuses",
       "31": "no memory at the address",
+      "32": "a device's address in user mode",
       "33": "word at an unaligned address, or byte at device",
       "34": "write to ROM or read-only device",
       "41": "the call system job",
@@ -1277,6 +1325,8 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
   machine10: MACHINE10_STRINGS,
   // Module 11 (strings11.ts).
   machine11: MACHINE11_STRINGS,
+  // Module 12 (strings12.ts).
+  machine12: MACHINE12_STRINGS,
   // Module 0. Drafted by the prose process (docs/notes/module-0-machine/briefs/6V.md).
   meet: {
     lines: {

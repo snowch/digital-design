@@ -389,7 +389,9 @@ and are marked "not done" below.
    R14 and R15, and a watch a figure names as an address (11.2's and 11.5's R1), show hexadecimal
    first. The watch reads decimal, or hexadecimal after `0x`, and a refused entry says why (a name
    it does not know, an address not a multiple of 8, or outside the memory). *Not done:* values
-   below 10 show decimal only, since their hexadecimal is the same digit.
+   below 10 show decimal only, since their hexadecimal is the same digit; Module 12's review
+   (A4) narrowed this to values that are not addresses: the PC, R14, R15 and a watched address
+   show three hexadecimal digits at every value (`004`), in every debugger, this module's too.
 2. The views a lead points at. On a phone the order is the buttons, the ▶ line, the watch, the
    view, then the rest; on a desk the view sits beside the listing. Only the devices a program's
    lines name are shown. On a phone the listing, a long region of memory and the stack are short

@@ -739,6 +739,13 @@ export interface MemoryPorts {
    */
   readonly FETCHING?: NetId;
   readonly ENDS?: NetId;
+  /**
+   * Module 12: USER, 1 in user mode, refuses a device's address (cause 32); TICK, 1 at an edge
+   * where an instruction finishes, counts the timer down, where ENDS (which is 1 at a trap's edge
+   * too) still moves the door's register and "waiting".
+   */
+  readonly USER?: NetId;
+  readonly TICK?: NetId;
 }
 
 /**
@@ -764,7 +771,7 @@ export function machineMemory(
   b: CircuitBuilder,
   ins: MemoryPorts,
   rom: DatapathOptions["rom"],
-  out: ReturnType<typeof memoryNets>,
+  out: ReturnType<typeof memoryNets> & { readonly WAITING?: NetId },
   scoped = true,
 ) {
   block(
@@ -833,10 +840,16 @@ export function machineMemory(
         output: bb.net("RONLY"),
       });
       // The memory step's cause: no memory (31), then misaligned (33), then read-only (34).
+      // Module 12: a device's address in user mode (32), after no memory.
+      const userDev =
+        ins.USER === undefined
+          ? undefined
+          : bb.and([access, devSel, ins.USER], { name: "userDev", output: bb.net("USERDEV") });
       causeWord(
         bb,
         [
           [noMem, CAUSES.noMemory],
+          ...(userDev !== undefined ? [[userDev, CAUSES.userDevice] as const] : []),
           [misalign, CAUSES.misaligned],
           [rOnly, CAUSES.readOnly],
         ],
@@ -930,7 +943,7 @@ export function machineMemory(
       const writeTimer = writeDev(5);
       const counting = bb.net("COUNTING");
       const nonZero = anyBit(bb, count, 63, 0, "nonZero");
-      bb.and([ins.ENDS ?? ins.GO, nonZero], { name: "andCounting", output: counting });
+      bb.and([ins.TICK ?? ins.ENDS ?? ins.GO, nonZero], { name: "andCounting", output: counting });
       const less = bb.net("LESS", 64);
       bb.scope(
         "minus1",
@@ -998,6 +1011,7 @@ export function machineMemory(
         );
         return keep;
       });
+      if (out.WAITING !== undefined) joinParts(bb, waitingBits, out.WAITING, "joinWaiting");
       const zeros = (w: number, name: string) => constant(bb, name, w, 0n);
       const widenTo64 = (parts: NetId[], name: string) => {
         const used = parts.reduce((t, p) => t + bb.widthOf(p), 0);
@@ -1059,6 +1073,8 @@ export function machineMemory(
             BYTE: ins.BYTE,
             GO: ins.GO,
             ...(ins.ENDS !== undefined ? { ENDS: ins.ENDS } : {}),
+            ...(ins.TICK !== undefined ? { TICK: ins.TICK } : {}),
+            ...(ins.USER !== undefined ? { USER: ins.USER } : {}),
             RST: ins.RST,
             CLK: ins.CLK,
             DOOR: ins.DOOR,
@@ -1073,6 +1089,7 @@ export function machineMemory(
             CAUSEM: out.CAUSEM,
             DISPLAY: out.DISPLAY,
             LAMPS: out.LAMPS,
+            ...(out.WAITING !== undefined ? { WAITING: out.WAITING } : {}),
           },
         },
   );

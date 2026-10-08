@@ -59,6 +59,15 @@ import { stack } from "./stack";
 import { recursion } from "./recursion";
 import { debugging } from "./debugging";
 import { logReport } from "./log-report";
+// Module 12, traps and interrupts
+import { traps } from "./traps";
+import { savingState } from "./saving-state";
+import { userMode } from "./user-mode";
+import { systemCalls } from "./system-calls";
+import { interrupts } from "./interrupts";
+import { nesting } from "./nesting";
+import { trapHardware } from "./trap-hardware";
+import { systemCallMechanism } from "./system-call-mechanism";
 
 const INPUTS: readonly LessonInput[] = [
   // Module 0, meet the machine.
@@ -117,6 +126,15 @@ const INPUTS: readonly LessonInput[] = [
   recursion,
   debugging,
   logReport,
+  // Module 12, traps and interrupts
+  traps,
+  savingState,
+  userMode,
+  systemCalls,
+  interrupts,
+  nesting,
+  trapHardware,
+  systemCallMechanism,
 ];
 
 export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(

@@ -25,6 +25,8 @@ import {
   buildDatapath,
   controllerMachine,
   edgeView,
+  machineOf,
+  trapControllerMachine,
   rowFor,
   type EdgeView,
   datapathRamWord,
@@ -53,6 +55,15 @@ import { withProps } from "./props";
 const RUN_LIMIT = 500;
 /** Edges a run makes between two redraws. */
 const RUN_SLICE = 20;
+
+/** Module 12: the control registers' nets, and their hexadecimal digits (0: two bits). */
+const CONTROL_NETS: readonly (readonly [string, number])[] = [
+  ["STATUS", 0],
+  ["datapath/cregs/C1", 0],
+  ["datapath/C2", 3],
+  ["datapath/cregs/C3", 2],
+  ["datapath/C4", 3],
+];
 
 const Inputs = z.record(z.string(), z.union([z.string(), z.number()]));
 
@@ -97,11 +108,13 @@ const Props = z.object({
   faults: z.array(FaultSpec).default([]),
   /** Shown once the learner has made an edge, so the results do not answer the lead's question. */
   outcomes: z.string().optional(),
+  /** Module 12: show `outcomes` only once the machine has stopped, not after the first edge. */
+  outcomesWhen: z.enum(["edge", "stopped"]).default("edge"),
   /** A prediction of the next edge, asked before the clock can be pressed. */
   question: z.string().optional(),
   options: z.array(z.object({ value: z.string(), label: z.string() })).optional(),
   explain: z.string().default(""),
-  ask: z.enum(["changed", "pc", "stop", "value", "edges", "took"]).default("changed"),
+  ask: z.enum(["changed", "pc", "stop", "value", "edges", "took", "state"]).default("changed"),
   /** For `value`: the register asked about. */
   register: z.number().int().min(0).max(15).default(0),
   /**
@@ -359,18 +372,57 @@ export const DatapathFigure = withProps(
         .map((n) => n.name);
     };
     const reason = reasonKey(state);
+    // A `stop` stops the machine; a cause halts it (the course's words since Module 8).
+    const halt = reason !== undefined && reason !== "stop";
     const status = stopped
-      ? format(t.stopped, { reason: t.reasons[reason ?? ""] ?? "" })
+      ? format(halt ? t.halted : t.stopped, { reason: t.reasons[reason ?? ""] ?? "" })
       : running !== undefined
         ? format(t.runningEdges, { edges: running })
         : gaveUp
           ? format(t.gaveUp, { edges: RUN_LIMIT, pc: hex3(state.pc ?? 0) })
           : reason !== undefined
-            ? format(t.halting, { reason: t.reasons[reason] ?? reason })
+            ? format(halt ? t.haltsNext : t.halting, { reason: t.reasons[reason] ?? reason })
             : // While the learner steps through an edge, the PC the steps show, not the edge's end.
               shownState.pc !== undefined
               ? format(t.running, { pc: hex3(shownState.pc) })
               : "";
+
+    // Module 12: the control registers, and the trap logic's TRAP and GO for the next edge, beside
+    // the buttons, so an edge's transfers show where it is pressed.
+    const traps = machineOf(data.libraryId)?.traps === true;
+    const trapReadings = traps && (
+      <div className="datapath-tables trap-readings">
+        <div className="truth-table-wrap">
+          <table className="truth-table datapath-table">
+            <caption>{strings.machine12.controlCaption}</caption>
+            <thead>
+              <tr>
+                <th scope="col">{t.bus}</th>
+                <th scope="col">{t.value}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {CONTROL_NETS.map(([net, digits], k) => {
+                const w = netValue(net);
+                const known = w !== undefined && w.known === (1n << BigInt(w.width)) - 1n;
+                const text = !known
+                  ? "X"
+                  : digits === 0
+                    ? w.value.toString(2).padStart(2, "0")
+                    : w.value.toString(16).toUpperCase().padStart(digits, "0");
+                return (
+                  <tr key={net}>
+                    <th scope="row">{`C${k} ${strings.machine12.controlNames[k] ?? ""}`}</th>
+                    <td className="memory-word">{text}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <SignalsTable view={trapSignals(circuit, values)} signals={["TRAP", "GO"]} />
+      </div>
+    );
 
     return (
       <div className="explorer datapath-figure" data-interactive={interactive.id}>
@@ -478,6 +530,7 @@ export const DatapathFigure = withProps(
             </button>
           </div>
         )}
+        {committed && trapReadings}
         {/* The why comes after the learner's own edge has shown the what: before it, the
             explanation would describe an edge the drawing has not made. */}
         {asking && committed && ran && data.explain && <Prose markdown={data.explain} />}
@@ -679,13 +732,29 @@ export const DatapathFigure = withProps(
         {faultAt >= 0 && ranFaults.has(faultAt) && data.faults[faultAt]?.outcome && (
           <Prose markdown={data.faults[faultAt]?.outcome ?? ""} />
         )}
-        {(faults.length === 0 ? ran : ranFaults.size === faults.length) && data.outcomes && (
-          <Prose markdown={data.outcomes} />
-        )}
+        {(faults.length === 0 ? ran : ranFaults.size === faults.length) &&
+          (data.outcomesWhen === "edge" || stopped) &&
+          data.outcomes && <Prose markdown={data.outcomes} />}
       </div>
     );
   },
 );
+
+/** Module 12: the trap logic's outputs for the next edge, by name, read off the control unit. */
+function trapSignals(circuit: Circuit, values: readonly Word[]): EdgeView {
+  const view = edgeView(circuit, values);
+  const level = (n: string): 0 | 1 | undefined => {
+    const net = circuit.nets.find((x) => x.name === `control/${n}`);
+    const w = net ? values[net.id] : undefined;
+    return w && w.known === 1n ? (w.value === 1n ? 1 : 0) : undefined;
+  };
+  const signals: Record<string, 0 | 1 | undefined> = { ...view.signals };
+  for (const n of ["TRAP", "GO"]) {
+    const v = level(n);
+    if (v !== undefined) signals[n] = v;
+  }
+  return { ...view, signals };
+}
 
 /**
  * Module 9: the views of the machine of several edges beside its drawing, all read from the same
@@ -711,11 +780,28 @@ function ControlPanes({
   const strings = useViewStrings();
   const t = strings.control;
   const next = edgeView(circuit, values);
-  const machine = useMemo(() => controllerMachine(), []);
+  // Module 12's machine has its own controller: READ leads to WRITE for a control-register job.
+  const traps = machineOf(data.libraryId)?.traps === true;
+  const machine = useMemo(() => (traps ? trapControllerMachine() : controllerMachine()), [traps]);
+  const level = (n: string) => {
+    if (next.signals[n] !== undefined) return next.signals[n] === 1 ? 1 : 0;
+    const net = circuit.nets.find((x) => x.name === `control/${n}`);
+    const w = net ? values[net.id] : undefined;
+    return w && w.known === 1n && w.value === 1n ? 1 : 0;
+  };
   const inputs: Record<string, 0 | 1> = Object.fromEntries(
-    machine.inputs.map((n) => [n, next.signals[n] === 1 ? 1 : 0]),
+    machine.inputs.map((n) => [n, level(n)]),
   );
-  const applies = next.state && !stopped ? rowFor(machine, next.state, inputs) : undefined;
+  // Module 12: an edge that traps leads to FETCH whatever the table says, and one where GO is 0
+  // and nothing traps (a halt) leaves the state as it is. The diagram marks that state, not the
+  // table's move, and says why under it.
+  const trapping = traps && !stopped && level("TRAP") === 1;
+  const held = traps && !stopped && !trapping && level("GO") === 0;
+  const outside = trapping ? "FETCH" : held ? next.state : undefined;
+  const applies =
+    next.state && !stopped && outside === undefined
+      ? rowFor(machine, next.state, inputs)
+      : undefined;
   const names = Object.fromEntries(
     Object.entries(CONTROL_STATES).map(([name, code]) => [code, name]),
   );
@@ -734,7 +820,15 @@ function ControlPanes({
             machine={machine}
             {...(next.state ? { current: next.state } : {})}
             {...(applies ? { nextRow: applies.index } : {})}
+            {...(outside ? { nextState: outside } : {})}
           />
+          {(trapping || held) && (
+            <p className="state-note">
+              {format(trapping ? strings.machine12.trapMove : strings.machine12.heldMove, {
+                state: next.state ?? "",
+              })}
+            </p>
+          )}
         </figure>
       )}
       {data.timing.length > 0 && (

@@ -49,3 +49,7 @@ export * from "./meet";
 // Module 11, programming and debugging: the debugger's runs and programs graded by running them.
 export * from "./debugger";
 export * from "./program-tests";
+// Module 12, traps and interrupts: the machine of several edges with its trap hardware.
+export * from "./traps";
+export * from "./traps-run";
+export * from "./trap-timeline";

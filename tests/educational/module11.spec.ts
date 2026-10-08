@@ -99,7 +99,7 @@ const WRONG: readonly {
     from: "signed goto show",
     to: "unsigned goto show",
     fails: "Room A -30, room B 15",
-    left: "the display -30",
+    left: "the display: -30",
   },
   {
     lesson: "lists",
@@ -107,7 +107,7 @@ const WRONG: readonly {
     from: "if R3 < R5 signed goto found",
     to: "if R3 < R5 unsigned goto found",
     fails: "Log -200, 25, -150, 30; limit -150",
-    left: "the display 0",
+    left: "the display: 0",
   },
   {
     lesson: "lists",
@@ -115,7 +115,7 @@ const WRONG: readonly {
     from: "R3 <= R6 - R5         // the largest rise so far: the first pair's",
     to: "R3 <= 0",
     fails: "Log -190, -195, -200",
-    left: "the display 0",
+    left: "the display: 0",
   },
   {
     lesson: "functions",
@@ -124,7 +124,7 @@ const WRONG: readonly {
     to: "R5",
     all: true,
     fails: "Room A -160, room B -195",
-    left: "the display 77",
+    left: "the display: 77",
   },
   {
     lesson: "functions",
@@ -132,7 +132,7 @@ const WRONG: readonly {
     from: "signed goto below",
     to: "unsigned goto below",
     fails: "Call R1 -15, R2 20, R3 50",
-    left: "R1 0",
+    left: "R1: 0",
   },
   {
     lesson: "stack",
@@ -148,7 +148,7 @@ const WRONG: readonly {
     from: "        R1 <= R11\n",
     to: "",
     fails: "The lesson's store",
-    left: "the display 3",
+    left: "the display: 3",
   },
   {
     lesson: "debugging",
@@ -164,7 +164,7 @@ const WRONG: readonly {
     from: "R11 <= word[count]   //",
     to: "R11 <= count        //",
     fails: "Log -190, -181, -175, -170; limit -180",
-    left: "the display 94",
+    left: "the display: 94",
   },
   {
     lesson: "log-report",
@@ -172,7 +172,7 @@ const WRONG: readonly {
     from: "          R5 <= word[R1]        // the highest so far: the first reading",
     to: "          R5 <= 0",
     fails: "Log 1: the whole program",
-    left: "the word at 408 0",
+    left: "the word at 408: 0",
   },
 ];
 
@@ -319,7 +319,8 @@ test.describe("Module 11's lab", () => {
       const step = figure.getByRole("button", { name: T.step, exact: true });
       for (let k = 0; k < 12; k++) await step.click();
       await check();
-      await figure.getByRole("button", { name: T.runToPause, exact: true }).click();
+      // The run button says what a press will do: to a breakpoint, or to the end past the last.
+      await figure.getByRole("button", { name: /^Run to/ }).click();
       await check();
       await figure.getByRole("button", { name: T.back, exact: true }).click();
       await check();

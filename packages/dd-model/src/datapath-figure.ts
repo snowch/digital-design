@@ -10,8 +10,8 @@ import { Simulator, parseWord, word, type Circuit, type Word } from "@dd/sim";
 import { assemble, type Program } from "./assemble";
 import { type Stage } from "./datapath";
 import { datapathState, registersOf, stopReasonOf, type DatapathState } from "./datapath-run";
-import { placedMachine } from "./library-control";
-import { edgesLeft, registersTaken } from "./multicycle-view";
+import { placedMachine, placedTrapMachine } from "./library-control";
+import { edgeView, edgesLeft, registersTaken } from "./multicycle-view";
 import { placedDatapath } from "./library-datapath";
 
 /** The stage a library id draws. */
@@ -35,12 +35,18 @@ export interface BuiltDatapath {
   readonly program?: Program;
   /** Module 9's capstone: the machine knows the call through a register. */
   readonly callThroughRegister?: boolean;
+  /** Module 12: the machine with its trap hardware. */
+  readonly traps?: boolean;
 }
 
 /** Module 9: the machine of several edges, by library id, and whether it has the capstone's call. */
-export function machineOf(libraryId: string): { callThroughRegister: boolean } | undefined {
+export function machineOf(
+  libraryId: string,
+): { callThroughRegister: boolean; traps?: boolean } | undefined {
   if (libraryId === "machine-edges") return { callThroughRegister: false };
   if (libraryId === "machine-edges-call") return { callThroughRegister: true };
+  // Module 12: the machine with its trap hardware.
+  if (libraryId === "machine-traps") return { callThroughRegister: false, traps: true };
   return undefined;
 }
 
@@ -66,6 +72,14 @@ export function buildDatapath(setup: DatapathSetup): BuiltDatapath {
   if (machine) {
     const assembly = machine.callThroughRegister ? { callThroughRegister: 9 } : {};
     const program = setup.program === undefined ? undefined : assemble(setup.program, assembly);
+    if (machine.traps) {
+      const circuit = placedTrapMachine({
+        name: "machine",
+        ...(program ? { rom: program.rom } : {}),
+        registers: registerWords(setup.registers),
+      });
+      return { circuit, stage: "edges", ...machine, ...(program ? { program } : {}) };
+    }
     const circuit = placedMachine({
       name: "machine",
       ...machine,
@@ -153,7 +167,7 @@ export function startDatapath(
 }
 
 /** What a prediction asks about the next edge. */
-export type EdgeQuestion = "changed" | "pc" | "stop" | "value" | "edges" | "took";
+export type EdgeQuestion = "changed" | "pc" | "stop" | "value" | "edges" | "took" | "state";
 
 const signed64 = (v: bigint) => (v >= 1n << 63n ? v - (1n << 64n) : v);
 
@@ -189,6 +203,9 @@ export function edgeAnswer(sim: Simulator, ask: EdgeQuestion, register = 0): str
       if (!reason) return "go";
       return reason.kind === "trap" ? reason.cause.toString(16).toUpperCase() : reason.kind;
     }
+    case "state":
+      // Module 12: the controller's state after the next edge, by its name.
+      return edgeView(circuit, values).state ?? "X";
     case "value": {
       const v = after[register];
       return v === undefined ? "X" : signed64(v).toString();

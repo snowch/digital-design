@@ -10,7 +10,7 @@ export const LABELS = {
     "Predict a control signal for a given instruction kind.",
     "Trace an instruction kind to the control signals it sets.",
     "Write two control signals as OR gates over instruction kinds.",
-    "Write all twelve signals as a SystemVerilog `case` statement.",
+    "Write all twelve signals as a SystemVerilog case statement.",
   ],
   titles: {
     question: "The decoder, closed until now",

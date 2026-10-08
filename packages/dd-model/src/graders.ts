@@ -339,6 +339,32 @@ function exact(
   if (gone) return gone;
   const want = String(expect["value"]);
   if (given["form"] === "choice") return choices(answers, given, expect);
+  // Module 12: C0 or C1 as its two bits, bit 1 then bit 0. The same value in another notation is
+  // not wrong in value, so it gets the form's sentence (`bitsForm`), not the case's own detail.
+  if (given["form"] === "bits") {
+    const typed = (answers[field] ?? "").replace(/\s/g, "");
+    const want2 = want.padStart(2, "0");
+    if (/^[01]{1,2}$/.test(typed))
+      return {
+        pass: typed.padStart(2, "0") === want2,
+        inputs: {},
+        actual: { [field]: typed },
+        expected: { [field]: want2 },
+        ...ruleOf(given, field, typed),
+      };
+    const h = parseHex(typed);
+    const n = h === undefined ? undefined : Number.parseInt(h, 16);
+    if (n === undefined || Number.isNaN(n)) return { invalid: field };
+    return {
+      pass: false,
+      inputs: {},
+      actual: { [field]: typed },
+      expected: { [field]: want2 },
+      ...(n === Number.parseInt(want2, 2)
+        ? { detail: { key: "bitsForm", field, values: { actual: typed } } }
+        : ruleOf(given, field, typed)),
+    };
+  }
   if (given["form"] === "hex") {
     const h = parseHex(answers[field]);
     if (h === undefined) return { invalid: field };

@@ -20,7 +20,7 @@ import {
   scenarioOf,
   callStart,
   withData,
-  type MachineInputs,
+  type InputPlan,
 } from "@dd/dd-model";
 import type { Artifact, Challenge } from "@platform/lesson-schema";
 import type { ChallengeEditorProps, Verdict, VerdictFailure } from "@platform/lesson-runtime";
@@ -29,6 +29,7 @@ import {
   DebuggerView,
   ProgramText,
   refusalText,
+  valueText,
   type DebuggerOptions,
 } from "./interactives/Debugger";
 import { DEFAULT_VIEW_STRINGS, format, useViewStrings, type ViewStrings } from "./strings";
@@ -51,14 +52,14 @@ function leftText(
   return keys
     .map((key) => {
       const value = actual[key] ?? "";
-      const reg = /^R(\d{1,2})$/.exec(key);
+      const reg = /^[RC](\d{1,2})$/.exec(key);
       const word = /^word:([0-9A-Fa-f]+)$/.exec(key);
       const name = reg
         ? format(t.checkRegister, { name: key })
         : word
           ? format(t.checkWord, { address: (word[1] as string).toUpperCase() })
-          : (t.checks[key] ?? key);
-      if (key === "end") return format(t.checkValue, { name, value: "" }).trim();
+          : (t.checks[key] ?? strings.machine12.checks[key] ?? key);
+      if (key === "end") return name;
       if (key === "kept") return value === "" ? t.keptAll : format(t.keptNot, { names: value });
       if (key === "returned") return value === "yes" ? t.returnedYes : t.returnedNo;
       if (key === "lamps")
@@ -68,9 +69,16 @@ function leftText(
             .map((n, bit) => `${n} ${(Number(value) >> bit) & 1 ? t.lampOn : t.lampOff}`)
             .join(", "),
         });
-      return format(t.checkValue, { name, value: value || t.empty });
+      // A word or a register as the debugger writes it: from 10 to 7FF, its hexadecimal beside.
+      const said = (reg && key.startsWith("R")) || word ? wordText(value) : value;
+      return format(t.checkValue, { name, value: said || t.emptyLeft });
     })
     .join("; ");
+}
+
+/** A decimal the grader left, as the debugger writes a word: its hexadecimal beside from 10 to 7FF. */
+function wordText(value: string): string {
+  return /^-?\d+$/.test(value) ? valueText(BigInt(value)) : value;
 }
 
 /** Grades a program challenge: every case run, each failure saying what the program left. */
@@ -111,17 +119,32 @@ export function gradeProgram(
     if (r.pass) continue;
     // One sentence for each check that failed: what the program left; how the run ended, when that
     // was not a stop of the program's or a return; the task's own sentence for what was wrong.
-    const wrongLeft = r.wrong.filter((k) => k !== "end");
+    // Module 12 (a run with traps) says how its run ended in its own words, the handler's `stop`
+    // never "the program's", and how a run must end in the task's own sentence.
+    const traps = c.given["traps"] !== undefined;
+    const m12 = strings.machine12;
+    const endWrong = r.wrong.includes("end") || r.wrong.includes("stopAt");
+    const wrongLeft = r.wrong.filter((k) => k !== "end" && k !== "stopAt");
     const parts: string[] = [];
     if (wrongLeft.length)
-      parts.push(format(t.failedLeft, { left: leftText(strings, r.actual, wrongLeft) }));
+      parts.push(
+        format(traps ? m12.failedLeft : t.failedLeft, {
+          left: leftText(strings, r.actual, wrongLeft),
+        }),
+      );
     const endKey = r.end?.key;
-    if (r.end && (r.wrong.includes("end") || (endKey !== "stop" && endKey !== "returned")))
-      parts.push(format(t.stops[r.end.key] ?? r.end.key, r.end.values));
+    const ended = (key: string) =>
+      traps ? (m12.stops[key] ?? t.stops[key]) : (t.stops[key] ?? m12.stops[key]);
+    if (r.end && (endWrong || (endKey !== "stop" && endKey !== "returned")))
+      parts.push(format(ended(r.end.key) ?? r.end.key, r.end.values));
     const key = c.given["detail"];
-    const sentence = key !== undefined ? t.details[String(key)] : undefined;
+    const sentence =
+      key !== undefined ? (t.details[String(key)] ?? m12.details[String(key)]) : undefined;
     if (sentence && wrongLeft.length) parts.push(sentence);
-    if (r.wrong.includes("end") && endKey !== "stop") parts.push(t.mustStop);
+    if (traps) {
+      const must = key !== undefined ? m12.ends[String(key)] : undefined;
+      if (endWrong && must) parts.push(must);
+    } else if (r.wrong.includes("end") && endKey !== "stop") parts.push(t.mustStop);
     failures.push({
       index,
       label: c.label,
@@ -158,12 +181,15 @@ export function ProgramEditor({ challenge, artifact, onChange }: ChallengeEditor
   const run = runs[chosen] ?? runs[0];
   const scenario = useMemo(() => (run ? scenarioOf(run.given) : {}), [run]);
   const checked = useMemo(() => assembleChecked(withData(text, scenario)), [text, scenario]);
-  const inputs = useMemo<MachineInputs>(
+  const inputs = useMemo<InputPlan>(
     () => ({
       door: scenario.inputs?.door ?? 0,
       warm: scenario.inputs?.warm ?? 0,
       sensorA: scenario.inputs?.sensorA ?? 0n,
       sensorB: scenario.inputs?.sensorB ?? 0n,
+      // Module 12: a test's door that opens before an instruction.
+      ...(scenario.doorOpensAt !== undefined ? { doorOpensAt: scenario.doorOpensAt } : {}),
+      ...(scenario.doorClosesAt !== undefined ? { doorClosesAt: scenario.doorClosesAt } : {}),
     }),
     [scenario],
   );
@@ -225,6 +251,10 @@ export function ProgramEditor({ challenge, artifact, onChange }: ChallengeEditor
         </div>
       )}
       <ProgramText
+        // Module 12's challenges write a handler, not a program: the box says so.
+        {...(runs.some((c) => c.given["traps"] !== undefined)
+          ? { label: strings.machine12.handlerLabel }
+          : {})}
         text={text}
         onChange={(next) => onChange({ ...artifact, text: next })}
         problems={problems}
@@ -257,6 +287,7 @@ export function ProgramEditor({ challenge, artifact, onChange }: ChallengeEditor
             options={{
               ...(start.debugger ?? {}),
               ...(callAt ? { start: callAt } : {}),
+              ...(scenario.traps ? { traps: true } : {}),
             }}
             id={challenge.id}
           />

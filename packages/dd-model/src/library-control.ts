@@ -10,6 +10,7 @@ import type { Circuit } from "@dd/sim";
 import { decoderCircuit } from "./control";
 import { routed } from "./library-datapath";
 import { multicycleCircuit, type MulticycleOptions } from "./multicycle";
+import { trapsCircuit, type TrapMachineOptions } from "./traps";
 
 type At = Readonly<Record<string, readonly [number, number]>>;
 type Place = (circuit: Circuit, at: At) => Circuit;
@@ -17,6 +18,23 @@ type Routes = Readonly<Record<string, readonly number[]>>;
 
 /** Hand-placed drawings of Module 9's circuits' top levels, in grid cells. */
 export const CONTROL_AT: Readonly<Record<string, At>> = {
+  // Module 12: the machine with its trap hardware, Module 9's three blocks wider for it.
+  "machine-traps": {
+    "in:CLK": [0, 25],
+    "in:RST": [0, 27],
+    control: [8, 4],
+    "out:CAUSE": [17, 1.5],
+    // One cell left of the loops' wires down to the datapath, so its value is written clear of them.
+    "out:HALT": [16, 12.5],
+    datapath: [22, 6.5],
+    "in:DOOR": [33, 11],
+    "in:WARM": [33, 12],
+    "in:SENSORA": [32, 13],
+    "in:SENSORB": [32, 14],
+    port: [38, 6],
+    "out:DISPLAY": [51, 4.5],
+    "out:LAMPS": [51, 6.5],
+  },
   decoder: {
     "in:K": [0, 5],
     "in:J": [0, 8],
@@ -212,6 +230,35 @@ const JOB_CHECK_ROUTES: Routes = {
 };
 
 export const CONTROL_KIND_ROUTES: Readonly<Record<string, Routes>> = {
+  // Module 12's controller: RESUME up into its output logic.
+  "controller-traps": { "input:RESUME.y>outputs.RESUME": [50.5] },
+  // Module 12's datapath: the words up into the next PC's choice and register Y's word, the
+  // lower source turning further right.
+  "datapath-traps": {
+    "toNext.RESUME>nextTrap.RESUME": [67.5],
+    "toNext.TRAP>nextTrap.TRAP": [68],
+    "heldM.Q>yWord.HM": [68.5],
+    "cregs.CWORD>yWord.CWORD": [69.5],
+    "cregs.C2>nextTrap.C2": [70.5],
+    "cregs.C4>nextTrap.C4": [71],
+    "toNext.CALL>yWord.CALL": [70],
+    "toNext.CREAD>yWord.CREAD": [71.5],
+  },
+  // Module 12's control unit: the unit's own inputs up into the trap logic, the lower ones
+  // turning further right.
+  "control-unit-traps": {
+    "input:CAUSEF.y>trapLogic.CAUSEF": [28],
+    "input:CAUSEM.y>trapLogic.CAUSEM": [28.5],
+    "input:WAITING.y>trapLogic.WAITING": [29],
+    "input:NOHANDLER.y>trapLogic.NOHANDLER": [29.5],
+    // User mode up between the system jobs and the trap logic, and over to the bus.
+    "mode.USER>bus.USER": [31.5, 31.6],
+    // GO and TRAP up past the controller and over its top, into it from the left.
+    "trapLogic.GO>controller.GO": [44, 1.6, 32],
+    "trapLogic.TRAP>controller.TRAP": [44.5, 1.1, 31.5],
+    "input:RST.y>controller.RST": [26],
+  },
+
   // Down the bus, the line from higher up further right.
   "control-decoder": DECODER_BUS,
   "control-decoder-mem": DECODER_BUS,
@@ -451,6 +498,27 @@ function routedByKind(circuit: Circuit, routes: Readonly<Record<string, Routes>>
 
 /** Hand routes, where the router alone cannot keep a drawing clear. */
 export const CONTROL_ROUTES: Readonly<Record<string, Routes>> = {
+  // Module 12: the loops back nested, the memory's outermost; the datapath's below the memory's
+  // loops to the datapath, so each crosses only wires of another block.
+  "machine-traps": {
+    "control.CAUSE>output:CAUSE.a": [16, 2.1],
+    "control.HALT>output:HALT.a": [15.5],
+    "control.CONTROL>port.CONTROL": [19, 3, 36],
+    "port.CAUSEF>control.CAUSEF": [47, 24, 3],
+    "port.CAUSEM>control.CAUSEM": [46.5, 23.5, 3.5],
+    "port.WAITING>control.WAITING": [46, 23, 4],
+    "port.FETCHED>datapath.FETCHED": [45.5, 20, 19.5],
+    "port.MQ>datapath.MQ": [45, 19.5, 20],
+    "datapath.IR>control.IR": [31, 22, 4.5],
+    "datapath.STATUS>control.STATUS": [30.5, 21.5, 5],
+    "datapath.NOHANDLER>control.NOHANDLER": [30, 21, 5.5],
+    "input:CLK.y>control.CLK": [6.5],
+    "input:CLK.y>datapath.CLK": [20.5],
+    "input:CLK.y>port.CLK": [36.5],
+    "input:RST.y>control.RST": [7],
+    "input:RST.y>datapath.RST": [21],
+    "input:RST.y>port.RST": [37],
+  },
   machine: {
     // The control bus straight into the datapath, and over it into the memory.
     "control.CONTROL>datapath.CONTROL": [19],
@@ -474,6 +542,28 @@ export const CONTROL_ROUTES: Readonly<Record<string, Routes>> = {
 
 /** Hand-placed insides of Module 9's blocks a learner opens, by kind. */
 export const CONTROL_INSIDE: Readonly<Record<string, At>> = {
+  // Module 12's control unit: Module 9's, with the mode's bits and the system jobs beside the
+  // decoder, and the trap logic where the stop logic was.
+  "control-unit-traps": {
+    "in:RST": [0, 4],
+    "in:CLK": [0, 6.5],
+    "in:IR": [0, 20.5],
+    "in:STATUS": [0, 39.5],
+    "in:CAUSEF": [0, 43],
+    "in:CAUSEM": [0, 44.5],
+    "in:WAITING": [0, 46],
+    "in:NOHANDLER": [0, 47.5],
+    digits: [4, 17.5],
+    decoder: [12, 15],
+    system: [21, 31],
+    mode: [8, 39],
+    controller: [33, 3],
+    trapLogic: [33, 36],
+    bus: [52, 5],
+    "out:CONTROL": [62, 18.5],
+    "out:CAUSE": [45, 41],
+    "out:HALT": [45, 43],
+  },
   // The capstone's: kind 9's line joins WRITEY, BCONST and OP1, and CALL and JUMP are ORs.
   // The capstone's, drawn as the decoder without it: kind 9's line joins WRITEY, BCONST and OP1,
   // and CALL and JUMP are ORs below the rest.
@@ -901,6 +991,43 @@ export const CONTROL_INSIDE: Readonly<Record<string, At>> = {
     "out:DISPLAY": [33, 9],
     "out:LAMPS": [38, 10],
   },
+  // Module 12's datapath: Module 9's, with the control registers below the ALU and the next PC's
+  // choice of C2 or C4 after the next-PC block.
+  "datapath-traps": {
+    "in:CONTROL": [0, 3],
+    "in:CAUSE": [0, 38],
+    "in:FETCHED": [0, 14],
+    "in:MQ": [0, 30],
+    "in:CLK": [0, 33],
+    "in:RST": [0, 35],
+    toFetch: [4, 3],
+    pickAddr: [18, 3],
+    pc: [12, 8],
+    ir: [12, 14],
+    digits: [20, 12.5],
+    registers: [27, 14.5],
+    toRegisters: [12, 23],
+    widen: [27, 26],
+    hold: [33, 16.5],
+    toAlu: [33, 3],
+    pickA: [40, 15],
+    pickB: [40, 19],
+    alu: [47, 15.5],
+    heldR: [54, 7],
+    condition: [54, 15.5],
+    next: [61, 15.5],
+    toNext: [54, 22.5],
+    heldM: [61, 33],
+    toControlRegisters: [33, 36],
+    cregs: [47, 34],
+    nextTrap: [72, 18],
+    yWord: [72, 25],
+    "out:ADDR": [82, 4],
+    "out:HB": [82, 11],
+    "out:IR": [82, 13],
+    "out:STATUS": [82, 39.5],
+    "out:NOHANDLER": [82, 41.5],
+  },
   "datapath-edges": {
     "in:CONTROL": [0, 3],
     "in:FETCHED": [0, 14],
@@ -941,6 +1068,14 @@ function laid(circuit: Circuit, key: string): Circuit {
   return Object.keys(routes).length ? routed(placedCircuit, routes) : placedCircuit;
 }
 
+/** Module 12's machine with its trap hardware, placed as its figure draws it. */
+export function placedTrapMachine(options: TrapMachineOptions): Circuit {
+  return routedByKind(
+    routedInside(laid(trapsCircuit(options), "machine-traps"), CONTROL_INSIDE_ROUTES),
+    CONTROL_KIND_ROUTES,
+  );
+}
+
 /** The machine of several edges, placed as its figure draws it, with a program and registers. */
 export function placedMachine(options: MulticycleOptions): Circuit {
   return routedByKind(
@@ -961,5 +1096,7 @@ export function controlLibrary(place: Place): Readonly<Record<string, () => Circ
       ),
     "machine-edges": () => placedMachine({ name: "machine" }),
     "machine-edges-call": () => placedMachine({ name: "machine", callThroughRegister: true }),
+    // Module 12: the machine with its trap hardware.
+    "machine-traps": () => placedTrapMachine({ name: "machine" }),
   };
 }

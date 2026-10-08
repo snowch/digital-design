@@ -123,10 +123,13 @@ export function StateDiagram({
   machine: m,
   current,
   nextRow,
+  nextState,
 }: {
   machine: Machine;
   current?: string;
   nextRow?: number;
+  /** Module 12: the state the next edge leads to by a rule outside the table (a trap, a halt). */
+  nextState?: string;
 }) {
   const strings = useViewStrings();
   const [natural, h] = m.size ?? [400, 380];
@@ -243,10 +246,11 @@ export function StateDiagram({
         {m.states.map((s) => {
           const p = at(s.name);
           const here = s.name === current;
+          const next = s.name === nextState;
           return (
             <g
               key={s.name}
-              className={`state-node${here ? " state-node-current" : ""}`}
+              className={`state-node${here ? " state-node-current" : ""}${next ? " state-node-next" : ""}`}
               data-state={s.name}
             >
               <rect x={p.x - p.w / 2} y={p.y - BOX_H / 2} width={p.w} height={BOX_H} rx={6} />

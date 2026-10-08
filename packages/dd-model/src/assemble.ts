@@ -82,7 +82,11 @@ export type AssemblyProblemCode =
   | "compareRegisters"
   | "callRegister"
   | "addressForm"
-  | "reservedName";
+  | "reservedName"
+  /** Module 12: a control register outside C0 to C4, which the learner's assembler refuses. */
+  | "controlRegister"
+  /** Module 12: a control register in a job, a load or a store, not copied to or from R. */
+  | "controlTransfer";
 
 export interface AssemblyProblem {
   /** The line's number in the text, from 1. */
@@ -276,7 +280,7 @@ function assembleAll(
   }
   const rom = new Uint8Array(MAP.romEnd);
   const lines: AssembledLine[] = [];
-  const context: Context = { labels, dataLabels };
+  const context: Context = { labels, dataLabels, learner: collect };
   for (const item of items) {
     if (item.kind === "data") {
       try {
@@ -334,6 +338,18 @@ interface Context {
   readonly labels: Readonly<Record<string, number>>;
   /** Names of `word` and `byte` lines: data, which a `goto` or a `call` may not go to. */
   readonly dataLabels: ReadonlySet<string>;
+  /** The learner's assembler (Module 12): a control register outside C0 to C4 is refused. */
+  readonly learner?: boolean;
+}
+
+/** A control register's number, refused outside 0 to 4 by the learner's assembler. */
+function controlNumber(text: string, context: Context, line: number): number {
+  const n = Number(text.slice(1));
+  if (context.learner && n > 4)
+    throw new AssemblyError(line, `${text} is not a control register`, "controlRegister", {
+      name: text,
+    });
+  return n;
 }
 
 /** A number of any size, for a word of data, which must fit in a word (or a byte). */
@@ -423,9 +439,20 @@ function addressOf(text: string, context: Context, line: number): { reg?: number
   return { c: constant(value(text, context, line), line) };
 }
 
+/** A control register's name inside a line. */
+const CONTROL_NAME = /\bC\d{1,2}\b/;
+
 /** Why a line no rule reads cannot be read, by the commonest slips. */
 function unreadable(t: string, line: number): AssemblyError {
   const v = { text: t };
+  // Module 12: a control register is only copied to or from an R register (`docs/isa.md`).
+  if (CONTROL_NAME.test(t))
+    return new AssemblyError(
+      line,
+      "a control register is only copied to or from an R register",
+      "controlTransfer",
+      v,
+    );
   if (/^(R\d{1,2}|word\[.*\]|byte\[.*\])\s*=[^=]/.test(t) || /^(R\d{1,2})\s*:=/.test(t))
     return new AssemblyError(line, "write the arrow `<=`", "useArrow", v);
   if (/[*/%]|<<|>>/.test(t.replace(/^.*?<=/, "")))
@@ -542,9 +569,16 @@ function instruction(
     const j = (m[1] === "byte" ? 1 : 0) | (reg === undefined ? 8 : 0);
     return encode(4, j, reg ?? 0, register(m[3] as string, line), 0, c);
   }
-  m = /^(C\d) <= (R\d{1,2})$/.exec(t);
+  m = /^(C\d{1,2}) <= (R\d{1,2})$/.exec(t);
   if (m)
-    return encode(8, 3, register(m[2] as string, line), 0, 0, Number((m[1] as string).slice(1)));
+    return encode(
+      8,
+      3,
+      register(m[2] as string, line),
+      0,
+      0,
+      controlNumber(m[1] as string, context, line),
+    );
   m = /^(R\d{1,2}) <= (.+)$/.exec(t);
   if (!m) throw unreadable(t, line);
   const y = register(m[1] as string, line);
@@ -577,8 +611,9 @@ function instruction(
     const j = (r[1] === "byte" ? 1 : 0) | (reg === undefined ? 8 : 0);
     return encode(3, j, reg ?? 0, 0, y, c);
   }
-  r = /^C(\d)$/.exec(right);
-  if (r) return encode(8, 2, 0, 0, y, Number(r[1]));
+  r = /^(C\d{1,2})$/.exec(right);
+  if (r) return encode(8, 2, 0, 0, y, controlNumber(r[1] as string, context, line));
+  if (CONTROL_NAME.test(right)) throw unreadable(t, line);
   r = /^(R\d{1,2}) ?([&^+|-]) ?(.+)$/.exec(right);
   if (r) {
     const a = register(r[1] as string, line);

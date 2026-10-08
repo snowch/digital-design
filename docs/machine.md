@@ -170,8 +170,11 @@ go in, the register the result goes to, and the constant. The parts, and where t
 - **A 5-way selector for the next PC**: PC + 4, the target, the ALU's result (a jump), C2
   (`resume`) or C4 (a trap). Made of Module 3's selectors.
 - **The control registers** and the selectors in front of them: C0 takes `01` on a trap, C1 on
-  `resume`, or the register A on a write; C1 takes C0 on a trap; C2 takes the return point; C3
-  takes the cause; C4 takes the register A.
+  `resume`, or the register A on a write; C1 takes C0 on a trap; C2 takes the return point on a
+  trap; C3 takes the cause on a trap; and each of the five takes the register A on a write,
+  `Cc <= Rm` (`docs/isa.md`, "System jobs"). A handler writes C2 to skip the instruction that
+  faulted, and writes C1 and C2 back before `resume` when it has let interrupts in (Module 12's
+  correction: this bullet first gave the register A to C0 and C4 alone).
 - **The decoder**: the kind and job digits, the constant (for a control register's number) and
   C0's mode in; the control signals and the decode causes (`21`, `22`) out.
 - **The trap logic**: every cause, the interrupts waiting and C0's bit 1 in; whether this edge
@@ -265,7 +268,12 @@ check to fail in the order the steps run.
   fetch at the new PC traps (`11` or `12`), with that PC as the return point.
 - **An interrupt** is taken at an edge between two instructions, when C0's bit 1 is 1 and a bit
   of "waiting" is 1. The instruction that would have run is not run; it is the return point.
-  The timer comes first if both wait.
+  The timer comes first if both wait. Decided with Module 12, where this document left it open:
+  on the machine of several edges an interrupt is taken at the edge that would fetch, and a
+  fetch's own cause (`11`, `12`) wins over it there, as the lower number; a trap's edge does not
+  count the timer down, since no instruction finished; and the door is seen at every edge that
+  ends an instruction or traps, so both machines take the same interrupt before the same
+  instruction.
 - **User mode refuses** `resume`, reading or writing a control register, `stop` (cause `22`), and
   every load or store at a device's address (cause `32`). A user program reaches a device through a
   system call, which is why system calls exist.

@@ -77,7 +77,7 @@ export const EDGE_SIGNALS = [
 export type EdgeSignal = (typeof EDGE_SIGNALS)[number];
 
 /** A register of `width` bits written at a rising edge where EN is 1, with no reset. */
-function heldRegister(
+export function heldRegister(
   b: CircuitBuilder,
   name: string,
   ins: { D: NetId; EN: NetId; CLK: NetId },
@@ -103,7 +103,7 @@ function heldRegister(
 }
 
 /** A held word as a closed block: `held-64` or `held-32`. */
-function held(
+export function held(
   b: CircuitBuilder,
   name: string,
   ins: { D: NetId; EN: NetId; CLK: NetId },

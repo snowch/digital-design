@@ -13,6 +13,11 @@
 // system jobs, `call system` traps (cause 41) and so stops it too; `resume` and the two
 // control-register jobs stop it with the reason "later", since Module 12 builds what they do.
 //
+// Module 12 builds the control registers (option `traps`, `MODULE_12`): a trap goes to the handler
+// whose address C4 holds, `resume` goes back, the control-register jobs read and write C0 to C4,
+// user mode refuses what `docs/machine.md` says, and interrupts are taken between two
+// instructions. With C4 at 0, as at reset, a trap still halts the machine with its cause.
+//
 // A register or a byte of RAM that nothing has set is unknown, X, as every flip-flop is in the
 // course's model until something sets it. Here an unknown word is `undefined`: a result worked
 // out from one is unknown too.
@@ -49,11 +54,28 @@ export const CAUSES = {
   outsideRom: 0x11,
   notMultipleOf4: 0x12,
   illegal: 0x21,
+  userRefused: 0x22,
   noMemory: 0x31,
+  userDevice: 0x32,
   misaligned: 0x33,
   readOnly: 0x34,
   system: 0x41,
+  timer: 0x81,
+  door: 0x82,
 } as const;
+
+/**
+ * Module 12: the control registers, C0 to C4 (`docs/machine.md`, "Traps and interrupts"). C0 and
+ * C1 hold two bits (bit 0: system mode; bit 1: interrupts on), C3 a cause of 8 bits, C2 and C4 an
+ * address of 64 bits.
+ */
+export type ControlRegisters = readonly [bigint, bigint, bigint, bigint, bigint];
+
+/** The control registers at reset: system mode, interrupts off, no handler. */
+export const CONTROL_AT_RESET: ControlRegisters = [1n, 0n, 0n, 0n, 0n];
+
+/** The bits each control register keeps when written: C0 and C1 two, C3 eight, C2 and C4 all. */
+export const CONTROL_MASKS: ControlRegisters = [3n, 3n, (1n << 64n) - 1n, 0xffn, (1n << 64n) - 1n];
 
 /** Why the machine stopped: a trap's cause, the `stop` job, or a system job Module 12 builds. */
 export type StopReason =
@@ -87,6 +109,8 @@ export interface CpuState {
   readonly waiting: number;
   /** DOOR as it was at the edge before; a reset counts the door as closed, 0. */
   readonly doorBefore: 0 | 1;
+  /** Module 12: C0 to C4. Unused (at their reset values) on a machine without traps. */
+  readonly control: ControlRegisters;
   /** Set once the machine has stopped, with the reason and the PC of the instruction. */
   readonly stopped?: { readonly reason: StopReason; readonly pc: bigint };
 }
@@ -105,6 +129,7 @@ export function resetMachine(rom: Uint8Array | readonly number[]): CpuState {
     timer: 0n,
     waiting: 0,
     doorBefore: 0,
+    control: CONTROL_AT_RESET,
   };
 }
 
@@ -183,10 +208,26 @@ export interface MachineOptions {
    * job digit a branch's condition (jobs 0 to 7; 8 to F illegal).
    */
   readonly setIf?: number;
+  /**
+   * Module 12: the control registers, traps to the handler, `resume`, the control-register jobs,
+   * user mode and interrupts.
+   */
+  readonly traps?: boolean;
 }
 
 /** Module 9's machine: the decoder checks a control register's number. */
 export const MODULE_9: MachineOptions = { registerCheck: true };
+
+/** Module 12's machine: Module 9's, with the control registers and traps. */
+export const MODULE_12: MachineOptions = { registerCheck: true, traps: true };
+
+/** Whether C0 says user mode: bit 0 is 0. */
+export const userMode = (s: CpuState) => (s.control[0] & 1n) === 0n;
+
+/** The return point of a trap with this cause (docs/machine.md): the next instruction for 41. */
+export function returnPoint(cause: number, pc: bigint): bigint {
+  return cause === CAUSES.system ? (pc + 4n) & MASK64 : pc;
+}
 
 /** Whether an instruction is illegal (cause 21), from its fields alone (docs/isa.md). */
 export function isIllegal(f: Fields, options: MachineOptions = {}): boolean {
@@ -230,6 +271,10 @@ export interface StepRecord {
   };
   readonly nextPc: bigint;
   readonly stopped?: StopReason;
+  /** Module 12: the edge trapped and went to the handler, with this cause and return point. */
+  readonly trap?: { readonly cause: number; readonly returnPoint: bigint };
+  /** Module 12: a control register written, and the word it took. */
+  readonly control?: { readonly reg: number; readonly value: bigint };
 }
 
 const signedByteWord = (n: number) => BigInt(n);
@@ -277,10 +322,17 @@ function deviceRead(s: CpuState, inputs: MachineInputs, address: number): bigint
  * The memory check for an access (docs/machine.md, causes 31 to 34), or undefined when the access
  * is allowed. The lower number wins: no memory, then misaligned, then read-only.
  */
-export function memoryCheck(address: bigint, store: boolean, byte: boolean): number | undefined {
+export function memoryCheck(
+  address: bigint,
+  store: boolean,
+  byte: boolean,
+  user = false,
+): number | undefined {
   if (address >= BigInt(MAP.end) || address >= BigInt(DEVICES.none)) return CAUSES.noMemory;
   const a = Number(address);
   const device = a >= MAP.deviceStart;
+  // Module 12: user mode may not reach a device's address at all.
+  if (user && device) return CAUSES.userDevice;
   if (byte ? device : a % 8 !== 0) return CAUSES.misaligned;
   if (store) {
     if (a < MAP.romEnd) return CAUSES.readOnly;
@@ -316,8 +368,32 @@ export function step(
     },
     record: { pc, ...extra, nextPc: pc, stopped: reason },
   });
-  if (pc >= BigInt(MAP.romEnd)) return stop({ kind: "trap", cause: CAUSES.outsideRom });
-  if (pc % 4n !== 0n) return stop({ kind: "trap", cause: CAUSES.notMultipleOf4 });
+  // A trap: with no handler (C4 is 0), or at the handler's own address, the machine halts. With
+  // one, at this edge C2 takes the return point, C1 takes C0, C0 takes 01, C3 takes the cause and
+  // the PC takes C4, and nothing else the instruction would have done happens. No instruction
+  // finished, so the timer does not count; the door's event is the device's own and is kept.
+  const trap = (cause: number, extra: Partial<StepRecord> = {}) => {
+    const c4 = s.control[4];
+    if (!options.traps || c4 === 0n || c4 === pc) return stop({ kind: "trap", cause }, extra);
+    const back = returnPoint(cause, pc);
+    return {
+      state: {
+        ...s,
+        pc: c4,
+        waiting: s.waiting | doorEvent(s, inputs),
+        doorBefore: inputs.door,
+        control: [1n, s.control[0], back, BigInt(cause), c4] as ControlRegisters,
+      },
+      record: { pc, ...extra, nextPc: c4, trap: { cause, returnPoint: back } },
+    };
+  };
+  if (pc >= BigInt(MAP.romEnd)) return trap(CAUSES.outsideRom);
+  if (pc % 4n !== 0n) return trap(CAUSES.notMultipleOf4);
+  // Module 12: an interrupt is taken at the edge that would run the next instruction, while
+  // interrupts are on (C0's bit 1) and an event waits; the timer's first. The instruction is not
+  // run: it is the return point. A fetch's own cause, the lower number, wins over it.
+  if (options.traps && (s.control[0] & 2n) !== 0n && s.waiting !== 0)
+    return trap((s.waiting & 1) !== 0 ? CAUSES.timer : CAUSES.door);
   const at = Number(pc);
   const instruction =
     ((s.rom[at] ?? 0) |
@@ -332,11 +408,14 @@ export function step(
   // Module 9's decoder makes the check first (cause 21), and stops on the job only if it passes.
   if (!options.registerCheck && f.k === 8 && f.j >= 1 && f.j <= 3)
     return stop({ kind: "later" }, seen);
-  if (isIllegal(f, options)) return stop({ kind: "trap", cause: CAUSES.illegal }, seen);
+  if (isIllegal(f, options)) return trap(CAUSES.illegal, seen);
+  const user = options.traps === true && userMode(s);
   if (f.k === 8) {
-    if (f.j === 0) return stop({ kind: "trap", cause: CAUSES.system }, seen);
+    // User mode refuses every system job but `call system`.
+    if (user && f.j !== 0) return trap(CAUSES.userRefused, seen);
+    if (f.j === 0) return trap(CAUSES.system, seen);
     if (f.j === 4) return stop({ kind: "stop" }, seen);
-    return stop({ kind: "later" }, seen);
+    if (!options.traps) return stop({ kind: "later" }, seen);
   }
   const pc4 = (pc + 4n) & MASK64;
   const c = widen(f.raw);
@@ -351,6 +430,8 @@ export function step(
   let lamps = s.lamps;
   let timerWritten: bigint | undefined;
   let waitingClear = 0;
+  let control = s.control;
+  let controlWritten: StepRecord["control"];
   const write = (reg: number, value: bigint | undefined) => {
     wrote = { reg, value };
     regs = regs.map((r, i) => (i === reg ? value : r));
@@ -378,8 +459,8 @@ export function step(
       const base = absolute ? 0n : ra;
       if (base === undefined) throw new Error("the reference does not run an unknown address");
       const address = (base + c) & MASK64;
-      const cause = memoryCheck(address, store, byte);
-      if (cause !== undefined) return stop({ kind: "trap", cause }, seen);
+      const cause = memoryCheck(address, store, byte, user);
+      if (cause !== undefined) return trap(cause, seen);
       const a = Number(address);
       if (store) {
         const value = rb === undefined ? undefined : byte ? rb & 0xffn : rb;
@@ -425,6 +506,23 @@ export function step(
       if (ra === undefined) throw new Error("the reference does not jump to an unknown address");
       nextPc = (ra + c) & MASK64;
       break;
+    case 8:
+      // Module 12's system jobs 1 to 3, in system mode (user mode trapped above).
+      if (f.j === 1) {
+        // resume: C0 takes C1 and the PC takes C2.
+        control = [s.control[1], s.control[1], s.control[2], s.control[3], s.control[4]];
+        controlWritten = { reg: 0, value: s.control[1] };
+        nextPc = s.control[2];
+      } else if (f.j === 2) {
+        write(f.y, s.control[f.c] ?? 0n);
+      } else if (f.j === 3) {
+        if (ra === undefined)
+          throw new Error("the reference does not write an unknown word to a control register");
+        const value = ra & (CONTROL_MASKS[f.c] ?? 0n);
+        control = s.control.map((v, i) => (i === f.c ? value : v)) as unknown as ControlRegisters;
+        controlWritten = { reg: f.c, value };
+      }
+      break;
     case options.callThroughRegister:
       // Module 9's capstone: the call's return address and the jump's target, in one instruction.
       if (ra === undefined) throw new Error("the reference does not jump to an unknown address");
@@ -465,6 +563,7 @@ export function step(
     timer,
     waiting,
     doorBefore: inputs.door,
+    control,
   };
   return {
     state,
@@ -474,6 +573,7 @@ export function step(
       fields: f,
       ...(wrote ? { wrote } : {}),
       ...(memory ? { memory } : {}),
+      ...(controlWritten ? { control: controlWritten } : {}),
       nextPc,
     },
   };
