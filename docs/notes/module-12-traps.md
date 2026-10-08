@@ -508,13 +508,13 @@ and R9 into R12 and R13 (A1) no longer holds: B1 replaced that copy.
   inside, and closes them again; it carries `aria-expanded` and is offered only where the box hides
   rows (memory and the stack only on a phone, where their boxes are short). The listing's
   machine-word column is now left out unless a debugger asks for it (`words`, which Module 11's
-  assembly lesson does), and on a phone a row keeps to one line, its comment reached by scrolling
-  sideways. Where the button sits was set by the one-screen test: under the box it pushed 12.1's
+  assembly lesson does); a line with a comment still wraps on a phone, since no table on these
+  pages may scroll sideways (the full check's legibility test said so when one did). Where the button sits was set by the one-screen test: under the box it pushed 12.1's
   control registers, 12.5's events and 11.2's memory below a phone's screen, so the listing's
   button sits in its header row, memory's in its header's empty cell, and the stack's beside its
   title; the listing's title is hidden on a phone (its caption stays for a screen reader). The
-  compact listing on a phone is 9.5rem: four whole rows, or two where each row has its 40-pixel
-  breakpoint button; any taller and the one-screen test fails on 11.2. No drag handle: the
+  compact listing on a phone is 9.5rem: two to four whole rows, two where each row has its
+  40-pixel breakpoint button or a wrapped comment; any taller and the one-screen test fails on 11.2. No drag handle: the
   listing's maximum height would cap a drag at the compact size. The browser test opens 12.6's
   72-line listing at both widths, finds every row inside it with no scroll, closes it, steps, and
   finds the line about to run inside the compact box. Running the whole suite also found a hole
@@ -614,6 +614,14 @@ change, left for the managing session with the review's other two.
   tests expected "Stopped:" for a halt, which A3 made "Halted:"; and the long-debugger test still
   listed 12.8's investigation, now an 11-instruction program the test's twelve steps run past.
   The two expectations updated and the entry dropped; those six then passed (12 tests run).
+
+- **The fourth run, after the second reading and B12, on `2009f83`** (with `main` at `a889d56`
+  merged): formatting, copyright, the platform copy, types and the build passed; Vitest 128 files,
+  1338 tests passed; the browser 863 passed, 56 skipped, 11 failed. Ten are the stored
+  screenshots that fail in a build container on `main` too. The eleventh was B12's: on a phone
+  the listing's rows kept to one line and its table scrolled sideways, which the legibility test
+  forbids. That rule was taken out; the legibility test (both widths) and Modules 11's and 12's
+  browser specs (132 tests) then passed.
 
 ## What to change
 

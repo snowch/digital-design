@@ -3038,10 +3038,10 @@ svg.stack-depth {
   margin: 0;
   font-weight: normal;
 }
-/* On a phone a row of the listing keeps to one line, its comment reached by scrolling the box
-   sideways. The box shows two whole rows with their breakpoint buttons, which a phone keeps 40
-   pixels tall, and four without; any taller and stepping no longer fits one screen with the
-   panel a lead points at. The button in its header shows every row (B12 of the second reading). */
+/* On a phone the listing's box shows two whole rows with their breakpoint buttons, which a phone
+   keeps 40 pixels tall, and four without; any taller and stepping no longer fits one screen with
+   the panel a lead points at. A long line wraps rather than scroll sideways, as every table on
+   these pages does. The button in its header shows every row (B12 of the second reading). */
 @media (max-width: 480px) {
   .debugger-listing-wrap {
     max-height: 9.5rem;
@@ -3049,9 +3049,6 @@ svg.stack-depth {
   /* The table's caption still names the listing for a screen reader. */
   .debugger-run > .layout-title {
     display: none;
-  }
-  .debugger-listing .debugger-line {
-    white-space: pre;
   }
 }
 @media (max-width: 480px) {
