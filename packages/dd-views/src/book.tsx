@@ -19,6 +19,7 @@ import {
   elaborate,
   generate,
   machine9Modules,
+  machine13Modules,
   machineModules,
   type Construct,
   type CourseModule,
@@ -38,6 +39,7 @@ import { rememberVerdicts } from "./grade-cache";
 import { CircuitView, levelOf, SignalTable } from "./CircuitView";
 import { HdlPanel } from "./HdlPanel";
 import { ProgramEditor, gradeProgram, isProgramChallenge } from "./ProgramEditor";
+import { LabEditor, gradeLab, isLabChallenge } from "./LabEditor";
 import { GATE_IDS, labelFor } from "./parts";
 import {
   circuitToDrawing,
@@ -81,7 +83,8 @@ export function modulesOption(challenge: Challenge): { modules?: Record<string, 
   // port; "machine9-call" is the same with the capstone's call through a register, which the
   // program is assembled with.
   // Module 10: "machine9-set" is the learner's copy with the call through a register and set if.
-  const sets = ["machine", "machine9", "machine9-call", "machine9-set"];
+  // Module 13: "machine13" is the final machine's parts, which the lab's text joins.
+  const sets = ["machine", "machine9", "machine9-call", "machine9-set", "machine13"];
   if (!given || !sets.includes(given.set)) return {};
   let modules = MODULES.get(challenge);
   if (!modules) {
@@ -99,7 +102,12 @@ export function modulesOption(challenge: Challenge): { modules?: Record<string, 
       ...(given.program !== undefined ? { rom: assemble(given.program, assembly).rom } : {}),
       registers,
     };
-    modules = given.set === "machine" ? machineModules(context) : machine9Modules(context);
+    modules =
+      given.set === "machine"
+        ? machineModules(context)
+        : given.set === "machine13"
+          ? machine13Modules(context)
+          : machine9Modules(context);
     MODULES.set(challenge, modules);
   }
   return { modules };
@@ -149,6 +157,8 @@ export function circuitOf(
 export function grade(challenge: Challenge, artifact: Artifact): Verdict {
   // Module 11: a program, graded by running it.
   if (isProgramChallenge(challenge)) return gradeProgram(challenge, artifact);
+  // Module 13: the lab, the whole machine as text, graded by running programs on it.
+  if (isLabChallenge(challenge)) return gradeLab(challenge, artifact);
   if (challenge.tests.kind === "answers") return gradeAnswers(challenge, artifact);
   const { circuit, blocked } = circuitOf(challenge, artifact);
   const total =
@@ -507,7 +517,7 @@ function DrawEditor({ challenge, artifact, onChange, verdict }: ChallengeEditorP
   );
 }
 
-function WriteEditor({ challenge, artifact, onChange, verdict }: ChallengeEditorProps) {
+export function WriteEditor({ challenge, artifact, onChange, verdict }: ChallengeEditorProps) {
   const strings = useViewStrings();
   const text = artifact.hdl ?? challenge.initial.hdl ?? "";
   const result = useMemo(
@@ -548,6 +558,8 @@ function WriteEditor({ challenge, artifact, onChange, verdict }: ChallengeEditor
 export const ChallengeEditor: ComponentType<ChallengeEditorProps> = (props) =>
   isProgramChallenge(props.challenge) ? (
     <ProgramEditor {...props} />
+  ) : isLabChallenge(props.challenge) ? (
+    <LabEditor {...props} />
   ) : props.challenge.gradedDirection === "answer" ? (
     <AnswerEditor {...props} />
   ) : props.challenge.gradedDirection === "write" ? (

@@ -72,6 +72,7 @@ import { systemCallMechanism } from "./system-call-mechanism";
 import { wholeMachine } from "./whole-machine";
 import { fullPath } from "./full-path";
 import { tracing } from "./tracing";
+import { finalMachine } from "./final-machine";
 
 const INPUTS: readonly LessonInput[] = [
   // Module 0, meet the machine.
@@ -143,6 +144,7 @@ const INPUTS: readonly LessonInput[] = [
   wholeMachine,
   fullPath,
   tracing,
+  finalMachine,
 ];
 
 export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(

@@ -57,3 +57,4 @@ export * from "./trap-timeline";
 export * from "./final-programs";
 export * from "./final-run";
 export * from "./bit-views";
+export { TRAP_PROGRAMS as TRAP_PROGRAMS_FOR_TESTS } from "./traps-programs";

@@ -27,7 +27,9 @@ import {
   type StopReason,
 } from "./machine";
 import { bitOf } from "./multicycle-run";
-import { controlRegistersOf } from "./traps-run";
+import { assemble } from "./assemble";
+import { romParams } from "./datapath";
+import { MODULE_13_ASSEMBLY } from "./machine";
 import { word } from "@dd/sim";
 
 /** One step of a run: an instruction from its fetch to the edge that ends it, or a trap. */
@@ -95,6 +97,33 @@ export function planOf(setup: Pick<RunSetup, "inputs" | "doorOpensAt">): InputPl
 
 const signed = (v: bigint) => BigInt.asIntN(64, v);
 
+/**
+ * C0 to C4 as a circuit holds them, read off the five registers of its control registers' block
+ * (`cregs`), wherever it sits: the drawn machine's datapath, or a text's instance of the course's
+ * module. A register with an unknown bit is undefined.
+ */
+export function controlOf(circuit: Circuit, values: readonly Word[]): (bigint | undefined)[] {
+  return [0, 1, 2, 3, 4].map((k) => {
+    const part = circuit.components.find(
+      (c) => c.kind === "memory" && (c.path === `cregs/c${k}` || c.path.endsWith(`/cregs/c${k}`)),
+    );
+    const net = part?.outputs["Q0"];
+    const w = net === undefined ? undefined : values[net];
+    return w && w.known === (1n << BigInt(w.width)) - 1n ? w.value : undefined;
+  });
+}
+
+/** A circuit with its ROM's words replaced by a program's: the same circuit, another program. */
+export function withRom(circuit: Circuit, rom: Uint8Array | readonly number[]): Circuit {
+  const init = romParams(rom);
+  return {
+    ...circuit,
+    components: circuit.components.map((c) =>
+      c.kind === "rom" ? { ...c, params: { ...(c.params ?? {}), init } } : c,
+    ),
+  };
+}
+
 /** The first way the circuit's state differs from the model's, or undefined if none. */
 function firstDifference(
   circuit: Circuit,
@@ -117,7 +146,7 @@ function firstDifference(
         now.regs[k] === undefined ? undefined : signed(now.regs[k] as bigint),
         ref.regs[k] === undefined ? undefined : signed(ref.regs[k] as bigint),
       );
-  const control = controlRegistersOf(circuit, values);
+  const control = controlOf(circuit, values);
   for (let k = 0; k < 5; k++)
     if (differ(control[k], ref.control[k])) return out(`C${k}`, control[k], ref.control[k]);
   if (differ(now.display, ref.display))
@@ -228,4 +257,76 @@ export function recordRun(setup: RunSetup, limit = 500): RecordedRun {
 export function stepAt(run: RecordedRun, frame: number): number {
   const k = run.steps.findIndex((s) => frame >= s.first && frame < s.last);
   return k >= 0 ? k : run.steps.length;
+}
+
+/** Where a text of the final machine first disagrees with the model, and how the run ended. */
+export interface TextComparison {
+  /** The program's line and address of the step that first disagrees, and how. */
+  readonly difference?: RunDifference & { readonly line: string; readonly pc: bigint };
+  readonly steps: number;
+  readonly edges: number;
+}
+
+/**
+ * Runs a program on a circuit of the final machine whose top level has the drawn machine's ports
+ * (a text the lab's learner wrote, or the drawn machine) and on the model with Module 13's
+ * options, from reset, and compares them after every step. A step ends at the first edge after
+ * which the controller's state, the output S, is FETCH again; where the model stops, the circuit
+ * must halt within the same step, for the same reason (cause 00 with HALT is `stop`).
+ */
+export function compareFinalCircuit(
+  circuit: Circuit,
+  source: string,
+  plan: InputPlan = QUIET_INPUTS,
+  limit = 400,
+): TextComparison {
+  const program = assemble(source, MODULE_13_ASSEMBLY);
+  const c = withRom(circuit, program.rom);
+  const sim = resetDatapath(c, inputsAt(plan, 0));
+  const sNet = c.nets.find((n) => n.name === "S")?.id;
+  let ref: CpuState = resetMachine(program.rom);
+  let ran = 0;
+  let edges = 0;
+  const textAt = (pc: bigint) =>
+    program.lines.find((l) => BigInt(l.address) === pc && l.instruction !== undefined)?.text ?? "";
+  const fail = (step: number, pc: bigint, d: Omit<RunDifference, "step">) => ({
+    difference: { step, ...d, line: textAt(pc), pc },
+    steps: step + 1,
+    edges,
+  });
+  for (let k = 0; k < limit; k++) {
+    sim.setInput("DOOR", word(1, inputsAt(plan, ran).door));
+    sim.settle();
+    const pc = ref.pc;
+    const r = step(ref, inputsAt(plan, ran), MODULE_13);
+    for (let taken = 0; ; taken++) {
+      const before = datapathState(c, sim.snapshotValues());
+      if (before.halt === 1) {
+        const reason: StopReason =
+          before.cause !== undefined && before.cause !== 0
+            ? { kind: "trap", cause: before.cause }
+            : { kind: "stop" };
+        const model = r.state.stopped?.reason;
+        if (JSON.stringify(model) !== JSON.stringify(reason))
+          return fail(k, pc, {
+            what: "stop",
+            machineStop: reason,
+            ...(model ? { modelStop: model } : {}),
+          });
+        return { steps: k + 1, edges };
+      }
+      if (taken > 8)
+        return fail(k, pc, { what: "PC", machine: before.pc ?? 0n, model: r.state.pc });
+      sim.clockCycle("CLK");
+      edges++;
+      const s = sNet === undefined ? undefined : sim.snapshotValues()[sNet];
+      if (s && s.known === 7n && s.value === 0n) break;
+    }
+    if (r.state.stopped) return fail(k, pc, { what: "stop", modelStop: r.state.stopped.reason });
+    if (!r.record.trap) ran++;
+    ref = r.state;
+    const d = firstDifference(c, sim.snapshotValues(), ref);
+    if (d) return fail(k, pc, d);
+  }
+  return { steps: limit, edges };
 }

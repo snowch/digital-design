@@ -26,3 +26,4 @@ export * from "./straighten";
 // Module 11: programs as the answer to a challenge.
 export * from "./ProgramEditor";
 export * from "./strings13";
+export * from "./LabEditor";

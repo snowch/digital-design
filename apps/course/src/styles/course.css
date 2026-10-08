@@ -3068,6 +3068,43 @@ svg.stack-depth {
   max-width: 100%;
   font: inherit;
 }
+/* Module 13's lab, run in a figure: the choice of text and program, the changed line, the runs. */
+.lab-run-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  align-items: flex-end;
+  margin: 0 0 var(--space-3);
+}
+.lab-run-choice {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  max-width: 100%;
+}
+.lab-run-choice select {
+  min-height: 40px;
+  max-width: 100%;
+  font: inherit;
+}
+.lab-run-change-heading {
+  font-weight: 600;
+  margin: 0 0 var(--space-1);
+}
+.lab-run-change pre {
+  overflow-x: auto;
+  margin: 0 0 var(--space-3);
+}
+.lab-run-results ul {
+  margin: 0;
+  padding-left: var(--space-4);
+}
+.lab-run-results li + li {
+  margin-top: var(--space-1);
+}
+.lab-editor > .explorer-actions {
+  flex-wrap: wrap;
+}
 .machine-trace-table .trace-port {
   display: inline-block;
   margin-right: var(--space-2);

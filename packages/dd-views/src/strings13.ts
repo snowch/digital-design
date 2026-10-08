@@ -3,7 +3,7 @@
 // Module 13's figure words: the run of the whole machine stepped edge by edge, the instruction at
 // every level, each part's maker, the comparison with the instruction-level model, and the trace.
 // Kept in a file of their own and joined to the view strings as `machine13`. Drafted by the prose
-// process (docs/notes/module-13-machine/briefs, briefs V1 and V2) and checked against the figures.
+// process (docs/notes/module-13-machine/briefs, briefs V1 to V3) and checked against the figures.
 
 export interface Machine13Strings {
   // The controls of a recorded run.
@@ -98,6 +98,38 @@ export interface Machine13Strings {
   readonly bitHolds: string;
   /** For a selector's or an adder's bit: {result} now. */
   readonly bitGives: string;
+
+  // The lab (lesson 4).
+  readonly labOutline: string;
+  readonly labParts: string;
+  readonly labEmpty: string;
+  readonly labReplace: string;
+  readonly labKeep: string;
+  // The lab's verdict is plain text, not Markdown: its sentences quote the line, with no code.
+  /** {line} at {address}; {what}; {machine} on the learner's machine; {model} by the model. */
+  readonly labDiffers: string;
+  readonly labHalts: string;
+  readonly labStopsOnly: string;
+  readonly labRunsOn: string;
+
+  // The lab's runs of a text, in a figure (lesson 4).
+  readonly labTextLegend: string;
+  readonly labProgramLegend: string;
+  readonly labRun: string;
+  readonly labRunning: string;
+  /** The heading over the line a text changes. */
+  readonly labChange: string;
+  readonly labRunsCaption: string;
+  /** One run: {text}, {program}, {result}. */
+  readonly labRunLine: string;
+  /** {n}: the steps compared. */
+  readonly labRunAgrees: string;
+  /** The machine stops at `stop` at {line} at {address}; the model does not. */
+  readonly labRunStops: string;
+  /** The model stops or halts at {line} at {address}; the machine goes on. */
+  readonly labRunGoesOn: string;
+  /** After a prediction: {answer}, the option the runs give. */
+  readonly labAnswer: string;
 }
 
 export const MACHINE13_STRINGS: Machine13Strings = {
@@ -172,4 +204,28 @@ export const MACHINE13_STRINGS: Machine13Strings = {
   bitHeading: "{part}, bit {k}, as Module {module} drew one bit",
   bitHolds: "It holds {held} now; after the next edge it holds {result}.",
   bitGives: "It gives {result} now.",
+
+  labOutline: "Start from the outline",
+  labParts: "Start from the parts",
+  labEmpty: "Start from nothing",
+  labReplace: "Replace my text",
+  labKeep: "Keep my text",
+  labDiffers:
+    'After "{line}" at {address}, {what} is {machine} on your machine and {model} by the model.',
+  labHalts: 'At "{line}" at {address}, your machine halts with cause {cause}; the model does not.',
+  labStopsOnly: 'At "{line}" at {address}, your machine stops; the model does not.',
+  labRunsOn: 'At "{line}" at {address}, the model stops or halts; your machine goes on.',
+
+  labTextLegend: "Which text runs",
+  labProgramLegend: "Which program runs",
+  labRun: "Run it",
+  labRunning: "Running",
+  labChange: "The line this text changes",
+  labRunsCaption: "The runs so far",
+  labRunLine: "{text}, {program}: {result}",
+  labRunAgrees:
+    "The machine and the model agree after every one of its {n} instructions and traps.",
+  labRunStops: "At `{line}` at `{address}`, the machine stops; the model does not.",
+  labRunGoesOn: "At `{line}` at `{address}`, the model stops or halts; the machine goes on.",
+  labAnswer: "The runs answer: {answer}.",
 };
