@@ -174,6 +174,7 @@ export const traps: LessonInput = {
             control: true,
             breakpoints: true,
             pause: ["handler"],
+            memory: [{ from: "0x400", words: 1, title: LABELS.countTitle }],
             outcomes: PROSE.debuggerAfter,
           },
         },
@@ -230,7 +231,14 @@ export const traps: LessonInput = {
       interface: { inputs: [], outputs: [] },
       initial: {
         text: SKIP34_START,
-        data: { debugger: { breakpoints: true, control: true, registers: [2, 5, 6] } },
+        data: {
+          debugger: {
+            breakpoints: true,
+            control: true,
+            registers: [2, 5, 6],
+            memory: [{ from: "0x400", words: 1, title: LABELS.countTitle }],
+          },
+        },
       },
       tests: {
         kind: "answers",
@@ -238,11 +246,16 @@ export const traps: LessonInput = {
         cases: SKIP34_PROGRAMS.map((p) => ({
           label: LABELS.skip34Labels[SKIP34_PROGRAMS.indexOf(p)] ?? p.label,
           given: { traps: "yes", data: p.code, detail: "skip34" },
+          // How the run ended: at the tests' own `stop` (`end`) or at one of the handler's, and
+          // with which causes; and C2, by the name of the line it returns to, where the program
+          // carries on after a refused store.
           expect: {
             "word:400": String(p.count),
             display: String(p.display),
             traps: String(p.traps),
-            end: "stop",
+            causes: p.causes,
+            stopAt: p.stopAt,
+            ...(p.stopAt === "end" ? { C2at: "after" } : {}),
           },
         })),
       },
@@ -253,8 +266,8 @@ export const traps: LessonInput = {
   modelVsReality: PROSE.modelVsReality,
   originalityNote: {
     textbookExample:
-      "Patt and Patel's LC-3 exceptions and its interrupt vector table, a privilege mode exception or an illegal opcode handled by a service routine; Patterson and Hennessy's and Harris and Harris's MIPS exception handler, which saves EPC and Cause and jumps to a fixed address; the stock divide-by-zero or page-fault example.",
+      "SPIM's default MIPS exception handler, which reads the Cause register, adds 4 to EPC \"to avoid infinite loop\" and returns with eret; Patt and Patel's LC-3 exceptions and interrupt vector table; Patterson and Hennessy's and Harris and Harris's MIPS exception handler, which saves EPC and Cause and jumps to a fixed address; the stock divide-by-zero or page-fault example.",
     howThisDiffers:
-      "The trap arrives as the answer to the question Module 11 ended on, on the shop's own night program, whose stray store to room B's sensor halted the machine in Module 11's terms. The course machine's five control registers take their values at the edge that ends the faulting instruction, which the learner steps through edge by edge in a timeline read off the reference's own steps; the return point of a fault is the instruction that faulted, so a handler that only resumes runs it for ever, and one that adds 4 to C2 skips it. One handler address in C4, no table of vectors, no EPC or Cause registers by those names, no divide by zero (the machine has no division) and no page fault. The learner works out the registers for a trap the lesson never runs, then writes a handler that skips refused stores and counts them, and stops on every other cause.",
+      "The closest precedent is SPIM's default handler: like it, this lesson's handler reads the cause, adds 4 to the return point and goes back, a skeleton the course machine's approved design forces (one handler address in C4, as MIPS has one fixed handler address). What is this course's own: the trap arrives as the answer to the question Module 11 ended on, on the shop's night program, whose stray store to room B's sensor halted the machine in Module 11's terms; the handler keeps the cause in the RAM and counts refused stores, where SPIM's prints a message; the five control registers take their values at the edge that ends the faulting instruction, which the learner steps through edge by edge in a timeline read off the reference's own steps; and the failure experiment shows the handler that only resumes running the store for ever. No EPC or Cause registers by those names, no divide by zero (the machine has no division) and no page fault. The learner works out the registers for a trap the lesson never runs, then writes a handler that skips refused stores and counts them, and stops on every other cause.",
   },
 };

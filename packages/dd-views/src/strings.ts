@@ -1052,7 +1052,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
         "{actual} is not the PC after the trap. The PC takes C4, the handler's address, as three hexadecimal digits.",
       // Module 12, lessons 2 to 5.
       saveChoice:
-        "{actual} is not it for this handler. Check every register the handler writes: is it saved before it is written, and put back from the same word before resume?",
+        "\"{actual}\" is not it for this handler. Check every register the handler writes: is it saved before it is written, and put back from the same word before resume?",
       userRefusal:
         "{actual} is not the cause for this line. User mode refuses a load or store at a device's address (from 7C0) with 32, and resume, the control-register jobs and stop with 22. Give 0 if user mode runs the line.",
       callRegister:

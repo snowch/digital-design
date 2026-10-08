@@ -15,10 +15,17 @@ import {
   memoryWord,
   timelineRun,
 } from "@dd/dd-model";
-import { listingAnswer, transferValue } from "@dd/dd-views";
+import { grade, listingAnswer, transferValue } from "@dd/dd-views";
 import { parseLesson } from "@platform/lesson-schema";
 
-import { NIGHT, NIGHT_HALTS, NIGHT_NO_SKIP, TRAP_QUIZ } from "./module12";
+import {
+  NIGHT,
+  NIGHT_HALTS,
+  NIGHT_NO_SKIP,
+  SKIP34_REFERENCE,
+  SKIP34_START,
+  TRAP_QUIZ,
+} from "./module12";
 import { TRAP_ANSWERS, traps } from "./traps";
 
 const lesson = parseLesson(traps);
@@ -82,5 +89,15 @@ describe("facts for the traps lesson", () => {
     const s = run(NIGHT_NO_SKIP);
     expect(s.stopped).toEqual({ kind: "cutOff", ran: 5000 });
     expect([s.cpu.lamps, s.cpu.control[2]]).toEqual([0, 0x14n]);
+  });
+
+  it("the challenge fails the starting text and each shortcut the review found", () => {
+    const c = lesson.challenges.find((x) => x.id === "skip-refused")!;
+    // Skips by a `goto` through a register: never writes C2 or runs `resume`.
+    const gotoSkip = SKIP34_REFERENCE.replace(/C2 <= R5\n\s+resume/, "goto R5");
+    expect(gotoSkip).not.toBe(SKIP34_REFERENCE);
+    for (const text of [SKIP34_START, gotoSkip])
+      expect(grade(c, { text }).passed, text).toBe(false);
+    expect(grade(c, { text: SKIP34_REFERENCE }).passed).toBe(true);
   });
 });

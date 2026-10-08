@@ -186,6 +186,9 @@ export function scenarioOf(given: Readonly<Record<string, string | number>>): Pr
   };
 }
 
+/** The causes a failure lists at most, from the first. */
+const CAUSES_SHOWN = 8;
+
 /** Two bits, bit 1 then bit 0: C0, C1 and the waiting events as the pages write them. */
 const bits2 = (v: bigint) => (v & 3n).toString(2).padStart(2, "0");
 
@@ -224,15 +227,32 @@ export function leftFor(key: string, run: ScenarioRun): string {
     if (n === 2 || n === 4) return hex3(v);
     return n === 3 ? hex2(v) : bits2(v);
   }
+  // C2 by the name the tests' program gives its line, since the program's addresses move with the
+  // learner's lines before it; its address where no name does.
+  if (key === "C2at") {
+    const v = Number(cpu.control[2] ?? 0n);
+    const name = Object.entries(run.program?.labels ?? {}).find(([, a]) => a === v)?.[0];
+    return name ?? hex3(BigInt(v));
+  }
   if (key === "mode") return (cpu.control[0] & 1n) === 1n ? "system" : "user";
   if (key === "traps") return String(s.traps.length);
-  if (key === "causes") return s.traps.map((t) => hex2(BigInt(t.cause))).join(", ");
+  if (key === "causes") {
+    // A run that traps for ever lists its first causes, not thousands.
+    const causes = s.traps.slice(0, CAUSES_SHOWN + 1).map((t) => hex2(BigInt(t.cause)));
+    return causes.length > CAUSES_SHOWN
+      ? `${causes.slice(0, CAUSES_SHOWN).join(", ")}, …`
+      : causes.join(", ");
+  }
   if (key === "waiting") return bits2(BigInt(cpu.waiting));
-  // Where a run that ended at a `stop` stopped: the line's name if one names it, else its address.
+  // Where a run that ended at a `stop` stopped: the name the tests' program gives the line, or
+  // "handler" for any line of the learner's own, before `program`; else its address.
   if (key === "stopAt") {
     if (s.stopped?.kind !== "machine" || s.stopped.reason.kind !== "stop") return "";
     const pc = Number(s.stopped.pc);
-    const name = Object.entries(run.program?.labels ?? {}).find(([, a]) => a === pc)?.[0];
+    const labels = run.program?.labels ?? {};
+    const from = labels["program"];
+    if (from !== undefined && pc < from) return "handler";
+    const name = Object.entries(labels).find(([, a]) => a === pc)?.[0];
     return name ?? hex3(BigInt(pc));
   }
   if (key === "timer") return String(cpu.timer);

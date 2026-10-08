@@ -49,4 +49,5 @@ export const LABELS = {
     changes: "Changes a register",
   },
   saveLabels: ["One refused store", "Two refused stores", "A stack at the ROM"],
+  memoryTitle: "The words at `400` and `408`",
 } as const;

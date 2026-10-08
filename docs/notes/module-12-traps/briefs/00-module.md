@@ -150,3 +150,31 @@ Module 12's own terms, each allowed only from the lesson that introduces it: **t
   transfers, such as `C2 ← 014`.
 - A result a figure's run produces is shown only once the run has ended. A question a figure asks
   comes before its run.
+
+## Decisions after the reading review (8 October)
+
+These hold on every Module 12 page and override anything above that disagrees.
+
+- **The program and the handler.** "The program" is the user program only. "The handler" is the
+  code at the address C4 holds. From lesson 3 on, a user program's `stop` traps with cause `22`;
+  the run ends when the handler runs `stop`, so say "the handler's `stop` ends the run" or "the
+  run stops at `0A0`", never "the program stops" for it.
+- **A refusal with no handler** is an instruction that faults and halts the machine, as in Module
+  8. A **trap** is always going to the handler. Never write "a trap halts".
+- **Numbers.** An address is three hexadecimal digits: `004`, not 4. C0, C1 and "waiting" are
+  written as their two bits, bit 1 then bit 0: `01`, `11`. A cause is two hexadecimal digits, C2
+  and C4 three. A word in memory or in a register is a decimal number; from 10 to `7FF` the pages
+  show its hexadecimal beside it. So cause `34`, kept as a word, reads 52 (`034`): `34` in
+  hexadecimal is 3 × 16 + 4 = 52.
+- **Addresses in prose** are written `400`, with no prefix. Only a line for the learner to type
+  gives the code, `word[0x400]`.
+- **Words.** "Save" and "put back" are for copying a register or a control register to the RAM
+  and back. "Keep" is the calling convention's word for a register a function leaves as it was.
+  "A function call" is a call with `call`, written in full where a bare "call" could be misread.
+  "Job" is only a system call's service (lesson 4 on).
+- **The registers a system call may change** (lesson 4 on): R1 and R2, the call's own registers.
+  R1 names the job and brings back the result; R2 gives the job its word. Every other register
+  comes back as it was.
+- **Two causes at one edge**: the lower number wins.
+- **Buttons.** With a breakpoint or a pause ahead, the debugger's run button reads "Run to a
+  breakpoint"; with none ahead it reads "Run to the end". Name the button the step will show.

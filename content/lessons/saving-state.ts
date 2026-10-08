@@ -33,11 +33,6 @@ export const SAVE_CHOICES = [
   { id: "d", answer: "leaves" },
 ] as const;
 
-const SET_REGISTERS: [string, string][] = Array.from({ length: 9 }, (_, k) => [
-  `R${k + 1}`,
-  String((k + 1) * 11),
-]);
-
 /** Each choice's handler, as the task shows it. */
 const HANDLER_TEXT = { a: "A", b: "B", c: "C", d: "D" } as const;
 
@@ -175,7 +170,7 @@ export const savingState: LessonInput = {
           timeModel: "none",
           caption: LABELS.captions.timeline,
           lead: PROSE.timelineLead,
-          props: { program: SAVED, inputs: NIGHT_INPUTS, from: 4 },
+          props: { program: SAVED, inputs: NIGHT_INPUTS, from: 3 },
         },
       ],
     },
@@ -240,7 +235,14 @@ export const savingState: LessonInput = {
       interface: { inputs: [], outputs: [] },
       initial: {
         text: SAVE_START,
-        data: { debugger: { breakpoints: true, control: true, registers: [1, 5, 6, 14] } },
+        // Every register, which the tests check, and the count.
+        data: {
+          debugger: {
+            breakpoints: true,
+            control: true,
+            memory: [{ from: "0x400", words: 2, title: LABELS.memoryTitle }],
+          },
+        },
       },
       tests: {
         kind: "answers",
@@ -248,10 +250,13 @@ export const savingState: LessonInput = {
         cases: SAVE_PROGRAMS.map((p, k) => ({
           label: LABELS.saveLabels[k] ?? p.label,
           given: { traps: "yes", data: p.code, detail: "saveRegisters" },
+          // Every register the program set, R0 to R15, and how the run ended: at the program's
+          // own `end`, after its refused stores.
           expect: {
             "word:400": String(p.count),
-            ...Object.fromEntries(SET_REGISTERS),
-            end: "stop",
+            ...Object.fromEntries(p.registers.map((v, k) => [`R${k}`, String(v)])),
+            causes: p.causes,
+            stopAt: "end",
           },
         })),
       },
@@ -264,6 +269,6 @@ export const savingState: LessonInput = {
     textbookExample:
       "Patt and Patel's service routines that save and restore the registers they use (and LC-3's supervisor stack, switched to on a trap); Patterson and Hennessy's exception handler that saves registers in reserved memory, $k0 and $k1 set aside for the handler; the trap frame pushed on a kernel stack in xv6 and Bryant and O'Hallaron.",
     howThisDiffers:
-      "The need to save arrives as a failure the learner runs first: lesson 1's own handler, which writes R5, put on a program that keeps room A's reading in R5, so the display shows the return point, 20, instead of -184. The save is two absolute stores to fixed words of the course machine's RAM, which need no register to hold an address, and the reason not to push is run, not told: a handler whose first instruction stores below a stack that has reached the ROM traps at the address C4 holds, where this machine halts. No registers reserved for the handler, no second stack, no trap frame. The learner judges four handlers, then writes one that counts and skips refused stores while leaving R1 to R9 and R14 as it found them, tested on programs that set every register.",
+      "The need to save arrives as a failure the learner runs first: lesson 1's own handler, which writes R5, put on a program that keeps room A's reading in R5, so the display shows the return point, 20, instead of -184. The save is two absolute stores to fixed words of the course machine's RAM, which need no register to hold an address, and the reason not to push is run, not told: a handler whose first instruction stores below a stack that has reached the ROM traps at the address C4 holds, where this machine halts. No registers reserved for the handler, no second stack, no trap frame. The learner judges four handlers, then writes one that counts and skips refused stores while leaving every register, R0 to R15, as it found it, tested on programs that set every one to a word of their own and checked on all sixteen.",
   },
 };

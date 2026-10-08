@@ -10,7 +10,7 @@
 // ---------------------------------------------------------------------------------------------
 // 12.1 traps
 
-/** The night program as Module 11 left it: a store to room B's sensor halts the machine. */
+/** The shop's night program, with no handler: a store to room B's sensor halts the machine. */
 export const NIGHT_HALTS = `// The night program: show room A, clear room B, light NIGHT.
         R2 <= word[sensorA]
         word[display] <= R2
@@ -103,32 +103,37 @@ export const SKIP34_PROGRAMS: readonly {
   readonly count: number;
   readonly display: number;
   readonly traps: number;
-  readonly cause: string;
+  /** The causes of the run's traps, in order, as the grader lists them. */
+  readonly causes: string;
+  /** Where the run stops: the program's `end`, or the handler. */
+  readonly stopAt: "end" | "handler";
 }[] = [
   {
     label: "two refused stores",
     code: `program: R2 <= 7
         word[sensorA] <= R2
         word[display] <= R2
-        word[signals] <= R2
-        R2 <= R2 + 1
+        word[sensorB] <= R2
+after:  R2 <= R2 + 1
         word[display] <= R2
-        stop`,
+end:    stop`,
     count: 2,
     display: 8,
     traps: 2,
-    cause: "34",
+    causes: "34, 34",
+    stopAt: "end",
   },
   {
     label: "a store to the ROM",
     code: `program: R2 <= 25
         word[0x100] <= R2
-        word[display] <= R2
-        stop`,
+after:  word[display] <= R2
+end:    stop`,
     count: 1,
     display: 25,
     traps: 1,
-    cause: "34",
+    causes: "34",
+    stopAt: "end",
   },
   {
     label: "a word that is not an instruction",
@@ -141,18 +146,20 @@ data:   word 0`,
     count: 1,
     display: 8,
     traps: 2,
-    cause: "21",
+    causes: "34, 21",
+    stopAt: "handler",
   },
   {
     label: "a word not at a multiple of 8",
     code: `program: R2 <= 0x404
         R3 <= word[R2]
         word[display] <= R2
-        stop`,
+end:    stop`,
     count: 0,
     display: 0,
     traps: 1,
-    cause: "33",
+    causes: "33",
+    stopAt: "handler",
   },
 ];
 
@@ -257,57 +264,99 @@ program: R3 <= 0x410
         word[R3] <= R4          // the program's own total
         stop`;
 
-export const USER_START = `// Your handler. The tests add a program after it, named program.
-        R1 <= handler
-        C4 <= R1
-        goto program
-handler: stop`;
-
-export const USER_REFERENCE = `// Start the program in user mode; keep the cause, then stop.
+/**
+ * The prediction: a start that writes 0 to C1 but goes to the program with `goto`, so the program
+ * runs in system mode and its refused store traps with C1 taking `01`.
+ */
+export const GOTO_START = `// The start writes 0 to C1, then goes to program with goto.
         R1 <= handler
         C4 <= R1
         R1 <= 0
-        C1 <= R1
+        C1 <= R1                // user mode, for a resume
+        goto program            // no resume
+handler: R5 <= C3
+        word[0x400] <= R5       // keep the cause
+        stop
+program: R0 <= 0
+        word[sensorB] <= R0     // refused
+        stop`;
+
+export const USER_START = `// Your start and handler. The tests add a program after them, named program.
+        R1 <= handler
+        C4 <= R1
+        R1 <= 0
+        word[0x400] <= R1       // the count of device accesses refused
+        goto program
+handler: stop`;
+
+export const USER_REFERENCE = `// Start the program in user mode; count and skip a device access, keep any other cause.
+        R1 <= handler
+        C4 <= R1
+        R1 <= 0
+        word[0x400] <= R1       // the count of device accesses refused
+        C1 <= R1                // user mode, for the program resume starts
         R1 <= program
         C2 <= R1
         resume
 handler: R5 <= C3
+        R6 <= 0x32
+        if R5 != R6 goto other
+        R5 <= word[0x400]
+        R5 <= R5 + 1
         word[0x400] <= R5
+        R5 <= C2
+        R5 <= R5 + 4
+        C2 <= R5
+        resume
+other:  word[0x408] <= R5       // keep the cause
         stop`;
 
+/** The challenge's test programs, each named `program`, each meeting what user mode refuses. */
 export const USER_PROGRAMS: readonly {
   readonly label: string;
   readonly code: string;
+  readonly count: number;
   readonly cause: number;
+  readonly causes: string;
 }[] = [
   {
-    label: "a store to the lamps",
+    label: "a store to the lamps, then stop",
     code: `program: R1 <= 7
         word[lamps] <= R1
-        stop`,
-    cause: 0x32,
-  },
-  {
-    label: "stop",
-    code: `program: R1 <= 3
         R1 <= R1 + 1
-        stop`,
+end:    stop`,
+    count: 1,
     cause: 0x22,
+    causes: "32, 22",
   },
   {
-    label: "a load from a sensor",
+    label: "two sensors read, then a control register",
     code: `program: R2 <= word[sensorA]
-        word[0x418] <= R2
-        stop`,
-    cause: 0x32,
+        R3 <= word[sensorB]
+        R4 <= C0
+end:    stop`,
+    count: 2,
+    cause: 0x22,
+    causes: "32, 32, 22",
   },
   {
-    label: "a control register read",
-    code: `program: R2 <= 0x418
-        word[R2] <= R2
-        R3 <= C0
-        stop`,
-    cause: 0x22,
+    label: "a word not at a multiple of 8",
+    code: `program: R2 <= 0x404
+        R3 <= word[R2]
+end:    stop`,
+    count: 0,
+    cause: 0x33,
+    causes: "33",
+  },
+  {
+    label: "the timer, then the ROM",
+    code: `program: R1 <= 9
+        word[timer] <= R1
+        word[0x100] <= R1
+end:    stop`,
+    count: 1,
+    cause: 0x34,
+    causes: "32, 34",
   },
 ];
 
@@ -486,29 +535,41 @@ handler: word[0x408] <= R5      // save R5
         R5 <= word[0x408]       // put R5 back
         resume`;
 
-/** Each program sets R1 to R9 to words of its own, then stores where it may not. */
-const SET_ALL = Array.from({ length: 9 }, (_, k) => `        R${k + 1} <= ${(k + 1) * 11}`).join(
-  "\n",
-);
+/**
+ * The word each test's program sets in each register, R0 to R15, before it stores where it may
+ * not: the handler must leave every one as it was. Test 3's R14 is its stack instead.
+ */
+export const SET_WORDS: readonly number[] = Array.from({ length: 16 }, (_, k) => (k + 1) * 11);
+const SET_ALL = (except: readonly number[] = []) =>
+  SET_WORDS.flatMap((v, k) => (except.includes(k) ? [] : [`        R${k} <= ${v}`])).join("\n");
 export const SAVE_PROGRAMS: readonly {
   readonly label: string;
   readonly code: string;
   readonly count: number;
+  readonly causes: string;
+  /** The registers the program leaves, R0 to R15, as decimal words. */
+  readonly registers: readonly number[];
 }[] = [
   {
     label: "one refused store",
-    code: `program: nothing\n${SET_ALL}\n        word[sensorA] <= R1\n        stop`,
+    code: `program: nothing\n${SET_ALL()}\n        word[sensorA] <= R1\nend:    stop`,
     count: 1,
+    causes: "34",
+    registers: SET_WORDS,
   },
   {
     label: "two refused stores",
-    code: `program: nothing\n${SET_ALL}\n        word[signals] <= R2\n        word[0x200] <= R3\n        stop`,
+    code: `program: nothing\n${SET_ALL()}\n        word[sensorB] <= R2\n        word[0x200] <= R3\nend:    stop`,
     count: 2,
+    causes: "34, 34",
+    registers: SET_WORDS,
   },
   {
     label: "a stack at the ROM",
-    code: `program: R14 <= 0x400\n${SET_ALL}\n        R14 <= R14 - 8\n        word[R14] <= R5\n        stop`,
+    code: `program: R14 <= 0x400\n${SET_ALL([14])}\n        R14 <= R14 - 8\n        word[R14] <= R5\nend:    stop`,
     count: 1,
+    causes: "34",
+    registers: SET_WORDS.map((v, k) => (k === 14 ? 0x3f8 : v)),
   },
 ];
 

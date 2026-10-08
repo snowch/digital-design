@@ -15,10 +15,17 @@ import {
   memoryWord,
   timelineRun,
 } from "@dd/dd-model";
-import { listingAnswer, transferValue } from "@dd/dd-views";
+import { grade, listingAnswer, transferValue } from "@dd/dd-views";
 import { parseLesson } from "@platform/lesson-schema";
 
-import { SAVE_CHOICE_HANDLERS, SAVED, SPOILED, STACK_HANDLER } from "./module12";
+import {
+  SAVE_CHOICE_HANDLERS,
+  SAVED,
+  SAVE_REFERENCE,
+  SAVE_START,
+  SPOILED,
+  STACK_HANDLER,
+} from "./module12";
 import { SAVE_CHOICES, savingState } from "./saving-state";
 
 const lesson = parseLesson(savingState);
@@ -68,5 +75,16 @@ describe("facts for the saving-state lesson", () => {
     expect(endOf(s.stopped)).toEqual({ key: "cause34", values: { address: "01C", cause: "34" } });
     expect([s.traps[0]?.at, s.cpu.regs[14]]).toEqual([0x14n, 0x3f8n]);
     expect(assembleChecked(STACK_HANDLER).program!.labels["handler"]).toBe(0x1c);
+  });
+
+  it("the challenge fails the starting text and each shortcut the review found", () => {
+    const c = lesson.challenges.find((x) => x.id === "save-registers")!;
+    // The starting text writes R5 unsaved; the same with any other register in its place.
+    const tries = [
+      SAVE_START,
+      ...["R10", "R0", "R14", "R15"].map((r) => SAVE_START.replaceAll("R5", r)),
+    ];
+    for (const text of tries) expect(grade(c, { text }).passed, text).toBe(false);
+    expect(grade(c, { text: SAVE_REFERENCE }).passed).toBe(true);
   });
 });
