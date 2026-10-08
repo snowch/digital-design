@@ -146,15 +146,21 @@ test.describe("the final-machine lab", () => {
     await expect(trap).toContainText(format(T.joinsOpenCount, { n: 12 }));
   });
 
-  test("a lab figure marks the port its changed line joins", async ({ page }) => {
+  test("a lab figure draws no join, and marks the part a run names only after it", async ({
+    page,
+  }) => {
     await openLesson(page, "final-machine");
     const figure = page.locator('[data-interactive="lab-door"]');
     await figure.scrollIntoViewIfNeeded();
-    await figure
-      .locator(".lab-joins-map")
-      .getByRole("button", { name: /memory/ })
-      .click();
-    await expect(figure.locator(".lab-joins-marked .lab-joins-port")).toHaveText(["DOOR"]);
+    await expect(figure.locator(".lab-joins-map")).toBeVisible();
+    await expect(figure.locator(".lab-joins-row")).toHaveCount(0);
+    await expect(figure.locator(".lab-joins-marked")).toHaveCount(0);
+    await figure.locator("select").selectOption({ index: 3 });
+    await figure.getByRole("button", { name: T.labRun }).click();
+    await expect(figure.locator(".lab-run-results li")).toContainText('"waiting"', {
+      timeout: 30_000,
+    });
+    await expect(figure.locator(".lab-joins-marked code")).toHaveText(["memory"]);
   });
 
   test("the prediction is answered by running the programs", async ({ page }) => {

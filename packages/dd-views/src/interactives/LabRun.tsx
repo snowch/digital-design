@@ -15,7 +15,7 @@ import { Prose, useSlot, type InteractiveProps } from "@platform/lesson-runtime"
 import { PredictionChallenge } from "@platform/primitives";
 
 import { labCircuit, labPlan, labText } from "../LabEditor";
-import { LabJoins } from "./LabJoins";
+import { LabJoins, partNamed } from "./LabJoins";
 import { format, useViewStrings } from "../strings";
 import { withCode } from "./Module13Figures";
 import { withProps } from "./props";
@@ -91,6 +91,8 @@ export const LabRunFigure = withProps(
     const [program, setProgram] = useState(0);
     const [running, setRunning] = useState(false);
     const [runs, setRuns] = useState<readonly string[]>([]);
+    // The part the last run's sentence names, for the text it ran; nothing before a run.
+    const [named, setNamed] = useState<{ which: number; part?: string } | undefined>();
     const [stored, setStored] = useSlot<Stored>(store, interactive.id);
     const asking = data.question !== undefined && data.options !== undefined;
     const committed = !asking || stored?.choice !== undefined;
@@ -113,6 +115,9 @@ export const LabRunFigure = withProps(
       setTimeout(() => {
         const r = labRun(labVariant(data.hdl, text), chosen);
         const result = "blocked" in r ? r.blocked : labText(strings, r, false);
+        const d = "blocked" in r ? undefined : r.difference;
+        const part = partNamed(d?.what, d?.machineStop?.kind === "trap");
+        setNamed({ which, ...(part ? { part } : {}) });
         setRuns((old) => [
           format(t.labRunLine, { text: text.label, program: chosen.label, result }),
           ...old,
@@ -196,8 +201,14 @@ export const LabRunFigure = withProps(
                 </pre>
               </div>
             )}
-            {text && <LabJoins text={labVariant(data.hdl, text)} changed={text.to} />}
-            {text?.to !== undefined && <p className="lab-joins-note">{t.joinsMarkNote}</p>}
+            {text && (
+              <LabJoins
+                text={labVariant(data.hdl, text)}
+                mapOnly
+                {...(named?.which === which && named.part ? { marked: named.part } : {})}
+              />
+            )}
+            <p className="lab-joins-note">{t.joinsMarkNote}</p>
             <div className="explorer-actions">
               <button type="button" className="button" disabled={running} onClick={run}>
                 {running ? t.labRunning : t.labRun}

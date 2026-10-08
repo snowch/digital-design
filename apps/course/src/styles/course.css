@@ -3306,6 +3306,17 @@ svg.stack-depth {
   font-size: 0.85em;
   color: var(--accent);
 }
+.lab-joins-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.lab-joins-item.lab-joins-marked {
+  border-left: 4px solid var(--accent);
+}
 .lab-joins-button.lab-joins-marked {
   border-color: var(--accent);
 }

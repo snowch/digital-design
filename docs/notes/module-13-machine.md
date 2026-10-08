@@ -28,7 +28,7 @@ lists every fact or form put right in a draft, and every cut made on the second 
 | `full-path` | one line at every level at one edge | the drawing, opened to any level, beside "The instruction at every level" |
 | `tracing` | a value followed from a line to a gate | the drawing, opened block by block, and each closed part as the drawing of one bit its maker drew |
 | `final-machine` | the joins the learner's text makes between the parts | the lab's drawing: a map of the nine parts in lesson 1's blocks, and a part's ports as wires to what the text joins them to, open ports as rings |
-| `final-machine` | a changed line's effect | the same drawing in each `lab-run` figure, the ports the line feeds marked |
+| `final-machine` | where a run's first difference sits | each `lab-run` figure's map of the nine parts, the part holding the value the run's sentence names marked after the run; no port's join is drawn, since the figures run the course's own text |
 | `capstone` | the learner's own program run on the whole machine | lesson 3's trace figure on the learner's program, under the editor |
 
 Tables kept beside drawings, and why:

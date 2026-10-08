@@ -23,17 +23,6 @@ const BLOCKS: readonly (readonly [string, readonly string[]])[] = [
   ["port", ["memory"]],
 ];
 
-/** The ports a changed line feeds: the port it joins, or every port that reads the wire it sets. */
-export function markedBy(changed: string | undefined): (port: string, written: string) => boolean {
-  if (!changed) return () => false;
-  const joined = /^\s*\.(\w+)\(/.exec(changed)?.[1];
-  if (joined) return (port) => port === joined;
-  const assigned = /(\w+)\s*=(?!=)/.exec(changed)?.[1];
-  if (!assigned) return () => false;
-  const re = new RegExp(`\\b${assigned}\\b`);
-  return (_port, written) => re.test(written);
-}
-
 /** A label that may break after a part's name, `controller.` / `FETCHING`, on a narrow screen. */
 const breakable = (s: string) =>
   s.split(/(?<=\.)/).flatMap((piece, k) => (k ? [<wbr key={k} />, piece] : [piece]));
@@ -120,11 +109,35 @@ function PartJoins({
   );
 }
 
-/** The joins of a text of the whole machine: a map of the nine parts, and one part's joins drawn. */
-export function LabJoins({ text, changed }: { text: string; changed?: string }) {
+const NO_MARK = () => false;
+
+/** The part a run's sentence names, by what differs: the part that holds that value, if any. */
+export function partNamed(what: string | undefined, halts: boolean): string | undefined {
+  if (what === undefined) return undefined;
+  if (what === "stop") return halts ? "traplogic" : undefined;
+  if (/^R\d+$/.test(what)) return "registers";
+  if (/^C[0-4]$/.test(what)) return "cregs";
+  if (["timer", "waiting", "display", "lamps"].includes(what) || what.startsWith("byte"))
+    return "memory";
+  return undefined;
+}
+
+/**
+ * The joins of a text of the whole machine: a map of the nine parts, and one part's joins drawn.
+ * `mapOnly` (a figure that runs the course's text) draws the map alone, no port's join, and marks
+ * `marked`, the part a run's sentence names, once there has been a run.
+ */
+export function LabJoins({
+  text,
+  mapOnly = false,
+  marked,
+}: {
+  text: string;
+  mapOnly?: boolean;
+  marked?: string;
+}) {
   const t = useViewStrings().machine13;
   const joins = labJoins(text);
-  const marked = markedBy(changed);
   const [chosen, setChosen] = useState<string>("traplogic");
   if (joins.problem)
     return (
@@ -135,7 +148,7 @@ export function LabJoins({ text, changed }: { text: string; changed?: string }) 
   const byModule = new Map(joins.parts.map((p) => [p.module, p]));
   const partName = (instance: string) =>
     joins.parts.find((p) => p.name === instance)?.module ?? instance;
-  const part = byModule.get(chosen) ?? joins.parts[0];
+  const part = mapOnly ? undefined : (byModule.get(chosen) ?? joins.parts[0]);
   const openCount = (p: JoinPart) =>
     p.inputs.filter((i) => i.source.kind === "open").length +
     p.outputs.filter((o) => o.written === "").length;
@@ -152,8 +165,10 @@ export function LabJoins({ text, changed }: { text: string; changed?: string }) 
         ].filter((m) => m !== part.module)
       : [],
   );
-  const hasMark = (p: JoinPart) =>
-    [...p.inputs, ...p.outputs].some((port) => marked(port.port, port.written));
+  const count = (p: JoinPart | undefined) => {
+    const open = p ? openCount(p) : undefined;
+    return !p ? t.joinsMissing : open ? format(t.joinsOpenCount, { n: open }) : t.joinsAllJoined;
+  };
   return (
     <div className="lab-joins">
       <div className="lab-joins-map" role="group" aria-label={t.joinsMap}>
@@ -162,24 +177,28 @@ export function LabJoins({ text, changed }: { text: string; changed?: string }) 
             <p className="lab-joins-block-name">{t.joinsBlocks[block] ?? block}</p>
             {modules.map((m) => {
               const p = byModule.get(m);
-              const open = p ? openCount(p) : undefined;
+              if (mapOnly)
+                return (
+                  <div
+                    key={m}
+                    className={`lab-joins-item${marked === m ? " lab-joins-marked" : ""}`}
+                  >
+                    <code>{m}</code>
+                    <span className="lab-joins-count">{count(p)}</span>
+                    {marked === m && <span className="lab-joins-link">{t.joinsRunMark}</span>}
+                  </div>
+                );
               return (
                 <button
                   key={m}
                   type="button"
-                  className={`button secondary lab-joins-button${p && hasMark(p) ? " lab-joins-marked" : ""}${linked.has(m) ? " lab-joins-linked" : ""}`}
+                  className={`button secondary lab-joins-button${linked.has(m) ? " lab-joins-linked" : ""}`}
                   aria-pressed={part?.module === m}
                   disabled={!p}
                   onClick={() => setChosen(m)}
                 >
                   <code>{m}</code>
-                  <span className="lab-joins-count">
-                    {!p
-                      ? t.joinsMissing
-                      : open
-                        ? format(t.joinsOpenCount, { n: open })
-                        : t.joinsAllJoined}
-                  </span>
+                  <span className="lab-joins-count">{count(p)}</span>
                   {part && linked.has(m) && (
                     <span className="lab-joins-link">
                       {format(t.joinsLinked, { part: part.module })}
@@ -191,7 +210,7 @@ export function LabJoins({ text, changed }: { text: string; changed?: string }) 
           </div>
         ))}
       </div>
-      {part && <PartJoins part={part} marked={marked} partName={partName} />}
+      {part && <PartJoins part={part} marked={NO_MARK} partName={partName} />}
     </div>
   );
 }

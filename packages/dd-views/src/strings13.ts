@@ -172,6 +172,8 @@ export interface Machine13Strings {
   readonly joinsMarkNote: string;
   /** On the map, under a part the chosen {part} joins to. */
   readonly joinsLinked: string;
+  /** On a figure's map, under the part the last run's sentence names. */
+  readonly joinsRunMark: string;
 }
 
 export const MACHINE13_STRINGS: Machine13Strings = {
@@ -316,6 +318,7 @@ export const MACHINE13_STRINGS: Machine13Strings = {
   joinsUnread: "read by nothing",
   joinsNone: "The joins cannot be drawn: {problem}",
   joinsMarkNote:
-    "The ports drawn in colour are the ones the changed line feeds; a line that feeds no port directly marks none.",
+    "After a run, the part holding the value the sentence names is marked, and a sentence about the PC marks none.",
   joinsLinked: "joined to {part}",
+  joinsRunMark: "holds a value the last run names",
 };
