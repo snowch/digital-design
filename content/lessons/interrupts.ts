@@ -62,6 +62,8 @@ export const interrupts: LessonInput = {
             control: true,
             modeWords: true,
             events: true,
+            // The question comes before the motivation names interrupts.
+            interruptWords: false,
             doorOpensAt: DOOR_AT,
             outcomes: PROSE.unseenAfter,
           },

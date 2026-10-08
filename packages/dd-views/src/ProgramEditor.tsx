@@ -78,7 +78,7 @@ function leftText(
       const items = value.split(", ");
       const listed =
         items.length > LIST_SHOWN ? `${items.slice(0, LIST_SHOWN).join(", ")}, …` : value;
-      const said = (reg && key.startsWith("R")) || atTrap || word ? wordText(value) : listed;
+      const said = (reg && key.startsWith("R")) || atTrap || word ? wordText(value, t) : listed;
       return format(t.checkValue, { name, value: said || t.emptyLeft });
     })
     .join("; ");
@@ -87,9 +87,18 @@ function leftText(
 /** The items of a long list a failure names, from the first. */
 const LIST_SHOWN = 8;
 
-/** A decimal the grader left, as the debugger writes a word: its hexadecimal beside from 10 to 7FF. */
-function wordText(value: string): string {
-  return /^-?\d+$/.test(value) ? valueText(BigInt(value)) : value;
+/**
+ * A decimal the grader left, as the debugger writes a word: from 10 to 7FF its hexadecimal beside
+ * it, named in words, since a failure is read as text, with no hidden label.
+ */
+function wordText(value: string, t: ViewStrings["machine11"]): string {
+  if (!/^-?\d+$/.test(value)) return value;
+  const v = BigInt(value);
+  if (v < 10n || v > 0x7ffn) return valueText(v);
+  return format(t.wordInText, {
+    decimal: value,
+    hex: v.toString(16).toUpperCase().padStart(3, "0"),
+  });
 }
 
 /** Grades a program challenge: every case run, each failure saying what the program left. */

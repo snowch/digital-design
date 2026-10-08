@@ -209,6 +209,11 @@ export interface DebuggerOptions {
   /** Module 12: the timer, the waiting events, DOOR and WARM shown. */
   readonly events?: boolean;
   /**
+   * Module 12: whether C0's and C1's bit 1 is said in words (interrupts on or off); by default with
+   * `events`. False before the page has said what an interrupt is.
+   */
+  readonly interruptWords?: boolean;
+  /**
    * Module 12: the registers before the other panels, for a challenge whose failures name them,
    * so that on a phone they sit just below the buttons.
    */
@@ -594,7 +599,7 @@ export function DebuggerView({
             state={state}
             t12={t12}
             modeWords={options.modeWords === true}
-            interrupts={options.events === true}
+            interrupts={options.interruptWords ?? options.events === true}
           />
         )}
         {options.events && (

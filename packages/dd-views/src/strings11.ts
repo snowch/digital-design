@@ -134,6 +134,8 @@ export interface Machine11Strings {
   readonly dataAdded: string;
   /** {name}: a line name the learner's text and a test's lines both give; {test}: the test. */
   readonly nameShared: string;
+  /** {decimal} and {hex}: a word in a failure's text, from 10 to 7FF, with its hexadecimal. */
+  readonly wordInText: string;
   readonly startSkeleton: string;
   readonly startEmpty: string;
   /** Asking before a start replaces a program the learner changed. */
@@ -319,6 +321,7 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   runWith: "Run with",
   dataAdded: "The tests add these lines after your program:",
   nameShared: "[draft] nameShared {name} {test}",
+  wordInText: "{decimal} ({hex} in hexadecimal)",
   startSkeleton: "Start from the outline",
   startEmpty: "Start from an empty program",
   // Brief 8M.
