@@ -8,7 +8,7 @@ export const LABELS = {
   title: "How can the machine keep a program away from the shop's devices?",
   objectives: [
     "Say what user mode refuses, and the cause of each refusal.",
-    "Start a program in user mode with resume.",
+    "Start a program in user mode.",
     "Say what the machine protects and what it does not.",
     "Tell from C1 which mode a program was in when it trapped.",
   ],
@@ -31,13 +31,13 @@ export const LABELS = {
   captions: {
     system: "The debugger shows a program that clears the lamps by mistake.",
     predict:
-      "The listing gives the same program, started in user mode, and asks a question about C1.",
+      "Predict what C1 holds after the store traps, given a start that writes `00` to C1 and goes to `program` with `goto`.",
     timeline:
       "The timeline lists the program started in user mode edge by edge, with the mode after each edge.",
     answers: "Four lines of a program, each to be judged in user mode.",
     ram: "The debugger shows a program in user mode that writes the handler's count.",
     map: "The memory map shows each part, with what user mode does with each access.",
-    user: "The figure shows a handler that starts a program in user mode, and its tests.",
+    user: "You write the start and the handler, and 4 tests check them.",
   },
   fields: {
     load: "R2 <= word[sensorA]",
@@ -46,5 +46,11 @@ export const LABELS = {
     timer: "R3 <= word[timer]",
   },
   ramTitle: "The handler's count at 410",
-  userLabels: ["A store to the lamps", "stop", "A load from a sensor", "A control register read"],
+  userLabels: [
+    "A store to the lamps, then `stop`",
+    "Two sensors read, then a control register",
+    "A word not at a multiple of 8",
+    "The timer, then the ROM",
+  ],
+  memoryTitle: "Count at `400`, saved cause at `408`",
 } as const;

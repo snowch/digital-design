@@ -308,7 +308,7 @@ handler: R5 <= C3
         R5 <= R5 + 4
         C2 <= R5
         resume
-other:  word[0x408] <= R5       // keep the cause
+other:  word[0x408] <= R5       // save the cause
         stop`;
 
 /** The challenge's test programs, each named `program`, each meeting what user mode refuses. */
@@ -390,7 +390,9 @@ back:   R8 <= word[0x400]       // put R8 and R9 back
 end:    stop
 fault:  stop`;
 
-export const SHOW_PROGRAM = `program: R2 <= 25
+export const SHOW_PROGRAM = `program: R8 <= 88               // the program's own words in R8 and R9
+        R9 <= 99
+        R2 <= 25
         R1 <= 1
         call system             // show R2
         R2 <= R2 + 1
@@ -444,15 +446,39 @@ export const SERVICE2_REFERENCE = SERVICE2_START.replace(
 end:    stop`,
 );
 
-/** Programs that read a room through service 2 and show it through service 1. */
+/**
+ * The words the sensor job's test programs keep across their calls: R0 and R3 to R15, as words of
+ * their own (the call's own registers, R1 and R2, aside). Before its last call, which ends it in
+ * the handler, each program copies R8 and R9 into R12 and R13, so the test reads them as the
+ * program found them after its last job 2.
+ */
+const KEPT_REGISTERS = [0, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+const KEEP_ALL = KEPT_REGISTERS.map((k) => `        R${k} <= ${(k + 1) * 11}`).join("\n");
+const COPY_KEPT = `        R12 <= R8               // R8 and R9 as the program finds them
+        R13 <= R9`;
+/** What each kept register holds at the end: its own word, R12 and R13 R8's and R9's. */
+const keptAtEnd = (changed: Readonly<Record<number, number>> = {}) =>
+  Object.fromEntries(
+    KEPT_REGISTERS.filter((k) => k !== 8 && k !== 9).map((k) => [
+      `R${k}`,
+      String(changed[k] ?? (k === 12 ? 99 : k === 13 ? 110 : (k + 1) * 11)),
+    ]),
+  );
+
+/** Programs that read a room through job 2 and show it through job 1. */
 export const SERVICE2_PROGRAMS: readonly {
   readonly label: string;
   readonly code: string;
   readonly shown: string;
+  readonly causes: string;
+  /** The registers the program keeps, as decimal words at the end of its run. */
+  readonly kept: Readonly<Record<string, string>>;
 }[] = [
   {
     label: "room A, then room B",
-    code: `program: R2 <= 0
+    code: `program: nothing
+${KEEP_ALL}
+        R2 <= 0
         R1 <= 2
         call system             // room A's reading in R1
         R2 <= R1
@@ -464,13 +490,18 @@ export const SERVICE2_PROGRAMS: readonly {
         R2 <= R1
         R1 <= 1
         call system
+${COPY_KEPT}
         R1 <= 4
         call system`,
     shown: "-184, -250",
+    causes: "41, 41, 41, 41, 41",
+    kept: keptAtEnd(),
   },
   {
     label: "room B, kept in R5 across a call",
-    code: `program: R2 <= 1
+    code: `program: nothing
+${KEEP_ALL}
+        R2 <= 1
         R1 <= 2
         call system
         R5 <= R1                // room B's reading
@@ -480,13 +511,18 @@ export const SERVICE2_PROGRAMS: readonly {
         R2 <= R5
         R1 <= 1
         call system             // show room B's reading
+${COPY_KEPT}
         R1 <= 4
         call system`,
     shown: "7, -250",
+    causes: "41, 41, 41, 41",
+    kept: keptAtEnd({ 5: -250 }),
   },
   {
     label: "the difference between the rooms",
-    code: `program: R2 <= 0
+    code: `program: nothing
+${KEEP_ALL}
+        R2 <= 0
         R1 <= 2
         call system
         R6 <= R1
@@ -496,9 +532,12 @@ export const SERVICE2_PROGRAMS: readonly {
         R2 <= R6 - R1
         R1 <= 1
         call system             // room A's reading less room B's
+${COPY_KEPT}
         R1 <= 4
         call system`,
     shown: "66",
+    causes: "41, 41, 41, 41",
+    kept: keptAtEnd({ 6: -184 }),
   },
 ];
 
@@ -688,31 +727,79 @@ export const DOOR_NO_CLEAR = DOOR_OPEN.replace(
 `,
 );
 
+/**
+ * The timer challenge's start: NIGHT lit before the program runs, so the timer's part must light
+ * ALARM beside it and leave the other lamps as they are, a rule no figure's timer part keeps.
+ */
+const TO_PROGRAM_NIGHT = TO_PROGRAM_EVENTS.replace(
+  "        R1 <= 2\n        C1 <= R1",
+  "        R1 <= 2\n        word[lamps] <= R1       // NIGHT, before the program runs\n        C1 <= R1",
+);
+
 export const TIMER_START = `// The handler. Write its timer part. The tests add a program after it, named program.
-${TO_PROGRAM_EVENTS}
+${TO_PROGRAM_NIGHT}
 ${EVENT_HANDLER_HEAD}
 ${DOOR_PART}
 tick:   goto back
 ${EVENT_HANDLER_TAIL}`;
 
-export const TIMER_REFERENCE = `// The handler, with its timer part.
-${TO_PROGRAM_EVENTS}
+export const TIMER_REFERENCE = `// The handler, with its timer part: ALARM beside the lamps already lit.
+${TO_PROGRAM_NIGHT}
 ${EVENT_HANDLER_HEAD}
 ${DOOR_PART}
-${TIMER_PART}
+tick:   R8 <= 1
+        word[waiting] <= R8     // the timer's event is seen
+        R8 <= word[signals]
+        R9 <= 1
+        R8 <= R8 & R9           // DOOR
+        if R8 != R9 goto back   // closed in time
+        R8 <= word[lamps]
+        R8 <= R8 | R9           // ALARM, beside the lamps already lit
+        word[lamps] <= R8
+        goto back
 ${EVENT_HANDLER_TAIL}`;
+
+/**
+ * The timer challenge's program: words of its own in R0 and R4 to R15, a count to 30 in R2 and
+ * R3, then R8 and R9 copied into R12 and R13 as the program finds them, 30 shown, and the end.
+ * An interrupt keeps every register, R1 and R2 included: the program did not ask for it.
+ */
+const TIMER_KEPT = [0, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15];
+export const TIMER_PROGRAM = `program: nothing
+${TIMER_KEPT.map((k) => `        R${k} <= ${(k + 1) * 11}`).join("\n")}
+        R2 <= 0
+        R3 <= 30
+loop:   R2 <= R2 + 1
+        if R2 != R3 goto loop
+        R12 <= R8               // R8 and R9 as the program finds them
+        R13 <= R9
+        R1 <= 1
+        call system             // show 30
+        R1 <= 4
+        call system             // end the program`;
+
+/** What the timer program's kept registers hold at its end, by name, as decimal words. */
+export const TIMER_KEPT_END: Readonly<Record<string, string>> = Object.fromEntries([
+  ...TIMER_KEPT.filter((k) => k !== 8 && k !== 9).map((k) => [`R${k}`, String((k + 1) * 11)]),
+  ["R3", "30"],
+  ["R12", "99"],
+  ["R13", "110"],
+]);
 
 /** The timer challenge's runs: the door opens before an instruction, and maybe closes again. */
 export const TIMER_RUNS: readonly {
   readonly label: string;
   readonly opens?: number;
   readonly closes?: number;
+  readonly warm?: 1;
+  /** The lamps at the end: NIGHT (2), with ALARM (1) where the door was left open. */
   readonly lamps: number;
 }[] = [
-  { label: "the door left open", opens: 15, lamps: 1 },
-  { label: "the door closed in time", opens: 15, closes: 30, lamps: 0 },
-  { label: "the door shut all night", lamps: 0 },
-  { label: "the door opened late and left open", opens: 50, lamps: 1 },
+  { label: "the door left open", opens: 20, lamps: 3 },
+  { label: "the door closed in time", opens: 20, closes: 35, lamps: 2 },
+  { label: "the door shut all night", lamps: 2 },
+  { label: "the door opened late and left open", opens: 60, lamps: 3 },
+  { label: "the door left open on a warm night", opens: 20, warm: 1, lamps: 3 },
 ];
 
 // ---------------------------------------------------------------------------------------------

@@ -24,13 +24,27 @@ import {
 } from "./module12";
 import { NIGHT_INPUTS } from "./traps";
 
-/** The construction: the services' numbers, an argument, and a result. */
+/**
+ * The construction: R2 for job 3 to light NIGHT and CLASH; what a program that reads both rooms
+ * shows; and C2 after a `call system` at `0A0`.
+ */
 export const CALL_ANSWERS = [
-  { id: "show", value: "1" },
-  { id: "end", value: "4" },
-  { id: "night", value: "2" },
-  { id: "roomB", value: "-250" },
+  { id: "lamps", value: "6", form: "number", detail: "callLamps" },
+  { id: "shown", value: "-66", form: "number", detail: "callShown" },
+  { id: "c2", value: "0A4", form: "hex", detail: "callC2" },
 ] as const;
+
+/** The construction's program: room B's reading less room A's, through jobs 2 and 1. */
+export const CALL_QUIZ = `        R2 <= 1
+        R1 <= 2
+        call system             // job 2: room B
+        R5 <= R1
+        R2 <= 0
+        R1 <= 2
+        call system             // job 2: room A
+        R2 <= R5 - R1
+        R1 <= 1
+        call system             // job 1`;
 
 export const systemCalls: LessonInput = {
   id: "system-calls",
@@ -78,14 +92,14 @@ export const systemCalls: LessonInput = {
             program: SERVICES,
             question: PROSE.p1Question,
             options: [
-              { value: "064", label: "064" },
-              { value: "068", label: "068" },
               { value: "06C", label: "06C" },
+              { value: "070", label: "070" },
+              { value: "074", label: "074" },
               { value: "01C", label: "01C" },
             ],
             ask: {
               what: "run",
-              run: { after: 10, what: "control", reg: 2 },
+              run: { after: 12, what: "control", reg: 2 },
               inputs: NIGHT_INPUTS,
               traps: true,
             },
@@ -200,7 +214,8 @@ export const systemCalls: LessonInput = {
     {
       id: "call-registers",
       title: LABELS.challengeTitles.c1,
-      task: PROSE.c1Task,
+      // The task, then the program its second question runs.
+      task: `${PROSE.c1Task}\n\n\`\`\`\n${CALL_QUIZ}\n\`\`\``,
       gradedDirection: "answer",
       interface: { inputs: [], outputs: [] },
       fields: CALL_ANSWERS.map((a) => ({
@@ -213,7 +228,7 @@ export const systemCalls: LessonInput = {
         grader: "exact",
         cases: CALL_ANSWERS.map((a) => ({
           label: LABELS.fields[a.id],
-          given: { field: a.id, form: "number", detail: "callRegister" },
+          given: { field: a.id, form: a.form, detail: a.detail },
           expect: { value: a.value },
         })),
       },
@@ -230,7 +245,7 @@ export const systemCalls: LessonInput = {
       initial: {
         text: SERVICE2_START,
         data: {
-          debugger: { control: true, modeWords: true, breakpoints: true, registers: [1, 2] },
+          debugger: { control: true, modeWords: true, breakpoints: true },
         },
       },
       tests: {
@@ -245,7 +260,9 @@ export const systemCalls: LessonInput = {
             sensorB: NIGHT_INPUTS.SENSORB,
             detail: "sensorService",
           },
-          expect: { shown: p.shown, end: "stop" },
+          // What the display showed; every register the program keeps across its calls; and
+          // how the run ended: only system calls trapped, and job 4 stopped it in the handler.
+          expect: { shown: p.shown, ...p.kept, causes: p.causes, stopAt: "handler" },
         })),
       },
       hints: [...PROSE.c2Hints],

@@ -19,6 +19,8 @@ import {
   DOOR_NO_CLEAR,
   DOOR_OPEN,
   DOOR_UNSEEN,
+  TIMER_KEPT_END,
+  TIMER_PROGRAM,
   TIMER_REFERENCE,
   TIMER_RUNS,
   TIMER_START,
@@ -173,7 +175,6 @@ export const interrupts: LessonInput = {
           lead: PROSE.debuggerLead,
           props: {
             program: DOOR_OPEN,
-            registers: [2, 8, 9],
             traps: true,
             control: true,
             modeWords: true,
@@ -244,7 +245,6 @@ export const interrupts: LessonInput = {
             control: true,
             modeWords: true,
             events: true,
-            registers: [2, 8, 9],
           },
         },
       },
@@ -255,12 +255,21 @@ export const interrupts: LessonInput = {
           label: LABELS.timerLabels[i] ?? r.label,
           given: {
             traps: "yes",
-            data: COUNT_PROGRAM,
+            data: TIMER_PROGRAM,
             detail: "doorTimer",
             ...(r.opens !== undefined ? { doorOpensAt: String(r.opens) } : {}),
             ...(r.closes !== undefined ? { doorClosesAt: String(r.closes) } : {}),
+            ...(r.warm !== undefined ? { warm: r.warm } : {}),
           },
-          expect: { lamps: String(r.lamps), display: "30", end: "stop" },
+          // The lamps; 30 shown; every register the program keeps across the interrupts; and a
+          // run that ends at the handler's `stop` for job 4.
+          expect: {
+            lamps: String(r.lamps),
+            display: "30",
+            ...TIMER_KEPT_END,
+            causes: r.opens !== undefined ? "82, 81, 41, 41" : "41, 41",
+            stopAt: "handler",
+          },
         })),
       },
       hints: [...PROSE.c2Hints],

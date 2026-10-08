@@ -1052,11 +1052,15 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
         "{actual} is not the PC after the trap. The PC takes C4, the handler's address, as three hexadecimal digits.",
       // Module 12, lessons 2 to 5.
       saveChoice:
-        "\"{actual}\" is not it for this handler. Check every register the handler writes: is it saved before it is written, and put back from the same word before resume?",
+        '"{actual}" is not it for this handler. Check every register the handler writes: is it saved before it is written, and put back from the same word before resume?',
       userRefusal:
         "{actual} is not the cause for this line. User mode refuses a load or store at a device's address (from 7C0) with 32, and resume, the control-register jobs and stop with 22. Give 0 if user mode runs the line.",
-      callRegister:
-        "{actual} is not it. Read it from the table of jobs: R1 names the job, R2 gives its word, and the result comes back in R1.",
+      callLamps:
+        "{actual} is not it. Job 3 sets each lamp from one bit of R2: bit 0 ALARM, bit 1 NIGHT, bit 2 CLASH, as the table of jobs says. R2 is the word with those bits set.",
+      callShown:
+        "{actual} is not what the program shows. Follow R1, R2 and R5 through each call: job 2 leaves the reading of the room R2 names in R1, and job 1 shows R2.",
+      callC2:
+        "{actual} is not C2 after the call. A system call's return point is the instruction after the call, as the prediction showed.",
       nextEdge:
         "{actual} is not what the next edge does. The next edge traps only when bit 1 of C0 is 1 and a bit of \"waiting\" is set. The timer's 81 goes before the door's 82. Give 0 if the instruction runs.",
       nestC1:

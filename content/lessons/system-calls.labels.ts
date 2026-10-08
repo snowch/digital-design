@@ -39,10 +39,9 @@ export const LABELS = {
     sensor: "A handler that reads a room's sensor for a user program, and its tests.",
   },
   fields: {
-    show: "R1 to show R2",
-    end: "R1 to end the program",
-    night: "R2 to light NIGHT with job 3",
-    roomB: "R1 after job 2 for room B",
+    lamps: "R2 to light NIGHT and CLASH with job 3",
+    shown: "What the program shows",
+    c2: "C2 after a `call system` at `0A0`",
   },
   sensorLabels: [
     "Room A, then room B",

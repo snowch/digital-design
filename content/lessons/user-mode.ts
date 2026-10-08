@@ -15,6 +15,7 @@ import type { LessonInput } from "@platform/lesson-schema";
 import { LABELS } from "./user-mode.labels";
 import { PROSE } from "./user-mode.prose";
 import {
+  GOTO_START,
   LAMPS_SYSTEM,
   LAMPS_USER,
   RAM_UNGUARDED,
@@ -73,7 +74,7 @@ export const userMode: LessonInput = {
           timeModel: "none",
           caption: LABELS.captions.predict,
           props: {
-            program: LAMPS_USER,
+            program: GOTO_START,
             question: PROSE.p1Question,
             options: [
               { value: "00", label: "00" },
@@ -83,7 +84,7 @@ export const userMode: LessonInput = {
             ],
             ask: {
               what: "run",
-              run: { after: 13, what: "control", reg: 1 },
+              run: { after: 7, what: "control", reg: 1 },
               inputs: NIGHT_INPUTS,
               traps: true,
             },
@@ -218,7 +219,14 @@ export const userMode: LessonInput = {
       interface: { inputs: [], outputs: [] },
       initial: {
         text: USER_START,
-        data: { debugger: { control: true, modeWords: true, registers: [1, 5] } },
+        data: {
+          debugger: {
+            control: true,
+            modeWords: true,
+            registers: [1, 5, 6],
+            memory: [{ from: "0x400", words: 2, title: LABELS.memoryTitle }],
+          },
+        },
       },
       tests: {
         kind: "answers",
@@ -226,11 +234,14 @@ export const userMode: LessonInput = {
         cases: USER_PROGRAMS.map((p, k) => ({
           label: LABELS.userLabels[k] ?? p.label,
           given: { traps: "yes", data: p.code, detail: "startUser" },
+          // C1 at the end holds the mode the program ran in at its last trap; the count, the
+          // cause kept, the causes in order, and a run that ends at the handler's `stop`.
           expect: {
             C1: "00",
-            "word:400": String(p.cause),
-            traps: "1",
-            end: "stop",
+            "word:400": String(p.count),
+            "word:408": String(p.cause),
+            causes: p.causes,
+            stopAt: "handler",
           },
         })),
       },
@@ -243,6 +254,6 @@ export const userMode: LessonInput = {
     textbookExample:
       "LC-3's privilege bit in its processor status register, with the privilege mode violation exception and a supervisor stack (Patt and Patel); the two modes of Bryant and O'Hallaron's processes and their mode bit; RISC-V's machine and user modes.",
     howThisDiffers:
-      "The mode arrives because the learner watches a program in system mode clear the shop's lamps by a one-word mistake, with nothing to stop it. The course machine's mode is C0's bit 0; user mode refuses the four system jobs but call system (cause 22) and every device address (cause 32), the shop's own devices, read or written. The handler drops to user mode with the same resume lesson 1 taught, after writing C1 and C2, and the lesson says plainly that the RAM is not protected: a user program overwrites the count the handler keeps. The memory map is shown as user mode meets it, read off the machine's own checks. No supervisor stack, no privilege levels beyond two, no named commercial modes.",
+      "The mode arrives because the learner watches a program in system mode clear the shop's lamps by a one-word mistake, with nothing to stop it. The course machine's mode is C0's bit 0; user mode refuses the four system jobs but call system (cause 22) and every device address (cause 32), the shop's own devices, read or written. The start drops to user mode with the same resume lesson 1 taught, after writing C1 and C2 (the prediction shows a start that writes C1 but goes to the program with goto, so C1 records system mode), and the lesson says plainly that the RAM is not protected: a user program overwrites the count the handler keeps. The memory map is shown as user mode meets it, read off the machine's own checks. No supervisor stack, no privilege levels beyond two, no named commercial modes.",
   },
 };

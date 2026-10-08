@@ -15,10 +15,17 @@ import {
   memoryWord,
   timelineRun,
 } from "@dd/dd-model";
-import { listingAnswer, transferValue } from "@dd/dd-views";
+import { grade, listingAnswer, transferValue } from "@dd/dd-views";
 import { parseLesson } from "@platform/lesson-schema";
 
-import { LAMPS_SYSTEM, LAMPS_USER, RAM_UNGUARDED } from "./module12";
+import {
+  GOTO_START,
+  LAMPS_SYSTEM,
+  LAMPS_USER,
+  RAM_UNGUARDED,
+  USER_REFERENCE,
+  USER_START,
+} from "./module12";
 import { USER_ANSWERS, userMode } from "./user-mode";
 
 const lesson = parseLesson(userMode);
@@ -53,8 +60,31 @@ describe("facts for the user-mode lesson", () => {
     expect(p.lines.find((l) => l.address === 0x14)?.text.trim()).toMatch(/^word\[R1\] <= R2/);
   });
 
-  it("the prediction: C1 holds 00 after the trap", () => {
-    expect(listingAnswer(props("predict-c1"))).toBe("00");
+  it("the prediction: the start writes 00 to C1 but goes to program; the store traps with 34 at 024, C1 01", () => {
+    expect(listingAnswer(props("predict-c1"))).toBe("01");
+    const { edges } = timelineRun(GOTO_START, ROOMS);
+    expect(edges.map((e) => e.kind).join(" ")).toBe("run run run run run run trap run run stop");
+    const at = (n: number) =>
+      edges[n - 1]!.transfers.map((x) => `${x.target} ← ${transferValue(x)}`).join(", ");
+    expect(at(4)).toBe("C1 ← 00, PC ← 010");
+    expect(at(7)).toBe("C2 ← 024, C1 ← 01, C0 ← 01, C3 ← 34, PC ← 014");
+  });
+
+  it("user mode's devices are 7C0 to 7F7: a load at 7F0 traps with 32, at 7F8 with 31", () => {
+    expect(causeOf("R2 <= word[0x7F0]")).toBe("32");
+    expect(causeOf("R2 <= word[0x7F8]")).toBe("31");
+    expect(causeOf("R2 <= word[0x7C0]")).toBe("32");
+  });
+
+  it("the challenge fails the starting text and a start that goes to program", () => {
+    const c = lesson.challenges.find((x) => x.id === "start-user")!;
+    const gotoStart = USER_REFERENCE.replace(
+      "        R1 <= program\n        C2 <= R1\n        resume\n",
+      "        goto program\n",
+    );
+    expect(gotoStart).not.toBe(USER_REFERENCE);
+    for (const text of [USER_START, gotoStart]) expect(grade(c, { text }).passed, text).toBe(false);
+    expect(grade(c, { text: USER_REFERENCE }).passed).toBe(true);
   });
 
   it("the timeline: resume into user mode at 038, the store at 044 traps with 32, stop at 034", () => {
