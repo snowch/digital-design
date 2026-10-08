@@ -187,7 +187,7 @@ export function scenarioOf(given: Readonly<Record<string, string | number>>): Pr
 }
 
 /** What the program left for one expectation's key. */
-function leftFor(key: string, run: ScenarioRun): string {
+export function leftFor(key: string, run: ScenarioRun): string {
   const s = run.state;
   if (!s) return "";
   const cpu = s.cpu;

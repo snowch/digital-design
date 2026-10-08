@@ -20,6 +20,7 @@ import {
   endOf,
   fieldsOf,
   instructionHex,
+  leftFor,
   runScenario,
   RUN_LIMIT,
   type DebugState,
@@ -334,8 +335,11 @@ const ResultsProps = z.object({
     .array(
       z.object({
         label: z.string(),
-        readings: z.array(z.number().int()),
+        readings: z.array(z.number().int()).optional(),
         limit: z.number().int().optional(),
+        /** Module 12: lines added after the program in place of a log, and what they hold. */
+        data: z.string().optional(),
+        note: z.string().optional(),
         /** What the task asks this log's run to leave, by the check's key. */
         asks: z.record(z.string(), z.string()),
       }),
@@ -344,6 +348,8 @@ const ResultsProps = z.object({
   /** The checks shown, each a key of `asks` and the words that name it. */
   checks: z.array(z.object({ key: z.string(), label: z.string() })).min(1),
   outcomes: z.string().optional(),
+  /** Module 12: the machine with traps. */
+  traps: z.boolean().default(false),
 });
 type ResultsData = z.infer<typeof ResultsProps>;
 
@@ -358,11 +364,15 @@ const logText = (readings: readonly number[], limit?: number) => {
 export function resultsOf(data: z.input<typeof ResultsProps>) {
   const parsed = ResultsProps.parse(data);
   return parsed.logs.map((log) => {
-    const run = runScenario(parsed.program, { data: logText(log.readings, log.limit) });
+    const run = runScenario(parsed.program, {
+      data: log.data ?? logText(log.readings ?? [], log.limit),
+      ...(parsed.traps ? { traps: true } : {}),
+    });
     const s = run.state;
     const left: Record<string, string> = {};
     for (const c of parsed.checks) {
       if (!s) left[c.key] = "";
+      else if (log.data !== undefined) left[c.key] = leftFor(c.key, run);
       else if (c.key === "display") left[c.key] = signedText(s.cpu.display);
       else if (c.key === "lamps") left[c.key] = String(s.cpu.lamps);
       else if (c.key === "end") left[c.key] = endOf(s.stopped).key;
@@ -403,10 +413,14 @@ export const LogResults = withProps(
             return (
               <li key={log.label} className="log-card" aria-label={log.label}>
                 <p className="layout-title">{log.label}</p>
-                <p className="memory-word log-readings">
-                  {`${t.readingsCol}: ${log.readings.length ? log.readings.join(", ") : t.emptyLog}`}
-                  {log.limit !== undefined ? ` ${format(t.limitNote, { limit: log.limit })}` : ""}
-                </p>
+                {log.readings ? (
+                  <p className="memory-word log-readings">
+                    {`${t.readingsCol}: ${log.readings.length ? log.readings.join(", ") : t.emptyLog}`}
+                    {log.limit !== undefined ? ` ${format(t.limitNote, { limit: log.limit })}` : ""}
+                  </p>
+                ) : (
+                  log.note && <p className="log-readings">{log.note}</p>
+                )}
                 <table className="truth-table datapath-table log-table">
                   <thead>
                     <tr>

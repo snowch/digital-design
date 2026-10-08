@@ -1049,6 +1049,10 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       nestC3: "[draft] nestC3",
       nestSaved: "[draft] nestSaved",
       nestC0: "[draft] nestC0",
+      edgesCall: "[draft] edgesCall",
+      edgesResume: "[draft] edgesResume",
+      edgesInterrupt: "[draft] edgesInterrupt",
+      edgesStore: "[draft] edgesStore",
       // Module 11, lesson 4 (brief 4L).
       stackWord:
         "{actual} is not that word; a pop copies a word, adds 8 to R14, and leaves the word where it was. Give the word as three hexadecimal digits.",

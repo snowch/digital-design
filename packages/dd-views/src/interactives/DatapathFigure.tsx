@@ -25,6 +25,8 @@ import {
   buildDatapath,
   controllerMachine,
   edgeView,
+  machineOf,
+  trapControllerMachine,
   rowFor,
   type EdgeView,
   datapathRamWord,
@@ -53,6 +55,15 @@ import { withProps } from "./props";
 const RUN_LIMIT = 500;
 /** Edges a run makes between two redraws. */
 const RUN_SLICE = 20;
+
+/** Module 12: the control registers' nets, and their hexadecimal digits (0: two bits). */
+const CONTROL_NETS: readonly (readonly [string, number])[] = [
+  ["STATUS", 0],
+  ["datapath/cregs/C1", 0],
+  ["datapath/C2", 3],
+  ["datapath/cregs/C3", 2],
+  ["datapath/C4", 3],
+];
 
 const Inputs = z.record(z.string(), z.union([z.string(), z.number()]));
 
@@ -605,6 +616,36 @@ export const DatapathFigure = withProps(
               </table>
             </div>
           )}
+          {machineOf(data.libraryId)?.traps && (
+            <div className="truth-table-wrap">
+              <table className="truth-table datapath-table">
+                <caption>{strings.machine12.controlCaption}</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">{t.bus}</th>
+                    <th scope="col">{t.value}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {CONTROL_NETS.map(([net, digits], k) => {
+                    const w = netValue(net);
+                    const known = w !== undefined && w.known === (1n << BigInt(w.width)) - 1n;
+                    const text = !known
+                      ? "X"
+                      : digits === 0
+                        ? w.value.toString(2).padStart(2, "0")
+                        : w.value.toString(16).toUpperCase().padStart(digits, "0");
+                    return (
+                      <tr key={net}>
+                        <th scope="row">{`C${k} ${strings.machine12.controlNames[k] ?? ""}`}</th>
+                        <td className="memory-word">{text}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
           {data.devices && (
             <div className="truth-table-wrap">
               <table className="truth-table datapath-table">
@@ -711,9 +752,17 @@ function ControlPanes({
   const strings = useViewStrings();
   const t = strings.control;
   const next = edgeView(circuit, values);
-  const machine = useMemo(() => controllerMachine(), []);
+  // Module 12's machine has its own controller: READ leads to WRITE for a control-register job.
+  const traps = machineOf(data.libraryId)?.traps === true;
+  const machine = useMemo(() => (traps ? trapControllerMachine() : controllerMachine()), [traps]);
+  const level = (n: string) => {
+    if (next.signals[n] !== undefined) return next.signals[n] === 1 ? 1 : 0;
+    const net = circuit.nets.find((x) => x.name === `control/${n}`);
+    const w = net ? values[net.id] : undefined;
+    return w && w.known === 1n && w.value === 1n ? 1 : 0;
+  };
   const inputs: Record<string, 0 | 1> = Object.fromEntries(
-    machine.inputs.map((n) => [n, next.signals[n] === 1 ? 1 : 0]),
+    machine.inputs.map((n) => [n, level(n)]),
   );
   const applies = next.state && !stopped ? rowFor(machine, next.state, inputs) : undefined;
   const names = Object.fromEntries(

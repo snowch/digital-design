@@ -826,3 +826,149 @@ export const WAIT_RUNS: readonly {
     lamps: 1,
   },
 ];
+
+// ---------------------------------------------------------------------------------------------
+// 12.7 trap-hardware
+
+/** A trap inside 12 edges of the machine of several edges: C4 set, then a refused store. */
+export const TRAP_EDGES = `        R1 <= handler
+        C4 <= R1
+        word[sensorB] <= R1     // refused: it traps at its MEMORY edge
+        stop
+handler: R5 <= C3
+        stop`;
+
+const TRAPLOGIC_HEADER = `module traplogic(
+  input logic CHECKING,
+  input logic FETCHING,
+  input logic [7:0] CAUSED,
+  input logic STOP,
+  input logic IE,
+  input logic [7:0] CAUSEF,
+  input logic [7:0] CAUSEM,
+  input logic [1:0] WAITING,
+  input logic NOHANDLER,
+  output logic GO,
+  output logic TRAP,
+  output logic [7:0] CAUSE,
+  output logic HALT
+);
+  logic failedF, failedD, failedM, stopNow;
+  assign failedF = CAUSEF != 8'h00;
+  assign failedD = (CAUSED != 8'h00) & CHECKING;
+  assign failedM = CAUSEM != 8'h00;
+  assign stopNow = STOP & CHECKING;`;
+
+/** 12.7's challenge's start: Module 9's stop logic, which halts at every cause. */
+export const TRAPLOGIC_START = `${TRAPLOGIC_HEADER}
+  logic failed;
+  assign failed = failedF | failedD | failedM;
+  assign HALT = failed | stopNow;
+  assign TRAP = 1'b0;
+  assign GO = ~(failed | stopNow);
+  always_comb begin
+    CAUSE = CAUSEM;
+    if (failedD) CAUSE = CAUSED;
+    if (failedF) CAUSE = CAUSEF;
+  end
+endmodule
+`;
+
+export const TRAPLOGIC_REFERENCE = `${TRAPLOGIC_HEADER}
+  logic interrupt, traps;
+  assign interrupt = FETCHING & IE & (WAITING != 2'b00);
+  assign traps = failedF | interrupt | failedD | failedM;
+  assign HALT = stopNow | (traps & NOHANDLER);
+  assign TRAP = traps & ~NOHANDLER;
+  assign GO = ~(traps | stopNow);
+  always_comb begin
+    CAUSE = CAUSEM;
+    if (failedD) CAUSE = CAUSED;
+    if (interrupt) begin
+      if (WAITING[0]) CAUSE = 8'h81;
+      else CAUSE = 8'h82;
+    end
+    if (failedF) CAUSE = CAUSEF;
+  end
+endmodule
+`;
+
+/** One row of the trap logic's table: the inputs that are not 0. */
+export interface TrapLogicRow {
+  readonly label: string;
+  readonly inputs: Partial<
+    Record<
+      | "CHECKING"
+      | "FETCHING"
+      | "CAUSED"
+      | "STOP"
+      | "IE"
+      | "CAUSEF"
+      | "CAUSEM"
+      | "WAITING"
+      | "NOHANDLER",
+      number
+    >
+  >;
+}
+
+/** The trap logic's tests: each cause on its own, the events, which cause wins, and no handler. */
+export const TRAPLOGIC_ROWS: readonly TrapLogicRow[] = [
+  { label: "nothing to do", inputs: {} },
+  { label: "a fetch's cause 11", inputs: { FETCHING: 1, CAUSEF: 0x11 } },
+  { label: "a fetch's cause 11, no handler", inputs: { FETCHING: 1, CAUSEF: 0x11, NOHANDLER: 1 } },
+  { label: "the decoder's cause 22 at the check", inputs: { CHECKING: 1, CAUSED: 0x22 } },
+  { label: "the decoder's cause 22 outside the check", inputs: { CAUSED: 0x22 } },
+  { label: "call system at the check", inputs: { CHECKING: 1, CAUSED: 0x41 } },
+  { label: "the memory's cause 34", inputs: { CAUSEM: 0x34 } },
+  { label: "the memory's cause 32, no handler", inputs: { CAUSEM: 0x32, NOHANDLER: 1 } },
+  { label: "stop at the check", inputs: { CHECKING: 1, STOP: 1 } },
+  { label: "the door, at a fetch, interrupts on", inputs: { FETCHING: 1, IE: 1, WAITING: 2 } },
+  { label: "the timer, at a fetch, interrupts on", inputs: { FETCHING: 1, IE: 1, WAITING: 1 } },
+  { label: "both events, at a fetch", inputs: { FETCHING: 1, IE: 1, WAITING: 3 } },
+  { label: "the door, interrupts off", inputs: { FETCHING: 1, WAITING: 2 } },
+  { label: "the door, not at a fetch", inputs: { CHECKING: 1, IE: 1, WAITING: 2 } },
+  {
+    label: "the door and a fetch's cause 12",
+    inputs: { FETCHING: 1, IE: 1, WAITING: 2, CAUSEF: 0x12 },
+  },
+  {
+    label: "the door at a fetch, no handler",
+    inputs: { FETCHING: 1, IE: 1, WAITING: 2, NOHANDLER: 1 },
+  },
+  {
+    label: "the decoder's 21 and the memory's 31",
+    inputs: { CHECKING: 1, CAUSED: 0x21, CAUSEM: 0x31 },
+  },
+];
+
+/** What the drawn trap logic gives for a row: the rule `docs/machine.md` and the circuit share. */
+export function trapLogicOut(r: TrapLogicRow["inputs"]): {
+  GO: number;
+  TRAP: number;
+  CAUSE: number;
+  HALT: number;
+} {
+  const v = (k: keyof TrapLogicRow["inputs"]) => r[k] ?? 0;
+  const failedF = v("CAUSEF") !== 0;
+  const failedD = v("CAUSED") !== 0 && v("CHECKING") === 1;
+  const failedM = v("CAUSEM") !== 0;
+  const interrupt = v("FETCHING") === 1 && v("IE") === 1 && v("WAITING") !== 0;
+  const traps = failedF || interrupt || failedD || failedM;
+  const stopNow = v("STOP") === 1 && v("CHECKING") === 1;
+  const cause = failedF
+    ? v("CAUSEF")
+    : interrupt
+      ? (v("WAITING") & 1) === 1
+        ? 0x81
+        : 0x82
+      : failedD
+        ? v("CAUSED")
+        : v("CAUSEM");
+  return {
+    GO: traps || stopNow ? 0 : 1,
+    TRAP: traps && v("NOHANDLER") === 0 ? 1 : 0,
+    CAUSE: cause,
+    HALT: stopNow || (traps && v("NOHANDLER") === 1) ? 1 : 0,
+  };
+}
