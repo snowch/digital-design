@@ -8,6 +8,7 @@ import { createContext, useContext } from "react";
 import { MACHINE10_STRINGS, type Machine10Strings } from "./strings10";
 import { MACHINE11_STRINGS, type Machine11Strings } from "./strings11";
 import { MACHINE12_STRINGS, type Machine12Strings } from "./strings12";
+import { MACHINE13_STRINGS, type Machine13Strings } from "./strings13";
 
 export interface ViewStrings {
   readonly circuit: {
@@ -376,6 +377,8 @@ export interface ViewStrings {
   readonly machine11: Machine11Strings;
   /** Module 12: the control registers, the shop's events, the trap timeline. */
   readonly machine12: Machine12Strings;
+  /** Module 13's figure words (strings13.ts). */
+  readonly machine13: Machine13Strings;
 }
 
 /** Module 8: the words of the instruction-fields, widening, edges, memory-map and branches figures. */
@@ -1079,6 +1082,19 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
         "{actual} is not the number of edges. An interrupt is taken at the edge that would fetch, and that edge is all it takes.",
       edgesLoad:
         "{actual} is not the number of edges. The memory's checks give their cause in MEMORY, and a load that traps there never reaches WRITE.",
+      // Module 13, lesson 1 (brief 1D).
+      joinHb:
+        "{actual} does not drive HB. The block that drives a bus is the one whose right side the bus leaves, where that block's outputs are.",
+      joinWaiting:
+        "{actual} does not drive WAITING. The block that drives a bus is the one whose right side the bus leaves, where that block's outputs are.",
+      joinStatus:
+        "{actual} does not drive STATUS. The block that drives a bus is the one whose right side the bus leaves, where that block's outputs are.",
+      joinCausem:
+        "{actual} does not drive CAUSEM. The block that drives a bus is the one whose right side the bus leaves, where that block's outputs are.",
+      joinIrEdge:
+        "{actual} is not the edge at which the IR takes `resume`'s word. The IR takes an instruction's word at its FETCH edge, with edges counted from the reset; read the S lane.",
+      joinPcEdge:
+        "{actual} is not the edge at which the PC takes `040`. The PC takes its next value at the edge that ends `resume`, which takes three edges; read the PC lane.",
       // Module 11, lesson 4 (brief 4L).
       stackWord:
         "{actual} is not that word; a pop copies a word, adds 8 to R14, and leaves the word where it was. Give the word as three hexadecimal digits.",
@@ -1327,6 +1343,8 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
   machine11: MACHINE11_STRINGS,
   // Module 12 (strings12.ts).
   machine12: MACHINE12_STRINGS,
+  // Module 13 (strings13.ts).
+  machine13: MACHINE13_STRINGS,
   // Module 0. Drafted by the prose process (docs/notes/module-0-machine/briefs/6V.md).
   meet: {
     lines: {

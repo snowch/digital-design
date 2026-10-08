@@ -53,3 +53,6 @@ export * from "./program-tests";
 export * from "./traps";
 export * from "./traps-run";
 export * from "./trap-timeline";
+// Module 13, the whole machine: runs of the final machine recorded edge by edge.
+export * from "./final-programs";
+export * from "./final-run";

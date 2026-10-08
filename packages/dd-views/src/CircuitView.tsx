@@ -177,6 +177,8 @@ const SEALED = new Set([
   // word's worth of slices and one OR.
   "join-control-traps",
   "no-handler",
+  // Module 13: the final machine's control bus, one signal longer.
+  "join-control-final",
 ]);
 
 /** Whether a block of this kind is drawn closed for good, so a learner never sees inside it. */
