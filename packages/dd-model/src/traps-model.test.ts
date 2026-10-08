@@ -48,7 +48,8 @@ describe("a trap goes to the handler (Module 12)", () => {
     expect(after.cpu.regs).toEqual(before.cpu.regs);
     expect(after.cpu.ram).toEqual(before.cpu.ram);
     expect(after.ran).toBe(before.ran);
-    expect(after.traps).toEqual([{ at: 0xcn, cause: 0x34, returnPoint: 0xcn, after: 3 }]);
+    expect(after.traps).toMatchObject([{ at: 0xcn, cause: 0x34, returnPoint: 0xcn, after: 3 }]);
+    expect(after.traps[0]?.regs).toEqual(after.cpu.regs);
   });
 
   it("a handler that adds 4 to C2 skips the instruction, and the program goes on", () => {
