@@ -40,7 +40,7 @@ export const LABELS = {
     saved: "The debugger shows job 5 keeping C1 and C2, with the door's time to choose.",
     wait: "The handler's job 5 is yours to change, with its tests.",
   },
-  keptTitle: "C1 and C2 kept at 410 and 418",
+  keptTitle: "C1 and C2 saved at `410` and `418`",
   fields: {
     c1: "C1 after the door's interrupt",
     c3: "C3 after the door's interrupt",
@@ -48,9 +48,9 @@ export const LABELS = {
     c0: "C0 after the door part's resume",
   },
   waitLabels: [
-    "The door opens in the wait, and the program ends after the wait",
-    "Show 5, wait, show 6, the door open",
-    "Show 5, wait, show 6, the door shut",
-    "A word kept in R8 across the wait",
+    "The door opens in the count, and the program ends after it",
+    "Show 5, count, show 6, the door open",
+    "Show 5, count, show 6, the door shut",
+    "A longer count, the door open early in it",
   ],
 } as const;

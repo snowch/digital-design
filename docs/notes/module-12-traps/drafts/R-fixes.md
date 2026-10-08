@@ -18,3 +18,5 @@
   Hint keys renumbered from 0, as the placing tool counts them. `objectives.1` ("Start a program
   in user mode.", with "with resume" cut) is the review's own wording, placed directly.
 - R4: no fact wrong or dropped. The details placed in `strings.ts`; `fields.shown` capitalised as a label.
+- R5: `c2Task` wrote "its own values"; the fact sheet's word is "words", put in. The fifth test's label capitalised as the other four are.
+- R6: no fact wrong or dropped. `details.bitsForm` placed in `strings.ts`.

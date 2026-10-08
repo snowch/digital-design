@@ -18,6 +18,7 @@ import type { LessonInput } from "@platform/lesson-schema";
 import { LABELS } from "./nesting.labels";
 import { PROSE } from "./nesting.prose";
 import {
+  COUNT_KEPT_END,
   NEST_FAULT,
   NEST_LATE,
   NEST_SAVED,
@@ -32,10 +33,10 @@ export const NEST_DOOR = 60;
 
 /** The construction: the door's interrupt inside job 5's loop, in NEST_SAVED's run. */
 export const NEST_ANSWERS = [
-  { id: "c1", value: "11", detail: "nestC1" },
-  { id: "c3", value: "82", detail: "nestC3" },
-  { id: "saved", value: "10C", detail: "nestSaved" },
-  { id: "c0", value: "11", detail: "nestC0" },
+  { id: "c1", value: "11", form: "bits", detail: "nestC1" },
+  { id: "c3", value: "82", form: "hex", detail: "nestC3" },
+  { id: "saved", value: "10C", form: "hex", detail: "nestSaved" },
+  { id: "c0", value: "11", form: "bits", detail: "nestC0" },
 ] as const;
 
 export const nesting: LessonInput = {
@@ -64,6 +65,8 @@ export const nesting: LessonInput = {
             control: true,
             modeWords: true,
             events: true,
+            breakpoints: true,
+            pause: ["door"],
             doorOpensAt: NEST_DOOR,
             outcomes: PROSE.lateAfter,
           },
@@ -85,12 +88,12 @@ export const nesting: LessonInput = {
             program: NEST_FAULT,
             question: PROSE.p1Question,
             options: [
-              { value: "074", label: "074" },
+              { value: "07C", label: "07C" },
               { value: "048", label: "048" },
               { value: "04C", label: "04C" },
               { value: "01C", label: "01C" },
             ],
-            ask: { what: "run", run: { after: 21, what: "control", reg: 2 }, traps: true },
+            ask: { what: "run", run: { after: 23, what: "control", reg: 2 }, traps: true },
             explain: PROSE.p1Explain,
           },
         },
@@ -109,8 +112,8 @@ export const nesting: LessonInput = {
           lead: PROSE.timelineLead,
           props: {
             program: NEST_FAULT,
-            from: 9,
-            edges: 40,
+            from: 11,
+            edges: 42,
             mode: true,
             outcomes: PROSE.timelineAfter,
           },
@@ -128,7 +131,8 @@ export const nesting: LessonInput = {
           timeModel: "none",
           caption: LABELS.captions.savedListing,
           lead: PROSE.savedListingLead,
-          props: { program: NEST_SAVED },
+          // The questions read addresses and lines, not machine words or where branches go.
+          props: { program: NEST_SAVED, words: false, notes: false },
         },
         {
           id: "nest-answers",
@@ -227,7 +231,7 @@ export const nesting: LessonInput = {
         grader: "exact",
         cases: NEST_ANSWERS.map((a) => ({
           label: LABELS.fields[a.id],
-          given: { field: a.id, form: "hex", detail: a.detail },
+          given: { field: a.id, form: a.form, detail: a.detail },
           expect: { value: a.value },
         })),
       },
@@ -249,7 +253,7 @@ export const nesting: LessonInput = {
             control: true,
             modeWords: true,
             events: true,
-            registers: [1, 2, 8],
+            memory: [{ from: "0x410", words: 2, title: LABELS.keptTitle }],
           },
         },
       },
@@ -264,7 +268,17 @@ export const nesting: LessonInput = {
             detail: "waitDoor",
             ...(r.opens !== undefined ? { doorOpensAt: String(r.opens) } : {}),
           },
-          expect: { shown: r.shown, lamps: String(r.lamps), end: "stop" },
+          // What the display showed; the lamps; C1 at the end, the program's status at its last
+          // trap, which job 6 must put back; every register a call keeps; and a run that ends at
+          // the handler's `stop` for job 4. The causes' order is not checked: a longer job 6
+          // moves the timer's interrupt among the calls.
+          expect: {
+            shown: r.shown,
+            lamps: String(r.lamps),
+            C1: "10",
+            ...COUNT_KEPT_END,
+            stopAt: "handler",
+          },
         })),
       },
       hints: [...PROSE.c2Hints],
@@ -276,6 +290,6 @@ export const nesting: LessonInput = {
     textbookExample:
       "Nested interrupts in the textbooks: an interrupt priority level and a mask register, the supervisor stack that LC-3 or the 68000 pushes the status and PC onto, MIPS's EPC overwritten by an exception inside the handler and the advice to save EPC and Status before re-enabling interrupts, the 'reentrant handler' of an operating systems text.",
     howThisDiffers:
-      "The question comes from the shop: a user program asks the handler to wait, and the freezer's door, opened during the wait, goes unanswered for over a hundred instructions because the trap's edge turned interrupts off. A fault inside the handler, a room number the handler trusts, is stepped edge by edge until the learner sees C2 and C1 overwritten and the run circle inside the handler. The fix is the machine's own: C1 and C2 copied to two RAM words the handler chooses, C0 written to let interrupts in, and turned off again before C1 and C2 are written back; no stack, no priority levels, no mask register. The learner works out the registers after the nested interrupt from a listing, then rewrites the wait so the door comes in on time, tested with a program that ends straight after the wait.",
+      "The question comes from the shop: a user program asks the handler to wait, and the freezer's door, opened during the wait, goes unanswered for over a hundred instructions because the trap's edge turned interrupts off. A fault inside the handler, a room number the handler trusts, is stepped edge by edge until the learner sees C2 and C1 overwritten and the run circle inside the handler. The fix is the machine's own: C1 and C2 copied to two RAM words the handler chooses, C0 written to let interrupts in, and turned off again before C1 and C2 are written back; no stack, no priority levels, no mask register. The learner works out the registers after the nested interrupt from a listing, then rewrites a job of its own, job 6, which counts down on the display, so the door comes in during the count; the figures' job 5 is not the answer. The tests check C1 at the end, every register a call keeps, and a program that ends straight after the count.",
   },
 };

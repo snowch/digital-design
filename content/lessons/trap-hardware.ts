@@ -16,6 +16,7 @@ import type { LessonInput } from "@platform/lesson-schema";
 import { LABELS } from "./trap-hardware.labels";
 import { PROSE } from "./trap-hardware.prose";
 import {
+  CALL_TRAP,
   NIGHT,
   TRAPLOGIC_REFERENCE,
   TRAPLOGIC_ROWS,
@@ -38,12 +39,16 @@ const TRAPLOGIC_CONSTRUCTS = [
   "op-compare",
 ];
 
-/** The construction: how many edges each takes on the machine of several edges. */
+/**
+ * The construction: how many edges each takes on the machine of several edges, counting the edge
+ * that traps: a `stop` in user mode, the handler's `resume`, an interrupt, and a word load from an
+ * address not a multiple of 8. None of them is counted on the page.
+ */
 export const EDGE_ANSWERS = [
-  { id: "call", value: "2", detail: "edgesCall" },
+  { id: "stop", value: "2", detail: "edgesStop" },
   { id: "resume", value: "3", detail: "edgesResume" },
   { id: "interrupt", value: "1", detail: "edgesInterrupt" },
-  { id: "store", value: "4", detail: "edgesStore" },
+  { id: "load", value: "4", detail: "edgesLoad" },
 ] as const;
 
 const TRAPLOGIC_INPUTS = [
@@ -72,7 +77,10 @@ const LANES = [
   { net: "PC", show: "address" as const },
   { net: "IR", show: "word" as const },
   { net: "TRAP" },
+  { net: "STATUS", label: "C0", show: "bits" as const },
+  { net: "datapath/cregs/C1", label: "C1", show: "bits" as const },
   { net: "datapath/C2", label: "C2", show: "address" as const },
+  { net: "datapath/cregs/C3", label: "C3", show: "cause" as const },
 ];
 
 export const trapHardware: LessonInput = {
@@ -112,19 +120,20 @@ export const trapHardware: LessonInput = {
           caption: LABELS.captions.predict,
           props: {
             libraryId: "machine-traps",
-            program: TRAP_EDGES,
-            edges: 10,
+            program: CALL_TRAP,
+            edges: 8,
             shown: [1, 5],
             buses: ["IR"],
             states: true,
+            focus: ["control", "controller"],
             question: PROSE.p1Question,
             options: [
-              { value: "008", label: "008" },
-              { value: "00C", label: "00C" },
-              { value: "010", label: "010" },
-              { value: "000", label: "000" },
+              { value: "ALU", label: "ALU" },
+              { value: "FETCH", label: "FETCH" },
+              { value: "WRITE", label: "WRITE" },
+              { value: "READ", label: "READ" },
             ],
-            ask: "pc",
+            ask: "state",
             explain: PROSE.p1Explain,
           },
         },
@@ -143,6 +152,8 @@ export const trapHardware: LessonInput = {
           lead: PROSE.nightLead,
           props: {
             outcomes: PROSE.nightAfter,
+            outcomesWhen: "stopped",
+            focus: ["datapath", "cregs"],
             libraryId: "machine-traps",
             program: NIGHT,
             inputs: NIGHT_INPUTS,
@@ -191,6 +202,7 @@ export const trapHardware: LessonInput = {
             devices: true,
             run: true,
             states: true,
+            focus: ["control", "trapLogic"],
             faults: [
               {
                 kind: "stuck-at",

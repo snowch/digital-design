@@ -10,17 +10,25 @@ import {
   QUIET_INPUTS,
   assembleChecked,
   debugFinish,
+  debugRun,
   debugStart,
   endOf,
   resetMachine,
   step,
   timelineRun,
 } from "@dd/dd-model";
-import { listingAnswer, transferValue } from "@dd/dd-views";
+import { grade, listingAnswer, transferValue } from "@dd/dd-views";
 import { parseLesson } from "@platform/lesson-schema";
 
 import { DOOR_AT, EVENT_ANSWERS, interrupts } from "./interrupts";
-import { DOOR_NO_CLEAR, DOOR_OPEN, DOOR_UNSEEN } from "./module12";
+import {
+  DOOR_NO_CLEAR,
+  DOOR_OPEN,
+  DOOR_UNSEEN,
+  TIMER_PART,
+  TIMER_REFERENCE,
+  TIMER_START,
+} from "./module12";
 
 const lesson = parseLesson(interrupts);
 const props = (id: string) =>
@@ -91,12 +99,55 @@ describe("facts for the interrupts lesson", () => {
     }
   });
 
-  it("an event never cleared: cut off after 5000, 416 traps, R2 at 4, ALARM off", () => {
+  it("an event never cleared: cut off after 5000, 384 traps, R2 at 4, ALARM off", () => {
     const s = run(DOOR_NO_CLEAR, DOOR_AT);
     expect(s.stopped).toEqual({ kind: "cutOff", ran: 5000 });
-    expect([s.traps.length, s.cpu.regs[2], s.cpu.display, s.cpu.lamps]).toEqual([416, 4n, 0n, 0]);
+    expect([s.traps.length, s.cpu.regs[2], s.cpu.display, s.cpu.lamps]).toEqual([384, 4n, 0n, 0]);
     const first = s.traps[0]!;
     expect(s.traps.filter((t) => t.at !== first.at)).toEqual([]);
     expect(timelineRun(DOOR_NO_CLEAR, plan(DOOR_AT)).edges[16]?.kind).toBe("trap");
+  });
+
+  it("the door's bit is set at the edge that ends the 16th instruction; the interrupt is the next edge", () => {
+    const steps = debugRun(debugStart(assembleChecked(DOOR_OPEN).program!.rom), {
+      inputs: plan(DOOR_AT),
+      limit: 17,
+      options: MODULE_12,
+    } as never);
+    expect(steps.map((x) => [x.ran, x.cpu.waiting, x.traps.length]).slice(14, 17)).toEqual([
+      [15, 0, 0],
+      [16, 2, 0],
+      [16, 2, 1],
+    ]);
+    const s5 = run(DOOR_OPEN, 5);
+    expect([Number(s5.traps[0]?.returnPoint), s5.traps[0]?.cause]).toEqual([0xa4, 0x82]);
+  });
+
+  it("the timer challenge fails the starting text and each shortcut the review found", () => {
+    const c = lesson.challenges.find((x) => x.id === "door-timer")!;
+    const tick = (lines: string) => TIMER_START.replace("tick:   goto back", lines);
+    const shortcuts = [
+      // The figures' timer part, which overwrites the lamps.
+      tick(TIMER_PART),
+      // R2 as unsaved scratch.
+      tick(
+        "tick:   R8 <= 1\n        word[waiting] <= R8\n        R8 <= word[signals]\n        R2 <= 1\n        R8 <= R8 & R2\n        if R8 != R2 goto back\n        R8 <= word[lamps]\n        R8 <= R8 | R2\n        word[lamps] <= R8\n        goto back",
+      ),
+      // R5 and R6, never put back.
+      tick(
+        "tick:   R8 <= 1\n        word[waiting] <= R8\n        R5 <= word[signals]\n        R6 <= 1\n        R5 <= R5 & R6\n        if R5 != R6 goto back\n        R5 <= word[lamps]\n        R5 <= R5 | R6\n        word[lamps] <= R5\n        goto back",
+      ),
+      // Ending with its own resume: R8 and R9 never put back.
+      tick(
+        "tick:   R8 <= 1\n        word[waiting] <= R8\n        R8 <= word[signals]\n        R9 <= 1\n        R8 <= R8 & R9\n        if R8 != R9 goto done\n        R8 <= word[lamps]\n        R8 <= R8 | R9\n        word[lamps] <= R8\ndone:   resume",
+      ),
+      // The whole of signals compared with 1: wrong on a warm night.
+      tick(
+        "tick:   R8 <= 1\n        word[waiting] <= R8\n        R8 <= word[signals]\n        R9 <= 1\n        if R8 != R9 goto back\n        R8 <= word[lamps]\n        R8 <= R8 | R9\n        word[lamps] <= R8\n        goto back",
+      ),
+    ];
+    for (const text of [TIMER_START, ...shortcuts])
+      expect(grade(c, { text }).passed, text).toBe(false);
+    expect(grade(c, { text: TIMER_REFERENCE }).passed).toBe(true);
   });
 });

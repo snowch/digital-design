@@ -1069,7 +1069,8 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       nestSaved:
         "{actual} is not the word at 418. Job 5 saved C2 there when it began. That word is the return point of the program's call system.",
       nestC0: "{actual} is not C0 after the door part's resume. resume copies C1 into C0.",
-      bitsForm: "[draft] bitsForm",
+      bitsForm:
+        "{actual} has the right value, but this page writes C0 and C1 as their two bits, bit 1 first, such as `01`. Give it in that form.",
       edgesCall:
         "{actual} is not the number of edges. The cause of call system comes in READ, and that edge ends the call system.",
       edgesResume:

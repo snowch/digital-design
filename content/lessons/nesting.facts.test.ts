@@ -49,26 +49,26 @@ describe("facts for the nesting lesson", () => {
     expect(endOf(s.stopped)).toEqual({ key: "stop", values: { address: "0B4" } });
   });
 
-  it("the prediction: C2 holds 048 after the handler's load faults; the call's return point 074", () => {
+  it("the prediction: C2 holds 048 after the handler's load faults; the call's return point 07C", () => {
     expect(listingAnswer(props("predict-c2"))).toBe("048");
     const p = assembleChecked(NEST_FAULT).program!;
     expect(p.lines.find((l) => l.address === 0x48)?.text.trim()).toMatch(/^R1 <= word\[R8/);
   });
 
-  it("the timeline: the call at 10, the load's trap at 21, resume to 04C in system mode", () => {
-    const { edges } = timelineRun(NEST_FAULT, QUIET_INPUTS, 40);
+  it("the timeline: the call at 12, the load's trap at 23, resume to 04C in system mode", () => {
+    const { edges } = timelineRun(NEST_FAULT, QUIET_INPUTS, 42);
     const at = (n: number) =>
       edges[n - 1]!.transfers.map((x) => `${x.target} ← ${transferValue(x)}`).join(", ");
-    expect(at(10)).toBe("C2 ← 074, C1 ← 00, C0 ← 01, C3 ← 41, PC ← 01C");
-    expect([at(18), at(19), at(20)]).toEqual([
+    expect(at(12)).toBe("C2 ← 07C, C1 ← 00, C0 ← 01, C3 ← 41, PC ← 01C");
+    expect([at(20), at(21), at(22)]).toEqual([
       "R8 ← 10 00A, PC ← 040",
       "R8 ← 20 014, PC ← 044",
       "R8 ← 40 028, PC ← 048",
     ]);
-    expect(at(21)).toBe("C2 ← 048, C1 ← 01, C0 ← 01, C3 ← 31, PC ← 01C");
-    expect(at(29)).toBe("C2 ← 04C, PC ← 05C");
-    expect(at(32)).toBe("C0 ← 01, PC ← 04C");
-    expect(edges.slice(32).map((e) => e.pc.toString(16))).toEqual([
+    expect(at(23)).toBe("C2 ← 048, C1 ← 01, C0 ← 01, C3 ← 31, PC ← 01C");
+    expect(at(31)).toBe("C2 ← 04C, PC ← 05C");
+    expect(at(34)).toBe("C0 ← 01, PC ← 04C");
+    expect(edges.slice(34).map((e) => e.pc.toString(16))).toEqual([
       "4c",
       "5c",
       "60",

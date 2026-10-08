@@ -51,5 +51,6 @@ export const LABELS = {
     "The door closed in time",
     "The door shut all night",
     "The door opened late and left open",
+    "The door left open on a warm night",
   ],
 } as const;

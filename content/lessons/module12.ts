@@ -724,6 +724,7 @@ export const DOOR_NO_CLEAR = DOOR_OPEN.replace(
         word[waiting] <= R8     // the door's event is seen
 `,
   `door:   nothing                 // the door's event is left waiting
+        nothing
 `,
 );
 
@@ -760,17 +761,19 @@ tick:   R8 <= 1
 ${EVENT_HANDLER_TAIL}`;
 
 /**
- * The timer challenge's program: words of its own in R0 and R4 to R15, a count to 30 in R2 and
- * R3, then R8 and R9 copied into R12 and R13 as the program finds them, 30 shown, and the end.
+ * The timer challenge's program: words of its own in R0 and R5 to R15, a count to 30 in R2 over
+ * 30 rounds that R3 counts down, so a spoiled R2 shows on the display, then R8 and R9 copied into R12 and R13 as the program finds them, 30 shown, and the end.
  * An interrupt keeps every register, R1 and R2 included: the program did not ask for it.
  */
-const TIMER_KEPT = [0, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15];
+const TIMER_KEPT = [0, 5, 6, 7, 8, 9, 10, 11, 14, 15];
 export const TIMER_PROGRAM = `program: nothing
 ${TIMER_KEPT.map((k) => `        R${k} <= ${(k + 1) * 11}`).join("\n")}
         R2 <= 0
-        R3 <= 30
+        R3 <= 30                // rounds left
+        R4 <= 0
 loop:   R2 <= R2 + 1
-        if R2 != R3 goto loop
+        R3 <= R3 - 1
+        if R3 != R4 goto loop
         R12 <= R8               // R8 and R9 as the program finds them
         R13 <= R9
         R1 <= 1
@@ -781,7 +784,8 @@ loop:   R2 <= R2 + 1
 /** What the timer program's kept registers hold at its end, by name, as decimal words. */
 export const TIMER_KEPT_END: Readonly<Record<string, string>> = Object.fromEntries([
   ...TIMER_KEPT.filter((k) => k !== 8 && k !== 9).map((k) => [`R${k}`, String((k + 1) * 11)]),
-  ["R3", "30"],
+  ["R3", "0"],
+  ["R4", "0"],
   ["R12", "99"],
   ["R13", "110"],
 ]);
@@ -913,25 +917,83 @@ fault:  R8 <= C2                // skip what faulted, as lesson 1's handler did
 back:   R8 <= word[0x400]       // put R8 and R9 back
         R9 <= word[0x408]
         resume
-program: R2 <= 5
+program: R8 <= 88               // the program's own words in R8 and R9
+        R9 <= 99
+        R2 <= 5
         R1 <= 2
         call system             // room 5's reading in R1: there is no room 5
         R2 <= R1
         R1 <= 1
         call system`;
 
-/** 12.6's challenge: the handler with job 5 as it starts, and as it should be. */
-export const WAIT_START = `// The handler. Change job 5 so the door can come in while it waits.
+/**
+ * 12.6's challenge: a job of its own, job 6, which counts R2 down on the display to 1, so no
+ * figure lists its lines. The handler offers jobs 1, 4 and 6.
+ */
+const COUNT_HEAD = NEST_HEAD.replace(
+  "        R8 <= 5\n        if R1 == R8 goto wait",
+  "        R8 <= 6\n        if R1 == R8 goto count",
+);
+
+/** Job 6 as it starts: interrupts off, as every trap leaves them. */
+export const COUNT_OFF = `count:  R8 <= 0
+next:   word[display] <= R2     // show the count
+        R2 <= R2 - 1
+        if R2 != R8 goto next
+        goto back`;
+
+/** Job 6 letting the door in: C1 and C2 saved at 410 and 418, interrupts on for the count. */
+export const COUNT_ON = `count:  R8 <= word[0x400]       // the program's R8 and R9 back now:
+        R9 <= word[0x408]       // a trap in the count saves them again
+        R1 <= C1
+        word[0x410] <= R1       // save C1
+        R1 <= C2
+        word[0x418] <= R1       // save C2
+        R1 <= 3
+        C0 <= R1                // system mode, interrupts on
+        R1 <= 0
+next:   word[display] <= R2     // show the count
+        R2 <= R2 - 1
+        if R2 != R1 goto next
+        R1 <= 1
+        C0 <= R1                // interrupts off again
+        R1 <= word[0x410]
+        C1 <= R1                // C1 and C2 put back
+        R1 <= word[0x418]
+        C2 <= R1
+        resume`;
+
+export const WAIT_START = `// The handler. Change job 6 so the door can come in while it counts.
 ${TO_PROGRAM_EVENTS}
-${NEST_HEAD}
-${WAIT_OFF}
+${COUNT_HEAD}
+${COUNT_OFF}
 ${DOOR_PART}
 ${TIMER_PART}
 ${EVENT_HANDLER_TAIL}`;
 
-export const WAIT_REFERENCE = WAIT_START.replace(WAIT_OFF, WAIT_ON);
+export const WAIT_REFERENCE = WAIT_START.replace(COUNT_OFF, COUNT_ON);
 
-/** The challenge's runs: each user program waits with job 5 while the door may open. */
+/**
+ * The count challenge's programs: words of their own in R0 and R3 to R15, R8 and R9 copied into
+ * R12 and R13 before the end. A system call may change R1 and R2 alone.
+ */
+const COUNT_KEPT = [0, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+const COUNT_SET = COUNT_KEPT.map((k) => `        R${k} <= ${(k + 1) * 11}`).join("\n");
+const COUNT_END = `        R12 <= R8               // R8 and R9 as the program finds them
+        R13 <= R9
+        R1 <= 4
+        call system             // end the program`;
+/** The kept registers at the end of a count program, by name, as decimal words. */
+export const COUNT_KEPT_END: Readonly<Record<string, string>> = Object.fromEntries(
+  COUNT_KEPT.filter((k) => k !== 8 && k !== 9).map((k) => [
+    `R${k}`,
+    String(k === 12 ? 99 : k === 13 ? 110 : (k + 1) * 11),
+  ]),
+);
+const countdown = (from: number) =>
+  Array.from({ length: from }, (_, k) => String(from - k)).join(", ");
+
+/** The challenge's runs: each user program asks job 6 to count while the door may open. */
 export const WAIT_RUNS: readonly {
   readonly label: string;
   readonly code: string;
@@ -940,37 +1002,62 @@ export const WAIT_RUNS: readonly {
   readonly lamps: number;
 }[] = [
   {
-    label: "the door opens in the wait, and the program ends after it",
-    code: `program: R2 <= 60
-        R1 <= 5
-        call system             // wait 60 rounds
-        R1 <= 4
-        call system`,
-    opens: 30,
-    shown: "",
+    label: "the door opens in the count, and the program ends after it",
+    code: `program: nothing
+${COUNT_SET}
+        R2 <= 20
+        R1 <= 6
+        call system             // count 20 down
+${COUNT_END}`,
+    opens: 50,
+    shown: countdown(20),
     lamps: 1,
   },
   {
-    label: "show 5, wait, show 6, the door open",
-    code: WAIT_PROGRAM,
-    opens: 60,
-    shown: "5, 6",
-    lamps: 1,
-  },
-  { label: "show 5, wait, show 6, the door shut", code: WAIT_PROGRAM, shown: "5, 6", lamps: 0 },
-  {
-    label: "a word kept in R8 across the wait",
-    code: `program: R8 <= 7
-        R2 <= 60
-        R1 <= 5
-        call system             // wait 60 rounds
-        R2 <= R8
+    label: "show 5, count, show 6, the door open",
+    code: `program: nothing
+${COUNT_SET}
+        R2 <= 5
         R1 <= 1
-        call system             // show 7
-        R1 <= 4
-        call system`,
-    opens: 30,
-    shown: "7",
+        call system             // show 5
+        R2 <= 20
+        R1 <= 6
+        call system             // count 20 down
+        R2 <= 6
+        R1 <= 1
+        call system             // show 6
+${COUNT_END}`,
+    opens: 60,
+    shown: `5, ${countdown(20)}, 6`,
+    lamps: 1,
+  },
+  {
+    label: "show 5, count, show 6, the door shut",
+    code: `program: nothing
+${COUNT_SET}
+        R2 <= 5
+        R1 <= 1
+        call system             // show 5
+        R2 <= 20
+        R1 <= 6
+        call system             // count 20 down
+        R2 <= 6
+        R1 <= 1
+        call system             // show 6
+${COUNT_END}`,
+    shown: `5, ${countdown(20)}, 6`,
+    lamps: 0,
+  },
+  {
+    label: "a longer count, the door open early in it",
+    code: `program: nothing
+${COUNT_SET}
+        R2 <= 30
+        R1 <= 6
+        call system             // count 30 down
+${COUNT_END}`,
+    opens: 40,
+    shown: countdown(30),
     lamps: 1,
   },
 ];
@@ -982,6 +1069,17 @@ export const WAIT_RUNS: readonly {
 export const TRAP_EDGES = `        R1 <= handler
         C4 <= R1
         word[sensorB] <= R1     // refused: it traps at its MEMORY edge
+        stop
+handler: R5 <= C3
+        stop`;
+
+/**
+ * The prediction's program: a `call system` traps at its READ edge, where the controller's table
+ * would go on to ALU; the trap sends it to FETCH instead.
+ */
+export const CALL_TRAP = `        R1 <= handler
+        C4 <= R1
+        call system             // traps at its READ edge, with cause 41
         stop
 handler: R5 <= C3
         stop`;
