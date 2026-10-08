@@ -268,7 +268,12 @@ check to fail in the order the steps run.
   fetch at the new PC traps (`11` or `12`), with that PC as the return point.
 - **An interrupt** is taken at an edge between two instructions, when C0's bit 1 is 1 and a bit
   of "waiting" is 1. The instruction that would have run is not run; it is the return point.
-  The timer comes first if both wait.
+  The timer comes first if both wait. Decided with Module 12, where this document left it open:
+  on the machine of several edges an interrupt is taken at the edge that would fetch, and a
+  fetch's own cause (`11`, `12`) wins over it there, as the lower number; a trap's edge does not
+  count the timer down, since no instruction finished; and the door is seen at every edge that
+  ends an instruction or traps, so both machines take the same interrupt before the same
+  instruction.
 - **User mode refuses** `resume`, reading or writing a control register, `stop` (cause `22`), and
   every load or store at a device's address (cause `32`). A user program reaches a device through a
   system call, which is why system calls exist.

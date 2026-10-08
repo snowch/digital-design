@@ -9,6 +9,8 @@ a brief of checked facts. The plan is `docs/notes/module-12-plan.md`.
 
 - Started: 2026-10-07 23:39 UTC (first command in the session).
 - Outline committed and sent: 23:45 (below).
+- Last lesson committed: 2026-10-08 01:34; strings, browser tests and second pass: 02:02.
+- Full check started: 02:03 (below, "The full check").
 
 ## Log
 
@@ -20,6 +22,22 @@ a brief of checked facts. The plan is `docs/notes/module-12-plan.md`.
   hand placements (`library-control.ts`), the term gate, and lesson 11.4 as the model of a lesson's
   files. Scanned every lesson's words for the candidate terms (below, "Terms").
 - 23:45 `docs/machine.md`'s datapath bullet corrected (below, "Edits to files on `main`").
+- 23:50 The model (`machine.ts`): C0 to C4, traps to C4, `resume`, the control-register jobs,
+  causes `22`, `32`, `81`, `82`, interrupts, behind `MODULE_12`; the debugger, the grader and the
+  learner's assembler taught them.
+- 00:00 The circuit (`traps.ts`), Module 12's copy of Module 9's machine with the trap hardware,
+  compared with the model after every instruction on 45 programs, traps and interrupts included.
+- 00:17 The circuit placed and routed by hand: no drawing problem at any scope.
+- 00:24 The figures: the trap timeline (new), the debugger grown (control registers, the timer
+  and the door, the door's time), the memory map in user mode.
+- 00:34 to 01:34 The eight lessons, one commit each (12.2 to 12.4 together), each drafted by the
+  drafting subagent from briefs of checked facts, the drafts and every fix kept in
+  `docs/notes/module-12-traps/` (briefs, drafts, `N-fixes.md`), and each with a facts test.
+- 01:51 Every `[draft]` view string drafted (briefs V1 and V2); Module 12's browser spec; the
+  debugger's panels made to fit a phone.
+- 01:56 The second pass over every lesson (below, "Second pass").
+- 02:02 The results cards' wording for Module 12's runs; the mechanical walk (below).
+- 02:03 `docs/machine.md`: the three decisions the plan took inside it (below).
 
 ## The outline
 
@@ -181,3 +199,99 @@ halt, and the pages say so.
 None planned. The learner writes the trap logic in the subset they have (`always_comb`, `if`,
 vectors), and its tests are a combinational table, so no lesson needs `initial`, `#` or
 `$display`. They are left to Module 13.
+
+## Reused, built, and extractable
+
+- **Reused and grown**: Module 11's debugger (a control registers panel with the mode in words,
+  a panel for the timer and the door, a choice of when the door opens, traps shown as traps, never
+  as halts); Module 11's listing question (a run with traps and a door); Module 11's results cards
+  (`log-results`: a row may carry program data and the rooms' readings, on Module 12's machine,
+  with its own verdict and a cut-off run in words); Module 9's datapath figure (on `machine-traps`
+  it draws Module 12's controller, with READ to WRITE for a control-register job, and lists C0 to
+  C4); Module 8's edge timeline and memory map (a user-mode column); Module 11's grader (the mode,
+  traps, causes, waiting, the timer, a door that opens and closes at set instructions).
+- **Built**: the trap timeline (`trap-timeline`), a recorded run of the instruction-level model
+  edge by edge with each edge's transfers; `trap-timeline.ts` in the model; Module 12's machine of
+  several edges (`traps.ts`, library id `machine-traps`) and its comparison with the model
+  (`traps-run.ts`).
+- **Extractable**: nothing yet. The platform's rule of two asks for a second course; every new
+  piece here is the course's own machine.
+
+## Edits to files on `main`
+
+- 23:45 `docs/machine.md`, the datapath's list: the control registers are all written by
+  `Cc <= Rm` (it named only C4).
+- 02:03 `docs/machine.md`, "Traps and interrupts", the interrupt bullet: the three decisions
+  below, which the plan said go into it with the module.
+
+## Decisions taken while building
+
+- **Interrupts on the machine of several edges** (into `docs/machine.md`): taken at the edge that
+  would fetch, a fetch's own cause winning there; a trap's edge does not count the timer; the door
+  seen at every edge that ends an instruction or traps.
+- **"Job", not "service"**, on every page and in every listing's comments: "the jobs the handler
+  offers". `docs/isa.md`'s four are kept, numbered 1 to 4.
+- **Job 5, "wait R2 rounds", is lesson 6's own**: the long job its question needs. Neither the
+  capstone nor `docs/isa.md` has it.
+- **Lesson 3's construction** judges `R3 <= word[timer]`, not a byte load: no lesson before it
+  uses `byte[...]`.
+- **The capstone's contract**: a table `programs` (how many, then each address) the tests add;
+  the program running kept at `0x480`; a record per program at `0x400 + 8k`, 0 for job 4 or the
+  cause; job 2 gives 0 for a room that is not 0 or 1. Six runs, each reaching a case a handler
+  must survive. One challenge, three ways in, as Module 11's.
+- **Lesson 7's timing diagram** keeps Module 8's limit of 12 edges: its program sets C4 and
+  traps inside 12.
+- **The debugger on a phone**: control registers one to a row, values broken only between words;
+  the timer and the door two to a row, the door's time chosen in their panel.
+
+## Terms and exemptions
+
+As planned: **trap** and **handler** (lesson 1), **user mode** and **system mode** (lesson 3),
+**system call** (lesson 4), **interrupt** (lesson 5). No exemption: the term gate passes every
+lesson as it stands. The words for how a run ends are the plan's, written into the shared fact
+sheet every brief carried (`briefs/00-module.md`).
+
+## Second pass
+
+Each lesson read start to finish after its words were placed. Cut: the same argument made twice
+(a table of handler addresses, lesson 1; the case for absolute stores, lesson 2; the trap's edge
+and system mode, lesson 3; interrupts off at a trap, lesson 5; "a handler must not fault", lesson
+6; the return point's definition, lesson 4), and a construction's prose that gave its answer away
+(lesson 1, cause `33`). Mended: "three places" for the trap's parts, which are in two blocks
+(lesson 7); "the debugger" for the results cards (lesson 8); "a program clears it" for the handler
+(lesson 6); a caption that placed a panel by position (lesson 1). Found: lesson 2's construction
+named four handlers its page did not show; they now follow its task. Each lesson's interactive
+shows the mechanism its prose claims: the figures' numbers are the facts tests'.
+
+## The mechanical walk
+
+The built site, every Module 12 page at 375 and 1280 pixels, light and dark, with every run
+button pressed: no console error, no page wider than the screen, no control without a name, no
+`[draft]` text. By eye: the trap timeline at a phone's width; the results cards in the dark theme;
+the debugger's panels at both widths, where the control registers broke `01` and `024` across
+lines and, on a phone, the panel of the timer and the door ended below the screen (both mended,
+above). Module 12's browser spec drives the rest at both widths (`tests/educational/module12.spec.ts`,
+58 tests): every challenge completed with its reference, a wrong handler rejected for each,
+saved work graded on load, the debugger's buttons, its line and its panel on one screen as a run
+moves, results only after a run, the timeline stepped, the door's time chosen, the capstone's
+starts.
+
+## The full check
+
+(Filled in when it ends.)
+
+## What to change
+
+- **The reading half of the review has not been done.** CLAUDE.md asks for each lesson to go to
+  its own reviewer, every finding attacked by a sceptic. This session did the mechanical half and
+  the author's second pass; the reviewers' half is for the checkpoint.
+- **An unknown word in the timeline.** Lessons 4 to 6's handlers save R8 and R9, which the user
+  programs never set, so the timeline shows `word[400] ← X`. No page says why; a sentence, or a
+  handler start that sets them, would.
+- **Module 11's halt for cause `41`** still says "which Module 12 builds". No Module 12 page
+  halts there (every one sets C4), but the string should say what it means on both modules.
+- **On a phone, lesson 5's debugger** keeps its readings on the screen, not the door's choice
+  beneath them, which is used before a run; the browser test checks the readings.
+- **The edge timeline's limit of 12 edges** shaped lesson 7's program; a `from` like the trap
+  timeline's would let it show the night program's trap at edge 24.
+
