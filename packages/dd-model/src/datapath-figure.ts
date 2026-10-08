@@ -10,7 +10,7 @@ import { Simulator, parseWord, word, type Circuit, type Word } from "@dd/sim";
 import { assemble, type Program } from "./assemble";
 import { type Stage } from "./datapath";
 import { datapathState, registersOf, stopReasonOf, type DatapathState } from "./datapath-run";
-import { placedMachine } from "./library-control";
+import { placedMachine, placedTrapMachine } from "./library-control";
 import { edgesLeft, registersTaken } from "./multicycle-view";
 import { placedDatapath } from "./library-datapath";
 
@@ -35,12 +35,18 @@ export interface BuiltDatapath {
   readonly program?: Program;
   /** Module 9's capstone: the machine knows the call through a register. */
   readonly callThroughRegister?: boolean;
+  /** Module 12: the machine with its trap hardware. */
+  readonly traps?: boolean;
 }
 
 /** Module 9: the machine of several edges, by library id, and whether it has the capstone's call. */
-export function machineOf(libraryId: string): { callThroughRegister: boolean } | undefined {
+export function machineOf(
+  libraryId: string,
+): { callThroughRegister: boolean; traps?: boolean } | undefined {
   if (libraryId === "machine-edges") return { callThroughRegister: false };
   if (libraryId === "machine-edges-call") return { callThroughRegister: true };
+  // Module 12: the machine with its trap hardware.
+  if (libraryId === "machine-traps") return { callThroughRegister: false, traps: true };
   return undefined;
 }
 
@@ -66,6 +72,14 @@ export function buildDatapath(setup: DatapathSetup): BuiltDatapath {
   if (machine) {
     const assembly = machine.callThroughRegister ? { callThroughRegister: 9 } : {};
     const program = setup.program === undefined ? undefined : assemble(setup.program, assembly);
+    if (machine.traps) {
+      const circuit = placedTrapMachine({
+        name: "machine",
+        ...(program ? { rom: program.rom } : {}),
+        registers: registerWords(setup.registers),
+      });
+      return { circuit, stage: "edges", ...machine, ...(program ? { program } : {}) };
+    }
     const circuit = placedMachine({
       name: "machine",
       ...machine,

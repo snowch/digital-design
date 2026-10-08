@@ -2918,3 +2918,78 @@ svg.stack-depth {
 .memory-name {
   color: var(--fg-muted);
 }
+
+/* Module 12: the trap timeline's edges, the debugger's control registers and events, the door. */
+.trap-edges {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 18rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.trap-edges:empty {
+  display: none;
+}
+.trap-edge {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+}
+.trap-edge:last-child {
+  border-bottom: none;
+}
+.trap-edge[aria-current] {
+  background: var(--accent-soft);
+}
+.trap-edge-trap,
+.trap-edge-resume {
+  border-left: 4px solid var(--accent);
+}
+.trap-edge-halt {
+  border-left: 4px solid var(--bad);
+}
+.trap-edge-head {
+  margin: 0;
+}
+.trap-edge-n {
+  font-weight: 600;
+}
+.trap-transfers {
+  list-style: none;
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  font-variant-ligatures: none;
+}
+.trap-transfers .transfer-control {
+  font-weight: 600;
+}
+.trap-edge-none,
+.trap-edge-mode {
+  margin: var(--space-1) 0 0;
+  color: var(--fg-muted);
+}
+.control-name,
+.control-mode {
+  color: var(--fg-muted);
+  font-weight: 400;
+}
+.door-choice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-2) 0;
+}
+.door-choice select {
+  min-height: 40px;
+}
+@media (min-width: 60rem) {
+  .trap-edges {
+    max-height: 24rem;
+  }
+}

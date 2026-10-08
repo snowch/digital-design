@@ -154,9 +154,14 @@ export function constantRanges(): ConstantRange[] {
 export type Access = "load-word" | "load-byte" | "store-word" | "store-byte";
 export const ACCESSES: readonly Access[] = ["load-word", "load-byte", "store-word", "store-byte"];
 
-/** The machine's check on an access at a part's first address: the cause, or 0 if it is allowed. */
-export function accessVerdict(part: MapPart, access: Access): number {
-  return memoryCheck(BigInt(part.first), access.startsWith("store"), access.endsWith("byte")) ?? 0;
+/**
+ * The machine's check on an access at a part's first address: the cause, or 0 if it is allowed;
+ * in user mode with `user` (Module 12).
+ */
+export function accessVerdict(part: MapPart, access: Access, user = false): number {
+  return (
+    memoryCheck(BigInt(part.first), access.startsWith("store"), access.endsWith("byte"), user) ?? 0
+  );
 }
 
 /** One line of a program, with where a run went next from it. */

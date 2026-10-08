@@ -323,6 +323,8 @@ export const EdgeTimeline = withProps(
 const MapProps = z.object({
   /** The accesses shown, as columns; all four by default. */
   accesses: z.array(z.enum(["load-word", "load-byte", "store-word", "store-byte"])).optional(),
+  /** Module 12: the verdicts as user mode meets them. */
+  mode: z.enum(["system", "user"]).default("system"),
 });
 
 export const MemoryMapFigure = withProps(
@@ -331,14 +333,16 @@ export const MemoryMapFigure = withProps(
     data,
     interactive,
   }: InteractiveProps & { data: z.infer<typeof MapProps> }) {
-    const t = useViewStrings().machine8;
+    const strings = useViewStrings();
+    const t = strings.machine8;
+    const user = data.mode === "user";
     const accesses = data.accesses ?? ACCESSES;
     const parts = memoryMapParts();
     return (
       <div className="machine-figure memory-map-figure" data-interactive={interactive.id}>
         <div className="truth-table-wrap">
           <table className="truth-table map-table">
-            <caption>{t.mapCaption}</caption>
+            <caption>{user ? strings.machine12.mapCaptionUser : t.mapCaption}</caption>
             <thead>
               <tr>
                 <th scope="col">{t.part}</th>
@@ -361,7 +365,7 @@ export const MemoryMapFigure = withProps(
                     </span>
                   </th>
                   {accesses.map((a) => {
-                    const cause = accessVerdict(p, a);
+                    const cause = accessVerdict(p, a, user);
                     return (
                       <td key={a} className={cause ? "map-refused" : "map-allowed"}>
                         {cause ? format(t.refused, { cause: cause.toString(16) }) : t.allowed}

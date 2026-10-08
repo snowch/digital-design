@@ -18,6 +18,8 @@ import { z } from "zod";
 
 import {
   MAP,
+  MODULE_12,
+  PROGRAM_MACHINE,
   RUN_LIMIT,
   assembleChecked,
   debugRun,
@@ -25,10 +27,12 @@ import {
   debugStartAt,
   debugStep,
   endOf,
+  inputsAt,
   instructionHex,
   memoryWord,
   type AssemblyProblem,
   type DebugState,
+  type InputPlan,
   type MachineInputs,
   type Program,
 } from "@dd/dd-model";
@@ -37,6 +41,7 @@ import { PredictionChallenge } from "@platform/primitives";
 
 import { format, useViewStrings } from "../strings";
 import type { Machine11Strings } from "../strings11";
+import type { Machine12Strings } from "../strings12";
 import { withProps } from "./props";
 
 export const hex3 = (v: number | bigint) => v.toString(16).toUpperCase().padStart(3, "0");
@@ -56,10 +61,26 @@ export function refusalText(t: Machine11Strings, p: AssemblyProblem): string {
 }
 
 /** Why a run is not going on, in the course's words, or undefined while it can. */
-export function stopText(t: Machine11Strings, s: DebugState): string | undefined {
+export function stopText(
+  t: Machine11Strings,
+  s: DebugState,
+  t12?: Machine12Strings,
+): string | undefined {
   if (!s.stopped) return undefined;
   const { key, values } = endOf(s.stopped);
-  return format(t.stops[key] ?? key, values);
+  return format(t.stops[key] ?? t12?.stops[key] ?? key, values);
+}
+
+/** Module 12: the last edge's trap that went to the handler, in the course's words. */
+export function trapText(t12: Machine12Strings, s: DebugState): string | undefined {
+  const trap = s.last?.trap;
+  if (!trap || s.stopped) return undefined;
+  const values = {
+    address: hex3(s.last?.pc ?? 0n),
+    cause: trap.cause.toString(16).toUpperCase(),
+    handler: hex3(s.cpu.pc),
+  };
+  return format(trap.cause >= 0x80 ? t12.interrupted : t12.trapped, values);
 }
 
 /** Why a watch cannot show what was typed: its form, a name nothing defines, or its address. */
@@ -178,6 +199,15 @@ export interface DebuggerOptions {
   readonly start?: { readonly at: number; readonly registers: Readonly<Record<number, bigint>> };
   /** Called with the latest state, so a figure can show what follows a stop. */
   readonly onState?: (s: DebugState) => void;
+  /** Module 12: the machine with its control registers and traps. */
+  readonly traps?: boolean;
+  /** Module 12: C0 to C4 shown; with `modeWords`, C0's and C1's bits said as modes. */
+  readonly control?: boolean;
+  readonly modeWords?: boolean;
+  /** Module 12: the timer, the waiting events, DOOR and WARM shown. */
+  readonly events?: boolean;
+  /** Module 12: the instructions the learner may choose to open the door before. */
+  readonly doorOptions?: readonly number[];
 }
 
 const placeOf = (name: string, labels: Readonly<Record<string, number>>) =>
@@ -189,17 +219,26 @@ const placeOf = (name: string, labels: Readonly<Record<string, number>>) =>
  */
 export function DebuggerView({
   program,
-  inputs,
+  inputs: givenInputs,
   options,
   id,
 }: {
   program: Program;
-  inputs: MachineInputs;
+  inputs: InputPlan;
   options: DebuggerOptions;
   /** For the names of controls that must be unique on the page. */
   id: string;
 }) {
-  const t = useViewStrings().machine11;
+  const strings = useViewStrings();
+  const t = strings.machine11;
+  const t12 = strings.machine12;
+  const machine = options.traps ? MODULE_12 : PROGRAM_MACHINE;
+  // Module 12: the door opens before the instruction the learner chooses, or the figure gives.
+  const [doorAt, setDoorAt] = useState<number | undefined>(givenInputs.doorOpensAt);
+  const inputs = useMemo<InputPlan>(() => {
+    const { doorOpensAt: _given, ...rest } = givenInputs;
+    return doorAt === undefined ? rest : { ...rest, doorOpensAt: doorAt };
+  }, [givenInputs, doorAt]);
   const startAt = options.start;
   const start = useMemo(
     () =>
@@ -251,12 +290,14 @@ export function DebuggerView({
       setAt(at + 1);
     } else if (!state.stopped) {
       if (state.ran >= limit) keep([{ ...state, stopped: { kind: "cutOff", ran: state.ran } }]);
-      else keep([debugStep(state, inputs)]);
+      else keep([debugStep(state, inputs, machine)]);
     }
   };
   const onRun = () => {
     const pausesNow = options.breakpoints || options.runLabel ? pauses : new Set<number>();
-    keep(debugRun(history[at] ?? start, { breakpoints: pausesNow, inputs, limit }));
+    keep(
+      debugRun(history[at] ?? start, { breakpoints: pausesNow, inputs, limit, options: machine }),
+    );
   };
   const onReset = () => {
     setHistory([start]);
@@ -269,9 +310,9 @@ export function DebuggerView({
   const compact = options.listing === false && options.runLabel !== undefined;
   const pausesAhead = useMemo(() => {
     if (!compact) return true;
-    const ahead = debugRun(state, { breakpoints: pauses, inputs, limit }).at(-1);
+    const ahead = debugRun(state, { breakpoints: pauses, inputs, limit, options: machine }).at(-1);
     return !ahead?.stopped;
-  }, [compact, state, pauses, inputs, limit]);
+  }, [compact, state, pauses, inputs, limit, machine]);
   // A figure shows the devices its program reaches, and only those.
   const uses = useMemo(() => devicesUsed(program), [program]);
   // The listing sits in a box of its own height; the line about to run is kept in view inside it,
@@ -281,9 +322,10 @@ export function DebuggerView({
   const names = useMemo(() => namesByAddress(program), [program]);
   const wrote = state.last?.wrote?.reg;
   const shownRegs = options.registers ?? Array.from({ length: 16 }, (_, k) => k);
-  const stopped = stopText(t, state);
+  const stopped = stopText(t, state, t12);
   const status =
     stopped ??
+    trapText(t12, state) ??
     (state.ran === 0 && at === 0
       ? t.atStart
       : options.breakpoints && pauses.has(Number(pc)) && state.ran > 0
@@ -378,7 +420,30 @@ export function DebuggerView({
           {state.ran > 0 || at > 0
             ? ` ${format(state.ran === 1 ? t.ranOne : t.ran, { n: state.ran })}`
             : ""}
+          {state.traps.length > 0
+            ? ` ${state.traps.length === 1 ? t12.trapCountOne : format(t12.trapCount, { n: state.traps.length })}`
+            : ""}
         </p>
+        {options.doorOptions && (
+          <label className="door-choice">
+            <span>{t12.doorChoice}</span>
+            <select
+              value={doorAt === undefined ? "" : String(doorAt)}
+              disabled={!live}
+              onChange={(e) => {
+                const v = e.target.value;
+                setDoorAt(v === "" ? undefined : Number(v));
+              }}
+            >
+              <option value="">{t12.doorNever}</option>
+              {options.doorOptions.map((n) => (
+                <option key={n} value={String(n)}>
+                  {format(t12.doorBefore, { n })}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         {options.listing !== false && (
           <div className="truth-table-wrap debugger-listing-wrap" ref={boxRef}>
             <table className="truth-table datapath-table debugger-listing">
@@ -510,6 +575,10 @@ export function DebuggerView({
           <MemoryPanel key={region.from} region={region} program={program} state={state} t={t} />
         ))}
         {options.stack && <StackPanel program={program} state={state} names={names} t={t} />}
+        {options.control && (
+          <ControlPanel state={state} t12={t12} modeWords={options.modeWords === true} />
+        )}
+        {options.events && <EventsPanel state={state} inputs={inputs} t12={t12} />}
         <div className="debugger-panels">
           {uses.devices && (
             <section className="debugger-panel" aria-label={t.devicesCaption}>
@@ -586,6 +655,101 @@ export function DebuggerView({
         </div>
       </div>
     </div>
+  );
+}
+
+/** Module 12: C0's or C1's two bits in words: the mode, and whether interrupts are on. */
+export function statusText(t12: Machine12Strings, bits: bigint): string {
+  return format(t12.statusWords, {
+    mode: (bits & 1n) === 1n ? t12.systemMode : t12.userMode,
+    interrupts: (bits & 2n) !== 0n ? t12.interruptsOn : t12.interruptsOff,
+  });
+}
+
+/** Module 12: a control register's word as the pages write it. */
+export function controlText(k: number, v: bigint): string {
+  if (k === 0 || k === 1) return v.toString(2).padStart(2, "0");
+  if (k === 3) return v.toString(16).toUpperCase().padStart(2, "0");
+  return hex3(BigInt.asUintN(64, v));
+}
+
+/** Module 12: C0 to C4, each with its job, the ones the last edge wrote marked. */
+function ControlPanel({
+  state,
+  t12,
+  modeWords,
+}: {
+  state: DebugState;
+  t12: Machine12Strings;
+  modeWords: boolean;
+}) {
+  const last = state.last;
+  const changed = (k: number) =>
+    last?.trap !== undefined ? k <= 3 : last?.control?.reg === k && !last.stopped;
+  return (
+    <section className="debugger-panel debugger-control" aria-label={t12.controlCaption}>
+      <p className="layout-title">{t12.controlCaption}</p>
+      <dl className="debugger-registers">
+        {state.cpu.control.map((v, k) => (
+          <div
+            key={k}
+            className={`debugger-register${changed(k) ? " register-changed" : ""}`}
+            data-control={k}
+          >
+            <dt>
+              {`C${k} `}
+              <span className="control-name">{t12.controlNames[k]}</span>
+            </dt>
+            <dd className="memory-word">
+              {controlText(k, v)}
+              {modeWords && k <= 1 && (
+                <span className="control-mode">{` ${statusText(t12, v)}`}</span>
+              )}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  );
+}
+
+/** Module 12: the timer, the waiting events, and DOOR and WARM as the next edge sees them. */
+function EventsPanel({
+  state,
+  inputs,
+  t12,
+}: {
+  state: DebugState;
+  inputs: InputPlan;
+  t12: Machine12Strings;
+}) {
+  const now = inputsAt(inputs, state.ran);
+  return (
+    <section className="debugger-panel debugger-events" aria-label={t12.eventsCaption}>
+      <p className="layout-title">{t12.eventsCaption}</p>
+      <dl className="debugger-devices">
+        <div>
+          <dt>{t12.timer}</dt>
+          <dd className="memory-word">{state.cpu.timer.toString()}</dd>
+        </div>
+        <div>
+          <dt>{t12.timerReached}</dt>
+          <dd>{state.cpu.waiting & 1 ? t12.yes : t12.no}</dd>
+        </div>
+        <div>
+          <dt>{t12.doorOpened}</dt>
+          <dd>{state.cpu.waiting & 2 ? t12.yes : t12.no}</dd>
+        </div>
+        <div>
+          <dt>{t12.door}</dt>
+          <dd>{now.door ? t12.open : t12.closed}</dd>
+        </div>
+        <div>
+          <dt>{t12.warm}</dt>
+          <dd className="memory-word">{now.warm}</dd>
+        </div>
+      </dl>
+    </section>
   );
 }
 
@@ -947,7 +1111,19 @@ const Region = z.object({
 export const RunAsk = z.object({
   /** How many instructions the question is about; the run to its end when not given. */
   after: z.number().int().min(0).optional(),
-  what: z.enum(["register", "display", "end", "pc", "stack", "shown", "word", "calls"]),
+  what: z.enum([
+    "register",
+    "display",
+    "end",
+    "pc",
+    "stack",
+    "shown",
+    "word",
+    "calls",
+    // Module 12: a control register (by `reg`, 0 to 4), and how many traps went to the handler.
+    "control",
+    "traps",
+  ]),
   reg: z.number().int().min(0).max(15).default(1),
   /** For `word`: the word's address, in hexadecimal. */
   address: z.string().default("400"),
@@ -979,6 +1155,13 @@ const DebuggerProps = z.object({
   explain: z.string().default(""),
   /** Shown once the run has ended. */
   outcomes: z.string().optional(),
+  /** Module 12: the machine with traps, its control registers, the shop's events and the door. */
+  traps: z.boolean().default(false),
+  control: z.boolean().default(false),
+  modeWords: z.boolean().default(false),
+  events: z.boolean().default(false),
+  doorOpensAt: z.number().int().min(0).optional(),
+  doorOptions: z.array(z.number().int().min(0)).optional(),
 });
 type DebuggerData = z.infer<typeof DebuggerProps>;
 
@@ -986,7 +1169,10 @@ type DebuggerData = z.infer<typeof DebuggerProps>;
 export function debuggerAnswer(given: z.input<typeof DebuggerProps>): string {
   const data = DebuggerProps.parse(given);
   if (!data.ask) return "";
-  return runAnswer(data.program, data.inputs, data.ask, data.limit);
+  return runAnswer(data.program, data.inputs, data.ask, data.limit, {
+    traps: data.traps,
+    ...(data.doorOpensAt !== undefined ? { doorOpensAt: data.doorOpensAt } : {}),
+  });
 }
 
 /** A run question's answer: the reference run from reset, read where the question says. */
@@ -995,15 +1181,20 @@ export function runAnswer(
   given: z.input<typeof ShopInputs>,
   askGiven: z.input<typeof RunAsk>,
   limit = RUN_LIMIT,
+  module12: { readonly traps?: boolean; readonly doorOpensAt?: number } = {},
 ): string {
   const ask = RunAsk.parse(askGiven);
   const { program } = assembleChecked(source);
   if (!program) return "";
-  const inputs = shopInputs(ShopInputs.parse(given));
+  const inputs: InputPlan = {
+    ...shopInputs(ShopInputs.parse(given)),
+    ...(module12.doorOpensAt !== undefined ? { doorOpensAt: module12.doorOpensAt } : {}),
+  };
+  const machine = module12.traps ? MODULE_12 : PROGRAM_MACHINE;
   let s = debugStart(program.rom);
   const steps = ask.after;
-  if (steps === undefined) s = debugRun(s, { inputs, limit }).at(-1) ?? s;
-  else for (let i = 0; i < steps && !s.stopped; i++) s = debugStep(s, inputs);
+  if (steps === undefined) s = debugRun(s, { inputs, limit, options: machine }).at(-1) ?? s;
+  else for (let i = 0; i < steps && !s.stopped; i++) s = debugStep(s, inputs, machine);
   const shown = (v: bigint | undefined) =>
     ask.hex ? (v === undefined ? "X" : hex3(BigInt.asUintN(64, v))) : signedText(v);
   switch (ask.what) {
@@ -1023,6 +1214,10 @@ export function runAnswer(
       return s.deepest === undefined ? "0" : String((0x7c0n - s.deepest) / 8n);
     case "shown":
       return s.shown.map((v) => signedText(v)).join(", ");
+    case "control":
+      return controlText(ask.reg, s.cpu.control[ask.reg] ?? 0n);
+    case "traps":
+      return String(s.traps.length);
   }
 }
 
@@ -1039,7 +1234,13 @@ export const DebuggerFigure = withProps(
     const [stored, setStored] = useSlot<Stored>(store, interactive.id);
     const text = data.editable ? (stored?.text ?? data.program) : data.program;
     const checked = useMemo(() => assembleChecked(text), [text]);
-    const inputs = useMemo(() => shopInputs(data.inputs), [data.inputs]);
+    const inputs = useMemo<InputPlan>(
+      () => ({
+        ...shopInputs(data.inputs),
+        ...(data.doorOpensAt !== undefined ? { doorOpensAt: data.doorOpensAt } : {}),
+      }),
+      [data.inputs, data.doorOpensAt],
+    );
     const asking = data.question !== undefined && data.options !== undefined && !!data.ask;
     const committed = !asking || stored?.choice !== undefined;
     const answer = useMemo(() => (asking ? debuggerAnswer(data) : ""), [asking, data]);
@@ -1061,6 +1262,11 @@ export const DebuggerFigure = withProps(
       live: committed,
       ...(data.registers ? { registers: data.registers } : {}),
       onState: (s: DebugState) => setEnded(!!s.stopped),
+      traps: data.traps,
+      control: data.control,
+      modeWords: data.modeWords,
+      events: data.events,
+      ...(data.doorOptions ? { doorOptions: data.doorOptions } : {}),
     };
     let question: ReactNode = null;
     if (asking)

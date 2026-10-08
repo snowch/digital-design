@@ -59,6 +59,9 @@ const ListingProps = z.object({
       line: z.string().default(""),
       run: RunAsk.optional(),
       inputs: ShopInputs.optional(),
+      /** Module 12: the run on the machine with traps, and a door that opens before an instruction. */
+      traps: z.boolean().default(false),
+      doorOpensAt: z.number().int().min(0).optional(),
     })
     .optional(),
   explain: z.string().default(""),
@@ -72,7 +75,12 @@ export function listingAnswer(given: z.input<typeof ListingProps>): string {
   if (!data.ask || !program) return "";
   const { what, line } = data.ask;
   if (what === "run")
-    return data.ask.run ? runAnswer(data.program, data.ask.inputs ?? {}, data.ask.run) : "";
+    return data.ask.run
+      ? runAnswer(data.program, data.ask.inputs ?? {}, data.ask.run, undefined, {
+          traps: data.ask.traps,
+          ...(data.ask.doorOpensAt !== undefined ? { doorOpensAt: data.ask.doorOpensAt } : {}),
+        })
+      : "";
   if (what === "address") return hex3(program.labels[line] ?? 0);
   const l = program.lines.find((x) => x.text === line || x.label === line);
   if (!l || l.instruction === undefined) return "";

@@ -7,6 +7,7 @@ import { createContext, useContext } from "react";
 
 import { MACHINE10_STRINGS, type Machine10Strings } from "./strings10";
 import { MACHINE11_STRINGS, type Machine11Strings } from "./strings11";
+import { MACHINE12_STRINGS, type Machine12Strings } from "./strings12";
 
 export interface ViewStrings {
   readonly circuit: {
@@ -373,6 +374,8 @@ export interface ViewStrings {
   readonly machine10: Machine10Strings;
   /** Module 11: the assembler's refusals, the debugger and the program figures. */
   readonly machine11: Machine11Strings;
+  /** Module 12: the control registers, the shop's events, the trap timeline. */
+  readonly machine12: Machine12Strings;
 }
 
 /** Module 8: the words of the instruction-fields, widening, edges, memory-map and branches figures. */
@@ -1274,6 +1277,8 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
   machine10: MACHINE10_STRINGS,
   // Module 11 (strings11.ts).
   machine11: MACHINE11_STRINGS,
+  // Module 12 (strings12.ts).
+  machine12: MACHINE12_STRINGS,
   // Module 0. Drafted by the prose process (docs/notes/module-0-machine/briefs/6V.md).
   meet: {
     lines: {

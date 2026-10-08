@@ -20,7 +20,7 @@ import {
   scenarioOf,
   callStart,
   withData,
-  type MachineInputs,
+  type InputPlan,
 } from "@dd/dd-model";
 import type { Artifact, Challenge } from "@platform/lesson-schema";
 import type { ChallengeEditorProps, Verdict, VerdictFailure } from "@platform/lesson-runtime";
@@ -158,12 +158,15 @@ export function ProgramEditor({ challenge, artifact, onChange }: ChallengeEditor
   const run = runs[chosen] ?? runs[0];
   const scenario = useMemo(() => (run ? scenarioOf(run.given) : {}), [run]);
   const checked = useMemo(() => assembleChecked(withData(text, scenario)), [text, scenario]);
-  const inputs = useMemo<MachineInputs>(
+  const inputs = useMemo<InputPlan>(
     () => ({
       door: scenario.inputs?.door ?? 0,
       warm: scenario.inputs?.warm ?? 0,
       sensorA: scenario.inputs?.sensorA ?? 0n,
       sensorB: scenario.inputs?.sensorB ?? 0n,
+      // Module 12: a test's door that opens before an instruction.
+      ...(scenario.doorOpensAt !== undefined ? { doorOpensAt: scenario.doorOpensAt } : {}),
+      ...(scenario.doorClosesAt !== undefined ? { doorClosesAt: scenario.doorClosesAt } : {}),
     }),
     [scenario],
   );
@@ -257,6 +260,7 @@ export function ProgramEditor({ challenge, artifact, onChange }: ChallengeEditor
             options={{
               ...(start.debugger ?? {}),
               ...(callAt ? { start: callAt } : {}),
+              ...(scenario.traps ? { traps: true } : {}),
             }}
             id={challenge.id}
           />

@@ -4,6 +4,7 @@ import type { ComponentType } from "react";
 // Module 11, programming and debugging
 import { DebuggerFigure } from "./Debugger";
 import { LogResults, ProgramListing, StackDepth } from "./Module11Figures";
+import { TrapTimeline } from "./Module12Figures";
 // Module 0, meet the machine
 import { MachineAtWork } from "./MachineAtWork";
 import { Ladder } from "./Ladder";
@@ -109,6 +110,8 @@ export const INTERACTIVES: Readonly<Record<string, ComponentType<InteractiveProp
   "program-listing": ProgramListing,
   "stack-depth": StackDepth,
   "log-results": LogResults,
+  // Module 12, traps and interrupts
+  "trap-timeline": TrapTimeline,
   // Module 0, meet the machine
   "machine-at-work": MachineAtWork,
   ladder: Ladder,
@@ -181,6 +184,7 @@ export {
   stopText,
   watchValue,
 } from "./Debugger";
+export { TrapTimeline, edgeText as trapEdgeText, transferValue } from "./Module12Figures";
 export {
   LogResults,
   ProgramListing,
