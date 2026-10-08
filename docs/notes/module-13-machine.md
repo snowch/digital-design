@@ -101,6 +101,27 @@ machine's text elaborates in about 0.1 s and runs about 70 edges a second.
 - `packages/hdl/src/parser.ts`: the message for `initial`.
 - None of the files the brief set aside until Module 12 is on `main` was edited.
 
+## After the managing session's first look
+
+- **No challenge reads its answers off a figure.** Lesson 1's two edges are now of a short program
+  no figure runs, worked out from the states each kind takes; lesson 2's line, `R7 <= R5 | R6`, is
+  in a program no figure runs; lesson 3's PC bit is at `goto R15`'s ALU edge, which no trace on
+  the page reaches. Each facts test checks that no figure runs the program it asks about, and the
+  feedback states the rule, not the value.
+- **No prediction answered before it is asked.** Lesson 2's motivation took `A7345000`, the word
+  its prediction asks for, as its example; it now takes `R3 <= R1 - R2`, and says that machine
+  code is the words the learner has seen in the ROM and the IR since Module 8.
+- **The capstone grades no trace question against a program that fails its own tests**; each
+  such question says the program must pass first.
+- **The drawing names the blocks as the prose does**: "control unit", "datapath", "memory port".
+  The final machine's port takes a kind of its own, `memory-port-final`, so Module 12's drawing
+  keeps its names.
+- **Decision 1 is not in commits of its own.** The final machine came in with lesson 1, and every
+  lesson runs it. If the author declines decision 1, the change is: build every figure and test on
+  `machine-traps` with `MODULE_12`; drop the set if and the call through a register from the shop's
+  program, the lab's texts and the capstone's task; and redo the facts the prose states. The
+  machine's own code (`final` in `traps.ts`, `FINAL_INSIDE`, `MODULE_13`) can stay unused.
+
 ## Platform candidates
 
 - **A case-graded challenge whose artifact is HDL.** `checkLesson` takes a written challenge with

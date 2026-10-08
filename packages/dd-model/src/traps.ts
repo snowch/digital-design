@@ -1039,7 +1039,7 @@ export function trapsCircuit(options: TrapMachineOptions = {}): Circuit {
   // The memory of one port.
   b.scope(
     "port",
-    "memory-port-traps",
+    final ? "memory-port-final" : "memory-port-traps",
     (mb) => {
       const c = split(mb, control, ["FETCHING", "MLOAD", "MSTORE", "BYTE", "GO", "PCEN", "USER"]);
       const s = (n: string) => c[n] as NetId;

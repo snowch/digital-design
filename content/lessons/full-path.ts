@@ -17,12 +17,23 @@ import { PROSE } from "./full-path.prose";
 import { SHOP, SHOP_INPUTS } from "./module13";
 
 /** The challenge: a line's levels, worked out and read off the run. */
+/** The program of the challenge's line, `R7 <= R5 | R6` at `01C`, which no figure runs. */
+export const PATH_PROGRAM = `        R5 <= 12
+        R6 <= 10
+        nothing
+        nothing
+        nothing
+        nothing
+        nothing
+        R7 <= R5 | R6
+        stop`;
+
 export const PATH_ANSWERS = [
   { id: "code", form: "hex", value: "A6345000", detail: "pathCode" },
   { id: "edges", form: "number", value: "4", detail: "pathEdges" },
-  { id: "job", form: "choice", value: "copy", detail: "pathJob" },
-  { id: "yin", form: "number", value: "66", detail: "pathYin" },
-  { id: "pc", form: "hex", value: "03C", detail: "pathPc" },
+  { id: "job", form: "choice", value: "or", detail: "pathJob" },
+  { id: "yin", form: "number", value: "14", detail: "pathYin" },
+  { id: "pc", form: "hex", value: "020", detail: "pathPc" },
 ] as const;
 
 const SIGNALS = ["OP2", "OP1", "OP0", "WRITEY", "SET", "TRAP"];

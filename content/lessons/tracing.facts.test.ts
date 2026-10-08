@@ -107,7 +107,10 @@ describe("lesson tracing's facts", () => {
     expect(state(19)).toBe("ALU");
     expect(at(19, "datapath/alu/g0/q0/bit2/BX")).toBe(answer("xorB"));
     expect(at(19, "datapath/alu/g0/q0/bit1/SUM")).toBe(answer("sum1"));
-    expect(String(drive(47, "datapath/pc", 3).inputs.D)).toBe(answer("pcD"));
+    // goto R15's last edge, its ALU edge, is edge 68: the PC takes 030, whose bit 4 is 1. The
+    // construction traces the PC at another edge, the call's WRITE edge.
+    expect([state(67), at(67, "PC"), at(68, "PC")]).toEqual(["ALU", "40", "30"]);
+    expect(String(drive(67, "datapath/pc", 4).inputs.D)).toBe(answer("pcD"));
     expect(state(28)).toBe("WRITE");
     expect(String(drive(28, "datapath/registers", 0, 5).inputs.EN)).toBe(answer("r5En"));
     expect(String(drive(28, "datapath/registers", 0, 4).inputs.EN)).toBe(answer("r4En"));

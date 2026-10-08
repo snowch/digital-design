@@ -43,7 +43,7 @@ export const LABELS = {
   fields: {
     xorB: "xorB in the slice for bit 2",
     sum1: "SUM in the slice for bit 1",
-    pcD: "D of the PC's bit 3",
+    pcD: "D of the PC's bit 4",
     r5En: "EN of R5's bit 0",
     r4En: "EN of R4's bit 0",
   },

@@ -17,15 +17,23 @@ import { LABELS } from "./whole-machine.labels";
 import { PROSE } from "./whole-machine.prose";
 import { SHOP, SHOP_INPUTS } from "./module13";
 
-/** The challenge's questions: the block that drives each of four buses, and two edges of the timeline. */
+/** The challenge's questions: the block that drives each of four buses, and two edges of a run no figure shows. */
 export const JOIN_ANSWERS = [
   { id: "hb", form: "choice", value: "datapath", detail: "joinHb" },
   { id: "waiting", form: "choice", value: "port", detail: "joinWaiting" },
   { id: "status", form: "choice", value: "datapath", detail: "joinStatus" },
   { id: "causem", form: "choice", value: "port", detail: "joinCausem" },
-  { id: "irEdge", form: "number", value: "63", detail: "joinIrEdge" },
-  { id: "pcEdge", form: "number", value: "65", detail: "joinPcEdge" },
+  { id: "irEdge", form: "number", value: "15", detail: "joinIrEdge" },
+  { id: "pcEdge", form: "number", value: "17", detail: "joinPcEdge" },
 ] as const;
+
+/** The program of the challenge's edges, which no figure runs: its edges are worked out. */
+export const EDGES_PROGRAM = `        R1 <= handler
+        C4 <= R1
+        R2 <= word[sensorB]
+        call system
+        stop
+handler: resume`;
 
 const BLOCKS = [
   { value: "control", label: LABELS.blocks.control },

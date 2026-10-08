@@ -18,7 +18,7 @@ import { MACHINE13_STRINGS, compareText, makerText } from "@dd/dd-views";
 import type { Word } from "@dd/sim";
 
 import { SHOP, SHOP_INPUTS } from "./module13";
-import { JOIN_ANSWERS } from "./whole-machine";
+import { EDGES_PROGRAM, JOIN_ANSWERS, wholeMachine } from "./whole-machine";
 
 const hex = (w: Word | undefined) =>
   w && w.known === (1n << BigInt(w.width)) - 1n ? w.value.toString(16).toUpperCase() : "X";
@@ -133,15 +133,23 @@ describe("lesson whole-machine's facts", () => {
     expect(driver("WAITING")).toBe(answer("waiting"));
     expect(driver("STATUS")).toBe(answer("status"));
     expect(driver("CAUSEM")).toBe(answer("causem"));
-    // resume's FETCH is edge 63, where the IR takes 81000000; its WRITE edge, 65, takes C2.
-    expect([state(run, 62), at(run, 62, "PC"), at(run, 63, "IR")]).toEqual([
-      "FETCH",
-      "48",
-      "81000000",
-    ]);
-    expect(answer("irEdge")).toBe("63");
-    expect([state(run, 64), at(run, 65, "PC")]).toEqual(["WRITE", "40"]);
-    expect(answer("pcEdge")).toBe("65");
+    // The edges of a program no figure runs: resume's FETCH is edge 15, where the IR takes
+    // 81000000; its WRITE edge, 17, gives the PC the return point, 010.
+    const edges = recordRun({
+      libraryId: "machine-final",
+      program: EDGES_PROGRAM,
+      inputs: SHOP_INPUTS,
+    });
+    expect(edges.steps.map((s) => s.last - s.first)).toEqual([4, 3, 5, 2, 3, 1]);
+    expect(edges.steps[3]?.trap).toBe(0x41);
+    expect([state(edges, 14), at(edges, 15, "IR")]).toEqual(["FETCH", "81000000"]);
+    expect(answer("irEdge")).toBe("15");
+    expect([state(edges, 16), at(edges, 17, "PC")]).toEqual(["WRITE", "10"]);
+    expect(answer("pcEdge")).toBe("17");
+    // No figure runs it.
+    for (const s of wholeMachine.sections)
+      for (const i of s.interactives ?? [])
+        expect((i.props as { program?: string }).program).not.toBe(EDGES_PROGRAM);
   });
 
   describe("the broken joins", () => {

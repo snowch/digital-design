@@ -48,7 +48,7 @@ export const LABELS = {
     status: "The block that drives STATUS",
     causem: "The block that drives CAUSEM",
     irEdge: "The edge at which the IR takes the word of `resume`",
-    pcEdge: "The edge at which the PC takes `040`",
+    pcEdge: "The edge at which the PC takes `010`",
   },
   blocks: {
     control: "The control unit",

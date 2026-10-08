@@ -80,49 +80,47 @@ export function gradeCapstone(
   const failures: VerdictFailure[] = [];
   const fail = (index: number, label: string, detail: string) =>
     failures.push({ index, label, inputs: {}, actual: {}, expected: {}, detail });
-  cases.forEach((c, index) => {
-    if (c.given["kind"] === "program") {
-      const a = BigInt(c.given["sensorA"] as number);
-      const b = BigInt(c.given["sensorB"] as number);
-      const end = modelEnd(program, { sensorA: a, sensorB: b });
-      const rooms = { a: String(a), b: String(b) };
-      if (end.end.kind === "halt")
-        return fail(
-          index,
-          c.label,
-          format(t.capHalts, { ...rooms, cause: end.end.cause.toString(16).toUpperCase() }),
-        );
-      if (end.end.kind === "limit") return fail(index, c.label, format(t.capNoStop, rooms));
-      const want = { display: String(c.expect["display"]), lamps: Number(c.expect["lamps"]) };
-      if (String(end.display) !== want.display || end.lamps !== want.lamps)
-        fail(
-          index,
-          c.label,
-          format(t.capWrong, {
-            ...rooms,
-            display: String(end.display),
-            lamps: lampsText(end.lamps),
-            wantDisplay: want.display,
-            wantLamps: lampsText(want.lamps),
-          }),
-        );
-      return;
-    }
+  // The program's cases first; a trace question is graded only against a program that does the
+  // task, since its answers are read off that program's run.
+  const programCase = (c: (typeof cases)[number]): string | undefined => {
+    const a = BigInt(c.given["sensorA"] as number);
+    const b = BigInt(c.given["sensorB"] as number);
+    const end = modelEnd(program, { sensorA: a, sensorB: b });
+    const rooms = { a: String(a), b: String(b) };
+    if (end.end.kind === "halt")
+      return format(t.capHalts, { ...rooms, cause: end.end.cause.toString(16).toUpperCase() });
+    if (end.end.kind === "limit") return format(t.capNoStop, rooms);
+    const want = { display: String(c.expect["display"]), lamps: Number(c.expect["lamps"]) };
+    if (String(end.display) === want.display && end.lamps === want.lamps) return undefined;
+    return format(t.capWrong, {
+      ...rooms,
+      display: String(end.display),
+      lamps: lampsText(end.lamps),
+      wantDisplay: want.display,
+      wantLamps: lampsText(want.lamps),
+    });
+  };
+  const traceCase = (c: (typeof cases)[number]): string | undefined => {
     const question = String(c.given["question"]) as CapstoneQuestion;
     const given = readCapstoneAnswer(question, answers[question] ?? "");
-    if (given === undefined) return fail(index, c.label, t.capUnanswered);
+    if (given === undefined) return t.capUnanswered;
     const found = capstoneAnswer(runOf(text), question);
     if ("missing" in found)
-      return fail(
-        index,
-        c.label,
-        found.missing === "setIf"
-          ? t.capNoSetIf
-          : found.missing === "store"
-            ? t.capNoStore
-            : t.capNoEdge,
-      );
-    if (given !== found.answer) fail(index, c.label, t.capLevels[question] ?? "");
+      return found.missing === "setIf"
+        ? t.capNoSetIf
+        : found.missing === "store"
+          ? t.capNoStore
+          : t.capNoEdge;
+    return given === found.answer ? undefined : (t.capLevels[question] ?? "");
+  };
+  const programDetails = cases.map((c) =>
+    c.given["kind"] === "program" ? programCase(c) : undefined,
+  );
+  const doesTask = programDetails.every((d) => d === undefined);
+  cases.forEach((c, index) => {
+    const detail =
+      c.given["kind"] === "program" ? programDetails[index] : doesTask ? traceCase(c) : t.capFirst;
+    if (detail !== undefined) fail(index, c.label, detail);
   });
   return { passed: failures.length === 0, total, failures };
 }

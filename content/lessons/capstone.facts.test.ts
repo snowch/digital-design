@@ -91,6 +91,14 @@ describe("lesson capstone's facts", () => {
     const other = [...lines.slice(0, 4), lines[5], lines[4], ...lines.slice(6)].join("\n");
     const v = gradeCapstone(challenge, { text: other, answers });
     expect(v.blocked).toBeUndefined();
+    // A program that fails its own tests has no trace question graded against it.
+    const wrong = gradeCapstone(challenge, {
+      text: CAPSTONE_REFERENCE.replace("R6 <= -200", "R6 <= -100"),
+      answers,
+    });
+    expect(wrong.failures.slice(-5).map((f) => f.detail)).toEqual(
+      Array(5).fill(MACHINE13_STRINGS.capFirst),
+    );
     expect(v.failures.map((f) => f.label)).toContain(
       capstone.challenges![0]!.tests.kind === "answers"
         ? capstone.challenges![0]!.tests.cases[4]!.label

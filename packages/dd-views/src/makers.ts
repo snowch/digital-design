@@ -17,6 +17,7 @@ export const MAKERS: Readonly<Record<string, Maker>> = {
   "control-unit-final": { built: 9, grown: [10, 12] },
   "datapath-final": { built: 8, grown: [9, 10, 12] },
   "memory-port-traps": { built: 9, grown: [12] },
+  "memory-port-final": { built: 9, grown: [12] },
   // Inside the control unit.
   digits: { built: 8 },
   "control-decoder-set": { built: 9, grown: [10] },

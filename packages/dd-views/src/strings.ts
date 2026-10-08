@@ -1092,18 +1092,18 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       joinCausem:
         "{actual} does not drive CAUSEM. The block that drives a bus is the one whose right side the bus leaves, where that block's outputs are.",
       joinIrEdge:
-        "{actual} is not the edge at which the IR takes `resume`'s word. The IR takes an instruction's word at its FETCH edge, with edges counted from the reset; read the S lane.",
+        "`{actual}` is not the edge at which the IR takes `resume`'s word. The IR takes an instruction's word at its FETCH edge; add up the edges each earlier line takes, from the reset.",
       joinPcEdge:
-        "{actual} is not the edge at which the PC takes `040`. The PC takes its next value at the edge that ends `resume`, which takes three edges; read the PC lane.",
+        "`{actual}` is not the edge at which the PC takes `010`. `resume` takes three edges, and the PC takes the return point at the last of them.",
       // Module 13, lesson 2 (brief 2D).
       pathCode:
         "`{actual}` does not follow the rule for a set if line. Its eight digits are K, J, A, B and Y, then three digits of constant. Set if is kind A, and its job digit is a branch's condition.",
       pathEdges:
         "`{actual}` is not the count. A register job goes through FETCH, READ, ALU and WRITE. Count from its FETCH edge to its last edge.",
       pathJob:
-        "`{actual}` is not the ALU's job at its ALU edge. Read OP2, OP1 and OP0 in the table at that edge. A register job's ALU code is its job digit.",
+        "`{actual}` is not the ALU's job at its ALU edge. A register job's ALU code, OP2 OP1 OP0, is its job digit, and the line's operator names the job.",
       pathYin:
-        "`{actual}` is not the word Y takes. Read the register that Y names in the table after the WRITE edge, or read YIN on the drawing before that edge. Give the word in decimal.",
+        "`{actual}` is not the word Y takes. Y takes the ALU's result: work out R5 and R6 bit by bit with the job, and give the word in decimal.",
       pathPc:
         "`{actual}` is not the PC after the last edge. An instruction that does not branch, call or jump leaves the PC at its own address plus 4. Give the PC as three hexadecimal digits.",
       // Module 13, lesson 3 (brief 3L).
@@ -1112,7 +1112,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       traceSum1:
         "Your answer, {actual}, misses at the slice for bit 1. Open that slice at the ALU edge of `R3 <= R1 - R2`, and read SUM where it leaves the full adder.",
       tracePcD:
-        "Your answer, {actual}, misses what D holds. Pause at the WRITE edge of `call R6, R15`, show the PC's bit 3 from the list of parts that never open, and read D there: D is the bit of the PC's next value.",
+        "Your answer, {actual}, misses what D holds. Pause at the ALU edge of `goto R15`, show the PC's bit 4 from the list of parts that never open, and read D there. D is the bit of the PC's next value, the address the jump goes to.",
       traceR5En:
         "Your answer, {actual}, misses the rule for EN. EN is 1 for the register Y names, at a WRITE edge; pause at the WRITE edge of `R5 <= R3 >= R4 signed` and show the register file's bit for R5.",
       traceR4En:

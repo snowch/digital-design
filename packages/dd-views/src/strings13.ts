@@ -144,6 +144,8 @@ export interface Machine13Strings {
   readonly capNoSetIf: string;
   readonly capNoStore: string;
   readonly capNoEdge: string;
+  /** For each trace question while the program fails one of its own tests. */
+  readonly capFirst: string;
   /** For a wrong answer: the level to look at, never the value, by question. */
   readonly capLevels: Readonly<Record<string, string>>;
 }
@@ -258,6 +260,8 @@ export const MACHINE13_STRINGS: Machine13Strings = {
   capNoSetIf: "Your program has no set if, so this question has no edge to read.",
   capNoStore: "Your program has no store, so this question has no edge to read.",
   capNoEdge: "Your program's run does not reach the edge this question names.",
+  capFirst:
+    "Your program does not do the task yet, so this question is not graded; make the program pass its tests first.",
   capLevels: {
     result:
       "Pause before the ALU edge of your first set if. Read Y where it leaves the ALU in the datapath, as a signed number.",

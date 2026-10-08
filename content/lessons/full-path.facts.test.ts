@@ -19,7 +19,7 @@ import {
 import { MACHINE13_STRINGS, compareText, levelsAnswer } from "@dd/dd-views";
 import type { Word } from "@dd/sim";
 
-import { PATH_ANSWERS } from "./full-path";
+import { PATH_ANSWERS, PATH_PROGRAM, fullPath } from "./full-path";
 import { SHOP, SHOP_INPUTS } from "./module13";
 
 const hex = (w: Word | undefined) =>
@@ -132,18 +132,24 @@ describe("lesson full-path's facts", () => {
 
   it("answers the challenge", () => {
     expect(word("R5 <= R3 < R4 signed")).toBe(answer("code"));
-    const s = run.steps.find((x) => x.text === "R2 <= R3")!;
+    // The line asked about is in a program no figure runs.
+    const own = recordRun({ libraryId: "machine-final", program: PATH_PROGRAM, inputs: {} });
+    const s = own.steps.find((x) => x.text === "R7 <= R5 | R6")!;
+    expect(s.pc).toBe(0x1cn);
     expect(String(s.last - s.first)).toBe(answer("edges"));
-    // Its ALU edge is its third: OP2 OP1 OP0 101, copy B.
-    expect(state(run, s.first + 2)).toBe("ALU");
+    // Its ALU edge is its third: OP2 OP1 OP0 100, OR.
+    expect(state(own, s.first + 2)).toBe("ALU");
     expect([
-      at(run, s.first + 2, "OP2"),
-      at(run, s.first + 2, "OP1"),
-      at(run, s.first + 2, "OP0"),
-    ]).toEqual(["1", "0", "1"]);
-    expect(answer("job")).toBe("copy");
-    expect(state(run, s.first + 3)).toBe("WRITE");
-    expect(BigInt(`0x${at(run, s.first + 3, "YIN")}`).toString()).toBe(answer("yin"));
-    expect(at(run, s.last, "PC").padStart(3, "0")).toBe(answer("pc"));
+      at(own, s.first + 2, "OP2"),
+      at(own, s.first + 2, "OP1"),
+      at(own, s.first + 2, "OP0"),
+    ]).toEqual(["1", "0", "0"]);
+    expect(answer("job")).toBe("or");
+    expect(state(own, s.first + 3)).toBe("WRITE");
+    expect(BigInt(`0x${at(own, s.first + 3, "YIN")}`).toString()).toBe(answer("yin"));
+    expect(at(own, s.last, "PC").padStart(3, "0")).toBe(answer("pc"));
+    for (const sec of fullPath.sections)
+      for (const i of sec.interactives ?? [])
+        expect((i.props as { program?: string }).program).not.toBe(PATH_PROGRAM);
   });
 });

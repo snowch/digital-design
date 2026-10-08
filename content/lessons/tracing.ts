@@ -21,7 +21,7 @@ import { SHOP, SHOP_INPUTS } from "./module13";
 export const TRACE_ANSWERS = [
   { id: "xorB", value: "0", detail: "traceXorB" },
   { id: "sum1", value: "1", detail: "traceSum1" },
-  { id: "pcD", value: "0", detail: "tracePcD" },
+  { id: "pcD", value: "1", detail: "tracePcD" },
   { id: "r5En", value: "1", detail: "traceR5En" },
   { id: "r4En", value: "0", detail: "traceR4En" },
 ] as const;

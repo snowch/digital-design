@@ -42,7 +42,7 @@ export const LABELS = {
   },
   fields: {
     code: "The word of `R5 <= R3 < R4 signed`",
-    edges: "The edges that `R2 <= R3` takes",
+    edges: "The edges that `R7 <= R5 | R6` takes",
     job: "The ALU's job at its ALU edge",
     yin: "The word register Y takes at its WRITE edge",
     pc: "The PC after its last edge",

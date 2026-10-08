@@ -66,6 +66,10 @@ const COMPOSITE_LABELS: Readonly<Record<string, string>> = {
   "full-adder": "full adder",
   adder: "adder",
   alu: "ALU",
+  // Module 13: the final machine's three blocks, named as its lessons name them.
+  "control-unit-final": "control unit",
+  "datapath-final": "datapath",
+  "memory-port-final": "memory port",
   addsub: "add/sub",
   "alu-slice": "ALU-slice",
   "addsub-slice": "add/sub",
