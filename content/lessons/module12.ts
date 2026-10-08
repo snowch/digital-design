@@ -972,3 +972,214 @@ export function trapLogicOut(r: TrapLogicRow["inputs"]): {
     HALT: stopNow || (traps && v("NOHANDLER") === 1) ? 1 : 0,
   };
 }
+
+// ---------------------------------------------------------------------------------------------
+// 12.8 system-call-mechanism: the capstone
+
+/** The handler's start: run program number word[0x480] of the table, in user mode. */
+const RUN_START = `        R1 <= handler
+        C4 <= R1
+        R1 <= 0
+        word[0x480] <= R1       // the first program is number 0
+start:  R1 <= word[0x480]       // run program number R1, if there is one
+        R2 <= word[programs]
+        if R1 == R2 goto done
+        R1 <= R1 + R1
+        R1 <= R1 + R1
+        R1 <= R1 + R1           // 8 × R1
+        R2 <= programs
+        R1 <= R1 + R2
+        R1 <= word[R1 + 8]      // its address, from the table
+        C2 <= R1
+        R1 <= 0
+        C1 <= R1                // user mode, interrupts off
+        resume
+done:   stop`;
+
+const RUN_HANDLER_HEAD = `handler: word[0x488] <= R8      // save R8 and R9
+        word[0x490] <= R9
+        R9 <= C3
+        R8 <= 0x41
+        if R9 != R8 goto ended  // a fault: the program ends with its cause
+        R8 <= 1
+        if R1 == R8 goto show
+        R8 <= 2
+        if R1 == R8 goto room
+        R8 <= 3
+        if R1 == R8 goto light
+        R8 <= 4
+        if R1 == R8 goto finish
+        goto back               // a job the handler does not offer
+show:   word[display] <= R2
+        goto back`;
+
+const RUN_ROOM = `room:   R1 <= word[sensorA]     // job 2: room A when R2 is 0
+        R8 <= 0
+        if R2 == R8 goto back
+        R1 <= word[sensorB]     // room B when R2 is 1
+        R8 <= 1
+        if R2 == R8 goto back
+        R1 <= 0                 // no such room
+        goto back`;
+
+const RUN_LAMPS = `light:  word[lamps] <= R2      // job 3: the lamps from R2's bits 2 to 0
+        goto back`;
+
+const RUN_BACK = `back:   R8 <= word[0x488]       // put R8 and R9 back
+        R9 <= word[0x490]
+        resume`;
+
+const RUN_END = `finish: R9 <= 0                 // job 4: the program ended; its record is 0
+ended:  R8 <= word[0x480]       // record R9 for program R8, at 0x400 + 8 × R8
+        R1 <= R8 + R8
+        R1 <= R1 + R1
+        R1 <= R1 + R1
+        word[R1 + 0x400] <= R9
+        R8 <= R8 + 1
+        word[0x480] <= R8       // the next program
+        goto start`;
+
+export const RUN_REFERENCE = `// The shop's handler: run each program the table names, in user mode, through jobs 1 to 4.
+${RUN_START}
+${RUN_HANDLER_HEAD}
+${RUN_ROOM}
+${RUN_LAMPS}
+${RUN_BACK}
+${RUN_END}`;
+
+/** The guided start: the start and the choice given, jobs 2 and 3 and the ending to write. */
+export const RUN_SKELETON = `// The shop's handler: run each program the table names, in user mode, through jobs 1 to 4.
+${RUN_START}
+${RUN_HANDLER_HEAD}
+// job 2: R1 takes room A's reading when R2 is 0, room B's when R2 is 1, and 0 for any other room.
+room:   R1 <= 0
+        goto back
+// job 3: the lamps from R2's bits 2 to 0.
+light:  goto back
+${RUN_BACK}
+// job 4 and a fault: record 0 (job 4) or the cause at 0x400 + 8 × the program's number,
+// then run the next program.
+finish: stop
+ended:  stop`;
+
+/** The empty start: the requirements as comments. */
+export const RUN_EMPTY = `// The shop's handler. The tests add a table, programs, after it: its first word is how many
+// programs, then each program's address. Run each in user mode, in order, from the first. Offer
+// jobs 1 to 4 by call system: 1 shows R2; 2 puts room R2's reading in R1 (0 for room A, 1 for
+// room B, 0 for any other); 3 sets the lamps from R2; 4 ends the program. A program that faults
+// ends there. For program k, leave 0 at 0x400 + 8k if it ended with job 4, else its cause. Keep
+// every register but R1 for the program across a job. After the last program, stop.
+`;
+
+/** A handler that skips a faulting instruction, as lesson 1's did, instead of ending the program. */
+export const RUN_SKIPPING = RUN_REFERENCE.replace(
+  "        if R9 != R8 goto ended  // a fault: the program ends with its cause",
+  "        if R9 != R8 goto skip   // a fault: skip it, as lesson 1's handler did",
+).replace(
+  RUN_BACK,
+  `skip:   R8 <= C2
+        R8 <= R8 + 4
+        C2 <= R8
+${RUN_BACK}`,
+);
+
+/** One run of the capstone: the user programs and their table, and what the run must leave. */
+export interface RunCase {
+  readonly label: string;
+  readonly data: string;
+  readonly shown: string;
+  readonly lamps: number;
+  /** How each program ended: 0 for job 4, else its cause, in decimal. */
+  readonly records: readonly number[];
+}
+
+export const RUN_CASES: readonly RunCase[] = [
+  {
+    label: "two programs that end with job 4",
+    data: `programs: word 2, showA, showB
+showA:  R2 <= 25
+        R1 <= 1
+        call system             // show 25
+        R1 <= 4
+        call system
+showB:  R2 <= 1
+        R1 <= 2
+        call system             // room B's reading in R1
+        R2 <= R1
+        R1 <= 1
+        call system             // show it
+        R1 <= 4
+        call system`,
+    shown: "25, -250",
+    lamps: 0,
+    records: [0, 0],
+  },
+  {
+    label: "a program that stores to the display itself",
+    data: `programs: word 2, direct, after
+direct: R2 <= 7
+        word[display] <= R2     // refused in user mode
+        R1 <= 4
+        call system
+after:  R2 <= 8
+        R1 <= 1
+        call system
+        R1 <= 4
+        call system`,
+    shown: "8",
+    lamps: 0,
+    records: [0x32, 0],
+  },
+  {
+    label: "the lamps, then a program that runs stop",
+    data: `programs: word 2, night, stops
+night:  R2 <= 2
+        R1 <= 3
+        call system             // NIGHT on
+        R1 <= 4
+        call system
+stops:  stop                    // refused in user mode`,
+    shown: "",
+    lamps: 2,
+    records: [0, 0x22],
+  },
+  {
+    label: "a word kept in R10 across a job",
+    data: `programs: word 1, keeps
+keeps:  R10 <= 77
+        R2 <= 5
+        R1 <= 1
+        call system             // show 5
+        R2 <= R10
+        R1 <= 1
+        call system             // show 77
+        R1 <= 4
+        call system`,
+    shown: "5, 77",
+    lamps: 0,
+    records: [0],
+  },
+  {
+    label: "room 5, and a program that is not instructions",
+    data: `programs: word 2, room5, notcode
+room5:  R2 <= 5
+        R1 <= 2
+        call system             // there is no room 5
+        R2 <= R1
+        R1 <= 1
+        call system
+        R1 <= 4
+        call system
+notcode: word 0`,
+    shown: "0",
+    lamps: 0,
+    records: [0, 0x21],
+  },
+  {
+    label: "no programs",
+    data: `programs: word 0`,
+    shown: "",
+    lamps: 0,
+    records: [],
+  },
+];

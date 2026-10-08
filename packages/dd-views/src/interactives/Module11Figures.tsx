@@ -340,6 +340,9 @@ const ResultsProps = z.object({
         /** Module 12: lines added after the program in place of a log, and what they hold. */
         data: z.string().optional(),
         note: z.string().optional(),
+        /** Module 12: the rooms' readings for the run, as a test gives them. */
+        sensorA: z.number().int().optional(),
+        sensorB: z.number().int().optional(),
         /** What the task asks this log's run to leave, by the check's key. */
         asks: z.record(z.string(), z.string()),
       }),
@@ -367,6 +370,10 @@ export function resultsOf(data: z.input<typeof ResultsProps>) {
     const run = runScenario(parsed.program, {
       data: log.data ?? logText(log.readings ?? [], log.limit),
       ...(parsed.traps ? { traps: true } : {}),
+      inputs: {
+        ...(log.sensorA !== undefined ? { sensorA: BigInt(log.sensorA) } : {}),
+        ...(log.sensorB !== undefined ? { sensorB: BigInt(log.sensorB) } : {}),
+      },
     });
     const s = run.state;
     const left: Record<string, string> = {};

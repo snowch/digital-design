@@ -151,5 +151,6 @@ export const MACHINE12_STRINGS: Machine12Strings = {
     sensorService: "[draft] sensorService",
     doorTimer: "[draft] doorTimer",
     waitDoor: "[draft] waitDoor",
+    shopHandler: "[draft] shopHandler",
   },
 };

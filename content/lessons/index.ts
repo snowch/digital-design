@@ -67,6 +67,7 @@ import { systemCalls } from "./system-calls";
 import { interrupts } from "./interrupts";
 import { nesting } from "./nesting";
 import { trapHardware } from "./trap-hardware";
+import { systemCallMechanism } from "./system-call-mechanism";
 
 const INPUTS: readonly LessonInput[] = [
   // Module 0, meet the machine.
@@ -133,6 +134,7 @@ const INPUTS: readonly LessonInput[] = [
   interrupts,
   nesting,
   trapHardware,
+  systemCallMechanism,
 ];
 
 export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(
