@@ -286,7 +286,9 @@ starts.
   the machine's drawing, and on Module 12's controller the label for READ to WRITE overlapped ALU
   to WRITE's. Mended: the HALT pin one cell left, its wire's turn half a cell left, and the label
   moved clear; the diagram test then passed at both widths (22 tests).
-- **The second run**: (filled in when it ends).
+- **The second run, 02:47 to 03:19, on `9f051fb`**: everything before the browser passed (Vitest
+  128 files, 1324 tests); the browser 862 passed, 56 skipped, 10 failed, the ten stored screenshots
+  that fail in a build container on `main` too. Every other test passes.
 
 ## What to change
 
