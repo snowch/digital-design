@@ -132,6 +132,13 @@ export interface Machine11Strings {
   // The program editor in a challenge.
   readonly runWith: string;
   readonly dataAdded: string;
+  /** {name}: a line name the learner's text and a test's lines both give; {test}: the test. */
+  readonly nameShared: string;
+  /** {decimal} and {hex}: a word in a failure's text, from 10 to 7FF, with its hexadecimal. */
+  readonly wordInText: string;
+  /** The button under a box of rows (the listing, memory, the stack, the edges): open, then close. */
+  readonly rowsAll: string;
+  readonly rowsFewer: string;
   readonly startSkeleton: string;
   readonly startEmpty: string;
   /** Asking before a start replaces a program the learner changed. */
@@ -316,6 +323,11 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   limitNote: "(limit {limit})",
   runWith: "Run with",
   dataAdded: "The tests add these lines after your program:",
+  nameShared:
+    "Your text names a line {name}. The test {test} adds lines after your text, and they use the same name. The assembler cannot tell the two apart, so the test does not run. Give your line another name.",
+  wordInText: "{decimal} ({hex} in hexadecimal)",
+  rowsAll: "Show every row",
+  rowsFewer: "Show fewer rows",
   startSkeleton: "Start from the outline",
   startEmpty: "Start from an empty program",
   // Brief 8M.

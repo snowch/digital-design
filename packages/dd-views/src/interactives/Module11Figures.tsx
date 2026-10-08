@@ -37,6 +37,7 @@ import {
   runAnswer,
   shopInputs,
   signedText,
+  WordValue,
 } from "./Debugger";
 import { withProps } from "./props";
 
@@ -413,8 +414,16 @@ export const LogResults = withProps(
     const t = strings.machine11;
     const t12 = strings.machine12;
     // How a run ended, in the course's words where it has them (a run cut off), else its key.
-    const shown = (key: string, value: string | undefined) =>
-      key === "end" && value !== undefined ? (t12.endWords[value] ?? value) : value;
+    // Module 12: a word a run left, such as a record holding a cause, with its hexadecimal beside
+    // it, as the debugger writes a word.
+    const shown = (key: string, value: string | undefined, traps = false) =>
+      key === "end" && value !== undefined ? (
+        (t12.endWords[value] ?? value)
+      ) : traps && key.startsWith("word:") && value !== undefined && /^-?\d+$/.test(value) ? (
+        <WordValue value={BigInt(value)} t={t} />
+      ) : (
+        value
+      );
     const rows = useMemo(() => resultsOf(data), [data]);
     const [ran, setRan] = useState(false);
     return (
@@ -455,8 +464,14 @@ export const LogResults = withProps(
                         className={ran && left[c.key] !== log.asks[c.key] ? "row-differs" : ""}
                       >
                         <th scope="row">{c.label}</th>
-                        <td className="memory-word">{shown(c.key, log.asks[c.key])}</td>
-                        {ran && <td className="memory-word">{shown(c.key, left[c.key])}</td>}
+                        <td className="memory-word">
+                          {shown(c.key, log.asks[c.key], log.data !== undefined)}
+                        </td>
+                        {ran && (
+                          <td className="memory-word">
+                            {shown(c.key, left[c.key], log.data !== undefined)}
+                          </td>
+                        )}
                       </tr>
                     ))}
                   </tbody>

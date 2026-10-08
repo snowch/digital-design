@@ -18,6 +18,7 @@ import {
   assembleChecked,
   gradeProgramCase,
   scenarioOf,
+  sharedNames,
   callStart,
   withData,
   type InputPlan,
@@ -53,12 +54,15 @@ function leftText(
     .map((key) => {
       const value = actual[key] ?? "";
       const reg = /^[RC](\d{1,2})$/.exec(key);
+      const atTrap = /^(R\d{1,2})@trap$/.exec(key);
       const word = /^word:([0-9A-Fa-f]+)$/.exec(key);
       const name = reg
         ? format(t.checkRegister, { name: key })
-        : word
-          ? format(t.checkWord, { address: (word[1] as string).toUpperCase() })
-          : (t.checks[key] ?? strings.machine12.checks[key] ?? key);
+        : atTrap
+          ? format(strings.machine12.atTrap, { name: atTrap[1] as string })
+          : word
+            ? format(t.checkWord, { address: (word[1] as string).toUpperCase() })
+            : (t.checks[key] ?? strings.machine12.checks[key] ?? key);
       if (key === "end") return name;
       if (key === "kept") return value === "" ? t.keptAll : format(t.keptNot, { names: value });
       if (key === "returned") return value === "yes" ? t.returnedYes : t.returnedNo;
@@ -70,15 +74,31 @@ function leftText(
             .join(", "),
         });
       // A word or a register as the debugger writes it: from 10 to 7FF, its hexadecimal beside.
-      const said = (reg && key.startsWith("R")) || word ? wordText(value) : value;
+      // A long list (the words shown, the causes) is cut at its first eight.
+      const items = value.split(", ");
+      const listed =
+        items.length > LIST_SHOWN ? `${items.slice(0, LIST_SHOWN).join(", ")}, …` : value;
+      const said = (reg && key.startsWith("R")) || atTrap || word ? wordText(value, t) : listed;
       return format(t.checkValue, { name, value: said || t.emptyLeft });
     })
     .join("; ");
 }
 
-/** A decimal the grader left, as the debugger writes a word: its hexadecimal beside from 10 to 7FF. */
-function wordText(value: string): string {
-  return /^-?\d+$/.test(value) ? valueText(BigInt(value)) : value;
+/** The items of a long list a failure names, from the first. */
+const LIST_SHOWN = 8;
+
+/**
+ * A decimal the grader left, as the debugger writes a word: from 10 to 7FF its hexadecimal beside
+ * it, named in words, since a failure is read as text, with no hidden label.
+ */
+function wordText(value: string, t: ViewStrings["machine11"]): string {
+  if (!/^-?\d+$/.test(value)) return value;
+  const v = BigInt(value);
+  if (v < 10n || v > 0x7ffn) return valueText(v);
+  return format(t.wordInText, {
+    decimal: value,
+    hex: v.toString(16).toUpperCase().padStart(3, "0"),
+  });
 }
 
 /** Grades a program challenge: every case run, each failure saying what the program left. */
@@ -95,6 +115,20 @@ export function gradeProgram(
     return { passed: false, total: cases.length, failures: [], blocked: t.nothingWritten };
   const failures: VerdictFailure[] = [];
   for (const [index, c] of cases.entries()) {
+    // The tests' lines and the learner's are assembled as one text: a name both use is refused
+    // with its own sentence, naming the test, not as a line the learner never wrote.
+    const shared = sharedNames(text, c.given);
+    if (shared.length) {
+      failures.push({
+        index,
+        label: c.label,
+        inputs: {},
+        actual: {},
+        expected: {},
+        detail: format(t.nameShared, { name: shared[0] as string, test: c.label }),
+      });
+      continue;
+    }
     const r = gradeProgramCase(text, c.given, c.expect);
     // The tests' call to a name the program lacks fails that case alone; the program assembles.
     const missing = r.problems.filter((p) => p.code === "noFunction");
@@ -126,16 +160,20 @@ export function gradeProgram(
     const endWrong = r.wrong.includes("end") || r.wrong.includes("stopAt");
     const wrongLeft = r.wrong.filter((k) => k !== "end" && k !== "stopAt");
     const parts: string[] = [];
+    const endKey = r.end?.key;
+    const ended = (key: string) =>
+      traps ? (m12.stops[key] ?? t.stops[key]) : (t.stops[key] ?? m12.stops[key]);
+    // Module 12: every failed run says first where it stopped and how, and names a fault at one
+    // of the learner's own lines.
+    if (traps && r.end) parts.push(format(ended(r.end.key) ?? r.end.key, r.end.values));
+    if (traps && r.ownFault) parts.push(format(m12.ownFault, r.ownFault));
     if (wrongLeft.length)
       parts.push(
         format(traps ? m12.failedLeft : t.failedLeft, {
           left: leftText(strings, r.actual, wrongLeft),
         }),
       );
-    const endKey = r.end?.key;
-    const ended = (key: string) =>
-      traps ? (m12.stops[key] ?? t.stops[key]) : (t.stops[key] ?? m12.stops[key]);
-    if (r.end && (endWrong || (endKey !== "stop" && endKey !== "returned")))
+    if (!traps && r.end && (endWrong || (endKey !== "stop" && endKey !== "returned")))
       parts.push(format(ended(r.end.key) ?? r.end.key, r.end.values));
     const key = c.given["detail"];
     const sentence =
@@ -179,6 +217,7 @@ export function ProgramEditor({ challenge, artifact, onChange }: ChallengeEditor
   const [chosen, setChosen] = useState(0);
   const [asking, setAsking] = useState<"skeleton" | "empty" | undefined>(undefined);
   const run = runs[chosen] ?? runs[0];
+  const traps = runs.some((c) => c.given["traps"] !== undefined);
   const scenario = useMemo(() => (run ? scenarioOf(run.given) : {}), [run]);
   const checked = useMemo(() => assembleChecked(withData(text, scenario)), [text, scenario]);
   const inputs = useMemo<InputPlan>(
@@ -251,10 +290,8 @@ export function ProgramEditor({ challenge, artifact, onChange }: ChallengeEditor
         </div>
       )}
       <ProgramText
-        // Module 12's challenges write a handler, not a program: the box says so.
-        {...(runs.some((c) => c.given["traps"] !== undefined)
-          ? { label: strings.machine12.handlerLabel }
-          : {})}
+        // Module 12's challenges write a start and a handler, not a program: the box says so.
+        {...(traps ? { label: strings.machine12.handlerLabel, traps: true } : {})}
         text={text}
         onChange={(next) => onChange({ ...artifact, text: next })}
         problems={problems}
@@ -274,7 +311,7 @@ export function ProgramEditor({ challenge, artifact, onChange }: ChallengeEditor
       )}
       {scenario.data && (
         <div className="program-data">
-          <p className="hdl-label">{t.dataAdded}</p>
+          <p className="hdl-label">{traps ? strings.machine12.dataAdded : t.dataAdded}</p>
           <pre className="hdl-generated">{scenario.data}</pre>
         </div>
       )}

@@ -88,6 +88,8 @@ export interface TrapEvent {
   readonly returnPoint: bigint;
   /** Instructions run before the trap. */
   readonly after: number;
+  /** The registers at the trap's edge, which a trap does not change: the program's, as it left them. */
+  readonly regs: readonly (bigint | undefined)[];
 }
 
 /**
@@ -188,7 +190,7 @@ export function debugStep(
   const { state: cpu, record } = step(s.cpu, inputs, options);
   const trapped = record.stopped?.kind === "trap" || record.trap !== undefined;
   const traps = record.trap
-    ? [...s.traps, { at: record.pc, ...record.trap, after: s.ran }]
+    ? [...s.traps, { at: record.pc, ...record.trap, after: s.ran, regs: s.cpu.regs }]
     : s.traps;
   let calls = s.calls;
   let callsMade = s.callsMade;

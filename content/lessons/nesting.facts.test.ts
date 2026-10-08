@@ -16,10 +16,19 @@ import {
   memoryWord,
   timelineRun,
 } from "@dd/dd-model";
-import { listingAnswer, transferValue } from "@dd/dd-views";
+import { grade, listingAnswer, transferValue } from "@dd/dd-views";
 import { parseLesson } from "@platform/lesson-schema";
 
-import { NEST_FAULT, NEST_LATE, NEST_SAVED, NEST_UNSAVED, WAIT_RUNS, WAIT_START } from "./module12";
+import {
+  COUNT_OFF,
+  NEST_FAULT,
+  NEST_LATE,
+  NEST_SAVED,
+  NEST_UNSAVED,
+  WAIT_ON,
+  WAIT_REFERENCE,
+  WAIT_START,
+} from "./module12";
 import { NEST_ANSWERS, NEST_DOOR, nesting } from "./nesting";
 
 const lesson = parseLesson(nesting);
@@ -112,8 +121,44 @@ describe("facts for the nesting lesson", () => {
     expect(endOf(s.stopped)).toEqual({ key: "stop", values: { address: "0EC" } });
   });
 
-  it("the challenge: the starting job 5 leaves ALARM off when the program ends after the wait", () => {
-    const first = WAIT_RUNS[0]!;
-    expect(run(`${WAIT_START}\n${first.code}`, first.opens).cpu.lamps).toBe(0);
+  it("job 5 saving C1 and C2, the other door times: 30, 5 and never", () => {
+    expect(traps(NEST_SAVED, 30).slice(2, 4)).toEqual(["82 after 50", "81 after 79"]);
+    expect(traps(NEST_SAVED, 5).slice(0, 2)).toEqual(["82 after 7", "41 after 22"]);
+    for (const door of [30, 5]) {
+      const s = run(NEST_SAVED, door);
+      expect([s.ran, s.traps.length, s.shown, s.cpu.lamps]).toEqual([242, 6, [5n, 6n], 1]);
+    }
+    const never = run(NEST_SAVED);
+    expect([never.ran, never.traps.length, never.shown, never.cpu.lamps]).toEqual([
+      211,
+      4,
+      [5n, 6n],
+      0,
+    ]);
+    expect([memoryWord(never.cpu, 0x410), memoryWord(never.cpu, 0x418)]).toEqual([2n, 0x10cn]);
+  });
+
+  it("the challenge fails the starting text and each shortcut the readers found", () => {
+    const c = lesson.challenges.find((x) => x.id === "wait-door")!;
+    // C2 alone saved and put back.
+    const c2Only = WAIT_REFERENCE.replace(
+      "        R1 <= C1\n        word[0x410] <= R1       // save C1\n",
+      "",
+    ).replace(
+      "        R1 <= word[0x410]\n        C1 <= R1                // C1 and C2 put back\n",
+      "",
+    );
+    // The figures' job 5 typed in place of job 6.
+    const job5 = WAIT_START.replace(COUNT_OFF, WAIT_ON);
+    // A fixed status written to C1 instead of the saved one.
+    const fixedC1 = WAIT_REFERENCE.replace(
+      "        R1 <= word[0x410]\n        C1 <= R1                // C1 and C2 put back",
+      "        R1 <= 2\n        C1 <= R1",
+    );
+    for (const t of [c2Only, fixedC1]) expect(t).not.toBe(WAIT_REFERENCE);
+    expect(job5).not.toBe(WAIT_START);
+    for (const text of [WAIT_START, c2Only, job5, fixedC1])
+      expect(grade(c, { text }).passed, text).toBe(false);
+    expect(grade(c, { text: WAIT_REFERENCE }).passed).toBe(true);
   });
 });

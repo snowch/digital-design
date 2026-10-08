@@ -31,7 +31,7 @@ export const NIGHT_INPUTS = { SENSORA: "-184", SENSORB: "-250" };
 export const TRAP_ANSWERS = [
   { id: "c2", value: "010", form: "hex", detail: "trapC2" },
   { id: "c3", value: "33", form: "hex", detail: "trapC3" },
-  { id: "c1", value: "01", form: "hex", detail: "trapC1" },
+  { id: "c1", value: "01", form: "bits", detail: "trapC1" },
   { id: "pc", value: "01C", form: "hex", detail: "trapPc" },
 ] as const;
 

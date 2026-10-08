@@ -485,3 +485,177 @@ Module 12, traps and interrupts, from its plan:
 
 Its capstone is a minimal system-call mechanism. Then come checkpoint 5 and Module 13, the final
 machine.
+
+## Course checkpoint 5: traps and interrupts, before the final machine
+
+The plan's fifth checkpoint comes before Module 13, the final machine (`docs/plan.md`, "When a
+module is done, and the checkpoints"). The managing session wrote this report on 8 October 2026,
+after merging Module 12.
+
+The author asked to start Module 13 before this report. Its plan (`docs/notes/module-13-plan.md`)
+went to `main` first, and its build is under way. This report puts the plan's three decisions to
+the author, as checkpoint 4 put Module 12's.
+
+### What exists since checkpoint 4
+
+- **Module 12, traps and interrupts**: eight lessons.
+  - `traps`: a handler instead of a halt, and a cause read from C3.
+  - `saving-state`: a handler saves what it uses and puts it back.
+  - `user-mode`: user mode and system mode, and what user mode refuses.
+  - `system-calls`: a user program asks the handler for a job.
+  - `interrupts`: the timer's and the door's interrupts, between two instructions.
+  - `nesting`: a trap inside the handler, and a long job that lets interrupts in.
+  - `trap-hardware`: where each transfer happens, in a machine of several edges.
+  - `system-call-mechanism`, the capstone: a handler that runs a table of user programs through
+    its jobs and survives a faulty one.
+- **Module 11's follow-up**: 11.6's edge log asks a second question, so no challenge has a single
+  test.
+- **Shared parts that reach earlier pages**:
+  - every debugger's listing, memory and stack boxes open to show every row, at the author's
+    request;
+  - a phone's compact listing keeps each row to one line;
+  - the PC and every address show three hexadecimal digits;
+  - the run button names what a press will do;
+  - a halt reads "Halted" on Modules 8 and 9's figures.
+
+The course now has 54 lessons, in Modules 0 to 12. Module 13 is being built.
+
+### What the learner can now do
+
+After Module 12 a learner can:
+
+- write a handler that the machine goes to instead of halting, read the cause, and resume the
+  program at the right return point for a fault, a system call or an interrupt;
+- save and put back what a handler uses, with stores to addresses of its own;
+- start a program in user mode, and say what user mode refuses (the devices, the control
+  registers, `stop` and `resume`) and what the machine does not protect (the RAM);
+- offer jobs through a system call, under one rule: a call may change R1 and R2, and every other
+  register comes back as it was;
+- take the timer's and the door's interrupts between instructions, clear the waiting bit, and
+  leave the program unaware;
+- let interrupts into a long job safely, by saving C1 and C2 first;
+- find where each transfer of a trap happens in the circuit, and write the trap logic;
+- write a minimal system-call mechanism that runs several user programs, records how each ended,
+  and runs the next after a faulty one.
+
+### What was built
+
+- **The model's traps** (`MODULE_12`):
+  - the control registers C0 to C4, and the two modes;
+  - traps to the handler at C4, and `resume`;
+  - the control-register copies;
+  - causes `22`, `32`, `81` and `82`, and interrupts.
+
+  At reset there is no handler, so every program of Modules 8 to 11 runs as before.
+- **The trap hardware** in Module 12's own copy of Module 9's machine of several edges
+  (`machine-traps`). It is compared with the model after every instruction, traps and interrupts
+  included. Module 13 takes this copy.
+- **Figures**: the trap timeline, pausable at every transfer; the debugger's control registers,
+  events and door; the memory map as user mode sees it.
+- **The grader** now checks:
+  - every register the tests' programs set;
+  - how each run ended and where it stopped;
+  - the control registers, in the forms the pages use.
+
+  Its failures say how a run ended first, and cap long lists. A learner's line that takes a name
+  the tests' own lines use is refused with a sentence that says so.
+- **The assembler** refuses a control register used anywhere but a copy, with a sentence.
+
+### What was decided
+
+- **Checkpoint 4's five questions for Module 12** have no answer from the author beyond their
+  standing direction to take the recommendations, so Module 12 was built on them:
+  - `Cc <= Rm` writes all five control registers, and `docs/machine.md` is corrected;
+  - the trap hardware is in Module 12's own copy of the machine;
+  - "vector" stays off the pages, and C4 is the handler's address;
+  - the jobs come from `docs/isa.md`'s proposal;
+  - the assembler refuses a control register outside C0 to C4.
+- **A system call may change R1 and R2 only.** 12.4, 12.6 and 12.8 had given three different
+  rules.
+- **Three details of the machine** that `docs/machine.md` left open, now recorded there:
+  - an interrupt is taken at the edge that would fetch, and a fetch's own cause wins there, as
+    the lower number;
+  - a trap's edge does not count the timer down;
+  - the door is seen at every edge that ends an instruction or traps.
+- **The words of a trap**: an instruction traps, the machine goes to the handler, and the handler
+  resumes the program. With no handler there is no trap, and the machine halts with the cause, as
+  in Module 8. On Module 12's pages, "the program" is the user program only.
+- **No testbench constructs**: no lesson needed them. Module 13's plan takes up the question.
+
+### What the managing session checked before merging
+
+- **A reading review.** Each lesson had its own reviewer, reading as its learner, and a sceptic
+  attacked every review. 87 findings were upheld or narrowed, 7 of them blocking, and the build
+  acted on each. The commonest were:
+  - challenges whose tests a learner could pass while skipping the skill;
+  - answers shown in a figure;
+  - predictions answered before they were asked;
+  - the handler's `stop` credited to "the program".
+- **A second reading.** A new reader per lesson checked each finding, reran every shortcut and
+  read for what the changes broke, again with a sceptic per reading. It left 2 blocking items and
+  about 20 should fix, mostly registers the tests did not check, and the build acted on them. The
+  module note records both rounds (`docs/notes/module-12-traps.md`).
+- **The walk.** Every challenge of Modules 11 and 12 was run with its starting text, with a line
+  the assembler refuses and with a loop that never stops. No page showed a console error or
+  scrolled sideways on a phone.
+- **The full check** on the merged head: 1,338 unit and integration tests and 874 browser tests
+  passed, 56 skipped.
+
+### What the author should look at
+
+1. **The eight lessons, as a learner.** Start at <https://snowch.github.io/digital-design/#/lesson/traps>,
+   then `saving-state`, `user-mode`, `system-calls`, `interrupts`, `nesting`, `trap-hardware` and
+   `system-call-mechanism`, the capstone.
+2. **Module 13's plan** (`docs/notes/module-13-plan.md`). Its build follows the recommendations
+   until you answer.
+   - **The two instructions the learner added.** The call through a register (9.5) and set if
+     (10.5) exist only in "your copy" of Modules 9 and 10. Recommendation: the final machine runs
+     both, and `docs/isa.md` records them. The build keeps this work in commits of its own, so
+     that it can come out.
+   - **Whose parts run.** No page runs a learner's earlier answers, because each lesson keeps its
+     own work. Recommendation: the pages say plainly that the machine is built from the course's
+     parts, each of which passes the tests the learner's part passed. In the lab the learner's own
+     wiring of those parts is what runs.
+   - **The testbench and the real tools.** Recommendation:
+     - no testbench runs in the lessons;
+     - the capstone shows a short testbench as code to read;
+     - the offline run through Yosys or Verilator is a separate task after Module 13, if you
+       want its claim on a page. It needs a generator that writes the whole machine as
+       SystemVerilog; today's drops the memories.
+
+     The course plan's table changes with your answer.
+3. **Platform changes waiting in `snowch/learning-platform`**:
+   - objectives that show inline code;
+   - a choice placed beside the figure it asks about;
+   - the results list's name for a screen reader, which reads "of tests passed" with the numbers
+     missing.
+4. **The two extraction candidates from checkpoint 4** are still waiting.
+
+### Costs and known gaps
+
+- The full check takes about 45 minutes in the managing session's container and about 25 in CI.
+  Module 12 added 146 unit tests and 84 browser tests.
+- Ten stored screenshots fail in a build container on `main` too (text rendering). The managing
+  session's container and CI pass them, and CI is the authority.
+- On a phone, a debugger's compact listing shows two to four rows, and the button opens the rest.
+  More would push the values a step changes off the screen.
+- Module 11's halt for cause `41` still says "which Module 12 builds". No Module 12 page halts
+  there, but the sentence should say what it means on both modules.
+- The learning platform's `main` still has the three commits this course has not synced.
+- Branches from finished work remain on GitHub for you to delete, among them
+  `module-11-programming` and `module-12-traps`.
+
+### What comes next
+
+Module 13, the whole machine, is being built from its plan, in five lessons:
+
+- `whole-machine`: every part and the module that built it, and the joins between them;
+- `full-path`: one line at every level, edge by edge, the course's final demonstration;
+- `tracing`: a value followed from a line down to one gate, on a path the learner chooses;
+- `final-machine`, the lab: the machine's text, with its joins completed by the learner in the
+  course plan's three tiers;
+- `your-program`, the capstone: a program of the learner's own, run on the machine and traced to
+  logic.
+
+After it come a report on the whole course against `docs/plan.md`'s "Course acceptance", and then
+the two optional chapters.

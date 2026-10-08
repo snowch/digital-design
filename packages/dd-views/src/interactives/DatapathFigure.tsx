@@ -231,9 +231,12 @@ export const DatapathFigure = withProps(
     const shownState = stepping ? datapathState(circuit, values) : state;
     const bump = () => setGeneration((g) => g + 1);
 
-    const noteRun = () => {
+    // A fault's result shows once its run has ended (stopped or given up) where the figure says
+    // so, else once an edge has run; every new start clears it.
+    const noteRun = (ended = false) => {
       if (faults.length === 0 || faultAt >= 0) setRan(true);
-      if (faultAt >= 0) setRanFaults((was) => new Set([...was, faultAt]));
+      if (faultAt >= 0 && (ended || data.outcomesWhen === "edge"))
+        setRanFaults((was) => new Set([...was, faultAt]));
     };
     const clock = () => {
       if (stopped) return;
@@ -244,7 +247,7 @@ export const DatapathFigure = withProps(
       setPast(record(before, past));
       setStep(Number.POSITIVE_INFINITY);
       if (halting) setStopped(true);
-      noteRun();
+      noteRun(halting);
       bump();
     };
     // A run goes in slices of edges with a redraw between them, so a machine that never stops
@@ -284,7 +287,7 @@ export const DatapathFigure = withProps(
         setRunning(undefined);
         setGaveUp(gaveUp);
         setStep(Number.POSITIVE_INFINITY);
-        noteRun();
+        noteRun(true);
         bump();
       };
       setRunning(0);
@@ -299,6 +302,7 @@ export const DatapathFigure = withProps(
       setEdge(undefined);
       setStopped(false);
       setGaveUp(false);
+      if (data.outcomesWhen === "stopped") setRanFaults(new Set());
       bump();
     };
     const reset = () => {
@@ -310,6 +314,7 @@ export const DatapathFigure = withProps(
       setEdge(undefined);
       setStopped(false);
       setGaveUp(false);
+      if (data.outcomesWhen === "stopped") setRanFaults(new Set());
       bump();
     };
     const choose = (k: number) => {
@@ -420,7 +425,15 @@ export const DatapathFigure = withProps(
             </tbody>
           </table>
         </div>
-        <SignalsTable view={trapSignals(circuit, values)} signals={["TRAP", "GO"]} />
+        <div>
+          {/* The controller's state, which a step asks for, beside the buttons too. */}
+          <p className="trap-state">
+            {format(strings.machine12.stateNow, {
+              state: edgeView(circuit, values).state ?? "X",
+            })}
+          </p>
+          <SignalsTable view={trapSignals(circuit, values)} signals={["TRAP", "GO"]} />
+        </div>
       </div>
     );
 

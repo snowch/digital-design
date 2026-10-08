@@ -49,6 +49,7 @@ export const LABELS = {
     "a store to the ROM",
     "a word that is not an instruction",
     "a word load not at a multiple of 8",
+    "a load from an address where there is no memory",
   ],
   countTitle: "The word at 400",
 } as const;

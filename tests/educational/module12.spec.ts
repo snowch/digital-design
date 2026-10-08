@@ -86,7 +86,7 @@ const WRONG: readonly { lesson: string; id: string; from: string; to: string; wh
   {
     lesson: "saving-state",
     id: "save-registers",
-    from: "handler: word[0x408] <= R5      // save R5\n",
+    from: "handler: word[0x408] <= R5      // save R5 and R6\n",
     to: "handler: nothing\n",
     why: "does not save R5",
   },
@@ -204,6 +204,38 @@ test.describe("Module 12's lab", () => {
       await figure.getByRole("button", { name: T.back, exact: true }).click();
       await check();
     }
+  });
+
+  test("a debugger's listing opens to every row, and closed keeps the line about to run in view", async ({
+    page,
+  }) => {
+    // 12.6's last debugger, the longest listing of the two modules.
+    await openLesson(page, "nesting");
+    const figure = page.locator('[data-interactive="nest-saved"]');
+    const listing = figure.locator(".debugger-listing-wrap");
+    const toggle = figure.getByRole("button", { name: T.rowsAll, exact: true });
+    await expect(toggle).toHaveAttribute("aria-expanded", "false");
+    await toggle.click();
+    const open = figure.getByRole("button", { name: T.rowsFewer, exact: true });
+    await expect(open).toHaveAttribute("aria-expanded", "true");
+    // Open: no scroll inside the box, and every row drawn inside it.
+    const fits = await listing.evaluate((w) => w.scrollHeight <= w.clientHeight + 1);
+    expect(fits).toBe(true);
+    const wrap = (await listing.boundingBox())!;
+    const rows = listing.locator("tbody tr");
+    const last = (await rows.last().boundingBox())!;
+    expect(last.y + last.height).toBeLessThanOrEqual(wrap.y + wrap.height + 1);
+    await expect(figure.locator("tr[aria-current]")).toHaveCount(1);
+    // Closed again: the box is short, and after steps the line about to run is inside it.
+    await open.click();
+    await expect(toggle).toHaveAttribute("aria-expanded", "false");
+    const step = figure.getByRole("button", { name: T.step, exact: true });
+    for (let k = 0; k < 9; k++) await step.click();
+    const closed = (await listing.boundingBox())!;
+    expect(closed.height).toBeLessThan(wrap.height);
+    const row = (await figure.locator("tr[aria-current]").boundingBox())!;
+    expect(row.y).toBeGreaterThanOrEqual(closed.y);
+    expect(row.y + row.height).toBeLessThanOrEqual(closed.y + closed.height);
   });
 
   test("a figure's result shows only once its run has ended", async ({ page }) => {

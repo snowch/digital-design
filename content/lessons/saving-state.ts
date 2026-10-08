@@ -240,7 +240,8 @@ export const savingState: LessonInput = {
           debugger: {
             breakpoints: true,
             control: true,
-            memory: [{ from: "0x400", words: 2, title: LABELS.memoryTitle }],
+            registersFirst: true,
+            memory: [{ from: "0x400", words: 1, title: LABELS.memoryTitle }],
           },
         },
       },
@@ -255,6 +256,7 @@ export const savingState: LessonInput = {
           expect: {
             "word:400": String(p.count),
             ...Object.fromEntries(p.registers.map((v, k) => [`R${k}`, String(v)])),
+            C3: "34",
             causes: p.causes,
             stopAt: "end",
           },

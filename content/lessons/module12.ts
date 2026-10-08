@@ -22,7 +22,7 @@ export const NIGHT_HALTS = `// The night program: show room A, clear room B, lig
 
 /** The handler that keeps the cause at 400 and skips the instruction that faulted. */
 export const SKIP_HANDLER = `handler: R5 <= C3
-        word[0x400] <= R5       // keep the cause
+        word[0x400] <= R5       // store the cause
         R5 <= C2
         R5 <= R5 + 4            // the instruction after the one that faulted
         C2 <= R5
@@ -142,7 +142,7 @@ end:    stop`,
         word[sensorB] <= R2
         R2 <= R2 - 1
         word[display] <= R2
-data:   word 0`,
+notCode: word 0`,
     count: 1,
     display: 8,
     traps: 2,
@@ -159,6 +159,19 @@ end:    stop`,
     display: 0,
     traps: 1,
     causes: "33",
+    stopAt: "handler",
+  },
+  {
+    label: "a load where there is no memory",
+    code: `program: R2 <= 6
+        word[display] <= R2
+        R3 <= word[0x7F8]
+        word[display] <= R3
+end:    stop`,
+    count: 0,
+    display: 6,
+    traps: 1,
+    causes: "31",
     stopAt: "handler",
   },
 ];
@@ -197,11 +210,11 @@ export const SAVED = `// Room A's reading kept in R5, with a handler that saves 
         stop
 ${SAVING_HANDLER}`;
 
-/** A program whose stack has run into the ROM, with a handler that saves R5 below R14. */
-export const STACK_HANDLER = `// The stack has reached the ROM; the handler saves R5 below it.
+/** A program whose stack starts at the bottom of the RAM, with a handler that saves R5 below R14. */
+export const STACK_HANDLER = `// A stack started in the wrong place; the handler saves R5 below it.
         R1 <= handler
         C4 <= R1
-        R14 <= 0x400            // the stack is full
+        R14 <= 0x400            // not 0x7C0: the bottom of the RAM
         R10 <= 7
         R14 <= R14 - 8
         word[R14] <= R10        // a push into the ROM
@@ -237,11 +250,11 @@ const TO_USER = `        R1 <= handler
         C2 <= R1
         resume                  // C0 takes C1: user mode`;
 
-/** The same program in user mode, under a handler that keeps the cause and where. */
-export const LAMPS_USER = `// The same program, started in user mode by the handler.
+/** The same program in user mode, under a handler that stores the cause and where. */
+export const LAMPS_USER = `// The lamps program in user mode: the start lights ALARM, then resumes to it.
 ${TO_USER}
 handler: R5 <= C3
-        word[0x400] <= R5       // keep the cause
+        word[0x400] <= R5       // store the cause
         R5 <= C2
         word[0x408] <= R5       // and where
         stop
@@ -252,7 +265,7 @@ program: R1 <= display
         stop`;
 
 /** A program in user mode that writes the word the handler counts its traps in. */
-export const RAM_UNGUARDED = `// The handler counts the night's traps at 410; the program keeps its own total there.
+export const RAM_UNGUARDED = `// The handler counts the night's traps at 410; the program stores its own total there.
 ${TO_USER.replace("        R1 <= 0\n        C1 <= R1", "        R1 <= 0\n        word[0x410] <= R1       // no traps yet tonight\n        C1 <= R1")}
 handler: R5 <= word[0x410]
         R5 <= R5 + 1
@@ -275,7 +288,7 @@ export const GOTO_START = `// The start writes 0 to C1, then goes to program wit
         C1 <= R1                // user mode, for a resume
         goto program            // no resume
 handler: R5 <= C3
-        word[0x400] <= R5       // keep the cause
+        word[0x400] <= R5       // store the cause
         stop
 program: R0 <= 0
         word[sensorB] <= R0     // refused
@@ -289,7 +302,7 @@ export const USER_START = `// Your start and handler. The tests add a program af
         goto program
 handler: stop`;
 
-export const USER_REFERENCE = `// Start the program in user mode; count and skip a device access, keep any other cause.
+export const USER_REFERENCE = `// Start the program in user mode; count and skip a device access, save any other cause.
         R1 <= handler
         C4 <= R1
         R1 <= 0
@@ -298,7 +311,9 @@ export const USER_REFERENCE = `// Start the program in user mode; count and skip
         R1 <= program
         C2 <= R1
         resume
-handler: R5 <= C3
+handler: word[0x410] <= R5      // save R5 and R6
+        word[0x418] <= R6
+        R5 <= C3
         R6 <= 0x32
         if R5 != R6 goto other
         R5 <= word[0x400]
@@ -307,9 +322,18 @@ handler: R5 <= C3
         R5 <= C2
         R5 <= R5 + 4
         C2 <= R5
+        R6 <= word[0x418]       // put R6 and R5 back
+        R5 <= word[0x410]
         resume
-other:  word[0x408] <= R5       // save the cause
+other:  word[0x408] <= R5       // store the cause
         stop`;
+
+/** Words of a test's own in R0 to R15, from a base of its own, so no fixed word passes. */
+const userWords = (base: number): number[] => Array.from({ length: 16 }, (_, k) => base + 13 * k);
+const setUser = (base: number) =>
+  userWords(base)
+    .map((v, k) => `        R${k} <= ${v}`)
+    .join("\n");
 
 /** The challenge's test programs, each named `program`, each meeting what user mode refuses. */
 export const USER_PROGRAMS: readonly {
@@ -318,45 +342,58 @@ export const USER_PROGRAMS: readonly {
   readonly count: number;
   readonly cause: number;
   readonly causes: string;
+  /** R0 to R15 as the program left them at its last trap, as decimal words. */
+  readonly registers: readonly number[];
 }[] = [
   {
     label: "a store to the lamps, then stop",
-    code: `program: R1 <= 7
+    code: `program: nothing
+${setUser(20)}
         word[lamps] <= R1
         R1 <= R1 + 1
-end:    stop`,
+        stop`,
     count: 1,
     cause: 0x22,
     causes: "32, 22",
+    registers: userWords(20).map((v, k) => (k === 1 ? v + 1 : v)),
   },
   {
     label: "two sensors read, then a control register",
-    code: `program: R2 <= word[sensorA]
+    code: `program: nothing
+${setUser(400)}
+        R2 <= word[sensorA]
         R3 <= word[sensorB]
         R4 <= C0
-end:    stop`,
+        stop`,
     count: 2,
     cause: 0x22,
     causes: "32, 32, 22",
+    registers: userWords(400),
   },
   {
     label: "a word not at a multiple of 8",
-    code: `program: R2 <= 0x404
+    code: `program: nothing
+${setUser(900)}
+        R2 <= 0x404
         R3 <= word[R2]
-end:    stop`,
+        stop`,
     count: 0,
     cause: 0x33,
     causes: "33",
+    registers: userWords(900).map((v, k) => (k === 2 ? 0x404 : v)),
   },
   {
     label: "the timer, then the ROM",
-    code: `program: R1 <= 9
+    code: `program: nothing
+${setUser(1300)}
         word[timer] <= R1
+        R5 <= R5 + 2
         word[0x100] <= R1
-end:    stop`,
+        stop`,
     count: 1,
     cause: 0x34,
     causes: "32, 34",
+    registers: userWords(1300).map((v, k) => (k === 5 ? v + 2 : v)),
   },
 ];
 
@@ -419,7 +456,7 @@ export const SERVICES_SKIPPING = SERVICES.replace(
 export const SHOW_DIRECT = `// A user program that shows 25 by storing to the display.
 ${TO_PROGRAM}
 handler: R5 <= C3
-        word[0x400] <= R5       // keep the cause
+        word[0x400] <= R5       // store the cause
         stop
 program: R2 <= 25
         word[display] <= R2
@@ -447,23 +484,19 @@ end:    stop`,
 );
 
 /**
- * The words the sensor job's test programs keep across their calls: R0 and R3 to R15, as words of
- * their own (the call's own registers, R1 and R2, aside). Before its last call, which ends it in
- * the handler, each program copies R8 and R9 into R12 and R13, so the test reads them as the
- * program found them after its last job 2.
+ * The words the sensor job's test programs give R0 and R3 to R15 (the call's own registers, R1
+ * and R2, aside), a set of their own for each test. The tests read them as the program left them
+ * at its last trap, job 4's call, before the handler's `stop` writes over R8 and R9.
  */
 const KEPT_REGISTERS = [0, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-const KEEP_ALL = KEPT_REGISTERS.map((k) => `        R${k} <= ${(k + 1) * 11}`).join("\n");
-const COPY_KEPT = `        R12 <= R8               // R8 and R9 as the program finds them
-        R13 <= R9`;
-/** What each kept register holds at the end: its own word, R12 and R13 R8's and R9's. */
-const keptAtEnd = (changed: Readonly<Record<number, number>> = {}) =>
-  Object.fromEntries(
-    KEPT_REGISTERS.filter((k) => k !== 8 && k !== 9).map((k) => [
-      `R${k}`,
-      String(changed[k] ?? (k === 12 ? 99 : k === 13 ? 110 : (k + 1) * 11)),
-    ]),
-  );
+const keptWords = (base: number) => KEPT_REGISTERS.map((k) => [k, base + 9 * k] as const);
+const KEEP_ALL = (base: number) =>
+  keptWords(base)
+    .map(([k, v]) => `        R${k} <= ${v}`)
+    .join("\n");
+/** What each kept register holds at the last trap: its own word, or what the program changed. */
+const keptAtTrap = (base: number, changed: Readonly<Record<number, number>> = {}) =>
+  Object.fromEntries(keptWords(base).map(([k, v]) => [`R${k}@trap`, String(changed[k] ?? v)]));
 
 /** Programs that read a room through job 2 and show it through job 1. */
 export const SERVICE2_PROGRAMS: readonly {
@@ -477,7 +510,7 @@ export const SERVICE2_PROGRAMS: readonly {
   {
     label: "room A, then room B",
     code: `program: nothing
-${KEEP_ALL}
+${KEEP_ALL(30)}
         R2 <= 0
         R1 <= 2
         call system             // room A's reading in R1
@@ -490,17 +523,16 @@ ${KEEP_ALL}
         R2 <= R1
         R1 <= 1
         call system
-${COPY_KEPT}
         R1 <= 4
         call system`,
     shown: "-184, -250",
     causes: "41, 41, 41, 41, 41",
-    kept: keptAtEnd(),
+    kept: keptAtTrap(30),
   },
   {
     label: "room B, kept in R5 across a call",
     code: `program: nothing
-${KEEP_ALL}
+${KEEP_ALL(600)}
         R2 <= 1
         R1 <= 2
         call system
@@ -511,17 +543,16 @@ ${KEEP_ALL}
         R2 <= R5
         R1 <= 1
         call system             // show room B's reading
-${COPY_KEPT}
         R1 <= 4
         call system`,
     shown: "7, -250",
     causes: "41, 41, 41, 41",
-    kept: keptAtEnd({ 5: -250 }),
+    kept: keptAtTrap(600, { 5: -250 }),
   },
   {
     label: "the difference between the rooms",
     code: `program: nothing
-${KEEP_ALL}
+${KEEP_ALL(1200)}
         R2 <= 0
         R1 <= 2
         call system
@@ -532,12 +563,11 @@ ${KEEP_ALL}
         R2 <= R6 - R1
         R1 <= 1
         call system             // room A's reading less room B's
-${COPY_KEPT}
         R1 <= 4
         call system`,
     shown: "66",
     causes: "41, 41, 41, 41",
-    kept: keptAtEnd({ 6: -184 }),
+    kept: keptAtTrap(1200, { 6: -184 }),
   },
 ];
 
@@ -553,9 +583,9 @@ export const SAVE_START = `// Your handler. The tests add a program after it, na
 handler: R5 <= word[0x400]
         R5 <= R5 + 1
         word[0x400] <= R5
-        R5 <= C2
-        R5 <= R5 + 4
-        C2 <= R5
+        R6 <= C2
+        R6 <= R6 + 4
+        C2 <= R6
         resume`;
 
 export const SAVE_REFERENCE = `// Count and skip a refused store, and leave every register as it was.
@@ -564,23 +594,30 @@ export const SAVE_REFERENCE = `// Count and skip a refused store, and leave ever
         R1 <= 0
         word[0x400] <= R1       // the count of refused stores
         goto program
-handler: word[0x408] <= R5      // save R5
+handler: word[0x408] <= R5      // save R5 and R6
+        word[0x410] <= R6
         R5 <= word[0x400]
         R5 <= R5 + 1
         word[0x400] <= R5
-        R5 <= C2
-        R5 <= R5 + 4
-        C2 <= R5
-        R5 <= word[0x408]       // put R5 back
+        R6 <= C2
+        R6 <= R6 + 4
+        C2 <= R6
+        R6 <= word[0x410]       // put R6 and R5 back
+        R5 <= word[0x408]
         resume`;
 
 /**
- * The word each test's program sets in each register, R0 to R15, before it stores where it may
- * not: the handler must leave every one as it was. Test 3's R14 is its stack instead.
+ * Each test's program gives every register, R0 to R15, a word of its own, a different set for
+ * each test, and changes some between its refused stores, so no fixed word written back passes.
+ * Test 3's R14 is its stack, started in the wrong place.
  */
-export const SET_WORDS: readonly number[] = Array.from({ length: 16 }, (_, k) => (k + 1) * 11);
-const SET_ALL = (except: readonly number[] = []) =>
-  SET_WORDS.flatMap((v, k) => (except.includes(k) ? [] : [`        R${k} <= ${v}`])).join("\n");
+const SET_BASES = [11, 300, 1500] as const;
+export const setWords = (base: number): number[] =>
+  Array.from({ length: 16 }, (_, k) => base + 7 * k);
+const SET_ALL = (base: number, except: readonly number[] = []) =>
+  setWords(base)
+    .flatMap((v, k) => (except.includes(k) ? [] : [`        R${k} <= ${v}`]))
+    .join("\n");
 export const SAVE_PROGRAMS: readonly {
   readonly label: string;
   readonly code: string;
@@ -591,24 +628,24 @@ export const SAVE_PROGRAMS: readonly {
 }[] = [
   {
     label: "one refused store",
-    code: `program: nothing\n${SET_ALL()}\n        word[sensorA] <= R1\nend:    stop`,
+    code: `program: nothing\n${SET_ALL(SET_BASES[0])}\n        word[sensorA] <= R1\nend:    stop`,
     count: 1,
     causes: "34",
-    registers: SET_WORDS,
+    registers: setWords(SET_BASES[0]),
   },
   {
     label: "two refused stores",
-    code: `program: nothing\n${SET_ALL()}\n        word[sensorB] <= R2\n        word[0x200] <= R3\nend:    stop`,
+    code: `program: nothing\n${SET_ALL(SET_BASES[1])}\n        word[sensorB] <= R2\n        R5 <= R5 + 3\n        R6 <= R6 - 5\n        word[0x200] <= R3\nend:    stop`,
     count: 2,
     causes: "34, 34",
-    registers: SET_WORDS,
+    registers: setWords(SET_BASES[1]).map((v, k) => (k === 5 ? v + 3 : k === 6 ? v - 5 : v)),
   },
   {
-    label: "a stack at the ROM",
-    code: `program: R14 <= 0x400\n${SET_ALL([14])}\n        R14 <= R14 - 8\n        word[R14] <= R5\nend:    stop`,
+    label: "a stack started in the wrong place",
+    code: `program: R14 <= 0x400\n${SET_ALL(SET_BASES[2], [14])}\n        R14 <= R14 - 8\n        word[R14] <= R5\nend:    stop`,
     count: 1,
     causes: "34",
-    registers: SET_WORDS.map((v, k) => (k === 14 ? 0x3f8 : v)),
+    registers: setWords(SET_BASES[2]).map((v, k) => (k === 14 ? 0x3f8 : v)),
   },
 ];
 
@@ -734,17 +771,17 @@ export const DOOR_NO_CLEAR = DOOR_OPEN.replace(
  */
 const TO_PROGRAM_NIGHT = TO_PROGRAM_EVENTS.replace(
   "        R1 <= 2\n        C1 <= R1",
-  "        R1 <= 2\n        word[lamps] <= R1       // NIGHT, before the program runs\n        C1 <= R1",
+  "        R1 <= word[startLamps]\n        word[lamps] <= R1       // the lamps each test starts with\n        R1 <= 2\n        C1 <= R1",
 );
 
-export const TIMER_START = `// The handler. Write its timer part. The tests add a program after it, named program.
+export const TIMER_START = `// The start and the handler. Write the timer part. The tests add a program, named program.
 ${TO_PROGRAM_NIGHT}
 ${EVENT_HANDLER_HEAD}
 ${DOOR_PART}
 tick:   goto back
 ${EVENT_HANDLER_TAIL}`;
 
-export const TIMER_REFERENCE = `// The handler, with its timer part: ALARM beside the lamps already lit.
+export const TIMER_REFERENCE = `// The start and the handler, with its timer part: ALARM beside the lamps already lit.
 ${TO_PROGRAM_NIGHT}
 ${EVENT_HANDLER_HEAD}
 ${DOOR_PART}
@@ -761,33 +798,38 @@ tick:   R8 <= 1
 ${EVENT_HANDLER_TAIL}`;
 
 /**
- * The timer challenge's program: words of its own in R0 and R5 to R15, a count to 30 in R2 over
- * 30 rounds that R3 counts down, so a spoiled R2 shows on the display, then R8 and R9 copied into R12 and R13 as the program finds them, 30 shown, and the end.
- * An interrupt keeps every register, R1 and R2 included: the program did not ask for it.
+ * The timer challenge's program: words of its own in R0, R1 and R5 to R15; a count to 30 in R2
+ * over 30 rounds that R3 counts down to R4's 0, so a spoiled R2 shows on the display; R1 stored
+ * at 500 before the calls use it; then 30 shown and the end. An interrupt changes no register,
+ * R1 and R2 included: the program did not ask for it. Each test adds its lamps word after it.
  */
-const TIMER_KEPT = [0, 5, 6, 7, 8, 9, 10, 11, 14, 15];
-export const TIMER_PROGRAM = `program: nothing
-${TIMER_KEPT.map((k) => `        R${k} <= ${(k + 1) * 11}`).join("\n")}
+const TIMER_KEPT = [0, 1, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+const TIMER_WORD = (k: number) => 40 + 17 * k;
+export const TIMER_PROGRAM = (lamps: number) => `program: nothing
+${TIMER_KEPT.map((k) => `        R${k} <= ${TIMER_WORD(k)}`).join("\n")}
         R2 <= 0
         R3 <= 30                // rounds left
         R4 <= 0
-loop:   R2 <= R2 + 1
+testLoop: R2 <= R2 + 1
         R3 <= R3 - 1
-        if R3 != R4 goto loop
-        R12 <= R8               // R8 and R9 as the program finds them
-        R13 <= R9
+        if R3 != R4 goto testLoop
+        word[0x500] <= R1       // R1 as the interrupts left it
         R1 <= 1
         call system             // show 30
         R1 <= 4
-        call system             // end the program`;
+        call system             // end the program
+startLamps: word ${lamps}`;
 
-/** What the timer program's kept registers hold at its end, by name, as decimal words. */
+/**
+ * What the timer program's registers hold at its last trap, job 4's call, by name, and R1's own
+ * word, stored at 500 after the count.
+ */
 export const TIMER_KEPT_END: Readonly<Record<string, string>> = Object.fromEntries([
-  ...TIMER_KEPT.filter((k) => k !== 8 && k !== 9).map((k) => [`R${k}`, String((k + 1) * 11)]),
-  ["R3", "0"],
-  ["R4", "0"],
-  ["R12", "99"],
-  ["R13", "110"],
+  ...TIMER_KEPT.filter((k) => k !== 1).map((k) => [`R${k}@trap`, String(TIMER_WORD(k))]),
+  ["R2@trap", "30"],
+  ["R3@trap", "0"],
+  ["R4@trap", "0"],
+  ["word:500", String(TIMER_WORD(1))],
 ]);
 
 /** The timer challenge's runs: the door opens before an instruction, and maybe closes again. */
@@ -796,14 +838,16 @@ export const TIMER_RUNS: readonly {
   readonly opens?: number;
   readonly closes?: number;
   readonly warm?: 1;
-  /** The lamps at the end: NIGHT (2), with ALARM (1) where the door was left open. */
+  /** The lamps the start lights, from the word the test's lines give. */
+  readonly start: number;
+  /** The lamps at the end: the start's, with ALARM (bit 0) where the door was left open. */
   readonly lamps: number;
 }[] = [
-  { label: "the door left open", opens: 20, lamps: 3 },
-  { label: "the door closed in time", opens: 20, closes: 35, lamps: 2 },
-  { label: "the door shut all night", lamps: 2 },
-  { label: "the door opened late and left open", opens: 60, lamps: 3 },
-  { label: "the door left open on a warm night", opens: 20, warm: 1, lamps: 3 },
+  { label: "the door left open", opens: 20, start: 2, lamps: 3 },
+  { label: "the door closed in time", opens: 20, closes: 35, start: 6, lamps: 6 },
+  { label: "the door shut all night", start: 4, lamps: 4 },
+  { label: "the door opened late and left open", opens: 60, start: 5, lamps: 5 },
+  { label: "the door left open on a warm night", opens: 20, warm: 1, start: 2, lamps: 3 },
 ];
 
 // ---------------------------------------------------------------------------------------------
@@ -890,9 +934,9 @@ ${program}`;
 
 export const NEST_LATE = `// A long job keeps the door waiting: job 5 waits with interrupts off.
 ${nest(WAIT_OFF)}`;
-export const NEST_UNSAVED = `// Job 5 lets the door in, but does not keep C1 and C2.
+export const NEST_UNSAVED = `// Job 5 lets the door in, but does not save C1 and C2.
 ${nest(WAIT_UNSAVED)}`;
-export const NEST_SAVED = `// Job 5 lets the door in, and keeps C1 and C2 at 410 and 418.
+export const NEST_SAVED = `// Job 5 lets the door in, and saves C1 and C2 at 410 and 418.
 ${nest(WAIT_ON)}`;
 
 /** A handler whose job 2 trusts R2, and whose fault part skips, as lesson 1's did. */
@@ -963,8 +1007,14 @@ next:   word[display] <= R2     // show the count
         C2 <= R1
         resume`;
 
-export const WAIT_START = `// The handler. Change job 6 so the door can come in while it counts.
-${TO_PROGRAM_EVENTS}
+/** 12.6's start: the program's status comes from the word each test gives, `startStatus`. */
+const TO_PROGRAM_STATUS = TO_PROGRAM_EVENTS.replace(
+  "        R1 <= 2\n        C1 <= R1                // user mode, interrupts on",
+  "        R1 <= word[startStatus]\n        C1 <= R1                // the status each test gives",
+);
+
+export const WAIT_START = `// The start and the handler. Change job 6 so the door can come in while it counts.
+${TO_PROGRAM_STATUS}
 ${COUNT_HEAD}
 ${COUNT_OFF}
 ${DOOR_PART}
@@ -974,24 +1024,24 @@ ${EVENT_HANDLER_TAIL}`;
 export const WAIT_REFERENCE = WAIT_START.replace(COUNT_OFF, COUNT_ON);
 
 /**
- * The count challenge's programs: words of their own in R0 and R3 to R15, R8 and R9 copied into
- * R12 and R13 before the end. A system call may change R1 and R2 alone.
+ * The count challenge's programs: words of their own in R0 and R3 to R15, a set for each test; a
+ * system call may change R1 and R2 alone. The tests read them as the program left them at its last
+ * trap, job 4's call. Each test gives the status the start runs the program with.
  */
 const COUNT_KEPT = [0, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-const COUNT_SET = COUNT_KEPT.map((k) => `        R${k} <= ${(k + 1) * 11}`).join("\n");
-const COUNT_END = `        R12 <= R8               // R8 and R9 as the program finds them
-        R13 <= R9
-        R1 <= 4
-        call system             // end the program`;
-/** The kept registers at the end of a count program, by name, as decimal words. */
-export const COUNT_KEPT_END: Readonly<Record<string, string>> = Object.fromEntries(
-  COUNT_KEPT.filter((k) => k !== 8 && k !== 9).map((k) => [
-    `R${k}`,
-    String(k === 12 ? 99 : k === 13 ? 110 : (k + 1) * 11),
-  ]),
-);
+const countWords = (base: number) => COUNT_KEPT.map((k) => [k, base + 5 * k] as const);
+const countSet = (base: number) =>
+  countWords(base)
+    .map(([k, v]) => `        R${k} <= ${v}`)
+    .join("\n");
+/** The kept registers at the last trap, by name, as decimal words. */
+export const countKeptAt = (base: number): Readonly<Record<string, string>> =>
+  Object.fromEntries(countWords(base).map(([k, v]) => [`R${k}@trap`, String(v)]));
 const countdown = (from: number) =>
   Array.from({ length: from }, (_, k) => String(from - k)).join(", ");
+const countEnd = (status: number) => `        R1 <= 4
+        call system             // end the program
+startStatus: word ${status}`;
 
 /** The challenge's runs: each user program asks job 6 to count while the door may open. */
 export const WAIT_RUNS: readonly {
@@ -1000,23 +1050,28 @@ export const WAIT_RUNS: readonly {
   readonly opens?: number;
   readonly shown: string;
   readonly lamps: number;
+  /** C1 at the end: the status the start ran the program with, as two bits. */
+  readonly status: string;
+  readonly kept: Readonly<Record<string, string>>;
 }[] = [
   {
     label: "the door opens in the count, and the program ends after it",
     code: `program: nothing
-${COUNT_SET}
+${countSet(30)}
         R2 <= 20
         R1 <= 6
         call system             // count 20 down
-${COUNT_END}`,
+${countEnd(2)}`,
     opens: 50,
     shown: countdown(20),
     lamps: 1,
+    status: "10",
+    kept: countKeptAt(30),
   },
   {
     label: "show 5, count, show 6, the door open",
     code: `program: nothing
-${COUNT_SET}
+${countSet(500)}
         R2 <= 5
         R1 <= 1
         call system             // show 5
@@ -1026,15 +1081,17 @@ ${COUNT_SET}
         R2 <= 6
         R1 <= 1
         call system             // show 6
-${COUNT_END}`,
+${countEnd(2)}`,
     opens: 60,
     shown: `5, ${countdown(20)}, 6`,
     lamps: 1,
+    status: "10",
+    kept: countKeptAt(500),
   },
   {
     label: "show 5, count, show 6, the door shut",
     code: `program: nothing
-${COUNT_SET}
+${countSet(900)}
         R2 <= 5
         R1 <= 1
         call system             // show 5
@@ -1044,21 +1101,25 @@ ${COUNT_SET}
         R2 <= 6
         R1 <= 1
         call system             // show 6
-${COUNT_END}`,
+${countEnd(2)}`,
     shown: `5, ${countdown(20)}, 6`,
     lamps: 0,
+    status: "10",
+    kept: countKeptAt(900),
   },
   {
-    label: "a longer count, the door open early in it",
+    label: "a longer count, the program's interrupts off",
     code: `program: nothing
-${COUNT_SET}
+${countSet(1400)}
         R2 <= 30
         R1 <= 6
         call system             // count 30 down
-${COUNT_END}`,
+${countEnd(0)}`,
     opens: 40,
     shown: countdown(30),
     lamps: 1,
+    status: "00",
+    kept: countKeptAt(1400),
   },
 ];
 
@@ -1322,9 +1383,10 @@ ended:  stop`;
 export const RUN_EMPTY = `// The shop's handler. The tests add a table, programs, after it: its first word is how many
 // programs, then each program's address. Run each in user mode with interrupts off, in order,
 // from the first. Offer jobs 1 to 4 by call system: 1 shows R2; 2 puts room R2's reading in R1
-// (0 for room A, 1 for room B, 0 for any other); 3 sets the lamps from R2; 4 ends the program.
-// A program that faults ends there. For program k, leave 0 at 0x400 + 8k if it ended with job 4,
-// else its cause. A job may change R1 and R2 only. After the last program, stop.
+// (R2 is 0 for room A, 1 for room B; any other R2 puts 0 in R1); 3 sets the lamps from R2;
+// 4 ends the program. A program that faults ends there. For program k, store 0 at 0x400 + 8k if
+// it ended with job 4, else its cause. A job may change R1 and R2 only. After the last program,
+// stop.
 `;
 
 /**
@@ -1367,18 +1429,32 @@ export interface RunCase {
   readonly lamps: number;
   /** How each program ended: 0 for job 4, else its cause, in decimal. */
   readonly records: readonly number[];
+  /** Registers the last program keeps, as it left them at its last trap. */
+  readonly kept?: Readonly<Record<string, string>>;
 }
+
+/**
+ * Run 6's second program gives R0 and R3 to R15 words of its own; the tests read them at its last
+ * trap, job 4's call, so a handler that keeps the program's number or its own words in a register
+ * the program uses fails.
+ */
+const RUN6_KEPT_REGISTERS = [0, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+const RUN6_WORD = (k: number) => 700 + 19 * k;
+const RUN6_SET = RUN6_KEPT_REGISTERS.map((k) => `        R${k} <= ${RUN6_WORD(k)}`).join("\n");
+const RUN6_KEPT: Readonly<Record<string, string>> = Object.fromEntries(
+  RUN6_KEPT_REGISTERS.map((k) => [`R${k}@trap`, String(RUN6_WORD(k))]),
+);
 
 export const RUN_CASES: readonly RunCase[] = [
   {
     label: "two programs that end with job 4",
-    data: `programs: word 2, showA, showB
-showA:  R2 <= 25
+    data: `programs: word 2, run1first, run1second
+run1first:  R2 <= 25
         R1 <= 1
         call system             // show 25
         R1 <= 4
         call system
-showB:  R2 <= 1
+run1second:  R2 <= 1
         R1 <= 2
         call system             // room B's reading in R1
         R2 <= R1
@@ -1392,12 +1468,12 @@ showB:  R2 <= 1
   },
   {
     label: "a program that stores to the display itself",
-    data: `programs: word 2, direct, after
-direct: R2 <= 7
+    data: `programs: word 2, run2first, run2second
+run2first: R2 <= 7
         word[display] <= R2     // refused in user mode
         R1 <= 4
         call system
-after:  R2 <= 8
+run2second:  R2 <= 8
         R1 <= 1
         call system
         R1 <= 4
@@ -1408,21 +1484,21 @@ after:  R2 <= 8
   },
   {
     label: "the lamps, then a program that runs stop",
-    data: `programs: word 2, night, stops
-night:  R2 <= 2
+    data: `programs: word 2, run3first, run3second
+run3first:  R2 <= 2
         R1 <= 3
         call system             // NIGHT on
         R1 <= 4
         call system
-stops:  stop                    // refused in user mode`,
+run3second:  stop                    // refused in user mode`,
     shown: "",
     lamps: 2,
     records: [0, 0x22],
   },
   {
     label: "a word kept in R10 across a job",
-    data: `programs: word 1, keeps
-keeps:  R10 <= 77
+    data: `programs: word 1, run4only
+run4only:  R10 <= 77
         R2 <= 5
         R1 <= 1
         call system             // show 5
@@ -1437,8 +1513,8 @@ keeps:  R10 <= 77
   },
   {
     label: "room 5, and a program that is not instructions",
-    data: `programs: word 2, room5, notcode
-room5:  R2 <= 5
+    data: `programs: word 2, run5first, run5second
+run5first:  R2 <= 5
         R1 <= 2
         call system             // there is no room 5
         R2 <= R1
@@ -1446,15 +1522,15 @@ room5:  R2 <= 5
         call system
         R1 <= 4
         call system
-notcode: word 0`,
+run5second: word 0`,
     shown: "0",
     lamps: 0,
     records: [0, 0x21],
   },
   {
-    label: "R8, R9 and R12 kept across jobs",
-    data: `programs: word 2, own, again
-own:    R8 <= 81
+    label: "every register kept across jobs",
+    data: `programs: word 2, run6first, run6second
+run6first: R8 <= 81
         R9 <= 92
         R12 <= 3
         R2 <= R8
@@ -1468,18 +1544,20 @@ own:    R8 <= 81
         call system             // show 3
         R1 <= 4
         call system
-again:  R12 <= 7
+run6second: nothing
+${RUN6_SET}
         R2 <= 1
         R1 <= 2
         call system             // room B's reading in R1
         R2 <= R12
         R1 <= 1
-        call system             // show 7
+        call system             // show R12
         R1 <= 4
         call system`,
-    shown: "81, 92, 3, 7",
+    shown: `81, 92, 3, ${RUN6_WORD(12)}`,
     lamps: 0,
     records: [0, 0],
+    kept: RUN6_KEPT,
   },
   {
     label: "no programs",

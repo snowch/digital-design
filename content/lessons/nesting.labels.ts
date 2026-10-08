@@ -51,6 +51,6 @@ export const LABELS = {
     "The door opens in the count, and the program ends after it",
     "Show 5, count, show 6, the door open",
     "Show 5, count, show 6, the door shut",
-    "A longer count, the door open early in it",
+    "Count 30, interrupts off, the door opening during the count",
   ],
 } as const;

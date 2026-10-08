@@ -223,7 +223,7 @@ export const userMode: LessonInput = {
           debugger: {
             control: true,
             modeWords: true,
-            registers: [1, 5, 6],
+            registersFirst: true,
             memory: [{ from: "0x400", words: 2, title: LABELS.memoryTitle }],
           },
         },
@@ -240,6 +240,8 @@ export const userMode: LessonInput = {
             C1: "00",
             "word:400": String(p.count),
             "word:408": String(p.cause),
+            // R0 to R15 as the program left them at its last trap: the skip must keep them.
+            ...Object.fromEntries(p.registers.map((v, k) => [`R${k}@trap`, String(v)])),
             causes: p.causes,
             stopAt: "handler",
           },

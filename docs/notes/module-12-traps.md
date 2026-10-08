@@ -448,6 +448,129 @@ Also 12.4's: the generalisation's sentence on lesson 4's return point cut.
    prose; run 2's fault and `ended` said.
 13. Cuts made. 14. A9. 15. The empty program's comment rewritten. 16. A8.
 
+## The second reading (8 October)
+
+The managing session's second reading of b6e3c8a: eleven findings across the module (B1 to B11)
+and items for each lesson. Below, each item and what was done; no challenge's answer is stated.
+The code came first (f9653d6, 4ea6743, d5c53bf), then the lessons' data and their pins (aa1dd77),
+then a fact brief per lesson to the drafting subagent (`briefs/W1.md` to `W8.md`, `V4.md`; the
+shared fact sheet gained "Decisions after the second reading"), then the second pass. Every fix of
+fact or form to a draft is in `drafts/W-fixes.md`. A note above that the tests' programs copy R8
+and R9 into R12 and R13 (A1) no longer holds: B1 replaced that copy.
+
+### Across the module
+
+- **B1, registers really checked.** A trap's record now keeps the registers as they were at that
+  trap, and the grader reads them as `R<k>@trap`. Every test program of 12.2 to 12.6 and 12.8's
+  run 6 gives each register it does not pass to a call a word of its own, a different set in each
+  test, and the tests read them at the last trap the program reaches (or at its own `end`, in
+  12.2). 12.2's test 2 changes R5 and R6 between its traps; 12.5's program stores R1 at `500`
+  after the interrupts. Each task lists what is set and what is read. Every attempt the readers
+  found is pinned in its lesson's facts test as a wrong attempt that fails.
+- **B2, line names the tests' lines share.** The program editor compares the learner's names with
+  each test's before assembling, and a clash fails that test with its own sentence naming the line
+  and the test (`nameShared`). The tests' own lines took names a learner is unlikely to choose
+  (12.5's `testLoop`, 12.8's `run1first` and so on); 12.1's task names `program`, `end` and
+  `after` and says which tests have `end` and `after`. Pinned in 12.5's facts test.
+- **B3, where a failed run stopped.** Every failed Module 12 run says first how it ended (the
+  stop's address, the halt and its cause, or the cut-off), then names a fault at one of the
+  learner's own lines with its address and cause (`ownFault`), then what it left, then the
+  task's sentence. 12.3's sentence on how a run must end no longer gives advice that fits only
+  some runs.
+- **B4, long lists.** A list in a failure's words shows its first eight items and an ellipsis.
+- **B5, Module 12's words for shared strings.** The tests' lines' heading, the listing's caption
+  and the assembler's sentence have Module 12 forms; Module 11's stay on Module 11's pages. The
+  starting texts of 12.5 and 12.6 say "the start and the handler". A word from 10 to `7FF` in a
+  failure's text names its hexadecimal in words, since a failure is read as text.
+- **B6, results after the run.** 12.7's fault results show once the run has ended, and clear on a
+  new start or choice. 12.6's result after the explanation's figure says only what holds for every
+  door time and sends the reader to the status line for the rest.
+- **B7, words.** The fact sheet now rules "save" and "put back" for registers, "store" for a count
+  or a cause, "keep" for a register left as it was, "job" for a system call's service only, "the
+  start" apart from "the handler", and "traps" for going to the handler only. Every use the
+  reading quoted was changed, and the programs' comments with them.
+- **B8, the note's own claims.** 12.6's facts test now grades three wrong attempts beside the starting text; brief 7C and
+  the trap logic's comment in `traps.ts` say the lower number wins; 12.8's empty program's comment
+  says what R2 does for each room and any other. Every door time a figure offers is pinned,
+  12.6's 30, 5 and never among them.
+- **B9, hints.** 12.5's smaller example and 12.1's and 12.8's are now cases no task asks and no
+  answer contains; 12.1's long hint is split. A slip in this round's brief (12.1's hint indices)
+  overwrote the whole answer and a part of the answer; both were put back in the second pass.
+- **B10, the way into user mode.** "Only through `resume`" became "the way these pages enter user
+  mode": `resume` changes the mode and the PC at one edge.
+- **B11, phones.** A challenge's debugger can put its registers first (12.2, 12.3, 12.4, 12.5's
+  challenge, 12.6), so a failure that names a register sits beside the panel that shows it.
+  12.7's figures show the controller's state beside their buttons.
+
+- **B12, boxes the reader can open** (asked for during this round, at the author's request). A
+  button, "Show every row" and then "Show fewer rows" (drafted, brief V5), opens the listing, a
+  region of memory, the stack's frames and the trap timeline's edges to every row, with no scroll
+  inside, and closes them again; it carries `aria-expanded` and is offered only where the box hides
+  rows (memory and the stack only on a phone, where their boxes are short). The listing's
+  machine-word column is now left out unless a debugger asks for it (`words`, which Module 11's
+  assembly lesson does); a line with a comment still wraps on a phone, since no table on these
+  pages may scroll sideways (the full check's legibility test said so when one did). Where the button sits was set by the one-screen test: under the box it pushed 12.1's
+  control registers, 12.5's events and 11.2's memory below a phone's screen, so the listing's
+  button sits in its header row, memory's in its header's empty cell, and the stack's beside its
+  title; the listing's title is hidden on a phone (its caption stays for a screen reader). The
+  compact listing on a phone is 9.5rem: two to four whole rows, two where each row has its
+  40-pixel breakpoint button or a wrapped comment; any taller and the one-screen test fails on 11.2. No drag handle: the
+  listing's maximum height would cap a drag at the compact size. The browser test opens 12.6's
+  72-line listing at both widths, finds every row inside it with no scroll, closes it, steps, and
+  finds the line about to run inside the compact box. Running the whole suite also found a hole
+  this round made: 12.5's "closed in time" test started with ALARM lit, so a timer part that
+  always lights ALARM passed; that test now starts with other lamps, and the attempt is pinned.
+
+### The managing session's calls
+
+- **12.3, C1 at reset.** A start that leaves C1 at reset's `00` passes; accepted.
+- **12.1, C2 and `goto`.** A handler that jumps back through C2 with `goto` rather than `resume`
+  passes, since this lesson's program runs in the mode the handler runs in. The limit is recorded
+  here: the tests cannot tell the two apart until lesson 3's user mode.
+- **12.8's cards.** The question's cards show no record before the prediction; the failure
+  experiment's cards show each fault record with its hexadecimal.
+
+### Each lesson
+
+- **12.1.** The task says which tests end at `end` and which C2 checks, and a test with cause
+  `31` fails a handler that stops on two causes and skips the rest. C1 is asked as two bits. The
+  investigation limits the hexadecimal beside a word to R registers and memory. The cut
+  generalisation sentence and "this lesson" in the construction's feedback are done.
+- **12.2.** No fixed word passes; the starting handler's second register is named in the task;
+  the stack figure is told as a stack started in the wrong place; C3 is checked; the construction
+  no longer repeats the task; the timeline's lead names every edge's transfers; the
+  generalisation points back to the motivation; the investigation's steps read C2.
+- **12.3.** Every register checked; B10 and B3; the investigation says the start lights ALARM
+  before the program; hint 2 no longer contradicts the prediction; C1 "takes C0 again"; the RAM
+  point said once; the device range is `7C0` to `7F7`.
+- **12.4.** R12 and R13 checked with the rest, and the task lists the registers as they are; the
+  generalisation keeps the comparison and the rule once; "reads C3 first" corrected; the
+  construction's hint and task say where each answer comes from and that R5 survives a call; the
+  quiz program's comments fit a phone.
+- **12.5.** A lamps word of each test's own, some with ALARM already lit; R1 checked through the
+  word at `500`; the OR and AND forms named in the task; the explanation's debugger shows the
+  registers its prose names; the door at 5 explained; the question's panel says nothing of
+  interrupts before the motivation names them. Item 7, "Run with" far from "Step" on a phone, is
+  optional and left.
+- **12.6.** The C2-only and job-5 attempts and a fixed status are pinned and fail; each test's
+  status comes from a word of its own; the question's 172 against 167 explained; B4, B6; the form
+  of C0 and C1 in feedback without backticks; the waiting paragraph moved; the generalisation
+  names the interrupt; the last test renamed.
+- **12.7.** The motivation names each block by the title it is drawn with; B11; B6; the
+  originality note and B8; "control-register copy"; the prediction's dashed box tied to before the
+  edge; `resume` named with the function call; the task's rule on causes agrees with the hint and
+  says why the last row tests a pair the machine never gives; the controller's rule said once.
+- **12.8.** Run 6 checks every register at its second program's last trap; B2, B3; cards as
+  called; the question's repeated paragraph cut; the empty program's comment; the failure result
+  names the program as its card does; "with interrupts off" in the run's sentence; the
+  originality note and the file's header say two ways in; the motivation says the start is not
+  part of the handler.
+- **My own slip, recorded.** In the first reading's round (db12ddd) a registers list was taken off
+  12.5's explanation debugger instead of off its challenge; it is back.
+
+The platform items (the results list's accessible name, A8, opening a block from a figure's props)
+are the managing session's.
+
 ## The mechanical walk
 
 The built site, every Module 12 page at 375 and 1280 pixels, light and dark, with every run
@@ -491,6 +614,14 @@ change, left for the managing session with the review's other two.
   tests expected "Stopped:" for a halt, which A3 made "Halted:"; and the long-debugger test still
   listed 12.8's investigation, now an 11-instruction program the test's twelve steps run past.
   The two expectations updated and the entry dropped; those six then passed (12 tests run).
+
+- **The fourth run, after the second reading and B12, on `2009f83`** (with `main` at `a889d56`
+  merged): formatting, copyright, the platform copy, types and the build passed; Vitest 128 files,
+  1338 tests passed; the browser 863 passed, 56 skipped, 11 failed. Ten are the stored
+  screenshots that fail in a build container on `main` too. The eleventh was B12's: on a phone
+  the listing's rows kept to one line and its table scrolled sideways, which the legibility test
+  forbids. That rule was taken out; the legibility test (both widths) and Modules 11's and 12's
+  browser specs (132 tests) then passed.
 
 ## What to change
 

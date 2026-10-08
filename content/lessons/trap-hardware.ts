@@ -125,7 +125,8 @@ export const trapHardware: LessonInput = {
             shown: [1, 5],
             buses: ["IR"],
             states: true,
-            focus: ["control", "controller"],
+            // Paths from the top: each opened block scrolls to the next part named inside it.
+            focus: ["control/controller/state"],
             question: PROSE.p1Question,
             options: [
               { value: "ALU", label: "ALU" },
@@ -153,7 +154,7 @@ export const trapHardware: LessonInput = {
           props: {
             outcomes: PROSE.nightAfter,
             outcomesWhen: "stopped",
-            focus: ["datapath", "cregs"],
+            focus: ["datapath/cregs/c2", "datapath/cregs/c3"],
             libraryId: "machine-traps",
             program: NIGHT,
             inputs: NIGHT_INPUTS,
@@ -202,7 +203,9 @@ export const trapHardware: LessonInput = {
             devices: true,
             run: true,
             states: true,
-            focus: ["control", "trapLogic"],
+            focus: ["control/trapLogic"],
+            // Each fault's result once the run stops or gives up, not after its first edge.
+            outcomesWhen: "stopped",
             faults: [
               {
                 kind: "stuck-at",
@@ -289,6 +292,6 @@ export const trapHardware: LessonInput = {
     textbookExample:
       "Patterson and Hennessy's multicycle datapath with exceptions: EPC and Cause registers, the IntCause selector, a fixed exception address 8000 0180 and two new states in the finite-state control for an undefined instruction and an overflow; Harris and Harris's version of the same; LC-3's interrupt and exception hardware with its supervisor stack pointer and vector table.",
     howThisDiffers:
-      "The hardware is the course machine's own, added to Module 9's machine of several edges in Module 12's copy: five control registers named for their jobs, each with a selector that takes its word at a trap's edge, at `resume`'s, or from a control-register job; the trap logic in the control unit where Module 9's stop logic was, choosing the lowest cause in the order the steps run, with the waiting events taken only at an edge that would fetch; and one rule added to the controller, that an edge which traps leads to FETCH, so no new state is needed. A three-instruction program traps within twelve edges, drawn as a timing diagram; the learner predicts the PC after the trapping edge, counts the edges of a call system, a resume, an interrupt and a refused store, breaks the TRAP signal and the control registers' write enable, and writes the trap logic from Module 9's stop logic, tested on a table of seventeen rows.",
+      "The hardware is the course machine's own, added to Module 9's machine of several edges in Module 12's copy: five control registers named for their jobs, each with a selector that takes its word at a trap's edge, at `resume`'s, or from a control-register copy; the trap logic in the control unit where Module 9's stop logic was, where the lower cause wins, with the waiting events taken only at an edge that would fetch; and one rule added to the controller, that an edge which traps leads to FETCH, so no new state is needed. A three-instruction program traps within twelve edges, drawn as a timing diagram; the learner predicts the controller's state after the trapping edge, counts the edges of a call system, a resume, an interrupt and a refused store, breaks the TRAP signal and the control registers' write enable, and writes the trap logic from Module 9's stop logic, tested on a table of seventeen rows.",
   },
 };
