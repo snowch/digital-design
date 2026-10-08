@@ -359,7 +359,8 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   rowsAll: "Show every row",
   rowsFewer: "Show fewer rows",
   lanes: {
-    title: "The run drawn as lanes, one for each part of the program that runs, with the moves between them",
+    title:
+      "The run drawn as lanes, one for each part of the program that runs, with the moves between them",
     move: "{from} passed the run to {to}, and the move wrote {transfer}",
     doorOpens: "freezer door opens",
     timerReaches: "timer reaches 0",
@@ -368,13 +369,16 @@ export const MACHINE11_STRINGS: Machine11Strings = {
     nextMove: "Next move",
   },
   boxes: {
-    label: "{title} drawn as words in boxes at their addresses, with an arrow from each register that holds an address",
+    label:
+      "{title} drawn as words in boxes at their addresses, with an arrow from each register that holds an address",
     changed: "The box with the thick outline is the word the last step stored.",
     saves: "saves {reg}",
-    stackLabel: "The stack drawn as words in boxes, from the top of the RAM down, grouped by the call that pushed them",
+    stackLabel:
+      "The stack drawn as words in boxes, from the top of the RAM down, grouped by the call that pushed them",
     roomsLabel: "The rooms reachable from the hall, each with its reading and its two doors",
     roomAgain: "{name}, drawn above",
-    roomsKey: "Each room is a box with its name and reading; the lit room is the one whose address R1 holds, the room the current call is about. Its two doors are circles to its right: a circle with 1 or 2 is a door to a room drawn below it, joined by a line, and a dashed circle with 0 is a door that leads nowhere.",
+    roomsKey:
+      "Each room is a box with its name and reading; the lit room is the one whose address R1 holds, the room the current call is about. Its two doors are circles to its right: a circle with 1 or 2 is a door to a room drawn below it, joined by a line, and a dashed circle with 0 is a door that leads nowhere.",
   },
   startSkeleton: "Start from the outline",
   startEmpty: "Start from an empty program",
