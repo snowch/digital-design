@@ -653,3 +653,176 @@ export const TIMER_RUNS: readonly {
   { label: "the door shut all night", lamps: 0 },
   { label: "the door opened late and left open", opens: 50, lamps: 1 },
 ];
+
+// ---------------------------------------------------------------------------------------------
+// 12.6 nesting
+
+/** The handler's choice for 12.6: the door, the timer, then jobs 1, 2, 4 and 5. */
+const NEST_HEAD = `handler: word[0x400] <= R8      // save R8 and R9
+        word[0x408] <= R9
+        R9 <= C3
+        R8 <= 0x82
+        if R9 == R8 goto door
+        R8 <= 0x81
+        if R9 == R8 goto tick
+        R8 <= 0x41
+        if R9 != R8 goto fault
+        R8 <= 1
+        if R1 == R8 goto show
+        R8 <= 4
+        if R1 == R8 goto end
+        R8 <= 5
+        if R1 == R8 goto wait
+        goto back
+show:   word[display] <= R2
+        goto back`;
+
+/** Job 5 as it starts: R2 rounds of a loop, with interrupts off, as every trap leaves them. */
+export const WAIT_OFF = `wait:   R8 <= 0
+pause:  R2 <= R2 - 1
+        if R2 != R8 goto pause
+        goto back`;
+
+/** Job 5 letting the door in: C1 and C2 kept at 410 and 418, interrupts on for the loop. */
+export const WAIT_ON = `wait:   R8 <= word[0x400]       // the program's R8 and R9 back now:
+        R9 <= word[0x408]       // a trap in the loop saves them again
+        R1 <= C1
+        word[0x410] <= R1       // save C1
+        R1 <= C2
+        word[0x418] <= R1       // save C2
+        R1 <= 3
+        C0 <= R1                // system mode, interrupts on
+        R1 <= 0
+pause:  R2 <= R2 - 1
+        if R2 != R1 goto pause
+        R1 <= 1
+        C0 <= R1                // interrupts off again
+        R1 <= word[0x410]
+        C1 <= R1                // C1 and C2 back
+        R1 <= word[0x418]
+        C2 <= R1
+        resume`;
+
+/** Job 5 with interrupts on, but C1 and C2 not kept. */
+export const WAIT_UNSAVED = `wait:   R8 <= word[0x400]       // the program's R8 and R9 back now:
+        R9 <= word[0x408]       // a trap in the loop saves them again
+        R1 <= 3
+        C0 <= R1                // system mode, interrupts on
+        R1 <= 0
+pause:  R2 <= R2 - 1
+        if R2 != R1 goto pause
+        R1 <= 1
+        C0 <= R1                // interrupts off again
+        resume`;
+
+/** The user program of 12.6: shows 5, waits 60 rounds, shows 6, ends. */
+export const WAIT_PROGRAM = `program: R2 <= 5
+        R1 <= 1
+        call system             // show 5
+        R2 <= 60
+        R1 <= 5
+        call system             // wait 60 rounds
+        R2 <= 6
+        R1 <= 1
+        call system             // show 6
+        R1 <= 4
+        call system             // end the program`;
+
+const nest = (wait: string, program = WAIT_PROGRAM) => `${TO_PROGRAM_EVENTS}
+${NEST_HEAD}
+${wait}
+${DOOR_PART}
+${TIMER_PART}
+${EVENT_HANDLER_TAIL}
+${program}`;
+
+export const NEST_LATE = `// A long job keeps the door waiting: job 5 waits with interrupts off.
+${nest(WAIT_OFF)}`;
+export const NEST_UNSAVED = `// Job 5 lets the door in, but does not keep C1 and C2.
+${nest(WAIT_UNSAVED)}`;
+export const NEST_SAVED = `// Job 5 lets the door in, and keeps C1 and C2 at 410 and 418.
+${nest(WAIT_ON)}`;
+
+/** A handler whose job 2 trusts R2, and whose fault part skips, as lesson 1's did. */
+export const NEST_FAULT = `// A user program asks job 2 for room 5; the handler's own load faults.
+${TO_PROGRAM}
+handler: word[0x400] <= R8      // save R8 and R9
+        word[0x408] <= R9
+        R9 <= C3
+        R8 <= 0x41
+        if R9 != R8 goto fault
+        R8 <= 2
+        if R1 == R8 goto room
+        goto back
+room:   R8 <= R2 + R2           // room R2's sensor: sensorA + 8 × R2
+        R8 <= R8 + R8
+        R8 <= R8 + R8
+        R1 <= word[R8 + 0x7D8]
+        goto back
+fault:  R8 <= C2                // skip what faulted, as lesson 1's handler did
+        R8 <= R8 + 4
+        C2 <= R8
+back:   R8 <= word[0x400]       // put R8 and R9 back
+        R9 <= word[0x408]
+        resume
+program: R2 <= 5
+        R1 <= 2
+        call system             // room 5's reading in R1: there is no room 5
+        R2 <= R1
+        R1 <= 1
+        call system`;
+
+/** 12.6's challenge: the handler with job 5 as it starts, and as it should be. */
+export const WAIT_START = `// The handler. Change job 5 so the door can come in while it waits.
+${TO_PROGRAM_EVENTS}
+${NEST_HEAD}
+${WAIT_OFF}
+${DOOR_PART}
+${TIMER_PART}
+${EVENT_HANDLER_TAIL}`;
+
+export const WAIT_REFERENCE = WAIT_START.replace(WAIT_OFF, WAIT_ON);
+
+/** The challenge's runs: each user program waits with job 5 while the door may open. */
+export const WAIT_RUNS: readonly {
+  readonly label: string;
+  readonly code: string;
+  readonly opens?: number;
+  readonly shown: string;
+  readonly lamps: number;
+}[] = [
+  {
+    label: "the door opens in the wait, and the program ends after it",
+    code: `program: R2 <= 60
+        R1 <= 5
+        call system             // wait 60 rounds
+        R1 <= 4
+        call system`,
+    opens: 30,
+    shown: "",
+    lamps: 1,
+  },
+  {
+    label: "show 5, wait, show 6, the door open",
+    code: WAIT_PROGRAM,
+    opens: 60,
+    shown: "5, 6",
+    lamps: 1,
+  },
+  { label: "show 5, wait, show 6, the door shut", code: WAIT_PROGRAM, shown: "5, 6", lamps: 0 },
+  {
+    label: "a word kept in R8 across the wait",
+    code: `program: R8 <= 7
+        R2 <= 60
+        R1 <= 5
+        call system             // wait 60 rounds
+        R2 <= R8
+        R1 <= 1
+        call system             // show 7
+        R1 <= 4
+        call system`,
+    opens: 30,
+    shown: "7",
+    lamps: 1,
+  },
+];

@@ -150,5 +150,6 @@ export const MACHINE12_STRINGS: Machine12Strings = {
     startUser: "[draft] startUser",
     sensorService: "[draft] sensorService",
     doorTimer: "[draft] doorTimer",
+    waitDoor: "[draft] waitDoor",
   },
 };

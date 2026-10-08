@@ -113,6 +113,7 @@ export const interrupts: LessonInput = {
             program: DOOR_OPEN,
             doorOpensAt: DOOR_AT,
             from: 15,
+            edges: 136,
             mode: true,
             interrupts: true,
             outcomes: PROSE.timelineAfter,

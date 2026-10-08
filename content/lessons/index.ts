@@ -65,6 +65,7 @@ import { savingState } from "./saving-state";
 import { userMode } from "./user-mode";
 import { systemCalls } from "./system-calls";
 import { interrupts } from "./interrupts";
+import { nesting } from "./nesting";
 
 const INPUTS: readonly LessonInput[] = [
   // Module 0, meet the machine.
@@ -129,6 +130,7 @@ const INPUTS: readonly LessonInput[] = [
   userMode,
   systemCalls,
   interrupts,
+  nesting,
 ];
 
 export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(
