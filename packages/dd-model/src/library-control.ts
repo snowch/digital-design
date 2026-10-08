@@ -1071,8 +1071,9 @@ function laid(circuit: Circuit, key: string): Circuit {
 /** Module 12's machine with its trap hardware, placed as its figure draws it. */
 export function placedTrapMachine(options: TrapMachineOptions): Circuit {
   return routedByKind(
+    // Module 13's final machine has Module 12's top level: its changes are inside the blocks.
     routedInside(laid(trapsCircuit(options), "machine-traps"), CONTROL_INSIDE_ROUTES),
-    CONTROL_KIND_ROUTES,
+    options.final ? { ...CONTROL_KIND_ROUTES, ...FINAL_KIND_ROUTES } : CONTROL_KIND_ROUTES,
   );
 }
 
@@ -1098,5 +1099,70 @@ export function controlLibrary(place: Place): Readonly<Record<string, () => Circ
     "machine-edges-call": () => placedMachine({ name: "machine", callThroughRegister: true }),
     // Module 12: the machine with its trap hardware.
     "machine-traps": () => placedTrapMachine({ name: "machine" }),
+    // Module 13: the final machine, with the call through a register and set if.
+    "machine-final": () => placedTrapMachine({ name: "machine", final: true }),
   };
 }
+
+// ---- Module 13: the final machine ------------------------------------------------------------
+
+/** Each entry of a placement moved down by `dy` cells from row `from` on. */
+function lowered(at: At, from: number, dy: number): Record<string, readonly [number, number]> {
+  return Object.fromEntries(
+    Object.entries(at).map(([k, [x, y]]) => [k, [x, y >= from ? y + dy : y] as const]),
+  );
+}
+
+/**
+ * Hand-placed insides of the final machine's blocks, by kind: Module 12's, with the decoder of
+ * Module 10's capstone (kind 9's line and kind A's, SET) and the word register Y takes with set
+ * if's condition as a fourth source. "kind-lines" gains kind A's AND under kind 9's, for every
+ * machine: a decoder without kind A has no such part, and the entries for it are not read.
+ */
+export const FINAL_INSIDE: Readonly<Record<string, At>> = {
+  "control-unit-final": CONTROL_INSIDE["control-unit-traps"] as At,
+  // The set split a cell higher, so its last signal, SET, clears the load's word below it.
+  "datapath-final": { ...(CONTROL_INSIDE["datapath-traps"] as At), toNext: [54, 21.5] },
+  "kind-lines": {
+    ...(CONTROL_INSIDE["kind-lines"] as At),
+    kind10: [22, 39],
+    "out:KIND10": [27, 39.5],
+  },
+  "control-decoder-set": {
+    ...(CONTROL_INSIDE["control-decoder-call"] as At),
+    "out:SET": [27.5, 6],
+  },
+  "decode-checks-set": {
+    ...lowered(CONTROL_INSIDE["decode-checks-call"] as At, 19, 2),
+    "in:SET": [0, 19],
+  },
+  "kind-check-set": {
+    ...(CONTROL_INSIDE["kind-check-call"] as At),
+    "in:SET": [0, 19],
+  },
+  "job-check-set": {
+    ...lowered(CONTROL_INSIDE["job-check-call"] as At, 7, 2),
+    "in:SET": [0, 7],
+  },
+  "control-signals-set": {
+    ...lowered(CONTROL_INSIDE["control-signals-call"] as At, 18, 2),
+    "in:SET": [0, 18],
+  },
+};
+
+/** Hand routes inside the final machine's blocks, by kind: Module 12's, and the new wires. */
+export const FINAL_KIND_ROUTES: Readonly<Record<string, Routes>> = {
+  "control-unit-final": CONTROL_KIND_ROUTES["control-unit-traps"] as Routes,
+  "datapath-final": {
+    ...(CONTROL_KIND_ROUTES["datapath-traps"] as Routes),
+    // SET down into the word register Y takes, left of the words rising to the next PC's choice.
+    "toNext.SET>yWord.SET": [67],
+    // MET up over the next PC and down into the word register Y takes.
+    "condition.MET>yWord.MET": [59.5, 13.5, 66.5],
+  },
+  "kind-lines": {
+    ...(CONTROL_KIND_ROUTES["kind-lines"] as Routes),
+    "high.Y2>kind10.a": [19.5],
+    "low.Y2>kind10.b": [18],
+  },
+};

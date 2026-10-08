@@ -25,11 +25,24 @@
 //
 // An edge that traps changes nothing the instruction would have changed, as an edge that halts
 // changes nothing: every enable of the instruction's own waits on GO, which is 0 at both.
+//
+// Module 13's final machine (option `final`) is this one with the two instructions the learner
+// added: the decoder of Module 10's capstone, which knows the call through a register at kind 9
+// (CALL and JUMP at once, so it goes READ to WRITE as a call does and takes its PC from the ALU)
+// and set if at kind A (its line is SET, which subtracts as a branch does); and a fourth source
+// for the word register Y takes, the branch condition MET as a word, chosen by SET. The blocks
+// that change take kinds of their own ("-final"), since each is drawn by hand with its ports.
 
 import { CircuitBuilder, type Circuit, type NetId } from "@dd/sim";
 
 import { aluParts } from "./alu";
-import { CONTROL_STATES, controlDecoder, type ControlState } from "./control";
+import {
+  CALL_REGISTER_KIND,
+  CONTROL_STATES,
+  SET_IF_KIND,
+  controlDecoder,
+  type ControlState,
+} from "./control";
 import {
   anyBit,
   block,
@@ -58,6 +71,8 @@ export interface TrapMachineOptions {
   readonly rom?: DatapathOptions["rom"];
   readonly registers?: DatapathOptions["registers"];
   readonly name?: string;
+  /** Module 13: the final machine, with the call through a register (kind 9) and set if (kind A). */
+  readonly final?: boolean;
 }
 
 /** The controller's per-edge signals in Module 12's machine: Module 9's, and the trap's own. */
@@ -79,6 +94,14 @@ export const TRAP_CONTROL_BUS = [
   "USER",
   "TRAP",
 ] as const;
+
+/** Module 13's control bus: Module 12's, then SET, set if's choice of the word register Y takes. */
+export const FINAL_CONTROL_BUS = [...TRAP_CONTROL_BUS, "SET"] as const;
+
+/** The control bus of Module 12's machine, or of Module 13's final machine. */
+export function trapControlBus(final = false): readonly string[] {
+  return final ? FINAL_CONTROL_BUS : TRAP_CONTROL_BUS;
+}
 
 /** The controller as Module 5's state machine, as data, with Module 12's way for the system jobs. */
 export function trapControllerMachine(): Machine {
@@ -111,9 +134,15 @@ export function trapControllerMachine(): Machine {
   };
 }
 
-/** The edges each instruction takes in Module 12's machine: the system jobs 1 to 3 go to WRITE. */
-export function trapStateSequence(kind: number, job: number): ControlState[] {
+/**
+ * The edges each instruction takes in Module 12's machine: the system jobs 1 to 3 go to WRITE. On
+ * Module 13's final machine the call through a register takes a call's edges, and set if a
+ * register job's.
+ */
+export function trapStateSequence(kind: number, job: number, final = false): ControlState[] {
   if (kind === 8 && job >= 1 && job <= 3) return ["FETCH", "READ", "WRITE"];
+  if (final && kind === CALL_REGISTER_KIND) return ["FETCH", "READ", "WRITE"];
+  if (final && kind === SET_IF_KIND) return ["FETCH", "READ", "ALU", "WRITE"];
   const sequences: Readonly<Record<number, ControlState[]>> = {
     1: ["FETCH", "READ", "ALU", "WRITE"],
     2: ["FETCH", "READ", "ALU", "WRITE"],
@@ -632,6 +661,7 @@ function splitBus(
   names: readonly string[],
   name = "signals",
   suffix = "",
+  order: readonly string[] = TRAP_CONTROL_BUS,
 ): Record<string, NetId> {
   // A signal split out twice in one block takes a suffix on its second net's name.
   const outs = Object.fromEntries(names.map((n) => [n, b.net(`${n}${suffix}`)]));
@@ -640,7 +670,7 @@ function splitBus(
     "split-control",
     (bb) => {
       for (const n of names) {
-        const at = TRAP_CONTROL_BUS.indexOf(n as never);
+        const at = order.indexOf(n);
         slicePart(bb, bus, at, at, outs[n] as NetId, `bit${n}`);
       }
     },
@@ -657,6 +687,17 @@ function splitBus(
  */
 export function trapsCircuit(options: TrapMachineOptions = {}): Circuit {
   const b = new CircuitBuilder(options.name ?? "machine");
+  const final = options.final === true;
+  const busOrder = trapControlBus(final);
+  // Each block that changes on the final machine takes a kind of its own, drawn with its ports.
+  const kind = (name: string) => (final ? `${name}-final` : `${name}-traps`);
+  const split = (
+    bb: CircuitBuilder,
+    bus: NetId,
+    names: readonly string[],
+    name?: string,
+    suffix?: string,
+  ) => splitBus(bb, bus, names, name, suffix, busOrder);
   const clk = b.input("CLK");
   const rst = b.input("RST");
   const shop = {
@@ -680,7 +721,7 @@ export function trapsCircuit(options: TrapMachineOptions = {}): Circuit {
   const noHandler = b.net("NOHANDLER");
   const halt = b.net("HALT");
   const cause = b.net("CAUSE", 8);
-  const control = b.net("CONTROL", TRAP_CONTROL_BUS.length);
+  const control = b.net("CONTROL", busOrder.length);
   const signals = Object.fromEntries(
     [
       "CAUSED",
@@ -708,6 +749,7 @@ export function trapsCircuit(options: TrapMachineOptions = {}): Circuit {
       "USER",
       "IE",
       "TRAP",
+      ...(final ? ["SET"] : []),
     ].map((n) => [n, b.net(`control/${n}`, n === "CAUSED" || n === "CAUSET" ? 8 : 1)]),
   );
   const sig = (n: string) => signals[n] as NetId;
@@ -719,7 +761,7 @@ export function trapsCircuit(options: TrapMachineOptions = {}): Circuit {
   // The control unit.
   b.scope(
     "control",
-    "control-unit-traps",
+    kind("control-unit"),
     (cb) => {
       const d = digits(cb, ir);
       // C0's two bits: user mode is bit 0 at 0; interrupts on is bit 1.
@@ -734,7 +776,12 @@ export function trapsCircuit(options: TrapMachineOptions = {}): Circuit {
         },
         { inputs: { STATUS: status }, outputs: { USER: sig("USER"), IE: sig("IE") } },
       );
-      controlDecoder(cb, { K: d.K, J: d.J, C: d.C }, { outs: signals });
+      controlDecoder(
+        cb,
+        { K: d.K, J: d.J, C: d.C },
+        { outs: signals },
+        final ? { callThroughRegister: true, setIf: true } : {},
+      );
       systemJobs12(
         cb,
         {
@@ -787,7 +834,7 @@ export function trapsCircuit(options: TrapMachineOptions = {}): Circuit {
         },
         { HALT: halt, CAUSE: cause, GO: go, TRAP: sig("TRAP") },
       );
-      const bits = TRAP_CONTROL_BUS.map((n) =>
+      const bits = busOrder.map((n) =>
         n === "GO"
           ? go
           : n === "WRITEY"
@@ -796,7 +843,7 @@ export function trapsCircuit(options: TrapMachineOptions = {}): Circuit {
       );
       cb.scope(
         "bus",
-        "join-control-traps",
+        kind("join-control"),
         (jb) =>
           jb.component(
             "join",
@@ -804,10 +851,10 @@ export function trapsCircuit(options: TrapMachineOptions = {}): Circuit {
               bits.map((n, i) => [i < 26 ? String.fromCharCode(97 + i) : `in${i}`, n]),
             ),
             { y: control },
-            { name: "join", params: { width: TRAP_CONTROL_BUS.length } },
+            { name: "join", params: { width: busOrder.length } },
           ),
         {
-          inputs: Object.fromEntries(TRAP_CONTROL_BUS.map((n, i) => [n, bits[i] as NetId])),
+          inputs: Object.fromEntries(busOrder.map((n, i) => [n, bits[i] as NetId])),
           outputs: { CONTROL: control },
         },
       );
@@ -831,22 +878,32 @@ export function trapsCircuit(options: TrapMachineOptions = {}): Circuit {
   // The datapath.
   b.scope(
     "datapath",
-    "datapath-traps",
+    kind("datapath"),
     (db) => {
       const c = {
-        ...splitBus(db, control, ["FETCHING", "IREN", "PCEN"], "toFetch"),
-        ...splitBus(db, control, ["HOLDAB", "WREG"], "toRegisters"),
-        ...splitBus(db, control, ["AZERO", "BCONST", "OP2", "OP1", "OP0", "HOLDR"], "toAlu"),
-        ...splitBus(
+        ...split(db, control, ["FETCHING", "IREN", "PCEN"], "toFetch"),
+        ...split(db, control, ["HOLDAB", "WREG"], "toRegisters"),
+        ...split(db, control, ["AZERO", "BCONST", "OP2", "OP1", "OP0", "HOLDR"], "toAlu"),
+        ...split(
           db,
           control,
-          ["BRANCH", "CALL", "JUMP", "HOLDM", "LOAD", "CREAD", "RESUME", "TRAP"],
+          [
+            "BRANCH",
+            "CALL",
+            "JUMP",
+            "HOLDM",
+            "LOAD",
+            "CREAD",
+            "RESUME",
+            "TRAP",
+            ...(final ? ["SET"] : []),
+          ],
           "toNext",
         ),
       };
       const s = (n: string) => c[n] as NetId;
       // TRAP again for the control registers, from a split of their own beside them.
-      const cr = splitBus(db, control, ["TRAP", "RESUMING", "CWEN"], "toControlRegisters", "2");
+      const cr = split(db, control, ["TRAP", "RESUMING", "CWEN"], "toControlRegisters", "2");
       const ha = db.net("HA", 64);
       const hr = db.net("HR", 64);
       const hm = db.net("HM", 64);
@@ -914,26 +971,6 @@ export function trapsCircuit(options: TrapMachineOptions = {}): Circuit {
         },
         { CWORD: cword, C2: c2, C4: c4, STATUS: status, NOHANDLER: noHandler },
       );
-      // What register Y takes: the held result, a load's word, PC + 4, or a control register.
-      const yIns = {
-        HR: hr,
-        HM: hm,
-        PC4: pc4,
-        CWORD: cword,
-        LOAD: s("LOAD"),
-        CALL: s("CALL"),
-        CREAD: s("CREAD"),
-      };
-      db.scope(
-        "yWord",
-        "yWord-traps",
-        (bb) => {
-          const loaded = mux(bb, yIns.LOAD, hr, hm, "pickLoad");
-          const called = mux(bb, yIns.CALL, loaded, pc4, "pickCall");
-          mux(bb, yIns.CREAD, called, cword, "pickControl", yIn);
-        },
-        { inputs: yIns, outputs: { YIN: yIn } },
-      );
       const met = branchCondition(db, {
         ZERO: flags["ZERO"] as NetId,
         MINUS: flags["MINUS"] as NetId,
@@ -941,6 +978,33 @@ export function trapsCircuit(options: TrapMachineOptions = {}): Circuit {
         OVER: flags["OVER"] as NetId,
         J: d.J,
       });
+      // What register Y takes: the held result, a load's word, PC + 4, or a control register; on
+      // the final machine also set if's condition, MET as a word.
+      const yIns = {
+        HR: hr,
+        HM: hm,
+        PC4: pc4,
+        CWORD: cword,
+        ...(final ? { MET: met } : {}),
+        LOAD: s("LOAD"),
+        CALL: s("CALL"),
+        CREAD: s("CREAD"),
+        ...(final ? { SET: s("SET") } : {}),
+      };
+      db.scope(
+        "yWord",
+        kind("yWord"),
+        (bb) => {
+          const loaded = mux(bb, yIns.LOAD, hr, hm, "pickLoad");
+          const called = mux(bb, yIns.CALL, loaded, pc4, "pickCall");
+          if (!final) return void mux(bb, yIns.CREAD, called, cword, "pickControl", yIn);
+          const read = mux(bb, yIns.CREAD, called, cword, "pickControl");
+          // MET as a word: its one bit at bit 0, with 0s above it.
+          const metWord = zeroWiden(bb, met, "METWORD");
+          mux(bb, s("SET"), read, metWord, "pickSet", yIn);
+        },
+        { inputs: yIns, outputs: { YIN: yIn } },
+      );
       const nextIns = {
         PC: pc,
         RESULT: result,
@@ -977,15 +1041,7 @@ export function trapsCircuit(options: TrapMachineOptions = {}): Circuit {
     "port",
     "memory-port-traps",
     (mb) => {
-      const c = splitBus(mb, control, [
-        "FETCHING",
-        "MLOAD",
-        "MSTORE",
-        "BYTE",
-        "GO",
-        "PCEN",
-        "USER",
-      ]);
+      const c = split(mb, control, ["FETCHING", "MLOAD", "MSTORE", "BYTE", "GO", "PCEN", "USER"]);
       const s = (n: string) => c[n] as NetId;
       // The timer counts an instruction that finished: the PC's enable where GO is 1. At a trap's
       // edge the PC's enable is 1 and GO is 0.
