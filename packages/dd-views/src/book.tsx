@@ -40,6 +40,7 @@ import { CircuitView, levelOf, SignalTable } from "./CircuitView";
 import { HdlPanel } from "./HdlPanel";
 import { ProgramEditor, gradeProgram, isProgramChallenge } from "./ProgramEditor";
 import { LabEditor, gradeLab, isLabChallenge } from "./LabEditor";
+import { CapstoneEditor, gradeCapstone, isCapstoneChallenge } from "./CapstoneEditor";
 import { GATE_IDS, labelFor } from "./parts";
 import {
   circuitToDrawing,
@@ -159,6 +160,8 @@ export function grade(challenge: Challenge, artifact: Artifact): Verdict {
   if (isProgramChallenge(challenge)) return gradeProgram(challenge, artifact);
   // Module 13: the lab, the whole machine as text, graded by running programs on it.
   if (isLabChallenge(challenge)) return gradeLab(challenge, artifact);
+  // Module 13: the capstone, a program of the learner's own and questions about its run.
+  if (isCapstoneChallenge(challenge)) return gradeCapstone(challenge, artifact);
   if (challenge.tests.kind === "answers") return gradeAnswers(challenge, artifact);
   const { circuit, blocked } = circuitOf(challenge, artifact);
   const total =
@@ -560,6 +563,8 @@ export const ChallengeEditor: ComponentType<ChallengeEditorProps> = (props) =>
     <ProgramEditor {...props} />
   ) : isLabChallenge(props.challenge) ? (
     <LabEditor {...props} />
+  ) : isCapstoneChallenge(props.challenge) ? (
+    <CapstoneEditor {...props} />
   ) : props.challenge.gradedDirection === "answer" ? (
     <AnswerEditor {...props} />
   ) : props.challenge.gradedDirection === "write" ? (

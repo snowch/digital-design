@@ -73,6 +73,7 @@ import { wholeMachine } from "./whole-machine";
 import { fullPath } from "./full-path";
 import { tracing } from "./tracing";
 import { finalMachine } from "./final-machine";
+import { capstone } from "./capstone";
 
 const INPUTS: readonly LessonInput[] = [
   // Module 0, meet the machine.
@@ -145,6 +146,7 @@ const INPUTS: readonly LessonInput[] = [
   fullPath,
   tracing,
   finalMachine,
+  capstone,
 ];
 
 export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(

@@ -350,3 +350,38 @@ ${W.empty.map((c) => `  // ${c}`).join("\n")}
 endmodule
 `;
 }
+
+// ---------------------------------------------------------------------------------------------
+// 13.5 the capstone: a program of the learner's own, traced.
+
+/** The capstone's figures' program, not the challenge's task: CLASH when room B is colder. */
+export const CAPSTONE_SAMPLE = `// Is room B colder than room A? CLASH says so.
+        R1 <= word[sensorA]
+        R2 <= word[sensorB]
+        R3 <= R2 < R1 signed     // set if: 1 when room B is colder than room A
+        R3 <= R3 + R3
+        R3 <= R3 + R3            // CLASH is bit 2
+        word[lamps] <= R3
+        word[display] <= R1
+        stop`;
+
+/** A program that does the capstone's task: how many rooms are colder than -20.0 degrees. */
+export const CAPSTONE_REFERENCE = `// How many rooms are colder than -20.0 degrees, and ALARM when both are.
+        R1 <= word[sensorA]
+        R2 <= word[sensorB]
+        R6 <= -200
+        R3 <= R1 < R6 signed     // 1 when room A is colder than -20.0 degrees
+        R4 <= R2 < R6 signed     // 1 when room B is
+        R5 <= R3 + R4            // how many: 0, 1 or 2
+        word[display] <= R5
+        R7 <= R3 & R4            // ALARM when both are
+        word[lamps] <= R7
+        stop`;
+
+/** The capstone's tests of the program: the rooms' readings, and what the task asks for. */
+export const CAPSTONE_CASES = [
+  { id: "mixed", sensorA: -184, sensorB: -250, display: 1, lamps: 0 },
+  { id: "both", sensorA: -250, sensorB: -250, display: 2, lamps: 1 },
+  { id: "neither", sensorA: -150, sensorB: -100, display: 0, lamps: 0 },
+  { id: "edge", sensorA: -200, sensorB: -201, display: 1, lamps: 0 },
+] as const;

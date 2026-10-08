@@ -130,6 +130,22 @@ export interface Machine13Strings {
   readonly labRunGoesOn: string;
   /** After a prediction: {answer}, the option the runs give. */
   readonly labAnswer: string;
+
+  // The capstone (lesson 5). Its verdict is plain text: no code, no Markdown.
+  readonly capTrace: string;
+  readonly capTraceCaption: string;
+  /** {a}, {b}: the rooms' readings; {display}, {lamps}: what the program left; {want...}: the task's. */
+  readonly capWrong: string;
+  /** {a}, {b}; {cause}. */
+  readonly capHalts: string;
+  /** {a}, {b}. */
+  readonly capNoStop: string;
+  readonly capUnanswered: string;
+  readonly capNoSetIf: string;
+  readonly capNoStore: string;
+  readonly capNoEdge: string;
+  /** For a wrong answer: the level to look at, never the value, by question. */
+  readonly capLevels: Readonly<Record<string, string>>;
 }
 
 export const MACHINE13_STRINGS: Machine13Strings = {
@@ -228,4 +244,29 @@ export const MACHINE13_STRINGS: Machine13Strings = {
   labRunStops: "At `{line}` at `{address}`, the machine stops; the model does not.",
   labRunGoesOn: "At `{line}` at `{address}`, the model stops or halts; the machine goes on.",
   labAnswer: "The runs answer: {answer}.",
+
+  capTrace: "Run my program on the whole machine",
+  capTraceCaption: "Your program on the whole machine",
+  capWrong:
+    "With room A at {a} and room B at {b}, your program leaves {display} on the display and {lamps} on the lamps. The task asks for {wantDisplay} and {wantLamps}.",
+  capHalts:
+    "With room A at {a} and room B at {b}, your program halts with cause {cause} before it stops.",
+  capNoStop:
+    "With room A at {a} and room B at {b}, your program does not reach stop within its limit of instructions.",
+  capUnanswered:
+    "This question has no answer yet, or the answer is not a value of the form asked for.",
+  capNoSetIf: "Your program has no set if, so this question has no edge to read.",
+  capNoStore: "Your program has no store, so this question has no edge to read.",
+  capNoEdge: "Your program's run does not reach the edge this question names.",
+  capLevels: {
+    result:
+      "Pause before the ALU edge of your first set if. Read Y where it leaves the ALU in the datapath, as a signed number.",
+    carry:
+      "At that same edge, read COUT where it leaves the ALU. It is the carry out of the ALU's top bit, not the condition.",
+    met: "At that same edge, read MET where it leaves the condition block in the datapath. It is worked out from the ALU's flags and the job digit.",
+    address:
+      "Pause before the MEMORY edge of your first store. Read ADDR, the address the memory port reads, which comes from HR at that edge.",
+    pcBit:
+      'Pause before the WRITE edge of your first set if. Show the PC\'s bit 4 from "Parts here that never open", and read D.',
+  },
 };
