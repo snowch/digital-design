@@ -2992,6 +2992,74 @@ svg.stack-depth {
 .trap-edges:empty {
   display: none;
 }
+/* The button under a box of rows opens it to every row, with no scroll inside it; a second press
+   brings back the compact box, which keeps its current row in view. */
+.debugger-listing-wrap.rows-open,
+.memory-box.rows-open,
+.stack-frames.rows-open,
+.trap-edges.rows-open {
+  max-height: none;
+  overflow-y: visible;
+}
+.rows-toggle {
+  margin-top: var(--space-2);
+}
+@media (min-width: 481px) {
+  .rows-toggle-phone {
+    display: none;
+  }
+}
+/* A panel's title with the button that opens its box, on one line: no row of its own. */
+.rows-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.rows-title .rows-toggle {
+  margin: 0;
+}
+.rows-title .layout-title {
+  margin: 0;
+}
+.rows-title {
+  margin-bottom: var(--space-1);
+}
+/* A header cell that holds the button is as tall as the button, no taller. */
+.truth-table.debugger-listing thead th.debugger-line-head,
+.memory-box .truth-table thead th:has(.rows-toggle) {
+  padding-top: 0;
+  padding-bottom: 0;
+  vertical-align: middle;
+}
+.memory-box th .rows-toggle,
+.debugger-line-head .rows-toggle {
+  float: right;
+  margin: 0;
+  font-weight: normal;
+}
+/* On a phone a row of the listing keeps to one line, its comment reached by scrolling the box
+   sideways. The box shows two whole rows with their breakpoint buttons, which a phone keeps 40
+   pixels tall, and four without; any taller and stepping no longer fits one screen with the
+   panel a lead points at. The button in its header shows every row (B12 of the second reading). */
+@media (max-width: 480px) {
+  .debugger-listing-wrap {
+    max-height: 9.5rem;
+  }
+  /* The table's caption still names the listing for a screen reader. */
+  .debugger-run > .layout-title {
+    display: none;
+  }
+  .debugger-listing .debugger-line {
+    white-space: pre;
+  }
+}
+@media (max-width: 480px) {
+  .debugger-stack .stack-frames.rows-open {
+    max-height: none;
+    overflow-y: visible;
+  }
+}
 .trap-edge {
   padding: var(--space-2) var(--space-3);
   border-bottom: 1px solid var(--border);

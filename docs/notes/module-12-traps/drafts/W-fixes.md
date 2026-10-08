@@ -51,3 +51,7 @@ cuts and single words of the second pass. Haiku's sentences were otherwise kept.
 - Strings: 12.1's C1 feedback "In this lesson"; 12.3's device range "7C0 to 7F7"; C0 and C1's form
   without backticks; 12.5's timer sentence "may change no register", as the task says; 12.3's
   ending sentence cut to its first; 12.8's run sentence "with interrupts off".
+
+## B12
+
+- **V5** (`rowsAll`, `rowsFewer`): placed as drafted, "Show every row" and "Show fewer rows".

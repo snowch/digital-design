@@ -502,6 +502,25 @@ and R9 into R12 and R13 (A1) no longer holds: B1 replaced that copy.
   challenge, 12.6), so a failure that names a register sits beside the panel that shows it.
   12.7's figures show the controller's state beside their buttons.
 
+- **B12, boxes the reader can open** (asked for during this round, at the author's request). A
+  button, "Show every row" and then "Show fewer rows" (drafted, brief V5), opens the listing, a
+  region of memory, the stack's frames and the trap timeline's edges to every row, with no scroll
+  inside, and closes them again; it carries `aria-expanded` and is offered only where the box hides
+  rows (memory and the stack only on a phone, where their boxes are short). The listing's
+  machine-word column is now left out unless a debugger asks for it (`words`, which Module 11's
+  assembly lesson does), and on a phone a row keeps to one line, its comment reached by scrolling
+  sideways. Where the button sits was set by the one-screen test: under the box it pushed 12.1's
+  control registers, 12.5's events and 11.2's memory below a phone's screen, so the listing's
+  button sits in its header row, memory's in its header's empty cell, and the stack's beside its
+  title; the listing's title is hidden on a phone (its caption stays for a screen reader). The
+  compact listing on a phone is 9.5rem: four whole rows, or two where each row has its 40-pixel
+  breakpoint button; any taller and the one-screen test fails on 11.2. No drag handle: the
+  listing's maximum height would cap a drag at the compact size. The browser test opens 12.6's
+  72-line listing at both widths, finds every row inside it with no scroll, closes it, steps, and
+  finds the line about to run inside the compact box. Running the whole suite also found a hole
+  this round made: 12.5's "closed in time" test started with ALARM lit, so a timer part that
+  always lights ALARM passed; that test now starts with other lamps, and the attempt is pinned.
+
 ### The managing session's calls
 
 - **12.3, C1 at reset.** A start that leaves C1 at reset's `00` passes; accepted.

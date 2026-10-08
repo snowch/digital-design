@@ -8,7 +8,7 @@
 //   can pause at every one. The machine's own steps make the list (`timelineRun`); nothing is
 //   worked out here.
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 
 import { timelineRun, type TimelineEdge, type Transfer } from "@dd/dd-model";
@@ -18,7 +18,9 @@ import { format, useViewStrings } from "../strings";
 import type { Machine11Strings } from "../strings11";
 import type { Machine12Strings } from "../strings12";
 import {
+  RowsToggle,
   ShopInputs,
+  useRowsHidden,
   WordValue,
   controlText,
   hex3,
@@ -121,6 +123,10 @@ export const TrapTimeline = withProps(
     // How many of the shown edges the learner has stepped through.
     const [at, setAt] = useState(0);
     const boxRef = useRef<HTMLOListElement>(null);
+    // The edges sit in a box of fixed height; the button under it opens it to every edge shown.
+    const [open, setOpen] = useState(false);
+    const boxId = useId();
+    const hidden = useRowsHidden(boxRef, [at, open]);
     useEffect(() => {
       const box = boxRef.current;
       const row = box?.querySelector<HTMLElement>("li[aria-current]");
@@ -128,7 +134,7 @@ export const TrapTimeline = withProps(
       const top = row.offsetTop - box.offsetTop;
       if (top < box.scrollTop || top + row.offsetHeight > box.scrollTop + box.clientHeight)
         box.scrollTop = Math.max(0, top - box.clientHeight / 3);
-    }, [at]);
+    }, [at, open]);
     const current = at > 0 ? shown[at - 1] : undefined;
     const ended = at >= shown.length && shown.length > 0;
     return (
@@ -166,7 +172,7 @@ export const TrapTimeline = withProps(
           {current ? `${format(t.edge, { n: current.n })}: ${edgeText(t, current)}` : t.noEdge}
         </p>
         <p className="layout-title">{t.timelineTitle}</p>
-        <ol className="trap-edges" ref={boxRef}>
+        <ol className={`trap-edges${open ? " rows-open" : ""}`} ref={boxRef} id={boxId}>
           {shown.slice(0, at).map((e, i) => (
             <li
               key={e.n}
@@ -199,6 +205,14 @@ export const TrapTimeline = withProps(
             </li>
           ))}
         </ol>
+        {(hidden || open) && (
+          <RowsToggle
+            open={open}
+            onToggle={() => setOpen(!open)}
+            controls={boxId}
+            t={strings.machine11}
+          />
+        )}
         {ended && data.outcomes && <Prose markdown={data.outcomes} />}
       </div>
     );

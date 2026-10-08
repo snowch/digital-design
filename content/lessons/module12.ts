@@ -844,7 +844,7 @@ export const TIMER_RUNS: readonly {
   readonly lamps: number;
 }[] = [
   { label: "the door left open", opens: 20, start: 2, lamps: 3 },
-  { label: "the door closed in time", opens: 20, closes: 35, start: 3, lamps: 3 },
+  { label: "the door closed in time", opens: 20, closes: 35, start: 6, lamps: 6 },
   { label: "the door shut all night", start: 4, lamps: 4 },
   { label: "the door opened late and left open", opens: 60, start: 5, lamps: 5 },
   { label: "the door left open on a warm night", opens: 20, warm: 1, start: 2, lamps: 3 },

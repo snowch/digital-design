@@ -156,6 +156,10 @@ describe("facts for the interrupts lesson", () => {
       tick(
         "tick:   R1 <= 1\n        word[waiting] <= R1\n        R1 <= word[signals]\n        R12 <= 1\n        R1 <= R1 & R12\n        if R1 != R12 goto back\n        R1 <= word[lamps]\n        R1 <= R1 | R12\n        word[lamps] <= R1\n        goto back",
       ),
+      // ALARM lit whether or not the door has closed (the browser suite's wrong handler).
+      tick(
+        "tick:   R8 <= 1\n        word[waiting] <= R8\n        R8 <= word[signals]\n        R9 <= 1\n        R8 <= R8 & R9\n        R8 <= word[lamps]\n        R8 <= R8 | R9\n        word[lamps] <= R8\n        goto back",
+      ),
       // The whole of signals compared with 1: wrong on a warm night.
       tick(
         "tick:   R8 <= 1\n        word[waiting] <= R8\n        R8 <= word[signals]\n        R9 <= 1\n        if R8 != R9 goto back\n        R8 <= word[lamps]\n        R8 <= R8 | R9\n        word[lamps] <= R8\n        goto back",

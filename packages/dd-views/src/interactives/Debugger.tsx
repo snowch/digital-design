@@ -13,7 +13,7 @@
 //
 // `debugger` is the lesson's figure; `DebuggerView` is also the challenge editor's "Try it".
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
 import { z } from "zod";
 
 import {
@@ -220,6 +220,62 @@ export interface DebuggerOptions {
   readonly registersFirst?: boolean;
   /** Module 12: the instructions the learner may choose to open the door before. */
   readonly doorOptions?: readonly number[];
+  /**
+   * The listing's column of machine words, for a lesson that reads them (Module 11's first). Left
+   * out by default, so that a row of the listing takes one line on a phone.
+   */
+  readonly words?: boolean;
+}
+
+/**
+ * Whether a box of rows hides some behind its height, measured after each render that may change
+ * it, so the button that opens it is offered only where it shows more.
+ */
+export function useRowsHidden(
+  ref: RefObject<HTMLElement | null>,
+  deps: readonly unknown[],
+): boolean {
+  const [hidden, setHidden] = useState(false);
+  useEffect(() => {
+    const box = ref.current;
+    if (!box) return;
+    const measure = () => setHidden(box.scrollHeight > box.clientHeight + 1);
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, deps);
+  return hidden;
+}
+
+/**
+ * The button under a box of rows that keeps its current row in view: it opens the box to show
+ * every row, with no scroll inside it, and a second press brings back the compact box.
+ */
+export function RowsToggle({
+  open,
+  onToggle,
+  controls,
+  t,
+  phoneOnly = false,
+}: {
+  open: boolean;
+  onToggle: () => void;
+  controls: string;
+  t: Machine11Strings;
+  /** Only on a phone, where the box is short; on a wider screen it shows every row already. */
+  phoneOnly?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      className={`button secondary rows-toggle${phoneOnly ? " rows-toggle-phone" : ""}`}
+      aria-expanded={open}
+      aria-controls={controls}
+      onClick={onToggle}
+    >
+      {open ? t.rowsFewer : t.rowsAll}
+    </button>
+  );
 }
 
 const placeOf = (name: string, labels: Readonly<Record<string, number>>) =>
@@ -336,7 +392,10 @@ export function DebuggerView({
   // The listing sits in a box of its own height; the line about to run is kept in view inside it,
   // without moving the page.
   const boxRef = useRef<HTMLDivElement>(null);
-  useEffect(() => keepInView(boxRef.current, "tr[aria-current]"), [pc, at]);
+  const [listingOpen, setListingOpen] = useState(false);
+  const listingId = useId();
+  const listingHidden = useRowsHidden(boxRef, [program, listingOpen]);
+  useEffect(() => keepInView(boxRef.current, "tr[aria-current]"), [pc, at, listingOpen]);
   const names = useMemo(() => namesByAddress(program), [program]);
   const wrote = state.last?.wrote?.reg;
   const shownRegs = options.registers ?? Array.from({ length: 16 }, (_, k) => k);
@@ -464,17 +523,41 @@ export function DebuggerView({
             : ""}
         </p>
         {options.listing !== false && (
-          <div className="truth-table-wrap debugger-listing-wrap" ref={boxRef}>
+          // The caption sits above the box, so the box's height is all rows.
+          <p className="layout-title" aria-hidden="true">
+            {options.traps ? t12.listingCaption : t.listingCaption}
+          </p>
+        )}
+        {options.listing !== false && (
+          <div
+            className={`truth-table-wrap debugger-listing-wrap${listingOpen ? " rows-open" : ""}`}
+            ref={boxRef}
+            id={listingId}
+          >
             <table className="truth-table datapath-table debugger-listing">
-              <caption>{options.traps ? t12.listingCaption : t.listingCaption}</caption>
+              <caption className="visually-hidden">
+                {options.traps ? t12.listingCaption : t.listingCaption}
+              </caption>
               <thead>
                 <tr>
                   {options.breakpoints && (
                     <th scope="col" aria-label={t.pauseBefore.split(" ")[0]} />
                   )}
                   <th scope="col">{t.address}</th>
-                  <th scope="col">{t.word}</th>
-                  <th scope="col">{t.line}</th>
+                  {options.words && <th scope="col">{t.word}</th>}
+                  <th scope="col" className="debugger-line-head">
+                    {t.line}
+                    {/* In the header row, which the box has anyway, so that on a phone the
+                        buttons, the line about to run and the panels below still fit a screen. */}
+                    {(listingHidden || listingOpen) && (
+                      <RowsToggle
+                        open={listingOpen}
+                        onToggle={() => setListingOpen(!listingOpen)}
+                        controls={listingId}
+                        t={t}
+                      />
+                    )}
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -507,9 +590,11 @@ export function DebuggerView({
                         {isNext && <span className="next-mark">{`▶ `}</span>}
                         {hex3(l.address)}
                       </td>
-                      <td className="memory-word">
-                        {l.instruction !== undefined ? instructionHex(l.instruction) : t.data}
-                      </td>
+                      {options.words && (
+                        <td className="memory-word">
+                          {l.instruction !== undefined ? instructionHex(l.instruction) : t.data}
+                        </td>
+                      )}
                       <td className="memory-word debugger-line">
                         {l.label ? `${l.label}: ` : ""}
                         {l.text}
@@ -880,9 +965,13 @@ function MemoryPanel({
   state: DebugState;
   t: Machine11Strings;
 }) {
-  // A long region sits in a box of its own height that keeps the word a register points at in view.
+  // A long region sits in a box of its own height that keeps the word a register points at in view;
+  // on a phone the button under it opens it to every row.
   const boxRef = useRef<HTMLDivElement>(null);
-  useEffect(() => keepInView(boxRef.current, "tr.row-current"), [state]);
+  const [open, setOpen] = useState(false);
+  const boxId = useId();
+  useEffect(() => keepInView(boxRef.current, "tr.row-current"), [state, open]);
+  const hidden = useRowsHidden(boxRef, [region, open]);
   const first = placeOf(region.from, program.labels);
   if (first === undefined) return null;
   const rows = Array.from({ length: region.words }, (_, k) => first + 8 * k);
@@ -893,14 +982,29 @@ function MemoryPanel({
       <p className="layout-title" aria-hidden="true">
         {region.title}
       </p>
-      <div className="truth-table-wrap memory-box" ref={boxRef}>
+      <div
+        className={`truth-table-wrap memory-box${open ? " rows-open" : ""}`}
+        ref={boxRef}
+        id={boxId}
+      >
         <table className="truth-table datapath-table">
           <caption className="visually-hidden">{region.title}</caption>
           <thead>
             <tr>
               <th scope="col">{t.address}</th>
               <th scope="col">{t.memoryValue}</th>
-              <th scope="col" aria-label={t.pointsHere.replace("{names}", "").trim()} />
+              <th scope="col" aria-label={t.pointsHere.replace("{names}", "").trim()}>
+                {/* In the header row's empty cell, so on a phone it takes no row of its own. */}
+                {(hidden || open) && (
+                  <RowsToggle
+                    open={open}
+                    onToggle={() => setOpen(!open)}
+                    controls={boxId}
+                    t={t}
+                    phoneOnly
+                  />
+                )}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -999,6 +1103,11 @@ function StackPanel({
 }) {
   const sp = state.cpu.regs[14];
   const items = stackGroups(state, names);
+  // On a phone the frames sit in a short box; the button under it opens it to every frame.
+  const [open, setOpen] = useState(false);
+  const boxId = useId();
+  const boxRef = useRef<HTMLOListElement>(null);
+  const hidden = useRowsHidden(boxRef, [state, open]);
   const callOf = (k: number) => state.calls[k];
   const frameName = (k: number) => {
     const c = callOf(k);
@@ -1010,13 +1119,24 @@ function StackPanel({
   };
   return (
     <section className="debugger-panel debugger-stack" aria-label={t.stackCaption}>
-      <p className="layout-title">{t.stackCaption}</p>
+      <div className="rows-title">
+        <p className="layout-title">{t.stackCaption}</p>
+        {(hidden || open) && (
+          <RowsToggle
+            open={open}
+            onToggle={() => setOpen(!open)}
+            controls={boxId}
+            t={t}
+            phoneOnly
+          />
+        )}
+      </div>
       {sp === undefined ? (
         <p className="watch-note">{t.stackUnset}</p>
       ) : items.length === 0 ? (
         <p className="watch-note">{t.stackEmpty}</p>
       ) : (
-        <ol className="stack-frames">
+        <ol className={`stack-frames${open ? " rows-open" : ""}`} id={boxId} ref={boxRef}>
           {items.map((item) =>
             item.kind === "fold" ? (
               <li key={`fold-${item.group.rows[0]?.address}`} className="stack-fold">
