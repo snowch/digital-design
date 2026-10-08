@@ -22,7 +22,7 @@ export const NIGHT_HALTS = `// The night program: show room A, clear room B, lig
 
 /** The handler that keeps the cause at 400 and skips the instruction that faulted. */
 export const SKIP_HANDLER = `handler: R5 <= C3
-        word[0x400] <= R5       // keep the cause
+        word[0x400] <= R5       // store the cause
         R5 <= C2
         R5 <= R5 + 4            // the instruction after the one that faulted
         C2 <= R5
@@ -210,11 +210,11 @@ export const SAVED = `// Room A's reading kept in R5, with a handler that saves 
         stop
 ${SAVING_HANDLER}`;
 
-/** A program whose stack has run into the ROM, with a handler that saves R5 below R14. */
-export const STACK_HANDLER = `// The stack has reached the ROM; the handler saves R5 below it.
+/** A program whose stack starts at the bottom of the RAM, with a handler that saves R5 below R14. */
+export const STACK_HANDLER = `// A stack started in the wrong place; the handler saves R5 below it.
         R1 <= handler
         C4 <= R1
-        R14 <= 0x400            // the stack is full
+        R14 <= 0x400            // not 0x7C0: the bottom of the RAM
         R10 <= 7
         R14 <= R14 - 8
         word[R14] <= R10        // a push into the ROM
@@ -250,11 +250,11 @@ const TO_USER = `        R1 <= handler
         C2 <= R1
         resume                  // C0 takes C1: user mode`;
 
-/** The same program in user mode, under a handler that keeps the cause and where. */
-export const LAMPS_USER = `// The same program, started in user mode by the handler.
+/** The same program in user mode, under a handler that stores the cause and where. */
+export const LAMPS_USER = `// The lamps program in user mode: the start lights ALARM, then resumes to it.
 ${TO_USER}
 handler: R5 <= C3
-        word[0x400] <= R5       // keep the cause
+        word[0x400] <= R5       // store the cause
         R5 <= C2
         word[0x408] <= R5       // and where
         stop
@@ -265,7 +265,7 @@ program: R1 <= display
         stop`;
 
 /** A program in user mode that writes the word the handler counts its traps in. */
-export const RAM_UNGUARDED = `// The handler counts the night's traps at 410; the program keeps its own total there.
+export const RAM_UNGUARDED = `// The handler counts the night's traps at 410; the program stores its own total there.
 ${TO_USER.replace("        R1 <= 0\n        C1 <= R1", "        R1 <= 0\n        word[0x410] <= R1       // no traps yet tonight\n        C1 <= R1")}
 handler: R5 <= word[0x410]
         R5 <= R5 + 1
@@ -288,7 +288,7 @@ export const GOTO_START = `// The start writes 0 to C1, then goes to program wit
         C1 <= R1                // user mode, for a resume
         goto program            // no resume
 handler: R5 <= C3
-        word[0x400] <= R5       // keep the cause
+        word[0x400] <= R5       // store the cause
         stop
 program: R0 <= 0
         word[sensorB] <= R0     // refused
@@ -325,7 +325,7 @@ handler: word[0x410] <= R5      // save R5 and R6
         R6 <= word[0x418]       // put R6 and R5 back
         R5 <= word[0x410]
         resume
-other:  word[0x408] <= R5       // save the cause
+other:  word[0x408] <= R5       // store the cause
         stop`;
 
 /** Words of a test's own in R0 to R15, from a base of its own, so no fixed word passes. */
@@ -456,7 +456,7 @@ export const SERVICES_SKIPPING = SERVICES.replace(
 export const SHOW_DIRECT = `// A user program that shows 25 by storing to the display.
 ${TO_PROGRAM}
 handler: R5 <= C3
-        word[0x400] <= R5       // keep the cause
+        word[0x400] <= R5       // store the cause
         stop
 program: R2 <= 25
         word[display] <= R2
@@ -774,14 +774,14 @@ const TO_PROGRAM_NIGHT = TO_PROGRAM_EVENTS.replace(
   "        R1 <= word[startLamps]\n        word[lamps] <= R1       // the lamps each test starts with\n        R1 <= 2\n        C1 <= R1",
 );
 
-export const TIMER_START = `// The handler. Write its timer part. The tests add a program after it, named program.
+export const TIMER_START = `// The start and the handler. Write the timer part. The tests add a program, named program.
 ${TO_PROGRAM_NIGHT}
 ${EVENT_HANDLER_HEAD}
 ${DOOR_PART}
 tick:   goto back
 ${EVENT_HANDLER_TAIL}`;
 
-export const TIMER_REFERENCE = `// The handler, with its timer part: ALARM beside the lamps already lit.
+export const TIMER_REFERENCE = `// The start and the handler, with its timer part: ALARM beside the lamps already lit.
 ${TO_PROGRAM_NIGHT}
 ${EVENT_HANDLER_HEAD}
 ${DOOR_PART}
@@ -934,9 +934,9 @@ ${program}`;
 
 export const NEST_LATE = `// A long job keeps the door waiting: job 5 waits with interrupts off.
 ${nest(WAIT_OFF)}`;
-export const NEST_UNSAVED = `// Job 5 lets the door in, but does not keep C1 and C2.
+export const NEST_UNSAVED = `// Job 5 lets the door in, but does not save C1 and C2.
 ${nest(WAIT_UNSAVED)}`;
-export const NEST_SAVED = `// Job 5 lets the door in, and keeps C1 and C2 at 410 and 418.
+export const NEST_SAVED = `// Job 5 lets the door in, and saves C1 and C2 at 410 and 418.
 ${nest(WAIT_ON)}`;
 
 /** A handler whose job 2 trusts R2, and whose fault part skips, as lesson 1's did. */
@@ -1383,9 +1383,10 @@ ended:  stop`;
 export const RUN_EMPTY = `// The shop's handler. The tests add a table, programs, after it: its first word is how many
 // programs, then each program's address. Run each in user mode with interrupts off, in order,
 // from the first. Offer jobs 1 to 4 by call system: 1 shows R2; 2 puts room R2's reading in R1
-// (0 for room A, 1 for room B, 0 for any other); 3 sets the lamps from R2; 4 ends the program.
-// A program that faults ends there. For program k, leave 0 at 0x400 + 8k if it ended with job 4,
-// else its cause. A job may change R1 and R2 only. After the last program, stop.
+// (R2 is 0 for room A, 1 for room B; any other R2 puts 0 in R1); 3 sets the lamps from R2;
+// 4 ends the program. A program that faults ends there. For program k, store 0 at 0x400 + 8k if
+// it ended with job 4, else its cause. A job may change R1 and R2 only. After the last program,
+// stop.
 `;
 
 /**

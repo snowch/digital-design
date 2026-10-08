@@ -130,7 +130,7 @@ export const MACHINE12_STRINGS: Machine12Strings = {
   trapCountOne: "1 trap went to the handler.",
   stops: {
     cause22:
-      "The machine halted with cause 22: the instruction at {address} is one that user mode refuses (resume, a control-register job or stop).",
+      "The machine halted with cause 22: the instruction at {address} is one that user mode refuses (resume, a control-register copy or stop).",
     cause32:
       "The machine halted with cause 32: the instruction at {address} reached a device's address in user mode.",
     cause81:
@@ -142,18 +142,20 @@ export const MACHINE12_STRINGS: Machine12Strings = {
     "unknown-control":
       "The debugger ended the run before the instruction at {address}: it copies {reg} into a control register, and nothing has set {reg}.",
   },
-  atTrap: "[draft] {name} at the last trap",
-  ownFault: "[draft] ownFault {address} {cause}",
-  dataAdded: "[draft] dataAdded",
-  assembled: "[draft] assembled {n} {bytes}",
-  listingCaption: "[draft] listingCaption",
-  stateNow: "[draft] stateNow {state}",
+  atTrap: "{name} as the program left it at its last trap",
+  ownFault:
+    "An instruction you wrote, in the start or the handler, at {address} faulted with cause {cause} (it is not one of the tests' lines).",
+  dataAdded: "The tests add these lines, which hold the program, after your start and handler:",
+  assembled:
+    "The assembler made {n} instructions; the listing, instructions and words of data together, takes {bytes} bytes of ROM.",
+  listingCaption:
+    "The listing as the assembler made it: the start, the handler and the program together",
+  stateNow: "The controller is in the state {state} now.",
   ends: {
     skip34:
       "A run must stop at the program's end line, or at the handler's stop after a cause other than 34.",
     saveRegisters: "A run must stop at the program's end line, with every refused store skipped.",
-    startUser:
-      "A run must end at the handler's stop. The start must set C2 to the program's address and C1 to the mode the program runs in, before resume.",
+    startUser: "A run must end at the handler's stop.",
     sensorService:
       "A run must end at the handler's stop for job 4, with no trap but the system calls.",
     doorTimer: "A run must end at the handler's stop for job 4, after the program has shown 30.",
@@ -217,10 +219,10 @@ export const MACHINE12_STRINGS: Machine12Strings = {
     sensorService:
       "Job 2 must put into R1 the reading of the room that R2 names: room A for 0 and room B for 1. A system call may change only R1 and R2. The handler must put R8 and R9 back before resume and leave every other register as it was.",
     doorTimer:
-      "The timer's part must clear the timer's bit and, only if the door is still open, light ALARM beside the lamps already lit. It may change no register the program uses.",
+      "The timer's part must clear the timer's bit and, only if the door is still open, light ALARM beside the lamps already lit. It may change no register.",
     waitDoor:
       "Job 6 must let the door and the timer in while it counts, then give the program back its mode, its return point and every register but R1 and R2.",
     shopHandler:
-      "The handler must run each program in the table in user mode, offer jobs 1 to 4, leave each program's record (0 for job 4, else its cause) at 400 plus 8 times its number, and stop after the last.",
+      "The handler must run each program in the table in user mode with interrupts off, offer jobs 1 to 4, leave each program's record (0 for job 4, else its cause) at 400 plus 8 times its number, and stop after the last.",
   },
 };

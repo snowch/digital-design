@@ -1047,14 +1047,14 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       trapC3:
         "{actual} is not C3 after the trap. C3 takes the fault's cause, two hexadecimal digits. The first digit says which step failed.",
       trapC1:
-        "{actual} is not C1 after the trap. C1 takes C0 as it was. In lesson 1, C0 is 01 throughout.",
+        "{actual} is not C1 after the trap. C1 takes C0 as it was. In this lesson, C0 is 01 throughout.",
       trapPc:
         "{actual} is not the PC after the trap. The PC takes C4, the handler's address, as three hexadecimal digits.",
       // Module 12, lessons 2 to 5.
       saveChoice:
         '"{actual}" is not it for this handler. Check every register the handler writes: is it saved before it is written, and put back from the same word before resume?',
       userRefusal:
-        "{actual} is not the cause for this line. User mode refuses a load or store at a device's address (from 7C0) with 32, and resume, the control-register jobs and stop with 22. Give 0 if user mode runs the line.",
+        "{actual} is not the cause for this line. User mode refuses a load or store at a device's address (7C0 to 7F7) with 32, and resume, the control-register copies and stop with 22. Give 0 if user mode runs the line.",
       callLamps:
         "{actual} is not it. Job 3 sets each lamp from one bit of R2: bit 0 ALARM, bit 1 NIGHT, bit 2 CLASH, as the table of jobs says. R2 is the word with those bits set.",
       callShown:
@@ -1070,11 +1070,11 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
         "{actual} is not the word at 418. Job 5 saved C2 there when it began. That word is the return point of the program's call system.",
       nestC0: "{actual} is not C0 after the door part's resume. resume copies C1 into C0.",
       bitsForm:
-        "{actual} has the right value, but this page writes C0 and C1 as their two bits, bit 1 first, such as `01`. Give it in that form.",
+        "{actual} has the right value, but this page writes C0 and C1 as their two bits, bit 1 first, such as 01. Give it in that form.",
       edgesStop:
         "{actual} is not the number of edges. The decoder refuses stop in user mode. Its cause appears in READ, and that edge ends the instruction.",
       edgesResume:
-        "{actual} is not the number of edges. In system mode resume does not trap: it goes from READ to WRITE, as a control-register job does.",
+        "{actual} is not the number of edges. In system mode resume does not trap: it goes from READ to WRITE, as a control-register copy does.",
       edgesInterrupt:
         "{actual} is not the number of edges. An interrupt is taken at the edge that would fetch, and that edge is all it takes.",
       edgesLoad:

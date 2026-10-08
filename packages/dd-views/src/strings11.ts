@@ -320,7 +320,8 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   limitNote: "(limit {limit})",
   runWith: "Run with",
   dataAdded: "The tests add these lines after your program:",
-  nameShared: "[draft] nameShared {name} {test}",
+  nameShared:
+    "Your text names a line {name}. The test {test} adds lines after your text, and they use the same name. The assembler cannot tell the two apart, so the test does not run. Give your line another name.",
   wordInText: "{decimal} ({hex} in hexadecimal)",
   startSkeleton: "Start from the outline",
   startEmpty: "Start from an empty program",

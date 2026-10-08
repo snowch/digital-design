@@ -5,8 +5,8 @@
 // another, through lesson 4's four jobs; job 4 ends a program, a fault ends it with its cause
 // recorded, and after the last the handler stops. The tests add the table and the programs after
 // the handler and check the words shown, the lamps, each program's record and the stop. One
-// challenge with three ways in, as Module 11's capstone: the guided start, the specification in
-// the lesson, and the requirements and tests alone.
+// challenge with two ways in, each a starting text: the outline, which the construction's steps
+// complete, and an empty program whose comments give the requirements.
 //
 // The structure is here; the words are in system-call-mechanism.prose.ts and
 // system-call-mechanism.labels.ts. The numbers the prose states are pinned by
@@ -242,6 +242,6 @@ export const systemCallMechanism: LessonInput = {
     textbookExample:
       "The operating-system capstone of the textbooks: a round-robin scheduler with a process table and context switches on a timer interrupt; LC-3's TRAP routines for GETC, OUT and HALT with a trap vector table; a 'tiny kernel' that loads programs and services read and write calls; Nand2Tetris's Jack OS library.",
     howThisDiffers:
-      "The handler runs the shop's own programs one after another from a table the tests add after it, each in user mode, through the four jobs lesson 4 numbered (show, a room's reading, the lamps, the end), and keeps a record for each program: 0 when it ended with job 4, its cause when it faulted. No scheduler, no process table, no timer slicing, no loader: the programs are in the ROM, the table holds their addresses, and the handler's own state is one RAM word, the number of the program running. The runs are chosen to reach the cases a handler must survive: a program that stores to the display itself, one that runs stop, one that asks for a room that does not exist, a table entry that is not instructions, a register kept across a job, an empty table. The course plan's three tiers are three ways into the one challenge.",
+      "The handler runs the shop's own programs one after another from a table the tests add after it, each in user mode, through the four jobs lesson 4 numbered (show, a room's reading, the lamps, the end), and keeps a record for each program: 0 when it ended with job 4, its cause when it faulted. No scheduler, no process table, no timer slicing, no loader: the programs are in the ROM, the table holds their addresses, and the handler's own state is one RAM word, the number of the program running. The runs are chosen to reach the cases a handler must survive: a program that stores to the display itself, one that runs stop, one that asks for a room that does not exist, a table entry that is not instructions, a register kept across a job, an empty table. The course plan's tiers are two ways into the one challenge: the outline the construction completes, and an empty program with the requirements as comments.",
   },
 };
