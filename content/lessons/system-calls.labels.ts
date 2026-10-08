@@ -41,7 +41,7 @@ export const LABELS = {
   fields: {
     lamps: "R2 to light NIGHT and CLASH with job 3",
     shown: "What the program shows",
-    c2: "C2 after a `call system` at `0A0`",
+    c2: "C2 after a call system at 0A0",
   },
   sensorLabels: [
     "Room A, then room B",

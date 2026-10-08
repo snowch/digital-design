@@ -40,7 +40,7 @@ export const LABELS = {
     saved: "The debugger shows job 5 keeping C1 and C2, with the door's time to choose.",
     wait: "The handler's job 5 is yours to change, with its tests.",
   },
-  keptTitle: "C1 and C2 saved at `410` and `418`",
+  keptTitle: "C1 and C2 saved at 410 and 418",
   fields: {
     c1: "C1 after the door's interrupt",
     c3: "C3 after the door's interrupt",

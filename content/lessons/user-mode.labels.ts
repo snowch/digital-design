@@ -31,7 +31,7 @@ export const LABELS = {
   captions: {
     system: "The debugger shows a program that clears the lamps by mistake.",
     predict:
-      "Predict what C1 holds after the store traps, given a start that writes `00` to C1 and goes to `program` with `goto`.",
+      "Predict what C1 holds after the store traps, given a start that writes 00 to C1 and goes to program with goto.",
     timeline:
       "The timeline lists the program started in user mode edge by edge, with the mode after each edge.",
     answers: "Four lines of a program, each to be judged in user mode.",
@@ -47,10 +47,10 @@ export const LABELS = {
   },
   ramTitle: "The handler's count at 410",
   userLabels: [
-    "A store to the lamps, then `stop`",
+    "A store to the lamps, then stop",
     "Two sensors read, then a control register",
     "A word not at a multiple of 8",
     "The timer, then the ROM",
   ],
-  memoryTitle: "Count at `400`, saved cause at `408`",
+  memoryTitle: "Count at 400, saved cause at 408",
 } as const;

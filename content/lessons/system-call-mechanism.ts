@@ -17,6 +17,7 @@ import type { LessonInput } from "@platform/lesson-schema";
 import { LABELS } from "./system-call-mechanism.labels";
 import { PROSE } from "./system-call-mechanism.prose";
 import {
+  RECORD_ONE,
   RUN_CASES,
   RUN_EMPTY,
   RUN_REFERENCE,
@@ -37,7 +38,9 @@ export function runAsks(c: RunCase): Record<string, string> {
     shown: c.shown,
     lamps: String(c.lamps),
     ...Object.fromEntries(c.records.map((r, k) => [recordKey(k), String(r)])),
-    end: "stop",
+    // C1 holds the status of the last program at its last trap: user mode, interrupts off.
+    C1: "00",
+    stopAt: "handler",
   };
 }
 
@@ -54,16 +57,14 @@ const resultsRuns = RUN_CASES.map((c, k) => ({
   note: LABELS.runNotes[k] ?? "",
   data: c.data,
   ...ROOMS,
+  // The cards show how a run ended (a stop, or cut off), where the tests read where it stopped.
   asks: {
     ...runAsks(c),
+    end: "stop",
     "word:400": c.records[0] !== undefined ? String(c.records[0]) : "X",
     "word:408": c.records[1] !== undefined ? String(c.records[1]) : "X",
   },
 }));
-
-/** The run the prediction, the investigation and the explanation use: the display refused. */
-const DIRECT = RUN_CASES[1]!;
-const BOTH = RUN_CASES[0]!;
 
 export const systemCallMechanism: LessonInput = {
   id: "system-call-mechanism",
@@ -106,13 +107,13 @@ export const systemCallMechanism: LessonInput = {
           timeModel: "none",
           caption: LABELS.captions.predict,
           props: {
-            program: `${RUN_REFERENCE}\n${DIRECT.data}`,
+            program: RECORD_ONE,
             question: PROSE.p1Question,
             options: [
               { value: "0", label: "0" },
-              { value: "32", label: "32" },
-              { value: "50", label: "50" },
-              { value: "34", label: "34" },
+              { value: "33", label: "33" },
+              { value: "51", label: "51" },
+              { value: "52", label: "52" },
             ],
             ask: { what: "run", run: { what: "word", address: "400" }, traps: true },
             explain: PROSE.p1Explain,
@@ -132,18 +133,15 @@ export const systemCallMechanism: LessonInput = {
           caption: LABELS.captions.walk,
           lead: PROSE.walkLead,
           props: {
-            program: `${RUN_REFERENCE}\n${BOTH.data}`,
+            program: RECORD_ONE,
             inputs: NIGHT_INPUTS,
-            registers: [1, 2, 8, 9],
+            registers: [2, 3, 5],
             traps: true,
             control: true,
             modeWords: true,
             breakpoints: true,
-            pause: ["start", "ended"],
-            memory: [
-              { from: "0x400", words: 2, title: LABELS.recordsTitle },
-              { from: "0x480", words: 1, title: LABELS.numberTitle },
-            ],
+            pause: ["handler"],
+            memory: [{ from: "0x400", words: 1, title: LABELS.recordTitle }],
             outcomes: PROSE.walkAfter,
           },
         },
@@ -203,11 +201,17 @@ export const systemCallMechanism: LessonInput = {
         data: {
           tiers: true,
           empty: RUN_EMPTY,
+          // The records and the program's number, which the tests read, and a watch.
           debugger: {
             breakpoints: true,
             control: true,
             modeWords: true,
-            registers: [1, 2, 8, 9],
+            watch: true,
+            registers: [1, 2, 8, 9, 12],
+            memory: [
+              { from: "0x400", words: 2, title: LABELS.recordsTitle },
+              { from: "0x480", words: 1, title: LABELS.numberTitle },
+            ],
           },
         },
       },

@@ -42,9 +42,9 @@ export const LABELS = {
     cwenLow: "The control registers' write enable stuck at 0",
   },
   fields: {
-    call: "Edges of a call system",
-    resume: "Edges of a resume",
+    stop: "Edges of a stop in user mode",
+    resume: "Edges of the handler's resume",
     interrupt: "Edges of an interrupt",
-    store: "Edges of a refused store",
+    load: "Edges of a word load from 404",
   },
 } as const;

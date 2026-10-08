@@ -50,5 +50,5 @@ export const LABELS = {
     "a word that is not an instruction",
     "a word load not at a multiple of 8",
   ],
-  countTitle: "The word at `400`",
+  countTitle: "The word at 400",
 } as const;

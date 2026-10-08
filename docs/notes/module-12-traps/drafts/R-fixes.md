@@ -20,3 +20,11 @@
 - R4: no fact wrong or dropped. The details placed in `strings.ts`; `fields.shown` capitalised as a label.
 - R5: `c2Task` wrote "its own values"; the fact sheet's word is "words", put in. The fifth test's label capitalised as the other four are.
 - R6: no fact wrong or dropped. `details.bitsForm` placed in `strings.ts`.
+- R7: `reflection` said the machine can "record where it was"; "record" is 12.8's word for a program's end, so the brief's "save" put back. Field labels capitalised. The brief's `0x404` became `404` in prose, which A4 asks for; kept.
+- R8: the hints' rung words came back in quotation marks; the marks removed. `captions.asks` said
+  "the parts the outline leaves", where the figure shows what the runs leave; the brief's "what
+  the outline leaves" put back. `modelVsReality` came back as a numbered list, then again as
+  prose; the prose taken.
+- V3: `halted` and `haltsNext` lacked their full stops; added. `checks.C2at` dropped "by the name
+  of its line"; the value beside it is that name, so the shorter label stands.
+- Labels: memory-panel titles, field labels and captions are plain text on the page, so the backticks the drafts gave them were removed.

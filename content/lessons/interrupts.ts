@@ -15,7 +15,6 @@ import type { LessonInput } from "@platform/lesson-schema";
 import { LABELS } from "./interrupts.labels";
 import { PROSE } from "./interrupts.prose";
 import {
-  COUNT_PROGRAM,
   DOOR_NO_CLEAR,
   DOOR_OPEN,
   DOOR_UNSEEN,
@@ -281,6 +280,6 @@ export const interrupts: LessonInput = {
     textbookExample:
       "The keyboard or timer interrupt of the textbooks: LC-3's keyboard interrupt echoing a character through a vector table and a supervisor stack, a MIPS or RISC-V timer interrupt with its interrupt-enable and pending registers, the stock 'blink an LED from a timer interrupt' of microcontroller courses.",
     howThisDiffers:
-      "The event is the shop's own freezer door, which Module 2 gave its DOOR signal, opening while a user program counts and knows nothing of it. Interrupts arrive through the machine's own waiting word and C0's bit 1, taken at the edge that would run the next instruction, with the instruction not yet run as the return point; the same handler and C4 as every trap, no vector table, no pending or enable registers by those names. The door's handler starts the shop's timer, and the timer's handler lights ALARM only if the door is still open, so the learner's challenge is a rule of the shop, tested with doors that open, close in time, never open, or open late. The failure experiment is a handler that leaves the door's event waiting, which the learner watches send the machine back to the handler before any of the program runs.",
+      "The event is the shop's own freezer door, which Module 2 gave its DOOR signal, opening while a user program counts and knows nothing of it. Interrupts arrive through the machine's own waiting word and C0's bit 1, taken at the edge that would run the next instruction, with the instruction not yet run as the return point; the same handler and C4 as every trap, no vector table, no pending or enable registers by those names. The door's handler starts the shop's timer, and the timer's handler lights ALARM only if the door is still open, so the learner's challenge is a rule of the shop that no figure lists (ALARM lit beside the NIGHT the start lit, so the figures' timer part is not its answer), tested with doors that open, close in time, never open, open late, or stay open on a warm night, and with programs whose own registers must survive every interrupt. The failure experiment is a handler that leaves the door's event waiting, which the learner watches send the machine back to the handler before any of the program runs.",
   },
 };

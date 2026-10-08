@@ -8,14 +8,16 @@ import { describe, expect, it } from "vitest";
 import {
   applyFaults,
   buildDatapath,
+  rowFor,
   startDatapath,
   stuckAt,
+  trapControllerMachine,
   trapLogic,
   trapStateSequence,
 } from "@dd/dd-model";
 import { CircuitBuilder, Simulator, word, type Word } from "@dd/sim";
 
-import { DOOR_OPEN, NIGHT, TRAPLOGIC_ROWS, TRAP_EDGES, trapLogicOut } from "./module12";
+import { CALL_TRAP, DOOR_OPEN, NIGHT, TRAPLOGIC_ROWS, TRAP_EDGES, trapLogicOut } from "./module12";
 import { EDGE_ANSWERS } from "./trap-hardware";
 
 const NAMES = ["FETCH", "READ", "ALU", "MEMORY", "WRITE"];
@@ -70,10 +72,34 @@ describe("facts for the trap-hardware lesson", () => {
     ]).toEqual([1n, 0x18n, 0x34n, 0x24n]);
   });
 
-  it("the edges: call system 2, resume 3, an interrupt 1, a refused store 4", () => {
-    expect(trapStateSequence(8, 0)).toEqual(["FETCH", "READ"]);
+  it("the prediction: a call system traps at its READ edge, where the table says ALU; FETCH next", () => {
+    const m = machine(CALL_TRAP);
+    for (let e = 0; e < 8; e++) m.sim.clockCycle("CLK");
+    expect([m.state(), m.v("control/TRAP")]).toEqual(["READ", 1n]);
+    const row = rowFor(trapControllerMachine(), "READ", { CALL: 0, CREG: 0, MEM: 0, WRITEY: 0 });
+    expect(row?.row.to).toBe("ALU");
+    m.sim.clockCycle("CLK");
+    expect([m.state(), m.v("PC")]).toEqual(["FETCH", 0x10n]);
+  });
+
+  it("the edges: a stop in user mode 2, resume 3, an interrupt 1, a word load at 404 4", () => {
+    // Edges from the instruction's FETCH to the edge that traps, counting both.
+    const edgesTo = (src: string) => {
+      const m = machine(src);
+      let since = 0;
+      for (let e = 0; e < 200; e++) {
+        since = m.state() === "FETCH" ? 1 : since + 1;
+        if (m.v("control/TRAP") === 1n) return since;
+        m.sim.clockCycle("CLK");
+      }
+      return -1;
+    };
+    const handler = "handler: R5 <= C3\n        stop";
+    const user = `        R1 <= handler\n        C4 <= R1\n        R1 <= 0\n        C1 <= R1\n        R1 <= program\n        C2 <= R1\n        resume\n${handler}\nprogram: stop`;
+    expect(edgesTo(user)).toBe(2);
+    const load = `        R1 <= handler\n        C4 <= R1\n        R2 <= 0x404\n        R3 <= word[R2]\n        stop\n${handler}`;
+    expect(edgesTo(load)).toBe(4);
     expect(trapStateSequence(8, 1)).toEqual(["FETCH", "READ", "WRITE"]);
-    expect(trapStateSequence(4, 8)).toHaveLength(4);
     const m = machine(DOOR_OPEN);
     let seen = "";
     for (let k = 1; k < 120 && !seen; k++) {

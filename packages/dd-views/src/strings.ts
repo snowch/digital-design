@@ -1071,14 +1071,14 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       nestC0: "{actual} is not C0 after the door part's resume. resume copies C1 into C0.",
       bitsForm:
         "{actual} has the right value, but this page writes C0 and C1 as their two bits, bit 1 first, such as `01`. Give it in that form.",
-      edgesCall:
-        "{actual} is not the number of edges. The cause of call system comes in READ, and that edge ends the call system.",
+      edgesStop:
+        "{actual} is not the number of edges. The decoder refuses stop in user mode. Its cause appears in READ, and that edge ends the instruction.",
       edgesResume:
-        "{actual} is not the number of edges. resume goes from READ to WRITE, as a control-register job does.",
+        "{actual} is not the number of edges. In system mode resume does not trap: it goes from READ to WRITE, as a control-register job does.",
       edgesInterrupt:
         "{actual} is not the number of edges. An interrupt is taken at the edge that would fetch, and that edge is all it takes.",
-      edgesStore:
-        "{actual} is not the number of edges. A store traps at its MEMORY edge, its last.",
+      edgesLoad:
+        "{actual} is not the number of edges. The memory's checks give their cause in MEMORY, and a load that traps there never reaches WRITE.",
       // Module 11, lesson 4 (brief 4L).
       stackWord:
         "{actual} is not that word; a pop copies a word, adds 8 to R14, and leaves the word where it was. Give the word as three hexadecimal digits.",
@@ -1207,17 +1207,17 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     running: "PC is {pc}.",
     halting: "Stops at next edge: {reason}.",
     stopped: "Stopped: {reason}.",
-    halted: "[draft] halted",
-    haltsNext: "[draft] haltsNext",
+    halted: "Halted: {reason}.",
+    haltsNext: "Halts at the next edge: {reason}.",
     gaveUp: "The machine did not stop after {edges} edges, so the run gave up; PC is {pc}.",
     runningEdges: "{edges} edges made so far.",
     reasons: {
       "11": "instruction fetch outside the ROM",
       "12": "fetch at an address not a multiple of 4",
       "21": "an illegal instruction",
-      "22": "[draft] reason 22",
+      "22": "an instruction that user mode refuses",
       "31": "no memory at the address",
-      "32": "[draft] reason 32",
+      "32": "a device's address in user mode",
       "33": "word at an unaligned address, or byte at device",
       "34": "write to ROM or read-only device",
       "41": "the call system job",

@@ -1293,15 +1293,25 @@ ${RUN_LAMPS}
 ${RUN_BACK}
 ${RUN_END}`;
 
-/** The guided start: the start and the choice given, jobs 2 and 3 and the ending to write. */
+/** The lines before the start: C4, and the number of the first program, 0, at 480. */
+const RUN_FIRST = `        R1 <= handler
+        C4 <= R1
+        R1 <= 0
+        word[0x480] <= R1       // the first program is number 0`;
+
+/**
+ * The outline, the challenge's starting text: the choice of job and jobs 1 to 3 given; the start
+ * of each program and the end of each, with its record, left to the learner, so no figure shows
+ * them.
+ */
 export const RUN_SKELETON = `// The shop's handler: run each program the table names, in user mode, through jobs 1 to 4.
-${RUN_START}
+${RUN_FIRST}
+// start: run program number word[0x480] from the table, in user mode with interrupts off;
+// after the last program, stop.
+start:  stop
 ${RUN_HANDLER_HEAD}
-// job 2: R1 takes room A's reading when R2 is 0, room B's when R2 is 1, and 0 for any other room.
-room:   R1 <= 0
-        goto back
-// job 3: the lamps from R2's bits 2 to 0.
-light:  goto back
+${RUN_ROOM}
+${RUN_LAMPS}
 ${RUN_BACK}
 // job 4 and a fault: record 0 (job 4) or the cause at 0x400 + 8 × the program's number,
 // then run the next program.
@@ -1310,12 +1320,32 @@ ended:  stop`;
 
 /** The empty start: the requirements as comments. */
 export const RUN_EMPTY = `// The shop's handler. The tests add a table, programs, after it: its first word is how many
-// programs, then each program's address. Run each in user mode, in order, from the first. Offer
-// jobs 1 to 4 by call system: 1 shows R2; 2 puts room R2's reading in R1 (0 for room A, 1 for
-// room B, 0 for any other); 3 sets the lamps from R2; 4 ends the program. A program that faults
-// ends there. For program k, leave 0 at 0x400 + 8k if it ended with job 4, else its cause. Keep
-// every register but R1 for the program across a job. After the last program, stop.
+// programs, then each program's address. Run each in user mode with interrupts off, in order,
+// from the first. Offer jobs 1 to 4 by call system: 1 shows R2; 2 puts room R2's reading in R1
+// (0 for room A, 1 for room B, 0 for any other); 3 sets the lamps from R2; 4 ends the program.
+// A program that faults ends there. For program k, leave 0 at 0x400 + 8k if it ended with job 4,
+// else its cause. A job may change R1 and R2 only. After the last program, stop.
 `;
+
+/**
+ * The prediction's handler, smaller than the challenge's: it runs one program in user mode and
+ * records the cause of its trap at 400. The program's load faults with cause 33.
+ */
+export const RECORD_ONE = `// One program in user mode; the handler records the cause of its trap.
+        R1 <= handler
+        C4 <= R1
+        R1 <= 0
+        C1 <= R1                // user mode, interrupts off
+        R1 <= program
+        C2 <= R1
+        resume
+handler: R5 <= C3
+        word[0x400] <= R5       // record the cause
+        stop
+program: R2 <= 0x404
+        R3 <= word[R2]          // a word not at a multiple of 8
+        R1 <= 4
+        call system`;
 
 /** A handler that skips a faulting instruction, as lesson 1's did, instead of ending the program. */
 export const RUN_SKIPPING = RUN_REFERENCE.replace(
@@ -1420,6 +1450,36 @@ notcode: word 0`,
     shown: "0",
     lamps: 0,
     records: [0, 0x21],
+  },
+  {
+    label: "R8, R9 and R12 kept across jobs",
+    data: `programs: word 2, own, again
+own:    R8 <= 81
+        R9 <= 92
+        R12 <= 3
+        R2 <= R8
+        R1 <= 1
+        call system             // show 81
+        R2 <= R9
+        R1 <= 1
+        call system             // show 92
+        R2 <= R12
+        R1 <= 1
+        call system             // show 3
+        R1 <= 4
+        call system
+again:  R12 <= 7
+        R2 <= 1
+        R1 <= 2
+        call system             // room B's reading in R1
+        R2 <= R12
+        R1 <= 1
+        call system             // show 7
+        R1 <= 4
+        call system`,
+    shown: "81, 92, 3, 7",
+    lamps: 0,
+    records: [0, 0],
   },
   {
     label: "no programs",
