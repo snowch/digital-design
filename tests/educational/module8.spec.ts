@@ -208,7 +208,7 @@ test.describe("Module 8's datapath figure", () => {
     await expect(figure.getByRole("button", { name: V.datapath.clock })).toBeEnabled();
     await figure.getByRole("button", { name: V.datapath.run }).click();
     await expect(figure.locator(".datapath-status")).toHaveText(
-      format(V.datapath.stopped, { reason: V.datapath.reasons["21"]! }),
+      format(V.datapath.halted, { reason: V.datapath.reasons["21"]! }),
     );
   });
 

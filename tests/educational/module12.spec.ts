@@ -164,7 +164,6 @@ const LONG_DEBUGGERS = [
   // The panel's readings: the door's time below them is chosen before a run, not during it.
   ["interrupts", "door-debugger", ".debugger-events dl"],
   ["nesting", "nest-saved", ".debugger-memory"],
-  ["system-call-mechanism", "run-walk", ".debugger-memory"],
 ] as const;
 
 test.describe("Module 12's lab", () => {

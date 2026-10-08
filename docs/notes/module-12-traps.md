@@ -484,15 +484,19 @@ change, left for the managing session with the review's other two.
 - **The second run, 02:47 to 03:19, on `9f051fb`**: everything before the browser passed (Vitest
   128 files, 1324 tests); the browser 862 passed, 56 skipped, 10 failed, the ten stored screenshots
   that fail in a build container on `main` too. Every other test passes.
+- **The third run, after the reading review, on `5502052`**: formatting, copyright, the platform
+  copy, types and the build passed; Vitest 128 files, 1335 tests passed; the browser 856 passed,
+  56 skipped, 16 failed. Ten are the same stored screenshots (4 at desktop, 6 at phone). The other
+  six, three tests at both widths, followed this review's own changes: Modules 8 and 9's datapath
+  tests expected "Stopped:" for a halt, which A3 made "Halted:"; and the long-debugger test still
+  listed 12.8's investigation, now an 11-instruction program the test's twelve steps run past.
+  The two expectations updated and the entry dropped; those six then passed (12 tests run).
 
 ## What to change
 
-- **The reading half of the review has not been done.** CLAUDE.md asks for each lesson to go to
-  its own reviewer, every finding attacked by a sceptic. This session did the mechanical half and
-  the author's second pass; the reviewers' half is for the checkpoint.
-- **An unknown word in the timeline.** Lessons 4 to 6's handlers save R8 and R9, which the user
-  programs never set, so the timeline shows `word[400] ← X`. No page says why; a sentence, or a
-  handler start that sets them, would.
+- **Three platform changes the review left to the managing session**: inline code in objectives
+  (A8), a choice placed beside the figure it asks about (12.2 item 7), and a figure that opens a
+  block of its drawing from its props (12.7 item 2).
 - **Module 11's halt for cause `41`** still says "which Module 12 builds". No Module 12 page
   halts there (every one sets C4), but the string should say what it means on both modules.
 - **On a phone, lesson 5's debugger** keeps its readings on the screen, not the door's choice
