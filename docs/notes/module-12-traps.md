@@ -461,6 +461,16 @@ saved work graded on load, the debugger's buttons, its line and its panel on one
 moves, results only after a run, the timeline stepped, the door's time chosen, the capstone's
 starts.
 
+After the reading review (walked on the built site, desktop and phone): 12.7's prediction shows
+the dashed FETCH and its sentence under the state diagram, with the control registers and TRAP and
+GO beside the buttons, no console error at either width. On a phone the controller's diagram is
+still 291 pixels wide in a box of 252; rather than squeeze every state diagram in the course, its
+box now shows a shadow at an edge while more of the drawing lies past it (review 12.7 item 10).
+NOHANDLER's chip in the trap logic's failure rows broke as "NOHA / NDLER" at 1280 pixels; a chip
+now moves to the next line whole, and only one wider than the line breaks inside (item 13).
+Opening a block from a figure's props (12.7 item 2, the half `focus` cannot do) is a platform
+change, left for the managing session with the review's other two.
+
 ## The full check
 
 - **02:03 to 02:38, on `a9311a5`**: formatting, copyright, the platform copy, types and the build
