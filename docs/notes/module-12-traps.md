@@ -520,6 +520,10 @@ and R9 into R12 and R13 (A1) no longer holds: B1 replaced that copy.
   finds the line about to run inside the compact box. Running the whole suite also found a hole
   this round made: 12.5's "closed in time" test started with ALARM lit, so a timer part that
   always lights ALARM passed; that test now starts with other lamps, and the attempt is pinned.
+  The managing session's call on the rows (after the round): the one-screen test stays as it is.
+  The button that opens the whole listing is what the author asked for, and a compact box of four
+  one-line rows, or two where rows carry breakpoints, is the price of keeping the buttons, the
+  line about to run and its values on one screen. No drag handle.
 
 ### The managing session's calls
 
@@ -570,6 +574,38 @@ and R9 into R12 and R13 (A1) no longer holds: B1 replaced that copy.
 
 The platform items (the results list's accessible name, A8, opening a block from a figure's props)
 are the managing session's.
+
+## The figures pass (8 October)
+
+At the author's question whether Modules 11 and 12 have enough pictures: they had five drawings
+in forty figures, and the plan's "a system call crossing from a user program to the handler and
+back" and "nesting: two traps, the second overwriting C1 and C2" had shipped as the text timeline.
+On branch `figures-11-12`, the run is now drawn as lanes: one column for each part of the program
+that runs, time running down (it fits a phone; across, a long run's labels would not), each move
+an arrow labelled with what it writes, a band for the mode, the door and the timer marked where
+their bits of "waiting" are set. It is a view of the trap timeline's own edges, stepped with them,
+or of the debugger's run; a "Next move" button runs on to the next arrow.
+
+- 12.1: the night program's trap and `resume`, above the investigation's timeline.
+- 12.4: the start, the handler and the program, the three calls crossing in system mode and back.
+- 12.5: the door marked between two instructions of the program, then its interrupt, then the
+  timer's.
+- 12.6: the handler's own load traps into a third lane, the handler again, C2 taking `048` while
+  `07C` was the program's return point; and under the explanation's debugger, job 5's stores to
+  `410` and `418` marked before the door's and the timer's interrupts come in to the handler
+  again.
+- 12.8: a figure of its own in the explanation, the reference handler on run 2's table, with
+  `list: false`: the lanes and their arrows only, no lines, so the handler is not given away.
+
+12.2 keeps its watch: the save at `408` and the putting back are two lines a watch shows plainly,
+and a drawing of one word adds nothing to it. 12.3 and 12.7 are as they were. No drawing shows a
+value before its step, and the leads are generic about what an arrow writes; the outcomes name the
+values. Each run's moves are pinned in `content/lessons/drawings.facts.test.ts`.
+
+A fault found on the way, now mended: the debugger figure's props schema dropped any key it did
+not list, so two settings this module made never reached the page: 12.5's question figure's
+`interruptWords: false` (second reading, item 6) and 11.1's `words: true` (B12). The schema now
+lists every option the lessons give, and a probe found no other key dropped.
 
 ## The mechanical walk
 
