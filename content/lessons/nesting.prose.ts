@@ -59,7 +59,7 @@ export const PROSE = {
   c2Hints: [
     "The idea: job 6 takes the explanation's four steps: save C1 and C2, write 3 to C0, count, write 1 to C0, put C1 and C2 back, then `resume`.",
     "A common mistake: writing 3 to C0 and nothing else. The door's interrupt writes over C1 and C2, and the program goes on in system mode, or never comes back.",
-    "A smaller example: lesson 2's handler saved R5 with `word[0x408] <= R5` before it changed R5. A control register is saved through an R register: `R1 <= C2`, then a store of R1.",
+    "A smaller example: a handler that needs C3 after a trap can save C3 the way it saves a register, through an R register that it has saved first: `R1 <= C3`, then `word[0x420] <= R1`. It puts C3 back with `R1 <= word[0x420]`, then `C3 <= R1`.",
     "Part of the answer: put the program's R8 and R9 back from `400` and `408` first, since a trap in the count saves them there again, and count with R1 and R2 only.",
     "The whole answer: job 6, from `count:` to its `resume`, is this:\n\n```\ncount:  R8 <= word[0x400]       // the program's R8 and R9 back now:\n        R9 <= word[0x408]       // a trap in the count saves them again\n        R1 <= C1\n        word[0x410] <= R1       // save C1\n        R1 <= C2\n        word[0x418] <= R1       // save C2\n        R1 <= 3\n        C0 <= R1                // system mode, interrupts on\n        R1 <= 0\nnext:   word[display] <= R2     // show the count\n        R2 <= R2 - 1\n        if R2 != R1 goto next\n        R1 <= 1\n        C0 <= R1                // interrupts off again\n        R1 <= word[0x410]\n        C1 <= R1                // C1 and C2 put back\n        R1 <= word[0x418]\n        C2 <= R1\n        resume\n```",
   ],

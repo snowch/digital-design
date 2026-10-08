@@ -8,14 +8,14 @@ export const LABELS = {
   title: "Where in the machine does a trap happen?",
   objectives: [
     "Name the parts that make a trap's edge, and what each does.",
-    "Count the edges a trap, a call system, a resume and an interrupt take.",
+    "Count the edges an instruction takes up to the edge that traps, and the edges of a resume and an interrupt.",
     "Say which cause the trap logic chooses when there are several.",
     "Write the trap logic.",
   ],
   titles: {
     question: "A trap, edge by edge",
     motivation: "Four parts and a rule",
-    prediction: "The PC after the trapping edge",
+    prediction: "The state after the trapping edge",
     investigation: "The night program on this machine",
     construction: "Counting edges, worked out",
     failureExperiment: "A broken trap",
@@ -31,7 +31,7 @@ export const LABELS = {
   captions: {
     edges: "A timing diagram of a program that traps within 12 edges.",
     predict:
-      "The machine's drawing, stopped before the store's last edge, with a question about the PC.",
+      "The machine's drawing, stopped before a call system's last edge, with a question about the controller's state.",
     night: "The night program on the machine of several edges, with its control registers.",
     answers: "Four questions about the edges a trap takes.",
     faults: "The night program with a fault you choose.",

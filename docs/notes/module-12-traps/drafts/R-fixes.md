@@ -28,3 +28,14 @@
 - V3: `halted` and `haltsNext` lacked their full stops; added. `checks.C2at` dropped "by the name
   of its line"; the value beside it is that name, so the shorter label stands.
 - Labels: memory-panel titles, field labels and captions are plain text on the page, so the backticks the drafts gave them were removed.
+- Second pass, 12.2: `explanation` said `400` holds the count; in the figures' handler it holds the cause (the count is the challenge's). My brief R2 had it wrong; corrected in place.
+- Second pass, 12.3: `p1Question` still asked about "the store to the lamps", which the new
+  prediction's program does not make; "the store to room B's sensor" put in. `timelineAfter`'s
+  "keeps the cause" made "saves", A11's word.
+- Second pass, 12.4: the construction's caption still said four questions; three now.
+- Second pass, 12.5: "The handler start" in the generalisation made "The start", the page's name for the reset lines.
+- Second pass, 12.6: the labels still used "keep" for the save (A11) and named job 5 in the challenge; "save" and job 6 put in, the challenge's title made "A count the door can interrupt".
+- Second pass, 12.7: the prediction's title, caption and the second objective still named the PC and a call system's count; they now name the controller's state and the counts the construction asks for.
+- Second pass, 12.8: the failure experiment still said "the six runs"; 7. The investigation's title and the question figure's lead named the whole handler; they name the record's run and the outline.
+- Second pass, 12.1: "keeps the cause" (twice) made "stores the cause": lesson 1 has not taught saving, and A11 keeps "keep" for the calling convention.
+- R9: the lesson 1 hint came back as a fragment ("a handler that runs stop ..." with no verb); joined into its next sentence.

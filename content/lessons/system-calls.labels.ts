@@ -33,7 +33,7 @@ export const LABELS = {
     predict:
       "A handler with two jobs and a program that uses them, listed, with a question about C2.",
     timeline: "The program's three calls, edge by edge, with the mode after each.",
-    answers: "Four questions about a call's registers.",
+    answers: "Three questions about a system call's registers and results.",
     skipping: "The same program with a handler that adds 4 to C2, in the debugger.",
     services: "The same program in the debugger, with a breakpoint on the handler.",
     sensor: "A handler that reads a room's sensor for a user program, and its tests.",

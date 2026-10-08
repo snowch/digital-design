@@ -56,7 +56,7 @@ export const PROSE = {
   c2Hints: [
     "The idea: a signal `interrupt` and a signal `traps` (any cause, or the interrupt), then TRAP, HALT and GO from those and NOHANDLER.",
     "A common mistake: taking the interrupt whatever the state. An interrupt is taken only at an edge that would fetch.",
-    "A smaller example: Module 9's GO, `~(failed | stopNow)`, already says \"not if anything stops the machine\"; the trap logic's GO is the same with `traps` for `failed`.",
+    "A smaller example: a signal that is 1 when either of two causes is not 0 is `assign either = (CAUSEF != 8'h00) | (CAUSEM != 8'h00);`. The trap logic's signals are built from pieces like this one.",
     "Part of the answer: `assign interrupt = FETCHING & IE & (WAITING != 2'b00);`, and in the `always_comb`, the interrupt's lines go between the decoder's and the fetch's, so the fetch's still wins.",
     "The whole answer: these lines replace the starting text's lines after `assign stopNow`, up to `endmodule`.\n\n```\n  logic interrupt, traps;\n  assign interrupt = FETCHING & IE & (WAITING != 2'b00);\n  assign traps = failedF | interrupt | failedD | failedM;\n  assign HALT = stopNow | (traps & NOHANDLER);\n  assign TRAP = traps & ~NOHANDLER;\n  assign GO = ~(traps | stopNow);\n  always_comb begin\n    CAUSE = CAUSEM;\n    if (failedD) CAUSE = CAUSED;\n    if (interrupt) begin\n      if (WAITING[0]) CAUSE = 8'h81;\n      else CAUSE = 8'h82;\n    end\n    if (failedF) CAUSE = CAUSEF;\n  end\n```",
   ],

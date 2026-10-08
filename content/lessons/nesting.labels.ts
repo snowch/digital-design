@@ -9,7 +9,7 @@ export const LABELS = {
   objectives: [
     "Say what a trap inside the handler writes over.",
     "Give the control registers just after a trap inside the handler.",
-    "Keep C1 and C2 before letting interrupts in, and put them back before resume.",
+    "Save C1 and C2 before letting interrupts in, and put them back before resume.",
     "Say why a handler must not fault.",
   ],
   titles: {
@@ -18,27 +18,27 @@ export const LABELS = {
     prediction: "C2 after the handler faults",
     investigation: "Two traps, edge by edge",
     construction: "The registers inside the wait, worked out",
-    failureExperiment: "Interrupts let in, nothing kept",
-    explanation: "Keeping C1 and C2",
+    failureExperiment: "Interrupts let in, nothing saved",
+    explanation: "Saving C1 and C2",
     generalisation: "When to let interrupts in",
-    challenge: "A wait the door can interrupt",
+    challenge: "A count the door can interrupt",
     reflection: "Where a trap happens",
   },
   challengeTitles: {
     c1: "The registers inside the wait",
-    c2: "A wait the door can interrupt",
+    c2: "A count the door can interrupt",
   },
   captions: {
     late: "The debugger shows a handler whose long job keeps the door waiting.",
     predict: "The handler's listing shows job 2 faulting on room 5, with a question about C2.",
     timeline:
       "The timeline shows the run from the program's call, edge by edge, with the mode after each.",
-    savedListing: "The listing shows the handler with job 5 keeping C1 and C2.",
+    savedListing: "The listing shows the handler with job 5 saving C1 and C2.",
     answers:
       "Four questions ask about the registers when the door's interrupt comes in during the wait.",
-    unsaved: "The debugger shows a job 5 that lets interrupts in without keeping C1 and C2.",
-    saved: "The debugger shows job 5 keeping C1 and C2, with the door's time to choose.",
-    wait: "The handler's job 5 is yours to change, with its tests.",
+    unsaved: "The debugger shows a job 5 that lets interrupts in without saving C1 and C2.",
+    saved: "The debugger shows job 5 saving C1 and C2, with the door's time to choose.",
+    wait: "The handler's job 6 is yours to change, with its tests.",
   },
   keptTitle: "C1 and C2 saved at 410 and 418",
   fields: {

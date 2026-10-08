@@ -10,7 +10,7 @@
 export const PROSE = {
   question:
     "Lesson 7 ended on a question. Can you write the handler that runs the shop's programs, one after another, each in user mode, and gives them the jobs of lesson 4?\n\nThe handler runs each program in a table, in turn, in user mode. It offers the four jobs of lesson 4. It writes a record for each program, and it stops the machine after the last.\n\nThe figure runs the outline, the challenge's starting text, on the 7 runs the tests use. The outline gives the choice of job and jobs 1 to 3. It leaves the start of each program and the end of each to you.",
-  asksLead: "Read what each run asks, then press the button and compare what this handler left.",
+  asksLead: "Read what each run asks, then press the button and compare what the outline left.",
   asksAfter:
     "The outline's start only stops, so in every run the machine stops after 5 instructions. No program runs: nothing is shown and no record is written. Only run 7, the empty table, matches what its test asks.",
   motivation:
@@ -29,7 +29,7 @@ export const PROSE = {
   construction:
     "Build the handler from the outline in this order, and run the tests after each step.\n\n1. Write the start: the program number at `480`, its address from the table, C1 and C2, then `resume`; and the stop after the last program. The outline's `finish:` and `ended:` still only stop. Run 1 shows 25, then stops at `finish:`. Run 7 matches.\n2. Write the end of a program for job 4, at `finish:`: record 0, move to the next number, and go back to the start. Runs 1, 4, 6 and 7 match.\n3. Make a fault's end write the cause as the record, with the same lines. Every run matches.\n\nThen use the debugger in the challenge: set breakpoints, and step through any test's programs.",
   failureExperiment:
-    "The figure runs a handler whose fault part skips the faulting instruction, as lesson 1's handler did. It adds 4 to C2 and resumes, instead of ending the program. The figure runs it on the six runs.",
+    "The figure runs a handler whose fault part skips the faulting instruction, as lesson 1's handler did. It adds 4 to C2 and resumes, instead of ending the program. The figure runs it on the 7 runs.",
   skippingLead: "Predict which runs match, then press the button.",
   skippingAfter:
     "Runs 1, 4, 6 and 7 still match their tests. Run 2 does not: the store to the display is skipped, and `direct` ends with job 4, so its record is 0, not 50. The display still shows 8.\n\nRun 3 skips the refused `stop`. The run goes on past the program's end, onto words that are not instructions, and each one is skipped in turn. The run is cut off after 5000 instructions. Run 5 has the same result: the word that is not an instruction is skipped, and the run is cut off after 5000 instructions.\n\nSkipping suits a handler that knows what the program meant. A handler that runs programs it did not write cannot know, so it ends the program and records why.",

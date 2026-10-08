@@ -16,7 +16,7 @@ export const LABELS = {
     question: "A handler for the shop",
     motivation: "The handler's parts",
     prediction: "A program's record",
-    investigation: "The whole handler at work",
+    investigation: "One program's record, step by step",
     construction: "Building it in steps",
     failureExperiment: "A handler that skips",
     explanation: "Two ways to end",

@@ -17,7 +17,7 @@ export const PROSE = {
     "Bit 0 of C0 sets the mode.\n\nWhen bit 0 is 1, the machine refuses only what Module 8's machine refused. That is **system mode**. Every program so far ran in it.\n\nWhen bit 0 is 0, the machine refuses more. That is **user mode**. In user mode these instructions fault, with these causes:\n\n- every line that reads or writes a control register, `resume`, and `stop`: cause `22`;\n- every load or store at a device's address, `7C0` to `7F7`: cause `32`.\n\nEvery other instruction runs as before. That includes its accesses to the ROM and the RAM.\n\nA trap's edge sets C0 to `01`, so the handler always runs in system mode. C1 takes C0 at that edge, so C1 holds the mode the program was in.\n\nThe start is the lines from reset at `000` that set C4 and start the program. For user mode, it writes `00` to C1 and the program's address to C2, the return point, then runs `resume` from lesson 1. At `resume`'s edge, C0 takes C1 and the PC takes C2.",
   prediction:
     'The listing gives a start that writes `00` to C1, as a start for user mode does. Then it goes to `program` with `goto program`, not `resume`. The program stores to room B\'s sensor, which the machine refuses. The handler saves the cause at `400`, then stops.\n\nChoose an answer and press "Check my prediction".',
-  p1Question: "Just after the store to the lamps traps, what does C1 hold?",
+  p1Question: "Just after the store to room B's sensor traps, what does C1 hold?",
   p1Explain:
     "C1 holds `01` just after the store traps. That is C0 as it was when the store faulted.\n\n`goto` changes only the PC, so C0 was still `01`, and the program ran in system mode. The `00` the start wrote to C1 was never used: the trap's edge wrote over it.\n\nThe cause is `34`, a store to a read-only device, not `32`. In system mode the store is refused because the sensor is read only, not because of the mode.\n\nA start reaches user mode only through `resume`, which copies C1 into C0.",
   investigation:
@@ -25,7 +25,7 @@ export const PROSE = {
   timelineLead:
     '1. Press "Next edge" until the last edge shown is `resume`\'s edge. Read the mode after that edge.\n2. Press "Next edge" through the program\'s lines until the store to the lamps traps. Watch which five registers are written at that edge.\n3. Press "Run to the end" to show the rest.',
   timelineAfter:
-    "`resume` sets C0 to `00` and the PC to `038`, so the program runs in user mode. The store at `044` traps with cause `32`, and C1 keeps `00`. The handler runs in system mode. It keeps the cause at `400` and the return point at `408`. It ends with `stop` at `034`. ALARM is still on.",
+    "`resume` sets C0 to `00` and the PC to `038`, so the program runs in user mode. The store at `044` traps with cause `32`, and C1 keeps `00`. The handler runs in system mode. It saves the cause at `400` and the return point at `408`. It ends with `stop` at `034`. ALARM is still on.",
   construction:
     "You can tell what user mode does with a line from its address and its job alone, without running it.",
   answersLead: "Work out each answer, then run the tests.",

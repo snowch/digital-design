@@ -48,7 +48,7 @@ export const PROSE = {
   stackAfter:
     "The machine halts with cause `34` at `01C`, the handler's first line.\n\nThe push at `014` trapped, and the machine went to the handler. The handler's own store, at `3F0`, is in the ROM too.\n\nA fault at the address C4 holds halts the machine, so nothing more runs.",
   explanation:
-    "A handler saves each register it writes, before it writes it, and puts it back before `resume`.\n\nIt saves a register with an absolute store, at an address the instruction's constant gives: `word[0x408] <= R5`. It puts the register back with `R5 <= word[0x408]`.\n\nAn absolute store needs no register to hold its address. So the handler can save R5 before it has changed any register, as its first line.\n\nIt cannot push on the stack. The stack belongs to the program, and R14 may be what went wrong, as the last figure showed.\n\nThe handler's words live at addresses it alone uses. Here `400` holds the count, and `408` holds R5.\n\nThe control registers are the handler's own. The program never sees them change.",
+    "A handler saves each register it writes, before it writes it, and puts it back before `resume`.\n\nIt saves a register with an absolute store, at an address the instruction's constant gives: `word[0x408] <= R5`. It puts the register back with `R5 <= word[0x408]`.\n\nAn absolute store needs no register to hold its address. So the handler can save R5 before it has changed any register, as its first line.\n\nIt cannot push on the stack. The stack belongs to the program, and R14 may be what went wrong, as the last figure showed.\n\nThe handler's words live at addresses it alone uses. Here `400` holds the cause, and `408` holds R5.\n\nThe control registers are the handler's own. The program never sees them change.",
   timelineLead:
     "This is the trap timeline of the same run, with the saving handler. The first press of \"Next edge\" shows edge 4, `R0 <= 0`, the edge before the trap. Only the timeline shows each edge's transfers. Look for these:\n\n1. Edge 5: the store at `010` traps. That one edge makes five transfers: C2 ← `010`, C1 ← `01`, C0 ← `01`, C3 ← `34` and PC ← `01C`.\n2. Edge 13: `resume` makes two transfers: C0 ← `01` (C1's word) and PC ← `014`.\n3. Each edge between them makes one or two transfers: a register or a word, and the PC.",
   generalisation:
@@ -59,7 +59,7 @@ export const PROSE = {
   c2Hints: [
     "The idea: save R5 with an absolute store before the handler's first write, and put it back just before `resume`.",
     "A common mistake: saving R5 on the stack. One test's stack has reached the ROM, and the save would fault.",
-    "A smaller example: the investigation's handler saves R5 with `word[0x408] <= R5` first and puts it back with `R5 <= word[0x408]` last.",
+    "A smaller example: a handler that writes R7 alone saves R7 with `word[0x410] <= R7` as its first line, and puts it back with `R7 <= word[0x410]` just before `resume`.",
     "Part of the answer: the count lives at `400`, so the saved word needs an address of its own, such as `408`.",
     "The whole answer:\n\n```\n        R1 <= handler\n        C4 <= R1\n        R1 <= 0\n        word[0x400] <= R1       // the count of refused stores\n        goto program\nhandler: word[0x408] <= R5      // save R5\n        R5 <= word[0x400]\n        R5 <= R5 + 1\n        word[0x400] <= R5\n        R5 <= C2\n        R5 <= R5 + 4\n        C2 <= R5\n        R5 <= word[0x408]       // put R5 back\n        resume\n```",
   ],

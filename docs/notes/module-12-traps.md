@@ -128,7 +128,8 @@ let a trap in on purpose.
 - **The model** (`machine.ts`) gains C0 to C4, the mode, traps to C4, `resume`, the two
   control-register jobs, causes `22`, `32`, `81` and `82`, and interrupts, behind a
   `MachineOptions` flag (`traps`), with `MODULE_12` the course's machine from this module on. At
-  reset the machine is in system mode with no handler, so a trap with C4 at 0 halts with its cause,
+  reset the machine is in system mode with no handler, so an instruction that faults with C4 at 0
+  halts the machine with its cause,
   as now; Modules 8 to 11 keep their options and every page runs as it does today.
 - **The circuit** is Module 12's own copy of Module 9's machine of several edges
   (`packages/dd-model/src/traps.ts`, library id `machine-traps`), so Modules 8 to 11's figures and
@@ -191,8 +192,9 @@ point and a function's return address), "call" (`call system` and a call of a fu
 How a run ends, Module 11's words kept: a run *stops* at its `stop`; the machine *halts* with a
 cause; the debugger *pauses* at a breakpoint; a run is *cut off* after 5000 instructions; the
 debugger *ends* it before a register nothing has set. Module 12's own: an instruction *traps*, and
-the machine *goes to the handler*; the handler *resumes* the program. A trap with no handler is a
-halt, and the pages say so.
+the machine *goes to the handler*; the handler *resumes* the program. With no handler there is no
+trap: an instruction that faults halts the machine, as in Module 8, and the pages say so (review
+A10).
 
 ## The SystemVerilog this module brings
 
@@ -262,6 +264,189 @@ and system mode, lesson 3; interrupts off at a trap, lesson 5; "a handler must n
 (lesson 6); a caption that placed a panel by position (lesson 1). Found: lesson 2's construction
 named four handlers its page did not show; they now follow its task. Each lesson's interactive
 shows the mechanism its prose claims: the figures' numbers are the facts tests'.
+
+## The reading review (8 October)
+
+The managing session's reading review of a9311a5: 87 findings, 7 blocking, each upheld or narrowed
+by an independent sceptic. Below, each finding and what was done. No challenge's answer is stated.
+The code came first (commits 6073304, 5c50219), then a fact brief per lesson to the drafting
+subagent (`briefs/R1.md` to `R9.md`, `V3.md`; the shared fact sheet gained a section, "Decisions
+after the reading review"), then the second pass. Every fix of fact or form to a draft is in
+`drafts/R-fixes.md`. Every shortcut the review found is pinned in its lesson's facts test as a
+wrong attempt that fails, beside the starting text.
+
+### Part A
+
+- **A1, tests that fail the shortcuts.** The program grader gained `stopAt` (where a run stopped:
+  the name the tests' program gives its line, or `handler` for any line before the tests' own),
+  `C2at` (C2 by the name of its line, since the program's addresses move with the learner's
+  lines), `causes` (capped at eight in a failure's words) and C0 to C4 in the pages' forms. The
+  tests' programs set R0 to R15 to words of their own except the call's own registers, and copy
+  R8 and R9 into R12 and R13 before the run's last call, which ends it in the handler; every test
+  checks them. The figures' user programs that show a save set R8 and R9 (12.4's and 12.6's), and
+  their numbers were recomputed and re-pinned.
+- **A2, no challenge's lines on the page.** 12.3's, 12.5's, 12.6's and 12.8's challenges changed
+  so that no figure lists their lines (below). Four "smaller example" hints that were part of
+  their answers were redrafted (brief R9).
+- **A3, Module 12's run words.** Module 12 has its own `stops.stop`, `stops.cutOff`, `stopsAt`,
+  `failedLeft`, the editor's heading and each challenge's sentence for how a run must end
+  (`ends.*`); Module 11's stay on Module 11's pages. The datapath figure says "Halted:" for a cause
+  and "Stopped:" only for `stop`, on every module. The reset lines are "the start".
+- **A4, numbers.** An address shows three hexadecimal digits at every value; C0, C1 and "waiting"
+  are two bits everywhere, the grader's feedback included; a word holding a cause shows its
+  hexadecimal beside it, and 12.1 says once why cause `34` reads 52. Prose writes `400`; a task
+  gives `word[0x400]`. Feedback writes "{name}: {value}", and an empty value reads "nothing".
+  Module 11's note narrowed to match.
+- **A5, the run button.** It reads "Run to a breakpoint" only while a pause lies ahead, else "Run
+  to the end"; every Module 12 lead was checked against it. Module 11's leads name "Run to a
+  breakpoint" only for presses that pause; their last press, which now reads "Run to the end",
+  they leave unnamed, and they stand.
+- **A6, results that describe the run made.** 12.6's result gives each door choice's numbers;
+  12.7's investigation shows its result when the run stops (`outcomesWhen`).
+- **A7, what the tests check, on show.** The challenges' debuggers of 12.1, 12.2, 12.3, 12.6 and
+  12.8 show the words the tests read; 12.2's, 12.4's and 12.5's show every register; 12.8's has a
+  watch.
+- **A8, objectives.** Backticks dropped, with a content test (done before this review's commits).
+- **A9, the registers a system call may change.** R1 and R2. Stated in 12.4 beside the comparison
+  with a function call, with the reason checked against the handler (it saves at its start,
+  before it reads C3, because the same handler takes faults); 12.6 and 12.8 cite it; the tests
+  check every other register.
+- **A10, a trap goes to the handler.** 12.1's explanation and this note no longer call a halt a
+  trap.
+- **A11, one word, one meaning.** "Save" and "put back" for the RAM, "keep" for the calling
+  convention, "a function call" in full, "job" only for a system call's service.
+- **A12, predictions.** 12.2, 12.3, 12.5, 12.7 and 12.8's predictions no longer follow from what
+  is above them (below).
+- **A13, originality.** 12.1's note names SPIM's default MIPS handler and says what is this
+  course's own.
+
+### 12.1 `traps`
+
+1. The task names its checks; the failure ends with the lesson's own sentence on how a run ends.
+2. Tests 1 and 2 check C2 by its line's name; the `goto` shortcut fails (pinned).
+3. "A register like any other" gone: a control register is only copied to or from an R register.
+   The assembler's new refusal says so for a job, a load, a store or a branch, and `docs/isa.md`
+   lists it.
+4. A10 applied; the motivation's first lines no longer read wrongly at first; "every module
+   before this one" narrowed to Modules 8 to 11.
+5. The explanation's debugger shows the word at `400`; its lead's steps are things to do; 52 is
+   explained where it first appears, in the investigation.
+6. The investigation says each edge is one instruction or one trap; the note on hardware says what
+   a real machine does instead.
+7. Cuts made; "mend" is given its case: the night program's store cannot be mended, and why.
+8. The fourth hint points to where the causes are listed (the schema allows five hints, so it
+   joins "Part of the answer").
+9. "A night program for the shop"; the tests no longer use `signals`; the code comment fixed. The
+   first caption's "handler" left: the objectives above it use the term.
+10. A8 and A4. 11. A13.
+Also 12.4's: the generalisation's sentence on lesson 4's return point cut.
+
+### 12.2 `saving-state`
+
+1. Blocking. Every register checked, R0 to R15; the task, the failure and the originality note
+   say so; the four shortcuts fail (pinned).
+2. The motivation says which registers and that C2's new word is the skip.
+3. The timeline starts at the edge before the trap; its lead points at what only the timeline
+   shows.
+4. The prediction no longer states the save's line; the explanation carries the case for absolute
+   stores again.
+5. The repeats cut. 6. The calling convention's set given whole, R0 to R9.
+7. The choice quoted in `saveChoice`; the placement half is the platform's.
+8. A8, A4; the timeline's values carry the hidden "hexadecimal".
+
+### 12.3 `user-mode`
+
+1. The opening figure is stepped, so ALARM's going off is seen.
+2. "The start" named and used; "the handler" is only C4's code.
+3. Accepted as the review called it: the C0 route and a start that leaves C1 at reset pass. The
+   objective is the skill; the challenge is new (the start, and a handler that counts and skips
+   one cause and saves any other), not listed by any figure; hint 3 is smaller and no part of it.
+   `goto program` fails (pinned).
+4. Causes shown with their hexadecimal; the challenge's own sentence on how a run ends, which
+   names C2.
+5. The explanation agrees with the failure experiment; the RAM and C0 points made once; "its
+   devices' addresses".
+6. "Every program so far" corrected; the devices are `7C0` to `7F7` (pinned: `7F0` gives `32`,
+   `7F8` gives `31`); no mode in the question.
+7. The prediction is now a start that writes C1 but goes to the program with `goto`, so C1 differs
+   across the trap; "are written".
+8. The map's lead points at the motivation's list. 9. A3; "in words" reworded. 10. A8.
+
+### 12.4 `system-calls`
+
+1. Each run's causes and where it stopped are checked; the fault-line shortcut fails (pinned).
+2. R0 and R3 to R15 checked across job 2; the own-`resume` and scratch shortcuts fail (pinned);
+   Try it shows every register; the reason for saving stated with A9.
+3. A3. 4. New construction questions to work out (a lamps word, what a program of two job 2s
+   shows, C2 after a call); NIGHT's bit in the table of jobs; the wrong-answer sentences point at
+   the answer's source.
+5. The stepping moved to the first pause. 6. Cuts made. 7. "A function call". 8. A1.
+
+### 12.5 `interrupts`
+
+1. The timer challenge asks for a rule no figure lists (ALARM lit beside the NIGHT the start
+   lit). Pasting the figures' timer part fails (pinned).
+2. The motivation no longer gives the return point. 3. "Waiting" explained where it first
+   appears, with when the bit is set (pinned); brief 5A's lag corrected.
+4. `resume` described as lesson 1 did; the edge after each `resume` traps again; the failure
+   figure's handler keeps the right one's length, and its traps re-pinned (384).
+5. The tests have programs of their own whose registers are checked, and a warm night; the four
+   shortcuts fail (pinned). The figures' program left as it was.
+6. C0 and "waiting" as two bits, bit 1 first. 7. The lead names C2 at the first pause with the
+   door at 5. 8. A3. 9. A4.
+
+### 12.6 `nesting`
+
+1. Blocking. The construction gives C1 and C0 as two bits; another notation of the right value
+   gets the form's sentence (`bitsForm`); brief 6B corrected.
+2. Blocking. The result gives each door choice's numbers; the memory word explained.
+3. Blocking. C1 checked at the end of every run; the shortcut that puts back C2 alone fails
+   (pinned). Writing C1 and C2 back with interrupts still on is not caught by any fixed door time,
+   and is left, as the review allowed.
+4. The challenge's job is a job of its own, job 6, a countdown; no figure lists it.
+5. The question's figure pauses at the door's part. 6. The repeat removed at the motivation's
+   end; the fault separated from letting interrupts in; the waiting bit cited.
+7. The four lines named without "last". 8. The construction's listing leaves out the words and
+   the notes; a listing's explanation sits beside its verdict (Module 11's too).
+9. A11. 10. A8. 11. A4. 12. Try it's door follows the chosen run.
+
+### 12.7 `trap-hardware`
+
+1. Blocking. The lower number wins, said with why only one pair can meet; the note, brief 7C and
+   `traps.ts` corrected; the clash with the note on hardware gone.
+2. Each drawing has a `focus`, and the motivation names the block to press for each part. The
+   first diagram has C0, C1 and C3 lanes. A drawing still opens closed; opening one from a page is
+   a platform change, noted below.
+3. The prediction asks for the controller's state after a `call system` traps at READ, which no
+   figure above shows.
+4. The state diagram marks a trap's move (a dashed box at FETCH, a sentence under it) and a move
+   GO holds back (the same at the held state); the "CALL 1" arrow is said to be `call`'s.
+5. The result shows when the run stops. 6. TRAP, GO and the control registers sit beside the
+   buttons. 7. IE glossed; NOHANDLER too. 8. `returnPoint` explained.
+9. The construction asks about four traps the page does not count; "the handler's `resume`";
+   hint 3 smaller and no part of it.
+10. Left: see the walk. 11. A11, A3. 12. The repeat cut. 13. A8; "no device changes" narrowed to
+   what holds; the NOHANDLER chip: see the walk.
+
+### 12.8 `system-call-mechanism`
+
+1. Blocking. No figure lists or runs the challenge's lines: the prediction and the investigation
+   use a one-program handler of their own; the question's and the failure's figures show results
+   only.
+2. Blocking. The construction's steps rewritten from the new outline; each step's stated result
+   pinned.
+3. The prediction asks about a record no card states. 4. A run whose programs depend on their own
+   R8, R9 and R12 across jobs; C1 checked; the three shortcuts fail (pinned).
+5. The ways in named as the buttons name them; the outline leaves the start and the end of a
+   program, the module's mechanism.
+6. Limited to what user mode refuses. 7. The objective says what the word at `480` gains, and the
+   motivation that the RAM is not protected.
+8. The record is the cause itself, read as a word; said after the prediction.
+9. The capstone's own sentence on how a run must end; `stopAt` checked. 10. The challenge's
+   debugger shows the records, the number and a watch.
+11. A5. 12. The outline is introduced before it is named; runs numbered on the cards and in the
+   prose; run 2's fault and `ended` said.
+13. Cuts made. 14. A9. 15. The empty program's comment rewritten. 16. A8.
 
 ## The mechanical walk
 

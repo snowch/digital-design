@@ -16,7 +16,7 @@ export const PROSE = {
   motivation:
     "The machine refuses some instructions. The store to room B's sensor faults. Instead of halting, the machine can go to a program of its own. A program the machine goes to when an instruction faults is a **handler**. Going to the handler in place of halting is a **trap**. The store traps instead of halting the machine.\n\nControl register C4 holds the handler's address. A program sets it before anything faults, with `C4 <= R1`.\n\nAt the edge that ends the instruction that faults, five registers take new words:\n\n- C2 takes the return point, where to go back to;\n- C1 takes C0, the status, as it was;\n- C0 takes `01`;\n- C3 takes the cause;\n- the PC takes C4, so the next instruction is the handler's first.\n\nThe instruction that faulted changes nothing else: no register, no memory, no device.\n\nThe handler reads the cause with `R5 <= C3`. It goes back with `resume`, which sets the PC to C2.\n\nC0 and C1 say more in lesson 3. In this lesson C0 is `01` throughout.",
   prediction:
-    'The figure lists the night program with a handler at `024`. Its first two lines set C4 to `024`.\n\nThe handler keeps the cause at `400`, works on C2, and resumes.\n\nChoose an answer and press "Check my prediction".',
+    'The figure lists the night program with a handler at `024`. Its first two lines set C4 to `024`.\n\nThe handler stores the cause at `400`, works on C2, and resumes.\n\nChoose an answer and press "Check my prediction".',
   p1Question: "Just after the store to room B's sensor traps, what does C2 hold?",
   p1Explain:
     "C2 holds `014`: the address of the store that faulted, not the next instruction.\n\nAfter a fault, the return point is the instruction that faulted, so a handler can mend what went wrong and run it again.\n\n`018` is the instruction after it. `024` is the handler's address, which the PC takes.\n\nThe next figure runs the program edge by edge.",
@@ -40,7 +40,7 @@ export const PROSE = {
     "The whole answer: `010`, `33`, `01` and `01C`.",
   ],
   failureExperiment:
-    "The figure runs the night program with a shorter handler. It keeps the cause at `400` and runs `resume` at once. It does not change C2.\n\nWatch C2 in the control registers panel.",
+    "The figure runs the night program with a shorter handler. It stores the cause at `400` and runs `resume` at once. It does not change C2.\n\nWatch C2 in the control registers panel.",
   noSkipLead: 'Predict how the run ends, then press "Run to the end".',
   noSkipAfter:
     "The debugger cuts the run off after 5000 instructions. NIGHT never lights.\n\nC2 still holds `014` when `resume` runs, so the PC goes back to the store to room B's sensor.\n\nThe store faults again and traps again. The handler resumes the program again, and the run goes round for ever.",
@@ -58,7 +58,7 @@ export const PROSE = {
   c2Hints: [
     "The idea: read the cause with `R5 <= C3` and compare it with `0x34` before doing anything else.",
     "A common mistake: counting every trap. Only a refused store, cause `34`, is counted and skipped.",
-    "A smaller example: the night program's handler skips with `R5 <= C2`, `R5 <= R5 + 4` and `C2 <= R5` before `resume`.",
+    "A smaller example: a handler that runs `stop` when the cause is `21`, and runs `resume` for every other cause, reads C3 into a register, puts the cause `21` in another register, and branches when the two are equal.",
     "Part of the answer: `R6 <= 0x34` then `if R5 != R6 goto other`, with `other: stop` at the end.",
     "The whole answer:\n\n```\n        R1 <= handler\n        C4 <= R1\n        R1 <= 0\n        word[0x400] <= R1       // the count of refused stores\n        goto program\nhandler: R5 <= C3\n        R6 <= 0x34\n        if R5 != R6 goto other\n        R5 <= word[0x400]\n        R5 <= R5 + 1\n        word[0x400] <= R5\n        R5 <= C2\n        R5 <= R5 + 4\n        C2 <= R5\n        resume\nother:  stop\n```",
   ],

@@ -50,7 +50,7 @@ export const PROSE = {
   debuggerAfter:
     'If the door opens after 5, 15 or 50 instructions, the display shows 30, ALARM is on, 132 instructions run and 4 traps go to the handler. With "never", no interrupt comes. 101 instructions run and 2 traps go to the handler: the two `call system`. ALARM stays off.',
   generalisation:
-    "An interrupt lets the machine answer an event at once, without the program checking for it. A program that checked the door itself would have to read it again and again, and a user program may not read it at all.\n\nThe handler start chooses whether the program may be interrupted, by C1's bit 1.\n\nEach event has its bit and its cause. The handler tells them apart by C3, as it tells a fault from a system call.\n\nThe timer is how a handler waits without stopping the program. It sets a count and answers when the count reaches 0.",
+    "An interrupt lets the machine answer an event at once, without the program checking for it. A program that checked the door itself would have to read it again and again, and a user program may not read it at all.\n\nThe start chooses whether the program may be interrupted, by C1's bit 1.\n\nEach event has its bit and its cause. The handler tells them apart by C3, as it tells a fault from a system call.\n\nThe timer is how a handler waits without stopping the program. It sets a count and answers when the count reaches 0.",
   timerLead:
     "Write the timer's part, step through it with the door at different times, then run the tests.",
   c2Task:
