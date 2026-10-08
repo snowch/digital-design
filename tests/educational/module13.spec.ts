@@ -128,7 +128,7 @@ test.describe("the final-machine lab", () => {
     const section = challenge(page, c.id);
     await section.scrollIntoViewIfNeeded();
     const map = section.locator(".lab-joins-map");
-    const trap = map.getByRole("button", { name: /traplogic/ });
+    const trap = map.locator("button", { has: page.locator("code", { hasText: /^traplogic$/ }) });
     await expect(trap).toContainText(T.joinsAllJoined);
     // The parts the chosen part joins to are marked on the map.
     await expect(map.locator(".lab-joins-linked code")).toHaveText([
