@@ -115,7 +115,32 @@ describe("facts for the capstone", () => {
       ),
     ];
     for (const text of shortcuts) expect(text).not.toBe(RUN_REFERENCE);
-    for (const text of [RUN_SKELETON, RUN_EMPTY, ...shortcuts])
+    // The program's number kept in a register, never in the RAM.
+    const inRegister = (r: string) =>
+      RUN_REFERENCE.replace(
+        "        R1 <= 0\n        word[0x480] <= R1       // the first program is number 0",
+        `        ${r} <= 0`,
+      )
+        .replace("start:  R1 <= word[0x480]", `start:  R1 <= ${r}`)
+        .replace("ended:  R8 <= word[0x480]", `ended:  R8 <= ${r}`)
+        .replace("        word[0x480] <= R8       // the next program", `        ${r} <= R8`);
+    // R8 and R9 saved in other registers, not in the RAM.
+    const inOthers = (a: string, b: string) =>
+      RUN_REFERENCE.replace(
+        "handler: word[0x488] <= R8      // save R8 and R9\n        word[0x490] <= R9",
+        `handler: ${a} <= R8\n        ${b} <= R9`,
+      ).replace(
+        "back:   R8 <= word[0x488]       // put R8 and R9 back\n        R9 <= word[0x490]",
+        `back:   R8 <= ${a}\n        R9 <= ${b}`,
+      );
+    const readers = [
+      ...["R11", "R13", "R5"].map(inRegister),
+      inOthers("R3", "R4"),
+      inOthers("R6", "R7"),
+      inOthers("R10", "R11"),
+    ];
+    for (const t of readers) expect(t).not.toBe(RUN_REFERENCE);
+    for (const text of [RUN_SKELETON, RUN_EMPTY, ...shortcuts, ...readers])
       expect(grade(c, { text }).passed, text).toBe(false);
     expect(grade(c, { text: RUN_REFERENCE }).passed).toBe(true);
   });

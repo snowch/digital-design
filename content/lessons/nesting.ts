@@ -18,7 +18,6 @@ import type { LessonInput } from "@platform/lesson-schema";
 import { LABELS } from "./nesting.labels";
 import { PROSE } from "./nesting.prose";
 import {
-  COUNT_KEPT_END,
   NEST_FAULT,
   NEST_LATE,
   NEST_SAVED,
@@ -253,6 +252,7 @@ export const nesting: LessonInput = {
             control: true,
             modeWords: true,
             events: true,
+            registersFirst: true,
             memory: [{ from: "0x410", words: 2, title: LABELS.keptTitle }],
           },
         },
@@ -275,8 +275,8 @@ export const nesting: LessonInput = {
           expect: {
             shown: r.shown,
             lamps: String(r.lamps),
-            C1: "10",
-            ...COUNT_KEPT_END,
+            C1: r.status,
+            ...r.kept,
             stopAt: "handler",
           },
         })),

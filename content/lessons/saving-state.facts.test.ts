@@ -83,8 +83,36 @@ describe("facts for the saving-state lesson", () => {
     const tries = [
       SAVE_START,
       ...["R10", "R0", "R14", "R15"].map((r) => SAVE_START.replaceAll("R5", r)),
+      // Writing back fixed words: test 1's, or R5 and R6 rebuilt from R4.
+      SAVE_START.replace("        resume", "        R5 <= 46\n        R6 <= 53\n        resume"),
+      SAVE_START.replace(
+        "        resume",
+        "        R5 <= R4 + 7\n        R6 <= R5 + 7\n        resume",
+      ),
+      // R5 and R6 saved in control registers, with no store.
+      SAVE_REFERENCE.replace(
+        "handler: word[0x408] <= R5      // save R5 and R6\n        word[0x410] <= R6",
+        "handler: C3 <= R5\n        C1 <= R6",
+      ).replace(
+        "        R6 <= word[0x410]       // put R6 and R5 back\n        R5 <= word[0x408]",
+        "        R6 <= C1\n        R5 <= C3",
+      ),
     ];
+    for (const t of tries.slice(5)) expect(t).not.toBe(SAVE_START);
+    expect(tries.at(-1)).not.toBe(SAVE_REFERENCE);
     for (const text of tries) expect(grade(c, { text }).passed, text).toBe(false);
     expect(grade(c, { text: SAVE_REFERENCE }).passed).toBe(true);
+  });
+
+  it("the timeline's lead: first press at edge 4, the trap's five transfers at 5, resume's two at 13", () => {
+    expect((props("saved-timeline") as { from: number }).from).toBe(3);
+    const { edges } = timelineRun(SAVED, ROOMS);
+    const at = (n: number) =>
+      edges[n - 1]!.transfers.map((x) => `${x.target} ← ${transferValue(x)}`).join(", ");
+    expect(at(4)).toBe("R0 ← 0, PC ← 010");
+    expect(at(5)).toBe("C2 ← 010, C1 ← 01, C0 ← 01, C3 ← 34, PC ← 01C");
+    expect(edges[12]?.kind).toBe("resume");
+    expect(at(13)).toBe("C0 ← 01, PC ← 014");
+    expect(edges.slice(5, 12).every((e) => e.transfers.length === 2)).toBe(true);
   });
 });

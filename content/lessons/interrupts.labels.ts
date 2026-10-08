@@ -53,4 +53,5 @@ export const LABELS = {
     "The door opened late and left open",
     "The door left open on a warm night",
   ],
+  storedTitle: "The word at 500: R1 as the interrupts left it",
 } as const;

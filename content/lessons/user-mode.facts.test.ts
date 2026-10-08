@@ -83,7 +83,22 @@ describe("facts for the user-mode lesson", () => {
       "        goto program\n",
     );
     expect(gotoStart).not.toBe(USER_REFERENCE);
-    for (const text of [USER_START, gotoStart]) expect(grade(c, { text }).passed, text).toBe(false);
+    // The handler writes R5 and R6 and puts neither back; or uses R1 as its scratch.
+    const unsaved = USER_REFERENCE.replace(
+      "handler: word[0x410] <= R5      // save R5 and R6\n        word[0x418] <= R6\n        R5 <= C3",
+      "handler: R5 <= C3",
+    ).replace(
+      "        R6 <= word[0x418]       // put R6 and R5 back\n        R5 <= word[0x410]\n",
+      "",
+    );
+    const r1Scratch = unsaved.replace(
+      /R5 <= C2\n {8}R5 <= R5 \+ 4\n {8}C2 <= R5/,
+      "R1 <= C2\n        R1 <= R1 + 4\n        C2 <= R1",
+    );
+    for (const t of [unsaved, r1Scratch]) expect(t).not.toBe(USER_REFERENCE);
+    expect(r1Scratch).not.toBe(unsaved);
+    for (const text of [USER_START, gotoStart, unsaved, r1Scratch])
+      expect(grade(c, { text }).passed, text).toBe(false);
     expect(grade(c, { text: USER_REFERENCE }).passed).toBe(true);
   });
 

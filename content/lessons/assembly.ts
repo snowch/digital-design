@@ -111,6 +111,8 @@ export const assembly: LessonInput = {
             program: ROOM_A_LIMIT,
             inputs: { SENSORA: "-170", SENSORB: "-250" },
             registers: [2, 3, 4],
+            // This lesson reads the words the assembler makes, so its listings show them.
+            words: true,
             outcomes: PROSE.debuggerAfter,
           },
         },
@@ -146,6 +148,7 @@ export const assembly: LessonInput = {
             program: ROOM_A_MISTAKES,
             editable: true,
             inputs: { SENSORA: "-170", SENSORB: "-250" },
+            words: true,
             outcomes: PROSE.mistakesAfter,
           },
         },

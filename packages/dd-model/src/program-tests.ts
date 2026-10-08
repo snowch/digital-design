@@ -72,6 +72,30 @@ export function withData(source: string, scenario: ProgramScenario): string {
   return parts.join("\n");
 }
 
+/** The names a text gives its lines: each line's leading `name:`, outside comments. */
+function namesIn(text: string): Set<string> {
+  const names = new Set<string>();
+  for (const line of text.split("\n")) {
+    const m = /^\s*([A-Za-z_][A-Za-z0-9_]*):/.exec(line.replace(/\/\/.*$/, ""));
+    if (m) names.add(m[1] as string);
+  }
+  return names;
+}
+
+/**
+ * The names the learner's text gives its lines that a test's own lines also use. The two are
+ * assembled as one text, so such a name would be refused as given twice, at a line the learner
+ * never wrote.
+ */
+export function sharedNames(
+  source: string,
+  given: Readonly<Record<string, string | number>>,
+): string[] {
+  const scenario = scenarioOf(given);
+  const theirs = namesIn(withData("", scenario));
+  return [...namesIn(source)].filter((n) => theirs.has(n));
+}
+
 /**
  * Where a test that calls a function starts the run, and the registers it sets first: R10 to R13
  * at their own words, R14 at the top of the stack, R15 at the tests' own `stop`, and the
@@ -160,6 +184,8 @@ export interface ProgramCaseResult {
   /** The keys whose expectation did not hold, in the case's order. */
   readonly wrong: readonly string[];
   readonly end?: { readonly key: string; readonly values: Readonly<Record<string, string>> };
+  /** Module 12: the first fault at one of the learner's own lines, before the tests' lines. */
+  readonly ownFault?: { readonly address: string; readonly cause: string };
 }
 
 /** The scenario a case's `given` describes. */
@@ -201,6 +227,13 @@ export function leftFor(key: string, run: ScenarioRun): string {
   if (key === "lamps") return String(cpu.lamps);
   const reg = /^R(\d{1,2})$/.exec(key);
   if (reg) return signedText(cpu.regs[Number(reg[1])]);
+  // Module 12: a register as the program left it at the run's last trap, before a handler that
+  // ends the run writes over it.
+  const atTrap = /^R(\d{1,2})@trap$/.exec(key);
+  if (atTrap) {
+    const last = s.traps.at(-1);
+    return last ? signedText(last.regs[Number(atTrap[1])]) : "";
+  }
   const word = /^word:([0-9A-Fa-f]+)$/.exec(key);
   if (word) return signedText(memoryWord(cpu, parseInt(word[1] as string, 16)));
   if (key === "end") return endOf(s.stopped).key;
@@ -291,12 +324,18 @@ export function gradeProgramCase(
     actual[key] = left;
     if (!meets(key, left, String(value))) wrong.push(key);
   }
+  const labels = run.program?.labels ?? {};
+  const from = labels["program"] ?? labels["programs"];
+  const own = run.state.traps.find(
+    (t) => t.cause < 0x40 && t.cause !== 0x41 && from !== undefined && Number(t.at) < from,
+  );
   return {
     pass: wrong.length === 0,
     problems: [],
     actual,
     wrong,
     end: endOfRun(run),
+    ...(own ? { ownFault: { address: hex3(own.at), cause: hex2(BigInt(own.cause)) } } : {}),
   };
 }
 

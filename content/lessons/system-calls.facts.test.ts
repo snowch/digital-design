@@ -122,6 +122,10 @@ describe("facts for the system-calls lesson", () => {
       job2(
         "sensor: R1 <= word[sensorA]\n        R8 <= 0\n        if R2 == R8 goto own\n        R1 <= word[sensorB]\nown:    resume",
       ),
+      // A job 2 that uses R12 as unsaved scratch.
+      job2(
+        "sensor: R1 <= word[sensorA]\n        R12 <= 0\n        if R2 == R12 goto back\n        R1 <= word[sensorB]\n        goto back",
+      ),
       // A job 2 that uses R3 as unsaved scratch.
       job2(
         "sensor: R1 <= word[sensorA]\n        R3 <= 0\n        if R2 == R3 goto back\n        R1 <= word[sensorB]\n        goto back",

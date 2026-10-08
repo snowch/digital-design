@@ -380,10 +380,12 @@ export function systemJobs12(
  * The trap logic, where Module 9's stop logic was: each step's cause (fetch while FETCHING, the
  * decode step's while CHECKING, the memory's), the waiting events and IE, C0's bit 1, in. An
  * interrupt waits for the edge that would fetch, while IE is 1: the timer's (81) before the
- * door's (82). The cause is the lowest of those there: fetch, interrupt, decode, memory, which is
- * the order the steps run in. TRAPS is 1 when any is there. With no handler (NOHANDLER), a trap
- * halts the machine, as `stop` does in system mode; otherwise TRAP is 1 and the machine goes to
- * the handler. GO, 1 when the edge neither traps nor halts, lets the instruction do its work.
+ * door's (82). When two causes are there at one edge the lower number wins, as Module 8's causes
+ * did; the only pair that can meet is a fetch's cause and an interrupt, both at an edge that would
+ * fetch, and the fetch's wins. (The chain below also puts an interrupt ahead of the decode and
+ * memory causes, which are never there at a fetch.) TRAPS is 1 when any is there. With no
+ * handler (NOHANDLER), the cause halts the machine, as `stop` does in system mode; otherwise TRAP
+ * is 1 and the machine goes to the handler. GO, 1 when the edge neither traps nor halts, lets the instruction do its work.
  */
 export function trapLogic(
   b: CircuitBuilder,

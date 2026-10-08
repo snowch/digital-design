@@ -178,3 +178,21 @@ These hold on every Module 12 page and override anything above that disagrees.
 - **Two causes at one edge**: the lower number wins.
 - **Buttons.** With a breakpoint or a pause ahead, the debugger's run button reads "Run to a
   breakpoint"; with none ahead it reads "Run to the end". Name the button the step will show.
+
+## Decisions after the second reading (8 October)
+
+These also hold on every Module 12 page.
+
+- **Save, put back, store, keep.** "Save" and "put back": a register or a control register copied
+  to the RAM and back. "Store": a word written to the RAM for its own sake, such as a count or a
+  cause ("cause `34`, stored as a word"). "Keep": a register left as it was. Never "kept as a
+  word" or "keeps a count".
+- **The start and the handler.** From lesson 3 on, the learner's text has a start (the lines
+  from reset that set C4 and go to the program) and a handler (the lines at C4's address). Name
+  the one that does the thing.
+- **"Traps"** is only going to the handler. A circuit's signal is "1 when an instruction faults or
+  an interrupt is let in", not "when anything traps".
+- **A control-register copy** is an instruction such as `R5 <= C2` or `C2 <= R5`. Never "a
+  control-register job": "job" is only a system call's service.
+- **Faults** (lesson 1 on) is said of an instruction the machine refuses. Earlier modules used
+  "fault" for a broken part a fault lab put in a circuit; the first lesson says so once.

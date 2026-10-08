@@ -37,14 +37,14 @@ export const CALL_ANSWERS = [
 /** The construction's program: room B's reading less room A's, through jobs 2 and 1. */
 export const CALL_QUIZ = `        R2 <= 1
         R1 <= 2
-        call system             // job 2: room B
+        call system             // room B
         R5 <= R1
         R2 <= 0
         R1 <= 2
-        call system             // job 2: room A
+        call system             // room A
         R2 <= R5 - R1
         R1 <= 1
-        call system             // job 1`;
+        call system             // show R2`;
 
 export const systemCalls: LessonInput = {
   id: "system-calls",
@@ -245,7 +245,7 @@ export const systemCalls: LessonInput = {
       initial: {
         text: SERVICE2_START,
         data: {
-          debugger: { control: true, modeWords: true, breakpoints: true },
+          debugger: { control: true, modeWords: true, breakpoints: true, registersFirst: true },
         },
       },
       tests: {
