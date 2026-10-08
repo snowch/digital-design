@@ -23,7 +23,7 @@ export const PROSE = {
   investigation:
     "The program runs with room A at -170 and room B at -190. The figure shows a breakpoint on `overBy`, with the stack visible.",
   pushedLead:
-    '1. The watch shows R10, R14, R15 and `word[R14]`, the word on top of the stack.\n2. Press "Step" through `sumOver`\'s first four lines. At each push, R14 goes down by 8 and a word goes into the RAM.\n3. Press "Run to a breakpoint" to reach each call of `overBy`. Watch R10 take room B\'s reading, then room A\'s amount.\n4. Step through the pops at the end of `sumOver`, and watch R10 and R15 take back their words.',
+    "1. The watch shows R10, R14, R15 and `word[R14]`, the word on top of the stack.\n2. Press \"Step\" through `sumOver`'s first four lines. At each push, R14 goes down by 8 and a word goes into the RAM.\n3. Press \"Run to a breakpoint\" to reach each call of `overBy`. Watch R10 take room B's reading, then room A's amount.\n4. Step through the pops at the end of `sumOver`, and watch R10 and R15 take back their words.\n\nThe stack is drawn as boxes, from `7B8` down. Each word is marked with the register whose word it saves. The words one call pushed are grouped under that call's name and the place it was called from. R14's arrow points at the word on top.",
   pushedAfter:
     "`sumOver` used R10 to hold -190, then 10. The first pop restored R10 to its original value of 1. The pop of R15 restored `014`. `goto R15` returned to `014`, after the main program's call. The display shows 20 and ALARM is on because the main program stored R10's 1 to the lamps. The program ran 38 instructions and stopped at `024`. R14 is back at `7C0`.",
   construction:

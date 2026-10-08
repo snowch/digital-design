@@ -32,8 +32,7 @@ export const LABELS = {
     unseen: "Lesson 4's handler and a counting program, in the debugger, while the door opens.",
     predict:
       "The handler for the door and the timer, with the counting program, listed, with a question about C2.",
-    timeline:
-      "The run with the door opening, edge by edge, showing the mode and the interrupts after each edge.",
+    timeline: "The run with the door open, edge by edge from edge 16, drawn as lanes too.",
     answers: 'Four cases of C0 and "waiting".',
     noClear: "A handler that does not clear the door's bit, in the debugger.",
     debugger:
@@ -55,8 +54,8 @@ export const LABELS = {
   ],
   storedTitle: "The word at 500: R1 as the interrupts left it",
   lanes: {
-    start: "[draft] lanes.start",
-    handler: "[draft] lanes.handler",
-    program: "[draft] lanes.program",
+    start: "The start",
+    handler: "The handler",
+    program: "The program",
   },
 } as const;

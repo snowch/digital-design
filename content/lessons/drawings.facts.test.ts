@@ -63,7 +63,11 @@ function moves(lesson: LessonInput, id: string, limit = 400): string[] {
 
 /** Lane names without the page's words: the figure's own names stand in for them. */
 const plain = (list: readonly string[], names: Record<string, string>) =>
-  list.map((m) => Object.entries(names).reduce((t, [from, to]) => t.split(from).join(to), m));
+  list.map((m) =>
+    Object.entries(names)
+      .sort((a, b) => b[0].length - a[0].length)
+      .reduce((t, [from, to]) => t.split(from).join(to), m),
+  );
 
 describe("what the figures pass draws", () => {
   it("11.3: two calls of overBy, R15 taking 00C then 01C, each goto R15 back after its call", () => {

@@ -14,7 +14,7 @@ import { useWidth } from "../useWidth";
 import { hex3, signedText, stackGroups, valueText } from "./Debugger";
 
 const CHAR = 7.3;
-const ROW = 20;
+const ROW = 18;
 
 /** One drawn word: where it is, what it holds, and what the page says beside it. */
 interface BoxRow {
@@ -68,20 +68,20 @@ function WordBoxes({ rows, label }: { rows: readonly BoxRow[]; label: string }) 
                 {r.group}
               </text>
             )}
-            <text className="box-address" x={addrX} y={at + 14}>
+            <text className="box-address" x={addrX} y={at + 13}>
               {hex3(r.address)}
             </text>
             <rect className="box-word" x={boxX} y={at + 1} width={boxW} height={ROW - 2} rx={3} />
-            <text className="box-value" x={boxX + boxW / 2} y={at + 14} textAnchor="middle">
+            <text className="box-value" x={boxX + boxW / 2} y={at + 13} textAnchor="middle">
               {r.value === undefined ? signedText(r.value) : valueText(r.value)}
             </text>
             {r.note && (
-              <text className="box-note" x={noteX} y={at + 14}>
+              <text className="box-note" x={noteX} y={at + 13}>
                 {r.note}
               </text>
             )}
             {r.pointers.length > 0 && (
-              <text className="box-pointer" x={pointerX(r)} y={at + 14}>
+              <text className="box-pointer" x={pointerX(r)} y={at + 13}>
                 {`← ${r.pointers.join(", ")}`}
               </text>
             )}

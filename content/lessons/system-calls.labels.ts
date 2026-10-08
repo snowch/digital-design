@@ -32,7 +32,7 @@ export const LABELS = {
     direct: "A user program that stores to the display, in the debugger.",
     predict:
       "A handler with two jobs and a program that uses them, listed, with a question about C2.",
-    timeline: "The program's three calls, edge by edge, with the mode after each.",
+    timeline: "The program's three calls, edge by edge, with the mode after each, drawn as lanes.",
     answers: "Three questions about a system call's registers and results.",
     skipping: "The same program with a handler that adds 4 to C2, in the debugger.",
     services: "The same program in the debugger, with a breakpoint on the handler.",
@@ -49,8 +49,8 @@ export const LABELS = {
     "The difference between the rooms",
   ],
   lanes: {
-    start: "[draft] lanes.start",
-    handler: "[draft] lanes.handler",
-    program: "[draft] lanes.program",
+    start: "The start",
+    handler: "The handler",
+    program: "The program",
   },
 } as const;

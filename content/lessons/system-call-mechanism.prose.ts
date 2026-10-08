@@ -53,6 +53,8 @@ export const PROSE = {
     "The machine now runs the shop's programs. It has logic gates, registers, a datapath, a controller, an instruction set, programs, and a handler over them.\n\nEvery part was built, but in separate lessons, on separate drawings.\n\nCan you follow one of the shop's programs through the handler and down to the gates of the one machine that runs it?",
   modelVsReality:
     "A real machine's first program does what this handler does, with far more: it loads programs from storage and gives each its own memory. Its jobs are numbered as this handler's are, and a program asks for a job with one instruction.",
-  lanesLead: "[draft] lanesLead",
-  lanesAfter: "[draft] lanesAfter",
+  lanesLead:
+    'The figure runs a handler that does the challenge\'s work on run 2\'s table. It lists no lines, so it does not give the handler away. It shows only the lanes and the arrows between them.\n\n1. Press "Next move" to run on to each arrow, and read what it writes.\n2. Press "Run to the end".',
+  lanesAfter:
+    "Run 2's first program stores to the display, which user mode refuses. It traps with cause `32`. The handler goes back to the start, which runs the second program. The second program makes two system calls, job 1 and then job 4. After job 4, the handler goes back to the start. The start finds no program left, and the run stops there.",
 } as const;

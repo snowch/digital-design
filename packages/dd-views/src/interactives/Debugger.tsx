@@ -1056,7 +1056,11 @@ function MemoryPanel({
         />
       )}
       <div
-        className={`truth-table-wrap memory-box${open ? " rows-open" : ""}${region.drawn ? " visually-hidden" : ""}`}
+        className={
+          region.drawn
+            ? "visually-hidden"
+            : `truth-table-wrap memory-box${open ? " rows-open" : ""}`
+        }
         ref={boxRef}
         id={boxId}
       >
