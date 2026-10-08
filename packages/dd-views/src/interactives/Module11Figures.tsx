@@ -402,7 +402,12 @@ export function resultsOf(data: z.input<typeof ResultsProps>) {
 export const LogResults = withProps(
   ResultsProps,
   function LogResults({ data, interactive }: InteractiveProps & { data: ResultsData }) {
-    const t = useViewStrings().machine11;
+    const strings = useViewStrings();
+    const t = strings.machine11;
+    const t12 = strings.machine12;
+    // How a run ended, in the course's words where it has them (a run cut off), else its key.
+    const shown = (key: string, value: string | undefined) =>
+      key === "end" && value !== undefined ? (t12.endWords[value] ?? value) : value;
     const rows = useMemo(() => resultsOf(data), [data]);
     const [ran, setRan] = useState(false);
     return (
@@ -443,13 +448,17 @@ export const LogResults = withProps(
                         className={ran && left[c.key] !== log.asks[c.key] ? "row-differs" : ""}
                       >
                         <th scope="row">{c.label}</th>
-                        <td className="memory-word">{log.asks[c.key]}</td>
-                        {ran && <td className="memory-word">{left[c.key]}</td>}
+                        <td className="memory-word">{shown(c.key, log.asks[c.key])}</td>
+                        {ran && <td className="memory-word">{shown(c.key, left[c.key])}</td>}
                       </tr>
                     ))}
                   </tbody>
                 </table>
-                {ran && <p className="log-verdict">{all ? t.matches : t.differs}</p>}
+                {ran && (
+                  <p className="log-verdict">
+                    {all ? (log.data !== undefined ? t12.runMatches : t.matches) : t.differs}
+                  </p>
+                )}
               </li>
             );
           })}

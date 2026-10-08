@@ -73,6 +73,11 @@ export interface Machine12Strings {
   // The memory map in user mode.
   readonly mapCaptionUser: string;
 
+  /** The results cards: a run of Module 12's that left what it should. */
+  readonly runMatches: string;
+  /** How a run ended, as a results card writes it: the module's fixed words. */
+  readonly endWords: Readonly<Record<string, string>>;
+
   // The program grader: what a check names, and each challenge's sentence for what was wrong.
   readonly checks: Readonly<Record<string, string>>;
   readonly details: Readonly<Record<string, string>>;
@@ -135,6 +140,8 @@ export const MACHINE12_STRINGS: Machine12Strings = {
   nothingChanges: "Nothing changes.",
   modeAfter: "Then, {mode}.",
   mapCaptionUser: "What user mode does with each access",
+  runMatches: "The program left what the run should leave.",
+  endWords: { stop: "stop", cutOff: "cut off" },
   checks: {
     mode: "the mode at the end",
     traps: "how many traps went to the handler",

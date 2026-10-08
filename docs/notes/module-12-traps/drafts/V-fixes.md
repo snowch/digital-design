@@ -10,3 +10,5 @@ details) and `strings11.ts` (the assembler's refusal); these files are their rec
   sentence for a reserved name ("is a word the language uses"), which is not the refusal; now
   "{name} is not a control register." before the draft's second sentence. The grader's check
   names lost their full stops: they follow "Your program left".
+- The results cards' verdict for a matching Module 12 run said Module 11's "what the log should show"; a sentence of its own, `runMatches`, drafted (one brief, one sentence) and used where a row carries program data.
+- The results cards wrote a cut-off run as its key, `cutOff`; `endWords` gives the fixed words of the fact sheet ("stop", "cut off"), not drafted: they are the module's fixed words for how a run ends.
