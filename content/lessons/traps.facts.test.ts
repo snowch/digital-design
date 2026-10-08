@@ -96,7 +96,13 @@ describe("facts for the traps lesson", () => {
     // Skips by a `goto` through a register: never writes C2 or runs `resume`.
     const gotoSkip = SKIP34_REFERENCE.replace(/C2 <= R5\n\s+resume/, "goto R5");
     expect(gotoSkip).not.toBe(SKIP34_REFERENCE);
-    for (const text of [SKIP34_START, gotoSkip])
+    // Written to the tests' causes: stops on 21 and 33, skips every other cause.
+    const toTheTests = SKIP34_REFERENCE.replace(
+      "        R6 <= 0x34\n        if R5 != R6 goto other\n",
+      "        R6 <= 0x21\n        if R5 == R6 goto other\n        R6 <= 0x33\n        if R5 == R6 goto other\n",
+    );
+    expect(toTheTests).not.toBe(SKIP34_REFERENCE);
+    for (const text of [SKIP34_START, gotoSkip, toTheTests])
       expect(grade(c, { text }).passed, text).toBe(false);
     expect(grade(c, { text: SKIP34_REFERENCE }).passed).toBe(true);
   });

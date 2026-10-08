@@ -174,6 +174,7 @@ export const interrupts: LessonInput = {
           lead: PROSE.debuggerLead,
           props: {
             program: DOOR_OPEN,
+            registers: [2, 8, 9],
             traps: true,
             control: true,
             modeWords: true,
@@ -244,6 +245,8 @@ export const interrupts: LessonInput = {
             control: true,
             modeWords: true,
             events: true,
+            registersFirst: true,
+            memory: [{ from: "0x500", words: 1, title: LABELS.storedTitle }],
           },
         },
       },
@@ -254,7 +257,7 @@ export const interrupts: LessonInput = {
           label: LABELS.timerLabels[i] ?? r.label,
           given: {
             traps: "yes",
-            data: TIMER_PROGRAM,
+            data: TIMER_PROGRAM(r.start),
             detail: "doorTimer",
             ...(r.opens !== undefined ? { doorOpensAt: String(r.opens) } : {}),
             ...(r.closes !== undefined ? { doorClosesAt: String(r.closes) } : {}),

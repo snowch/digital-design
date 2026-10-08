@@ -141,6 +141,21 @@ describe("facts for the interrupts lesson", () => {
       tick(
         "tick:   R8 <= 1\n        word[waiting] <= R8\n        R8 <= word[signals]\n        R9 <= 1\n        R8 <= R8 & R9\n        if R8 != R9 goto done\n        R8 <= word[lamps]\n        R8 <= R8 | R9\n        word[lamps] <= R8\ndone:   resume",
       ),
+      // A fixed lamps word: the figures' part with ALARM and NIGHT written together.
+      tick(
+        TIMER_PART.replace(
+          "        word[lamps] <= R9       // still open: ALARM",
+          "        R9 <= 3\n        word[lamps] <= R9",
+        ),
+      ),
+      // 1 added to the lamps' word, not ALARM's bit set.
+      tick(
+        "tick:   R8 <= 1\n        word[waiting] <= R8\n        R8 <= word[signals]\n        R9 <= 1\n        R8 <= R8 & R9\n        if R8 != R9 goto back\n        R8 <= word[lamps]\n        R8 <= R8 + 1\n        word[lamps] <= R8\n        goto back",
+      ),
+      // R1, R12 or R13 spoiled unseen in the timer's part.
+      tick(
+        "tick:   R1 <= 1\n        word[waiting] <= R1\n        R1 <= word[signals]\n        R12 <= 1\n        R1 <= R1 & R12\n        if R1 != R12 goto back\n        R1 <= word[lamps]\n        R1 <= R1 | R12\n        word[lamps] <= R1\n        goto back",
+      ),
       // The whole of signals compared with 1: wrong on a warm night.
       tick(
         "tick:   R8 <= 1\n        word[waiting] <= R8\n        R8 <= word[signals]\n        R9 <= 1\n        if R8 != R9 goto back\n        R8 <= word[lamps]\n        R8 <= R8 | R9\n        word[lamps] <= R8\n        goto back",
@@ -149,5 +164,13 @@ describe("facts for the interrupts lesson", () => {
     for (const text of [TIMER_START, ...shortcuts])
       expect(grade(c, { text }).passed, text).toBe(false);
     expect(grade(c, { text: TIMER_REFERENCE }).passed).toBe(true);
+  });
+
+  it("a line of the learner's that shares a name with the tests' lines is refused, naming it", () => {
+    const c = lesson.challenges.find((x) => x.id === "door-timer")!;
+    const text = TIMER_REFERENCE.replace("tick:   R8 <= 1", "tick:   nothing\ntestLoop: R8 <= 1");
+    const v = grade(c, { text });
+    expect(v.passed).toBe(false);
+    expect(v.failures[0]?.detail).toContain("testLoop");
   });
 });

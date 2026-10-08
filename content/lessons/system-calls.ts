@@ -245,7 +245,7 @@ export const systemCalls: LessonInput = {
       initial: {
         text: SERVICE2_START,
         data: {
-          debugger: { control: true, modeWords: true, breakpoints: true },
+          debugger: { control: true, modeWords: true, breakpoints: true, registersFirst: true },
         },
       },
       tests: {

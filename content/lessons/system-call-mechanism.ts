@@ -40,6 +40,7 @@ export function runAsks(c: RunCase): Record<string, string> {
     ...Object.fromEntries(c.records.map((r, k) => [recordKey(k), String(r)])),
     // C1 holds the status of the last program at its last trap: user mode, interrupts off.
     C1: "00",
+    ...(c.kept ?? {}),
     stopAt: "handler",
   };
 }
@@ -51,6 +52,8 @@ const CHECKS = [
   { key: "word:408", label: LABELS.checks.second },
   { key: "end", label: LABELS.checks.end },
 ];
+/** The question's cards, above the prediction: no record, which would show its working. */
+const ASK_CHECKS = CHECKS.filter((c) => !c.key.startsWith("word:"));
 
 const resultsRuns = RUN_CASES.map((c, k) => ({
   label: LABELS.runLabels[k] ?? c.label,
@@ -88,7 +91,7 @@ export const systemCallMechanism: LessonInput = {
           props: {
             program: RUN_SKELETON,
             logs: resultsRuns,
-            checks: CHECKS,
+            checks: ASK_CHECKS,
             traps: true,
             outcomes: PROSE.asksAfter,
           },
