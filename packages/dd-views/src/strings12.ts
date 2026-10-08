@@ -32,6 +32,18 @@ export interface Machine12Strings {
    * stop there is the handler's or the reset lines', never "the program's".
    */
   readonly stops: Readonly<Record<string, string>>;
+  /** {name}: a register, named in a failure as it was at the run's last trap. */
+  readonly atTrap: string;
+  /** {address}, {cause}: a fault at one of the learner's own lines. */
+  readonly ownFault: string;
+  /** Over a test's lines, in a challenge: the tests add them after the learner's. */
+  readonly dataAdded: string;
+  /** {n}: instructions; {bytes}: ROM bytes the start, the handler and a test's lines take. */
+  readonly assembled: string;
+  /** {state}: the controller's state, beside the datapath figure's buttons. */
+  readonly stateNow: string;
+  /** The debugger's listing caption on Module 12's pages. */
+  readonly listingCaption: string;
   /** Each challenge's sentence for how its runs must end, by the challenge's detail key. */
   readonly ends: Readonly<Record<string, string>>;
   // The debugger: the shop's events.
@@ -130,6 +142,12 @@ export const MACHINE12_STRINGS: Machine12Strings = {
     "unknown-control":
       "The debugger ended the run before the instruction at {address}: it copies {reg} into a control register, and nothing has set {reg}.",
   },
+  atTrap: "[draft] {name} at the last trap",
+  ownFault: "[draft] ownFault {address} {cause}",
+  dataAdded: "[draft] dataAdded",
+  assembled: "[draft] assembled {n} {bytes}",
+  listingCaption: "[draft] listingCaption",
+  stateNow: "[draft] stateNow {state}",
   ends: {
     skip34:
       "A run must stop at the program's end line, or at the handler's stop after a cause other than 34.",

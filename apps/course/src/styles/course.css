@@ -2878,6 +2878,17 @@ svg.stack-depth {
 .debugger-values {
   min-width: 0;
 }
+/* Module 12: a challenge whose failures name registers draws them first, below the buttons. */
+.debugger-values.registers-first {
+  display: flex;
+  flex-direction: column;
+}
+.debugger-values.registers-first > .debugger-panels {
+  order: -1;
+}
+.debugger-values.registers-first .debugger-registers-panel {
+  order: -1;
+}
 .debugger-listing-wrap {
   max-height: 9rem;
   overflow-y: auto;

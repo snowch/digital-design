@@ -132,6 +132,8 @@ export interface Machine11Strings {
   // The program editor in a challenge.
   readonly runWith: string;
   readonly dataAdded: string;
+  /** {name}: a line name the learner's text and a test's lines both give; {test}: the test. */
+  readonly nameShared: string;
   readonly startSkeleton: string;
   readonly startEmpty: string;
   /** Asking before a start replaces a program the learner changed. */
@@ -316,6 +318,7 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   limitNote: "(limit {limit})",
   runWith: "Run with",
   dataAdded: "The tests add these lines after your program:",
+  nameShared: "[draft] nameShared {name} {test}",
   startSkeleton: "Start from the outline",
   startEmpty: "Start from an empty program",
   // Brief 8M.

@@ -125,7 +125,8 @@ export const trapHardware: LessonInput = {
             shown: [1, 5],
             buses: ["IR"],
             states: true,
-            focus: ["control", "controller"],
+            // Paths from the top: each opened block scrolls to the next part named inside it.
+            focus: ["control/controller/state"],
             question: PROSE.p1Question,
             options: [
               { value: "ALU", label: "ALU" },
@@ -153,7 +154,7 @@ export const trapHardware: LessonInput = {
           props: {
             outcomes: PROSE.nightAfter,
             outcomesWhen: "stopped",
-            focus: ["datapath", "cregs"],
+            focus: ["datapath/cregs/c2", "datapath/cregs/c3"],
             libraryId: "machine-traps",
             program: NIGHT,
             inputs: NIGHT_INPUTS,
@@ -202,7 +203,9 @@ export const trapHardware: LessonInput = {
             devices: true,
             run: true,
             states: true,
-            focus: ["control", "trapLogic"],
+            focus: ["control/trapLogic"],
+            // Each fault's result once the run stops or gives up, not after its first edge.
+            outcomesWhen: "stopped",
             faults: [
               {
                 kind: "stuck-at",

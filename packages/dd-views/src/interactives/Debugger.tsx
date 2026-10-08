@@ -208,6 +208,11 @@ export interface DebuggerOptions {
   readonly modeWords?: boolean;
   /** Module 12: the timer, the waiting events, DOOR and WARM shown. */
   readonly events?: boolean;
+  /**
+   * Module 12: the registers before the other panels, for a challenge whose failures name them,
+   * so that on a phone they sit just below the buttons.
+   */
+  readonly registersFirst?: boolean;
   /** Module 12: the instructions the learner may choose to open the door before. */
   readonly doorOptions?: readonly number[];
 }
@@ -456,7 +461,7 @@ export function DebuggerView({
         {options.listing !== false && (
           <div className="truth-table-wrap debugger-listing-wrap" ref={boxRef}>
             <table className="truth-table datapath-table debugger-listing">
-              <caption>{t.listingCaption}</caption>
+              <caption>{options.traps ? t12.listingCaption : t.listingCaption}</caption>
               <thead>
                 <tr>
                   {options.breakpoints && (
@@ -512,7 +517,7 @@ export function DebuggerView({
           </div>
         )}
       </div>
-      <div className="debugger-values">
+      <div className={`debugger-values${options.registersFirst ? " registers-first" : ""}`}>
         {options.watch && (
           <section className="debugger-panel" aria-label={t.watchCaption}>
             <p className="layout-title">{t.watchCaption}</p>
@@ -640,7 +645,10 @@ export function DebuggerView({
               </dl>
             </section>
           )}
-          <section className="debugger-panel" aria-label={t.registersCaption}>
+          <section
+            className="debugger-panel debugger-registers-panel"
+            aria-label={t.registersCaption}
+          >
             <p className="layout-title">{t.registersCaption}</p>
             <dl className="debugger-registers">
               <div className="debugger-register">
@@ -1047,6 +1055,7 @@ export function ProgramText({
   program,
   onRestore,
   label,
+  traps,
 }: {
   text: string;
   onChange: (text: string) => void;
@@ -1054,8 +1063,11 @@ export function ProgramText({
   program?: Program;
   onRestore?: () => void;
   label?: string;
+  /** Module 12: the text is a start and a handler, and the ROM holds a test's lines after them. */
+  traps?: boolean;
 }) {
-  const t = useViewStrings().machine11;
+  const strings = useViewStrings();
+  const t = strings.machine11;
   const last = program?.lines.at(-1);
   const bytes = last
     ? last.address + (last.instruction !== undefined ? 4 : dataBytes(last.text))
@@ -1094,7 +1106,7 @@ export function ProgramText({
           </>
         ) : program ? (
           <p>
-            {format(t.assembled, {
+            {format(traps ? strings.machine12.assembled : t.assembled, {
               n: program.lines.filter((l) => l.instruction !== undefined).length,
               bytes,
             })}
