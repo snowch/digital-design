@@ -368,6 +368,27 @@ export function DebuggerView({
         ))}
       </div>
     );
+  // The door's time, chosen in the panel of the timer and the door, where the door is.
+  const doorChoice = options.doorOptions ? (
+    <label className="door-choice">
+      <span>{t12.doorChoice}</span>
+      <select
+        value={doorAt === undefined ? "" : String(doorAt)}
+        disabled={!live}
+        onChange={(e) => {
+          const v = e.target.value;
+          setDoorAt(v === "" ? undefined : Number(v));
+        }}
+      >
+        <option value="">{t12.doorNever}</option>
+        {options.doorOptions.map((n) => (
+          <option key={n} value={String(n)}>
+            {format(t12.doorBefore, { n })}
+          </option>
+        ))}
+      </select>
+    </label>
+  ) : undefined;
   return (
     <div
       className={`debugger debugger-body${compact ? " debugger-compact" : ""}`}
@@ -424,26 +445,6 @@ export function DebuggerView({
             ? ` ${state.traps.length === 1 ? t12.trapCountOne : format(t12.trapCount, { n: state.traps.length })}`
             : ""}
         </p>
-        {options.doorOptions && (
-          <label className="door-choice">
-            <span>{t12.doorChoice}</span>
-            <select
-              value={doorAt === undefined ? "" : String(doorAt)}
-              disabled={!live}
-              onChange={(e) => {
-                const v = e.target.value;
-                setDoorAt(v === "" ? undefined : Number(v));
-              }}
-            >
-              <option value="">{t12.doorNever}</option>
-              {options.doorOptions.map((n) => (
-                <option key={n} value={String(n)}>
-                  {format(t12.doorBefore, { n })}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
         {options.listing !== false && (
           <div className="truth-table-wrap debugger-listing-wrap" ref={boxRef}>
             <table className="truth-table datapath-table debugger-listing">
@@ -583,7 +584,11 @@ export function DebuggerView({
             interrupts={options.events === true}
           />
         )}
-        {options.events && <EventsPanel state={state} inputs={inputs} t12={t12} />}
+        {options.events && (
+          <EventsPanel state={state} inputs={inputs} t12={t12}>
+            {doorChoice}
+          </EventsPanel>
+        )}
         <div className="debugger-panels">
           {uses.devices && (
             <section className="debugger-panel" aria-label={t.devicesCaption}>
@@ -727,10 +732,13 @@ function EventsPanel({
   state,
   inputs,
   t12,
+  children,
 }: {
   state: DebugState;
   inputs: InputPlan;
   t12: Machine12Strings;
+  /** The door's time, where a figure lets the learner choose it. */
+  children?: ReactNode;
 }) {
   const now = inputsAt(inputs, state.ran);
   return (
@@ -758,6 +766,7 @@ function EventsPanel({
           <dd className="memory-word">{now.warm}</dd>
         </div>
       </dl>
+      {children}
     </section>
   );
 }
