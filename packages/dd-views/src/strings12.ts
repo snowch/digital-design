@@ -70,6 +70,10 @@ export interface Machine12Strings {
 
   // The memory map in user mode.
   readonly mapCaptionUser: string;
+
+  // The program grader: what a check names, and each challenge's sentence for what was wrong.
+  readonly checks: Readonly<Record<string, string>>;
+  readonly details: Readonly<Record<string, string>>;
 }
 
 export const MACHINE12_STRINGS: Machine12Strings = {
@@ -130,4 +134,14 @@ export const MACHINE12_STRINGS: Machine12Strings = {
   nothingChanges: "[draft] Nothing changes.",
   modeAfter: "[draft] Then: {mode}.",
   mapCaptionUser: "[draft] The memory map in user mode",
+  checks: {
+    mode: "[draft] the mode",
+    traps: "[draft] traps that went to the handler",
+    causes: "[draft] the causes, in order",
+    waiting: "[draft] the waiting events",
+    timer: "[draft] the timer",
+  },
+  details: {
+    skip34: "[draft] skip34",
+  },
 };

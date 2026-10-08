@@ -51,13 +51,13 @@ function leftText(
   return keys
     .map((key) => {
       const value = actual[key] ?? "";
-      const reg = /^R(\d{1,2})$/.exec(key);
+      const reg = /^[RC](\d{1,2})$/.exec(key);
       const word = /^word:([0-9A-Fa-f]+)$/.exec(key);
       const name = reg
         ? format(t.checkRegister, { name: key })
         : word
           ? format(t.checkWord, { address: (word[1] as string).toUpperCase() })
-          : (t.checks[key] ?? key);
+          : (t.checks[key] ?? strings.machine12.checks[key] ?? key);
       if (key === "end") return format(t.checkValue, { name, value: "" }).trim();
       if (key === "kept") return value === "" ? t.keptAll : format(t.keptNot, { names: value });
       if (key === "returned") return value === "yes" ? t.returnedYes : t.returnedNo;
@@ -117,9 +117,14 @@ export function gradeProgram(
       parts.push(format(t.failedLeft, { left: leftText(strings, r.actual, wrongLeft) }));
     const endKey = r.end?.key;
     if (r.end && (r.wrong.includes("end") || (endKey !== "stop" && endKey !== "returned")))
-      parts.push(format(t.stops[r.end.key] ?? r.end.key, r.end.values));
+      parts.push(
+        format(t.stops[r.end.key] ?? strings.machine12.stops[r.end.key] ?? r.end.key, r.end.values),
+      );
     const key = c.given["detail"];
-    const sentence = key !== undefined ? t.details[String(key)] : undefined;
+    const sentence =
+      key !== undefined
+        ? (t.details[String(key)] ?? strings.machine12.details[String(key)])
+        : undefined;
     if (sentence && wrongLeft.length) parts.push(sentence);
     if (r.wrong.includes("end") && endKey !== "stop") parts.push(t.mustStop);
     failures.push({

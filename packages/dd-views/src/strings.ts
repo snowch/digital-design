@@ -1035,6 +1035,11 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       // Module 11, lesson 5 (brief 5L).
       recursionDepth:
         "{actual} is not it; a call that finds a room pushes 4 words, a call for a door that leads nowhere pushes none, and R14 starts at 7C0.",
+      // Module 12, lesson 1.
+      trapC2: "[draft] {actual} is not C2 after the trap.",
+      trapC3: "[draft] {actual} is not C3 after the trap.",
+      trapC1: "[draft] {actual} is not C1 after the trap.",
+      trapPc: "[draft] {actual} is not the PC after the trap.",
       // Module 11, lesson 4 (brief 4L).
       stackWord:
         "{actual} is not that word; a pop copies a word, adds 8 to R14, and leaves the word where it was. Give the word as three hexadecimal digits.",

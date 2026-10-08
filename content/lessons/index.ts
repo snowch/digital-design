@@ -59,6 +59,8 @@ import { stack } from "./stack";
 import { recursion } from "./recursion";
 import { debugging } from "./debugging";
 import { logReport } from "./log-report";
+// Module 12, traps and interrupts
+import { traps } from "./traps";
 
 const INPUTS: readonly LessonInput[] = [
   // Module 0, meet the machine.
@@ -117,6 +119,8 @@ const INPUTS: readonly LessonInput[] = [
   recursion,
   debugging,
   logReport,
+  // Module 12, traps and interrupts
+  traps,
 ];
 
 export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(
