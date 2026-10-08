@@ -69,8 +69,8 @@ circuit, or write the text.
 | 5 | `enum`, FSM idioms, `generate` | write the HDL; drill down to the circuit |
 | 6–7 | memories as arrays, `$readmemh`-style initialisation | write |
 | 8–10 | module hierarchy; the CPU is written in HDL and the learner reads and modifies it | write; "add an instruction" is an HDL edit |
-| 11, 12 | testbench constructs (`initial`, `#`, `$display`) for checking programs and traps | none |
-| 13 | optional: run the course CPU through Yosys or Verilator offline (CI or local, results recorded; no synthesis toolchain ships to the browser) and compare against the simulator | none |
+| 11, 12 | none new: programs and traps are checked by running them against the model, not by a testbench | none |
+| 13 | none new: the whole machine's top module is written in the subset Modules 8 to 10 have; the capstone's model note shows a short testbench (`initial`, `#`, `$display`) as code to read, which the engine does not run. An offline run through Yosys or Verilator is a separate task after Module 13 | write: the lab joins the course's parts |
 
 ## Graded projects
 
@@ -105,6 +105,23 @@ ALU/memory → register write → PC update → next instruction, pausable and i
 step.
 
 ## Decisions since the brief
+
+### 8 October 2026: Module 13, the final machine
+
+Module 13 was built with the three recommendations of `docs/notes/module-13-plan.md`, as the
+managing session passed them on:
+
+1. **The final machine runs both instructions the learner added**: the call through a register
+   (kind 9) and set if (kind A). The model has `MODULE_13`, the circuit is `machine-final`, and
+   `docs/isa.md` says so under "The final machine".
+2. **The machine is built from the course's parts.** No page runs a learner's earlier answers; in
+   the lab, the learner's own text joins the course's parts, and that text is what runs. Reading
+   earlier answers stays a candidate change to the platform.
+3. **No lesson runs a testbench.** The capstone's model note shows one as code to read, the
+   parser's message for `initial` no longer promises a later module, and the table above says so.
+   An offline run through real tools is a separate task, if the author wants its claim on a page.
+
+`docs/notes/module-13-machine.md` is the module's note.
 
 ### 6 October 2026: the platform taken from snowch/learning-platform
 
