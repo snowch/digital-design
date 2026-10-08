@@ -130,6 +130,13 @@ test.describe("the final-machine lab", () => {
     const map = section.locator(".lab-joins-map");
     const trap = map.getByRole("button", { name: /traplogic/ });
     await expect(trap).toContainText(T.joinsAllJoined);
+    // The parts the chosen part joins to are marked on the map.
+    await expect(map.locator(".lab-joins-linked code")).toHaveText([
+      "system",
+      "controller",
+      "cregs",
+      "memory",
+    ]);
     await section.getByRole("button", { name: T.labParts }).click();
     await expect(trap).toContainText(format(T.joinsOpenCount, { n: 13 }));
     await trap.click();

@@ -139,6 +139,19 @@ export function LabJoins({ text, changed }: { text: string; changed?: string }) 
   const openCount = (p: JoinPart) =>
     p.inputs.filter((i) => i.source.kind === "open").length +
     p.outputs.filter((o) => o.written === "").length;
+  // The parts the chosen part joins to, by the wires the text names at both ends.
+  const linked = new Set(
+    part
+      ? [
+          ...part.inputs.flatMap((i) =>
+            i.source.kind === "part" ? [partName(i.source.part)] : [],
+          ),
+          ...part.outputs.flatMap((o) =>
+            o.readers.flatMap((r) => (r.kind === "part" ? [partName(r.part)] : [])),
+          ),
+        ].filter((m) => m !== part.module)
+      : [],
+  );
   const hasMark = (p: JoinPart) =>
     [...p.inputs, ...p.outputs].some((port) => marked(port.port, port.written));
   return (
@@ -154,7 +167,7 @@ export function LabJoins({ text, changed }: { text: string; changed?: string }) 
                 <button
                   key={m}
                   type="button"
-                  className={`button secondary lab-joins-button${p && hasMark(p) ? " lab-joins-marked" : ""}`}
+                  className={`button secondary lab-joins-button${p && hasMark(p) ? " lab-joins-marked" : ""}${linked.has(m) ? " lab-joins-linked" : ""}`}
                   aria-pressed={part?.module === m}
                   disabled={!p}
                   onClick={() => setChosen(m)}
@@ -167,6 +180,11 @@ export function LabJoins({ text, changed }: { text: string; changed?: string }) 
                         ? format(t.joinsOpenCount, { n: open })
                         : t.joinsAllJoined}
                   </span>
+                  {part && linked.has(m) && (
+                    <span className="lab-joins-link">
+                      {format(t.joinsLinked, { part: part.module })}
+                    </span>
+                  )}
                 </button>
               );
             })}

@@ -170,6 +170,8 @@ export interface Machine13Strings {
   /** {problem}: why the text cannot be read. */
   readonly joinsNone: string;
   readonly joinsMarkNote: string;
+  /** On the map, under a part the chosen {part} joins to. */
+  readonly joinsLinked: string;
 }
 
 export const MACHINE13_STRINGS: Machine13Strings = {
@@ -315,4 +317,5 @@ export const MACHINE13_STRINGS: Machine13Strings = {
   joinsNone: "The joins cannot be drawn: {problem}",
   joinsMarkNote:
     "The ports drawn in colour are the ones the changed line feeds; a line that feeds no port directly marks none.",
+  joinsLinked: "joined to {part}",
 };

@@ -3298,6 +3298,14 @@ svg.stack-depth {
   background: var(--accent) !important;
   border-color: var(--accent) !important;
 }
+/* A part the chosen part joins to: a solid line in the accent on its left edge. */
+.lab-joins-button.lab-joins-linked {
+  border-left: 4px solid var(--accent);
+}
+.lab-joins-link {
+  font-size: 0.85em;
+  color: var(--accent);
+}
 .lab-joins-button.lab-joins-marked {
   border-color: var(--accent);
 }
