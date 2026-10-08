@@ -360,7 +360,7 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   rowsFewer: "Show fewer rows",
   lanes: {
     title: "The run drawn as lanes, one for each part of the program that runs, with the moves between them",
-    move: "from {from} to {to}, writing {transfer}",
+    move: "{from} passed the run to {to}, and the move wrote {transfer}",
     doorOpens: "freezer door opens",
     timerReaches: "timer reaches 0",
     systemBand: "system mode",
