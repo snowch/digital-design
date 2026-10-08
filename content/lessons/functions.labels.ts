@@ -46,4 +46,5 @@ export const LABELS = {
   roomPrefixA: "Room A",
   roomPrefixB: "room B",
   fridgePrefix: "Fridge at",
+  lanes: { main: "[draft] lanes.main" },
 } as const;

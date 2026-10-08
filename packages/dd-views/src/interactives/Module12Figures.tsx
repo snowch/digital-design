@@ -26,9 +26,18 @@ import {
   hex3,
   shopInputs,
   statusText,
-  valueText,
 } from "./Debugger";
 import { withProps } from "./props";
+import {
+  RunLanesDrawing,
+  itemsShown,
+  laneNames,
+  lanesOf,
+  transferValue,
+  type LanesConfig,
+} from "./RunLanes";
+
+export { transferValue };
 
 const TimelineProps = z.object({
   program: z.string(),
@@ -44,23 +53,23 @@ const TimelineProps = z.object({
   interrupts: z.boolean().default(false),
   /** Shown once the learner has stepped to the last edge. */
   outcomes: z.string().optional(),
+  /** The run drawn as lanes, stepped with the edges: the parts of the program that run. */
+  lanes: z
+    .object({
+      lanes: z
+        .array(z.object({ at: z.string(), name: z.string(), handler: z.boolean().optional() }))
+        .min(1),
+      again: z.string().optional(),
+      marks: z.array(z.string()).optional(),
+    })
+    .optional(),
+  /**
+   * Whether the edges are listed with their lines. False where the lines would give away a
+   * challenge's answer (12.8): the drawing and its moves only.
+   */
+  list: z.boolean().default(true),
 });
 type TimelineData = z.infer<typeof TimelineProps>;
-
-/** A transfer's value as the pages write it. */
-export function transferValue(x: Transfer): string {
-  if (x.value === undefined) return "X";
-  switch (x.form) {
-    case "address":
-      return hex3(BigInt.asUintN(64, x.value));
-    case "cause":
-      return controlText(3, x.value);
-    case "bits":
-      return controlText(0, x.value);
-    case "number":
-      return valueText(x.value);
-  }
-}
 
 /**
  * A transfer's value on the page: as `transferValue` writes it, with its hexadecimal digits named
@@ -137,12 +146,47 @@ export const TrapTimeline = withProps(
     }, [at, open]);
     const current = at > 0 ? shown[at - 1] : undefined;
     const ended = at >= shown.length && shown.length > 0;
+    const lanesConfig: LanesConfig | undefined = data.lanes && {
+      ...data.lanes,
+      mode: data.mode,
+    };
+    const items = useMemo(
+      () => (lanesConfig && run.program ? lanesOf(run.edges, run.program, lanesConfig) : []),
+      [run, data.lanes, data.mode, data.doorOpensAt],
+    );
+    // The edges run so far, counted from reset.
+    const ranTo = data.from + at;
+    // The next edge at which the run moves between lanes, or the end.
+    const nextMove = () => {
+      const m = items.find((it) => it.kind === "move" && it.edge >= ranTo);
+      setAt(Math.min(shown.length, m && m.kind === "move" ? m.edge - data.from + 1 : shown.length));
+    };
+    const lastMove = itemsShown(items, ranTo)
+      .filter((it) => it.kind === "move")
+      .at(-1);
+    const names = lanesConfig ? laneNames(lanesConfig) : [];
+    const statusLine = data.list
+      ? current
+        ? `${format(t.edge, { n: current.n })}: ${edgeText(t, current)}`
+        : t.noEdge
+      : lastMove && lastMove.kind === "move"
+        ? format(t11.lanes.move, {
+            from: names[lastMove.from] ?? "",
+            to: names[lastMove.to] ?? "",
+            transfer: lastMove.label,
+          })
+        : t.noEdge;
     return (
       <div className="machine-figure trap-timeline" data-interactive={interactive.id}>
         <div className="explorer-actions debugger-actions">
           <button type="button" className="button" disabled={ended} onClick={() => setAt(at + 1)}>
             {t.nextEdge}
           </button>
+          {lanesConfig && (
+            <button type="button" className="button secondary" disabled={ended} onClick={nextMove}>
+              {t11.lanes.nextMove}
+            </button>
+          )}
           <button
             type="button"
             className="button secondary"
@@ -169,43 +213,46 @@ export const TrapTimeline = withProps(
           </button>
         </div>
         <p className="debugger-status" role="status">
-          {current ? `${format(t.edge, { n: current.n })}: ${edgeText(t, current)}` : t.noEdge}
+          {statusLine}
         </p>
-        <p className="layout-title">{t.timelineTitle}</p>
-        <ol className={`trap-edges${open ? " rows-open" : ""}`} ref={boxRef} id={boxId}>
-          {shown.slice(0, at).map((e, i) => (
-            <li
-              key={e.n}
-              className={`trap-edge trap-edge-${e.kind}`}
-              aria-current={i === at - 1 ? "step" : undefined}
-            >
-              <p className="trap-edge-head">
-                <span className="trap-edge-n">{format(t.edge, { n: e.n })}</span> {edgeText(t, e)}
-              </p>
-              {e.transfers.length === 0 ? (
-                <p className="trap-edge-none">{t.nothingChanges}</p>
-              ) : (
-                <ul className="trap-transfers" aria-label={t.transfersLabel}>
-                  {e.transfers.map((x) => (
-                    <li
-                      key={x.target}
-                      className={`memory-word${/^C\d$/.test(x.target) ? " transfer-control" : ""}`}
-                    >
-                      {`${x.target} ← `}
-                      <TransferValue x={x} t11={t11} />
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {data.mode && (
-                <p className="trap-edge-mode">
-                  {format(t.modeAfter, { mode: statusText(t, e.control[0], data.interrupts) })}
+        {lanesConfig && <RunLanesDrawing items={items} config={lanesConfig} shown={ranTo} />}
+        {data.list && <p className="layout-title">{t.timelineTitle}</p>}
+        {data.list && (
+          <ol className={`trap-edges${open ? " rows-open" : ""}`} ref={boxRef} id={boxId}>
+            {shown.slice(0, at).map((e, i) => (
+              <li
+                key={e.n}
+                className={`trap-edge trap-edge-${e.kind}`}
+                aria-current={i === at - 1 ? "step" : undefined}
+              >
+                <p className="trap-edge-head">
+                  <span className="trap-edge-n">{format(t.edge, { n: e.n })}</span> {edgeText(t, e)}
                 </p>
-              )}
-            </li>
-          ))}
-        </ol>
-        {(hidden || open) && (
+                {e.transfers.length === 0 ? (
+                  <p className="trap-edge-none">{t.nothingChanges}</p>
+                ) : (
+                  <ul className="trap-transfers" aria-label={t.transfersLabel}>
+                    {e.transfers.map((x) => (
+                      <li
+                        key={x.target}
+                        className={`memory-word${/^C\d$/.test(x.target) ? " transfer-control" : ""}`}
+                      >
+                        {`${x.target} ← `}
+                        <TransferValue x={x} t11={t11} />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {data.mode && (
+                  <p className="trap-edge-mode">
+                    {format(t.modeAfter, { mode: statusText(t, e.control[0], data.interrupts) })}
+                  </p>
+                )}
+              </li>
+            ))}
+          </ol>
+        )}
+        {data.list && (hidden || open) && (
           <RowsToggle
             open={open}
             onToggle={() => setOpen(!open)}

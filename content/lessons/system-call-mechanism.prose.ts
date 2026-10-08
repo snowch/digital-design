@@ -53,4 +53,6 @@ export const PROSE = {
     "The machine now runs the shop's programs. It has logic gates, registers, a datapath, a controller, an instruction set, programs, and a handler over them.\n\nEvery part was built, but in separate lessons, on separate drawings.\n\nCan you follow one of the shop's programs through the handler and down to the gates of the one machine that runs it?",
   modelVsReality:
     "A real machine's first program does what this handler does, with far more: it loads programs from storage and gives each its own memory. Its jobs are numbered as this handler's are, and a program asks for a job with one instruction.",
+  lanesLead: "[draft] lanesLead",
+  lanesAfter: "[draft] lanesAfter",
 } as const;

@@ -53,4 +53,5 @@ export const LABELS = {
     both: "A hall with a room behind each door",
   },
   callPrefix: "Call farthest with",
+  roomsDrawn: "[draft] roomsDrawn",
 } as const;

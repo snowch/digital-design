@@ -144,6 +144,12 @@ export const functions: LessonInput = {
             pause: ["overBy"],
             watch: true,
             watched: ["R1", "R2", "R15", "PC"],
+            lanes: {
+              lanes: [
+                { at: "0x000", name: LABELS.lanes.main },
+                { at: "overBy", name: "overBy" },
+              ],
+            },
             outcomes: PROSE.callAfter,
           },
         },

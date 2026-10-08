@@ -139,6 +139,36 @@ export interface Machine11Strings {
   /** The button under a box of rows (the listing, memory, the stack, the edges): open, then close. */
   readonly rowsAll: string;
   readonly rowsFewer: string;
+  /** The run drawn as lanes (Modules 11 and 12). */
+  readonly lanes: {
+    /** The drawing's name for a screen reader. */
+    readonly title: string;
+    /** {from} and {to}: two lanes' names; {transfer}: what the move writes, such as R15 ← 00C. */
+    readonly move: string;
+    /** Where the door opens, and where the timer reaches 0, between two instructions. */
+    readonly doorOpens: string;
+    readonly timerReaches: string;
+    /** The band's key: the machine in system mode, and in user mode. */
+    readonly systemBand: string;
+    readonly userBand: string;
+    /** The trap timeline's button that runs on to the next move between lanes. */
+    readonly nextMove: string;
+  };
+  /** Memory drawn as boxes, the stack the same way, and the cold store as rooms. */
+  readonly boxes: {
+    /** {title}: the region's title; the drawing's name for a screen reader. */
+    readonly label: string;
+    /** Under a drawing whose last step stored a word: the outline marks it. */
+    readonly changed: string;
+    /** {reg}: the register whose word a push stored there. */
+    readonly saves: string;
+    readonly stackLabel: string;
+    readonly roomsLabel: string;
+    /** {name}: a room a door leads back to, drawn already above. */
+    readonly roomAgain: string;
+    /** Under the rooms: what the door marks and the lit room say. */
+    readonly roomsKey: string;
+  };
   readonly startSkeleton: string;
   readonly startEmpty: string;
   /** Asking before a start replaces a program the learner changed. */
@@ -328,6 +358,24 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   wordInText: "{decimal} ({hex} in hexadecimal)",
   rowsAll: "Show every row",
   rowsFewer: "Show fewer rows",
+  lanes: {
+    title: "[draft] lanes.title",
+    move: "[draft] {from} {to} {transfer}",
+    doorOpens: "[draft] doorOpens",
+    timerReaches: "[draft] timerReaches",
+    systemBand: "[draft] systemBand",
+    userBand: "[draft] userBand",
+    nextMove: "[draft] nextMove",
+  },
+  boxes: {
+    label: "[draft] {title}",
+    changed: "[draft] changed",
+    saves: "[draft] {reg}",
+    stackLabel: "[draft] stackLabel",
+    roomsLabel: "[draft] roomsLabel",
+    roomAgain: "[draft] {name}",
+    roomsKey: "[draft] roomsKey",
+  },
   startSkeleton: "Start from the outline",
   startEmpty: "Start from an empty program",
   // Brief 8M.

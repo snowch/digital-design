@@ -74,6 +74,8 @@ export interface DebugState {
   readonly returns: number;
   /** The RAM addresses a push wrote (a store through R14), lowest first: the stack's words. */
   readonly pushed: readonly number[];
+  /** For each address a push wrote, the register it stored there last: what the word saves. */
+  readonly saved?: Readonly<Record<number, number>>;
   /** The last instruction's record. */
   readonly last?: StepRecord;
   /** Module 12: every trap that went to the handler, in order: where, why, and the return point. */
@@ -228,6 +230,8 @@ export function debugStep(
     pushedAt === undefined || s.pushed.includes(pushedAt)
       ? s.pushed
       : [...s.pushed, pushedAt].sort((a, b) => a - b);
+  const saved =
+    pushedAt === undefined || f === undefined ? s.saved : { ...s.saved, [pushedAt]: f.b };
   const sp = cpu.regs[14];
   const deepest =
     sp === undefined ? s.deepest : s.deepest === undefined || sp < s.deepest ? sp : s.deepest;
@@ -239,6 +243,7 @@ export function debugStep(
     callsMade,
     returns,
     pushed,
+    ...(saved !== undefined ? { saved } : {}),
     last: record,
     traps,
     ...(deepest !== undefined ? { deepest } : {}),

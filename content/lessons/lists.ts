@@ -87,7 +87,9 @@ export const lists: LessonInput = {
             registers: [1],
             pause: [LOAD_LINE],
             runLabel: LABELS.nextReading,
-            memory: [{ from: "count", words: DAY_LOG.length + 1, title: LABELS.memoryTitle }],
+            memory: [
+              { from: "count", words: DAY_LOG.length + 1, title: LABELS.memoryTitle, drawn: true },
+            ],
           },
         },
       ],
@@ -138,7 +140,10 @@ export const lists: LessonInput = {
             watched: ["R1", "R2", "R3", "word[R1]"],
             watchAddresses: ["R1"],
             registers: [0, 1, 2, 3, 4, 5],
-            memory: [{ from: "log", words: DAY_LOG.length, title: LABELS.logTitle }],
+            // One word past the log, so the drawing shows R1 move on to it after the last reading.
+            memory: [
+              { from: "log", words: DAY_LOG.length + 1, title: LABELS.logTitle, drawn: true },
+            ],
           },
         },
       ],

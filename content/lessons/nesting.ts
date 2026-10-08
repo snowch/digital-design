@@ -114,6 +114,14 @@ export const nesting: LessonInput = {
             from: 11,
             edges: 42,
             mode: true,
+            lanes: {
+              lanes: [
+                { at: "0x000", name: LABELS.lanes.start },
+                { at: "handler", name: LABELS.lanes.handler, handler: true },
+                { at: "program", name: LABELS.lanes.program },
+              ],
+              again: LABELS.lanes.again,
+            },
             outcomes: PROSE.timelineAfter,
           },
         },
@@ -190,6 +198,15 @@ export const nesting: LessonInput = {
             doorOpensAt: NEST_DOOR,
             doorOptions: [5, 30, NEST_DOOR],
             memory: [{ from: "0x410", words: 2, title: LABELS.keptTitle }],
+            lanes: {
+              lanes: [
+                { at: "0x000", name: LABELS.lanes.start },
+                { at: "handler", name: LABELS.lanes.handler, handler: true },
+                { at: "program", name: LABELS.lanes.program },
+              ],
+              again: LABELS.lanes.again,
+              marks: ["0x410", "0x418"],
+            },
             outcomes: PROSE.savedAfter,
           },
         },

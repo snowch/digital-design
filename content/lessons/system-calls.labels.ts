@@ -48,4 +48,9 @@ export const LABELS = {
     "Room B, kept in R5 across a call",
     "The difference between the rooms",
   ],
+  lanes: {
+    start: "[draft] lanes.start",
+    handler: "[draft] lanes.handler",
+    program: "[draft] lanes.program",
+  },
 } as const;

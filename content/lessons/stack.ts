@@ -132,6 +132,7 @@ export const stack: LessonInput = {
             watch: true,
             watched: ["R10", "R14", "R15", "word[R14]"],
             stack: true,
+            stackDrawn: true,
             outcomes: PROSE.pushedAfter,
           },
         },

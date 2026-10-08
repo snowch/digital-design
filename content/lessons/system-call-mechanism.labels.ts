@@ -28,6 +28,7 @@ export const LABELS = {
     c1: "The shop's handler",
   },
   captions: {
+    lanes: "[draft] captions.lanes",
     asks: "The 7 runs the tests use, with what the outline leaves.",
     predict: "A handler that runs one program, listed, with a question about its record.",
     walk: "The same handler and program in the debugger.",
@@ -62,4 +63,10 @@ export const LABELS = {
   recordsTitle: "The records at 400 and 408",
   numberTitle: "The program's number at 480",
   recordTitle: "The record at 400",
+  lanes: {
+    start: "[draft] lanes.start",
+    handler: "[draft] lanes.handler",
+    first: "[draft] lanes.first",
+    second: "[draft] lanes.second",
+  },
 } as const;

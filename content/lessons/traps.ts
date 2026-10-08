@@ -106,7 +106,17 @@ export const traps: LessonInput = {
           timeModel: "none",
           caption: LABELS.captions.timeline,
           lead: PROSE.timelineLead,
-          props: { program: NIGHT, inputs: NIGHT_INPUTS, outcomes: PROSE.timelineAfter },
+          props: {
+            program: NIGHT,
+            inputs: NIGHT_INPUTS,
+            lanes: {
+              lanes: [
+                { at: "0x000", name: LABELS.lanes.program },
+                { at: "handler", name: LABELS.lanes.handler, handler: true },
+              ],
+            },
+            outcomes: PROSE.timelineAfter,
+          },
         },
       ],
     },

@@ -29,12 +29,16 @@ import {
   endOf,
   inputsAt,
   instructionHex,
+  linesByAddress,
   memoryWord,
+  timelineEdge,
   type AssemblyProblem,
   type DebugState,
   type InputPlan,
   type MachineInputs,
+  type MachineOptions,
   type Program,
+  type TimelineEdge,
 } from "@dd/dd-model";
 import { Prose, useSlot, type InteractiveProps } from "@platform/lesson-runtime";
 import { PredictionChallenge } from "@platform/primitives";
@@ -43,6 +47,8 @@ import { format, useViewStrings } from "../strings";
 import type { Machine11Strings } from "../strings11";
 import type { Machine12Strings } from "../strings12";
 import { withProps } from "./props";
+import { MemoryBoxes, RoomsDrawing, StackBoxes } from "./MemoryDrawings";
+import { RunLanesDrawing, lanesOf, type LanesConfig } from "./RunLanes";
 
 export const hex3 = (v: number | bigint) => v.toString(16).toUpperCase().padStart(3, "0");
 export const signedText = (v: bigint | undefined) =>
@@ -174,6 +180,8 @@ export interface MemoryRegion {
   readonly from: string;
   readonly words: number;
   readonly title: string;
+  /** Drawn as boxes, the registers that hold an address as arrows into them; the table kept for a screen reader. */
+  readonly drawn?: boolean;
 }
 
 export interface DebuggerOptions {
@@ -220,6 +228,12 @@ export interface DebuggerOptions {
   readonly registersFirst?: boolean;
   /** Module 12: the instructions the learner may choose to open the door before. */
   readonly doorOptions?: readonly number[];
+  /** The stack drawn as boxes, each word marked with the register it saves (Module 11). */
+  readonly stackDrawn?: boolean;
+  /** Module 11's cold store drawn as rooms from the hall this line names, and the panel's title. */
+  readonly rooms?: { readonly hall: string; readonly title: string };
+  /** The run drawn as lanes under the debugger, stepped with it (Modules 11 and 12). */
+  readonly lanes?: LanesConfig;
   /**
    * The listing's column of machine words, for a lesson that reads them (Module 11's first). Left
    * out by default, so that a row of the listing takes one line on a phone.
@@ -375,6 +389,19 @@ export function DebuggerView({
     setFrom(0);
   };
   const pc = state.cpu.pc;
+  // The run drawn as lanes: the whole run from reset once, shown up to the steps taken so far.
+  const lanesConfig: LanesConfig | undefined = options.lanes && {
+    ...options.lanes,
+    mode: options.lanes.mode ?? options.modeWords === true,
+  };
+  const laneItems = useMemo(
+    () =>
+      lanesConfig
+        ? lanesOf(laneRun(program, start, inputs, machine, limit), program, lanesConfig)
+        : [],
+    [program, start, inputs, machine, limit, options.lanes],
+  );
+  const stepsDone = state.ran + state.traps.length;
   // Without its listing, the figure walks from pause to pause only, and ends at the last pause
   // before the program's end: its run never reaches the stop.
   const compact = options.listing === false && options.runLabel !== undefined;
@@ -443,6 +470,18 @@ export function DebuggerView({
         {(options.memory ?? []).map((region) => (
           <MemoryPanel key={region.from} region={region} program={program} state={state} t={t} />
         ))}
+        {options.rooms && placeOf(options.rooms.hall, program.labels) !== undefined && (
+          <section className="debugger-panel debugger-rooms" aria-label={options.rooms.title}>
+            <p className="layout-title" aria-hidden="true">
+              {options.rooms.title}
+            </p>
+            <RoomsDrawing
+              state={state}
+              program={program}
+              hall={placeOf(options.rooms.hall, program.labels)!}
+            />
+          </section>
+        )}
       </div>
     );
   // The door's time, chosen in the panel of the timer and the door, where the door is.
@@ -678,7 +717,27 @@ export function DebuggerView({
         {(options.memory ?? []).map((region) => (
           <MemoryPanel key={region.from} region={region} program={program} state={state} t={t} />
         ))}
-        {options.stack && <StackPanel program={program} state={state} names={names} t={t} />}
+        {options.stack && (
+          <StackPanel
+            program={program}
+            state={state}
+            names={names}
+            t={t}
+            drawn={options.stackDrawn === true}
+          />
+        )}
+        {options.rooms && placeOf(options.rooms.hall, program.labels) !== undefined && (
+          <section className="debugger-panel debugger-rooms" aria-label={options.rooms.title}>
+            <p className="layout-title" aria-hidden="true">
+              {options.rooms.title}
+            </p>
+            <RoomsDrawing
+              state={state}
+              program={program}
+              hall={placeOf(options.rooms.hall, program.labels)!}
+            />
+          </section>
+        )}
         {options.control && (
           <ControlPanel
             state={state}
@@ -770,6 +829,11 @@ export function DebuggerView({
           </section>
         </div>
       </div>
+      {lanesConfig && (
+        <div className="debugger-lanes">
+          <RunLanesDrawing items={laneItems} config={lanesConfig} shown={stepsDone} />
+        </div>
+      )}
     </div>
   );
 }
@@ -982,8 +1046,17 @@ function MemoryPanel({
       <p className="layout-title" aria-hidden="true">
         {region.title}
       </p>
+      {region.drawn && (
+        <MemoryBoxes
+          first={first}
+          words={region.words}
+          title={region.title}
+          state={state}
+          names={nameAt}
+        />
+      )}
       <div
-        className={`truth-table-wrap memory-box${open ? " rows-open" : ""}`}
+        className={`truth-table-wrap memory-box${open ? " rows-open" : ""}${region.drawn ? " visually-hidden" : ""}`}
         ref={boxRef}
         id={boxId}
       >
@@ -995,7 +1068,7 @@ function MemoryPanel({
               <th scope="col">{t.memoryValue}</th>
               <th scope="col" aria-label={t.pointsHere.replace("{names}", "").trim()}>
                 {/* In the header row's empty cell, so on a phone it takes no row of its own. */}
-                {(hidden || open) && (
+                {!region.drawn && (hidden || open) && (
                   <RowsToggle
                     open={open}
                     onToggle={() => setOpen(!open)}
@@ -1095,11 +1168,14 @@ function StackPanel({
   state,
   names,
   t,
+  drawn = false,
 }: {
   program: Program;
   state: DebugState;
   names: Map<number, string>;
   t: Machine11Strings;
+  /** Drawn as boxes; the list kept for a screen reader. */
+  drawn?: boolean;
 }) {
   const sp = state.cpu.regs[14];
   const items = stackGroups(state, names);
@@ -1121,7 +1197,7 @@ function StackPanel({
     <section className="debugger-panel debugger-stack" aria-label={t.stackCaption}>
       <div className="rows-title">
         <p className="layout-title">{t.stackCaption}</p>
-        {(hidden || open) && (
+        {!drawn && (hidden || open) && (
           <RowsToggle
             open={open}
             onToggle={() => setOpen(!open)}
@@ -1131,12 +1207,17 @@ function StackPanel({
           />
         )}
       </div>
+      {drawn && <StackBoxes state={state} names={names} />}
       {sp === undefined ? (
         <p className="watch-note">{t.stackUnset}</p>
       ) : items.length === 0 ? (
         <p className="watch-note">{t.stackEmpty}</p>
       ) : (
-        <ol className={`stack-frames${open ? " rows-open" : ""}`} id={boxId} ref={boxRef}>
+        <ol
+          className={`stack-frames${open ? " rows-open" : ""}${drawn ? " visually-hidden" : ""}`}
+          id={boxId}
+          ref={boxRef}
+        >
           {items.map((item) =>
             item.kind === "fold" ? (
               <li key={`fold-${item.group.rows[0]?.address}`} className="stack-fold">
@@ -1271,6 +1352,16 @@ const Region = z.object({
   from: z.string(),
   words: z.number().int().min(1).max(64),
   title: z.string(),
+  drawn: z.boolean().optional(),
+});
+
+const LaneSpecs = z.object({
+  lanes: z
+    .array(z.object({ at: z.string(), name: z.string(), handler: z.boolean().optional() }))
+    .min(1),
+  again: z.string().optional(),
+  marks: z.array(z.string()).optional(),
+  mode: z.boolean().optional(),
 });
 
 /** A question about a run from reset, answered by running the reference. */
@@ -1328,6 +1419,13 @@ const DebuggerProps = z.object({
   events: z.boolean().default(false),
   doorOpensAt: z.number().int().min(0).optional(),
   doorOptions: z.array(z.number().int().min(0)).optional(),
+  /** C0's and C1's bit 1 said in words; by default with `events`. */
+  interruptWords: z.boolean().optional(),
+  /** The listing's column of machine words. */
+  words: z.boolean().optional(),
+  stackDrawn: z.boolean().optional(),
+  rooms: z.object({ hall: z.string(), title: z.string() }).optional(),
+  lanes: LaneSpecs.optional(),
 });
 type DebuggerData = z.infer<typeof DebuggerProps>;
 
@@ -1433,6 +1531,11 @@ export const DebuggerFigure = withProps(
       modeWords: data.modeWords,
       events: data.events,
       ...(data.doorOptions ? { doorOptions: data.doorOptions } : {}),
+      ...(data.interruptWords !== undefined ? { interruptWords: data.interruptWords } : {}),
+      ...(data.words !== undefined ? { words: data.words } : {}),
+      ...(data.stackDrawn !== undefined ? { stackDrawn: data.stackDrawn } : {}),
+      ...(data.rooms ? { rooms: data.rooms } : {}),
+      ...(data.lanes ? { lanes: data.lanes } : {}),
     };
     let question: ReactNode = null;
     if (asking)
@@ -1494,3 +1597,23 @@ export const DebuggerFigure = withProps(
     );
   },
 );
+
+/** A whole run from its start as edges, for the drawing of lanes: each step as the timeline reads it. */
+function laneRun(
+  program: Program,
+  start: DebugState,
+  inputs: InputPlan,
+  machine: MachineOptions,
+  limit: number,
+): TimelineEdge[] {
+  const lineAt = linesByAddress(program);
+  const edges: TimelineEdge[] = [];
+  let s = start;
+  while (!s.stopped && s.ran < limit) {
+    const next = debugStep(s, inputs, machine);
+    if (!next.last || next.stopped?.kind === "unknown") break;
+    edges.push(timelineEdge(edges.length + 1, s.cpu, next.cpu, next.last, s.ran, lineAt));
+    s = next;
+  }
+  return edges;
+}

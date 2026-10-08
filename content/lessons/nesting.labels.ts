@@ -53,4 +53,10 @@ export const LABELS = {
     "Show 5, count, show 6, the door shut",
     "Count 30, interrupts off, the door opening during the count",
   ],
+  lanes: {
+    start: "[draft] lanes.start",
+    handler: "[draft] lanes.handler",
+    program: "[draft] lanes.program",
+    again: "[draft] lanes.again",
+  },
 } as const;

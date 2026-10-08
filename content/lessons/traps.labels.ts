@@ -52,4 +52,5 @@ export const LABELS = {
     "a load from an address where there is no memory",
   ],
   countTitle: "The word at 400",
+  lanes: { program: "[draft] lanes.program", handler: "[draft] lanes.handler" },
 } as const;

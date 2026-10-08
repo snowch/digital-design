@@ -54,4 +54,9 @@ export const LABELS = {
     "The door left open on a warm night",
   ],
   storedTitle: "The word at 500: R1 as the interrupts left it",
+  lanes: {
+    start: "[draft] lanes.start",
+    handler: "[draft] lanes.handler",
+    program: "[draft] lanes.program",
+  },
 } as const;

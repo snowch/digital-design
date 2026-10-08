@@ -29,6 +29,9 @@ import { NIGHT_INPUTS } from "./traps";
 
 const ROOMS = { sensorA: -184, sensorB: -250 };
 
+/** The explanation's run drawn as lanes: run 2's table, whose first program faults. */
+const LANES_RUN = RUN_CASES[1]!;
+
 /** The records a run must leave: one word for each program, at 0x400 + 8k. */
 const recordKey = (k: number) => `word:${(0x400 + 8 * k).toString(16)}`;
 
@@ -172,7 +175,37 @@ export const systemCallMechanism: LessonInput = {
         },
       ],
     },
-    { kind: "explanation", title: LABELS.titles.explanation, prose: PROSE.explanation },
+    {
+      kind: "explanation",
+      title: LABELS.titles.explanation,
+      prose: PROSE.explanation,
+      interactives: [
+        {
+          id: "shop-lanes",
+          kind: "trap-timeline",
+          timeModel: "none",
+          caption: LABELS.captions.lanes,
+          lead: PROSE.lanesLead,
+          props: {
+            // The reference on run 2's table: its lines are not listed, only the moves.
+            program: `${RUN_REFERENCE}\n${LANES_RUN.data}`,
+            inputs: NIGHT_INPUTS,
+            edges: 300,
+            mode: true,
+            list: false,
+            lanes: {
+              lanes: [
+                { at: "0x000", name: LABELS.lanes.start },
+                { at: "handler", name: LABELS.lanes.handler, handler: true },
+                { at: "run2first", name: LABELS.lanes.first },
+                { at: "run2second", name: LABELS.lanes.second },
+              ],
+            },
+            outcomes: PROSE.lanesAfter,
+          },
+        },
+      ],
+    },
     { kind: "generalisation", title: LABELS.titles.generalisation, prose: PROSE.generalisation },
     {
       kind: "challenge",
