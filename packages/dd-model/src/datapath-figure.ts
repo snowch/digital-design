@@ -11,7 +11,7 @@ import { assemble, type Program } from "./assemble";
 import { type Stage } from "./datapath";
 import { datapathState, registersOf, stopReasonOf, type DatapathState } from "./datapath-run";
 import { placedMachine, placedTrapMachine } from "./library-control";
-import { edgesLeft, registersTaken } from "./multicycle-view";
+import { edgeView, edgesLeft, registersTaken } from "./multicycle-view";
 import { placedDatapath } from "./library-datapath";
 
 /** The stage a library id draws. */
@@ -167,7 +167,7 @@ export function startDatapath(
 }
 
 /** What a prediction asks about the next edge. */
-export type EdgeQuestion = "changed" | "pc" | "stop" | "value" | "edges" | "took";
+export type EdgeQuestion = "changed" | "pc" | "stop" | "value" | "edges" | "took" | "state";
 
 const signed64 = (v: bigint) => (v >= 1n << 63n ? v - (1n << 64n) : v);
 
@@ -203,6 +203,9 @@ export function edgeAnswer(sim: Simulator, ask: EdgeQuestion, register = 0): str
       if (!reason) return "go";
       return reason.kind === "trap" ? reason.cause.toString(16).toUpperCase() : reason.kind;
     }
+    case "state":
+      // Module 12: the controller's state after the next edge, by its name.
+      return edgeView(circuit, values).state ?? "X";
     case "value": {
       const v = after[register];
       return v === undefined ? "X" : signed64(v).toString();

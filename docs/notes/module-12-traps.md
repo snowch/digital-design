@@ -97,7 +97,7 @@ let a trap in on purpose.
 7. `trap-hardware`, "Where in the machine does a trap happen?": the control registers and the
    selectors in front of them, register Y's word from a control register, the next PC from C2 or
    C4, the trap logic (every cause, the waiting bits and C0's bit 1 in; whether this edge traps,
-   and with which cause, out: the lower number wins, Module 3's priority), and the controller's
+   and with which cause, out: the lower number wins, as Module 8's causes did), and the controller's
    step for a trap. The trap timeline at the edge level, on Module 12's machine of several edges.
    The learner writes the trap logic (SystemVerilog, a combinational table) and opens every
    part. Introduces nothing.

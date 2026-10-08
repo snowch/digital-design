@@ -15,7 +15,7 @@
 //   control-register jobs, which now run, and user mode's refusal of every system job but
 //   `call system` (cause 22); and the trap logic (`trap-logic`), where Module 9's stop logic
 //   was: every step's cause, the waiting events and C0's bit 1 in; whether this edge traps, with
-//   which cause, or halts, out. The lower number wins, Module 3's priority: an interrupt is taken
+//   which cause, or halts, out. The lower number wins, as Module 8's causes did: an interrupt is taken
 //   at the edge that would fetch, where only a fetch's own cause is lower.
 // - The controller (`controller-traps`) takes `resume` and the control-register jobs from READ to
 //   WRITE, as a call goes, and an edge that traps leads to FETCH, as a reset does. Its PC enable

@@ -202,6 +202,7 @@ export const MACHINE11_STRINGS: Machine11Strings = {
     // Module 12.
     controlRegister:
       "{name} is not a control register. The machine has five control registers, C0 to C4.",
+    controlTransfer: "[draft] controlTransfer",
     // Brief 8L.
     noFunction:
       "The tests call the function {name}, but no line of your program starts with {name}:, so start the function's first line with {name}: to give it that name.",

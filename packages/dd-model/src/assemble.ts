@@ -84,7 +84,9 @@ export type AssemblyProblemCode =
   | "addressForm"
   | "reservedName"
   /** Module 12: a control register outside C0 to C4, which the learner's assembler refuses. */
-  | "controlRegister";
+  | "controlRegister"
+  /** Module 12: a control register in a job, a load or a store, not copied to or from R. */
+  | "controlTransfer";
 
 export interface AssemblyProblem {
   /** The line's number in the text, from 1. */
@@ -437,9 +439,20 @@ function addressOf(text: string, context: Context, line: number): { reg?: number
   return { c: constant(value(text, context, line), line) };
 }
 
+/** A control register's name inside a line. */
+const CONTROL_NAME = /\bC\d{1,2}\b/;
+
 /** Why a line no rule reads cannot be read, by the commonest slips. */
 function unreadable(t: string, line: number): AssemblyError {
   const v = { text: t };
+  // Module 12: a control register is only copied to or from an R register (`docs/isa.md`).
+  if (CONTROL_NAME.test(t))
+    return new AssemblyError(
+      line,
+      "a control register is only copied to or from an R register",
+      "controlTransfer",
+      v,
+    );
   if (/^(R\d{1,2}|word\[.*\]|byte\[.*\])\s*=[^=]/.test(t) || /^(R\d{1,2})\s*:=/.test(t))
     return new AssemblyError(line, "write the arrow `<=`", "useArrow", v);
   if (/[*/%]|<<|>>/.test(t.replace(/^.*?<=/, "")))
@@ -600,6 +613,7 @@ function instruction(
   }
   r = /^(C\d{1,2})$/.exec(right);
   if (r) return encode(8, 2, 0, 0, y, controlNumber(r[1] as string, context, line));
+  if (CONTROL_NAME.test(right)) throw unreadable(t, line);
   r = /^(R\d{1,2}) ?([&^+|-]) ?(.+)$/.exec(right);
   if (r) {
     const a = register(r[1] as string, line);

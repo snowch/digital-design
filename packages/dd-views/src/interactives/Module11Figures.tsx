@@ -47,6 +47,12 @@ const ListingProps = z.object({
   program: z.string(),
   /** Whether the names the program defines are listed with their addresses. */
   names: z.boolean().default(true),
+  /**
+   * Whether each line's machine word, and a branch's "goes to" note, are shown once the question
+   * is answered: a listing whose question uses neither leaves them out.
+   */
+  words: z.boolean().default(true),
+  notes: z.boolean().default(true),
   question: z.string().optional(),
   options: z.array(z.object({ value: z.string(), label: z.string() })).optional(),
   /**
@@ -148,6 +154,8 @@ export const ProgramListing = withProps(
                 )
               }
             />
+            {/* The explanation follows its verdict, not the listing below it. */}
+            {committed && data.explain && <Prose markdown={data.explain} />}
           </div>
         )}
         <div className="truth-table-wrap">
@@ -156,20 +164,20 @@ export const ProgramListing = withProps(
             <thead>
               <tr>
                 <th scope="col">{t.address}</th>
-                {committed && <th scope="col">{t.word}</th>}
+                {committed && data.words && <th scope="col">{t.word}</th>}
                 <th scope="col">{t.line}</th>
               </tr>
             </thead>
             <tbody>
               {program.lines.map((l) => {
                 const goes =
-                  committed && l.instruction !== undefined
+                  committed && data.notes && l.instruction !== undefined
                     ? target(l.address, l.instruction)
                     : undefined;
                 return (
                   <tr key={l.address}>
                     <td className="memory-word">{hex3(l.address)}</td>
-                    {committed && (
+                    {committed && data.words && (
                       <td className="memory-word">
                         {l.instruction !== undefined ? instructionHex(l.instruction) : t.data}
                       </td>
@@ -206,7 +214,6 @@ export const ProgramListing = withProps(
             </table>
           </div>
         )}
-        {asking && committed && data.explain && <Prose markdown={data.explain} />}
       </div>
     );
   },

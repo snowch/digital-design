@@ -200,6 +200,9 @@ One line is one instruction, written as the transfer it makes, with Module 5's a
   `goto` or `call` to a name on data; a data word too wide; `=` for `<=`; multiplication, division
   or a shift; two jobs on one line; a store of a number; a branch on a number; a call with no
   register for the return address; an address of two registers; a program too large for the ROM.
+  Module 12 adds two: a control register outside C0 to C4, and a control register anywhere but
+  in a copy to or from an R register (`R3 <= C3`, `C4 <= R3`), such as in a job, a load, a store
+  or a branch.
   Within the 1 KB ROM no branch can be too far: 256 instructions are well inside a constant's
   reach.
 - The shop's devices have names the assembler knows, which stand for their addresses:

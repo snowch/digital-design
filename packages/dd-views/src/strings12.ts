@@ -8,6 +8,10 @@
 export interface Machine12Strings {
   // The debugger: the control registers.
   readonly controlCaption: string;
+  /** Under the controller's states, {state}: the next edge traps, so it leads to FETCH. */
+  readonly trapMove: string;
+  /** {state}: the next edge halts, so the controller stays in {state}. */
+  readonly heldMove: string;
   /** Each register's job, after its name: C0 to C4. */
   readonly controlNames: readonly [string, string, string, string, string];
   /** C0's or C1's two bits in words: {mode}, {interrupts}. */
@@ -97,6 +101,8 @@ export interface Machine12Strings {
 
 export const MACHINE12_STRINGS: Machine12Strings = {
   controlCaption: "The control registers",
+  trapMove: "[draft] trapMove {state}",
+  heldMove: "[draft] heldMove {state}",
   controlNames: ["status", "status before the trap", "return point", "cause", "handler's address"],
   statusWords: "{mode}, {interrupts}",
   systemMode: "system mode",

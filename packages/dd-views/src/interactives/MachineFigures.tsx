@@ -232,7 +232,9 @@ const TimelineProps = z.object({
       z.object({
         net: z.string(),
         label: z.string().optional(),
-        show: z.enum(["address", "word", "signed", "level", "state"]).default("level"),
+        show: z
+          .enum(["address", "word", "signed", "level", "state", "bits", "cause"])
+          .default("level"),
       }),
     )
     .min(1),
@@ -290,14 +292,20 @@ export const EdgeTimeline = withProps(
         const w: Word = e.value;
         if (w.known !== (1n << BigInt(w.width)) - 1n) continue;
         labels[formatWord(w)] =
-          s.show === "address"
-            ? hex3(w.value)
-            : s.show === "word"
-              ? hex8(Number(w.value))
-              : (w.value >= 1n << BigInt(w.width - 1)
-                  ? w.value - (1n << BigInt(w.width))
-                  : w.value
-                ).toString();
+          s.show === "bits"
+            ? // Module 12: C0 and C1 as their two bits, bit 1 then bit 0.
+              (w.value & 3n).toString(2).padStart(2, "0")
+            : s.show === "cause"
+              ? // Module 12: a cause, two hexadecimal digits.
+                w.value.toString(16).toUpperCase().padStart(2, "0")
+              : s.show === "address"
+                ? hex3(w.value)
+                : s.show === "word"
+                  ? hex8(Number(w.value))
+                  : (w.value >= 1n << BigInt(w.width - 1)
+                      ? w.value - (1n << BigInt(w.width))
+                      : w.value
+                    ).toString();
       }
       return { net: name, label: s.label ?? s.net, labels };
     });

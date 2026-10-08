@@ -1754,6 +1754,15 @@ button.bit {
   stroke: var(--accent);
   stroke-width: 3;
 }
+/* Module 12: the state an edge leads to by a trap or a halt, not by the table. */
+.state-node-next rect {
+  stroke: var(--focus);
+  stroke-width: 3;
+  stroke-dasharray: 6 3;
+}
+.state-note {
+  margin: var(--space-2) var(--space-3);
+}
 .state-name {
   font-weight: 700;
 }
