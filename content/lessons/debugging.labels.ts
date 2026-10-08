@@ -38,7 +38,8 @@ export const LABELS = {
     countToLog:
       "A program that keeps its number of warm readings at the wrong address, in the debugger.",
     edgeListing: "A counting program that counts a reading equal to the limit.",
-    edgeLog: "A question: which log shows that program's mistake.",
+    edgeLog:
+      "The figure's counting program raises two questions: which log shows its mistake, and what a right program shows on that log.",
   },
   displayCheck: "Display",
   logTitle: "Log",
@@ -54,4 +55,5 @@ export const LABELS = {
     equal: "-180 and -190",
     empty: "An empty log",
   },
+  edgeShowsField: "What a right program shows on the log you chose",
 } as const;

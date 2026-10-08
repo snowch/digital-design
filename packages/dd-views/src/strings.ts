@@ -1029,6 +1029,9 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
         "{actual} is not it; R14 starts at 7C0, and each word pushed takes 8 off it; give the address as three hexadecimal digits.",
       edgeLog:
         "On that log, the program and a right one show the same number, so that log cannot show the mistake.",
+      // Brief 6RL3.
+      edgeShows:
+        "{actual} is not it; a right program counts only readings warmer than -180, and a reading equal to the limit is not warmer.",
       // Module 11, lesson 5 (brief 5L).
       recursionDepth:
         "{actual} is not it; a call that finds a room pushes 4 words, a call for a door that leads nowhere pushes none, and R14 starts at 7C0.",

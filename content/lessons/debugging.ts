@@ -73,6 +73,9 @@ export const EDGE_LOGS = [
   { value: "equal", log: [-180, -190] },
   { value: "empty", log: [] },
 ] as const;
+/** The edge log that shows the mistake: a reading equal to the limit. */
+const EDGE_EQUAL = EDGE_LOGS.find((e) => e.value === "equal")!.log;
+
 const runLabel = (log: readonly number[], limit: number) =>
   `${LABELS.logPrefix} ${log.length ? log.join(", ") : LABELS.emptyLog}; ${LABELS.limitPrefix} ${limit}`;
 
@@ -279,20 +282,27 @@ export const debugging: LessonInput = {
           kind: "choice" as const,
           options: EDGE_LOGS.map((e) => ({ value: e.value, label: LABELS.edgeLogs[e.value] })),
         },
+        { id: "shows", label: LABELS.edgeShowsField, kind: "number" as const, step: 1 },
       ],
       tests: {
         kind: "answers",
-        grader: "choices",
+        grader: "exact",
         cases: [
           {
             label: LABELS.edgeField,
-            given: { field: "log", detail: "edgeLog" },
+            given: { field: "log", form: "choice", detail: "edgeLog" },
             expect: { value: "equal" },
+          },
+          {
+            // What a right program shows on the log that shows the mistake.
+            label: LABELS.edgeShowsField,
+            given: { field: "shows", form: "number", detail: "edgeShows" },
+            expect: { value: String(warmerCount(EDGE_EQUAL, -180)) },
           },
         ],
       },
       hints: [...PROSE.edgeHints],
-      reference: { answers: { log: "equal" } },
+      reference: { answers: { log: "equal", shows: String(warmerCount(EDGE_EQUAL, -180)) } },
     },
     {
       id: "mend-over",
