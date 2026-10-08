@@ -24,7 +24,8 @@ export const CONTROL_AT: Readonly<Record<string, At>> = {
     "in:RST": [0, 27],
     control: [8, 4],
     "out:CAUSE": [17, 1.5],
-    "out:HALT": [17, 12.5],
+    // One cell left of the loops' wires down to the datapath, so its value is written clear of them.
+    "out:HALT": [16, 12.5],
     datapath: [22, 6.5],
     "in:DOOR": [33, 11],
     "in:WARM": [33, 12],
@@ -501,7 +502,7 @@ export const CONTROL_ROUTES: Readonly<Record<string, Routes>> = {
   // loops to the datapath, so each crosses only wires of another block.
   "machine-traps": {
     "control.CAUSE>output:CAUSE.a": [16, 2.1],
-    "control.HALT>output:HALT.a": [16],
+    "control.HALT>output:HALT.a": [15.5],
     "control.CONTROL>port.CONTROL": [19, 3, 36],
     "port.CAUSEF>control.CAUSEF": [47, 24, 3],
     "port.CAUSEM>control.CAUSEM": [46.5, 23.5, 3.5],

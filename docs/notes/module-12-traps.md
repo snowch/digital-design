@@ -278,7 +278,15 @@ starts.
 
 ## The full check
 
-(Filled in when it ends.)
+- **02:03 to 02:38, on `a9311a5`**: formatting, copyright, the platform copy, types and the build
+  passed; Vitest 128 files, 1324 tests passed; the browser 858 passed, 56 skipped, 14 failed. Ten
+  of the 14 are the stored screenshots that fail in a build container on `main` too (aesthetics,
+  4 at desktop and 6 at phone width). The other four were Module 12's, the diagram test at both
+  widths, on lesson 7: the value written beside the HALT pin touched the FETCHED and MQ wires on
+  the machine's drawing, and on Module 12's controller the label for READ to WRITE overlapped ALU
+  to WRITE's. Mended: the HALT pin one cell left, its wire's turn half a cell left, and the label
+  moved clear; the diagram test then passed at both widths (22 tests).
+- **The second run**: (filled in when it ends).
 
 ## What to change
 

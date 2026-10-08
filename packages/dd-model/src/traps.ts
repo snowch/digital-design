@@ -96,8 +96,8 @@ export function trapControllerMachine(): Machine {
     ],
     rows: [
       { from: "FETCH", when: {}, to: "READ", labelAt: [105, 250] },
-      { from: "READ", when: { CALL: 1 }, to: "WRITE", labelAt: [372, 250] },
-      { from: "READ", when: { CALL: 0, CREG: 1 }, to: "WRITE", labelAt: [400, 200] },
+      { from: "READ", when: { CALL: 1 }, to: "WRITE", labelAt: [392, 190] },
+      { from: "READ", when: { CALL: 0, CREG: 1 }, to: "WRITE", labelAt: [392, 190] },
       { from: "READ", when: { CALL: 0, CREG: 0 }, to: "ALU", labelAt: [196, 112] },
       { from: "ALU", when: { MEM: 1 }, to: "MEMORY", labelAt: [210, 262] },
       { from: "ALU", when: { MEM: 0, WRITEY: 1 }, to: "WRITE", labelAt: [345, 300] },
