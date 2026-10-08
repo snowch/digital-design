@@ -61,6 +61,9 @@ import { debugging } from "./debugging";
 import { logReport } from "./log-report";
 // Module 12, traps and interrupts
 import { traps } from "./traps";
+import { savingState } from "./saving-state";
+import { userMode } from "./user-mode";
+import { systemCalls } from "./system-calls";
 
 const INPUTS: readonly LessonInput[] = [
   // Module 0, meet the machine.
@@ -121,6 +124,9 @@ const INPUTS: readonly LessonInput[] = [
   logReport,
   // Module 12, traps and interrupts
   traps,
+  savingState,
+  userMode,
+  systemCalls,
 ];
 
 export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(

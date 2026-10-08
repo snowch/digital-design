@@ -49,6 +49,8 @@ export interface Machine12Strings {
   readonly toEnd: string;
   readonly reset: string;
   readonly noEdge: string;
+  /** An edge at an address no line of the program names: a word of data, or of 0s. */
+  readonly noLine: string;
   /** {n}: the edge's number. */
   readonly edge: string;
   /** {line}, {address}. */
@@ -123,6 +125,7 @@ export const MACHINE12_STRINGS: Machine12Strings = {
   toEnd: "[draft] Run to the end",
   reset: "[draft] Reset",
   noEdge: "[draft] No edge yet.",
+  noLine: "[draft] the word",
   edge: "[draft] Edge {n}",
   runs: "[draft] {line}, at {address}, runs.",
   traps: "[draft] {line}, at {address}, traps with cause {cause}.",

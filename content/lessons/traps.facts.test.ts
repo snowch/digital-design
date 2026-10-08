@@ -56,9 +56,9 @@ describe("facts for the traps lesson", () => {
     );
     expect(transfers(NIGHT, 2)).toBe("C4 ← 024, PC ← 008");
     expect(transfers(NIGHT, 6)).toBe("C2 ← 014, C1 ← 01, C0 ← 01, C3 ← 34, PC ← 024");
-    expect(transfers(NIGHT, 7)).toBe("R5 ← 52, PC ← 028");
-    expect(transfers(NIGHT, 9)).toBe("R5 ← 20, PC ← 030");
-    expect(transfers(NIGHT, 10)).toBe("R5 ← 24, PC ← 034");
+    expect(transfers(NIGHT, 7)).toBe("R5 ← 52 034, PC ← 028");
+    expect(transfers(NIGHT, 9)).toBe("R5 ← 20 014, PC ← 030");
+    expect(transfers(NIGHT, 10)).toBe("R5 ← 24 018, PC ← 034");
     expect(transfers(NIGHT, 11)).toBe("C2 ← 018, PC ← 038");
     expect(transfers(NIGHT, 12)).toBe("C0 ← 01, PC ← 018");
     expect(edges.at(-1)?.pc).toBe(0x20n);

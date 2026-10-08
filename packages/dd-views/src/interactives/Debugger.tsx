@@ -576,7 +576,12 @@ export function DebuggerView({
         ))}
         {options.stack && <StackPanel program={program} state={state} names={names} t={t} />}
         {options.control && (
-          <ControlPanel state={state} t12={t12} modeWords={options.modeWords === true} />
+          <ControlPanel
+            state={state}
+            t12={t12}
+            modeWords={options.modeWords === true}
+            interrupts={options.events === true}
+          />
         )}
         {options.events && <EventsPanel state={state} inputs={inputs} t12={t12} />}
         <div className="debugger-panels">
@@ -659,7 +664,8 @@ export function DebuggerView({
 }
 
 /** Module 12: C0's or C1's two bits in words: the mode, and whether interrupts are on. */
-export function statusText(t12: Machine12Strings, bits: bigint): string {
+export function statusText(t12: Machine12Strings, bits: bigint, interrupts = true): string {
+  if (!interrupts) return (bits & 1n) === 1n ? t12.systemMode : t12.userMode;
   return format(t12.statusWords, {
     mode: (bits & 1n) === 1n ? t12.systemMode : t12.userMode,
     interrupts: (bits & 2n) !== 0n ? t12.interruptsOn : t12.interruptsOff,
@@ -678,10 +684,13 @@ function ControlPanel({
   state,
   t12,
   modeWords,
+  interrupts,
 }: {
   state: DebugState;
   t12: Machine12Strings;
   modeWords: boolean;
+  /** Whether C0's bit 1 is said in words: from lesson 5, which names interrupts. */
+  interrupts: boolean;
 }) {
   const last = state.last;
   const changed = (k: number) =>
@@ -703,7 +712,7 @@ function ControlPanel({
             <dd className="memory-word">
               {controlText(k, v)}
               {modeWords && k <= 1 && (
-                <span className="control-mode">{` ${statusText(t12, v)}`}</span>
+                <span className="control-mode">{` ${statusText(t12, v, interrupts)}`}</span>
               )}
             </dd>
           </div>

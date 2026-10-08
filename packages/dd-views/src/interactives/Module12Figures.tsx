@@ -16,7 +16,7 @@ import { Prose, type InteractiveProps } from "@platform/lesson-runtime";
 
 import { format, useViewStrings } from "../strings";
 import type { Machine12Strings } from "../strings12";
-import { ShopInputs, controlText, hex3, shopInputs, signedText, statusText } from "./Debugger";
+import { ShopInputs, controlText, hex3, shopInputs, statusText, valueText } from "./Debugger";
 import { withProps } from "./props";
 
 const TimelineProps = z.object({
@@ -29,6 +29,8 @@ const TimelineProps = z.object({
   edges: z.number().int().min(1).max(400).default(60),
   /** Whether each edge says the mode it leaves the machine in (lesson 3 on). */
   mode: z.boolean().default(false),
+  /** Whether the mode's words say C0's bit 1 too (lesson 5 on, which names interrupts). */
+  interrupts: z.boolean().default(false),
   /** Shown once the learner has stepped to the last edge. */
   outcomes: z.string().optional(),
 });
@@ -45,14 +47,14 @@ export function transferValue(x: Transfer): string {
     case "bits":
       return controlText(0, x.value);
     case "number":
-      return signedText(x.value);
+      return valueText(x.value);
   }
 }
 
 /** What an edge did, in the course's words. */
 export function edgeText(t: Machine12Strings, e: TimelineEdge): string {
   const values = {
-    line: e.line ?? "",
+    line: e.line ?? t.noLine,
     address: hex3(e.pc),
     cause: e.cause === undefined ? "" : e.cause.toString(16).toUpperCase(),
   };
@@ -161,7 +163,7 @@ export const TrapTimeline = withProps(
               )}
               {data.mode && (
                 <p className="trap-edge-mode">
-                  {format(t.modeAfter, { mode: statusText(t, e.control[0]) })}
+                  {format(t.modeAfter, { mode: statusText(t, e.control[0], data.interrupts) })}
                 </p>
               )}
             </li>
