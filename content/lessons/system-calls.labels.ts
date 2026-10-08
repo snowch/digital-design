@@ -7,10 +7,10 @@
 export const LABELS = {
   title: "How does a user program show a reading if it may not touch the display?",
   objectives: [
-    "Make a system call with the job in R1 and its word in R2\n.",
-    "Say where a system call returns, and how that differs from a fault\n.",
-    "Tell a system call from a fault in a handler, by C3\n.",
-    "Add a job to a handler\n.",
+    "Make a system call with the job in R1 and its word in R2.",
+    "Say where a system call returns, and how that differs from a fault.",
+    "Tell a system call from a fault in a handler, by C3.",
+    "Add a job to a handler.",
   ],
   titles: {
     question: "A store the display refuses",

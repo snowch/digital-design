@@ -38,6 +38,9 @@ const SET_REGISTERS: [string, string][] = Array.from({ length: 9 }, (_, k) => [
   String((k + 1) * 11),
 ]);
 
+/** Each choice's handler, as the task shows it. */
+const HANDLER_TEXT = { a: "A", b: "B", c: "C", d: "D" } as const;
+
 export const savingState: LessonInput = {
   id: "saving-state",
   title: LABELS.title,
@@ -198,7 +201,13 @@ export const savingState: LessonInput = {
     {
       id: "save-choices",
       title: LABELS.challengeTitles.c1,
-      task: PROSE.c1Task,
+      // The task, then the four handlers, each under its field's label.
+      task: [
+        PROSE.c1Task,
+        ...SAVE_CHOICES.map(
+          (c) => `**${LABELS.choiceFields[c.id]}**\n\n${PROSE[HANDLER_TEXT[c.id]]}`,
+        ),
+      ].join("\n\n"),
       gradedDirection: "answer",
       interface: { inputs: [], outputs: [] },
       fields: SAVE_CHOICES.map((c) => ({

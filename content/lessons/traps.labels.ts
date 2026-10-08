@@ -35,7 +35,7 @@ export const LABELS = {
     quizListing: "A program with a word load that faults, which this lesson does not run.",
     answers: "Four questions about the registers after the trap in that program.",
     noSkip: "The night program with a handler that only resumes, run in the debugger.",
-    debugger: "The night program with its handler in the debugger, beside the control registers.",
+    debugger: "The night program with its handler in the debugger, with the control registers.",
     skip34: "A handler that skips refused stores, with its four tests.",
   },
   fields: {

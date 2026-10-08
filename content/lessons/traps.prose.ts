@@ -27,7 +27,7 @@ export const PROSE = {
   timelineAfter:
     "At edge 6 the store at `014` traps. It makes five transfers: C2 ← `014`, C1 ← `01`, C0 ← `01`, C3 ← `34` and PC ← `024`. The handler adds 4 to C2, so C2 holds `018`. `resume` runs at edge 12. It sets the PC to `018` and C0 to C1's `01`. The program then lights NIGHT and stops at `020`. The run has 15 edges in all: 14 instructions run and 1 trap. The display shows -184 and NIGHT is on. The machine did not halt.",
   construction:
-    "You can work out what a trap leaves in the control registers without running the program.\n\nThe figure lists another program. It sets C4, puts the lamps' address plus 4 in R2, then loads the word at R2.\n\nThat address is not a multiple of 8, so the load faults with cause `33`. The lesson does not run this program.",
+    "You can work out what a trap leaves in the control registers without running the program.\n\nThe figure lists another program. It sets C4, puts the lamps' address plus 4 in R2, then loads the word at R2.\n\nThat address is not a multiple of 8, so the load faults. The lesson does not run this program.",
   quizListingLead: "The program, as the assembler lists it.",
   answersLead: "Work out each answer from the listing, then run the tests.",
   c1Task:
@@ -51,7 +51,7 @@ export const PROSE = {
   debuggerAfter:
     "The program stops at `020` with NIGHT on and -184 on the display. The status line says 14 instructions ran and 1 trap went to the handler.\n\nThe word at `400` holds 52: cause `34` read as a decimal number.",
   generalisation:
-    "Every cause goes to the same handler, at the address C4 holds. The handler reads C3 to tell the causes apart.\n\nOne handler address serves every cause on this machine. Some machines keep a table of addresses instead, one for each cause.\n\nA fault returns to the instruction that faulted. Lesson 4 meets a trap whose return point is the instruction after it.\n\nThe handler is an ordinary program in the ROM, written in the same assembly. The machine adds only the five transfers at the trap's edge and the two at `resume`'s edge.",
+    "Every cause goes to the same handler, at the address C4 holds. The handler reads C3 to tell the causes apart.\n\nOne handler address serves every cause on this machine.\n\nA fault returns to the instruction that faulted. Lesson 4 meets a trap whose return point is the instruction after it.\n\nThe handler is an ordinary program in the ROM, written in the same assembly. The machine adds only the five transfers at the trap's edge and the two at `resume`'s edge.",
   skip34Lead: "Write the handler, step through it on the tests' programs, then run the tests.",
   c2Task:
     "1. Write a handler that skips every store the machine refuses, cause `34`, and counts them in the word at `0x400`.\n2. On any other cause, the handler runs `stop`, so the machine stops there.\n3. The starting text sets C4, sets the count to 0 and goes to `program`. Its handler only resumes.\n4. There are 4 tests. Each adds its own program after yours, named `program`, and runs the whole of it from reset. Each checks the count, the display, how many traps went to the handler, and that the run ends at a `stop`.",
