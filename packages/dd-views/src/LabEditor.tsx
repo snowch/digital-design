@@ -16,6 +16,7 @@ import type { ChallengeEditorProps, Verdict, VerdictFailure } from "@platform/le
 import type { Circuit } from "@dd/sim";
 
 import { WriteEditor, portProblem } from "./book";
+import { LabJoins } from "./interactives/LabJoins";
 import { DEFAULT_VIEW_STRINGS, format, useViewStrings, type ViewStrings } from "./strings";
 
 export const LAB_GRADER = "machine13-lab";
@@ -198,6 +199,7 @@ export function LabEditor(props: ChallengeEditorProps) {
         )}
       </div>
       <WriteEditor {...props} />
+      <LabJoins text={text} />
     </div>
   );
 }

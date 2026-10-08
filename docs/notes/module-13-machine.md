@@ -18,6 +18,32 @@ in `docs/notes/module-13-machine/`.
 Every learner-facing string went through briefs of checked facts and drafts; `drafts/N-fixes.md`
 lists every fact or form put right in a draft, and every cut made on the second reading.
 
+## Ideas that are shapes, and the figures that draw them
+
+| Lesson | The idea | The figure that draws it |
+| --- | --- | --- |
+| `whole-machine` | the machine as three blocks, each built in an earlier module | the machine's drawing, each block with its maker beside it |
+| `whole-machine` | an instruction's words crossing the joins, edge by edge | the edge timeline: one lane per bus, values where they hold |
+| `whole-machine` | a join held at a fixed value | the drawing with the fault on its wire, the comparison beside it |
+| `full-path` | one line at every level at one edge | the drawing, opened to any level, beside "The instruction at every level" |
+| `tracing` | a value followed from a line to a gate | the drawing, opened block by block, and each closed part as the drawing of one bit its maker drew |
+| `final-machine` | the joins the learner's text makes between the parts | the lab's drawing: a map of the nine parts in lesson 1's blocks, and a part's ports as wires to what the text joins them to, open ports as rings |
+| `final-machine` | a changed line's effect | the same drawing in each `lab-run` figure, the ports the line feeds marked |
+| `capstone` | the learner's own program run on the whole machine | lesson 3's trace figure on the learner's program, under the editor |
+
+Tables kept beside drawings, and why:
+
+- **"The instruction at every level"** (`full-path`) lists the line, its address, its word, the IR's
+  fields, the state and six control signals at one edge. Each row is a different form of one
+  moment, words and fields rather than parts and wires; the drawing beside it is the shape. The
+  reviewers are checking it against the plan's "Module 0's ladder, made general"; their findings
+  decide whether it becomes a drawing.
+- **The table of levels opened** (`tracing`) records the blocks opened so far with their ports'
+  values. The same review applies.
+- **The `lab-run` results** are a list of sentences, one per run; each names the first instruction
+  that disagreed. A strip over the instructions, agreeing up to the first that disagrees, was
+  offered as optional and is not built: a run's sentence already says where it stopped agreeing.
+
 ## The machine
 
 - **`machine-final`** (`packages/dd-model/src/traps.ts`, option `final`) is Module 12's

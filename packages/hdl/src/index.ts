@@ -12,3 +12,4 @@ export * from "./machine-modules";
 export * from "./machine9-modules";
 // Module 13: the final machine joined from its parts.
 export * from "./machine13-modules";
+export * from "./machine13-joins";

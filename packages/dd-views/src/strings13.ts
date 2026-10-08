@@ -148,6 +148,28 @@ export interface Machine13Strings {
   readonly capFirst: string;
   /** For a wrong answer: the level to look at, never the value, by question. */
   readonly capLevels: Readonly<Record<string, string>>;
+
+  // The lab's drawing of a text's joins (lesson 4).
+  readonly joinsMap: string;
+  readonly joinsBlocks: Readonly<Record<string, string>>;
+  /** {n}: the part's ports nothing joins. */
+  readonly joinsOpenCount: string;
+  readonly joinsAllJoined: string;
+  readonly joinsMissing: string;
+  /** {part}: the part whose joins are drawn. */
+  readonly joinsPartLabel: string;
+  readonly joinsOpen: string;
+  /** {name}: one of the machine's inputs. */
+  readonly joinsInput: string;
+  /** {name}: one of the machine's outputs. */
+  readonly joinsOutput: string;
+  /** {text}: what the text writes at a port, worked out in its own logic. */
+  readonly joinsText: string;
+  readonly joinsReadByText: string;
+  readonly joinsUnread: string;
+  /** {problem}: why the text cannot be read. */
+  readonly joinsNone: string;
+  readonly joinsMarkNote: string;
 }
 
 export const MACHINE13_STRINGS: Machine13Strings = {
@@ -273,4 +295,24 @@ export const MACHINE13_STRINGS: Machine13Strings = {
     pcBit:
       'Pause before the WRITE edge of your first set if. Show the PC\'s bit 4 from "Parts here that never open", and read D.',
   },
+
+  joinsMap: "the nine parts, by block",
+  joinsBlocks: {
+    control: "control unit",
+    datapath: "datapath",
+    port: "memory port",
+  },
+  joinsOpenCount: "{n} of its ports joined to nothing",
+  joinsAllJoined: "every port joined",
+  joinsMissing: "the text does not place this part",
+  joinsPartLabel: "{part}'s joins",
+  joinsOpen: "open, joined to nothing",
+  joinsInput: "machine input {name}",
+  joinsOutput: "machine output {name}",
+  joinsText: "the text's own logic, {text}",
+  joinsReadByText: "read by the text's own logic",
+  joinsUnread: "read by nothing",
+  joinsNone: "The joins cannot be drawn: {problem}",
+  joinsMarkNote:
+    "The ports drawn in colour are the ones the changed line feeds; a line that feeds no port directly marks none.",
 };

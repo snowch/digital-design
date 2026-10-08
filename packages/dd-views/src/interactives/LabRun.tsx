@@ -15,6 +15,7 @@ import { Prose, useSlot, type InteractiveProps } from "@platform/lesson-runtime"
 import { PredictionChallenge } from "@platform/primitives";
 
 import { labCircuit, labPlan, labText } from "../LabEditor";
+import { LabJoins } from "./LabJoins";
 import { format, useViewStrings } from "../strings";
 import { withCode } from "./Module13Figures";
 import { withProps } from "./props";
@@ -195,6 +196,8 @@ export const LabRunFigure = withProps(
                 </pre>
               </div>
             )}
+            {text && <LabJoins text={labVariant(data.hdl, text)} changed={text.to} />}
+            {text?.to !== undefined && <p className="lab-joins-note">{t.joinsMarkNote}</p>}
             <div className="explorer-actions">
               <button type="button" className="button" disabled={running} onClick={run}>
                 {running ? t.labRunning : t.labRun}

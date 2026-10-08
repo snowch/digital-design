@@ -121,6 +121,35 @@ test.describe("the final-machine lab", () => {
     await expect(box).toHaveValue(/JOIN: /);
   });
 
+  test("the drawing follows the text: open ports in the parts start, joins as they are written", async ({
+    page,
+  }) => {
+    await openLesson(page, "final-machine");
+    const section = challenge(page, c.id);
+    await section.scrollIntoViewIfNeeded();
+    const map = section.locator(".lab-joins-map");
+    const trap = map.getByRole("button", { name: /traplogic/ });
+    await expect(trap).toContainText(T.joinsAllJoined);
+    await section.getByRole("button", { name: T.labParts }).click();
+    await expect(trap).toContainText(format(T.joinsOpenCount, { n: 13 }));
+    await trap.click();
+    await expect(section.locator(".lab-joins-open")).toHaveCount(13);
+    const box = section.locator("textarea.hdl-text").first();
+    await box.fill((await box.inputValue()).replace(".WAITING(),", ".WAITING(WAITING),"));
+    await expect(trap).toContainText(format(T.joinsOpenCount, { n: 12 }));
+  });
+
+  test("a lab figure marks the port its changed line joins", async ({ page }) => {
+    await openLesson(page, "final-machine");
+    const figure = page.locator('[data-interactive="lab-door"]');
+    await figure.scrollIntoViewIfNeeded();
+    await figure
+      .locator(".lab-joins-map")
+      .getByRole("button", { name: /memory/ })
+      .click();
+    await expect(figure.locator(".lab-joins-marked .lab-joins-port")).toHaveText(["DOOR"]);
+  });
+
   test("the prediction is answered by running the programs", async ({ page }) => {
     await openLesson(page, "final-machine");
     const figure = page.locator('[data-interactive="lab-predict"]');

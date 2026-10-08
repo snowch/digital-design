@@ -3178,6 +3178,129 @@ svg.stack-depth {
 .lab-run-results li + li {
   margin-top: var(--space-1);
 }
+/* The lab's drawing of a text's joins: the map of the nine parts, and one part's wires. */
+.lab-joins {
+  margin: var(--space-3) 0;
+}
+.lab-joins-map {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+.lab-joins-block {
+  flex: 1 1 14rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  align-content: start;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.lab-joins-block-name {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-weight: 600;
+}
+.lab-joins-button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  min-height: 40px;
+  text-align: left;
+}
+.lab-joins-button[aria-pressed="true"] {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.lab-joins-count {
+  font-size: 0.85em;
+}
+.lab-joins-part {
+  max-width: 44rem;
+  margin: 0 auto;
+}
+.lab-joins-title {
+  text-align: center;
+  margin-bottom: var(--space-1);
+}
+/* A part's joins: the part is the middle column, a box; what feeds an input port comes in on a
+   wire from the left, and what reads an output port leaves on a wire to the right. */
+.lab-joins-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+.lab-joins-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 1.25rem 6.5rem 1.25rem minmax(0, 1fr);
+  align-items: center;
+  min-height: 1.6rem;
+}
+@media (max-width: 30rem) {
+  .lab-joins-row {
+    grid-template-columns: minmax(0, 1fr) 0.75rem 5.25rem 0.75rem minmax(0, 1fr);
+  }
+}
+.lab-joins-far {
+  overflow-wrap: break-word;
+  padding: 0.1rem 0;
+}
+.lab-joins-in .lab-joins-far:first-child {
+  text-align: right;
+}
+.lab-joins-port {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-1);
+  background: var(--bg-raised);
+  border-left: 2px solid var(--fg);
+  border-right: 2px solid var(--fg);
+}
+.lab-joins-out .lab-joins-port {
+  justify-content: flex-end;
+}
+.lab-joins-row:first-child .lab-joins-port {
+  border-top: 2px solid var(--fg);
+}
+.lab-joins-row:last-child .lab-joins-port {
+  border-bottom: 2px solid var(--fg);
+}
+.lab-joins-in .lab-joins-wire:nth-child(2),
+.lab-joins-out .lab-joins-wire:nth-child(4) {
+  height: 2px;
+  background: var(--fg);
+}
+/* An open port: a short stub ending in a hollow ring, nothing beyond it. */
+.lab-joins-open.lab-joins-in .lab-joins-wire:nth-child(2),
+.lab-joins-open.lab-joins-out .lab-joins-wire:nth-child(4) {
+  height: 0.7rem;
+  width: 0.7rem;
+  justify-self: center;
+  background: var(--bg);
+  border: 2px solid var(--fg);
+  border-radius: 50%;
+}
+.lab-joins-open .lab-joins-far {
+  color: var(--fg-muted);
+}
+.lab-joins-marked .lab-joins-far,
+.lab-joins-marked .lab-joins-port {
+  color: var(--accent);
+  font-weight: 700;
+}
+.lab-joins-marked .lab-joins-wire {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+.lab-joins-button.lab-joins-marked {
+  border-color: var(--accent);
+}
 .lab-editor > .explorer-actions {
   flex-wrap: wrap;
 }
