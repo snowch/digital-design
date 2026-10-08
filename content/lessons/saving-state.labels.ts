@@ -8,7 +8,7 @@ export const LABELS = {
   title: "What must a handler leave as it found it?",
   objectives: [
     "Say why a handler must leave every register as it found it.",
-    "Save a register with an absolute store and put it back before `resume`.",
+    "Save a register with an absolute store and put it back before resume.",
     "Say why a handler does not save on the program's stack.",
     "Judge whether a handler leaves a program's registers alone.",
   ],

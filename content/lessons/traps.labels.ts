@@ -8,7 +8,7 @@ export const LABELS = {
   objectives: [
     "Say which registers change at the edge where an instruction traps, and what each takes.",
     "Read the cause and the return point in a handler.",
-    "Skip a faulting instruction by adding 4 to C2 before `resume`.",
+    "Skip a faulting instruction by adding 4 to C2 before resume.",
     "Write a handler that treats one cause differently from the others.",
   ],
   titles: {

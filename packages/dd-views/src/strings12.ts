@@ -23,8 +23,13 @@ export interface Machine12Strings {
   /** {n}: traps that went to the handler. */
   readonly trapCount: string;
   readonly trapCountOne: string;
-  /** Halts with no handler, by cause, with {address}. */
+  /**
+   * How a run ended, by key, with {address}, {cause}, {reg}, {n}: on Module 12's pages, first. A
+   * stop there is the handler's or the reset lines', never "the program's".
+   */
   readonly stops: Readonly<Record<string, string>>;
+  /** Each challenge's sentence for how its runs must end, by the challenge's detail key. */
+  readonly ends: Readonly<Record<string, string>>;
   // The debugger: the shop's events.
   readonly eventsCaption: string;
   readonly timer: string;
@@ -73,6 +78,13 @@ export interface Machine12Strings {
   // The memory map in user mode.
   readonly mapCaptionUser: string;
 
+  /** The text box of a Module 12 challenge, which holds a handler and the lines before it. */
+  readonly handlerLabel: string;
+  /** A failed test of a Module 12 challenge: {left}, what the run left. */
+  readonly failedLeft: string;
+  /** The results cards on Module 12's runs: the column of what the handler left, and a mismatch. */
+  readonly leftCol: string;
+  readonly runDiffers: string;
   /** The results cards: a run of Module 12's that left what it should. */
   readonly runMatches: string;
   /** How a run ended, as a results card writes it: the module's fixed words. */
@@ -106,8 +118,19 @@ export const MACHINE12_STRINGS: Machine12Strings = {
       "The machine halted with cause 81: the timer reached 0 before the instruction at {address}.",
     cause82:
       "The machine halted with cause 82: the door opened before the instruction at {address}.",
+    stop: "[draft] stop",
+    cutOff: "[draft] cutOff",
     "unknown-control":
       "The debugger ended the run before the instruction at {address}: it copies {reg} into a control register, and nothing has set {reg}.",
+  },
+  ends: {
+    skip34: "[draft] ends skip34",
+    saveRegisters: "[draft] ends saveRegisters",
+    startUser: "[draft] ends startUser",
+    sensorService: "[draft] ends sensorService",
+    doorTimer: "[draft] ends doorTimer",
+    waitDoor: "[draft] ends waitDoor",
+    shopHandler: "[draft] ends shopHandler",
   },
   eventsCaption: "The timer and the door",
   timer: "Timer",
@@ -135,12 +158,16 @@ export const MACHINE12_STRINGS: Machine12Strings = {
   interrupts: "{line}, at {address}, does not run: an interrupt with cause {cause} comes first.",
   resumes: "resume, at {address}, runs.",
   halts: "{line}, at {address}: the machine halts with cause {cause}.",
-  stopsAt: "stop, at {address}: the program stops.",
+  stopsAt: "[draft] stopsAt {address}",
   transfersLabel: "At this edge",
   nothingChanges: "Nothing changes.",
   modeAfter: "Then, {mode}.",
   mapCaptionUser: "What user mode does with each access",
-  runMatches: "The program left what the run should leave.",
+  runMatches: "[draft] runMatches",
+  handlerLabel: "[draft] handlerLabel",
+  failedLeft: "[draft] failedLeft {left}",
+  leftCol: "[draft] leftCol",
+  runDiffers: "[draft] runDiffers",
   endWords: { stop: "stop", cutOff: "cut off" },
   checks: {
     mode: "the mode at the end",

@@ -40,6 +40,13 @@ describe("the course's lessons", () => {
     }
   });
 
+  it("writes its objectives as plain text: the page shows them unformatted", () => {
+    const marked = LESSONS.flatMap((l) =>
+      l.objectives.filter((o) => o.includes("`")).map((o) => `${l.id}: ${o}`),
+    );
+    expect(marked).toEqual([]);
+  });
+
   it("uses no rationed term before the lesson that introduces it", () => {
     expect(termProblems(LESSONS)).toEqual([]);
   });

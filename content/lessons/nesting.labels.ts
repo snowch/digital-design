@@ -9,7 +9,7 @@ export const LABELS = {
   objectives: [
     "Say what a trap inside the handler writes over.",
     "Give the control registers just after a trap inside the handler.",
-    "Keep C1 and C2 before letting interrupts in, and put them back before `resume`.",
+    "Keep C1 and C2 before letting interrupts in, and put them back before resume.",
     "Say why a handler must not fault.",
   ],
   titles: {

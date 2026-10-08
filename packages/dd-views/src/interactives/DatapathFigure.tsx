@@ -370,14 +370,16 @@ export const DatapathFigure = withProps(
         .map((n) => n.name);
     };
     const reason = reasonKey(state);
+    // A `stop` stops the machine; a cause halts it (the course's words since Module 8).
+    const halt = reason !== undefined && reason !== "stop";
     const status = stopped
-      ? format(t.stopped, { reason: t.reasons[reason ?? ""] ?? "" })
+      ? format(halt ? t.halted : t.stopped, { reason: t.reasons[reason ?? ""] ?? "" })
       : running !== undefined
         ? format(t.runningEdges, { edges: running })
         : gaveUp
           ? format(t.gaveUp, { edges: RUN_LIMIT, pc: hex3(state.pc ?? 0) })
           : reason !== undefined
-            ? format(t.halting, { reason: t.reasons[reason] ?? reason })
+            ? format(halt ? t.haltsNext : t.halting, { reason: t.reasons[reason] ?? reason })
             : // While the learner steps through an edge, the PC the steps show, not the edge's end.
               shownState.pc !== undefined
               ? format(t.running, { pc: hex3(shownState.pc) })

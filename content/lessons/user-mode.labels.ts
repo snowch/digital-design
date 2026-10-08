@@ -8,7 +8,7 @@ export const LABELS = {
   title: "How can the machine keep a program away from the shop's devices?",
   objectives: [
     "Say what user mode refuses, and the cause of each refusal.",
-    "Start a program in user mode with `resume`.",
+    "Start a program in user mode with resume.",
     "Say what the machine protects and what it does not.",
     "Tell from C1 which mode a program was in when it trapped.",
   ],

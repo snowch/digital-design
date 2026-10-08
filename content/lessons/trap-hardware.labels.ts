@@ -8,7 +8,7 @@ export const LABELS = {
   title: "Where in the machine does a trap happen?",
   objectives: [
     "Name the parts that make a trap's edge, and what each does.",
-    "Count the edges a trap, a `call system`, a `resume` and an interrupt take.",
+    "Count the edges a trap, a call system, a resume and an interrupt take.",
     "Say which cause the trap logic chooses when there are several.",
     "Write the trap logic.",
   ],

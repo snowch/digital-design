@@ -68,7 +68,9 @@ export function stopText(
 ): string | undefined {
   if (!s.stopped) return undefined;
   const { key, values } = endOf(s.stopped);
-  return format(t.stops[key] ?? t12?.stops[key] ?? key, values);
+  // Module 12's machine (t12 given) says how its run ended in its own words first: a `stop` there
+  // is the handler's, never "the program's".
+  return format((t12 ? (t12.stops[key] ?? t.stops[key]) : t.stops[key]) ?? key, values);
 }
 
 /** Module 12: the last edge's trap that went to the handler, in the course's words. */
@@ -235,6 +237,8 @@ export function DebuggerView({
   const machine = options.traps ? MODULE_12 : PROGRAM_MACHINE;
   // Module 12: the door opens before the instruction the learner chooses, or the figure gives.
   const [doorAt, setDoorAt] = useState<number | undefined>(givenInputs.doorOpensAt);
+  // A run chosen in a challenge's Try it brings its own door: the choice follows it.
+  useEffect(() => setDoorAt(givenInputs.doorOpensAt), [givenInputs.doorOpensAt]);
   const inputs = useMemo<InputPlan>(() => {
     const { doorOpensAt: _given, ...rest } = givenInputs;
     return doorAt === undefined ? rest : { ...rest, doorOpensAt: doorAt };
@@ -308,11 +312,14 @@ export function DebuggerView({
   // Without its listing, the figure walks from pause to pause only, and ends at the last pause
   // before the program's end: its run never reaches the stop.
   const compact = options.listing === false && options.runLabel !== undefined;
-  const pausesAhead = useMemo(() => {
-    if (!compact) return true;
+  // Whether a press of the run button would pause before the run ends: the button says what the
+  // press will do, "Run to a breakpoint" while a pause lies ahead and "Run to the end" when none does.
+  const pauseAhead = useMemo(() => {
+    if (!options.breakpoints || pauses.size === 0 || state.stopped) return false;
     const ahead = debugRun(state, { breakpoints: pauses, inputs, limit, options: machine }).at(-1);
     return !ahead?.stopped;
-  }, [compact, state, pauses, inputs, limit, machine]);
+  }, [options.breakpoints, state, pauses, inputs, limit, machine]);
+  const pausesAhead = !compact || pauseAhead;
   // A figure shows the devices its program reaches, and only those.
   const uses = useMemo(() => devicesUsed(program), [program]);
   // The listing sits in a box of its own height; the line about to run is kept in view inside it,
@@ -322,7 +329,7 @@ export function DebuggerView({
   const names = useMemo(() => namesByAddress(program), [program]);
   const wrote = state.last?.wrote?.reg;
   const shownRegs = options.registers ?? Array.from({ length: 16 }, (_, k) => k);
-  const stopped = stopText(t, state, t12);
+  const stopped = stopText(t, state, options.traps ? t12 : undefined);
   const status =
     stopped ??
     trapText(t12, state) ??
@@ -425,7 +432,7 @@ export function DebuggerView({
             disabled={!live || !!state.stopped || (compact && !pausesAhead)}
             onClick={onRun}
           >
-            {options.runLabel ?? (options.breakpoints && pauses.size ? t.runToPause : t.run)}
+            {options.runLabel ?? (pauseAhead ? t.runToPause : t.run)}
           </button>
           <button
             type="button"
@@ -777,11 +784,13 @@ function EventsPanel({
  * R15, or a watch a figure names as one). Other values are decimal only, read signed.
  */
 export function valueText(value: bigint | undefined, address = false): string {
+  // An address below 10 is still an address: three hexadecimal digits, as the listing writes it.
+  if (address && value !== undefined && value >= 0n && value < 10n) return hex3(value);
   if (value === undefined || value < 10n || value > 0x7ffn) return signedText(value);
   return address ? `${hex3(value)} ${value}` : `${value} ${hex3(value)}`;
 }
 
-function WordValue({
+export function WordValue({
   value,
   t,
   address = false,
@@ -790,6 +799,7 @@ function WordValue({
   t: Machine11Strings;
   address?: boolean;
 }) {
+  if (address && value !== undefined && value >= 0n && value < 10n) return <>{hex3(value)}</>;
   if (value === undefined || value < 10n || value > 0x7ffn) return <>{signedText(value)}</>;
   const hex = (
     <span className="value-hex">

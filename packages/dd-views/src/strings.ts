@@ -471,6 +471,9 @@ export interface DatapathStrings {
   readonly halting: string;
   /** After the edge that stopped it: {reason}. */
   readonly stopped: string;
+  /** A cause, not a `stop`: the machine halts. */
+  readonly halted: string;
+  readonly haltsNext: string;
   /** After a run that reached {edges} edges without stopping, at {pc}. */
   readonly gaveUp: string;
   /** While a run is going: {edges} made so far. */
@@ -1062,6 +1065,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       nestSaved:
         "{actual} is not the word at 418. Job 5 saved C2 there when it began. That word is the return point of the program's call system.",
       nestC0: "{actual} is not C0 after the door part's resume. resume copies C1 into C0.",
+      bitsForm: "[draft] bitsForm",
       edgesCall:
         "{actual} is not the number of edges. The cause of call system comes in READ, and that edge ends the call system.",
       edgesResume:
@@ -1198,13 +1202,17 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     running: "PC is {pc}.",
     halting: "Stops at next edge: {reason}.",
     stopped: "Stopped: {reason}.",
+    halted: "[draft] halted",
+    haltsNext: "[draft] haltsNext",
     gaveUp: "The machine did not stop after {edges} edges, so the run gave up; PC is {pc}.",
     runningEdges: "{edges} edges made so far.",
     reasons: {
       "11": "instruction fetch outside the ROM",
       "12": "fetch at an address not a multiple of 4",
       "21": "an illegal instruction",
+      "22": "[draft] reason 22",
       "31": "no memory at the address",
+      "32": "[draft] reason 32",
       "33": "word at an unaligned address, or byte at device",
       "34": "write to ROM or read-only device",
       "41": "the call system job",

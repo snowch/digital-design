@@ -438,7 +438,7 @@ export const LogResults = withProps(
                     <tr>
                       <th scope="col" aria-label={t.logCol} />
                       <th scope="col">{t.asks}</th>
-                      {ran && <th scope="col">{t.left}</th>}
+                      {ran && <th scope="col">{log.data !== undefined ? t12.leftCol : t.left}</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -456,7 +456,13 @@ export const LogResults = withProps(
                 </table>
                 {ran && (
                   <p className="log-verdict">
-                    {all ? (log.data !== undefined ? t12.runMatches : t.matches) : t.differs}
+                    {log.data !== undefined
+                      ? all
+                        ? t12.runMatches
+                        : t12.runDiffers
+                      : all
+                        ? t.matches
+                        : t.differs}
                   </p>
                 )}
               </li>

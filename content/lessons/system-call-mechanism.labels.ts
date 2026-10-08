@@ -8,7 +8,7 @@ export const LABELS = {
   title: "Can you write the handler that runs the shop's programs?",
   objectives: [
     "Run a table of programs one after another, each in user mode.",
-    "Offer jobs 1 to 4 by `call system`.",
+    "Offer jobs 1 to 4 by call system.",
     "End a program that faults, and record why.",
     "Keep the handler's own state where no program can change it by accident.",
   ],

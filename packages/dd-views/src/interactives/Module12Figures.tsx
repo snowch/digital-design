@@ -15,8 +15,17 @@ import { timelineRun, type TimelineEdge, type Transfer } from "@dd/dd-model";
 import { Prose, type InteractiveProps } from "@platform/lesson-runtime";
 
 import { format, useViewStrings } from "../strings";
+import type { Machine11Strings } from "../strings11";
 import type { Machine12Strings } from "../strings12";
-import { ShopInputs, controlText, hex3, shopInputs, statusText, valueText } from "./Debugger";
+import {
+  ShopInputs,
+  WordValue,
+  controlText,
+  hex3,
+  shopInputs,
+  statusText,
+  valueText,
+} from "./Debugger";
 import { withProps } from "./props";
 
 const TimelineProps = z.object({
@@ -51,6 +60,24 @@ export function transferValue(x: Transfer): string {
   }
 }
 
+/**
+ * A transfer's value on the page: as `transferValue` writes it, with its hexadecimal digits named
+ * for a screen reader, as the debugger names them.
+ */
+function TransferValue({ x, t11 }: { x: Transfer; t11: Machine11Strings }) {
+  if (x.value === undefined) return <>X</>;
+  const hex = (digits: string) => (
+    <span className="value-hex">
+      <span className="visually-hidden">{`${t11.hex} `}</span>
+      {digits}
+    </span>
+  );
+  if (x.form === "address") return hex(hex3(BigInt.asUintN(64, x.value)));
+  if (x.form === "cause") return hex(controlText(3, x.value));
+  if (x.form === "number") return <WordValue value={x.value} t={t11} />;
+  return <>{transferValue(x)}</>;
+}
+
 /** What an edge did, in the course's words. */
 export function edgeText(t: Machine12Strings, e: TimelineEdge): string {
   const values = {
@@ -75,7 +102,9 @@ export function edgeText(t: Machine12Strings, e: TimelineEdge): string {
 export const TrapTimeline = withProps(
   TimelineProps,
   function TrapTimeline({ data, interactive }: InteractiveProps & { data: TimelineData }) {
-    const t = useViewStrings().machine12;
+    const strings = useViewStrings();
+    const t = strings.machine12;
+    const t11 = strings.machine11;
     const run = useMemo(
       () =>
         timelineRun(
@@ -156,7 +185,8 @@ export const TrapTimeline = withProps(
                       key={x.target}
                       className={`memory-word${/^C\d$/.test(x.target) ? " transfer-control" : ""}`}
                     >
-                      {`${x.target} ← ${transferValue(x)}`}
+                      {`${x.target} ← `}
+                      <TransferValue x={x} t11={t11} />
                     </li>
                   ))}
                 </ul>

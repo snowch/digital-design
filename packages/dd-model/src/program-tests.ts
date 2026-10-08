@@ -186,6 +186,9 @@ export function scenarioOf(given: Readonly<Record<string, string | number>>): Pr
   };
 }
 
+/** Two bits, bit 1 then bit 0: C0, C1 and the waiting events as the pages write them. */
+const bits2 = (v: bigint) => (v & 3n).toString(2).padStart(2, "0");
+
 /** What the program left for one expectation's key. */
 export function leftFor(key: string, run: ScenarioRun): string {
   const s = run.state;
@@ -216,13 +219,22 @@ export function leftFor(key: string, run: ScenarioRun): string {
   if (creg) {
     const n = Number(creg[1]);
     const v = cpu.control[n] ?? 0n;
-    // C2 and C4 hold addresses, written in three digits; C0, C1 and C3 in two.
-    return n === 2 || n === 4 ? hex3(v) : hex2(v);
+    // C2 and C4 hold addresses, written in three hexadecimal digits; C3 a cause, in two; C0 and
+    // C1 their two bits, bit 1 then bit 0, as the pages write them.
+    if (n === 2 || n === 4) return hex3(v);
+    return n === 3 ? hex2(v) : bits2(v);
   }
   if (key === "mode") return (cpu.control[0] & 1n) === 1n ? "system" : "user";
   if (key === "traps") return String(s.traps.length);
   if (key === "causes") return s.traps.map((t) => hex2(BigInt(t.cause))).join(", ");
-  if (key === "waiting") return String(cpu.waiting);
+  if (key === "waiting") return bits2(BigInt(cpu.waiting));
+  // Where a run that ended at a `stop` stopped: the line's name if one names it, else its address.
+  if (key === "stopAt") {
+    if (s.stopped?.kind !== "machine" || s.stopped.reason.kind !== "stop") return "";
+    const pc = Number(s.stopped.pc);
+    const name = Object.entries(run.program?.labels ?? {}).find(([, a]) => a === pc)?.[0];
+    return name ?? hex3(BigInt(pc));
+  }
   if (key === "timer") return String(cpu.timer);
   if (key === "returned") {
     const back = run.program?.labels[RETURN_LABEL];
