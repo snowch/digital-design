@@ -17,6 +17,10 @@ import { z } from "zod";
 
 import {
   CONTROL_STATES,
+  bitDrive,
+  bitPartOf,
+  libraryCircuit,
+  type BitPart,
   datapathState,
   edgeView,
   netWord,
@@ -27,7 +31,7 @@ import {
 } from "@dd/dd-model";
 import { Prose, useSlot, type InteractiveProps } from "@platform/lesson-runtime";
 import { FaultInjector, PredictionChallenge } from "@platform/primitives";
-import type { Circuit, Word } from "@dd/sim";
+import { Simulator, word, type Circuit, type Word } from "@dd/sim";
 
 import { CircuitView, valueLabel } from "../CircuitView";
 import { makerOf } from "../makers";
@@ -90,8 +94,16 @@ const Props = z.object({
   /** For `net`: the net asked about, and how its value is written. */
   net: z.string().optional(),
   form: z.enum(["word", "address", "signed", "bits"]).default("word"),
+  /** For `net`: one bit of it, 0 or 1, in place of the whole word. */
+  bit: z.number().int().min(0).max(63).optional(),
   /** Shown once the learner has reached the run's last edge. */
   outcomes: z.string().optional(),
+  /**
+   * Lesson 3, the trace: a choice of where to pause (a line, and an edge of it); the levels
+   * opened so far, each with its maker and its ports' values; and, for the parts at the level on
+   * show that never open, the drawing of one bit each, as the module that built it drew it.
+   */
+  trace: z.boolean().default(false),
 });
 type Data = z.infer<typeof Props>;
 
@@ -140,11 +152,17 @@ export function levelsAnswer(
   ask: z.infer<typeof Ask>,
   net?: string,
   form: Data["form"] = "word",
+  bit?: number,
 ): string {
   const after = run.frames[Math.min(at + 1, run.frames.length - 1)] ?? [];
   switch (ask) {
-    case "net":
-      return formOf(netWord(run.circuit, after, net ?? ""), form);
+    case "net": {
+      const w = netWord(run.circuit, after, net ?? "");
+      if (bit === undefined) return formOf(w, form);
+      return w && ((w.known >> BigInt(bit)) & 1n) === 1n
+        ? String((w.value >> BigInt(bit)) & 1n)
+        : "X";
+    }
     case "pc": {
       const pc = datapathState(run.circuit, after).pc;
       return pc === undefined ? "X" : hex3(pc);
@@ -244,8 +262,8 @@ export const MachineLevels = withProps(
     const committed = !asking || stored?.choice !== undefined;
     // The answer is the run's own, from the edge the figure first shows.
     const answer = useMemo(
-      () => (asking ? levelsAnswer(run, first, data.ask, data.net, data.form) : ""),
-      [asking, run, first, data.ask, data.net, data.form],
+      () => (asking ? levelsAnswer(run, first, data.ask, data.net, data.form, data.bit) : ""),
+      [asking, run, first, data.ask, data.net, data.form, data.bit],
     );
     const optionLabel = (v: string) =>
       (data.options?.find((o) => o.value === v)?.label ?? v).replace(/\.$/, "");
@@ -398,6 +416,7 @@ export const MachineLevels = withProps(
             <p className="debugger-status" role="status">
               {withCode(status)}
             </p>
+            {data.trace && <PauseChooser run={run} t={t} onGo={go} />}
           </>
         )}
         {committed && data.levels && (
@@ -492,6 +511,9 @@ export const MachineLevels = withProps(
               </tbody>
             </table>
           </div>
+        )}
+        {committed && data.trace && (
+          <TracePanel circuit={circuit} values={values} scope={scope} t={t} />
         )}
         {committed && data.compare && (
           <p className="machine-compare" role="status">
@@ -597,3 +619,298 @@ export const MachineLevels = withProps(
     );
   },
 );
+
+/** Lesson 3: choose a line of the program and an edge of it, and pause the run before it. */
+function PauseChooser({
+  run,
+  t,
+  onGo,
+}: {
+  run: RecordedRun;
+  t: Machine13Strings;
+  onGo: (frame: number) => void;
+}) {
+  // Each line the run reaches, at its first step, with that step's edges by state.
+  const lines = useMemo(() => {
+    const seen = new Set<string>();
+    return run.steps.flatMap((s) => {
+      const key = s.pc.toString();
+      if (seen.has(key) || !s.text) return [];
+      seen.add(key);
+      const states = Array.from(
+        { length: s.last - s.first },
+        (_, i) => edgeView(run.circuit, run.frames[s.first + i] ?? []).state ?? "X",
+      );
+      return [{ pc: s.pc, text: s.text, first: s.first, states }];
+    });
+  }, [run]);
+  const [line, setLine] = useState(0);
+  const [edge, setEdge] = useState(0);
+  const chosen = lines[line];
+  return (
+    <fieldset className="pause-chooser">
+      <legend>{t.pauseLegend}</legend>
+      <label>
+        <span>{t.pauseLine}</span>
+        <select
+          value={line}
+          onChange={(e) => {
+            setLine(Number(e.target.value));
+            setEdge(0);
+          }}
+        >
+          {lines.map((l, i) => (
+            <option key={l.pc.toString()} value={i}>
+              {`${hex3(l.pc)}  ${l.text}`}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label>
+        <span>{t.pauseEdge}</span>
+        <select value={edge} onChange={(e) => setEdge(Number(e.target.value))}>
+          {(chosen?.states ?? []).map((st, i) => (
+            <option key={i} value={i}>
+              {format(t.pauseEdgeOption, { k: i + 1, state: st })}
+            </option>
+          ))}
+        </select>
+      </label>
+      <button
+        type="button"
+        className="button secondary"
+        onClick={() => chosen && onGo(chosen.first + edge)}
+      >
+        {t.pauseGo}
+      </button>
+    </fieldset>
+  );
+}
+
+/** A port's value as the trace lists it: a bit as 0 or 1, a word in hexadecimal, X unknown. */
+const portText = (w: Word | undefined) => (w ? valueLabel(w) : "X");
+
+/**
+ * Lesson 3: the trace. The levels opened so far, the whole machine first, each with the module
+ * that built it and the values on its ports at this edge; then the parts at the level on show
+ * that never open, each offering the drawing of one bit.
+ */
+function TracePanel({
+  circuit,
+  values,
+  scope,
+  t,
+}: {
+  circuit: Circuit;
+  values: readonly Word[];
+  scope: string;
+  t: Machine13Strings;
+}) {
+  const levels =
+    scope === "" ? [] : scope.split("/").map((_, i, all) => all.slice(0, i + 1).join("/"));
+  const [open, setOpen] = useState<string | undefined>();
+  // The parts directly inside the block on show that a learner cannot open.
+  const closed = useMemo(() => {
+    const inside = (path: string) => {
+      const cut = path.lastIndexOf("/");
+      return (cut < 0 ? "" : path.slice(0, cut)) === scope;
+    };
+    return [
+      ...circuit.composites.map((c) => c.path),
+      ...circuit.components
+        .filter((c) => c.kind === "memory" || c.kind === "mux2")
+        .map((c) => c.path),
+    ]
+      .filter(inside)
+      .map((path) => bitPartOf(circuit, path))
+      .filter((p): p is BitPart => p !== undefined);
+  }, [circuit, scope]);
+  const part = closed.find((p) => p.path === open);
+  return (
+    <div className="machine-trace">
+      {levels.length > 0 && (
+        <div className="truth-table-wrap">
+          <table className="truth-table datapath-table machine-trace-table">
+            <caption>{t.traceCaption}</caption>
+            <thead>
+              <tr>
+                <th scope="col">{t.traceLevel}</th>
+                <th scope="col">{t.traceIn}</th>
+                <th scope="col">{t.traceOut}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {levels.map((path) => {
+                const block = circuit.composites.find((c) => c.path === path);
+                if (!block) return null;
+                const ports = (r: Readonly<Record<string, number>>) =>
+                  Object.entries(r).map(([port, net]) => (
+                    <span key={port} className="trace-port">
+                      {format(t.tracePort, { port, value: portText(values[net]) })}
+                    </span>
+                  ));
+                return (
+                  <tr key={path}>
+                    <th scope="row">
+                      <span className="memory-word">{block.name}</span>
+                      <br />
+                      {makerText(t, block.kind) ?? ""}
+                    </th>
+                    <td className="memory-word">{ports(block.inputs)}</td>
+                    <td className="memory-word">{ports(block.outputs)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {closed.length > 0 && (
+        <section className="machine-closed" aria-label={t.closedCaption}>
+          <p className="layout-title">{t.closedCaption}</p>
+          <ul className="machine-closed-list">
+            {closed
+              .filter((p) => p.bit !== "wiring")
+              .map((p) => (
+                <li key={p.path}>
+                  <button
+                    type="button"
+                    className="button secondary"
+                    aria-pressed={open === p.path}
+                    onClick={() => setOpen(open === p.path ? undefined : p.path)}
+                  >
+                    {format(t.closedOpen, { part: p.name, module: p.module })}
+                  </button>
+                </li>
+              ))}
+          </ul>
+          {/* The parts with no gate after the buttons, as sentences: the trace passes through. */}
+          {closed.some((p) => p.bit === "wiring") && (
+            <p className="machine-wiring">
+              {closed
+                .filter((p) => p.bit === "wiring")
+                .map((p) => format(t.closedWiring, { part: p.name }))
+                .join(" ")}
+            </p>
+          )}
+          {part && <BitView part={part} circuit={circuit} values={values} t={t} />}
+        </section>
+      )}
+    </div>
+  );
+}
+
+const unknownBit = { width: 1, value: 0n, known: 0n } as const;
+
+/** One bit of a part that never opens, drawn as its module drew one bit, at the machine's values. */
+function BitView({
+  part,
+  circuit,
+  values,
+  t,
+}: {
+  part: BitPart;
+  circuit: Circuit;
+  values: readonly Word[];
+  t: Machine13Strings;
+}) {
+  const strings = useViewStrings();
+  const [k, setK] = useState(0);
+  const [index, setIndex] = useState(0);
+  const drive = bitDrive(circuit, values, part, Math.min(k, part.width - 1), index);
+  const shown = useMemo(() => {
+    if (!drive) return undefined;
+    const lc = libraryCircuit(drive.libraryId);
+    const sim = new Simulator(lc);
+    const has = (n: string) => lc.inputs.some((i) => i.name === n);
+    const set = (n: string, v: 0 | 1 | undefined) => {
+      if (has(n)) sim.setInput(n, v === undefined ? unknownBit : word(1, v));
+    };
+    for (const i of lc.inputs) sim.setInput(i.name, word(1, 0));
+    sim.settle();
+    // A register's flip-flop is given what the part holds, then the part's inputs at this edge.
+    if (drive.held !== undefined) {
+      set("D", drive.held);
+      set("EN", 1);
+      sim.settle();
+      sim.clockCycle("CLK");
+    }
+    for (const [n, v] of Object.entries(drive.inputs)) set(n, v);
+    sim.settle();
+    return { circuit: lc, values: sim.snapshotValues() };
+  }, [drive?.libraryId, JSON.stringify(drive?.inputs), drive?.held]);
+  const bitText = (v: 0 | 1 | undefined) => (v === undefined ? "X" : String(v));
+  const choices =
+    part.bit === "registerFile"
+      ? Array.from({ length: 16 }, (_, r) => ({ value: r, label: `R${r}` }))
+      : part.bit === "pair"
+        ? [
+            { value: 0, label: "HA" },
+            { value: 1, label: "HB" },
+          ]
+        : part.bit === "ram"
+          ? Array.from({ length: part.choices ?? 0 }, (_, b) => ({
+              value: b,
+              label: hex3(0x400 + b),
+            }))
+          : [];
+  return (
+    <div className="machine-bit">
+      <div className="pause-chooser">
+        {choices.length > 0 && (
+          <label>
+            <span>
+              {part.bit === "registerFile"
+                ? t.bitRegister
+                : part.bit === "ram"
+                  ? t.bitByte
+                  : t.bitPair}
+            </span>
+            <select value={index} onChange={(e) => setIndex(Number(e.target.value))}>
+              {choices.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        <label>
+          <span>{t.bitWhich}</span>
+          <select
+            value={Math.min(k, part.width - 1)}
+            onChange={(e) => setK(Number(e.target.value))}
+          >
+            {Array.from({ length: part.width }, (_, b) => (
+              <option key={b} value={b}>
+                {b}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      {drive && shown && (
+        <>
+          <p className="layout-title">
+            {format(t.bitHeading, {
+              part: part.name,
+              k: Math.min(k, part.width - 1),
+              module: drive.module,
+            })}
+          </p>
+          <CircuitView
+            circuit={shown.circuit}
+            values={shown.values}
+            title={strings.explorer.title}
+            table={false}
+          />
+          <p role="status" className="machine-bit-status">
+            {drive.held !== undefined || part.bit === "register" || part.bit === "registerReset"
+              ? format(t.bitHolds, { held: bitText(drive.held), result: bitText(drive.result) })
+              : format(t.bitGives, { result: bitText(drive.result) })}
+          </p>
+        </>
+      )}
+    </div>
+  );
+}

@@ -3,7 +3,7 @@
 // Module 13's figure words: the run of the whole machine stepped edge by edge, the instruction at
 // every level, each part's maker, the comparison with the instruction-level model, and the trace.
 // Kept in a file of their own and joined to the view strings as `machine13`. Drafted by the prose
-// process (docs/notes/module-13-machine/briefs, brief V1) and checked against the figures.
+// process (docs/notes/module-13-machine/briefs, briefs V1 and V2) and checked against the figures.
 
 export interface Machine13Strings {
   // The controls of a recorded run.
@@ -67,6 +67,37 @@ export interface Machine13Strings {
 
   // The control registers' table.
   readonly controlCaption: string;
+
+  // The trace (lesson 3 on).
+  /** The choice of where to pause: a line, an edge of it, and the button. */
+  readonly pauseLegend: string;
+  readonly pauseLine: string;
+  readonly pauseEdge: string;
+  readonly pauseGo: string;
+  /** {k}: an edge of the line, counted from its FETCH edge, 1 first; {state}: its state. */
+  readonly pauseEdgeOption: string;
+  readonly traceCaption: string;
+  readonly traceLevel: string;
+  readonly traceIn: string;
+  readonly traceOut: string;
+  /** A port and its value: {port}, {value}. */
+  readonly tracePort: string;
+  // The parts that never open, and one bit of each.
+  readonly closedCaption: string;
+  /** {part}: its name; {module}: the module whose drawing of one bit stands for it. */
+  readonly closedOpen: string;
+  /** {part}: a part that only splits or joins words, with no gate in it. */
+  readonly closedWiring: string;
+  readonly bitWhich: string;
+  readonly bitRegister: string;
+  readonly bitByte: string;
+  readonly bitPair: string;
+  /** {part}, {k}, {module}: the heading over the drawing of one bit. */
+  readonly bitHeading: string;
+  /** For a register's bit: {held} now, {result} after the next edge. */
+  readonly bitHolds: string;
+  /** For a selector's or an adder's bit: {result} now. */
+  readonly bitGives: string;
 }
 
 export const MACHINE13_STRINGS: Machine13Strings = {
@@ -120,4 +151,25 @@ export const MACHINE13_STRINGS: Machine13Strings = {
   },
 
   controlCaption: "The control registers",
+
+  pauseLegend: "Pause before an edge",
+  pauseLine: "Line of the program",
+  pauseEdge: "Which edge of that line",
+  pauseGo: "Go there",
+  pauseEdgeOption: "Edge {k}, {state}",
+  traceCaption: "The levels you have opened",
+  traceLevel: "Level",
+  traceIn: "Inputs",
+  traceOut: "Outputs",
+  tracePort: "{port} {value}",
+  closedCaption: "Parts here that never open",
+  closedOpen: "{part}: show one bit, as Module {module} drew it",
+  closedWiring: "{part} only splits or joins words; it has no gate.",
+  bitWhich: "Bit",
+  bitRegister: "Register",
+  bitByte: "Byte at",
+  bitPair: "Word",
+  bitHeading: "{part}, bit {k}, as Module {module} drew one bit",
+  bitHolds: "It holds {held} now; after the next edge it holds {result}.",
+  bitGives: "It gives {result} now.",
 };

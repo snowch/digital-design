@@ -1106,6 +1106,17 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
         "`{actual}` is not the word Y takes. Read the register that Y names in the table after the WRITE edge, or read YIN on the drawing before that edge. Give the word in decimal.",
       pathPc:
         "`{actual}` is not the PC after the last edge. An instruction that does not branch, call or jump leaves the PC at its own address plus 4. Give the PC as three hexadecimal digits.",
+      // Module 13, lesson 3 (brief 3L).
+      traceXorB:
+        "Your answer, {actual}, misses at the slice for bit 2. Pause at the ALU edge of `R3 <= R1 - R2`, open the ALU down to that slice, and see that the XOR turns B's bit over when the ALU subtracts.",
+      traceSum1:
+        "Your answer, {actual}, misses at the slice for bit 1. Open that slice at the ALU edge of `R3 <= R1 - R2`, and read SUM where it leaves the full adder.",
+      tracePcD:
+        "Your answer, {actual}, misses what D holds. Pause at the WRITE edge of `call R6, R15`, show the PC's bit 3 from the list of parts that never open, and read D there: D is the bit of the PC's next value.",
+      traceR5En:
+        "Your answer, {actual}, misses the rule for EN. EN is 1 for the register Y names, at a WRITE edge; pause at the WRITE edge of `R5 <= R3 >= R4 signed` and show the register file's bit for R5.",
+      traceR4En:
+        "Your answer, {actual}, misses the rule for R4. Pause at the WRITE edge of `R5 <= R3 >= R4 signed` and show the register file's bit for R4; only one register is written at an edge.",
       // Module 11, lesson 4 (brief 4L).
       stackWord:
         "{actual} is not that word; a pop copies a word, adds 8 to R14, and leaves the word where it was. Give the word as three hexadecimal digits.",

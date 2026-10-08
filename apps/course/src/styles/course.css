@@ -3041,3 +3041,47 @@ svg.stack-depth {
     max-height: 24rem;
   }
 }
+
+/* Module 13: the trace's choice of where to pause, its levels, and one bit of a part that never
+   opens. */
+.pause-chooser {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  align-items: flex-end;
+  border: 0;
+  margin: 0 0 var(--space-3);
+  padding: 0;
+}
+.pause-chooser legend {
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+.pause-chooser label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  max-width: 100%;
+}
+.pause-chooser select {
+  min-height: 40px;
+  max-width: 100%;
+  font: inherit;
+}
+.machine-trace-table .trace-port {
+  display: inline-block;
+  margin-right: var(--space-2);
+  white-space: nowrap;
+}
+.machine-closed-list {
+  list-style: none;
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.machine-compare,
+.machine-bit-status {
+  font-weight: 600;
+}

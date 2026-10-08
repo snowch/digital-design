@@ -56,3 +56,4 @@ export * from "./trap-timeline";
 // Module 13, the whole machine: runs of the final machine recorded edge by edge.
 export * from "./final-programs";
 export * from "./final-run";
+export * from "./bit-views";
