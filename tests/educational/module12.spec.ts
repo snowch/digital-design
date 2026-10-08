@@ -93,9 +93,9 @@ const WRONG: readonly { lesson: string; id: string; from: string; to: string; wh
   {
     lesson: "user-mode",
     id: "start-user",
-    from: "        R1 <= 0\n        C1 <= R1\n",
-    to: "        R1 <= 1\n        C1 <= R1\n",
-    why: "starts the program in system mode",
+    from: "        R1 <= program\n        C2 <= R1\n        resume\n",
+    to: "        goto program\n",
+    why: "goes to the program in system mode",
   },
   {
     lesson: "interrupts",
@@ -199,7 +199,8 @@ test.describe("Module 12's lab", () => {
       const step = figure.getByRole("button", { name: T.step, exact: true });
       for (let k = 0; k < 12; k++) await step.click();
       await check();
-      await figure.getByRole("button", { name: T.runToPause, exact: true }).click();
+      // The run button says what a press will do: to a breakpoint, or to the end past the last.
+      await figure.getByRole("button", { name: /^Run to/ }).click();
       await check();
       await figure.getByRole("button", { name: T.back, exact: true }).click();
       await check();
@@ -220,7 +221,9 @@ test.describe("Module 12's lab", () => {
         .find((x) => x.id === id)!.props as { outcomes: string };
       const first = props.outcomes.split(/[.:]/)[0]!.replace(/`/g, "");
       await expect(figure.getByText(first, { exact: false })).toHaveCount(0);
-      await figure.getByRole("button", { name: T.run, exact: true }).click();
+      // A figure with a breakpoint pauses first; its button reads "Run to the end" after the last.
+      const runs = figure.getByRole("button", { name: /^Run to/ });
+      for (let k = 0; k < 10 && (await runs.isEnabled()); k++) await runs.click();
       await expect(figure.getByText(first, { exact: false }).first()).toBeVisible();
     }
   });
@@ -235,7 +238,7 @@ test.describe("Module 12's lab", () => {
     await expect(figure.locator(".trap-edge")).toHaveCount(0);
     for (let k = 0; k < 6; k++) await next.click();
     await expect(figure.locator(".trap-edge")).toHaveCount(6);
-    await expect(figure.locator(".trap-edge").last()).toContainText("C2 ← 014");
+    await expect(figure.locator(".trap-edge").last()).toContainText(/C2 ←\s*(hexadecimal\s*)?014/);
     await figure.getByRole("button", { name: T12.backEdge, exact: true }).click();
     await expect(figure.locator(".trap-edge")).toHaveCount(5);
     await figure.getByRole("button", { name: T12.toEnd, exact: true }).click();

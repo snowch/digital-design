@@ -315,10 +315,11 @@ export function DebuggerView({
   // Whether a press of the run button would pause before the run ends: the button says what the
   // press will do, "Run to a breakpoint" while a pause lies ahead and "Run to the end" when none does.
   const pauseAhead = useMemo(() => {
-    if (!options.breakpoints || pauses.size === 0 || state.stopped) return false;
+    // A compact figure walks from pause to pause without the breakpoints' controls.
+    if ((!options.breakpoints && !compact) || pauses.size === 0 || state.stopped) return false;
     const ahead = debugRun(state, { breakpoints: pauses, inputs, limit, options: machine }).at(-1);
     return !ahead?.stopped;
-  }, [options.breakpoints, state, pauses, inputs, limit, machine]);
+  }, [options.breakpoints, compact, state, pauses, inputs, limit, machine]);
   const pausesAhead = !compact || pauseAhead;
   // A figure shows the devices its program reaches, and only those.
   const uses = useMemo(() => devicesUsed(program), [program]);

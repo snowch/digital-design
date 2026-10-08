@@ -319,7 +319,8 @@ test.describe("Module 11's lab", () => {
       const step = figure.getByRole("button", { name: T.step, exact: true });
       for (let k = 0; k < 12; k++) await step.click();
       await check();
-      await figure.getByRole("button", { name: T.runToPause, exact: true }).click();
+      // The run button says what a press will do: to a breakpoint, or to the end past the last.
+      await figure.getByRole("button", { name: /^Run to/ }).click();
       await check();
       await figure.getByRole("button", { name: T.back, exact: true }).click();
       await check();
