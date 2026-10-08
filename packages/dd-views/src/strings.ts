@@ -1095,6 +1095,17 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
         "{actual} is not the edge at which the IR takes `resume`'s word. The IR takes an instruction's word at its FETCH edge, with edges counted from the reset; read the S lane.",
       joinPcEdge:
         "{actual} is not the edge at which the PC takes `040`. The PC takes its next value at the edge that ends `resume`, which takes three edges; read the PC lane.",
+      // Module 13, lesson 2 (brief 2D).
+      pathCode:
+        "`{actual}` does not follow the rule for a set if line. Its eight digits are K, J, A, B and Y, then three digits of constant. Set if is kind A, and its job digit is a branch's condition.",
+      pathEdges:
+        "`{actual}` is not the count. A register job goes through FETCH, READ, ALU and WRITE. Count from its FETCH edge to its last edge.",
+      pathJob:
+        "`{actual}` is not the ALU's job at its ALU edge. Read OP2, OP1 and OP0 in the table at that edge. A register job's ALU code is its job digit.",
+      pathYin:
+        "`{actual}` is not the word Y takes. Read the register that Y names in the table after the WRITE edge, or read YIN on the drawing before that edge. Give the word in decimal.",
+      pathPc:
+        "`{actual}` is not the PC after the last edge. An instruction that does not branch, call or jump leaves the PC at its own address plus 4. Give the PC as three hexadecimal digits.",
       // Module 11, lesson 4 (brief 4L).
       stackWord:
         "{actual} is not that word; a pop copies a word, adds 8 to R14, and leaves the word where it was. Give the word as three hexadecimal digits.",

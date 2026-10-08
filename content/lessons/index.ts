@@ -70,6 +70,7 @@ import { trapHardware } from "./trap-hardware";
 import { systemCallMechanism } from "./system-call-mechanism";
 // Module 13, the whole machine
 import { wholeMachine } from "./whole-machine";
+import { fullPath } from "./full-path";
 
 const INPUTS: readonly LessonInput[] = [
   // Module 0, meet the machine.
@@ -139,6 +140,7 @@ const INPUTS: readonly LessonInput[] = [
   systemCallMechanism,
   // Module 13, the whole machine
   wholeMachine,
+  fullPath,
 ];
 
 export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(
