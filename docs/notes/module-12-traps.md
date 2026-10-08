@@ -607,6 +607,11 @@ not list, so two settings this module made never reached the page: 12.5's questi
 `interruptWords: false` (second reading, item 6) and 11.1's `words: true` (B12). The schema now
 lists every option the lessons give, and a probe found no other key dropped.
 
+The full check on the pass (`0df0ad9`, with `main` at `a955c55` merged): formatting, copyright,
+the platform copy, types and the build passed; Vitest 129 files, 1347 tests passed; the browser
+866 passed, 56 skipped, 10 failed, the ten stored screenshots that fail in a build container on
+`main` too. The log's exit line: `EXIT 1`, from those ten alone.
+
 ## The mechanical walk
 
 The built site, every Module 12 page at 375 and 1280 pixels, light and dark, with every run
