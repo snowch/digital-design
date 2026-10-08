@@ -65,18 +65,19 @@ export const TRAP_EDGE_SIGNALS = [...EDGE_SIGNALS, "CWEN", "RESUMING"] as const;
 export type TrapEdgeSignal = (typeof TRAP_EDGE_SIGNALS)[number];
 
 /**
- * Module 12's control bus: Module 9's signals, then TRAP (this edge goes to the handler), CWEN (a
- * control register is written at this edge), RESUMING (`resume`'s edge), RESUME and CREAD (the
- * decoder's: the next PC from C2, register Y's word from a control register) and USER (user mode).
+ * Module 12's control bus: Module 9's signals, then CWEN (a control register is written at this
+ * edge), RESUMING (`resume`'s edge), RESUME and CREAD (the system jobs': the next PC from C2,
+ * register Y's word from a control register), USER (user mode) and TRAP (this edge goes to the
+ * handler), in the order their wires arrive at the bus.
  */
 export const TRAP_CONTROL_BUS = [
   ...CONTROL_BUS,
-  "TRAP",
   "CWEN",
   "RESUMING",
   "RESUME",
   "CREAD",
   "USER",
+  "TRAP",
 ] as const;
 
 /** The controller as Module 5's state machine, as data, with Module 12's way for the system jobs. */
@@ -278,16 +279,21 @@ export function trapController(
       );
     },
     {
+      // In the order the wires arrive from: the trap logic, over the top, the unit's reset and
+      // clock, the decoder, the system jobs.
       inputs: {
-        ...decoderIns,
-        LOAD: ins.LOAD,
-        STORE: ins.STORE,
-        CWRITE: ins.CWRITE,
-        RESUME: ins.RESUME,
         GO: ins.GO,
         TRAP: ins.TRAP,
         RST: ins.RST,
         CLK: ins.CLK,
+        LOAD: ins.LOAD,
+        STORE: ins.STORE,
+        CALL: ins.CALL,
+        MEM: ins.MEM,
+        WRITEY: ins.WRITEY,
+        CREG: ins.CREG,
+        CWRITE: ins.CWRITE,
+        RESUME: ins.RESUME,
       },
       outputs: Object.fromEntries(["S", ...TRAP_EDGE_SIGNALS].map((n) => [n, outs[n as "S"]])),
     },
@@ -351,13 +357,21 @@ export function systemJobs12(
     },
     {
       inputs: {
+        WRITEY: ins.WRITEY,
         STOP: ins.STOP,
+        CAUSED: ins.CAUSED,
         J: ins.J,
         USER: ins.USER,
-        CAUSED: ins.CAUSED,
-        WRITEY: ins.WRITEY,
       },
-      outputs: outs,
+      outputs: {
+        WRITEYT: outs.WRITEYT,
+        CREG: outs.CREG,
+        CWRITE: outs.CWRITE,
+        RESUME: outs.RESUME,
+        CREAD: outs.CREAD,
+        CAUSET: outs.CAUSET,
+        HALTJOB: outs.HALTJOB,
+      },
     },
   );
 }
@@ -435,18 +449,20 @@ export function trapLogic(
       bb.nor([traps, stopNow], { name: "norGo", output: outs.GO });
     },
     {
+      // In the order the wires arrive from: the controller above, the system jobs, the mode, then
+      // the unit's own inputs.
       inputs: {
-        CAUSEF: ins.CAUSEF,
-        CAUSED: ins.CAUSED,
-        CAUSEM: ins.CAUSEM,
-        STOP: ins.STOP,
         CHECKING: ins.CHECKING,
         FETCHING: ins.FETCHING,
-        WAITING: ins.WAITING,
+        CAUSED: ins.CAUSED,
+        STOP: ins.STOP,
         IE: ins.IE,
+        CAUSEF: ins.CAUSEF,
+        CAUSEM: ins.CAUSEM,
+        WAITING: ins.WAITING,
         NOHANDLER: ins.NOHANDLER,
       },
-      outputs: outs,
+      outputs: { GO: outs.GO, TRAP: outs.TRAP, CAUSE: outs.CAUSE, HALT: outs.HALT },
     },
   );
 }
@@ -615,8 +631,10 @@ function splitBus(
   bus: NetId,
   names: readonly string[],
   name = "signals",
+  suffix = "",
 ): Record<string, NetId> {
-  const outs = Object.fromEntries(names.map((n) => [n, b.net(n)]));
+  // A signal split out twice in one block takes a suffix on its second net's name.
+  const outs = Object.fromEntries(names.map((n) => [n, b.net(`${n}${suffix}`)]));
   b.scope(
     name,
     "split-control",
@@ -795,17 +813,18 @@ export function trapsCircuit(options: TrapMachineOptions = {}): Circuit {
       );
     },
     {
+      // The loops back from the memory first, then the datapath's, so the wires nest.
       inputs: {
-        IR: ir,
-        STATUS: status,
-        NOHANDLER: noHandler,
         CAUSEF: causef,
         CAUSEM: causem,
         WAITING: waiting,
+        IR: ir,
+        STATUS: status,
+        NOHANDLER: noHandler,
         CLK: clk,
         RST: rst,
       },
-      outputs: { CONTROL: control, HALT: halt, CAUSE: cause },
+      outputs: { CONTROL: control, CAUSE: cause, HALT: halt },
     },
   );
 
@@ -821,12 +840,13 @@ export function trapsCircuit(options: TrapMachineOptions = {}): Circuit {
         ...splitBus(
           db,
           control,
-          ["HOLDM", "LOAD", "CALL", "CREAD", "BRANCH", "JUMP", "RESUME"],
+          ["BRANCH", "CALL", "JUMP", "HOLDM", "LOAD", "CREAD", "RESUME", "TRAP"],
           "toNext",
         ),
-        ...splitBus(db, control, ["TRAP", "RESUMING", "CWEN"], "toControlRegisters"),
       };
       const s = (n: string) => c[n] as NetId;
+      // TRAP again for the control registers, from a split of their own beside them.
+      const cr = splitBus(db, control, ["TRAP", "RESUMING", "CWEN"], "toControlRegisters", "2");
       const ha = db.net("HA", 64);
       const hr = db.net("HR", 64);
       const hm = db.net("HM", 64);
@@ -886,9 +906,9 @@ export function trapsCircuit(options: TrapMachineOptions = {}): Circuit {
           PC: pc,
           PC4: pc4,
           CAUSE: cause,
-          TRAP: s("TRAP"),
-          RESUMING: s("RESUMING"),
-          CWEN: s("CWEN"),
+          TRAP: cr["TRAP"] as NetId,
+          RESUMING: cr["RESUMING"] as NetId,
+          CWEN: cr["CWEN"] as NetId,
           RST: rst,
           CLK: clk,
         },
@@ -947,7 +967,7 @@ export function trapsCircuit(options: TrapMachineOptions = {}): Circuit {
       );
     },
     {
-      inputs: { CONTROL: control, FETCHED: fetched, MQ: mq, CAUSE: cause, CLK: clk, RST: rst },
+      inputs: { CONTROL: control, CAUSE: cause, FETCHED: fetched, MQ: mq, CLK: clk, RST: rst },
       outputs: { ADDR: addr, HB: hb, IR: ir, STATUS: status, NOHANDLER: noHandler },
     },
   );
@@ -1007,9 +1027,9 @@ export function trapsCircuit(options: TrapMachineOptions = {}): Circuit {
         LAMPS: lamps,
         CAUSEF: causef,
         CAUSEM: causem,
+        WAITING: waiting,
         FETCHED: fetched,
         MQ: mq,
-        WAITING: waiting,
       },
     },
   );

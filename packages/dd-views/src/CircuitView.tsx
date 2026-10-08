@@ -173,6 +173,10 @@ const SEALED = new Set([
   "split-control",
   "word-register-32",
   "join-control",
+  // Module 12: the longer control bus's join, and the check that C4 is 0 or holds the PC, a
+  // word's worth of slices and one OR.
+  "join-control-traps",
+  "no-handler",
 ]);
 
 /** Whether a block of this kind is drawn closed for good, so a learner never sees inside it. */
