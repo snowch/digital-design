@@ -217,7 +217,7 @@ test.describe("Module 11's wrong programs", () => {
     await openLesson(page, "debugging");
     const section = challenge(page, c.id);
     await section.scrollIntoViewIfNeeded();
-    await answerAll(section, c, { log: "above" });
+    await answerAll(section, c, { log: "above", shows: "0" });
     await runTests(section);
     await expect(section.locator(".verdict-failure")).toHaveCount(1);
     await expect(section.locator(".challenge-complete")).toHaveCount(0);

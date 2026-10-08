@@ -74,8 +74,8 @@ machine stop a program between two instructions, or asked another program to do 
 - **The hardware.** Where each of those transfers happens in a machine the learner built: the
   control registers and the selectors in front of them, register Y's input from a control
   register, the next PC from C2 or C4, the trap logic (every cause, the waiting bits and C0's bit 1
-  in; whether this edge traps, and with which cause, out: the lower number wins, which is Module
-  3's priority), and the controller's step for a trap. The learner builds at least one part of it
+  in; whether this edge traps, and with which cause, out: the lower number wins, as Module 8's
+  causes did in lessons 8.3 and 8.4), and the controller's step for a trap. The learner builds at least one part of it
   and can open every part.
 - **The capstone: a minimal system-call mechanism.** The learner's handler offers the services,
   sets C4 and drops to user mode; user programs run through the services. Graded by tests that run

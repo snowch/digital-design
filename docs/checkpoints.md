@@ -462,8 +462,9 @@ After Module 11 a learner can:
   Module 11 added 78 unit tests and 93 browser tests.
 - Ten stored screenshots fail in a build container on `main` too (text rendering). The managing
   session's container and CI pass them, and CI is the authority.
-- The platform's verdict line has no form for one test ("0 of 1 tests passed"). One challenge has
-  one test, 11.6's edge log; the build is giving it a second question.
+- The platform's verdict line has no form for one test ("0 of 1 tests passed"). One challenge had
+  one test, 11.6's edge log; on 8 October it gained a second question (176377e). Nothing checks
+  that a new challenge has more than one.
 - The learning platform's `main` has three commits that this course has not synced: role
   badges, details a reader opens, and a model's note stated once at the foot. Syncing them is a
   change to review on its own.
