@@ -9,7 +9,7 @@ export const LABELS = {
   objectives: [
     "Write a program of your own for the shop that uses set if.",
     "Run it on the whole machine.",
-    "Answer questions about one wire at one edge of its run, by tracing it.",
+    "Answer questions about a word or a row of wires, all at one edge of the run.",
     "Say at which level each question's wire is drawn.",
   ],
   titles: {
@@ -31,9 +31,9 @@ export const LABELS = {
     free: "The figure's program on the whole machine, ready to trace.",
     predict:
       "The same program, paused before the ALU edge of its set if, with a question about MET.",
-    carry: "The same program, paused before the ALU edge of its set if, for COUT and MET",
+    carry: "The same program, paused before the ALU edge of its set if, for COUT and MET.",
     fault: "The same program with MET held at 0, beside the model.",
-    cap: "The challenge: your program, its five tests and five questions about its run",
+    cap: "The challenge: your program, its six tests and four questions about its run.",
   },
   faults: {
     met: "MET held at 0",

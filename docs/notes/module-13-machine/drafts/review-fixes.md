@@ -123,3 +123,12 @@ Facts put right in placed text without a new draft, each a word or a number:
 - `capLevels.xorB`: "bit 7 first" with "(the slice `bit3`)" added, since the drawing names the
   slice, not the word's bit.
 - The field and case labels came back with full stops; removed, as the other labels have none.
+
+## The second read, after the second reading's drafts
+
+- `whole-machine`: "Three examples follow." cut: it labels the examples instead of giving them.
+- `full-path` `question`: the quotation of lesson 1's question takes its capital, as lesson 1 writes it.
+- `capstone` `c1Task`: "HM, the held word" is "HM, a held word": Module 10 named four held words.
+- Brief R3-6, labels out of date: `whole-machine` `objectives.2` dropped "Say what a join is";
+  restored. `tracing` `captions.free` wrote the line as code, which a caption shows as characters;
+  now "a store to the lamps".

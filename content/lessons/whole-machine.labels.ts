@@ -9,7 +9,7 @@ export const LABELS = {
   title: "Which parts make the whole machine, and where do they meet?",
   objectives: [
     "Name the three blocks of the whole machine, and the module that built each part.",
-    "Say what a join is, and find the block that drives a bus.",
+    "Say what a join is, and open the blocks to find the part at a bus's end, inside the control unit or the datapath.",
     "Follow the words of a load across the joins, edge by edge.",
     "Explain why a join can break the whole machine although every part works alone.",
   ],
@@ -32,9 +32,9 @@ export const LABELS = {
     makers:
       "The whole machine running the shop's program, with a table of which module built each part.",
     predict:
-      "The shop's program stopped before the WRITE edge of a call through a register, with a question about the PC.",
+      "The shop's program is paused before the WRITE edge of a call through a register, with a question about the PC.",
     timeline: "A timing diagram of signals crossing joins, from edge 57 to edge 64.",
-    load: "The shop's program stopped before a load, with the signals of its edges.",
+    load: "The shop's program is paused before a load, with the signals of its edges.",
     answers: "Six questions about the joins and the edges.",
     faults: "The shop's program with one join held at a fixed value, which you choose.",
   },

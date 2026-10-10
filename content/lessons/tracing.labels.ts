@@ -28,7 +28,7 @@ export const LABELS = {
     c1: "Four traces",
   },
   captions: {
-    free: "The whole machine, paused before the READ edge of a copy, ready to trace.",
+    free: "The whole machine, paused before the ALU edge of a store to the lamps.",
     predict:
       "The machine paused before the ALU edge of a set if, with a question about one bit of HR.",
     sum: "The machine paused before the ALU edge of a set if, for a trace of one bit of the ALU's result.",

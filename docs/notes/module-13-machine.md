@@ -184,6 +184,22 @@ machine's text elaborates in about 0.1 s and runs about 70 edges a second.
 - **Tests.** A test fails a lesson whose prose holds a key it never reads; the capstone's and lesson
   3's last hints are built from their answers and graded.
 
+## After the second reading
+
+- **A grader that throws fails the work.** `gradeSafely` (`book.tsx`) turns any grader's error into
+  a failed verdict that says why, so a challenge, the grade on load and the list of lessons still
+  draw; the capstone names the line and the register that holds no value.
+- **The figure.** One sticky band holds the step controls, the status line and the overview. The
+  drawing marks the wires the next edge uses (`edgeUses` in `dd-model`: back from each write, along
+  each selector's chosen input, through a bus by the bits taken from it), under a band of colour a
+  bus shows. Table rows and ports pin their wires; a pinned word marks the parts it splits into.
+  Results show under the drawing and stay once shown.
+- **The tests.** A figure whose `focus` names nothing it can place fails; the joins each edge of
+  13.1's load uses are pinned; the lab's facts test fills two more slips (a call to a label not
+  taken, a target without its sign), which a call to a label above it in the signs program finds;
+  each capstone comparison read unsigned fails the case with that room above 0.
+- **Prose.** Briefs R3-S and R3-1 to R3-6; `drafts/review-fixes.md` logs every fact fixed.
+
 ## Platform candidates
 
 - **A case-graded challenge whose artifact is HDL.** `checkLesson` takes a written challenge with
