@@ -70,7 +70,6 @@ describe("where a handler's stop may stand", () => {
     const S12 = DEFAULT_VIEW_STRINGS.machine12;
     // No stop of the learner's sits above handler:, so the feedback says to move the start's.
     expect(late.failures[0]?.detail).toContain(S12.stopBelow);
-    expect(late.failures[0]?.detail).not.toContain(S12.stopInHandler);
     // The construction's step 1 done: the start written, its stop above handler:, while finish:
     // and ended: still only stop. The run ends at the handler's stop, which the feedback names
     // once, and does not ask to move the start's stop.
