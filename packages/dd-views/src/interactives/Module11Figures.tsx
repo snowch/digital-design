@@ -227,6 +227,11 @@ const DepthProps = z.object({
   program: z.string(),
   inputs: ShopInputs,
   limit: z.number().int().min(1).max(20000).default(RUN_LIMIT),
+  /**
+   * A prediction on the page that asks how many calls the run makes (11.5): the chart's marks for
+   * the calls, which can be counted, and the sentence about them wait until it is checked.
+   */
+  after: z.string().optional(),
 });
 type DepthData = z.infer<typeof DepthProps>;
 
@@ -255,8 +260,10 @@ export function depthRun(
 
 export const StackDepth = withProps(
   DepthProps,
-  function StackDepth({ data, interactive }: InteractiveProps & { data: DepthData }) {
+  function StackDepth({ data, interactive, store }: InteractiveProps & { data: DepthData }) {
     const t = useViewStrings().machine11;
+    const [predicted] = useSlot<unknown>(store, data.after ?? interactive.id);
+    const showCalls = data.after === undefined || predicted !== undefined;
     const run = useMemo(
       () => depthRun(data.program, shopInputs(data.inputs), data.limit),
       [data.program, data.inputs, data.limit],
@@ -306,7 +313,7 @@ export const StackDepth = withProps(
               </text>
             </g>
           ))}
-          {run.calls.map((i) => (
+          {(showCalls ? run.calls : []).map((i) => (
             <line
               key={i}
               className="depth-call"
@@ -326,7 +333,9 @@ export const StackDepth = withProps(
         </svg>
         <ul className="program-counts">
           <li>{format(t.depthMost, { n: run.deepest })}</li>
-          {run.calls.length > 0 && <li>{format(t.depthCalls, { n: run.calls.length })}</li>}
+          {showCalls && run.calls.length > 0 && (
+            <li>{format(t.depthCalls, { n: run.calls.length })}</li>
+          )}
           <li>{format(t.stops[end.key] ?? end.key, end.values)}</li>
         </ul>
       </div>

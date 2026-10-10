@@ -3593,6 +3593,14 @@ svg.run-lanes-drawing {
   .debugger-near-desk {
     display: block;
   }
+  /* A listing with a drawing under it is shorter, so the drawing's newest row stays on the screen. */
+  .debugger-listing-wrap:not(.rows-open):has(~ .debugger-near-desk) {
+    max-height: 22rem;
+  }
+  /* A short run (11.3) drawn whole under its listing, its first call's arrows with its last. */
+  .debugger-near-desk .run-lanes-box.run-lanes-whole {
+    max-height: none;
+  }
   .debugger-near-phone {
     display: none;
   }
@@ -3608,6 +3616,40 @@ svg.run-lanes-drawing {
    so the newest row of each is on the screen with the buttons. */
 .trap-timeline-body .run-lanes-box {
   max-height: 9rem;
+}
+/* Under a debugger's listing the drawing is short, so its newest row is on the screen with the
+   buttons however long the listing above it. */
+.debugger-near .run-lanes-box {
+  max-height: 9rem;
+}
+/* On a phone the rooms sit after the stack: a short box that keeps the marked room in view. */
+.debugger-near-phone .store-rooms-box {
+  max-height: 3.5rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+@media (max-width: 59.99rem) {
+  /* With the rooms under the stack, the listing and the stack are shorter, so the marked room is
+     on the screen with the buttons. */
+  .debugger-body:has(.debugger-near-phone .store-rooms-box) .debugger-listing-wrap:not(.rows-open) {
+    max-height: 7rem;
+  }
+  .debugger-body:has(.debugger-near-phone .store-rooms-box),
+  .debugger-body:has(.debugger-near-phone .store-rooms-box) .debugger-values {
+    gap: var(--space-2);
+  }
+  /* On a phone the rooms' panel shows no title of its own: the key under the drawing says what it
+     is, and the panel keeps its name for a screen reader. The room it saves keeps the mark on the
+     screen with the buttons at every pause, at 375 by 812. */
+  .debugger-near-phone .debugger-rooms .layout-title {
+    display: none;
+  }
+  .debugger-near-phone .debugger-rooms {
+    padding-top: var(--space-1);
+  }
+  .debugger-body:has(.debugger-near-phone .store-rooms-box) .stack-frames:not(.rows-open) {
+    max-height: 8.625rem;
+  }
 }
 .trap-timeline-body .trap-edges {
   max-height: 13rem;
@@ -3628,18 +3670,30 @@ svg.run-lanes-drawing {
     align-items: start;
   }
 }
-.run-lanes-drawing .lane-interrupts-on,
-.run-lanes-legend .lane-interrupts-on {
-  fill: var(--accent);
-  background: var(--accent);
+/* Hatched, in the drawing and in its key: the lanes' bars are solid --accent, so the band that says
+   interrupts are on takes a pattern no other mark uses. */
+.run-lanes-drawing .lane-hatch-ground {
+  fill: var(--bg);
 }
+.run-lanes-drawing .lane-hatch {
+  stroke: var(--fg);
+  stroke-width: 2;
+}
+.run-lanes-legend .lane-interrupts-on {
+  background: repeating-linear-gradient(45deg, var(--fg) 0 1.5px, var(--bg) 1.5px 3px);
+  outline: 1px solid var(--fg-muted);
+}
+/* No outline: drawn once per row, it crossed the band at every row's edge, where nothing changes. */
 .run-lanes-legend .lane-key-now {
   border-radius: 50%;
   background: var(--focus);
 }
-.run-lanes-drawing .lane-mark-stop rect,
-.run-lanes-drawing .lane-mark-cut rect {
+.run-lanes-drawing .lane-mark-stop rect {
   fill: var(--fg-muted);
+}
+.run-lanes-drawing .lane-mark-cut path {
+  stroke: var(--fg);
+  stroke-width: 2;
 }
 
 /* Memory drawn as boxes, the stack the same way, and the cold store as rooms (Module 11). */
@@ -3704,13 +3758,13 @@ svg.store-rooms {
   fill: var(--fg-muted);
 }
 .store-rooms .room-door-followed circle {
-  fill: var(--accent-soft);
+  fill: var(--bg);
   stroke: var(--accent-strong);
-  stroke-width: 3;
+  stroke-width: 2;
   stroke-dasharray: none;
 }
 .store-rooms .room-door-followed text {
-  fill: var(--accent-strong);
+  fill: var(--fg);
   font-weight: 700;
 }
 .memory-boxes .box-past .box-word {

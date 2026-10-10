@@ -45,6 +45,9 @@ export function runAsks(c: RunCase): Record<string, string> {
     C1: "00",
     ...(c.kept ?? {}),
     stopAt: "handler",
+    // The stop after the last program is the start's: above the line `handler`, which the task
+    // says to name so. A `stop` from that line on, or a text with no such line, fails here alone.
+    stopIn: "start",
   };
 }
 

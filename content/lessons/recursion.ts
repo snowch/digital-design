@@ -148,7 +148,8 @@ export const recursion: LessonInput = {
           timeModel: "none",
           caption: LABELS.captions.depth,
           lead: PROSE.depthLead,
-          props: { program: WARM_ROOMS },
+          // The marks for the calls wait for the prediction, which asks how many there are.
+          props: { program: WARM_ROOMS, after: "predict-calls" },
         },
       ],
     },

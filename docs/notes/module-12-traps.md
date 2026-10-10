@@ -646,6 +646,56 @@ copyright, the platform copy, types and the build passed; Vitest 129 files, 1351
 browser 868 passed, 56 skipped, 10 failed, the ten stored screenshots that fail in a build
 container on `main` too. The log's exit line: `EXIT 1`, from those ten alone.
 
+### The second reading of the fixes (10 October, afternoon)
+
+Four readers and their sceptics over the ten lessons; nothing blocking. Fixed, code first, then
+brief Y4:
+
+- H1: the interrupts band is hatched, in the drawing and its key; the lanes' bars are solid, so
+  the handler's bars no longer read "interrupts are on".
+- H2: the start's `resume` is a move of its own, "starts", since the program has not run.
+- H3: a write to C0 inside a lane starts its band at its own step. With the door at 30, the
+  "interrupts on" stretch now begins at job 5's `C0 <= R1`, before the door's arrow (pinned).
+- 12.1: the cut is a zigzag across the lane, unlike the stop's square, with no dot after it; the
+  outcome says only what the drawing adds; the one-screen test holds `no-skip`.
+- 12.4 and 12.5: "Next move" is offered for the later calls; 12.5's and 12.6's leads say the
+  program's first bar is drawn before the list starts (edges 8 to 15, and 8 to 11).
+- 12.6: a lane the run never enters is not drawn, and the lead says so for 5 and never; each door
+  choice's lanes and interrupts are pinned. On a phone, a debugger with no watch has its drawing
+  after the control registers and the events, so C1 and C2 stay with the buttons; on a wide screen
+  the listing above a drawing is 22rem and the drawing's box 9rem. The one-screen test holds the
+  control registers, and the drawing's newest item at the wide width.
+- 12.8: the whole text is "the runner"; "the handler" is the lines at C4's address. The tests now
+  ask for the start's `stop` (`stopAt: "start"`: a learner's `stop` before the line `handler`), so
+  the task, the figure, the tests and the feedback agree. The title and the question keep "the
+  handler", which there means the job the lesson asks for.
+
+The full check on both halves of the second reading (`32047fa`, with `main` at 9c637e9 merged):
+formatting, copyright, the platform copy, types and the build passed; Vitest 129 files, 1353 tests
+passed; the browser 868 passed, 56 skipped, 10 failed, the ten stored screenshots that fail in a
+build container on `main` too. `EXIT 1`, from those ten alone.
+
+### The third reading (10 October, evening)
+
+Blocking, and mended first: the second reading's stop check counted a `stop` above the line
+`handler` as the start's in every lesson, so 12.1, 12.4, 12.5 and 12.6 failed correct handlers
+whose stops sat there, and 12.8 failed a runner whose first handler line had another name. The
+check `stopAt` is the old rule again: any `stop` of the learner's own is the handler's. 12.8 alone
+asks a second check, `stopIn`, which reads the start's lines as those above the line `handler`;
+its task, its outline and its empty program say so, and its feedback names the reason when it
+fails (no line is named `handler`, or the stop comes at or after it). `stop-check.test.ts` pins
+the five lessons' results for these attempts. Also: 12.8 says the runner is the handler its
+question asks for, and its starting texts and an objective use the page's names; 12.1 and 12.6 say
+where their drawings sit on a phone; 12.5 and 12.6 say what a bar is; the interrupts band has no
+outline, which crossed it at every row.
+
+The full check on the third reading (`979943c`): formatting, copyright, the platform copy, types
+and the build passed; Vitest 130 files, 1358 tests passed; the browser 868 passed, 56 skipped, 12
+failed: the ten stored screenshots that fail in a build container on `main` too, and Module 10's
+layouts test at both widths, which chose the load by its place among the instructions, a place
+that moved when the prediction's own instruction was held back. It now chooses it by name, and
+`module10.spec.ts` passes whole (78).
+
 ## The mechanical walk
 
 The built site, every Module 12 page at 375 and 1280 pixels, light and dark, with every run

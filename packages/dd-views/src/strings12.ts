@@ -35,6 +35,10 @@ export interface Machine12Strings {
   /** {name}: a register, named in a failure as it was at the run's last trap. */
   readonly atTrap: string;
   /** {address}, {cause}: a fault at one of the learner's own lines. */
+  /** 12.8: the run stopped at a `stop` of the learner's own, but no line is named `handler`. */
+  readonly stopUnnamed: string;
+  /** 12.8: the run stopped at a `stop` at or after the line `handler`, so it is the handler's. */
+  readonly stopAfterHandler: string;
   readonly ownFault: string;
   /** Over a test's lines, in a challenge: the tests add them after the learner's. */
   readonly dataAdded: string;
@@ -143,6 +147,10 @@ export const MACHINE12_STRINGS: Machine12Strings = {
       "The debugger ended the run before the instruction at {address}: it copies {reg} into a control register, and nothing has set {reg}.",
   },
   atTrap: "{name} as the program left it at its last trap",
+  stopUnnamed:
+    "No line of your text is named handler, so the test cannot tell the start's stop from the handler's lines. Name the handler's first line handler.",
+  stopAfterHandler:
+    "The run ended at the stop at {address}, which comes at or after the line named handler, so the test counts it as the handler's. The start's stop must come above that line.",
   ownFault:
     "An instruction you wrote, in the start or the handler, at {address} faulted with cause {cause} (it is not one of the tests' lines).",
   dataAdded: "The tests add these lines, which hold the program, after your start and handler:",
@@ -162,7 +170,7 @@ export const MACHINE12_STRINGS: Machine12Strings = {
     waitDoor:
       "A run must end at the handler's stop for job 4. Job 6 must put C1 and C2 back before its resume.",
     shopHandler:
-      "A run must end at the handler's stop after the last program, with a record for every program.",
+      "A run must end at the start's stop after the last program, with a record for every program.",
   },
   eventsCaption: "The timer and the door",
   timer: "Timer",
@@ -223,6 +231,6 @@ export const MACHINE12_STRINGS: Machine12Strings = {
     waitDoor:
       "Job 6 must let the door and the timer in while it counts, then give the program back its mode, its return point and every register but R1 and R2.",
     shopHandler:
-      "The handler must run each program in the table in user mode with interrupts off, offer jobs 1 to 4, leave each program's record (0 for job 4, else its cause) at 400 plus 8 times its number, and stop after the last.",
+      "The runner must run each program in the table in user mode with interrupts off, offer jobs 1 to 4, and leave each program's record (0 for job 4, else its cause) at 400 plus 8 times its number.",
   },
 };

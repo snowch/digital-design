@@ -12,7 +12,7 @@
 
 import type { Program, TimelineEdge, Transfer } from "@dd/dd-model";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
 
 import { format, useViewStrings, type ViewStrings } from "../strings";
 import { useWidth } from "../useWidth";
@@ -55,6 +55,8 @@ export interface LanesConfig {
   readonly interrupts?: boolean;
   /** The most edges drawn: a run that goes on past them is drawn to there, and says so. */
   readonly upTo?: number;
+  /** A short run drawn whole on a wide screen, not in a box that follows its newest row (11.3). */
+  readonly whole?: boolean;
 }
 
 /** One stretch of the run inside one lane. */
@@ -74,7 +76,7 @@ export interface Move {
   readonly from: number;
   readonly to: number;
   readonly edge: number;
-  readonly what: "call" | "back" | "trap" | "interrupt" | "resume" | "jump";
+  readonly what: "call" | "back" | "trap" | "interrupt" | "resume" | "start" | "jump";
   /** What the move writes, as the pages write transfers. */
   readonly label: string;
   /** C0 once the move is made: the mode of the lane it enters. */
@@ -168,6 +170,13 @@ export function lanesOf(
       lane = to;
       return;
     }
+    // A write to C0 inside a lane (job 5 letting interrupts in, or shutting them out) starts a new
+    // stretch at its own step, drawn with C0 as the write leaves it.
+    const written0 = Number(e.control[0]);
+    if (config.interrupts && e.kind === "run" && (written0 & 2) !== (c0 & 2)) {
+      close(i - 1);
+      c0 = written0;
+    }
     stayAt(i);
     if (arrived & 1) {
       close(i);
@@ -185,22 +194,27 @@ export function lanesOf(
     }
     const next = pcAfter(e);
     if (e.kind === "resume") depth = Math.max(0, depth - 1);
-    const before = c0;
     c0 = Number(e.control[0]);
     if (next === undefined) return;
     const to = laneAt(next);
-    if (to === lane) {
-      // A write to C0 inside a lane (job 5 letting interrupts in) starts a new stretch.
-      if (config.interrupts && (before & 2) !== (c0 & 2)) close(i);
-      return;
-    }
+    if (to === lane) return;
     close(i);
     const line = (e.line ?? "").trim();
     const call = /^call\s+(?!system)/.test(line);
     const back = /^goto\s+R\d+/.test(line);
     const written = e.transfers.find((x) => /^R\d+$/.test(x.target));
+    // The start's `resume` starts a program that has not run; a handler's resumes one it left.
+    const fromHandler = lane === handler || lane === again;
     const what: Move["what"] =
-      e.kind === "resume" ? "resume" : call ? "call" : back ? "back" : "jump";
+      e.kind === "resume"
+        ? fromHandler
+          ? "resume"
+          : "start"
+        : call
+          ? "call"
+          : back
+            ? "back"
+            : "jump";
     items.push({
       kind: "move",
       from: lane,
@@ -278,6 +292,7 @@ export function laneItemText(
     trap: t.moveTrap,
     interrupt: t.moveInterrupt,
     resume: t.moveResume,
+    start: t.moveStart,
     jump: t.moveJump,
   }[it.what];
   return capitalised(
@@ -342,6 +357,7 @@ export function RunLanesDrawing({
     if (box) box.scrollTop = box.scrollHeight;
   }, [now.length, shown]);
   const said = now.filter((it): it is Move | Mark => it.kind !== "stay");
+  const hatchId = `lanes-hatch-${useId().replace(/:/g, "")}`;
   const modeOf = (c0: number) =>
     format(t12.modeAfter, { mode: statusText(t12, BigInt(c0), config.interrupts === true) });
   return (
@@ -353,15 +369,30 @@ export function RunLanesDrawing({
           </li>
         ))}
       </ol>
-      <div className="run-lanes-box" ref={boxRef}>
+      <div className={`run-lanes-box${config.whole ? " run-lanes-whole" : ""}`} ref={boxRef}>
         <svg
           className="run-lanes-drawing"
           width={W}
           height={H}
           viewBox={`0 0 ${W} ${H}`}
           role="img"
-          aria-label={t.title}
+          aria-label={config.lanes.some((l) => l.handler) ? t.title : t.titleCalls}
         >
+          {/* The interrupts band is hatched: no bar, band or mark in the drawing is drawn so. */}
+          {config.interrupts && (
+            <defs>
+              <pattern
+                id={hatchId}
+                width={4}
+                height={4}
+                patternUnits="userSpaceOnUse"
+                patternTransform="rotate(45)"
+              >
+                <rect className="lane-hatch-ground" width={4} height={4} />
+                <line className="lane-hatch" x1={0} y1={0} x2={0} y2={4} />
+              </pattern>
+            </defs>
+          )}
           {columns.map((i) => (
             <line key={i} className="lane-rule" x1={x(i)} x2={x(i)} y1={0} y2={H} />
           ))}
@@ -379,6 +410,7 @@ export function RunLanesDrawing({
               {config.interrupts && (it.c0 & 2) !== 0 && (
                 <rect
                   className="lane-interrupts-on"
+                  fill={`url(#${hatchId})`}
                   x={config.mode ? bandW + 3 : 0}
                   y={y0}
                   width={bandW}
@@ -412,8 +444,14 @@ export function RunLanesDrawing({
               const right = cx + 9 + label.length * CHAR <= W - 4;
               return (
                 <g key={k} className={`lane-mark lane-mark-${it.what}`}>
-                  {it.what === "stop" || it.what === "cut" ? (
+                  {it.what === "stop" ? (
                     <rect x={cx - 6} y={y0 + ROW / 2 - 3} width={12} height={10} />
+                  ) : it.what === "cut" ? (
+                    // A break across the lane: the drawing ends here and the run goes on.
+                    <path
+                      d={`M ${cx - 8} ${y0 + ROW / 2 + 2} l 4 -5 l 4 10 l 4 -10 l 4 5`}
+                      fill="none"
+                    />
                   ) : (
                     <circle cx={cx} cy={y0 + ROW / 2 + 2} r={5} />
                   )}
@@ -440,7 +478,8 @@ export function RunLanesDrawing({
               </g>
             );
           })}
-          {last && (
+          {/* The dot follows the run; once the drawing has stopped following it, there is none. */}
+          {last && !(last.it.kind === "mark" && last.it.what === "cut") && (
             <circle
               className="lane-now"
               cx={last.it.kind === "move" ? x(last.it.to) : x(last.it.lane)}

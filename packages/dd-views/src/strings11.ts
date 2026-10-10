@@ -148,11 +148,15 @@ export interface Machine11Strings {
      * ("the handler", "overBy"); {transfer} is what the move writes, such as R15 ← 00C. The
      * sentence's first letter is made a capital on the page.
      */
+    /** The drawing's name where its lanes are a program and its functions (Module 11). */
+    readonly titleCalls: string;
     readonly moveCall: string;
     readonly moveBack: string;
     readonly moveTrap: string;
     readonly moveInterrupt: string;
     readonly moveResume: string;
+    /** The start's `resume`: it starts a program that has not yet run. */
+    readonly moveStart: string;
     readonly moveJump: string;
     /** A mark in words: {lane} is where it is; {label} what a store wrote. */
     readonly markDoor: string;
@@ -367,7 +371,8 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   depthRan: "{n} instructions run",
   depthRanOne: "1 instruction run",
   depthMost: "At most, the stack held {n} words.",
-  depthCalls: "The marks under the chart's axis are the {n} calls the run made.",
+  // No count: 11.5's prediction asks how many calls, and this line shows at load.
+  depthCalls: "The marks under the chart's axis are the calls the run made.",
   logCol: "What is checked",
   readingsCol: "Readings",
   asks: "Should show",
@@ -391,12 +396,15 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   lanes: {
     title:
       "The run drawn as lanes side by side, time running down, where each lane is one stretch of lines the run goes to and the arrows between lanes are the moves",
+    titleCalls:
+      "The run drawn as lanes side by side, with time running down: one lane for the main program and one for each function it calls, each call an arrow to a function and each return an arrow back",
     moveCall: "a call goes to {to}, a function that {from} calls: {transfer}.",
     moveBack: "the function {from} goes back to {to}: {transfer}.",
     moveTrap: "an instruction in {from} traps, and the machine goes to {to}: {transfer}.",
     moveInterrupt:
       "an interrupt comes while {from} runs, and the machine goes to {to}: {transfer}.",
     moveResume: "{from} resumes {to}: {transfer}.",
+    moveStart: "{from} runs resume and so starts {to}, which has not run yet: {transfer}.",
     moveJump: "{from} goes back to {to}: {transfer}.",
     markDoor: "the freezer door opens while {lane} runs.",
     markTimer: "the timer reaches 0 while {lane} runs.",
@@ -421,13 +429,13 @@ export const MACHINE11_STRINGS: Machine11Strings = {
     saves: "saves {reg}",
     popped: "Off the stack, still in the RAM",
     stackLabel:
-      "The stack drawn as boxes, R14's word at the top, then the words below it grouped by the call that pushed them, and the words a pop has passed set apart above",
+      "The stack drawn as boxes: R14's word at the top, then the words below it grouped by the call that pushed them, and the words a pop has taken off set apart above",
     roomsLabel: "The rooms reachable from the hall, each with its reading and its two doors",
     roomAgain: "{name}, drawn above",
     roomsKey:
-      "The lit room is the room whose address R1 holds. Each room is a box with its name and reading. Its two doors are circles to its right. A circle with 1 or 2 is a door to a room. A dashed circle with 0 is a door that leads nowhere. When R1 holds 0, a door drawn with a thick ring is the door the current call came through. Each room behind a door is drawn below, a step to the right, with a line from the box of the room it opens from.",
+      "Each room is a box with its name and its reading. Its two doors are circles to its right: a circle with 1 or 2 is a door to a room, and a dashed circle with 0 is a door that leads nowhere. The lit box is the room whose address R1 holds. A door with a thick ring is the door the running call came through. Each room behind a door is drawn below, set in a little to the right, and a line runs to it from the box of the room it opens from.",
     roomsKeyStill:
-      "Each room is a box with its name and reading. Its two doors are circles to its right. A circle with 1 or 2 is a door to a room. A dashed circle with 0 is a door that leads nowhere. Each room behind a door is drawn below, a step to the right, with a line from the box of the room it opens from.",
+      "Each room is a box with its name and its reading. Its two doors are circles to its right: a circle with 1 or 2 is a door to a room, and a dashed circle with 0 is a door that leads nowhere. Each room behind a door is drawn below, set in a little to the right, and a line runs to it from the box of the room it opens from.",
     roomLit: "{name} is lit, and R1 holds its address.",
     doorFollowed:
       "Door {door} of {name} is marked. R1 holds 0, and the current call came through that door.",

@@ -385,6 +385,11 @@ const LayoutProps = z.object({
   question: z.string().optional(),
   options: z.array(z.object({ value: z.string(), label: z.string() })).optional(),
   explain: z.string().default(""),
+  /**
+   * Instructions held back until a prediction elsewhere on the page is checked (10.2): its own
+   * instruction, whose layouts would answer it on one click.
+   */
+  holdUntil: z.object({ prediction: z.string(), texts: z.array(z.string()) }).optional(),
 });
 
 /** The question's answer: the fields the packed layout moves for the first instruction. */
@@ -443,13 +448,16 @@ export const LayoutCompare = withProps(
     const strings = useViewStrings();
     const t = strings.machine10;
     const [stored, setStored] = useSlot<Stored>(store, interactive.id);
+    const [predicted] = useSlot<unknown>(store, data.holdUntil?.prediction ?? interactive.id);
+    const held = new Set(data.holdUntil && predicted === undefined ? data.holdUntil.texts : []);
+    const instructions = data.instructions.filter((c) => !held.has(c.text));
     const asking = data.question !== undefined && data.options !== undefined;
     const committed = !asking || stored?.choice !== undefined;
     const answer = useMemo(() => (asking ? layoutAnswer(data) : ""), [asking, data]);
     const optionLabel = (v: string) =>
       (data.options?.find((o) => o.value === v)?.label ?? v).replace(/\.$/, "");
     const [chosen, setChosen] = useState(0);
-    const given = data.instructions[chosen] ?? data.instructions[0];
+    const given = instructions[chosen] ?? instructions[0];
     const instruction = useMemo(() => (given ? wordOfText(given.text) : 0), [given]);
     const course = courseLayout(instruction);
     const packed = packedLayout(instruction);
@@ -484,10 +492,10 @@ export const LayoutCompare = withProps(
             />
           </div>
         )}
-        {committed && data.instructions.length > 1 && (
+        {committed && instructions.length > 1 && (
           <fieldset className="carry-cases">
             <legend>{strings.machine8.choose}</legend>
-            {data.instructions.map((c, k) => (
+            {instructions.map((c, k) => (
               <label key={c.label} className="fault-choice">
                 <input
                   type="radio"
@@ -530,6 +538,13 @@ const ExplorerProps = z.object({
   width: z.union([z.literal(16), z.literal(64)]).default(64),
   /** Module 10's capstone: the learner's copy, with set if at kind A and kind 9's call. */
   capstone: z.boolean().default(false),
+  /**
+   * A prediction on the page that these words would answer (10.2): the figure, and its outcome,
+   * wait until it is checked.
+   */
+  holdUntil: z.string().optional(),
+  /** Shown under the figure once it shows: what its words show. */
+  outcome: z.string().optional(),
 });
 
 function entryText(t: ReturnType<typeof useViewStrings>["machine10"], e: Entry): string {
@@ -626,9 +641,12 @@ export const EncodingExplorer = withProps(
   function EncodingExplorer({
     data,
     interactive,
+    store,
   }: InteractiveProps & { data: z.infer<typeof ExplorerProps> }) {
     const strings = useViewStrings();
     const t = strings.machine10;
+    const [predicted] = useSlot<unknown>(store, data.holdUntil ?? interactive.id);
+    const held = data.holdUntil !== undefined && predicted === undefined;
     const options: MachineOptions = data.capstone ? { setIf: 10, callThroughRegister: 9 } : {};
     const assembly = data.capstone ? { setIf: 10, callThroughRegister: 9 } : {};
     const firstWord = data.words[0] ? hex8(wordOfText(data.words[0].text, assembly)) : "13123000";
@@ -692,7 +710,13 @@ export const EncodingExplorer = withProps(
     const rows: number[] = [];
     for (let hi = width - 1; hi >= 0; hi -= 16) rows.push(hi);
 
-    return (
+    if (held)
+      return (
+        <div className="machine-figure" data-interactive={interactive.id}>
+          <p className="watch-note">{t.heldNote}</p>
+        </div>
+      );
+    const figure = (
       <div className="machine-figure encoding-explorer" data-interactive={interactive.id}>
         <label className="answer-field explorer-word">
           <span className="answer-label">{t.wordLabel}</span>
@@ -878,6 +902,12 @@ export const EncodingExplorer = withProps(
           </section>
         )}
       </div>
+    );
+    return (
+      <>
+        {figure}
+        {data.outcome && <Prose markdown={data.outcome} />}
+      </>
     );
   },
 );

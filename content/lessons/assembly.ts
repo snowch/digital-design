@@ -111,8 +111,7 @@ export const assembly: LessonInput = {
             program: ROOM_A_LIMIT,
             inputs: { SENSORA: "-170", SENSORB: "-250" },
             registers: [2, 3, 4],
-            // This lesson reads the words the assembler makes, so its listings show them.
-            words: true,
+            // No words: row 008's would give the prediction's constant away before it is checked.
             outcomes: PROSE.debuggerAfter,
           },
         },

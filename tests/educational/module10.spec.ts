@@ -324,7 +324,8 @@ test.describe("Module 10's figures", () => {
     await expect(figure.getByText("Word: 13123000").first()).toBeVisible();
     await expect(figure.locator(".layout-field.moved")).toHaveCount(0);
     await expect(figure.locator(".layout-moved")).toHaveText(T.layoutStill);
-    await figure.getByRole("radio").nth(4).check();
+    // By its name: the prediction's own instruction is held back until the prediction is checked.
+    await figure.getByRole("radio", { name: /memory\[7D8\]/ }).check();
     await expect(figure.getByText("Word: 380207D8")).toBeVisible();
     await expect(figure.locator(".layout-field.moved")).toHaveText(["Y2"]);
   });
