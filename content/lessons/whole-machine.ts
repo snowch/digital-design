@@ -231,6 +231,8 @@ export const wholeMachine: LessonInput = {
           caption: LABELS.captions.cpu,
           props: {
             libraryId: "machine-final",
+            // The drawing alone: no word is written beside its wire, as on the machine's figures.
+            writtenWidth: 4,
             still: true,
             canOpen: false,
             highlight: ["control", "datapath"],

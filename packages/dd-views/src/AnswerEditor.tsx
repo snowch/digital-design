@@ -224,9 +224,9 @@ export const AnswerEditor: ComponentType<ChallengeEditorProps> = ({
 };
 
 /**
- * A field's label inside a sentence: a first word written as a sentence starts ("The word of …")
- * takes a small letter; a name such as "R9" or "PC" keeps its capitals.
+ * A field's label inside a sentence: a label written as a sentence starts, with an article ("The
+ * word of …"), takes a small letter; a name such as "Unsigned", "R9" or "PC" keeps its capital.
  */
 export function inSentence(label: string): string {
-  return /^[A-Z][a-z]/.test(label) ? label[0]!.toLowerCase() + label.slice(1) : label;
+  return /^(The|A|An) /.test(label) ? label[0]!.toLowerCase() + label.slice(1) : label;
 }
