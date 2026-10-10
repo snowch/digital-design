@@ -7,9 +7,10 @@
 // (`CAPSTONE_QUESTIONS`). The answers are read off the recorded run of the learner's own program
 // (`capstoneAnswer`), so no two learners' answers need be the same, and a wrong answer is told
 // which level to look at, never the value. The figures trace a short program of their own, whose
-// set if compares a gap with a limit it loads last, so nothing they show at that edge is a likely
-// answer: MET and COUT at the ALU edge, and MET held at 0 found from the comparison with the
-// model. The model note shows a short testbench for the machine as code to read, which the
+// set if compares a gap below 0 with a limit above 0 it loads last, and open at that set if's ALU
+// edge, where nothing they show is an answer a likely program gives (the facts test runs those
+// programs): MET and COUT at the ALU edge, with opposite verdicts, and MET held at 0 found from
+// the comparison with the model. The model note shows a short testbench for the machine as code to read, which the
 // course's engine does not run.
 //
 // The structure is here; the words are in capstone.prose.ts and capstone.labels.ts. The numbers
@@ -25,7 +26,7 @@ import { CAPSTONE_CASES, CAPSTONE_REFERENCE, CAPSTONE_SAMPLE } from "./module13"
 export const CAPSTONE_FIELDS = [
   { id: "result", reference: "16" },
   { id: "flags", reference: "00100" },
-  { id: "xorB", reference: "1100" },
+  { id: "carry", reference: "1100" },
   { id: "held", reference: "-250" },
 ] as const;
 
@@ -35,6 +36,10 @@ const SAMPLE = {
   levels: false,
   trace: true,
   shown: [1, 2, 3, 4, 5],
+  // Every figure opens paused before the set if's ALU edge, edge 22: at every other frame the
+  // carries of the slices for bits 7 to 4 are 0000, the row a program that tests room B first
+  // gives, and at this one nothing the figure writes is a likely program's answer.
+  start: 21,
 };
 
 export const capstone: LessonInput = {
@@ -72,14 +77,14 @@ export const capstone: LessonInput = {
           caption: LABELS.captions.predict,
           props: {
             ...SAMPLE,
-            start: 21,
             question: PROSE.p1Question,
             options: [
               { value: "0", label: "0" },
               { value: "1", label: "1" },
             ],
+            // COUT, not MET: the question's figure, run to its end, shows MET on the display.
             ask: "net",
-            net: "MET",
+            net: "COUT",
             explain: PROSE.p1Explain,
           },
         },
@@ -98,11 +103,10 @@ export const capstone: LessonInput = {
           lead: PROSE.invLead,
           props: {
             ...SAMPLE,
-            start: 21,
             // Opens on the whole machine, the datapath in view; opening it, the step the lead asks for,
-            // shows the ALU and the condition block.
+            // shows the ALU and the condition block, and the paragraph.
             focus: ["datapath/alu", "datapath/condition"],
-            reveal: { text: PROSE.invAfter, scope: "datapath/alu" },
+            reveal: { text: PROSE.invAfter, scope: "datapath" },
           },
         },
       ],
@@ -202,6 +206,6 @@ export const capstone: LessonInput = {
     textbookExample:
       "The textbooks' closing exercise: a program written for the finished computer and run on it (Nand2Tetris's programs for the Hack computer, run on its CPU emulator; Harris and Harris's or Patterson and Hennessy's test programs run on the processor they built in Verilog, checked by one value written to memory at the end), with the levels below the program left to the simulator.",
     howThisDiffers:
-      "The learner's program, for the course's own shop (how many freezer rooms are colder than -20.0 degrees, Module 10's count of cold rooms, with ALARM when both are), must use the set if the learner added in Module 10, and is graded twice: on the instruction-level model for six pairs of readings, two of which, one room at or above 0 each, only comparisons read signed pass, and by four questions about its own run on the whole machine, paused before the ALU edge of its first set if (the ALU's output, its four flags and MET as a row, the XORs that turn B's bits 7 to 4 over, inside the ALU, and HM). The answers are read off the recorded run of the learner's own program, so no two learners' answers need agree, and a wrong answer is told the level to look at, never the value. The figures trace a short program of their own, built so that nothing they show at their set if's edge is an answer a learner's program is likely to give, set COUT beside MET in Module 3's terms, and hold MET at 0 to be found from the comparison with the model. The model note shows a testbench as code to read and says the course's engine does not run it.",
+      "The learner's program, for the course's own shop (how many freezer rooms are colder than -20.0 degrees, Module 10's count of cold rooms, with ALARM when both are), must use the set if the learner added in Module 10, and is graded twice: on the instruction-level model for seven pairs of readings, two of which, one room at or above 0 each, only comparisons read signed pass, and two of which, one room at exactly -200 each, only comparisons that leave -200 out pass; and by four questions about its own run on the whole machine, paused before the ALU edge of its first set if (the ALU's output, its four flags and MET as a row, the carries out of the ALU's slices for bits 7 to 4, written only inside the ALU, and HM). The answers are read off the recorded run of the learner's own program, so no two learners' answers need agree, and a wrong answer is told the level to look at, never the value. The figures trace a short program of their own whose set if compares words of opposite signs, so that COUT and MINUS are both 1, a flags row no comparison of two readings below 0 gives; each opens on a frame where nothing it shows is an answer a likely program gives (the facts test runs those programs). They set COUT beside MET in Module 3's terms, where read unsigned and read signed give opposite verdicts, and hold MET at 0 to be found from the comparison with the model. The model note shows a testbench as code to read and says the course's engine does not run it.",
   },
 };

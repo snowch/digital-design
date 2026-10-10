@@ -222,6 +222,17 @@ screen, and the build writes a manifest beside the page, so a browser can instal
 its own name, "Digital Design", with the cover's description. The icon is drawn once, as
 `apps/course/public/icon.svg`; `scripts/icons.mjs` draws the PNGs the platforms ask for from it.
 
+On 10 October the author found the stages naming their modules and the list under them naming
+the same modules again, and asked for the modules to sit inside the stages, closed. Each stage is
+one line: its mark, its name, its modules and how many of their challenges are complete, with what
+it builds under it. Pressing a stage shows its modules, each one line as before. A stage starts
+open when it holds a module that starts open, so a returning reader sees the module they are in.
+The rule between the stages and the list went with the list. Module 0 comes first, and a bare
+module heading there looked out of place to the author, so its line takes the stages' form: a
+glass for its mark, in the words' ink, "Module 0" where a stage gives its modules, and what you do
+in it. The line above the path was cut down so the two do not say the same thing (brief C6). The
+page without scripts gives Module 0's line, then the five stages.
+
 ### 6 October 2026: a calculator of the course's own, in Module 10
 
 The author asked whether to bundle their programmer's calculator, `snowch/programmer-calculator`,

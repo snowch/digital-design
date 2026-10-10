@@ -38,6 +38,8 @@ describe("the final machine's text", () => {
     expect(r.difference).toBeUndefined();
     expect(r.edges).toBe(69);
   });
+  // Each run simulates the whole machine gate by gate, edge by edge: one took 75 seconds on a busy
+  // machine, so each has three minutes, which still stops a run that never ends.
   for (const p of FINAL_PROGRAMS)
     it(
       p.label,
@@ -46,7 +48,7 @@ describe("the final machine's text", () => {
           compareFinalCircuit(circuit, p.source, { ...QUIET_INPUTS, ...p.inputs }).difference,
         ).toBeUndefined();
       },
-      60_000,
+      180_000,
     );
   for (const p of TRAP_PROGRAMS_FOR_TESTS)
     it(`Module 12's: ${p.label}`, () => {
@@ -56,5 +58,5 @@ describe("the final machine's text", () => {
           ...(p.door !== undefined ? { doorOpensAt: p.door } : {}),
         }).difference,
       ).toBeUndefined();
-    }, 60_000);
+    }, 180_000);
 });

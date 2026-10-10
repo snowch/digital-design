@@ -11,9 +11,9 @@ in `docs/notes/module-13-machine/`.
 | --- | --- | --- | --- |
 | `whole-machine` | What is the whole machine made of, and where do its parts meet? | CPU | where the parts meet: answers |
 | `full-path` | What happens to one line of a program at every level, edge by edge? | machine code | one line at every level: answers |
-| `tracing` | Can you follow one value from a line of a program down to one gate? | abstraction | five traces: answers |
+| `tracing` | Can you follow one value from a line of a program down to one gate? | abstraction | four rows of wires: answers |
 | `final-machine` | Can you join the parts into the whole machine? | none | the lab: the top module as text |
-| `capstone` | Can you write a program of your own and trace its run down to the gates? | none | a program and five trace questions |
+| `capstone` | Can you write a program of your own and trace its run down to the gates? | none | a program and four trace questions |
 
 Every learner-facing string went through briefs of checked facts and drafts; `drafts/N-fixes.md`
 lists every fact or form put right in a draft, and every cut made on the second reading.
@@ -31,7 +31,7 @@ lists every fact or form put right in a draft, and every cut made on the second 
 | `final-machine` | where a run's first difference sits | each `lab-run` figure's map of the nine parts, the part holding the value the run's sentence names marked after the run; no port's join is drawn, since the figures run the course's own text |
 | `capstone` | the learner's own program run on the whole machine | lesson 3's trace figure on the learner's program, under the editor |
 | every lesson's machine figure | the run over time: each line's edges side by side, by state | the run strip above the drawing, the next edge marked; a press pauses there |
-| every lesson's machine figure | the route a value takes at one edge | the joins the next edge changes drawn bold, and a pressed wire pinned and marked at every level it is drawn |
+| every lesson's machine figure | the route a value takes at one edge | the wires the next edge uses under a band of colour (`edgeUses`), and a pressed wire pinned and marked at every level it is drawn |
 | `tracing`, `capstone` | where each wire sits among the levels | the drawing opened block by block, with the table of levels beside it |
 
 Tables kept beside drawings, and why:
@@ -101,12 +101,14 @@ splits or joins words says it holds no gate. So every trace ends at a gate or a 
 - **The lab's figures** (`lab-run`) run the course's text with one line changed, never one of the
   six joins, and never show the line it replaces.
 - **The capstone** (`CapstoneEditor.tsx`, grader `machine13-capstone`, `dd-model/src/capstone.ts`):
-  the learner's program is run on the model for six pairs of readings; in two, one room reads at
-  or above 0, and each fails a program that reads that room's comparison unsigned. Four questions
-  name wires paused before the ALU edge of the program's first set if: RESULT, signed; the ALU's
-  flags and MET as a row of five bits; the XORs in the slices for bits 7 to 4, whose row differs
-  with the operand the learner's set if puts in B; and HM, signed. A row cannot be found by
-  trying 0 and then 1. Their answers are read off the recorded run of the learner's own program;
+  the learner's program is run on the model for seven pairs of readings; in two, one room reads
+  at or above 0, and each fails a program that reads that room's comparison unsigned; in two, one
+  room reads exactly -200, and each fails a program that counts -200 as cold. Four questions name
+  wires paused before the ALU edge of the program's first set if: RESULT, signed; the ALU's flags
+  and MET as a row of five bits; the carries out of the slices for bits 7 to 4, written only inside
+  the ALU's group `q1`; and HM, signed. With fixed readings each can be worked out from the text,
+  and a program that tests room B first has carries `0000`; what the questions check is that the
+  learner found the edge and read the wires. Their answers are read off the recorded run of the learner's own program;
   a wire whose value is not known reads X, and X is an answer. A wrong answer gets the level to look at and what to
   read there.
 
@@ -119,7 +121,7 @@ grade measured again after the reading review, against the built site, at 1280):
 | --- | --- |
 | The lab's grade of the outline: one elaboration, seven programs, 274 edges | 2.4 s |
 | One `lab-run` figure run | 0.2 to 1.1 s, by program |
-| The capstone's grade of the reference: five model runs, one recorded run of 39 edges | 0.5 s |
+| The capstone's grade of the reference: seven model runs, one recorded run of 39 edges | 0.5 s |
 | The capstone's trace figure opening on the learner's program | 0.9 s |
 
 A slow phone may take several times as long; the lab stays inside the plan's ten seconds unless it
@@ -199,6 +201,36 @@ machine's text elaborates in about 0.1 s and runs about 70 edges a second.
   taken, a target without its sign), which a call to a label above it in the signs program finds;
   each capstone comparison read unsigned fails the case with that room above 0.
 - **Prose.** Briefs R3-S and R3-1 to R3-6; `drafts/review-fixes.md` logs every fact fixed.
+
+## After the third reading
+
+- **Shared figure.** The step buttons and the status line stick over the whole figure, tables and
+  bit views too; the overview sticks under them over the drawing only, and only in a window taller
+  than 860 pixels, so a phone (375 by 812, or held sideways) keeps most of its window for the page.
+  The run's strip sits under the drawing. Each row of the levels table names its wire, opens the
+  block that draws it (`drawnAt`: a wire is drawn where it joins two things) and reads it in its
+  own form. The comparison sits right under the drawing, before the paragraphs that explain it; a
+  fault's explanation goes with the run it explains. A field's label inside "Fill in …" takes a
+  small letter.
+- **13.1.** The two questions the page answered now ask about HB's driver (`hold`) and IR's end in
+  the control unit (`digits`), which the facts test checks no reading or hint before the last
+  names. The challenge has the machine under it; the explanation marks the CPU on the drawing.
+- **13.2.** The store's figure opens before the call's trap edge, where no wire it draws carries the
+  store's word (only the ROM's second read port, inside the memory, does).
+- **13.3.** The carry row is asked at `R3 <= R1 - R2`, where no figure opens; the shop's program has
+  no other edge with carries that are not all 0 or all 1. Its bit 3 is the carry the failure
+  experiment holds, which that run shows at 0. The facts test checks each row's message names its
+  line, and that no figure's first frame holds a row's answer on its wires. On a phone the table
+  of levels stacks each row.
+- **13.4.** The button that shows the changed line follows any run that differs, and the paragraph
+  that reasons to it waits for the press; the investigation's waits for all 21 runs.
+- **13.5.** The figures' set if compares -66 with 100, opposite signs, so COUT and MINUS are both 1,
+  a row no likely program gives; every figure opens at that edge, since at every other frame q1's
+  carries are `0000`. The prediction asks COUT, which the question's figure does not show on the
+  display. The gate row became q1's carries. The model's refusal names the registers the line
+  reads and what for. The facts test runs 96 likely first set ifs and checks no figure's first
+  frame shows any of their answers.
+- **Prose.** Briefs R4-S and R4-1 to R4-5; `drafts/review-fixes.md` logs every fact fixed.
 
 ## Platform candidates
 

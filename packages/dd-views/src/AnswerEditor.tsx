@@ -84,7 +84,7 @@ export function gradeAnswers(
   // Every field missing anywhere is named at once, in the order the challenge asks for them.
   const gone = new Set(results.flatMap((r) => ("missing" in r ? r.missing : [])));
   if (gone.size) {
-    const fields = challenge.fields.filter((f) => gone.has(f.id)).map((f) => f.label);
+    const fields = challenge.fields.filter((f) => gone.has(f.id)).map((f) => inSentence(f.label));
     const blocked = format(strings.answers.unanswered, { fields: fields.join(", ") });
     return { passed: false, total: cases.length, failures: [], blocked };
   }
@@ -93,7 +93,9 @@ export function gradeAnswers(
     if (isProblem(r)) {
       const blocked =
         "missing" in r
-          ? format(strings.answers.unanswered, { fields: r.missing.map(labelOf).join(", ") })
+          ? format(strings.answers.unanswered, {
+              fields: r.missing.map((id) => inSentence(labelOf(id))).join(", "),
+            })
           : strings.answers.invalidFor[r.invalid] !== undefined
             ? strings.answers.invalidFor[r.invalid]!
             : formOf(r.invalid) !== undefined &&
@@ -220,3 +222,11 @@ export const AnswerEditor: ComponentType<ChallengeEditorProps> = ({
     </div>
   );
 };
+
+/**
+ * A field's label inside a sentence: a label written as a sentence starts, with an article ("The
+ * word of …"), takes a small letter; a name such as "Unsigned", "R9" or "PC" keeps its capital.
+ */
+export function inSentence(label: string): string {
+  return /^(The|A|An) /.test(label) ? label[0]!.toLowerCase() + label.slice(1) : label;
+}

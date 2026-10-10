@@ -328,35 +328,62 @@ ol {
   color: var(--hero-muted);
 }
 
-/* The path: five stages in reading order, a list down a phone and a row across a wide screen. A rule
-   across the page closes it, darker and longer than the lines between the modules below, so the
-   stages do not run on into the list (the author asked for a separator there). */
-.journey {
-  padding-bottom: var(--space-7);
-  border-bottom: 1px solid var(--border-strong);
-}
+/* The path: Module 0, then the five stages in reading order, one under another at every width. Each
+   stage is one line until it is pressed, and holds its modules, each one line until it is pressed
+   in turn (the author, 10 October 2026: the stages named their modules, and a list under them named
+   them again). The stage of an open module opens with it. Module 0's line takes the stages' form,
+   and shows its lessons when pressed. */
 .journey h2 {
   margin-top: var(--space-6);
 }
-/* Where Module 0, the way in, sits: a line between the heading and the stages. */
+/* Where Module 0, the way in, sits: a line between the heading and Module 0's own line. */
 .journey-intro {
   max-width: var(--measure);
-  margin: 0 0 var(--space-5);
+  margin: 0 0 var(--space-3);
   color: var(--fg-muted);
 }
 .journey-stages {
   list-style: none;
   padding: 0;
   margin: 0;
-  display: grid;
-  gap: var(--space-4);
+  max-width: var(--measure);
 }
 .journey-stage {
+  border-bottom: 1px solid var(--border);
+  --chevron: 0.55rem;
+}
+/* Module 0's line, before the stages and in their form; its lessons show where a stage's modules do. */
+.journey-opening {
+  max-width: var(--measure);
+}
+.stage-heading {
+  margin: 0;
+}
+/* A stage's line: the chevron, the stage's mark, then its name, its modules and its progress. */
+.stage-toggle {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: var(--space-3);
-  align-items: start;
-  align-content: start;
+  grid-template-columns: var(--chevron) 48px minmax(0, 1fr);
+  column-gap: var(--space-3);
+  align-items: center;
+  width: 100%;
+  min-height: 48px;
+  padding: var(--space-3) var(--space-2);
+  border: 0;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.stage-toggle:hover .stage-name {
+  color: var(--accent-strong);
+}
+.stage-toggle[aria-expanded="true"] .module-chevron {
+  transform: rotate(45deg);
+}
+.stage-toggle .module-chevron {
+  align-self: center;
+  margin-top: 0;
 }
 .stage-icon {
   display: grid;
@@ -375,6 +402,9 @@ ol {
   stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+.stage-0 {
+  color: var(--stage-0);
 }
 .stage-1 {
   color: var(--stage-1);
@@ -403,44 +433,39 @@ ol {
 .stage-modules {
   font-family: var(--font-mono);
   font-size: var(--text-sm);
+  font-weight: 400;
   color: var(--fg-muted);
-}
-.stage-about {
-  color: var(--fg);
 }
 .stage-status {
+  font-family: var(--font-text);
   font-size: var(--text-sm);
+  font-weight: 400;
+  letter-spacing: normal;
   color: var(--fg-muted);
-  font-style: italic;
+}
+/* What a stage builds, shown closed or open, under the stage's name. */
+.stage-about {
+  margin: 0 0 var(--space-3);
+  padding-left: calc(var(--space-2) + var(--chevron) + var(--space-3) + 48px + var(--space-3));
+  color: var(--fg);
 }
 .stage-to-write .stage-icon {
   border-style: dashed;
 }
-@media (min-width: 56rem) {
-  .journey-stages {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: var(--space-5);
-  }
-  .journey-stage {
-    position: relative;
-    grid-template-columns: none;
-    justify-items: center;
-    text-align: center;
-  }
-  /* An arrow from each stage to the next, read across. */
-  .journey-stage + .journey-stage::before {
-    content: "\2192" / "";
-    position: absolute;
-    top: 12px;
-    left: calc(-1 * var(--space-5) / 2);
-    transform: translateX(-50%);
-    color: var(--fg-muted);
-  }
+/* A stage's modules, set in under the stage's name. */
+.stage-list {
+  padding-left: calc(var(--space-2) + var(--chevron) + var(--space-3) + 48px);
+  margin-bottom: var(--space-3);
 }
-/* The list's heading is for readers who move by headings, and is not shown (strings.ts): the rule
-   above ends the stages, and each module names itself. Its gap under the rule stays. */
-.contents-heading + .module {
-  margin-top: var(--space-5);
+.stage-list .module:last-child {
+  border-bottom: 0;
+}
+/* On a phone the modules line up under the stage's mark instead, so their lessons keep the width a
+   title needs to stay on one or two lines. */
+@media (max-width: 40rem) {
+  .stage-list {
+    padding-left: calc(var(--space-2) + var(--chevron) + var(--space-3));
+  }
 }
 /* Each module is one line until it is pressed: its name and its summary beside a chevron that turns
    when its lessons show (the author: the front page had grown long with every lesson shown). A
@@ -450,7 +475,8 @@ ol {
   border-bottom: 1px solid var(--border);
   --chevron: 0.55rem;
 }
-.module h3 {
+.module h3,
+.module h4 {
   margin: 0;
 }
 .module-toggle {
@@ -503,7 +529,8 @@ ol {
   padding: var(--space-3) var(--space-2) var(--space-3)
     calc(var(--space-2) + var(--chevron) + var(--space-3));
 }
-.module-to-write h3 {
+.module-to-write h3,
+.module-to-write h4 {
   color: var(--fg-muted);
 }
 .module .lesson-list {

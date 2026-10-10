@@ -16,6 +16,7 @@ import {
   stuckAt,
   type RecordedRun,
 } from "@dd/dd-model";
+import { parseLesson } from "@platform/lesson-schema";
 import { MACHINE13_STRINGS, compareText, levelsAnswer } from "@dd/dd-views";
 import type { Word } from "@dd/sim";
 
@@ -93,6 +94,23 @@ describe("lesson full-path's facts", () => {
   it("works out the handler's store to the display, edges 59 to 62", () => {
     expect(word("word[display] <= R2")).toBe("480207C0");
     expect(at(run, 59, "IR")).toBe("480207C0");
+    // The figure pauses before edge 58, the call's trap edge, where no wire it draws yet carries
+    // the store's word: FETCHED does from the next frame, before the store's FETCH edge.
+    const figure = parseLesson(fullPath)
+      .sections.flatMap((s) => s.interactives ?? [])
+      .find((i) => i.id === "path-store")!;
+    const start = (figure.props as { start: number }).start;
+    expect(start).toBe(57);
+    expect(state(run, start)).toBe("READ");
+    expect(at(run, start, "TRAP")).toBe("1");
+    // Only the ROM's second read port, inside the memory, a level the construction never opens,
+    // carries it: no wire of the top level or of the datapath does.
+    expect(
+      run.frames[start]!.flatMap((w, n) =>
+        w.width === 32 && w.value === 0x480207c0n ? [run.circuit.nets[n]!.name] : [],
+      ),
+    ).toEqual(["port/memory/ROMHIGH"]);
+    expect(at(run, start + 1, "FETCHED")).toBe("480207C0");
     expect([59, 60, 61, 62].map((e) => state(run, e - 1))).toEqual([
       "FETCH",
       "READ",

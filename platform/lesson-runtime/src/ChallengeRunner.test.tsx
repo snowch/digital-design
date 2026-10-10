@@ -3,10 +3,11 @@
 
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
+import type { Book } from "./book";
 import { ChallengeRunner } from "./ChallengeRunner";
-import { fixtureBook, fixtureLesson } from "./fixtures";
+import { TextEditor, fixtureBook, fixtureLesson } from "./fixtures";
 import { LessonStore, memoryStorage, storageKey, type Storage } from "./state";
 import { DEFAULT_STRINGS as S } from "./strings";
 
@@ -14,12 +15,26 @@ const lesson = fixtureLesson();
 const book = fixtureBook([lesson]);
 const challenge = lesson.challenges[0]!;
 
-function mount(storage: Storage) {
+function mount(storage: Storage, withBook: Book = book) {
   const store = new LessonStore(storage, book.id, lesson.id);
   const view = render(
-    <ChallengeRunner book={book} lesson={lesson} challenge={challenge} store={store} />,
+    <ChallengeRunner book={withBook} lesson={lesson} challenge={challenge} store={store} />,
   );
   return { store, ...view };
+}
+
+/** Storage holding one saved artifact for the fixture's challenge. */
+function savedWork(hdl: string): Storage {
+  const storage = memoryStorage();
+  storage.set(
+    storageKey(book.id, lesson.id),
+    JSON.stringify({
+      version: 1,
+      challenges: { latch: { artifact: { hdl }, attempts: 1, hintsRevealed: 0 } },
+      slots: {},
+    }),
+  );
+  return storage;
 }
 
 describe("ChallengeRunner", () => {
@@ -94,6 +109,50 @@ describe("ChallengeRunner", () => {
     await user.click(screen.getByRole("button", { name: S.challenge.run }));
     expect(screen.getByRole("status")).toHaveTextContent(S.challenge.blocked);
     expect(screen.getByText("the text does not parse")).toBeInTheDocument();
+  });
+
+  it("turns a grader that throws into tests that could not run, keeping the work", async () => {
+    const user = userEvent.setup();
+    const throwing: Book = {
+      ...book,
+      grade: () => {
+        throw new Error("the reference does not branch on an unknown word");
+      },
+    };
+    // Saved work is graded on mount: the throw is a verdict, not a page that fails to draw.
+    mount(savedWork("anything"), throwing);
+    expect(screen.getByRole("status")).toHaveTextContent(S.challenge.blocked);
+    expect(
+      screen.getByText(/the reference does not branch on an unknown word/),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Your text")).toHaveValue("anything");
+    await user.type(screen.getByLabelText("Your text"), " more");
+    await user.click(screen.getByRole("button", { name: S.challenge.run }));
+    expect(screen.getByRole("status")).toHaveTextContent(S.challenge.blocked);
+    expect(screen.getByLabelText("Your text")).toHaveValue("anything more");
+  });
+
+  it("shows an editor that cannot draw the saved work as a sentence, and a reset draws it again", async () => {
+    const user = userEvent.setup();
+    const fragile: Book = {
+      ...book,
+      ChallengeEditor: (props) => {
+        if (props.artifact.hdl === "poison") throw new Error("the editor cannot draw this");
+        return <TextEditor {...props} />;
+      },
+    };
+    const quiet = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      mount(savedWork("poison"), fragile);
+      expect(screen.getByRole("note")).toHaveTextContent("the editor cannot draw this");
+      expect(screen.queryByLabelText("Your text")).not.toBeInTheDocument();
+      await user.click(screen.getByRole("button", { name: /^Clear work/ }));
+      await user.click(screen.getByRole("button", { name: S.challenge.resetConfirm }));
+      expect(screen.getByLabelText("Your text")).toHaveValue("");
+      expect(screen.queryByRole("note")).not.toBeInTheDocument();
+    } finally {
+      quiet.mockRestore();
+    }
   });
 
   it("reveals hints one rung at a time and remembers how many", async () => {

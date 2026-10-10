@@ -146,17 +146,11 @@ export const finalMachine: LessonInput = {
             hdl: MACHINE13_TEXT,
             texts: [LAB_TEXTS.branch, LAB_TEXTS.ie, LAB_TEXTS.call],
             programs: LAB_RUNS,
-            // Shown once every run it quotes is made: texts 0, 1 and 2 are the branch, IE and call.
+            // Shown once every run it reports is made: each of the three texts on each of the
+            // seven programs, since it says which programs agree as well as which disagree.
             reveal: {
               text: PROSE.invAfter,
-              everyText: true,
-              runs: [
-                [0, "timer"],
-                [1, "timer"],
-                [1, "door"],
-                [2, "shop"],
-                [2, "bits"],
-              ],
+              runs: [0, 1, 2].flatMap((k) => LAB_RUNS.map((r) => [k, r.id] as [number, string])),
             },
           },
         },
@@ -180,10 +174,11 @@ export const finalMachine: LessonInput = {
             // before the join is named.
             texts: [{ ...LAB_TEXTS.door, label: LABELS.texts.mystery, hidden: true }],
             programs: LAB_RUNS,
-            // "Six programs agree": shown once all seven have run on the text.
+            // "Six programs agree": shown once all seven have run on the text, and only after the
+            // press that shows the changed line, so its reasoning waits for the learner's own.
             reveal: {
               text: PROSE.failAfter,
-              program: "door",
+              afterChange: true,
               runs: LAB_RUNS.map((r) => [0, r.id] as [number, string]),
             },
           },

@@ -79,6 +79,10 @@ export interface Machine13Strings {
   readonly pinNote: string;
   /** A table row's button: {row}, the row's label; {wire}, the wire it reads. */
   readonly rowPin: string;
+  /** Under a row's label: the wire it reads, {wire}, as the drawing names it. */
+  readonly rowWire: string;
+  /** Under "Its word in the ROM": FETCHED, and when it carries the row's word. */
+  readonly romWire: string;
   /** In the row "Its word in the ROM", until the figure's first edge has run. */
   readonly romLater: string;
   /** In a prediction's verdict, before the next edge: the explanation follows it. */
@@ -162,6 +166,10 @@ export interface Machine13Strings {
   readonly capNoStop: string;
   /** {registers}: "R1", or "R1 and R2". */
   readonly capUnknown: string;
+  /** {them} in `capUnknown`: one register, or more. */
+  readonly capUnknownThem: { readonly one: string; readonly many: string };
+  /** {why} in `capUnknown`, by what the instruction reads the registers for. */
+  readonly capUnknownWhy: Readonly<Record<"address" | "branch" | "jump" | "control", string>>;
   readonly capUnanswered: string;
   /** An answer typed that is not a signed decimal number (nor X). */
   readonly capFormSigned: string;
@@ -260,8 +268,10 @@ export const MACHINE13_STRINGS: Machine13Strings = {
   stripEdge: "Edge {n}, {state}",
   romLater: "Shows after the next edge.",
   rowPin: "{row}: pin {wire} on the drawing",
+  rowWire: "Reads wire {wire}",
+  romWire: "Wire FETCHED carries this row's word only before a FETCH edge.",
   pinNote:
-    "Press a wire to pin it: it stays marked as you open blocks, and its name and value show under the drawing, in hexadecimal for a word. A band of colour marks the wires the next edge uses, from each register, held word, memory or device it writes back along each selector's chosen input to where the value starts.",
+    "Press a wire to pin it: it keeps an orange halo as you open blocks, and its name and value show under the drawing, in hexadecimal for a word. A blue band marks the wires the next edge uses, along their whole length and with all their branches. It starts at each register, held word, memory or device the edge writes, and goes back along each selector's chosen input to where the value starts; it does not mark the address a store writes to, nor the input that chooses a selector's input, such as TRAP.",
   explainNext: 'Press "Next edge" to see why. The explanation appears after that edge.',
   traceCaption: "The levels you have opened",
   traceLevel: "Level",
@@ -320,7 +330,14 @@ export const MACHINE13_STRINGS: Machine13Strings = {
   capHalts:
     "With room A at {a} and room B at {b}, your program halts with cause {cause} before it stops.",
   capUnknown:
-    "With room A at `{a}` and room B at `{b}`, your program reaches `{line}` at `{address}`, where `{registers}` holds no value yet: the model cannot branch or jump on a register that no instruction has written.",
+    "With room A at `{a}` and room B at `{b}`, your program reaches `{line}` at `{address}`, which reads {registers} before any instruction has written {them}: {why}",
+  capUnknownThem: { one: "it", many: "them" },
+  capUnknownWhy: {
+    address: "the model cannot work out an address from a register that holds no value.",
+    branch: "the model cannot decide a branch on a register that holds no value.",
+    jump: "the model cannot jump to an address in a register that holds no value.",
+    control: "the model cannot write a control register from a register that holds no value.",
+  },
   capNoStop:
     "With room A at {a} and room B at {b}, your program does not reach stop within its limit of instructions.",
   capFormSigned: "The answer must be a signed decimal number, such as -34, or X.",
@@ -335,7 +352,8 @@ export const MACHINE13_STRINGS: Machine13Strings = {
       "Pause before the ALU edge of your first set if. Read RESULT where it leaves the ALU in the datapath, in hexadecimal, and write it as a signed decimal number.",
     flags:
       "At the ALU edge of your first set if, read the four flags where they leave the ALU, and MET where it leaves the condition block, in that order.",
-    xorB: "At the ALU edge of your first set if, open `datapath`, `alu`, `g0`, then `q1`, and read the output of `xorB` in each slice, bit 7 (the slice `bit3`) first.",
+    carry:
+      "At the ALU edge of your first set if, open `datapath`, `alu`, `g0`, then `q1`, and read the carry out of each slice, bit 7 (the slice `bit3`) first.",
     held: "At the ALU edge of your first set if, read HM in the datapath, and write it as a signed decimal number, or X if the trace shows X.",
   },
 

@@ -132,3 +132,11 @@ Facts put right in placed text without a new draft, each a word or a number:
 - Brief R3-6, labels out of date: `whole-machine` `objectives.2` dropped "Say what a join is";
   restored. `tracing` `captions.free` wrote the line as code, which a caption shows as characters;
   now "a store to the lamps".
+
+## After the third reading (briefs R4-S, R4-1 to R4-5)
+
+- R4-2 `question`: "and do not open: the PC, the IR, the register file and the held words" read as
+  the whole list; the control registers and the selectors run whole too. "such as" restored, as
+  the brief gave it.
+- R4-S `capUnknown`: `{registers}` came back without code marks; kept, since the challenge's
+  results show this sentence as plain text.

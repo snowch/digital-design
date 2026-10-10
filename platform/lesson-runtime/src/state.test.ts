@@ -3,7 +3,15 @@
 import { describe, expect, it } from "vitest";
 
 import { fixtureBook, fixtureLesson } from "./fixtures";
-import { LessonStore, artifactFor, memoryStorage, storageKey, verifyCompletion } from "./state";
+import {
+  LessonStore,
+  artifactFor,
+  gradeSafely,
+  memoryStorage,
+  resetBook,
+  storageKey,
+  verifyCompletion,
+} from "./state";
 
 describe("the lesson store", () => {
   it("keeps a lesson's work under one namespaced key and reads it back", () => {
@@ -46,6 +54,22 @@ describe("the lesson store", () => {
     store.setSlot("a", 2);
     expect(calls).toBe(3);
   });
+
+  it("forgets every lesson of one book on resetBook, and no other book's", () => {
+    const storage = memoryStorage();
+    new LessonStore(storage, "dd", "remember").setSlot("a", 1);
+    new LessonStore(storage, "dd", "count").setSlot("b", 2);
+    new LessonStore(storage, "ms", "invisible-system").setSlot("c", 3);
+    expect([...storage.keys()].sort()).toEqual([
+      "dd:v1:count",
+      "dd:v1:remember",
+      "ms:v1:invisible-system",
+    ]);
+    resetBook(storage, "dd");
+    expect(storage.keys()).toEqual(["ms:v1:invisible-system"]);
+    expect(new LessonStore(storage, "dd", "remember").get().slots).toEqual({});
+    expect(new LessonStore(storage, "ms", "invisible-system").slot("c")).toBe(3);
+  });
 });
 
 describe("completion", () => {
@@ -80,6 +104,32 @@ describe("completion", () => {
     const completion = verifyCompletion(book, lesson, tampered.get());
     expect(completion.passed).toBe(0);
     expect(completion.verdicts["latch"]?.passed).toBe(false);
+  });
+
+  it("counts work whose grader throws as not passed, and does not throw itself", () => {
+    // A book's list of lessons grades every stored challenge as it draws; one grader that throws
+    // on one saved artifact must not take the list down on every later visit.
+    const throwing = {
+      ...book,
+      grade: () => {
+        throw new Error("the reference does not branch on an unknown word");
+      },
+    };
+    const store = new LessonStore(memoryStorage(), "fx", lesson.id);
+    store.setChallenge("latch", (c) => ({ ...c, artifact: { hdl: "anything" } }));
+    const completion = verifyCompletion(throwing, lesson, store.get());
+    expect(completion.passed).toBe(0);
+    expect(completion.verdicts["latch"]).toEqual({
+      passed: false,
+      total: 0,
+      failures: [],
+      blocked: "the reference does not branch on an unknown word",
+    });
+    expect(
+      gradeSafely(throwing, lesson.challenges[0]!, { hdl: "x" }, (m) => `could not run: ${m}`)
+        .blocked,
+    ).toBe("could not run: the reference does not branch on an unknown word");
+    expect(gradeSafely(book, lesson.challenges[0]!, { hdl: "right" }).passed).toBe(true);
   });
 
   it("does not grade work the learner never touched", () => {

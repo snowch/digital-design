@@ -33,6 +33,8 @@ describe("a failure with a detail", () => {
     );
     expect(screen.getByRole("heading", { name: "At most 4 gates" })).toBeInTheDocument();
     expect(screen.getByText("Your circuit has 5 gates.")).toBeInTheDocument();
+    // The list of failures is named by the status sentence, with its numbers.
+    expect(screen.getByRole("list", { name: "4 of 5 tests passed" })).toBeInTheDocument();
     expect(container.querySelector(".verdict-values")).toBeNull();
     expect(screen.queryByText(S.challenge.inputs)).toBeNull();
   });
