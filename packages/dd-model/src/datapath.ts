@@ -656,7 +656,7 @@ export function stopLogic(
 
 // ---- The program ROM (the fetch stage) and the memory (from the memory stage) ---------------
 
-function romParams(rom: Uint8Array | readonly number[] | undefined): string {
+export function romParams(rom: Uint8Array | readonly number[] | undefined): string {
   const bytes = Array.from(rom ?? []);
   const words = Array.from({ length: 256 }, (_, k) => {
     let v = 0;

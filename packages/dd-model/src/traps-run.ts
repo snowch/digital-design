@@ -13,6 +13,8 @@ import { datapathState, resetDatapath, stopReasonOf } from "./datapath-run";
 import { inputsAt, type InputPlan } from "./debugger";
 import {
   MODULE_12,
+  MODULE_13,
+  MODULE_13_ASSEMBLY,
   QUIET_INPUTS,
   resetMachine,
   step,
@@ -59,16 +61,19 @@ export interface TrapsComparison {
 /**
  * Runs a program on Module 12's machine and on the reference, and compares them after every step.
  * Where the reference halts, the machine must halt within the same step, for the same reason, and
- * one more edge must change nothing.
+ * one more edge must change nothing. With `final`, Module 13's final machine against the reference
+ * with Module 13's options, the two added instructions included.
  */
 export function compareTraps(
   source: string,
   plan: InputPlan = QUIET_INPUTS,
   limit = 400,
-  build: (rom: Uint8Array) => Circuit = (rom) => trapsCircuit({ rom }),
+  build?: (rom: Uint8Array) => Circuit,
+  final = false,
 ): TrapsComparison {
-  const program = assemble(source);
-  const circuit = build(program.rom);
+  const program = assemble(source, final ? MODULE_13_ASSEMBLY : {});
+  const options = final ? MODULE_13 : MODULE_12;
+  const circuit = build ? build(program.rom) : trapsCircuit({ rom: program.rom, final });
   const sim: Simulator = resetDatapath(circuit, inputsAt(plan, 0));
   let ref: CpuState = resetMachine(program.rom);
   let ran = 0;
@@ -92,7 +97,7 @@ export function compareTraps(
     const inputs = inputsAt(plan, ran);
     sim.setInput("DOOR", word(1, inputs.door));
     sim.settle();
-    const r = step(ref, inputs, MODULE_12);
+    const r = step(ref, inputs, options);
     const at = `after ${hex(ref.pc).padStart(3, "0")} ${textAt(ref.pc)}`;
     let taken = 0;
     let halted = false;
@@ -145,7 +150,7 @@ export function compareTraps(
     else {
       const f = r.record.fields;
       edges.push({ kind: f?.k ?? 0, job: f?.j ?? 0, edges: taken });
-      const expected = trapStateSequence(f?.k ?? 0, f?.j ?? 0).length;
+      const expected = trapStateSequence(f?.k ?? 0, f?.j ?? 0, final).length;
       if (taken !== expected)
         differences.push(`${at}: kind ${f?.k} job ${f?.j} took ${taken} edges, not ${expected}`);
       ran++;

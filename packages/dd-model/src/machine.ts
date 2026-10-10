@@ -221,6 +221,16 @@ export const MODULE_9: MachineOptions = { registerCheck: true };
 /** Module 12's machine: Module 9's, with the control registers and traps. */
 export const MODULE_12: MachineOptions = { registerCheck: true, traps: true };
 
+/**
+ * Module 13's machine, the course's final one: Module 12's, with the two instructions the learner
+ * added, the call through a register at kind 9 (Module 9's capstone) and set if at kind A (Module
+ * 10's).
+ */
+export const MODULE_13: MachineOptions = { ...MODULE_12, callThroughRegister: 9, setIf: 10 };
+
+/** The assembler's options for Module 13's machine: the two kinds it knows beyond `docs/isa.md`. */
+export const MODULE_13_ASSEMBLY = { callThroughRegister: 9, setIf: 10 } as const;
+
 /** Whether C0 says user mode: bit 0 is 0. */
 export const userMode = (s: CpuState) => (s.control[0] & 1n) === 0n;
 

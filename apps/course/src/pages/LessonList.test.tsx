@@ -9,7 +9,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
 import { INTERACTIVES, createBook, grade, rememberVerdicts } from "@dd/dd-views";
-import { LessonStore, memoryStorage } from "@platform/lesson-runtime";
+import { LessonStore, LessonView, memoryStorage } from "@platform/lesson-runtime";
 import { termPattern, type Artifact, type Challenge } from "@platform/lesson-schema";
 import { LESSONS } from "@dd/content";
 
@@ -285,5 +285,48 @@ describe("the course's front page: every module of the plan", () => {
     expect(
       screen.getByRole("button", { name: new RegExp(`^${STRINGS.module(first.module)}: `) }),
     ).toHaveTextContent(STRINGS.cover.moduleSummary(lessons.length, 1, total));
+  });
+});
+
+// A grader that stops with an error once took the whole site down: the capstone's model refused a
+// program that branched on a register it never set, the lesson graded the saved program on load,
+// and the list graded it as it drew. The work fails with a sentence instead, everywhere.
+describe("saved work a grader cannot run", () => {
+  const capstone = book.lessons.find((l) => l.id === "capstone")!;
+  const challenge = capstone.challenges[0]!;
+  const broken = "        R1 <= word[sensorA]\n        if R1 == R7 goto done\ndone:   stop";
+  const stored = () => {
+    const storage = memoryStorage();
+    new LessonStore(storage, book.id, capstone.id).setChallenge(challenge.id, (x) => ({
+      ...x,
+      artifact: { text: broken, answers: {} },
+    }));
+    return storage;
+  };
+
+  it("fails, naming the line and the register that holds no value", () => {
+    const v = book.grade(challenge, { text: broken, answers: {} });
+    expect(v.passed).toBe(false);
+    expect(v.failures[0]?.detail).toContain("if R1 == R7 goto done");
+    expect(v.failures[0]?.detail).toContain("R7");
+  });
+
+  it("turns any grader's throw into a failed verdict that says why", () => {
+    // A grader the book does not have throws; the guarded grade fails the work instead.
+    const unknown = {
+      ...challenge,
+      tests: { ...challenge.tests, grader: "no-such-grader" },
+    } as Challenge;
+    expect(() => grade(unknown, { text: broken, answers: {} })).toThrow();
+    const v = book.grade(unknown, { text: broken, answers: {} });
+    expect(v.passed).toBe(false);
+    expect(v.blocked).toMatch(/^The tests could not run: /);
+  });
+
+  it("keeps the list and the lesson drawn over such saved work", () => {
+    render(<LessonList book={book} storage={stored()} />);
+    expect(screen.getAllByRole("link").length).toBeGreaterThan(0);
+    const { container } = render(<LessonView book={book} lesson={capstone} storage={stored()} />);
+    expect(container.querySelector(`[data-challenge="${challenge.id}"] textarea`)).not.toBeNull();
   });
 });

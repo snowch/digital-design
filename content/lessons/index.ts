@@ -68,6 +68,12 @@ import { interrupts } from "./interrupts";
 import { nesting } from "./nesting";
 import { trapHardware } from "./trap-hardware";
 import { systemCallMechanism } from "./system-call-mechanism";
+// Module 13, the whole machine
+import { wholeMachine } from "./whole-machine";
+import { fullPath } from "./full-path";
+import { tracing } from "./tracing";
+import { finalMachine } from "./final-machine";
+import { capstone } from "./capstone";
 
 const INPUTS: readonly LessonInput[] = [
   // Module 0, meet the machine.
@@ -135,6 +141,12 @@ const INPUTS: readonly LessonInput[] = [
   nesting,
   trapHardware,
   systemCallMechanism,
+  // Module 13, the whole machine
+  wholeMachine,
+  fullPath,
+  tracing,
+  finalMachine,
+  capstone,
 ];
 
 export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(

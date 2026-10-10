@@ -8,8 +8,14 @@ import { createContext, useContext } from "react";
 import { MACHINE10_STRINGS, type Machine10Strings } from "./strings10";
 import { MACHINE11_STRINGS, type Machine11Strings } from "./strings11";
 import { MACHINE12_STRINGS, type Machine12Strings } from "./strings12";
+import { MACHINE13_STRINGS, type Machine13Strings } from "./strings13";
 
 export interface ViewStrings {
+  /** Any challenge whose grader stops with an error: the work fails, and says why. */
+  readonly grading: {
+    /** {why}: the grader's own reason. */
+    readonly couldNotRun: string;
+  };
   readonly circuit: {
     readonly where: string;
     readonly toggle: string;
@@ -200,6 +206,8 @@ export interface ViewStrings {
   readonly bits: {
     readonly row: string;
     readonly flip: string;
+    /** A bit pressed in a row of wires that is not a number: its wire's number, no worth. */
+    readonly flipBare: string;
     readonly fixed: string;
     /** A bit shown with its worth inside its hexadecimal digit (8, 4, 2 or 1). */
     readonly inDigit: string;
@@ -342,6 +350,8 @@ export interface ViewStrings {
     readonly details: Readonly<Record<string, string>>;
     /** Module 0: what a valid entry is, by field, in place of the general sentence. */
     readonly invalidFor: Readonly<Record<string, string>>;
+    /** Module 13: by the form a field's answer takes (number, hex, bits); {field}: its label. */
+    readonly invalidForm: Readonly<Record<string, string>>;
   };
   /** Module 6: the memory explorer's table of words. */
   readonly memory: {
@@ -376,6 +386,8 @@ export interface ViewStrings {
   readonly machine11: Machine11Strings;
   /** Module 12: the control registers, the shop's events, the trap timeline. */
   readonly machine12: Machine12Strings;
+  /** Module 13's figure words (strings13.ts). */
+  readonly machine13: Machine13Strings;
 }
 
 /** Module 8: the words of the instruction-fields, widening, edges, memory-map and branches figures. */
@@ -686,6 +698,9 @@ export interface MeetStrings {
 }
 
 export const DEFAULT_VIEW_STRINGS: ViewStrings = {
+  grading: {
+    couldNotRun: "The tests could not run: {why}.",
+  },
   circuit: {
     where: "Which block you are viewing",
     toggle: "Toggle between 0 and 1.",
@@ -864,6 +879,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
   bits: {
     row: "Bits",
     flip: "Bit {n}, worth {value}, now {bit}; press to change.",
+    flipBare: "Bit {n}, now {bit}; press to change.",
     fixed: "Bit {n}, worth {value}, {bit}.",
     inDigit: "Bit {n}, worth {value} in its digit, {bit}.",
     bare: "Bit {n}, {bit}.",
@@ -1079,6 +1095,38 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
         "{actual} is not the number of edges. An interrupt is taken at the edge that would fetch, and that edge is all it takes.",
       edgesLoad:
         "{actual} is not the number of edges. The memory's checks give their cause in MEMORY, and a load that traps there never reaches WRITE.",
+      // Module 13, lesson 1 (brief 1D).
+      joinMq: "Open the datapath and follow MQ from where it enters to the part it goes into.",
+      joinAddr:
+        "Open the datapath and follow ADDR back from where it leaves to the part that drives it.",
+      joinWaiting:
+        "Open the control unit and follow WAITING from where it enters to the part it goes into.",
+      joinStatus:
+        "Open the datapath and follow STATUS back from where it leaves to the part that drives it.",
+      joinIrEdge:
+        "`{actual}` is not the edge at which the IR takes `resume`'s word. The IR takes an instruction's word at its FETCH edge; add up the edges each earlier line takes, from the reset.",
+      joinPcEdge:
+        "`{actual}` is not the edge at which the PC takes `010`. The instruction `resume` takes three edges, and the PC takes the return point at the last of them.",
+      // Module 13, lesson 2 (brief 2D).
+      pathCode:
+        "`{actual}` does not follow the rule for a set if line: its eight digits are K, J, A, B and Y, then three digits of constant; set if is kind A, and its job digit is a branch's condition.",
+      pathEdges:
+        "`{actual}` is not the count. Count the states a load passes through, from its FETCH edge to its last.",
+      pathJob:
+        "`{actual}` is not the ALU's job at its ALU edge. Ask what a load needs the ALU to work out.",
+      pathYin:
+        "`{actual}` is not the word Y takes. Ask which held word feeds Y at a load's WRITE edge, and what it took at the MEMORY edge.",
+      pathPc:
+        "`{actual}` is not the PC after the last edge. An instruction that does not branch, call or jump leaves the PC at its own address plus 4. Give the PC as three hexadecimal digits.",
+      // Module 13, lesson 3 (brief 3L).
+      traceXorB:
+        "Your row is {actual}. Pause at the ALU edge of `R3 <= R1 - R2`, open the ALU down to the group `q0`, and read `xorB` in each slice. It turns B's bit over when the ALU subtracts.",
+      traceCarry:
+        "Your row is {actual}. At the ALU edge of `R5 <= R3 >= R4 signed`, open each slice's full adder and read its carry out, starting with bit 3.",
+      tracePcD:
+        "Your row is {actual}. Pause at the ALU edge of `goto R15`. Show the PC's bits from the list of parts that never open. D is the bit of the address the jump goes to.",
+      traceEn:
+        "Your row is {actual}. Pause at the WRITE edge of `R5 <= R3 >= R4 signed`. Show the register file's bit for each register. Only one register is written at an edge.",
       // Module 11, lesson 4 (brief 4L).
       stackWord:
         "{actual} is not that word; a pop copies a word, adds 8 to R14, and leaves the word where it was. Give the word as three hexadecimal digits.",
@@ -1106,6 +1154,10 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       designProgram:
         "Count the instructions each program runs with the new instruction; the one with fewer is shortened.",
       designCost: "The circuit must gain hardware or a control signal it does not already have.",
+    },
+    invalidForm: {
+      number: "{field} wants a whole number, in decimal, such as -12 or 40.",
+      hex: "{field} wants hexadecimal digits, 0 to 9 and A to F, such as 02C.",
     },
     invalidFor: {
       slices:
@@ -1327,6 +1379,8 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
   machine11: MACHINE11_STRINGS,
   // Module 12 (strings12.ts).
   machine12: MACHINE12_STRINGS,
+  // Module 13 (strings13.ts).
+  machine13: MACHINE13_STRINGS,
   // Module 0. Drafted by the prose process (docs/notes/module-0-machine/briefs/6V.md).
   meet: {
     lines: {

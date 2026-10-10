@@ -71,6 +71,21 @@ export interface CircuitViewProps {
    * it changes, as when a learner chooses a fault, and the strip's frame follows.
    */
   readonly focus?: readonly string[];
+  /**
+   * Module 13: the wire pressed, by net, held by the figure so it stays pinned as blocks open and
+   * close: a net keeps its number at every level, so its value shows wherever the wire is drawn.
+   */
+  readonly pinned?: number;
+  /** Module 13: the parts a pinned word is joined from or split into, marked with it. */
+  readonly pinnedParts?: ReadonlySet<number>;
+  /**
+   * Module 13: controls that change the drawing, kept at the top of the window with the overview
+   * while the drawing is on screen (`OverviewStrip`'s band).
+   */
+  readonly band?: ReactNode;
+  readonly onPin?: (net: number | undefined) => void;
+  /** Module 13: the nets marked as in use, the ones the next edge changes. */
+  readonly active?: ReadonlySet<number>;
 }
 
 type Level = "high" | "low" | "unknown" | "none";
@@ -119,9 +134,15 @@ export function shownWord(value: Word | undefined, words: boolean): string {
 function constText(circuit: Circuit, path: string): string {
   const c = circuit.components.find((x) => x.path === path);
   const width = Number(c?.params?.["width"] ?? 1);
-  return BigInt(String(c?.params?.["value"] ?? "0"))
-    .toString(2)
-    .padStart(width, "0");
+  const value = BigInt(String(c?.params?.["value"] ?? "0"));
+  // Module 13: a wide fixed word, such as the 0s above a narrow word widened to 64 bits, is
+  // written in hexadecimal, as every wide word is, a digit per four bits.
+  if (width > 8)
+    return value
+      .toString(16)
+      .toUpperCase()
+      .padStart(Math.ceil(width / 4), "0");
+  return value.toString(2).padStart(width, "0");
 }
 
 /** Blocks drawn closed for good: a split or a join holds no gates worth opening. */
@@ -177,6 +198,8 @@ const SEALED = new Set([
   // word's worth of slices and one OR.
   "join-control-traps",
   "no-handler",
+  // Module 13: the final machine's control bus, one signal longer.
+  "join-control-final",
 ]);
 
 /** Whether a block of this kind is drawn closed for good, so a learner never sees inside it. */
@@ -204,6 +227,11 @@ export function CircuitView({
   writtenWidth,
   overview,
   focus,
+  pinned,
+  onPin,
+  pinnedParts,
+  band,
+  active,
 }: CircuitViewProps) {
   const written = (v: Word | undefined) =>
     v !== undefined && (writtenWidth === undefined || v.width <= writtenWidth);
@@ -293,7 +321,9 @@ export function CircuitView({
   // A wire's name and value show while it is pointed at or focused, and stay after a press or a
   // tap until another wire is pressed, so a phone, which has no pointing, shows them too.
   const [hovered, setHovered] = useState<number | undefined>();
-  const [pressed, setPressed] = useState<number | undefined>();
+  const [ownPressed, setOwnPressed] = useState<number | undefined>();
+  const pressed = onPin ? pinned : ownPressed;
+  const setPressed = (net: number | undefined) => (onPin ? onPin(net) : setOwnPressed(net));
   const hot = hovered ?? pressed;
   const [scrollRef, overflows] = useOverflows<HTMLDivElement>();
   // Module 8: the box's width, for a drawing too wide for it, which gets the strip and zoom.
@@ -382,7 +412,17 @@ export function CircuitView({
           onGo={onScope}
         />
       )}
-      {large && <OverviewStrip box={box} width={scene.width} height={scene.height} zoom={zoom} />}
+      {large ? (
+        <OverviewStrip
+          box={box}
+          width={scene.width}
+          height={scene.height}
+          zoom={zoom}
+          {...(band !== undefined ? { band } : {})}
+        />
+      ) : (
+        band !== undefined && <div className="overview-bar">{band}</div>
+      )}
       {large ? (
         <p className="scroll-note">{strings.circuit.zoomNote}</p>
       ) : (
@@ -422,7 +462,7 @@ export function CircuitView({
               return (
                 <g
                   key={i}
-                  className={`wire wire-${level}${wide ? " wire-word" : ""}${isHot ? " wire-hot" : ""}${held ? " wire-held" : ""}`}
+                  className={`wire wire-${level}${wide ? " wire-word" : ""}${isHot ? " wire-hot" : ""}${held ? " wire-held" : ""}${net !== undefined && active?.has(net) ? " wire-active" : ""}${onPin && net !== undefined && (net === pinned || pinnedParts?.has(net)) ? " wire-pinned" : ""}`}
                   data-net={name}
                   role="button"
                   tabIndex={0}
@@ -440,7 +480,14 @@ export function CircuitView({
                   }}
                 >
                   <title>{value ? `${name} = ${valueLabel(value)}` : name}</title>
-                  {isHot && <path d={w.d} fill="none" className="wire-halo" />}
+                  {net !== undefined && active?.has(net) && (
+                    // Module 13: a wire the next edge uses, under a band of colour, so a bus
+                    // (already drawn wide) shows the mark as plainly as a one-bit wire.
+                    <path d={w.d} fill="none" className="wire-route" />
+                  )}
+                  {(isHot || (net !== undefined && pinnedParts?.has(net))) && (
+                    <path d={w.d} fill="none" className="wire-halo" />
+                  )}
                   <path d={w.d} fill="none" className="wire-hit" />
                   <path d={w.d} fill="none" />
                   <circle cx={w.end.x} cy={w.end.y} r={3} />

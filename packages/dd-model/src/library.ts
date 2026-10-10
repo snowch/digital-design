@@ -21,7 +21,7 @@ import { module5Library } from "./library-module5";
 // Module 6's circuits live in their own file too.
 import { MEMORY_INSIDE, memoryLibrary } from "./library-memory";
 import { DATAPATH_INSIDE, datapathLibrary } from "./library-datapath";
-import { CONTROL_INSIDE, controlLibrary } from "./library-control";
+import { CONTROL_INSIDE, FINAL_INSIDE, controlLibrary } from "./library-control";
 
 /**
  * A loop of `n` inverters with a `kick` input ORed into it. While kick is 1 the loop is forced;
@@ -273,6 +273,8 @@ export const INSIDE: Readonly<Record<string, Readonly<Record<string, readonly [n
     ...DATAPATH_INSIDE,
     // Module 9, control
     ...CONTROL_INSIDE,
+    // Module 13, the final machine
+    ...FINAL_INSIDE,
   };
 
 /**

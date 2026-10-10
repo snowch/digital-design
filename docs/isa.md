@@ -282,6 +282,20 @@ The numbers are this course's own. Module 12 decides the services it needs; this
 least that gives a user program, which may not touch a device, the shop's display, sensors and
 lamps.
 
+## The final machine
+
+Module 13's final machine runs two instructions this document leaves out: the two the learner
+added in their own copy of the machine. They are the course machine's from Module 13 on, and no
+earlier module's machine runs them.
+
+- **Kind 9, the call through a register** (Module 9's capstone): `RY ← PC + 4` and
+  `PC ← RA + c`, written `call R6, R15`. Its job digit is 0.
+- **Kind A, set if** (Module 10's capstone): `RY ← 1` if `RA cond RB`, else 0, where the job digit
+  is a branch's condition, written `R5 <= R3 >= R4 signed`.
+
+The model takes them with the options `MODULE_13` (`packages/dd-model/src/machine.ts`), and the
+assembler with `MODULE_13_ASSEMBLY`. The rest of the instruction set does not change.
+
 ## Left out on purpose
 
 Each is an instruction a capstone can add: Module 9's "add a new instruction to the CPU" and

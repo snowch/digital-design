@@ -257,7 +257,8 @@ class Parser {
       } else if (this.is("initial")) {
         throw new HdlError(
           t.at,
-          "`initial` describes a test, not hardware; the course meets it in a later module",
+          // Module 13: no module meets `initial`; a testbench is code the course shows, not runs.
+          "`initial` describes a test, not hardware: the course's texts describe hardware, and a test of a text is run by other tools.",
         );
       } else {
         throw new HdlError(
