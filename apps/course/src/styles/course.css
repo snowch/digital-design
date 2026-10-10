@@ -549,17 +549,23 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
 .circuit-scroll.words-hidden > .circuit .pin rect {
   vector-effect: non-scaling-stroke;
 }
-.circuit-overview .wire path:not(.wire-hit):not(.wire-halo),
-.circuit-scroll.words-hidden > .circuit .wire path:not(.wire-hit):not(.wire-halo) {
+.circuit-overview .wire path:not(.wire-hit):not(.wire-halo):not(.wire-route),
+.circuit-scroll.words-hidden > .circuit .wire path:not(.wire-hit):not(.wire-halo):not(.wire-route) {
   stroke-width: 1px;
   shape-rendering: auto;
 }
-.circuit-overview .wire-high path:not(.wire-hit):not(.wire-halo),
-.circuit-scroll.words-hidden > .circuit .wire-high path:not(.wire-hit):not(.wire-halo) {
+.circuit-overview .wire-high path:not(.wire-hit):not(.wire-halo):not(.wire-route),
+.circuit-scroll.words-hidden
+  > .circuit
+  .wire-high
+  path:not(.wire-hit):not(.wire-halo):not(.wire-route) {
   stroke-width: 1.6px;
 }
-.circuit-overview .wire-word path:not(.wire-hit):not(.wire-halo),
-.circuit-scroll.words-hidden > .circuit .wire-word path:not(.wire-hit):not(.wire-halo) {
+.circuit-overview .wire-word path:not(.wire-hit):not(.wire-halo):not(.wire-route),
+.circuit-scroll.words-hidden
+  > .circuit
+  .wire-word
+  path:not(.wire-hit):not(.wire-halo):not(.wire-route) {
   stroke-width: 2.2px;
 }
 .circuit-overview .part .box,
@@ -594,7 +600,7 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
 }
 /* Wires and signal levels are horizontal and vertical lines on whole pixels: drawn without
    anti-aliasing they stay sharp at any zoom, where a smoothed line blurs across two pixels. */
-.circuit .wire path:not(.wire-hit):not(.wire-halo),
+.circuit .wire path:not(.wire-hit):not(.wire-halo):not(.wire-route),
 .timing-diagram .level,
 .timing-diagram .lane-base,
 .timing-diagram .axis line,
@@ -627,7 +633,7 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
 }
 /* A wire that carries a word (a bus) is drawn wide in one colour: its value is a word, not a
    level, and the label at its source writes the bits. Module 3. */
-.circuit .wire-word path:not(.wire-hit):not(.wire-halo) {
+.circuit .wire-word path:not(.wire-hit):not(.wire-halo):not(.wire-route) {
   stroke: var(--wire-word);
   stroke-width: 5;
 }
@@ -641,11 +647,11 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
 .circuit .wire {
   cursor: pointer;
 }
-.circuit .wire path:not(.wire-hit):not(.wire-halo) {
+.circuit .wire path:not(.wire-hit):not(.wire-halo):not(.wire-route) {
   transition: stroke-width var(--motion);
 }
-.circuit .wire:hover path:not(.wire-hit):not(.wire-halo),
-.circuit .wire-hot path:not(.wire-hit):not(.wire-halo) {
+.circuit .wire:hover path:not(.wire-hit):not(.wire-halo):not(.wire-route),
+.circuit .wire-hot path:not(.wire-hit):not(.wire-halo):not(.wire-route) {
   stroke-width: 4;
 }
 .circuit .wire-halo {
@@ -2137,7 +2143,7 @@ button.bit {
   margin-right: 4px;
 }
 /* Module 8: a wire a stuck-at fault holds, drawn from its old driver, dashed in the fault colour. */
-.wire.wire-held > path:not(.wire-hit):not(.wire-halo) {
+.wire.wire-held > path:not(.wire-hit):not(.wire-halo):not(.wire-route) {
   stroke: var(--bad);
   stroke-dasharray: 6 4;
 }
@@ -3120,6 +3126,337 @@ svg.stack-depth {
   .trap-edges {
     max-height: 24rem;
   }
+}
+
+/* Module 13: the trace's choice of where to pause, its levels, and one bit of a part that never
+   opens. */
+.pause-chooser {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  align-items: flex-end;
+  border: 0;
+  margin: 0 0 var(--space-3);
+  padding: 0;
+}
+.pause-chooser legend {
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+.pause-chooser label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  max-width: 100%;
+}
+.pause-chooser select {
+  min-height: 40px;
+  max-width: 100%;
+  font: inherit;
+}
+/* Module 13's lab, run in a figure: the choice of text and program, the changed line, the runs. */
+.lab-run-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  align-items: flex-end;
+  margin: 0 0 var(--space-3);
+}
+.lab-run-choice {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  max-width: 100%;
+}
+.lab-run-choice select {
+  min-height: 40px;
+  max-width: 100%;
+  font: inherit;
+}
+.lab-run-change-heading {
+  font-weight: 600;
+  margin: 0 0 var(--space-1);
+}
+.lab-run-change pre {
+  overflow-x: auto;
+  margin: 0 0 var(--space-3);
+}
+.lab-run-results ul {
+  margin: 0;
+  padding-left: var(--space-4);
+}
+.lab-run-results li + li {
+  margin-top: var(--space-1);
+}
+/* The lab's drawing of a text's joins: the map of the nine parts, and one part's wires. */
+.lab-joins {
+  margin: var(--space-3) 0;
+}
+.lab-joins-map {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+.lab-joins-block {
+  flex: 1 1 14rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  align-content: start;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.lab-joins-block-name {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-weight: 600;
+}
+.lab-joins-button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  min-height: 40px;
+  text-align: left;
+}
+.lab-joins-button[aria-pressed="true"] {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.lab-joins-count {
+  font-size: 0.85em;
+}
+.lab-joins-part {
+  max-width: 44rem;
+  margin: 0 auto;
+}
+.lab-joins-title {
+  text-align: center;
+  margin-bottom: var(--space-1);
+}
+/* A part's joins: the part is the middle column, a box; what feeds an input port comes in on a
+   wire from the left, and what reads an output port leaves on a wire to the right. */
+.lab-joins-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+.lab-joins-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 1.25rem 6.5rem 1.25rem minmax(0, 1fr);
+  align-items: center;
+  min-height: 1.6rem;
+}
+@media (max-width: 30rem) {
+  .lab-joins-row {
+    grid-template-columns: minmax(0, 1fr) 0.75rem 5.25rem 0.75rem minmax(0, 1fr);
+  }
+}
+.lab-joins-far {
+  overflow-wrap: break-word;
+  padding: 0.1rem 0;
+}
+.lab-joins-in .lab-joins-far:first-child {
+  text-align: right;
+}
+.lab-joins-port {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-1);
+  background: var(--bg-raised);
+  border-left: 2px solid var(--fg);
+  border-right: 2px solid var(--fg);
+}
+.lab-joins-out .lab-joins-port {
+  justify-content: flex-end;
+}
+.lab-joins-row:first-child .lab-joins-port {
+  border-top: 2px solid var(--fg);
+}
+.lab-joins-row:last-child .lab-joins-port {
+  border-bottom: 2px solid var(--fg);
+}
+.lab-joins-in .lab-joins-wire:nth-child(2),
+.lab-joins-out .lab-joins-wire:nth-child(4) {
+  height: 2px;
+  background: var(--fg);
+}
+/* An open port: a short stub ending in a hollow ring, nothing beyond it. */
+.lab-joins-open.lab-joins-in .lab-joins-wire:nth-child(2),
+.lab-joins-open.lab-joins-out .lab-joins-wire:nth-child(4) {
+  height: 0.7rem;
+  width: 0.7rem;
+  justify-self: center;
+  background: var(--bg);
+  border: 2px solid var(--fg);
+  border-radius: 50%;
+}
+.lab-joins-open .lab-joins-far {
+  color: var(--fg-muted);
+}
+.lab-joins-marked .lab-joins-far,
+.lab-joins-marked .lab-joins-port {
+  color: var(--accent);
+  font-weight: 700;
+}
+.lab-joins-marked .lab-joins-wire {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+/* A part the chosen part joins to: a solid line in the accent on its left edge. */
+.lab-joins-button.lab-joins-linked {
+  border-left: 4px solid var(--accent);
+}
+.lab-joins-link {
+  font-size: 0.85em;
+  color: var(--accent);
+}
+.lab-joins-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.lab-joins-item.lab-joins-marked {
+  border-left: 4px solid var(--accent);
+}
+.lab-joins-button.lab-joins-marked {
+  border-color: var(--accent);
+}
+.lab-editor > .explorer-actions {
+  flex-wrap: wrap;
+}
+/* The step controls and the line saying where the run is sit in the drawing's sticky band, above
+   its overview, so they stay in reach while the drawing scrolls past and nothing covers them. */
+.machine-steps {
+  padding: 0 0 var(--space-1);
+  margin-bottom: var(--space-1);
+  border-bottom: 1px solid var(--border);
+}
+.machine-steps .debugger-status {
+  margin: var(--space-1) 0 0;
+}
+/* The run over time: each step with its edges side by side, the next edge marked. */
+.run-strip {
+  margin: var(--space-2) 0;
+}
+.run-strip-legend {
+  margin: 0 0 var(--space-1);
+  font-weight: 600;
+}
+.run-strip-steps {
+  list-style: none;
+  margin: var(--space-1) 0;
+  padding: 0;
+}
+.run-strip-step {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+  padding: var(--space-1) 0;
+  border-top: 1px solid var(--border);
+}
+.run-strip-line {
+  flex: 1 1 12rem;
+}
+.run-strip-edges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+.run-strip-edge {
+  min-height: 40px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+.run-strip-done {
+  color: var(--fg-muted);
+}
+.run-strip-next {
+  border: 2px solid var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.machine-pin-note {
+  margin: var(--space-1) 0;
+  color: var(--fg-muted);
+}
+/* Module 13: the wires the next edge uses, under a band of the accent colour, which a bus shows as
+   plainly as a one-bit wire (a wider stroke did not: a bus is drawn wide already). */
+.circuit .wire-route {
+  stroke: var(--accent) !important;
+  stroke-width: 13 !important;
+  stroke-dasharray: none !important;
+  opacity: 0.35;
+}
+.circuit .wire-pinned .wire-halo {
+  opacity: 0.45;
+}
+.fault-outcome {
+  margin-top: var(--space-2);
+}
+/* A port in the table of levels is a button that pins its wire. A phone breaks the cell between
+   ports, never inside a port's digits. */
+.machine-trace-table .trace-port {
+  display: inline-block;
+  margin: 0 var(--space-2) var(--space-1) 0;
+  padding: 0 var(--space-1);
+  min-height: 40px;
+  white-space: nowrap;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.machine-trace-table .trace-port:hover {
+  border-color: var(--border);
+}
+/* A port on the next edge's route, and a pinned one, marked as the drawing marks their wires. */
+.machine-trace-table .trace-port-route {
+  background: var(--accent-soft);
+}
+.machine-trace-table .trace-port-pinned {
+  border-color: var(--focus);
+  box-shadow: inset 0 0 0 1px var(--focus);
+}
+/* A row of the levels table names its wire: its heading pins that wire on the drawing. */
+.machine-row-wire {
+  font: inherit;
+  font-weight: 600;
+  color: var(--accent);
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 0;
+  min-height: 40px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.machine-row-pinned th,
+.machine-row-pinned td {
+  box-shadow: inset 3px 0 0 var(--focus);
+}
+.machine-closed-list {
+  list-style: none;
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.machine-compare,
+.machine-bit-status {
+  font-weight: 600;
 }
 
 /* The run as lanes (Modules 11 and 12): a column for each part of the program that runs, time

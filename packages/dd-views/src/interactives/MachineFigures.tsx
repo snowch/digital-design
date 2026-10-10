@@ -223,6 +223,11 @@ const TimelineProps = z.object({
   /** Edges run after the reset and drawn. */
   edges: z.number().int().min(1).max(12),
   /**
+   * Module 13: edges run after the reset before the drawing starts, so a diagram can show an
+   * instruction late in a run; the edges drawn keep their numbers from the reset.
+   */
+  from: z.number().int().min(0).default(0),
+  /**
    * The buses drawn, in order: a word's values are written as an address, a word or signed;
    * Module 9's `state` writes the controller's state by its name, FETCH to WRITE. A signal of
    * Module 9's control unit, named inside it (`control/PCEN`), may be given by its name alone.
@@ -254,13 +259,13 @@ export const EdgeTimeline = withProps(
     const t = useViewStrings().machine8;
     const run = useMemo(() => {
       const built = buildDatapath({ libraryId: data.libraryId, program: data.program });
-      const sim = startDatapath(built, { inputs: data.inputs });
+      const sim = startDatapath(built, { inputs: data.inputs, edges: data.from });
       const from = sim.time;
       // A whole low half before the first edge, so the first instruction's lane has room.
       sim.tick();
       for (let k = 0; k < data.edges; k++) sim.clockCycle("CLK");
       return { circuit: built.circuit, trace: sim.trace, from, to: sim.time };
-    }, [data.libraryId, data.program, data.inputs, data.edges]);
+    }, [data.libraryId, data.program, data.inputs, data.edges, data.from]);
     // Only the rising edges are named, each with its number from the reset: an edge here is a
     // rise, and a fall at either end of the window would match nothing drawn in CLK's lane. Every
     // other time keeps an unnamed mark, so the axis counts no third thing beside edges and steps.
@@ -268,12 +273,12 @@ export const EdgeTimeline = withProps(
       const rises = new Set(
         run.trace.marks.filter((m) => m.label === "↑" && m.time > run.from).map((m) => m.time),
       );
-      let n = 0;
+      let n = data.from;
       const marks = Array.from({ length: run.to - run.from + 1 }, (_, i) => run.from + i).map(
         (time) => ({ time, label: rises.has(time) ? format(t.edgeMark, { n: ++n }) : "" }),
       );
       return { ...run.trace, marks };
-    }, [run, t.edgeMark]);
+    }, [run, t.edgeMark, data.from]);
     // The cursor starts just before the first edge, on the values that edge writes, so a phone's
     // scrolled drawing opens at the start.
     const [cursor, setCursor] = useState(run.from + 1);

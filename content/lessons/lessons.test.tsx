@@ -228,7 +228,8 @@ describe("the course's lessons", () => {
           ...container.querySelectorAll(".interactive-problem, .interactive-missing"),
         ].map((e) => e.textContent);
         expect(problems).toEqual([]);
-      });
+        // Module 13's lessons record whole runs of the final machine as they render.
+      }, 30_000);
     });
   }
 });
