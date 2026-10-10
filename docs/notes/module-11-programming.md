@@ -168,10 +168,12 @@ a table. Now drawn, each a view of the debugger's state and stepped with it:
   doors only, no count of calls) and in the investigation, where the room R1 names is lit beside
   the stack. The construction's second store stays as words: reading them is its skill.
 
-11.6 and 11.7 are as they were. 11.1's debuggers showed only the words of the program in their
-listing; the pass gave both `words: true`, and the review took it off the failure experiment's
-editable one, where any program typed in would show its words and give the last challenge's skill
-away. 11.1's other debugger keeps it. The drawings' facts are pinned in
+11.6 and 11.7 are as they were. Before the pass, 11.1's debuggers drew their listing with no word column: B12
+had set `words: true` on both, but the debugger's props schema dropped the key until the pass's
+schema fix (a9ce1e3) let it reach the page. The review took it off the failure experiment's
+editable debugger, where any program typed in would show its words and give the last challenge's
+skill away; the second reading took it off the investigation's too, where row `008` showed the
+prediction's constant before it was checked. So neither of 11.1's debuggers shows words. The drawings' facts are pinned in
 `content/lessons/drawings.facts.test.ts`, and the diagrams test runs each to its end and reads its
 labels at both widths. The briefs and drafts are in `docs/notes/figures-11-12/`.
 
@@ -186,6 +188,27 @@ run of calls as its heading alone. 11.5's rooms mark the door a call about no ro
 (R10 the room, R15 `060` or `070` the door), say the lit room's name to a screen reader, and the
 question's figure has a key of its own with no run in it. Module 11's text column in the
 program-compare figure is headed "Line". No caption carries a backtick, and a content test says so.
+
+The second reading of those fixes (10 October; brief Y5), nothing blocking. 11.1's investigation
+debugger lost its word column, which showed the prediction's constant at load, and the motivation
+lets a listing leave its words out. 11.2's table carries "past the log's end" for a screen reader.
+11.3's drawing has a name of its own, with no "moves", and the end of its run stays on the screen.
+11.4 keeps R14's arrow at `7C0`, with no box, once the last pop has run, and says "off the stack"
+where it said "passed". 11.5 rings a door only while a call about no room runs, from its pause to
+its `goto R15` (pinned: four steps for each of the seven), and on a phone its listing and stack
+boxes are shorter, so the marked room is on the screen with the buttons. Two answers shown before
+their predictions went: 11.5's depth chart counted the calls at load, and 10.2's layouts named the
+field that moves; that sentence moved to 10.2's explanation.
+
+The third reading (10 October, evening; brief Y7). 11.5's depth chart draws its marks for the calls,
+which can be counted, and its sentence about them, only once the prediction is checked, and the
+investigation's lead no longer counts the pauses. On a phone (375 by 812) its stack's box holds the
+newest call's four words and the marked room stays on the screen at every one of the 13 pauses,
+which a test now checks; the listing's box is 7rem, the rooms' 3.5rem, and the rooms' panel shows
+no title of its own there. 11.3's short run is drawn whole on a wide screen. 11.4 draws R14's place
+at `7C0`, past the RAM, apart from the popped words, whose hidden text now names their hexadecimal.
+10.2's layouts hold the prediction's own instruction, and its packed words wait, until the
+prediction is checked; its call bullet says a field moves.
 
 ## What was reused, built, and could be extracted
 

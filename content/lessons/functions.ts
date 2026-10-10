@@ -150,6 +150,8 @@ export const functions: LessonInput = {
                 { at: "0x000", name: LABELS.lanes.main },
                 { at: "overBy", name: "overBy" },
               ],
+              // Short enough to draw whole under the listing: the first call's arrows stay in view.
+              whole: true,
             },
             outcomes: PROSE.callAfter,
           },

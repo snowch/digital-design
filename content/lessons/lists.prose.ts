@@ -24,7 +24,7 @@ export const PROSE = {
   walkLead:
     'The watch starts with R1, R2, R3 and `word[R1]`. R1 holds an address, so the watch shows R1 in hexadecimal first.\n\nA breakpoint is set on `next`. At each pause there, R1 already holds the address of the reading the next time round will load. So `word[R1]` shows that reading, not the one just counted.\n\nSo when R3 goes up, the reading that made it go up is the one before. The watch shows it as what `word[R1]` "was", and R1\'s arrow in the drawing of the log points at the word R1 has moved on to.\n\nTo add a watch, type a register or `word[...]` with an address, and press "Watch".\n\nPress "Run to a breakpoint" repeatedly. See R3 go up for each reading warmer than -180.',
   walkAfter:
-    "The run pauses at `next` seven times: once before each of the six readings, and once when R2 reaches 0. The display shows 2: the readings -176 and -172 are warmer than -180. The program stops at `034` after 46 instructions run. When the run stops, R1's arrow ends at `070`.",
+    "The run pauses at `next` seven times: once before each of the six readings, and once when R2 reaches 0. The display shows 2: the readings -176 and -172 are warmer than -180. The program stops at `034` after 46 instructions run. R1's arrow ends at `070`.",
   construction:
     "A loop can leave early, as soon as it finds what it is looking for. In the challenge, the tests add data after your program: a `count` of how many readings, a `limit`, and the readings themselves at `log`.",
   firstLead: "Write the program, pause it in the loop to check your work, then run the tests.",

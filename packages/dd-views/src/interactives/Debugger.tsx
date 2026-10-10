@@ -745,7 +745,8 @@ export function DebuggerView({
             )}
           </section>
         )}
-        {/* On a phone the drawings follow the watch, or the stack where there is one. */}
+        {/* On a phone the drawings follow the watch, or the stack where there is one; with neither,
+            they follow the control registers and the events, which the steps ask a reader to read. */}
         {options.watch && !options.stack && nearPhone}
         {(options.memory ?? []).map((region) => (
           <MemoryPanel key={region.from} region={region} program={program} state={state} t={t} />
@@ -759,7 +760,7 @@ export function DebuggerView({
             drawn={options.stackDrawn === true}
           />
         )}
-        {(options.stack || !options.watch) && nearPhone}
+        {options.stack && nearPhone}
         {options.control && (
           <ControlPanel
             state={state}
@@ -773,6 +774,7 @@ export function DebuggerView({
             {doorChoice}
           </EventsPanel>
         )}
+        {!options.watch && !options.stack && nearPhone}
         <div className="debugger-panels">
           {uses.devices && (
             <section className="debugger-panel" aria-label={t.devicesCaption}>
@@ -1058,6 +1060,8 @@ function MemoryPanel({
   const rows = Array.from({ length: region.words }, (_, k) => first + 8 * k);
   // The name a line gives an address, beside it: the rooms and the log by the program's names.
   const nameAt = namesByAddress(program);
+  // The first word past a list's end carries the drawing's note in the table too.
+  const endAt = region.ends ? first + 8 * region.ends.after : undefined;
   return (
     <section className="debugger-panel debugger-memory" aria-label={region.title}>
       <p className="layout-title" aria-hidden="true">
@@ -1113,6 +1117,9 @@ function MemoryPanel({
                     {hex3(address)}
                     {nameAt.get(address) && (
                       <span className="memory-name">{` ${nameAt.get(address)}`}</span>
+                    )}
+                    {address === endAt && region.ends && (
+                      <span className="memory-name">{` ${region.ends.note}`}</span>
                     )}
                   </td>
                   <td className="memory-word">
@@ -1233,10 +1240,21 @@ function StackPanel({
       {/* The words the drawing sets apart as popped, for a screen reader, before the stack's. */}
       {drawn && sp !== undefined && state.pushed.some((a) => BigInt(a) < sp) && (
         <p className="visually-hidden">
-          {`${t.boxes.popped}: ${state.pushed
+          {`${t.boxes.popped}: `}
+          {/* Each word as the stack's own items give it, its hexadecimal named. */}
+          {state.pushed
             .filter((a) => BigInt(a) < sp)
-            .map((a) => hex3(a))
-            .join(", ")}`}
+            .map((a, k) => {
+              const reg = state.saved?.[a];
+              return (
+                <span key={a}>
+                  {k > 0 ? "; " : ""}
+                  {`${hex3(a)} `}
+                  <WordValue value={memoryWord(state.cpu, a)} t={t} />
+                  {reg !== undefined ? ` ${format(t.boxes.saves, { reg: `R${reg}` })}` : ""}
+                </span>
+              );
+            })}
         </p>
       )}
       {sp === undefined ? (
@@ -1401,6 +1419,8 @@ const LaneSpecs = z.object({
   mode: z.boolean().optional(),
   /** Whether a second band shows when interrupts are on (12.6, where job 5 lets them in). */
   interrupts: z.boolean().optional(),
+  /** A short run drawn whole on a wide screen (11.3), not in a box that follows its newest row. */
+  whole: z.boolean().optional(),
   /** The most edges drawn, for a run that never ends (12.1's failure experiment). */
   upTo: z.number().int().min(1).optional(),
 });

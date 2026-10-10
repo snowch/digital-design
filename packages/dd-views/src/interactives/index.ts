@@ -193,7 +193,7 @@ export { TrapTimeline, edgeText as trapEdgeText, transferValue } from "./Module1
 export { MachineLevels, compareText, formOf, levelsAnswer, makerText } from "./Module13Figures";
 export { LabRunFigure, labAnswer, labRun, labVariant } from "./LabRun";
 export { lanesOf, laneNames, itemsShown, type LaneItem, type LanesConfig } from "./RunLanes";
-export { doorReturns, roomsFrom } from "./MemoryDrawings";
+export { doorReturns, noRoomLines, roomsFrom } from "./MemoryDrawings";
 export {
   LogResults,
   ProgramListing,
