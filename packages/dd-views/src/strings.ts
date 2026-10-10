@@ -1120,7 +1120,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
         "`{actual}` is not the PC after the last edge. An instruction that does not branch, call or jump leaves the PC at its own address plus 4. Give the PC as three hexadecimal digits.",
       // Module 13, lesson 3 (brief 3L).
       traceXorB:
-        "Your row is {actual}. Pause at the ALU edge of `R2 <= R3`, open the ALU down to the group `q0`, and read `xorB` in each slice. It turns B's bit over when OP0 is 1.",
+        "Your row is {actual}. Pause at the ALU edge of `R2 <= R3`, open the ALU down to the group `q0`, and read `xorB` in each slice; it turns B's bit over when OP0 is 1.",
       traceCarry:
         "Your row is {actual}. Pause at the ALU edge of `R3 <= R1 - R2`, open the ALU down to the group `q0`, and read the carry out of each slice's full adder, bit 3 first.",
       tracePcD:

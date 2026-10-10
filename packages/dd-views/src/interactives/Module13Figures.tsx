@@ -12,7 +12,7 @@
 //   instruction-level model after every step, which names the first that disagrees, as every
 //   machine since Module 8 has been held to. Every value is read off the recorded nets.
 
-import { useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useLayoutEffect, useMemo, useRef, useState, type FocusEvent, type ReactNode } from "react";
 import { z } from "zod";
 
 import {
@@ -517,6 +517,23 @@ export const MachineLevels = withProps(
         window.removeEventListener("resize", set);
       };
     }, [committed]);
+    // A browser scrolls a focused control into view only when none of it shows, so one half under
+    // the stuck band stays there; this moves it out from under the band, and the overview too.
+    const onFocus = (e: FocusEvent<HTMLDivElement>) => {
+      const band = bandRef.current;
+      const el = e.target as HTMLElement;
+      if (!band || band.contains(el)) return;
+      const b = band.getBoundingClientRect();
+      if (b.top > 1) return;
+      let cover = b.bottom;
+      const bar = rootRef.current?.querySelector<HTMLElement>(".overview-bar");
+      if (bar && el.closest(".circuit-view") && getComputedStyle(bar).position === "sticky") {
+        const r = bar.getBoundingClientRect();
+        if (r.top <= cover + 1) cover = Math.max(cover, r.bottom);
+      }
+      const top = el.getBoundingClientRect().top;
+      if (top < cover) window.scrollBy(0, top - cover - 8);
+    };
     const steps = (
       <div className="machine-steps" ref={bandRef}>
         <div className="explorer-actions debugger-actions">
@@ -554,7 +571,12 @@ export const MachineLevels = withProps(
       </div>
     );
     return (
-      <div className="explorer machine-levels" data-interactive={interactive.id} ref={rootRef}>
+      <div
+        className="explorer machine-levels"
+        data-interactive={interactive.id}
+        ref={rootRef}
+        onFocus={onFocus}
+      >
         {asking && (
           <div className="carry-question">
             <Prose markdown={data.question ?? ""} />

@@ -271,8 +271,9 @@ export const MACHINE13_STRINGS: Machine13Strings = {
   romLater: "Shows after the next edge.",
   rowPin: "{row}: pin {wire} on the drawing",
   rowWire: "Reads wire {wire}",
-  quietNote: "Values show once you move the run: press an edge in the strip, or a button above.",
-  romWire: "Wire FETCHED carries this row's word only before a FETCH edge.",
+  quietNote:
+    "No value shows yet; values show once you move the run, by pressing an edge in the strip under the drawing or a button at the top.",
+  romWire: "Wire FETCHED carries the word at this line's address, just before its FETCH edge.",
   pinNote:
     "Press a wire to pin it: it keeps an orange halo as you open blocks, and its name and value show under the drawing, in hexadecimal for a word. A blue band marks the wires the next edge uses, along their whole length and with all their branches. It starts at each register, held word, memory or device the edge writes, and goes back along each selector's chosen input to where the value starts; it does not mark the address a store writes to, nor the input that chooses a selector's input, such as TRAP.",
   explainNext: 'Press "Next edge" to see why. The explanation appears after that edge.',
