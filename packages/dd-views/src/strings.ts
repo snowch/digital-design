@@ -121,6 +121,10 @@ export interface ViewStrings {
     readonly afterRun: string;
     /** {where}: after a step the axis names, such as ↑3. */
     readonly afterMark: string;
+    /** {mark}: the red line stands on a mark of the axis, such as a rise. */
+    readonly atMark: string;
+    /** {mark}: the first mark of the axis after the red line. */
+    readonly beforeMark: string;
     /** {where}: before the axis names any step. */
     readonly atStart: string;
   };
@@ -810,6 +814,8 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     valuesHere: "Values at the red line",
     afterRun: "after the run",
     afterMark: "after {mark}",
+    atMark: "at {mark}",
+    beforeMark: "before {mark}",
     atStart: "before the first step",
   },
   table: {

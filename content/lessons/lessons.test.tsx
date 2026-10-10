@@ -59,18 +59,23 @@ describe("the course's lessons", () => {
   });
 
   it("draws a timing diagram only where time matters, and none before 4.1, which introduces it", () => {
-    // The figures that draw a timing diagram: a prediction shown as one, and the kinds that always do.
+    // The figures that draw a timing diagram: a prediction shown as one, a state machine with its
+    // trace pane (shown by default), a datapath with timing lanes, and the kinds that always do.
     const TIMING = new Set(["setup-hold", "latch-internals", "edge-timeline"]);
     const problems: string[] = [];
     for (const l of LESSONS)
       for (const s of l.sections)
         for (const x of s.interactives) {
           const p = x.props as {
-            show?: string;
+            show?: string | readonly string[];
             run?: readonly { clock?: string }[];
+            timing?: readonly string[];
           };
           const timing =
-            TIMING.has(x.kind) || (x.kind === "prediction" && (p.show ?? "timing") === "timing");
+            TIMING.has(x.kind) ||
+            (x.kind === "prediction" && (p.show ?? "timing") === "timing") ||
+            (x.kind === "state-machine" && (p.show === undefined || p.show.includes("trace"))) ||
+            (x.kind === "datapath" && (p.timing?.length ?? 0) > 0);
           if (!timing) continue;
           if (l.module < 4) problems.push(`${l.id} ${x.id}: a timing diagram before 4.1`);
           const run = p.run ?? [];

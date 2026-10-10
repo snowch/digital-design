@@ -14,7 +14,7 @@ import { Prose, useSlot, type InteractiveProps } from "@platform/lesson-runtime"
 import { PredictionChallenge } from "@platform/primitives";
 import { formatWord } from "@dd/sim";
 
-import { CircuitView, valueLabel } from "../CircuitView";
+import { CircuitView, SignalTable, valueLabel } from "../CircuitView";
 import { format, useViewStrings, youChose } from "../strings";
 import { TimingDiagram } from "../TimingDiagram";
 import { withProps } from "./props";
@@ -97,13 +97,13 @@ export const Prediction = withProps(
         data-interactive={interactive.id}
         data-committed={stored ? "true" : "false"}
       >
-        {/* After a commit, a run of one setting puts its values on this drawing and its table. */}
+        {/* After a commit, a run of one setting puts its values on this drawing; their table goes
+            with the outcome, under the status line, so the question and its button stay put. */}
         <CircuitView
           circuit={circuit}
           title={strings.prediction.circuitTitle}
-          {...(outcome && data.show === "circuit"
-            ? { values: outcome.sim.snapshotValues(), table: true }
-            : { table: false })}
+          table={false}
+          {...(outcome && data.show === "circuit" ? { values: outcome.sim.snapshotValues() } : {})}
         />
         <Prose markdown={data.question} />
         <PredictionChallenge
@@ -130,6 +130,13 @@ export const Prediction = withProps(
                 ? strings.prediction.match
                 : strings.prediction.noMatch}
             </p>
+            {data.show === "circuit" && (
+              <SignalTable
+                circuit={circuit}
+                values={outcome.sim.snapshotValues()}
+                {...(data.signals ? { only: shown.map((sg) => sg.net) } : {})}
+              />
+            )}
             {data.show === "timing" && (
               <TimingDiagram
                 circuit={circuit}
@@ -139,8 +146,14 @@ export const Prediction = withProps(
             )}
             {data.show === "settings" && (
               <div className="truth-table-wrap">
-                <table className="truth-table prediction-settings">
-                  <caption>{strings.prediction.settingsCaption}</caption>
+                {/* Above the table, not its caption: a caption keeps to a narrow table's width. */}
+                <p className="prediction-settings-caption" id={`${interactive.id}-settings`}>
+                  {strings.prediction.settingsCaption}
+                </p>
+                <table
+                  className="truth-table prediction-settings"
+                  aria-labelledby={`${interactive.id}-settings`}
+                >
                   <thead>
                     <tr>
                       <th scope="col">{strings.prediction.settingHeading}</th>

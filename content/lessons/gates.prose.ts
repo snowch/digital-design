@@ -17,7 +17,7 @@ export const PROSE = {
   p1Question:
     "The freezer is cold, so WARM is 0. The door is shut, so DOOR is 0. The wire from the NOT part to the OR part is called SHUT. What does this first try give for ALARM?",
   p1Explain:
-    "ALARM is 1. DOOR is 0, so the NOT part gives SHUT = 1. The OR part has SHUT = 1, and one input at 1 is enough for an OR, so ALARM is 1. The first try lights the lamp with a cold freezer and door shut, which the rule does not want, so the OR part is the wrong part. Once you check, the circuit drawing shows each wire's value after the run, and the table under it lists them.",
+    "ALARM is 1. DOOR is 0, so the NOT part gives SHUT = 1. The OR part has SHUT = 1, and one input at 1 is enough for an OR, so ALARM is 1. The first try lights the lamp with a cold freezer and door shut, which the rule does not want, so the OR part is the wrong part. The drawing above now shows each wire's value, SHUT included. The table under the result line lists WARM, DOOR and ALARM, the inputs and the output; SHUT appears only on the drawing.",
   exploreNotLead:
     "Each part in the circuit does one fixed rule on its inputs. Its output depends only on its inputs now: change an input and the output follows. A part like this is a **gate**. This figure shows one NOT gate. It has input A and output Y. A NOT gate is also called an inverter. Press A to flip it between 0 and 1, and watch Y. The table under the drawing lists both values of A with the Y each gives. The row for your inputs now is shaded and marked 'Applies now'.",
   exploreAndLead:

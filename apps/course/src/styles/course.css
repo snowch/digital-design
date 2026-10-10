@@ -878,6 +878,16 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
   letter-spacing: 0.06em;
   border-bottom: 2px solid var(--border-strong);
 }
+/* A prediction's settings: the signals' heads as the drawing names them (and3, not AND3). */
+.prediction-settings thead th + th {
+  text-transform: none;
+  letter-spacing: normal;
+}
+.prediction-settings-caption {
+  margin: 0 0 var(--space-2);
+  font-weight: 650;
+  font-size: var(--text-md);
+}
 .signal-table tbody tr:last-child td,
 .signal-table tbody tr:last-child th,
 .truth-table tbody tr:last-child td,

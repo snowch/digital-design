@@ -71,6 +71,11 @@ function resolveNet(circuit: Circuit, name: string): number | undefined {
 /** The widest a unit of time is drawn, in pixels, as the shared timeline draws it. */
 const UNIT_MAX = 48;
 const UNITS_SHOWN = 700;
+/** About how wide a character of a lane's value is drawn, in pixels, and the room around it. */
+const CHAR_W = 7.5;
+const VALUE_PAD = 8;
+/** The most room a unit of time is given for a value: a value wider than that is the table's. */
+const VALUE_UNIT_MAX = 80;
 
 /**
  * A short run whose named steps are wider than the unit of time they stand a unit apart in: the
@@ -121,10 +126,18 @@ export function TimingDiagram({
   const by =
     onCursor || units || to !== undefined ? 1 : roomFor(given, from, strings.timing.resetRise);
   const trace = useMemo(() => stretched(given, from, by), [given, from, by, given.events.length]);
-  // The run's last instant, where the red line stands by default; the drawing runs one unit past
-  // it, so the values the last step left are drawn, not only listed.
+  // The run's last instant, where the red line stands by default; the drawing runs one step past
+  // it (an edge, or a setting), so the values the last step left are drawn, not only listed. A
+  // window that ends before the run does (`to`) draws its last values, not what comes after.
   const last = to ?? traceEnd(trace);
-  const end = to ?? Math.max(last + 1, from + 1);
+  const stepMarks = marksShown(trace.marks, strings.timing.resetRise);
+  const gaps = stepMarks.slice(1).map((m, k) => m.time - (stepMarks[k]?.time ?? m.time));
+  const tail = Math.max(1, Math.min(2, ...gaps.filter((g) => g > 0)));
+  const end = Math.max(last + tail, from + 1);
+  const drawn = useMemo(
+    () => (to === undefined ? trace : { ...trace, events: trace.events.filter((e) => e.time <= to) }),
+    [trace, to, trace.events.length],
+  );
   const wanted = signals ?? [
     ...circuit.inputs.map((p) => p.name),
     ...circuit.outputs.map((p) => p.name),
@@ -150,7 +163,8 @@ export function TimingDiagram({
         labels: Readonly<Record<string, string>> | undefined;
       } => l.net !== undefined,
     );
-  // Module 5: a word written with its name where the lane gives one: `TRY 01`.
+  // One form per lane, the one the prose uses: a state by its name alone (TRY, FETCH), a word by
+  // the figure's own label for it, else its digits.
   const laneValue = (
     names: Readonly<Record<string, string>> | undefined,
     v: Word | undefined,
@@ -159,12 +173,11 @@ export function TimingDiagram({
     const label = v && labels ? labels[formatWord(v)] : undefined;
     if (label !== undefined) return label;
     const named = v && names ? names[formatWord(v)] : undefined;
-    return named ? `${named} ${valueLabel(v)}` : valueLabel(v);
+    return named ?? valueLabel(v);
   };
   const at = cursor ?? last;
   // The axis's marks: the run's steps as the lesson counts them, or, in units, a mark every
   // `ticks` units from the start and at each time the figure names.
-  const stepMarks = marksShown(trace.marks, strings.timing.resetRise);
   const unitMarks = units
     ? [
         ...(units.ticks
@@ -186,21 +199,38 @@ export function TimingDiagram({
   const named = new Set(stepMarks.map((m) => m.time));
   const shownMarks = units
     ? [
-        // A tick within one step of a named time is left out, so the name keeps its row.
-        ...unitMarks.filter(
-          (m) => ![...named].some((t) => Math.abs(t - m.time) <= (units.ticks ?? 1)),
-        ),
+        // A tick at a named time is left out; the shared timeline gives the rest their rows.
+        ...unitMarks.filter((m) => !named.has(m.time)),
         ...stepMarks,
       ].sort((a, b) => a.time - b.time)
     : stepMarks;
-  // Where the red line stands, in the run's own steps.
+  // Where the red line stands, by the run's own marks: at a mark, after the last one before it,
+  // or before the first; "after the run" only where the run has no marks.
   const where = (t: number) => {
-    if (t >= last) return strings.timing.afterRun;
-    const before = stepMarks.filter((m) => m.time <= t).at(-1);
-    return before
-      ? format(strings.timing.afterMark, { mark: before.label })
-      : strings.timing.atStart;
+    const on = stepMarks.find((m) => m.time === t);
+    if (on) return format(strings.timing.atMark, { mark: on.label });
+    const before = stepMarks.filter((m) => m.time < t).at(-1);
+    if (before) return format(strings.timing.afterMark, { mark: before.label });
+    const next = stepMarks.find((m) => m.time > t);
+    if (next) return format(strings.timing.beforeMark, { mark: next.label });
+    return t >= last ? strings.timing.afterRun : strings.timing.atStart;
   };
+  // Room for every value: the fewest pixels a unit needs so that each word's stretch holds it, and
+  // the stretch the red line stands in holds it on the longer side of the line.
+  const minUnit = useMemo(() => {
+    let need = 0;
+    for (const lane of lanes) {
+      if ((circuit.nets[lane.net]?.width ?? 1) === 1) continue;
+      for (const sg of segmentsOf(circuit, drawn, lane.net, from, end)) {
+        if (levelOf(sg.value) === "unknown") continue;
+        const w = laneValue(lane.names, sg.value, lane.labels).length * CHAR_W + VALUE_PAD;
+        const room =
+          at >= sg.from && at < sg.to ? Math.max(sg.to - at, at - sg.from) : sg.to - sg.from;
+        if (room > 0) need = Math.max(need, w / room);
+      }
+    }
+    return Math.min(VALUE_UNIT_MAX, need);
+  }, [circuit, drawn, lanes, from, end, at, drawn.events.length]);
   // A running figure grows its trace in place, and a press between edges moves no time: the event
   // count tells the table that the trace changed.
   const events = trace.events.length;
@@ -219,6 +249,7 @@ export function TimingDiagram({
       end={end}
       marks={shownMarks}
       cursor={at}
+      minUnit={minUnit}
       {...(onCursor ? { onCursor } : {})}
       cursorLabel={
         units
@@ -227,10 +258,10 @@ export function TimingDiagram({
       }
       title={strings.timing.title}
       scrollNote={strings.circuit.scrollNote}
-      // A drawing wider than its wrapper opens on the first shaded band, or else on the red line,
-      // and follows the red line as a running figure grows: a figure with no cursor has it at the
-      // trace's end, the moment its question asks about.
-      focus={shades[0]?.from ?? at}
+      // A drawing wider than its wrapper opens on the red line and follows it, as a slider moves it
+      // or a running figure grows: a figure with no cursor has it at the trace's end, the moment
+      // its question asks about. With no slider, a shaded band is what it opens on.
+      focus={onCursor ? at : (shades[0]?.from ?? at)}
       defs={({ id }) => (
         <pattern
           id={`${id}-hatch`}
@@ -260,7 +291,7 @@ export function TimingDiagram({
       renderLane={(i, top, { x, unit, id }) => {
         const lane = lanes[i];
         if (!lane) return null;
-        const segs = segmentsOf(circuit, trace, lane.net, from, end);
+        const segs = segmentsOf(circuit, drawn, lane.net, from, end);
         const width1 = (circuit.nets[lane.net]?.width ?? 1) === 1;
         let d = "";
         segs.forEach((s, j) => {
@@ -285,23 +316,18 @@ export function TimingDiagram({
                 );
               }
               if (!width1) {
-                // The value's forms, longest first: its label, or its name with its code, then the
-                // name alone, then the code alone. The longest that fits its stretch is written,
-                // clear of the red line; where none fits, the table gives it.
-                const full = laneValue(lane.names, s.value, lane.labels);
-                const named = lane.names ? lane.names[formatWord(s.value)] : undefined;
-                const forms = [full, ...(named ? [named, valueLabel(s.value)] : [])];
+                // The value in the lane's one form, at its stretch's start; in the stretch the red
+                // line stands in, beside the line, where a drawing that opens on the line shows it.
+                // Where it does not fit, the table gives it.
+                const text = laneValue(lane.names, s.value, lane.labels);
+                const w = text.length * CHAR_W;
                 const x0 = x(s.from) + 4;
                 const x1 = x(s.to) - 4;
                 const red = x(at);
-                const placed = forms
-                  .map((text) => {
-                    const w = text.length * 7.5;
-                    // Before the red line where it falls inside the stretch, else after it.
-                    const startAt = red > x0 && red < x0 + w ? red + 4 : x0;
-                    return { text, startAt, fits: startAt + w <= x1 + 4 };
-                  })
-                  .find((f) => f.fits);
+                const holds = at >= s.from && at < s.to;
+                const starts = holds ? [red + 4, red - 4 - w, x0] : [x0];
+                const startAt = starts.find((a) => a >= x0 && a + w <= x1 + 0.5);
+                const placed = startAt === undefined ? undefined : { text, startAt };
                 return (
                   <g key={j} className="bus-segment">
                     <rect

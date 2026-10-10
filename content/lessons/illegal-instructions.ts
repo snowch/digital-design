@@ -111,6 +111,8 @@ export const illegalInstructions: LessonInput = {
             libraryId: "decoder",
             run: [{ set: { K: 8, J: 4, C: 5 } }],
             watch: "CAUSED",
+            // The signals the explanation reasons with, after the word's fields.
+            signals: ["K", "J", "C", "STOP", "CAUSED"],
             options: [
               { value: "00000000", label: LABELS.options.p1Stop },
               { value: "00100001", label: LABELS.options.p1Illegal },

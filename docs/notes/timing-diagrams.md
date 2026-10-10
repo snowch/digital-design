@@ -64,3 +64,36 @@ desktop and phone "state machines", "signals", "scenes", "Module 2 pairs" and "f
 most", and phone "registers". This work changes the timing diagrams in the registers and state
 machines figures, so those two are expected to differ; the baselines are left to the managing
 session.
+
+## The check of the timing work
+
+The managing session's three checkers and a sceptic confirmed most items and sent back 21. With
+the platform at `36d21ae`, the shared timeline takes a least unit (`minUnit`) and widens a run until
+every axis label has room; this round uses both.
+
+- **Room for every value.** The diagram gives the timeline the fewest pixels a unit needs for each
+  word's stretch to hold the word, and the stretch the red line stands in to hold it on the longer
+  side of the line, up to 80 pixels a unit; a longer run scrolls. The drawing runs one step past the
+  red line, an edge where the run has edges, so the newest box is as wide as the others. A word is
+  written beside the red line in the stretch the line stands in, so a drawing that opens on the line
+  shows the watched word on a phone. A window that ends before the run (`to`) draws its last values
+  to its end: CLK no longer stays high where the table says 0.
+- **One form per lane.** A state is written by its name alone, as the prose writes it, in the lane
+  and in the table: TRY, FETCH; the state diagrams and the encoded tables keep the codes.
+- **Where the red line stands** is said by the axis's marks: "at ↑3" on a mark, "after ↑3"
+  between marks, "before ↑57" before the first in view; "after the run" only where a run has none.
+  The running figures' captions no longer say "after the run" beside a button that runs.
+- **Setup and hold** opens on the edge and follows the slider, so the setup band and Q's change are
+  both in view at 390; its ticks are dropped only where a named mark stands.
+- **A one-setting prediction's table** stands under the result line, not above the question, so the
+  question and its button stay where the learner pressed; it lists the lesson's signals (7.1's
+  three, 7.2's five, and new lists for 9.1 and 9.2). The settings table's caption is a line above it,
+  and its heads keep the drawing's names (and3, not AND3).
+- **Tests.** `diagrams.spec.ts` commits every prediction by id (it skipped seven), and clocks
+  `retry-machine` 40 times, the 9.3 controller 30, and runs `colder-edges` to its stop; the content
+  test counts a state machine's trace and a datapath's timing lanes as timing diagrams.
+- **Words** (brief T2): 2.1's explanation names the table's three signals and SHUT's place; 3.1's
+  lead joins its two figures; 4.1 calls a run's named input changes settings, not steps; 5.1 says
+  what its axis names; 5.4's lead explains ↑n and "↑ reset", its after text limits its claim to RST
+  at 0, and its reset prediction asks the learner to apply the motivation's rule; 8.3's ↑5 sentences
+  stand together.
