@@ -189,6 +189,17 @@ run of calls as its heading alone. 11.5's rooms mark the door a call about no ro
 question's figure has a key of its own with no run in it. Module 11's text column in the
 program-compare figure is headed "Line". No caption carries a backtick, and a content test says so.
 
+The second reading of those fixes (10 October; brief Y5), nothing blocking. 11.1's investigation
+debugger lost its word column, which showed the prediction's constant at load, and the motivation
+lets a listing leave its words out. 11.2's table carries "past the log's end" for a screen reader.
+11.3's drawing has a name of its own, with no "moves", and the end of its run stays on the screen.
+11.4 keeps R14's arrow at `7C0`, with no box, once the last pop has run, and says "off the stack"
+where it said "passed". 11.5 rings a door only while a call about no room runs, from its pause to
+its `goto R15` (pinned: four steps for each of the seven), and on a phone its listing and stack
+boxes are shorter, so the marked room is on the screen with the buttons. Two answers shown before
+their predictions went: 11.5's depth chart counted the calls at load, and 10.2's layouts named the
+field that moves; that sentence moved to 10.2's explanation.
+
 ## What was reused, built, and could be extracted
 
 Reused unchanged: the reference machine (`machine.ts`, with Module 9's options), the schema, the
