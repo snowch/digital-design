@@ -47,3 +47,13 @@ replaced 13. The managing session's list (S1 to S24) is answered here; the brief
 - **9.2's CAUSED** is written in binary on the circuit (an 8-bit word) and in hexadecimal in the
   prose; and **5.4's** status line gives a state's name with its code in brackets where the lane
   writes them side by side. Both are left for the managing session to decide.
+
+## The check
+
+`./scripts/check.sh` at the merge of Module 13 passed every step but the browser suite's screenshot
+comparisons and 9.3's prediction test, which picked its option by place; the options changed, and it
+now picks the answer by its label. The screenshot tests that fail, at their stored baselines:
+desktop and phone "state machines", "signals", "scenes", "Module 2 pairs" and "figures that matter
+most", and phone "registers". This work changes the timing diagrams in the registers and state
+machines figures, so those two are expected to differ; the baselines are left to the managing
+session.
