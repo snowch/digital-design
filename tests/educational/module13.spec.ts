@@ -35,7 +35,8 @@ async function answerAll(
     if (value === undefined) continue;
     const field = section.locator(`[data-field="${f.id}"]`);
     if (f.kind === "choice") {
-      const label = f.options?.find((o) => o.value === value)?.label ?? value;
+      // A choice shows its label as plain text: code marks go.
+      const label = (f.options?.find((o) => o.value === value)?.label ?? value).replace(/`/g, "");
       await field.locator("select").selectOption({ label });
     } else if (f.kind === "bits") {
       // A row of bits, pressed to match, highest bit first.
@@ -252,4 +253,18 @@ test("the step controls stay pressable with the drawing centred", async ({ page 
     await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
     await expect(figure.locator(".debugger-status")).not.toHaveText(before ?? "");
   }
+});
+
+// The levels table is an index into the drawing: a row's heading pins the wire it reads.
+test("a row of the levels table pins its wire on the drawing", async ({ page }) => {
+  await openLesson(page, "full-path");
+  const figure = page.locator('[data-interactive="path-whole"]');
+  await figure.scrollIntoViewIfNeeded();
+  const row = figure.getByRole("button", { name: format(T.rowPin, { row: T.inIr, wire: "IR" }) });
+  await row.click();
+  await expect(row).toHaveAttribute("aria-pressed", "true");
+  await expect(figure.locator(".machine-row-pinned")).toHaveCount(1);
+  await expect(
+    figure.locator("svg.circuit:not(.circuit-overview) .wire-pinned").first(),
+  ).toBeVisible();
 });

@@ -84,7 +84,7 @@ const COMPOSITE_LABELS: Readonly<Record<string, string>> = {
   "no-handler": "no handler",
   "control-registers": "control registers",
   "yWord-final": "word for Y",
-  "next-trap": "next PC",
+  "next-trap": "next PC, trap or resume",
   "count-down": "timer count down",
   "control-unit-final": "control unit",
   "datapath-final": "datapath",

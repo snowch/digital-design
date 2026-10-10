@@ -90,3 +90,10 @@ Facts put right in placed text without a new draft, each a word or a number:
   as the list itself; cut to "Four tools", with "for a trace" added. `capstone`
   `titles.generalisation` said "your own design"; the section is about designers', so "a real
   design". The objectives take the full stop the others have.
+
+## Brief R3-S (the second reading's shared words)
+
+- `labShowChange`: a button's label; the full stop dropped.
+- `title.next-trap`: "trap or resume PC" dropped that the block also passes the ordinary next PC on;
+  placed as "next PC, trap or resume". `title.next` ("choose next PC") is not placed: Modules 8 to
+  12 draw the same block as "next PC", and changing `next-trap` alone makes the two titles differ.

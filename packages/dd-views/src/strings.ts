@@ -699,7 +699,7 @@ export interface MeetStrings {
 
 export const DEFAULT_VIEW_STRINGS: ViewStrings = {
   grading: {
-    couldNotRun: "[draft] The tests could not run: {why}",
+    couldNotRun: "The tests could not run: {why}.",
   },
   circuit: {
     where: "Which block you are viewing",
@@ -879,7 +879,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
   bits: {
     row: "Bits",
     flip: "Bit {n}, worth {value}, now {bit}; press to change.",
-    flipBare: "[draft] Bit {n}, now {bit}; press to change.",
+    flipBare: "Bit {n}, now {bit}; press to change.",
     fixed: "Bit {n}, worth {value}, {bit}.",
     inDigit: "Bit {n}, worth {value} in its digit, {bit}.",
     bare: "Bit {n}, {bit}.",

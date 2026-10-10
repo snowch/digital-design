@@ -226,7 +226,11 @@ export function CapstoneEditor(props: ChallengeEditorProps) {
       {/* The answer boxes just above the trace: the step controls stay in the drawing's sticky
           band, so the boxes, the controls and the drawing are within reach of one another. */}
       <AnswerEditor {...props} />
-      {refused !== undefined && <p className="capstone-refused">{refused}</p>}
+      {refused !== undefined && (
+        <p className="capstone-refused" role="status">
+          {refused.replace(/`([^`]*)`/g, "$1")}
+        </p>
+      )}
       {interactive && refused === undefined && (
         <section className="capstone-trace" aria-label={t.capTraceCaption}>
           <MachineLevels
