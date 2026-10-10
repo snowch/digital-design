@@ -35,6 +35,11 @@ replaced 13. The managing session's list (S1 to S24) is answered here; the brief
   RST at 1, 5.4's status line named the state the next-state logic gives, not the all-zeros state a
   reset loads. 12.7 counts its halting edge, 54, as 9.3 does, and its facts test with it. A chosen
   option ending in a full stop no longer gets a second.
+- **The reset's rise.** The simulator's `clockCycle` marks a rise taken with RST at 1 as the
+  reset's, whoever clocks it; a figure that reset with a plain `clockCycle` (`startDatapath`, so
+  9.3's `colder-edges`, 9.4's `four-views` and 12.7's `night-hardware`) had numbered it ↑1, and
+  every edge after it one too high: the run ended at ↑24 under "stops after 23 edges", and 12.7's
+  stop at ↑55. Now they end at ↑23 and ↑54, which `traces.test.ts` pins for 9.3.
 - **One title.** Every timing diagram has one name for a screen reader.
 
 ## Not done here, and why
