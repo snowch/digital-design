@@ -229,16 +229,13 @@ export const LabRunFigure = withProps(
                 label={format(t.labListing, { program: chosen.label })}
               />
             )}
-            {text?.hidden &&
-              text.to !== undefined &&
-              !shown &&
-              differed.has(which) && (
-                <div className="explorer-actions">
-                  <button type="button" className="button secondary" onClick={() => setShown(true)}>
-                    {t.labShowChange}
-                  </button>
-                </div>
-              )}
+            {text?.hidden && text.to !== undefined && !shown && differed.has(which) && (
+              <div className="explorer-actions">
+                <button type="button" className="button secondary" onClick={() => setShown(true)}>
+                  {t.labShowChange}
+                </button>
+              </div>
+            )}
             {text?.to !== undefined && (!text.hidden || shown) && (
               <div className="lab-run-change">
                 <p className="lab-run-change-heading">{t.labChange}</p>

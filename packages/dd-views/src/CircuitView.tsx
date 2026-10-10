@@ -413,12 +413,7 @@ export function CircuitView({
         />
       )}
       {large ? (
-        <OverviewStrip
-          box={box}
-          width={scene.width}
-          height={scene.height}
-          zoom={zoom}
-        />
+        <OverviewStrip box={box} width={scene.width} height={scene.height} zoom={zoom} />
       ) : null}
       {large ? (
         <p className="scroll-note">{strings.circuit.zoomNote}</p>
