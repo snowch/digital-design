@@ -689,6 +689,13 @@ question asks for, and its starting texts and an objective use the page's names;
 where their drawings sit on a phone; 12.5 and 12.6 say what a bar is; the interrupts band has no
 outline, which crossed it at every row.
 
+The full check on the third reading (`979943c`): formatting, copyright, the platform copy, types
+and the build passed; Vitest 130 files, 1358 tests passed; the browser 868 passed, 56 skipped, 12
+failed: the ten stored screenshots that fail in a build container on `main` too, and Module 10's
+layouts test at both widths, which chose the load by its place among the instructions, a place
+that moved when the prediction's own instruction was held back. It now chooses it by name, and
+`module10.spec.ts` passes whole (78).
+
 ## The mechanical walk
 
 The built site, every Module 12 page at 375 and 1280 pixels, light and dark, with every run
