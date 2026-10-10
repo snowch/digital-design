@@ -497,6 +497,35 @@ test.describe("the diagrams", () => {
     }
   });
 
+  test("Modules 3, 6 and 9: every prediction committed, no label overlaps another or leaves its drawing", async ({
+    page,
+  }) => {
+    // CLAUDE.md's "before or after the figures are used" holds for every prediction: these modules'
+    // were checked only as first drawn until the timing review (S8).
+    for (const lesson of [
+      "selectors",
+      "decoders",
+      "adders",
+      "alu",
+      "bytes",
+      "memory-map",
+      "ram",
+      "register-file",
+      "control-signals",
+      "illegal-instructions",
+    ]) {
+      await openLesson(page, lesson);
+      for (const figure of await page
+        .locator("figure.interactive")
+        .filter({ has: page.getByRole("button", { name: V.prediction.commit }) })
+        .all()) {
+        await figure.getByRole("radio").nth(1).check();
+        await figure.getByRole("button", { name: V.prediction.commit }).click();
+      }
+      expect(await textCollisions(page), `${lesson} after use`).toEqual([]);
+    }
+  });
+
   test("the drawing editor: parts tidied before any wire is drawn keep their words apart", async ({
     page,
   }) => {

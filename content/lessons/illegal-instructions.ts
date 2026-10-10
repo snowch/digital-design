@@ -106,6 +106,7 @@ export const illegalInstructions: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.predictNumber,
           props: {
+            show: "circuit",
             question: PROSE.p1Question,
             libraryId: "decoder",
             run: [{ set: { K: 8, J: 4, C: 5 } }],

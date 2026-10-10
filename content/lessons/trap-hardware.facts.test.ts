@@ -54,7 +54,7 @@ describe("facts for the trap-hardware lesson", () => {
     );
   });
 
-  it("the night program: the store's trap at edge 24, stop at 020 after 53 edges", () => {
+  it("the night program: the store's trap at edge 24, stop at 020 after 54 edges", () => {
     const m = machine(NIGHT, ROOMS);
     let e = 0;
     const traps: number[] = [];
@@ -63,7 +63,11 @@ describe("facts for the trap-hardware lesson", () => {
       m.sim.clockCycle("CLK");
       e++;
     }
-    expect([traps, e, m.v("PC")]).toEqual([[24], 53, 0x20n]);
+    // HALT is 1 before the halting edge: that edge is counted, as 9.3 counts it ("Stopped").
+    const pc = m.v("PC");
+    m.sim.clockCycle("CLK");
+    e++;
+    expect([traps, e, pc]).toEqual([[24], 54, 0x20n]);
     expect([
       m.v("datapath/cregs/C1"),
       m.v("datapath/C2"),

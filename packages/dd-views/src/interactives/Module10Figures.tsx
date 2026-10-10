@@ -55,7 +55,7 @@ import {
 import { Prose, useSlot, type InteractiveProps } from "@platform/lesson-runtime";
 import { FaultInjector, PredictionChallenge } from "@platform/primitives";
 
-import { format, useViewStrings } from "../strings";
+import { format, useViewStrings, youChose } from "../strings";
 import type { Machine10Strings } from "../strings10";
 import { FaultSpec, toFault } from "./FaultLab";
 import { withProps } from "./props";
@@ -230,7 +230,7 @@ export const MachineCompare = withProps(
                     role="status"
                     className={stored.choice === answer ? "prediction-match" : "prediction-nomatch"}
                   >
-                    {format(strings.prediction.youSaid, { choice: optionLabel(stored.choice) })}{" "}
+                    {youChose(strings.prediction.youSaid, optionLabel(stored.choice))}{" "}
                     {format(t.answer, { answer: optionLabel(answer) })}{" "}
                     {stored.choice === answer
                       ? strings.prediction.match
@@ -481,7 +481,7 @@ export const LayoutCompare = withProps(
                     role="status"
                     className={stored.choice === answer ? "prediction-match" : "prediction-nomatch"}
                   >
-                    {format(strings.prediction.youSaid, { choice: optionLabel(stored.choice) })}{" "}
+                    {youChose(strings.prediction.youSaid, optionLabel(stored.choice))}{" "}
                     {format(t.layoutAnswer, { answer: optionLabel(answer) })}{" "}
                     {stored.choice === answer
                       ? strings.prediction.match
@@ -990,7 +990,7 @@ export const SwapCompare = withProps(
                     role="status"
                     className={stored.choice === answer ? "prediction-match" : "prediction-nomatch"}
                   >
-                    {format(strings.prediction.youSaid, { choice: optionLabel(stored.choice) })}{" "}
+                    {youChose(strings.prediction.youSaid, optionLabel(stored.choice))}{" "}
                     {format(t.swapAnswer, { answer: optionLabel(answer) })}{" "}
                     {stored.choice === answer
                       ? strings.prediction.match
@@ -1258,7 +1258,7 @@ export const ProgramCompare = withProps(
                     role="status"
                     className={stored.choice === answer ? "prediction-match" : "prediction-nomatch"}
                   >
-                    {format(strings.prediction.youSaid, { choice: optionLabel(stored.choice) })}{" "}
+                    {youChose(strings.prediction.youSaid, optionLabel(stored.choice))}{" "}
                     {format(t.programAnswer, { answer: optionLabel(answer) })}{" "}
                     {stored.choice === answer
                       ? strings.prediction.match

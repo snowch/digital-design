@@ -319,7 +319,6 @@ export const EdgeTimeline = withProps(
           to={run.to}
           cursor={cursor}
           onCursor={setCursor}
-          title={t.timelineTitle}
         />
       </div>
     );

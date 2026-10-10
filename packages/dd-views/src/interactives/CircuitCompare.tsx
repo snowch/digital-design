@@ -13,7 +13,7 @@ import { Prose, useSlot, type InteractiveProps } from "@platform/lesson-runtime"
 import { PredictionChallenge } from "@platform/primitives";
 
 import { CircuitView } from "../CircuitView";
-import { format, useViewStrings } from "../strings";
+import { format, useViewStrings, youChose } from "../strings";
 import { withProps } from "./props";
 
 const Side = z.object({ libraryId: z.string(), label: z.string() });
@@ -119,7 +119,7 @@ export const CircuitCompare = withProps(
                 role="status"
                 className={stored.choice === answer ? "prediction-match" : "prediction-nomatch"}
               >
-                {format(strings.prediction.youSaid, { choice: label(stored.choice) })}{" "}
+                {youChose(strings.prediction.youSaid, label(stored.choice))}{" "}
                 {stored.choice === answer ? strings.prediction.match : strings.prediction.noMatch}
               </p>
             )}

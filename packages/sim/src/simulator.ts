@@ -305,14 +305,24 @@ export class Simulator {
   }
 
   /**
+   * Settle model: marks the present time with a step's label, where its inputs changed and the
+   * circuit settled, then advances the timeline by one unit for the next step.
+   */
+  step(label = ""): void {
+    if (label) this.trace.marks.push({ time: this.time, label });
+    this.time += 1;
+  }
+
+  /**
    * Settle model, clocked discipline: with the inputs already set for this cycle, settle at the
    * low phase, raise `clock`, settle, advance, lower it, settle, advance. One cycle is two time
-   * units: the rising edge falls on an odd time.
+   * units: the rising edge falls on an odd time. The rise is marked `rise`: a step's own label, or
+   * the bare arrow a figure numbers.
    */
-  clockCycle(clock: NetId | string): { low: SettleResult; high: SettleResult } {
+  clockCycle(clock: NetId | string, rise = "↑"): { low: SettleResult; high: SettleResult } {
     const id = this.resolve(clock);
     const low = this.settle();
-    this.tick("↑");
+    this.tick(rise);
     this.setInput(id, { width: 1, value: 1n, known: 1n });
     const high = this.settle();
     this.tick("↓");

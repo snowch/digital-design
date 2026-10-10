@@ -102,6 +102,21 @@ export interface ViewStrings {
   readonly timing: {
     readonly cursor: string;
     readonly valuesAt: string;
+    /** The axis's mark on a rise of the clock while the reset is held. */
+    readonly resetRise: string;
+    /** Every timing diagram's name for a screen reader, one for the whole course. */
+    readonly title: string;
+    /** Where the red line stands, in the run's own steps: the slider's name and the table's caption. */
+    readonly cursorAt: string;
+    readonly valuesAfter: string;
+    /** The table's caption where the slider gives the time in units. */
+    readonly valuesHere: string;
+    /** {where}: after the run's last step. */
+    readonly afterRun: string;
+    /** {where}: after a step the axis names, such as ↑3. */
+    readonly afterMark: string;
+    /** {where}: before the axis names any step. */
+    readonly atStart: string;
   };
   readonly table: {
     readonly now: string;
@@ -127,6 +142,10 @@ export interface ViewStrings {
   readonly prediction: {
     readonly commit: string;
     readonly again: string;
+    /** The table of a run of a few settings: its caption, its first column, and a row's name. */
+    readonly settingsCaption: string;
+    readonly settingHeading: string;
+    readonly setting: string;
     readonly youSaid: string;
     readonly circuitDid: string;
     readonly match: string;
@@ -769,6 +788,14 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
   timing: {
     cursor: "Time {time}",
     valuesAt: "Values at time {time}",
+    resetRise: "[draft] resetRise",
+    title: "Timing diagram",
+    cursorAt: "[draft] cursorAt {where}",
+    valuesAfter: "[draft] valuesAfter {where}",
+    valuesHere: "[draft] valuesHere",
+    afterRun: "[draft] afterRun",
+    afterMark: "[draft] afterMark {mark}",
+    atStart: "[draft] atStart",
   },
   table: {
     now: "Now",
@@ -792,6 +819,9 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
   prediction: {
     commit: "Check my prediction",
     again: "Predict again",
+    settingsCaption: "[draft] settingsCaption",
+    settingHeading: "[draft] settingHeading",
+    setting: "[draft] setting {n}",
     youSaid: "You chose {choice}.",
     circuitDid: "The circuit set {signal} to {value}.",
     match: "You were correct.",
@@ -1412,6 +1442,14 @@ export function useViewStrings(): ViewStrings {
 }
 
 /** Fills `{slot}`s in a template. A slot with no value is left as written. */
+/**
+ * "You chose …" with a prediction's option: an option written as a sentence keeps its own full
+ * stop, and the line adds none of its own after it.
+ */
+export function youChose(template: string, choice: string): string {
+  return format(template, { choice: choice.replace(/\.$/, "") });
+}
+
 export function format(template: string, slots: Readonly<Record<string, string | number>>): string {
   return template.replace(/\{(\w+)\}/g, (whole, key: string) => {
     const v = slots[key];

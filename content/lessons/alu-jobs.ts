@@ -78,6 +78,7 @@ export const aluJobs: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.predictCountDown,
           props: {
+            show: "circuit",
             question: PROSE.p1Question,
             libraryId: "alu8-4-block",
             run: [

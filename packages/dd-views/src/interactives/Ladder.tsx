@@ -31,7 +31,7 @@ import { PredictionChallenge } from "@platform/primitives";
 import type { Word } from "@dd/sim";
 
 import { CircuitView } from "../CircuitView";
-import { format, useViewStrings } from "../strings";
+import { format, useViewStrings, youChose } from "../strings";
 import { lineText } from "./MachineAtWork";
 import { withProps } from "./props";
 
@@ -144,7 +144,7 @@ export const Ladder = withProps(
                     role="status"
                     className={stored.choice === answer ? "prediction-match" : "prediction-nomatch"}
                   >
-                    {format(strings.prediction.youSaid, { choice: optionLabel(stored.choice) })}{" "}
+                    {youChose(strings.prediction.youSaid, optionLabel(stored.choice))}{" "}
                     {format(t.answer, { answer: optionLabel(answer) })}{" "}
                     {stored.choice === answer
                       ? strings.prediction.match

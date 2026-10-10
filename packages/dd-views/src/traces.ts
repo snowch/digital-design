@@ -2,7 +2,16 @@
 
 // Reading a trace: the value of a net at a time, and the segments of a lane for drawing.
 
-import { unknown, type Circuit, type NetId, type Trace, type Word } from "@dd/sim";
+import {
+  equal,
+  isKnown,
+  unknown,
+  type Circuit,
+  type NetId,
+  type Simulator,
+  type Trace,
+  type Word,
+} from "@dd/sim";
 
 /** The value of every net at time `t`: the last change at or before `t`, else X. */
 export function valuesAt(circuit: Circuit, trace: Trace, t: number): Word[] {
@@ -50,6 +59,47 @@ export function segmentsOf(
     overlay = e.cause === "overlay";
   }
   if (to > start) out.push({ from: start, to, value, ...(overlay ? { overlay: true } : {}) });
+  // A value that changed and changed back within one settle leaves two stretches of one value:
+  // drawn as one, so its label is written once, where the value differs from the stretch before.
+  const merged: Segment[] = [];
+  for (const sg of out) {
+    const last = merged.at(-1);
+    if (last && equal(last.value, sg.value) && !last.overlay === !sg.overlay)
+      merged[merged.length - 1] = { ...last, to: sg.to };
+    else merged.push(sg);
+  }
+  return merged;
+}
+
+/** The mark a rise of the clock gets while the reset is held: the diagram names it as the reset. */
+export const RESET_RISE = "↑RST";
+
+/** The label a clock step's rise is marked with: its own, the reset's, or the bare arrow. */
+export function riseLabel(sim: Simulator, label?: string): string {
+  if (label) return label;
+  const rst = sim.circuit.inputs.find((i) => i.name === "RST");
+  const v = rst ? sim.read(rst.net) : undefined;
+  return v && isKnown(v) && v.value === 1n ? RESET_RISE : "↑";
+}
+
+/**
+ * The marks as a diagram writes them: each bare rise numbered from the last reset (↑1, ↑2), the
+ * reset's rise named, a fall left unnamed, a step's own label kept.
+ */
+export function marksShown(
+  marks: readonly { readonly time: number; readonly label: string }[],
+  resetLabel: string,
+): { time: number; label: string }[] {
+  let n = 0;
+  const out: { time: number; label: string }[] = [];
+  for (const m of marks) {
+    if (m.label === "↓" || m.label === "") continue;
+    if (m.label === RESET_RISE) {
+      n = 0;
+      out.push({ time: m.time, label: resetLabel });
+    } else if (m.label === "↑") out.push({ time: m.time, label: `↑${++n}` });
+    else out.push({ time: m.time, label: m.label });
+  }
   return out;
 }
 

@@ -12,7 +12,7 @@ import { Prose, type InteractiveProps } from "@platform/lesson-runtime";
 import { Simulator, bit0, bit1, type Circuit } from "@dd/sim";
 
 import { CircuitView } from "../CircuitView";
-import { format, useViewStrings } from "../strings";
+import { useViewStrings } from "../strings";
 import { TimingDiagram } from "../TimingDiagram";
 import { valuesAt } from "../traces";
 import { withProps } from "./props";
@@ -90,7 +90,10 @@ export const LatchInternals = withProps(
           to={data.until}
           cursor={cursor}
           onCursor={setCursor}
-          title={strings.internals.diagramTitle}
+          // Time in units, as 4.1 defines them; the axis marks the clock's rises.
+          units={{
+            marks: data.script.filter((s) => s.input === "CLK" && s.value === 1).map((s) => s.time),
+          }}
           {...(data.signals ? { signals: data.signals } : {})}
         />
         <div className="internals-actions">
@@ -110,7 +113,6 @@ export const LatchInternals = withProps(
           >
             {strings.internals.next}
           </button>
-          <span className="internals-time">{format(strings.internals.time, { time: cursor })}</span>
         </div>
         {phase && <Prose markdown={phase.text} className="internals-phase" />}
         <CircuitView

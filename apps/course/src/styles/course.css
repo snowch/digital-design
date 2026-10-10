@@ -978,10 +978,14 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
 .timing-diagram .axis line {
   stroke: var(--border-strong);
 }
-.timing-diagram .tick-label,
 .timing-diagram .mark-label {
   fill: var(--fg-muted);
   font-size: 12px;
+}
+/* The axis says what the lesson counts, with its marks (the run's steps, or 4.1's units): the
+   shared timeline's bare numbers, a lone "0" at the top of a short run, read as a value. */
+.timing-diagram .tick-label {
+  display: none;
 }
 .timing-lanes .lane-label {
   font-weight: 700;

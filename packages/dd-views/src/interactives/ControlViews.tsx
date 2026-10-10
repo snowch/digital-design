@@ -24,7 +24,7 @@ import { Prose, useSlot, type InteractiveProps } from "@platform/lesson-runtime"
 import { PredictionChallenge } from "@platform/primitives";
 import { Simulator, word, type Circuit } from "@dd/sim";
 
-import { format, useViewStrings, type ControlStrings } from "../strings";
+import { format, useViewStrings, type ControlStrings, youChose } from "../strings";
 import { withProps } from "./props";
 
 type Outs = Record<string, number | undefined>;
@@ -292,7 +292,7 @@ export const KindEdges = withProps(
                     role="status"
                     className={stored.choice === answer ? "prediction-match" : "prediction-nomatch"}
                   >
-                    {format(strings.prediction.youSaid, { choice: optionLabel(stored.choice) })}{" "}
+                    {youChose(strings.prediction.youSaid, optionLabel(stored.choice))}{" "}
                     {format(strings.machine10.edgesAnswer, { answer: optionLabel(answer) })}{" "}
                     {stored.choice === answer
                       ? strings.prediction.match

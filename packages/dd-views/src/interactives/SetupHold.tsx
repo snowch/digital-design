@@ -181,7 +181,9 @@ export const SetupHold = withProps(
           from={data.edgeAt + data.show[0]}
           to={data.edgeAt + data.show[1]}
           shades={shades}
-          title={strings.setupHold.diagramTitle}
+          // The red line stands at the clock's edge, and the axis counts units from it.
+          cursor={data.edgeAt}
+          units={{ ticks: 10, origin: data.edgeAt }}
           table={false}
         />
         <p role="status" className="setup-hold-result">

@@ -39,7 +39,7 @@ import { FaultInjector, PredictionChallenge } from "@platform/primitives";
 import type { Simulator, Word } from "@dd/sim";
 
 import { CircuitView } from "../CircuitView";
-import { format, useViewStrings, type MeetStrings } from "../strings";
+import { format, useViewStrings, type MeetStrings, youChose } from "../strings";
 import { withProps } from "./props";
 
 /** How many lines Run makes before it gives up on a program that never stops. */
@@ -344,7 +344,7 @@ export const MachineAtWork = withProps(
                     role="status"
                     className={stored.choice === answer ? "prediction-match" : "prediction-nomatch"}
                   >
-                    {format(strings.prediction.youSaid, { choice: optionLabel(stored.choice) })}{" "}
+                    {youChose(strings.prediction.youSaid, optionLabel(stored.choice))}{" "}
                     {format(t.answer, { answer: optionLabel(answer) })}{" "}
                     {stored.choice === answer
                       ? strings.prediction.match

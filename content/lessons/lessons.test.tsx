@@ -58,6 +58,28 @@ describe("the course's lessons", () => {
     expect(marked).toEqual([]);
   });
 
+  it("draws a timing diagram only where time matters, and none before 4.1, which introduces it", () => {
+    // The figures that draw a timing diagram: a prediction shown as one, and the kinds that always do.
+    const TIMING = new Set(["setup-hold", "latch-internals", "edge-timeline"]);
+    const problems: string[] = [];
+    for (const l of LESSONS)
+      for (const s of l.sections)
+        for (const x of s.interactives) {
+          const p = x.props as {
+            show?: string;
+            run?: readonly { clock?: string }[];
+          };
+          const timing =
+            TIMING.has(x.kind) || (x.kind === "prediction" && (p.show ?? "timing") === "timing");
+          if (!timing) continue;
+          if (l.module < 4) problems.push(`${l.id} ${x.id}: a timing diagram before 4.1`);
+          const run = p.run ?? [];
+          if (x.kind === "prediction" && run.length === 1 && !run[0]?.clock)
+            problems.push(`${l.id} ${x.id}: one setting, no clock, drawn against time`);
+        }
+    expect(problems).toEqual([]);
+  });
+
   it("uses no rationed term before the lesson that introduces it", () => {
     expect(termProblems(LESSONS)).toEqual([]);
   });
