@@ -193,7 +193,7 @@ export interface Machine10Strings {
 }
 
 export const MACHINE10_STRINGS: Machine10Strings = {
-  heldNote: "[draft] heldNote",
+  heldNote: "Check the prediction above first: the words in this figure would answer it.",
   singleName: "Module 8's machine",
   multiName: "Module 9's machine",
   seenCaption: "What a program can see",

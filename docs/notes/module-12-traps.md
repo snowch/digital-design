@@ -675,6 +675,20 @@ formatting, copyright, the platform copy, types and the build passed; Vitest 129
 passed; the browser 868 passed, 56 skipped, 10 failed, the ten stored screenshots that fail in a
 build container on `main` too. `EXIT 1`, from those ten alone.
 
+### The third reading (10 October, evening)
+
+Blocking, and mended first: the second reading's stop check counted a `stop` above the line
+`handler` as the start's in every lesson, so 12.1, 12.4, 12.5 and 12.6 failed correct handlers
+whose stops sat there, and 12.8 failed a runner whose first handler line had another name. The
+check `stopAt` is the old rule again: any `stop` of the learner's own is the handler's. 12.8 alone
+asks a second check, `stopIn`, which reads the start's lines as those above the line `handler`;
+its task, its outline and its empty program say so, and its feedback names the reason when it
+fails (no line is named `handler`, or the stop comes at or after it). `stop-check.test.ts` pins
+the five lessons' results for these attempts. Also: 12.8 says the runner is the handler its
+question asks for, and its starting texts and an objective use the page's names; 12.1 and 12.6 say
+where their drawings sit on a phone; 12.5 and 12.6 say what a bar is; the interrupts band has no
+outline, which crossed it at every row.
+
 ## The mechanical walk
 
 The built site, every Module 12 page at 375 and 1280 pixels, light and dark, with every run

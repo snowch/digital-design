@@ -200,6 +200,16 @@ boxes are shorter, so the marked room is on the screen with the buttons. Two ans
 their predictions went: 11.5's depth chart counted the calls at load, and 10.2's layouts named the
 field that moves; that sentence moved to 10.2's explanation.
 
+The third reading (10 October, evening; brief Y7). 11.5's depth chart draws its marks for the calls,
+which can be counted, and its sentence about them, only once the prediction is checked, and the
+investigation's lead no longer counts the pauses. On a phone (375 by 812) its stack's box holds the
+newest call's four words and the marked room stays on the screen at every one of the 13 pauses,
+which a test now checks; the listing's box is 7rem, the rooms' 3.5rem, and the rooms' panel shows
+no title of its own there. 11.3's short run is drawn whole on a wide screen. 11.4 draws R14's place
+at `7C0`, past the RAM, apart from the popped words, whose hidden text now names their hexadecimal.
+10.2's layouts hold the prediction's own instruction, and its packed words wait, until the
+prediction is checked; its call bullet says a field moves.
+
 ## What was reused, built, and could be extracted
 
 Reused unchanged: the reference machine (`machine.ts`, with Module 9's options), the schema, the
