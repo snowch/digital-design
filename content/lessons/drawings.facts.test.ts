@@ -14,7 +14,14 @@ import {
   timelineRun,
   type InputPlan,
 } from "@dd/dd-model";
-import { doorReturns, laneNames, lanesOf, roomsFrom, type LaneItem } from "@dd/dd-views";
+import {
+  doorReturns,
+  laneNames,
+  lanesOf,
+  roomsFrom,
+  type LaneItem,
+  type LanesConfig,
+} from "@dd/dd-views";
 import { parseLesson, type LessonInput } from "@platform/lesson-schema";
 
 import { functions } from "./functions";
@@ -209,6 +216,63 @@ describe("what the figures pass draws", () => {
       "again → handler: PC ← 088",
       "handler → program: PC ← 10C",
     ]);
+  });
+
+  it("12.6: each door choice's drawing, and the lanes it uses", () => {
+    const p = propsOf(nesting, "nest-saved") as {
+      program: string;
+      lanes: { lanes: { at: string; name: string; handler?: boolean }[]; again?: string };
+    };
+    const names = MODULE_12_NAMES(nesting, "nest-saved");
+    const lanes = laneNames(p.lanes);
+    const run = (door?: number) => {
+      const plan = { ...QUIET_INPUTS, ...(door !== undefined ? { doorOpensAt: door } : {}) };
+      const { program, edges } = timelineRun(p.program, plan, 400);
+      return lanesOf(edges, program!, p.lanes);
+    };
+    // The lanes a run enters: a lane it never enters takes no column in the drawing.
+    const entered = (door?: number) =>
+      plain(
+        [...new Set(run(door).flatMap((it) => (it.kind === "move" ? [it.from, it.to] : [it.lane])))]
+          .sort()
+          .map((k) => lanes[k]!),
+        names,
+      );
+    expect([5, 30, 60, undefined].map(entered)).toEqual([
+      ["start", "handler", "program"],
+      ["start", "handler", "program", "again"],
+      ["start", "handler", "program", "again"],
+      ["start", "handler", "program"],
+    ]);
+    const interrupts = (door?: number) =>
+      plain(
+        run(door)
+          .filter((it) => it.kind === "move" && it.what === "interrupt")
+          .map((it) => (it.kind === "move" ? `${lanes[it.from]} → ${lanes[it.to]}` : "")),
+        names,
+      );
+    expect([5, 30, 60, undefined].map(interrupts)).toEqual([
+      ["program → handler", "program → handler"],
+      ["handler → again", "handler → again"],
+      ["handler → again", "handler → again"],
+      [],
+    ]);
+  });
+
+  it("12.6, door at 30: the interrupts band starts at job 5's write to C0, before the door's arrow", () => {
+    const p = propsOf(nesting, "nest-saved") as {
+      program: string;
+      lanes: LanesConfig;
+    };
+    const { program, edges } = timelineRun(p.program, { ...QUIET_INPUTS, doorOpensAt: 30 }, 400);
+    const items = lanesOf(edges, program!, { ...p.lanes, interrupts: true });
+    const k = items.findIndex((it) => it.kind === "move" && it.what === "interrupt");
+    const before = items
+      .slice(0, k)
+      .filter((it) => it.kind === "stay")
+      .at(-1)!;
+    // The stretch just before the door's arrow is drawn with interrupts on, and begins at the write.
+    expect([before.c0 & 2, edges[before.first]?.line?.trim()]).toEqual([2, "C0 <= R1"]);
   });
 
   it("12.8: run 2's first program faults, the handler starts the second, which ends with job 4", () => {

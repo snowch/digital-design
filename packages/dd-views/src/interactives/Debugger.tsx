@@ -745,7 +745,8 @@ export function DebuggerView({
             )}
           </section>
         )}
-        {/* On a phone the drawings follow the watch, or the stack where there is one. */}
+        {/* On a phone the drawings follow the watch, or the stack where there is one; with neither,
+            they follow the control registers and the events, which the steps ask a reader to read. */}
         {options.watch && !options.stack && nearPhone}
         {(options.memory ?? []).map((region) => (
           <MemoryPanel key={region.from} region={region} program={program} state={state} t={t} />
@@ -759,7 +760,7 @@ export function DebuggerView({
             drawn={options.stackDrawn === true}
           />
         )}
-        {(options.stack || !options.watch) && nearPhone}
+        {options.stack && nearPhone}
         {options.control && (
           <ControlPanel
             state={state}
@@ -773,6 +774,7 @@ export function DebuggerView({
             {doorChoice}
           </EventsPanel>
         )}
+        {!options.watch && !options.stack && nearPhone}
         <div className="debugger-panels">
           {uses.devices && (
             <section className="debugger-panel" aria-label={t.devicesCaption}>

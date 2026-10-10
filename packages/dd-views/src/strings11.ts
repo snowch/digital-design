@@ -153,6 +153,8 @@ export interface Machine11Strings {
     readonly moveTrap: string;
     readonly moveInterrupt: string;
     readonly moveResume: string;
+    /** The start's `resume`: it starts a program that has not yet run. */
+    readonly moveStart: string;
     readonly moveJump: string;
     /** A mark in words: {lane} is where it is; {label} what a store wrote. */
     readonly markDoor: string;
@@ -397,6 +399,7 @@ export const MACHINE11_STRINGS: Machine11Strings = {
     moveInterrupt:
       "an interrupt comes while {from} runs, and the machine goes to {to}: {transfer}.",
     moveResume: "{from} resumes {to}: {transfer}.",
+    moveStart: "[draft] moveStart {from} {to} {transfer}",
     moveJump: "{from} goes back to {to}: {transfer}.",
     markDoor: "the freezer door opens while {lane} runs.",
     markTimer: "the timer reaches 0 while {lane} runs.",

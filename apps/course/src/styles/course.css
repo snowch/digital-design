@@ -3215,6 +3215,10 @@ svg.run-lanes-drawing {
   .debugger-near-desk {
     display: block;
   }
+  /* A listing with a drawing under it is shorter, so the drawing's newest row stays on the screen. */
+  .debugger-listing-wrap:not(.rows-open):has(~ .debugger-near-desk) {
+    max-height: 22rem;
+  }
   .debugger-near-phone {
     display: none;
   }
@@ -3229,6 +3233,11 @@ svg.run-lanes-drawing {
 /* On a phone a trap timeline's drawing and its list are stacked under the buttons: both kept short,
    so the newest row of each is on the screen with the buttons. */
 .trap-timeline-body .run-lanes-box {
+  max-height: 9rem;
+}
+/* Under a debugger's listing the drawing is short, so its newest row is on the screen with the
+   buttons however long the listing above it. */
+.debugger-near .run-lanes-box {
   max-height: 9rem;
 }
 .trap-timeline-body .trap-edges {
@@ -3250,18 +3259,33 @@ svg.run-lanes-drawing {
     align-items: start;
   }
 }
-.run-lanes-drawing .lane-interrupts-on,
+/* Hatched, in the drawing and in its key: the lanes' bars are solid --accent, so the band that says
+   interrupts are on takes a pattern no other mark uses. */
+.run-lanes-drawing .lane-hatch-ground {
+  fill: var(--bg);
+}
+.run-lanes-drawing .lane-hatch {
+  stroke: var(--fg);
+  stroke-width: 2;
+}
 .run-lanes-legend .lane-interrupts-on {
-  fill: var(--accent);
-  background: var(--accent);
+  background: repeating-linear-gradient(45deg, var(--fg) 0 1.5px, var(--bg) 1.5px 3px);
+  outline: 1px solid var(--fg-muted);
+}
+.run-lanes-drawing .lane-interrupts-on {
+  stroke: var(--fg-muted);
+  stroke-width: 1;
 }
 .run-lanes-legend .lane-key-now {
   border-radius: 50%;
   background: var(--focus);
 }
-.run-lanes-drawing .lane-mark-stop rect,
-.run-lanes-drawing .lane-mark-cut rect {
+.run-lanes-drawing .lane-mark-stop rect {
   fill: var(--fg-muted);
+}
+.run-lanes-drawing .lane-mark-cut path {
+  stroke: var(--fg);
+  stroke-width: 2;
 }
 
 /* Memory drawn as boxes, the stack the same way, and the cold store as rooms (Module 11). */

@@ -160,10 +160,18 @@ test.describe("Module 12's wrong handlers", () => {
 
 /** Debuggers with a breakpoint, each with the panel its lead points at. */
 const LONG_DEBUGGERS = [
-  ["traps", "night-debugger", ".debugger-control"],
+  ["traps", "night-debugger", [".debugger-control"]],
+  // The failure experiment says "Watch C2": the control registers, and the drawing's newest item.
+  ["traps", "no-skip", [".debugger-control", ".run-lanes-drawing > :last-child"]],
   // The panel's readings: the door's time below them is chosen before a run, not during it.
-  ["interrupts", "door-debugger", ".debugger-events dl"],
-  ["nesting", "nest-saved", ".debugger-memory"],
+  ["interrupts", "door-debugger", [".debugger-events dl"]],
+  // The steps read C1, C2 and the words at 410 and 418. On a phone the drawing comes after
+  // them, further down; on a wide screen it is under the listing, beside them.
+  [
+    "nesting",
+    "nest-saved",
+    [".debugger-memory", ".debugger-control", "wide: .run-lanes-drawing > :last-child"],
+  ],
 ] as const;
 
 test.describe("Module 12's lab", () => {
@@ -179,7 +187,7 @@ test.describe("Module 12's lab", () => {
         height,
       );
     };
-    for (const [lessonId, id, view] of LONG_DEBUGGERS) {
+    for (const [lessonId, id, views] of LONG_DEBUGGERS) {
       await openLesson(page, lessonId);
       const figure = page.locator(`[data-interactive="${id}"]`);
       const actions = figure.locator(".debugger-actions");
@@ -188,7 +196,14 @@ test.describe("Module 12's lab", () => {
       const listing = figure.locator(".debugger-listing-wrap");
       const check = async () => {
         await inView(actions, `${lessonId}'s buttons`);
-        await inView(figure.locator(view).first(), `${lessonId}'s ${view}`);
+        // Each view the steps name, the drawing's newest item among them, at the width shown.
+        for (const named of views) {
+          const wideOnly = named.startsWith("wide: ");
+          if (wideOnly && (page.viewportSize()?.width ?? 0) < 960) continue;
+          const view = named.replace(/^wide: /, "");
+          const shown = figure.locator(view).filter({ visible: true });
+          await inView(shown.last(), `${lessonId} ${id}'s ${view}`);
+        }
         const row = await figure.locator("tr[aria-current]").boundingBox();
         const wrap = await listing.boundingBox();
         expect(row!.y).toBeGreaterThanOrEqual(wrap!.y);

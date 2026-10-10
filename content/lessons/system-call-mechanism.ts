@@ -44,7 +44,8 @@ export function runAsks(c: RunCase): Record<string, string> {
     // C1 holds the status of the last program at its last trap: user mode, interrupts off.
     C1: "00",
     ...(c.kept ?? {}),
-    stopAt: "handler",
+    // The stop after the last program is the start's: a `stop` among the handler's lines fails.
+    stopAt: "start",
   };
 }
 
