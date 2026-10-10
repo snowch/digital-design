@@ -5,7 +5,7 @@
 // jobs, the controller, the trap logic, the control registers, the register file, the ALU and the
 // condition) and writing the small parts between them. One challenge with three ways in, each a
 // button above the text: the outline (the course's text with six joins left out, each marked),
-// the parts (every part placed, no port joined) and nothing (the machine's ports alone). Five
+// the parts (every part placed, no port joined) and nothing (the machine's ports alone). Seven
 // programs, each reaching a different part, run on the learner's machine and on the model,
 // compared after every instruction and every trap; a failure names the first line after which
 // they disagree, and what differs, never the join.

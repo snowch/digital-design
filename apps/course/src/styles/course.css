@@ -549,17 +549,23 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
 .circuit-scroll.words-hidden > .circuit .pin rect {
   vector-effect: non-scaling-stroke;
 }
-.circuit-overview .wire path:not(.wire-hit):not(.wire-halo),
-.circuit-scroll.words-hidden > .circuit .wire path:not(.wire-hit):not(.wire-halo) {
+.circuit-overview .wire path:not(.wire-hit):not(.wire-halo):not(.wire-route),
+.circuit-scroll.words-hidden > .circuit .wire path:not(.wire-hit):not(.wire-halo):not(.wire-route) {
   stroke-width: 1px;
   shape-rendering: auto;
 }
-.circuit-overview .wire-high path:not(.wire-hit):not(.wire-halo),
-.circuit-scroll.words-hidden > .circuit .wire-high path:not(.wire-hit):not(.wire-halo) {
+.circuit-overview .wire-high path:not(.wire-hit):not(.wire-halo):not(.wire-route),
+.circuit-scroll.words-hidden
+  > .circuit
+  .wire-high
+  path:not(.wire-hit):not(.wire-halo):not(.wire-route) {
   stroke-width: 1.6px;
 }
-.circuit-overview .wire-word path:not(.wire-hit):not(.wire-halo),
-.circuit-scroll.words-hidden > .circuit .wire-word path:not(.wire-hit):not(.wire-halo) {
+.circuit-overview .wire-word path:not(.wire-hit):not(.wire-halo):not(.wire-route),
+.circuit-scroll.words-hidden
+  > .circuit
+  .wire-word
+  path:not(.wire-hit):not(.wire-halo):not(.wire-route) {
   stroke-width: 2.2px;
 }
 .circuit-overview .part .box,
@@ -594,7 +600,7 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
 }
 /* Wires and signal levels are horizontal and vertical lines on whole pixels: drawn without
    anti-aliasing they stay sharp at any zoom, where a smoothed line blurs across two pixels. */
-.circuit .wire path:not(.wire-hit):not(.wire-halo),
+.circuit .wire path:not(.wire-hit):not(.wire-halo):not(.wire-route),
 .timing-diagram .level,
 .timing-diagram .lane-base,
 .timing-diagram .axis line,
@@ -627,7 +633,7 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
 }
 /* A wire that carries a word (a bus) is drawn wide in one colour: its value is a word, not a
    level, and the label at its source writes the bits. Module 3. */
-.circuit .wire-word path:not(.wire-hit):not(.wire-halo) {
+.circuit .wire-word path:not(.wire-hit):not(.wire-halo):not(.wire-route) {
   stroke: var(--wire-word);
   stroke-width: 5;
 }
@@ -641,11 +647,11 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
 .circuit .wire {
   cursor: pointer;
 }
-.circuit .wire path:not(.wire-hit):not(.wire-halo) {
+.circuit .wire path:not(.wire-hit):not(.wire-halo):not(.wire-route) {
   transition: stroke-width var(--motion);
 }
-.circuit .wire:hover path:not(.wire-hit):not(.wire-halo),
-.circuit .wire-hot path:not(.wire-hit):not(.wire-halo) {
+.circuit .wire:hover path:not(.wire-hit):not(.wire-halo):not(.wire-route),
+.circuit .wire-hot path:not(.wire-hit):not(.wire-halo):not(.wire-route) {
   stroke-width: 4;
 }
 .circuit .wire-halo {
@@ -2133,7 +2139,7 @@ button.bit {
   margin-right: 4px;
 }
 /* Module 8: a wire a stuck-at fault holds, drawn from its old driver, dashed in the fault colour. */
-.wire.wire-held > path:not(.wire-hit):not(.wire-halo) {
+.wire.wire-held > path:not(.wire-hit):not(.wire-halo):not(.wire-route) {
   stroke: var(--bad);
   stroke-dasharray: 6 4;
 }
@@ -3323,14 +3329,11 @@ svg.stack-depth {
 .lab-editor > .explorer-actions {
   flex-wrap: wrap;
 }
-/* The step controls and the line saying where the run is stay in reach while the drawing and the
-   tables under them scroll past. */
+/* The step controls and the line saying where the run is sit in the drawing's sticky band, above
+   its overview, so they stay in reach while the drawing scrolls past and nothing covers them. */
 .machine-steps {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background: var(--bg-raised);
-  padding: var(--space-1) 0;
+  padding: 0 0 var(--space-1);
+  margin-bottom: var(--space-1);
   border-bottom: 1px solid var(--border);
 }
 .machine-steps .debugger-status {
@@ -3381,8 +3384,13 @@ svg.stack-depth {
   margin: var(--space-1) 0;
   color: var(--fg-muted);
 }
-.circuit .wire-active path:not(.wire-hit):not(.wire-halo) {
-  stroke-width: 5;
+/* Module 13: the wires the next edge uses, under a band of the accent colour, which a bus shows as
+   plainly as a one-bit wire (a wider stroke did not: a bus is drawn wide already). */
+.circuit .wire-route {
+  stroke: var(--accent) !important;
+  stroke-width: 13 !important;
+  stroke-dasharray: none !important;
+  opacity: 0.35;
 }
 .circuit .wire-pinned .wire-halo {
   opacity: 0.45;
@@ -3390,12 +3398,49 @@ svg.stack-depth {
 .fault-outcome {
   margin-top: var(--space-2);
 }
-.machine-trace-table td {
-  overflow-wrap: anywhere;
-}
+/* A port in the table of levels is a button that pins its wire. A phone breaks the cell between
+   ports, never inside a port's digits. */
 .machine-trace-table .trace-port {
   display: inline-block;
-  margin-right: var(--space-2);
+  margin: 0 var(--space-2) var(--space-1) 0;
+  padding: 0 var(--space-1);
+  min-height: 40px;
+  white-space: nowrap;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.machine-trace-table .trace-port:hover {
+  border-color: var(--border);
+}
+/* A port on the next edge's route, and a pinned one, marked as the drawing marks their wires. */
+.machine-trace-table .trace-port-route {
+  background: var(--accent-soft);
+}
+.machine-trace-table .trace-port-pinned {
+  border-color: var(--focus);
+  box-shadow: inset 0 0 0 1px var(--focus);
+}
+/* A row of the levels table names its wire: its heading pins that wire on the drawing. */
+.machine-row-wire {
+  font: inherit;
+  font-weight: 600;
+  color: var(--accent);
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 0;
+  min-height: 40px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.machine-row-pinned th,
+.machine-row-pinned td {
+  box-shadow: inset 3px 0 0 var(--focus);
 }
 .machine-closed-list {
   list-style: none;

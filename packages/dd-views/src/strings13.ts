@@ -77,6 +77,8 @@ export interface Machine13Strings {
   readonly stripEdge: string;
   /** Under the drawing: a wire can be pressed, and stays pinned as blocks open. */
   readonly pinNote: string;
+  /** A table row's button: {row}, the row's label; {wire}, the wire it reads. */
+  readonly rowPin: string;
   /** In a prediction's verdict, before the next edge: the explanation follows it. */
   readonly explainNext: string;
   readonly traceCaption: string;
@@ -154,9 +156,10 @@ export interface Machine13Strings {
   readonly capHalts: string;
   /** {a}, {b}. */
   readonly capNoStop: string;
+  /** {registers}: "R1", or "R1 and R2". */
+  readonly capUnknown: string;
   readonly capUnanswered: string;
   readonly capNoSetIf: string;
-  readonly capNoStore: string;
   readonly capNoEdge: string;
   /** For each trace question while the program fails one of its own tests. */
   readonly capFirst: string;
@@ -247,6 +250,7 @@ export const MACHINE13_STRINGS: Machine13Strings = {
   stripEarlier: "Earlier lines",
   stripLater: "Later lines",
   stripEdge: "Edge {n}, {state}",
+  rowPin: "[draft] {row}: pin the wire {wire} on the drawing",
   pinNote:
     "Press a wire to pin it. It stays marked as you open blocks, and its name and value show under the drawing, in hexadecimal for a word.",
   explainNext: 'Press "Next edge" to see why. The explanation appears after that edge.',
@@ -305,12 +309,13 @@ export const MACHINE13_STRINGS: Machine13Strings = {
     "With room A at {a} and room B at {b}, your program leaves {display} on the display and {lamps} on the lamps. The task asks for {wantDisplay} and {wantLamps}.",
   capHalts:
     "With room A at {a} and room B at {b}, your program halts with cause {cause} before it stops.",
+  capUnknown:
+    "[draft] With room A at {a} and room B at {b}, your program reaches `{line}` at `{address}`, where {registers} holds no value yet.",
   capNoStop:
     "With room A at {a} and room B at {b}, your program does not reach stop within its limit of instructions.",
   capUnanswered:
     "This question has no answer yet, or the answer is not a value of the form asked for.",
   capNoSetIf: "Your program has no set if, so this question has no edge to read.",
-  capNoStore: "Your program has no store, so this question has no edge to read.",
   capNoEdge: "Your program's run does not reach the edge this question names.",
   capFirst:
     "Your program does not do the task yet, so this question is not graded; make the program pass its tests first.",

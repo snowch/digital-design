@@ -101,7 +101,7 @@ export const capstone: LessonInput = {
             start: 12,
             // Opens on the whole machine, the datapath in view; opening it, the step the lead asks for,
             // shows the ALU and the condition block.
-            focus: ["datapath", "alu", "condition"],
+            focus: ["datapath/alu", "datapath/condition"],
             reveal: { text: PROSE.invAfter, scope: "datapath/alu" },
           },
         },

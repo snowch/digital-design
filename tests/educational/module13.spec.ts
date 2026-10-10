@@ -226,3 +226,30 @@ test.describe("the capstone", () => {
     await expect(section.getByRole("button", { name: T.capTrace })).toBeDisabled();
   });
 });
+
+// The step controls and the drawing's overview share one sticky band: with the drawing centred
+// in the window, "Next edge" is the element under its own centre, and the band leaves at least
+// half the screen to the drawing.
+test("the step controls stay pressable with the drawing centred", async ({ page }) => {
+  for (const [lessonId, id] of [
+    ["whole-machine", "load-joins"],
+    ["capstone", "cap-carry"],
+  ] as const) {
+    await openLesson(page, lessonId);
+    const figure = page.locator(`[data-interactive="${id}"]`);
+    const drawing = figure.locator("svg.circuit:not(.circuit-overview)").first();
+    await drawing.evaluate((el) => el.scrollIntoView({ block: "center" }));
+    const next = figure.getByRole("button", { name: T.nextEdge });
+    const box = (await next.boundingBox())!;
+    const hit = await page.evaluate(
+      ([x, y]) => document.elementFromPoint(x!, y!)?.closest("button")?.textContent ?? "",
+      [box.x + box.width / 2, box.y + box.height / 2],
+    );
+    expect(hit, id).toBe(T.nextEdge);
+    const band = (await figure.locator(".overview-bar").first().boundingBox())!;
+    expect(band.height, id).toBeLessThanOrEqual(page.viewportSize()!.height / 2);
+    const before = await figure.locator(".debugger-status").textContent();
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+    await expect(figure.locator(".debugger-status")).not.toHaveText(before ?? "");
+  }
+});

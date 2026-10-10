@@ -95,7 +95,7 @@ async function wireFaults(page: Page): Promise<WireFault[]> {
       const toSvg = svg.getScreenCTM()?.inverse();
       if (!toSvg) continue;
       const wires = [...svg.querySelectorAll("g.wires > g.wire")].map((g) => {
-        const path = g.querySelector("path:not(.wire-hit):not(.wire-halo)");
+        const path = g.querySelector("path:not(.wire-hit):not(.wire-halo):not(.wire-route)");
         return {
           net: (g as SVGGElement).dataset["net"] ?? "a wire",
           pts: points(path?.getAttribute("d") ?? ""),
@@ -258,7 +258,7 @@ async function crowding(page: Page): Promise<WireFault[]> {
       const toSvg = svg.getScreenCTM()?.inverse();
       if (!toSvg) continue;
       const wires = [...svg.querySelectorAll("g.wires > g.wire")].map((g) => {
-        const path = g.querySelector("path:not(.wire-hit):not(.wire-halo)");
+        const path = g.querySelector("path:not(.wire-hit):not(.wire-halo):not(.wire-route)");
         const pts = points(path?.getAttribute("d") ?? "");
         return {
           net: (g as SVGGElement).dataset["net"] ?? "a wire",

@@ -6,6 +6,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  edgeUses,
   datapathState,
   edgeView,
   libraryCircuit,
@@ -18,6 +19,7 @@ import { MACHINE13_STRINGS, compareText, makerText } from "@dd/dd-views";
 import type { Word } from "@dd/sim";
 
 import { SHOP, SHOP_INPUTS } from "./module13";
+import { PROSE } from "./whole-machine.prose";
 import { EDGES_PROGRAM, JOIN_ANSWERS, wholeMachine } from "./whole-machine";
 
 const hex = (w: Word | undefined) =>
@@ -200,5 +202,56 @@ describe("lesson whole-machine's facts", () => {
       // resume goes back to call system, over and over.
       expect(r.steps.filter((s) => s.text === "call system").length).toBeGreaterThan(5);
     });
+  });
+
+  it("marks the joins each edge of the load uses, at the top level", () => {
+    // The joins the drawing marks before each edge of `R1 <= word[sensorA]`, edges 8 to 12: the
+    // wires the edge uses, back from what it writes along each selector's chosen input.
+    const c = run.circuit;
+    const top = new Set<number>([...c.inputs, ...c.outputs].map((p) => p.net));
+    for (const b of c.composites)
+      if (!b.path.includes("/"))
+        for (const n of [...Object.values(b.inputs), ...Object.values(b.outputs)]) top.add(n);
+    const marked = (frame: number) => {
+      const used = edgeUses(c, run.frames[frame] ?? []);
+      return [...top]
+        .filter((n) => used.has(n))
+        .map((n) => c.nets[n]!.name)
+        .sort();
+    };
+    expect([7, 8, 9, 10, 11].map(marked)).toEqual([
+      ["ADDR", "FETCHED"],
+      ["IR"],
+      ["CONTROL", "IR"],
+      ["ADDR", "MQ", "SENSORA"],
+      [],
+    ]);
+  });
+
+  it("states the machine's sizes and sources as the motivation and generalisation do", () => {
+    const c = libraryCircuit("machine-final");
+    const block = (path: string) => c.composites.find((b) => b.path === path)!;
+    // The word register Y takes has five sources, MET the fifth, chosen by SET.
+    const y = Object.keys(block("datapath/yWord").inputs);
+    for (const source of ["HR", "HM", "PC4", "CWORD", "MET", "SET"]) expect(y).toContain(source);
+    expect(PROSE.motivation).toContain("fifth source");
+    // Sixteen registers of 64 bits: a 4-bit write address and 64-bit words.
+    const regs = block("datapath/registers");
+    expect([c.nets[regs.inputs["WA"]!]!.width, c.nets[regs.inputs["D"]!]!.width]).toEqual([4, 64]);
+    expect(PROSE.motivation).toContain("sixteen registers of 64 bits");
+    // Eight buses between the CPU and the memory port: three out, five back.
+    const port = block("port");
+    const cpu = ["control", "datapath"].map(block);
+    const drives = (net: number) => cpu.some((b) => Object.values(b.outputs).includes(net));
+    const reads = (net: number) => cpu.some((b) => Object.values(b.inputs).includes(net));
+    const out = Object.entries(port.inputs)
+      .filter(([, n]) => drives(n))
+      .map(([k]) => k);
+    const back = Object.entries(port.outputs)
+      .filter(([, n]) => reads(n))
+      .map(([k]) => k);
+    expect(out.sort()).toEqual(["ADDR", "CONTROL", "D"]);
+    expect(back.sort()).toEqual(["CAUSEF", "CAUSEM", "FETCHED", "MQ", "WAITING"]);
+    expect(PROSE.generalisation).toContain("Here there are eight");
   });
 });

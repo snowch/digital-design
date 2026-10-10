@@ -12,7 +12,7 @@
 // is a copy of the drawing as it is after each render, its words and its controls taken out.
 
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
-import type { KeyboardEvent, PointerEvent as ReactPointerEvent } from "react";
+import type { KeyboardEvent, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 
 import {
   WORDS_HIDDEN_BELOW,
@@ -209,11 +209,17 @@ export function OverviewStrip({
   width,
   height,
   zoom,
+  band,
 }: {
   box: HTMLDivElement | null;
   width: number;
   height: number;
   zoom: ZoomControl;
+  /**
+   * Module 13: controls that change the drawing (a run's step buttons and its status line), held
+   * in the same sticky band above the strip, so neither covers the other.
+   */
+  band?: ReactNode;
 }) {
   const strings = useViewStrings().circuit;
   const id = useId();
@@ -351,6 +357,7 @@ export function OverviewStrip({
 
   return (
     <div className="overview-bar" ref={bar}>
+      {band}
       <div className="overview-head">
         <span className="overview-label" id={`${id}-label`}>
           {strings.overviewLabel}

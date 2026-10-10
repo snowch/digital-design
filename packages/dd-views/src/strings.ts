@@ -11,6 +11,11 @@ import { MACHINE12_STRINGS, type Machine12Strings } from "./strings12";
 import { MACHINE13_STRINGS, type Machine13Strings } from "./strings13";
 
 export interface ViewStrings {
+  /** Any challenge whose grader stops with an error: the work fails, and says why. */
+  readonly grading: {
+    /** {why}: the grader's own reason. */
+    readonly couldNotRun: string;
+  };
   readonly circuit: {
     readonly where: string;
     readonly toggle: string;
@@ -691,6 +696,9 @@ export interface MeetStrings {
 }
 
 export const DEFAULT_VIEW_STRINGS: ViewStrings = {
+  grading: {
+    couldNotRun: "[draft] The tests could not run: {why}",
+  },
   circuit: {
     where: "Which block you are viewing",
     toggle: "Toggle between 0 and 1.",

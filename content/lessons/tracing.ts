@@ -37,6 +37,8 @@ const TRACE = {
   levels: false,
   trace: true,
   shown: [1, 2, 3, 4, 5],
+  // Every lead here starts inside the datapath: it opens in view, on a phone too.
+  focus: ["datapath"],
 };
 
 export const tracing: LessonInput = {

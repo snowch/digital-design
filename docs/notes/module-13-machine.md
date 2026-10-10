@@ -196,8 +196,8 @@ machine's text elaborates in about 0.1 s and runs about 70 edges a second.
 
 ## What would be changed
 
-- The capstone's questions ask about the first set if and the first store; a program with a set
-  if inside a loop answers about its first pass. More questions, chosen per program, would need
+- The capstone's questions ask about the first set if, paused before its ALU edge; a program with
+  a set if inside a loop answers about its first pass. More questions, chosen per program, would need
   the trace figure to say which pass.
 - The lab's tests run every program on every grade. A cache by text across reloads would make a
   reload's re-grade free.

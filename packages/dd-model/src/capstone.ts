@@ -2,9 +2,10 @@
 
 // Module 13's capstone: a program of the learner's own for the shop, run on the instruction-level
 // model to see that it does the task, and on the whole machine (`machine-final`) to answer
-// questions that only a trace answers. Each question names a wire at an edge of an instruction
-// the program is sure to have (its first set if, its first store), and its answer is read off the
-// recorded run of the learner's own program, so no two learners' answers need be the same.
+// questions about its own run that a trace answers directly. Each question names a wire paused
+// before the ALU edge of the instruction the program is sure to have, its first set if, and its
+// answer is read off the recorded run of the learner's own program, so no two learners' answers
+// need be the same.
 
 import { assembleChecked, type Program } from "./assemble";
 import { recordRun, type RecordedRun } from "./final-run";
@@ -26,8 +27,16 @@ export interface ModelEnd {
   readonly end:
     | { readonly kind: "stop" }
     | { readonly kind: "halt"; readonly cause: number }
+    | { readonly kind: "limit" }
+    /**
+     * The model refused an instruction that reads a register no instruction has written yet: a
+     * branch, a jump or an address, which the machine cannot work out from an unknown word.
+     */
     | {
-        readonly kind: "limit";
+        readonly kind: "unknown";
+        readonly line: string;
+        readonly address: number;
+        readonly registers: readonly number[];
       };
 }
 
@@ -39,7 +48,17 @@ export function modelEnd(
 ): ModelEnd {
   let s: CpuState = resetMachine(program.rom);
   const inputs = { ...QUIET_INPUTS, ...sensors };
-  for (let k = 0; k < limit && !s.stopped; k++) s = step(s, inputs, MODULE_13).state;
+  for (let k = 0; k < limit && !s.stopped; k++) {
+    try {
+      s = step(s, inputs, MODULE_13).state;
+    } catch {
+      return {
+        display: BigInt.asIntN(64, s.display),
+        lamps: s.lamps,
+        end: unknownAt(program, s),
+      };
+    }
+  }
   const reason = s.stopped?.reason;
   return {
     display: BigInt.asIntN(64, s.display),
@@ -49,6 +68,21 @@ export function modelEnd(
       : reason.kind === "trap"
         ? { kind: "halt", cause: reason.cause }
         : { kind: "stop" },
+  };
+}
+
+/** Where the model refused: the line at the PC, and its registers that hold no value yet. */
+function unknownAt(program: Program, s: CpuState): ModelEnd["end"] {
+  const line = program.lines.find((l) => BigInt(l.address) === s.pc);
+  const word = line?.instruction ?? 0;
+  // The fields A and B (`docs/isa.md`): the registers an instruction reads.
+  const read = [(word >>> 20) & 15, (word >>> 16) & 15];
+  const unknown = [...new Set(read)].filter((r) => s.regs[r] === undefined);
+  return {
+    kind: "unknown",
+    line: line?.text ?? "",
+    address: Number(s.pc),
+    registers: unknown.length ? unknown : read.slice(0, 1),
   };
 }
 
@@ -86,14 +120,14 @@ export const CAPSTONE_TRACE_INPUTS = { SENSORA: -184, SENSORB: -250 } as const;
 const kindOf = (word: number) => (word >>> 28) & 15;
 
 /** The first step of a run whose instruction is of a kind, by its word. */
-function firstStep(run: RecordedRun, instruction: "setIf" | "store") {
+function firstStep(run: RecordedRun) {
   const words = new Map(
     run.program.lines
       .filter((l) => l.instruction !== undefined)
       .map((l) => [BigInt(l.address), l.instruction as number]),
   );
-  // Set if is kind A; a store is kind 4 (`docs/isa.md`).
-  const want = instruction === "setIf" ? 10 : 4;
+  // Set if is kind A (`docs/isa.md`).
+  const want = 10;
   return run.steps.find((s) => {
     const w = words.get(s.pc);
     return w !== undefined && kindOf(w) === want;
@@ -101,13 +135,12 @@ function firstStep(run: RecordedRun, instruction: "setIf" | "store") {
 }
 
 /** Why a question has no answer for a program, or its answer as the learner would write it. */
-export type CapstoneAnswer =
-  { readonly answer: string } | { readonly missing: "setIf" | "store" | "edge" };
+export type CapstoneAnswer = { readonly answer: string } | { readonly missing: "setIf" | "edge" };
 
 /** A question's answer, read off the run of the learner's program. */
 export function capstoneAnswer(run: RecordedRun, question: CapstoneQuestion): CapstoneAnswer {
   const q = CAPSTONE_QUESTIONS[question];
-  const s = firstStep(run, q.instruction);
+  const s = firstStep(run);
   if (!s) return { missing: q.instruction };
   // The frame before the named edge: the values on the wires while the controller is in it.
   let at: number | undefined;

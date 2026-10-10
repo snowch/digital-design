@@ -76,6 +76,13 @@ export interface CircuitViewProps {
    * close: a net keeps its number at every level, so its value shows wherever the wire is drawn.
    */
   readonly pinned?: number;
+  /** Module 13: the parts a pinned word is joined from or split into, marked with it. */
+  readonly pinnedParts?: ReadonlySet<number>;
+  /**
+   * Module 13: controls that change the drawing, kept at the top of the window with the overview
+   * while the drawing is on screen (`OverviewStrip`'s band).
+   */
+  readonly band?: ReactNode;
   readonly onPin?: (net: number | undefined) => void;
   /** Module 13: the nets marked as in use, the ones the next edge changes. */
   readonly active?: ReadonlySet<number>;
@@ -222,6 +229,8 @@ export function CircuitView({
   focus,
   pinned,
   onPin,
+  pinnedParts,
+  band,
   active,
 }: CircuitViewProps) {
   const written = (v: Word | undefined) =>
@@ -403,7 +412,17 @@ export function CircuitView({
           onGo={onScope}
         />
       )}
-      {large && <OverviewStrip box={box} width={scene.width} height={scene.height} zoom={zoom} />}
+      {large ? (
+        <OverviewStrip
+          box={box}
+          width={scene.width}
+          height={scene.height}
+          zoom={zoom}
+          {...(band !== undefined ? { band } : {})}
+        />
+      ) : (
+        band !== undefined && <div className="overview-bar">{band}</div>
+      )}
       {large ? (
         <p className="scroll-note">{strings.circuit.zoomNote}</p>
       ) : (
@@ -443,7 +462,7 @@ export function CircuitView({
               return (
                 <g
                   key={i}
-                  className={`wire wire-${level}${wide ? " wire-word" : ""}${isHot ? " wire-hot" : ""}${held ? " wire-held" : ""}${net !== undefined && active?.has(net) ? " wire-active" : ""}${onPin && net !== undefined && net === pinned ? " wire-pinned" : ""}`}
+                  className={`wire wire-${level}${wide ? " wire-word" : ""}${isHot ? " wire-hot" : ""}${held ? " wire-held" : ""}${net !== undefined && active?.has(net) ? " wire-active" : ""}${onPin && net !== undefined && (net === pinned || pinnedParts?.has(net)) ? " wire-pinned" : ""}`}
                   data-net={name}
                   role="button"
                   tabIndex={0}
@@ -461,7 +480,14 @@ export function CircuitView({
                   }}
                 >
                   <title>{value ? `${name} = ${valueLabel(value)}` : name}</title>
-                  {isHot && <path d={w.d} fill="none" className="wire-halo" />}
+                  {net !== undefined && active?.has(net) && (
+                    // Module 13: a wire the next edge uses, under a band of colour, so a bus
+                    // (already drawn wide) shows the mark as plainly as a one-bit wire.
+                    <path d={w.d} fill="none" className="wire-route" />
+                  )}
+                  {(isHot || (net !== undefined && pinnedParts?.has(net))) && (
+                    <path d={w.d} fill="none" className="wire-halo" />
+                  )}
                   <path d={w.d} fill="none" className="wire-hit" />
                   <path d={w.d} fill="none" />
                   <circle cx={w.end.x} cy={w.end.y} r={3} />

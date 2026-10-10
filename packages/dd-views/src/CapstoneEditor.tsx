@@ -18,6 +18,7 @@ import {
   modelEnd,
   readCapstoneAnswer,
   type CapstoneQuestion,
+  type Program,
 } from "@dd/dd-model";
 import type { Challenge, Interactive, Lesson } from "@platform/lesson-schema";
 import {
@@ -53,6 +54,32 @@ function runOf(source: string) {
 
 const lampsText = (n: number) => n.toString(2).padStart(3, "0");
 
+/** The model's refusal, in words: the line, its address, and the registers that hold nothing. */
+function unknownText(
+  t: ViewStrings["machine13"],
+  rooms: { readonly a: string; readonly b: string },
+  end: { readonly line: string; readonly address: number; readonly registers: readonly number[] },
+): string {
+  const names = end.registers.map((r) => `R${r}`);
+  return format(t.capUnknown, {
+    ...rooms,
+    line: end.line,
+    address: end.address.toString(16).toUpperCase().padStart(3, "0"),
+    registers:
+      names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names.at(-1)}` : (names[0] ?? ""),
+  });
+}
+
+/** Why the trace cannot run the program at the trace's readings, or nothing if it can. */
+function traceRefusal(program: Program, t: ViewStrings["machine13"]): string | undefined {
+  const a = BigInt(CAPSTONE_TRACE_INPUTS.SENSORA);
+  const b = BigInt(CAPSTONE_TRACE_INPUTS.SENSORB);
+  const end = modelEnd(program, { sensorA: a, sensorB: b });
+  return end.end.kind === "unknown"
+    ? unknownText(t, { a: String(a), b: String(b) }, end.end)
+    : undefined;
+}
+
 export function gradeCapstone(
   challenge: Challenge,
   artifact: { readonly text?: string; readonly answers?: Readonly<Record<string, string>> },
@@ -78,8 +105,17 @@ export function gradeCapstone(
     };
   const answers = answersOf(challenge, artifact as never);
   const failures: VerdictFailure[] = [];
+  // A verdict is plain text: a label's or a sentence's code marks go, as in every answer's verdict.
+  const plain = (text: string) => text.replace(/`([^`]*)`/g, "$1");
   const fail = (index: number, label: string, detail: string) =>
-    failures.push({ index, label, inputs: {}, actual: {}, expected: {}, detail });
+    failures.push({
+      index,
+      label: plain(label),
+      inputs: {},
+      actual: {},
+      expected: {},
+      detail: plain(detail),
+    });
   // The program's cases first; a trace question is graded only against a program that does the
   // task, since its answers are read off that program's run.
   const programCase = (c: (typeof cases)[number]): string | undefined => {
@@ -90,6 +126,7 @@ export function gradeCapstone(
     if (end.end.kind === "halt")
       return format(t.capHalts, { ...rooms, cause: end.end.cause.toString(16).toUpperCase() });
     if (end.end.kind === "limit") return format(t.capNoStop, rooms);
+    if (end.end.kind === "unknown") return unknownText(t, rooms, end.end);
     const want = { display: String(c.expect["display"]), lamps: Number(c.expect["lamps"]) };
     if (String(end.display) === want.display && end.lamps === want.lamps) return undefined;
     return format(t.capWrong, {
@@ -105,12 +142,7 @@ export function gradeCapstone(
     const given = readCapstoneAnswer(question, answers[question] ?? "");
     if (given === undefined) return t.capUnanswered;
     const found = capstoneAnswer(runOf(text), question);
-    if ("missing" in found)
-      return found.missing === "setIf"
-        ? t.capNoSetIf
-        : found.missing === "store"
-          ? t.capNoStore
-          : t.capNoEdge;
+    if ("missing" in found) return found.missing === "setIf" ? t.capNoSetIf : t.capNoEdge;
     return given === found.answer ? undefined : (t.capLevels[question] ?? "");
   };
   const programDetails = cases.map((c) =>
@@ -152,12 +184,16 @@ export function CapstoneEditor(props: ChallengeEditorProps) {
               inputs: CAPSTONE_TRACE_INPUTS,
               trace: true,
               shown: [1, 2, 3, 4, 5, 6, 7],
+              // The questions' wires: the ALU, the condition block and HM, in the datapath.
+              focus: ["datapath/alu", "datapath/condition", "datapath/heldM"],
               devices: true,
             },
           } as unknown as Interactive),
     [traced, challenge.id, t.capTraceCaption],
   );
   const runnable = checked.program !== undefined && checked.problems.length === 0;
+  // A program the model refuses at the trace's readings is not traced: the sentence says why.
+  const [refused, setRefused] = useState<string | undefined>();
   return (
     <div className="write-editor capstone-editor">
       <ProgramText
@@ -171,12 +207,17 @@ export function CapstoneEditor(props: ChallengeEditorProps) {
           type="button"
           className="button secondary"
           disabled={!runnable || traced === text}
-          onClick={() => setTraced(text)}
+          onClick={() => {
+            const why = checked.program ? traceRefusal(checked.program, t) : undefined;
+            setRefused(why);
+            if (why === undefined) setTraced(text);
+          }}
         >
           {t.capTrace}
         </button>
       </div>
-      {interactive && (
+      {refused !== undefined && <p className="capstone-refused">{refused}</p>}
+      {interactive && refused === undefined && (
         <section className="capstone-trace" aria-label={t.capTraceCaption}>
           <MachineLevels
             key={traced}

@@ -24,7 +24,13 @@ import {
   type Construct,
   type CourseModule,
 } from "@dd/hdl";
-import { limitCount, type Artifact, type Challenge, type Lesson } from "@platform/lesson-schema";
+import {
+  limitCount,
+  testCount,
+  type Artifact,
+  type Challenge,
+  type Lesson,
+} from "@platform/lesson-schema";
 import type {
   Book,
   ChallengeEditorProps,
@@ -582,6 +588,27 @@ export const TIME_MODEL_NOTES: Book["timeModelNotes"] = {
     "Each gate has its own propagation delay. Changes are worked through in time order. Two changes can race, and which arrives first decides the result. This is the model in which setup and hold times can be seen.",
 };
 
+/**
+ * The book's grader, guarded: a grader that stops with an error fails the work and says why, so
+ * the challenge, the grade of saved work when a lesson loads, and the list of lessons, which
+ * grades every saved challenge as it draws, all still draw. Module 13's capstone once threw on a
+ * program that branched on a register it never set, and the whole site went blank with it.
+ */
+export function gradeSafely(challenge: Challenge, artifact: Artifact): Verdict {
+  try {
+    return grade(challenge, artifact);
+  } catch (error) {
+    return {
+      passed: false,
+      total: testCount(challenge),
+      failures: [],
+      blocked: format(DEFAULT_VIEW_STRINGS.grading.couldNotRun, {
+        why: error instanceof Error ? error.message : String(error),
+      }),
+    };
+  }
+}
+
 export function createBook(
   lessons: readonly Lesson[],
   interactives: Readonly<Record<string, ComponentType<InteractiveProps>>>,
@@ -593,7 +620,7 @@ export function createBook(
     interactives,
     ChallengeEditor,
     // Remembered, so the front page and a lesson re-check saved work without running it again.
-    grade: rememberVerdicts(grade),
+    grade: rememberVerdicts(gradeSafely),
     timeModelNotes: TIME_MODEL_NOTES,
   };
 }

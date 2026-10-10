@@ -83,7 +83,7 @@ export const fullPath: LessonInput = {
           props: {
             ...LEVELS,
             start: 25,
-            focus: ["ir"],
+            focus: ["datapath/ir"],
             question: PROSE.p1Question,
             options: [
               { value: "A7435000", label: "A7435000" },
@@ -116,7 +116,7 @@ export const fullPath: LessonInput = {
             // Shown once the run has passed the call's READ edge, the edge it reports.
             reveal: { text: PROSE.callAfter, edge: 58 },
             control: true,
-            focus: ["cregs", "nextTrap"],
+            focus: ["datapath/cregs", "datapath/nextTrap"],
           },
         },
       ],

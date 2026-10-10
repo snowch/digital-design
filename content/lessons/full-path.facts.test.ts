@@ -39,7 +39,7 @@ describe("lesson full-path's facts", () => {
     expect([end.pc, end.display, end.lamps]).toEqual([0x30n, 66n, 0]);
   });
 
-  it("makes A7345000 of the set if, with its signals, in four edges", () => {
+  it("makes A7345000 of the set if, in four edges", () => {
     expect(word("R5 <= R3 >= R4 signed")).toBe("A7345000");
     // After 25 edges the next fetches it; the IR still holds R4 <= 100's word.
     expect([state(run, 25), at(run, 25, "PC"), at(run, 25, "IR")]).toEqual([
@@ -48,8 +48,6 @@ describe("lesson full-path's facts", () => {
       "25004064",
     ]);
     expect(levelsAnswer(run, 25, "net", "IR", "word")).toBe("A7345000");
-    expect([at(run, 26, "OP2"), at(run, 26, "OP1"), at(run, 26, "OP0")]).toEqual(["0", "1", "1"]);
-    expect([at(run, 26, "WRITEY"), at(run, 26, "SET")]).toEqual(["1", "1"]);
     expect([26, 27, 28, 29].map((e) => state(run, e - 1))).toEqual([
       "FETCH",
       "READ",
@@ -75,25 +73,43 @@ describe("lesson full-path's facts", () => {
     expect(state(run, 58)).toBe("FETCH");
   });
 
-  it("works out the store to the lamps, edges 38 to 41", () => {
-    expect(word("word[lamps] <= R5")).toBe("480507C8");
-    expect(at(run, 38, "IR")).toBe("480507C8");
-    expect([38, 39, 40, 41].map((e) => state(run, e - 1))).toEqual([
+  it("states the motivation's subtraction: 13123000, OP 011, WRITEY 1, SET 0, four edges", () => {
+    expect(word("R3 <= R1 - R2")).toBe("13123000");
+    const step = run.steps.find((x) => x.text === "R3 <= R1 - R2")!;
+    const fetched = step.first + 1;
+    expect(at(run, fetched, "IR")).toBe("13123000");
+    expect(["OP2", "OP1", "OP0", "WRITEY", "SET"].map((n) => at(run, fetched, n))).toEqual([
+      "0",
+      "1",
+      "1",
+      "1",
+      "0",
+    ]);
+    expect(
+      Array.from({ length: step.last - step.first }, (_, i) => state(run, step.first + i)),
+    ).toEqual(["FETCH", "READ", "ALU", "WRITE"]);
+  });
+
+  it("works out the handler's store to the display, edges 59 to 62", () => {
+    expect(word("word[display] <= R2")).toBe("480207C0");
+    expect(at(run, 59, "IR")).toBe("480207C0");
+    expect([59, 60, 61, 62].map((e) => state(run, e - 1))).toEqual([
       "FETCH",
       "READ",
       "ALU",
       "MEMORY",
     ]);
-    expect(at(run, 39, "HB")).toBe("0");
-    expect([at(run, 39, "OP2"), at(run, 39, "OP1"), at(run, 39, "OP0")]).toEqual(["0", "1", "0"]);
-    expect(at(run, 40, "HR")).toBe("7C8");
-    expect([at(run, 40, "ADDR"), at(run, 40, "MSTORE"), at(run, 40, "PCEN")]).toEqual([
-      "7C8",
+    expect(at(run, 60, "HB")).toBe("42");
+    expect([at(run, 60, "OP2"), at(run, 60, "OP1"), at(run, 60, "OP0")]).toEqual(["0", "1", "0"]);
+    expect(at(run, 61, "HR")).toBe("7C0");
+    expect([at(run, 61, "ADDR"), at(run, 61, "MSTORE"), at(run, 61, "PCEN")]).toEqual([
+      "7C0",
       "1",
       "1",
     ]);
-    expect(at(run, 41, "PC")).toBe("28");
-    expect(datapathState(run.circuit, run.frames[41]!).lamps).toBe(0);
+    expect(at(run, 62, "PC")).toBe("48");
+    expect(datapathState(run.circuit, run.frames[61]!).display).toBe(0n);
+    expect(datapathState(run.circuit, run.frames[62]!).display).toBe(66n);
   });
 
   describe("the broken signals", () => {

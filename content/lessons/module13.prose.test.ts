@@ -5,6 +5,9 @@
 
 import { describe, expect, it } from "vitest";
 
+import { INTERACTIVES, createBook } from "@dd/dd-views";
+import { parseLesson } from "@platform/lesson-schema";
+
 import type { LessonInput } from "@platform/lesson-schema";
 
 import { capstone } from "./capstone";
@@ -39,4 +42,43 @@ describe("Module 13's prose", () => {
         .map(([key]) => key);
       expect(unread).toEqual([]);
     });
+});
+
+// A verdict is plain text: a label or a sentence with code marks shows them as characters. Each
+// answer is made wrong in turn, so every case's label and feedback is seen.
+describe("Module 13's verdicts", () => {
+  const book = createBook(
+    LESSONS.map(([l]) => parseLesson(l)),
+    INTERACTIVES,
+  );
+  for (const [lesson] of LESSONS)
+    for (const c of (lesson.challenges ?? []).filter((x) => x.reference.answers))
+      it(`${lesson.id}: ${c.id} writes no code marks in its verdicts`, () => {
+        const reference = c.reference as { text?: string; answers?: Record<string, string> };
+        const answers = reference.answers ?? {};
+        const challenge = book.lessons.flatMap((l) => l.challenges).find((x) => x.id === c.id)!;
+        const wrong = (field: string, value: string) => {
+          const f = challenge.fields.find((x) => x.id === field);
+          if (f?.kind === "bits") return `${value[0] === "1" ? "0" : "1"}${value.slice(1)}`;
+          if (f?.kind === "choice")
+            return f.options?.find((o) => o.value !== value)?.value ?? value;
+          return /^-?\d+$/.test(value)
+            ? String(Number(value) + 1)
+            : value === "000"
+              ? "001"
+              : "000";
+        };
+        const seen: string[] = [];
+        for (const field of Object.keys(answers)) {
+          const v = book.grade(challenge, {
+            ...reference,
+            answers: { ...answers, [field]: wrong(field, answers[field]!) },
+          });
+          for (const f of v.failures) seen.push(f.label, f.detail ?? "");
+          if (v.blocked) seen.push(v.blocked);
+        }
+        expect(seen.length).toBeGreaterThan(0);
+        expect(seen.filter((t) => t.includes("could not run"))).toEqual([]);
+        expect(seen.filter((t) => t.includes("`"))).toEqual([]);
+      });
 });

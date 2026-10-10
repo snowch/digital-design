@@ -12,7 +12,7 @@
 //   instruction-level model after every step, which names the first that disagrees, as every
 //   machine since Module 8 has been held to. Every value is read off the recorded nets.
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 import { z } from "zod";
 
 import {
@@ -23,6 +23,7 @@ import {
   libraryCircuit,
   type BitPart,
   datapathState,
+  edgeUses,
   edgeView,
   netWord,
   recordRun,
@@ -248,8 +249,22 @@ export const MachineLevels = withProps(
     const t = strings.machine13;
     const td = strings.datapath;
     const [faultAt, setFaultAt] = useState(-1);
+    // A wire pinned from a table is brought into view: its name goes first in the focus.
+    const [pinFocus, setPinFocus] = useState<string | undefined>();
     const faults = useMemo(() => data.faults.map(toFault), [data.faults]);
     const fault = faults[faultAt];
+    // A chosen fault on a join (a wire of the top level) brings that join into view first; a
+    // fault inside a block is left for the learner to find.
+    const chosenSpec = data.faults[faultAt];
+    const faultNet = chosenSpec && "net" in chosenSpec ? chosenSpec.net : undefined;
+    const focus = useMemo(
+      () => [
+        ...(pinFocus !== undefined ? [pinFocus] : []),
+        ...(faultNet !== undefined && !faultNet.includes("/") ? [faultNet] : []),
+        ...(data.focus ?? []),
+      ],
+      [pinFocus, faultNet, data.focus],
+    );
     const run = useMemo(
       () =>
         recordRun(
@@ -275,7 +290,9 @@ export const MachineLevels = withProps(
     const go = (k: number) => {
       const to = Math.max(0, Math.min(last, k));
       setAt(to);
+      // A fault's outcome shows once its run has reached the end, until the run starts again.
       if (to === last) setReached(true);
+      else if (to === first) setReached(false);
     };
     const [stored, setStored] = useSlot<Stored>(store, interactive.id);
     const asking = data.question !== undefined && data.options !== undefined;
@@ -289,18 +306,33 @@ export const MachineLevels = withProps(
       (data.options?.find((o) => o.value === v)?.label ?? v).replace(/\.$/, "");
 
     const values = run.frames[at] ?? [];
+    // A pinned word marks the parts it is joined from or split into, so the pin follows it down
+    // a level (RESULT into the groups' results inside the ALU).
+    const pinnedParts = useMemo(
+      () => (pinned === undefined ? new Set<number>() : wordParts(run.circuit, pinned)),
+      [run.circuit, pinned],
+    );
+    // A table's row or port pressed: its wire pinned, and the drawing opened where it is drawn,
+    // with the wire in view.
+    const drawingRef = useRef<HTMLDivElement>(null);
+    const pinWire = (name: string) => {
+      const net = run.circuit.nets.find((n) => n.name === name);
+      if (!net) return;
+      setPinned(net.id);
+      setScope(drawnAt(run.circuit, net.id, scope));
+      setPinFocus(name);
+      drawingRef.current?.scrollIntoView?.({ block: "nearest" });
+    };
     // The wires the next edge changes: the joins in use at this edge, marked on the drawing.
-    const active = useMemo(() => {
-      const now = run.frames[at] ?? [];
-      const after = run.frames[at + 1];
-      const out = new Set<number>();
-      if (!after) return out;
-      now.forEach((w, n) => {
-        const v = after[n];
-        if (v && (v.value !== w.value || v.known !== w.known)) out.add(n);
-      });
-      return out;
-    }, [run, at]);
+    // The wires the next edge uses: back from what it writes, along each selector's chosen
+    // input (`edgeUses`), marked on the drawing at every level.
+    const active = useMemo(
+      () =>
+        at < run.frames.length - 1
+          ? edgeUses(run.circuit, run.frames[at] ?? [])
+          : new Set<number>(),
+      [run, at],
+    );
     const circuit = run.circuit;
     const state = datapathState(circuit, values);
     const next = edgeView(circuit, values);
@@ -363,6 +395,75 @@ export const MachineLevels = withProps(
     }, [circuit, scope]);
     const scopeKind = circuit.composites.find((c) => c.path === scope)?.kind;
 
+    // The step buttons and the status line, held in one sticky band with the drawing's overview,
+    // so the controls stay beside the drawing they change and neither covers the other.
+    // A paragraph a run reveals shows once its condition has held, and stays: stepping back
+    // past the edge does not take back what the learner has read.
+    const revealNow =
+      committed &&
+      data.reveal !== undefined &&
+      ((data.reveal.scope !== undefined &&
+        (scope === data.reveal.scope || scope.startsWith(`${data.reveal.scope}/`))) ||
+        (data.reveal.end === true && reached) ||
+        (data.reveal.edge !== undefined && at >= data.reveal.edge));
+    const [revealed, setRevealed] = useState(false);
+    if (revealNow && !revealed) setRevealed(true);
+    const isPinned = (name: string) => {
+      const net = run.circuit.nets.find((n) => n.name === name);
+      return net !== undefined && (net.id === pinned || pinnedParts.has(net.id));
+    };
+    const rowPinned = (name: string) => (isPinned(name) ? "machine-row-pinned" : undefined);
+    // A row's heading is a button: it pins the wire the row reads and brings it into view.
+    const rowButton = (label: string, name: string) => (
+      <button
+        type="button"
+        className="machine-row-wire"
+        aria-pressed={isPinned(name)}
+        aria-label={format(t.rowPin, {
+          row: plainText(label),
+          wire: name.split("/").pop() ?? name,
+        })}
+        onClick={() => pinWire(name)}
+      >
+        {label}
+      </button>
+    );
+    const steps = (
+      <div className="machine-steps">
+        <div className="explorer-actions debugger-actions">
+          <button type="button" className="button" disabled={at >= last} onClick={() => go(at + 1)}>
+            {t.nextEdge}
+          </button>
+          <button
+            type="button"
+            className="button secondary"
+            disabled={at === 0}
+            onClick={() => go(at - 1)}
+          >
+            {t.backEdge}
+          </button>
+          <button
+            type="button"
+            className="button secondary"
+            disabled={at >= last}
+            onClick={() => go(last)}
+          >
+            {t.toEnd}
+          </button>
+          <button
+            type="button"
+            className="button secondary"
+            disabled={at === first}
+            onClick={() => go(first)}
+          >
+            {t.reset}
+          </button>
+        </div>
+        <p className="debugger-status" role="status">
+          {withCode(status)}
+        </p>
+      </div>
+    );
     return (
       <div className="explorer machine-levels" data-interactive={interactive.id}>
         {asking && (
@@ -401,7 +502,8 @@ export const MachineLevels = withProps(
             name={`${interactive.id}-fault`}
             legend={strings.fault.choose}
             noneLabel={strings.fault.healthy}
-            faults={faults}
+            // The chooser shows plain text: a label's code marks go.
+            faults={faults.map((f) => ({ ...f, label: f.label.replace(/`([^`]*)`/g, "$1") }))}
             chosen={faultAt}
             onChoose={(i) => {
               setFaultAt(i);
@@ -410,63 +512,45 @@ export const MachineLevels = withProps(
             }}
           />
         )}
-        {committed && (
-          <div className="machine-steps">
-            <div className="explorer-actions debugger-actions">
-              <button
-                type="button"
-                className="button"
-                disabled={at >= last}
-                onClick={() => go(at + 1)}
-              >
-                {t.nextEdge}
-              </button>
-              <button
-                type="button"
-                className="button secondary"
-                disabled={at === 0}
-                onClick={() => go(at - 1)}
-              >
-                {t.backEdge}
-              </button>
-              <button
-                type="button"
-                className="button secondary"
-                disabled={at >= last}
-                onClick={() => go(last)}
-              >
-                {t.toEnd}
-              </button>
-              <button
-                type="button"
-                className="button secondary"
-                disabled={at === first}
-                onClick={() => go(first)}
-              >
-                {t.reset}
-              </button>
-            </div>
-            <p className="debugger-status" role="status">
-              {withCode(status)}
-            </p>
-          </div>
-        )}
         {data.listing && <ProgramListing source={data.program} label={data.listing} />}
         {committed && (data.trace || data.levels) && <RunStrip run={run} at={at} t={t} onGo={go} />}
-        <CircuitView
-          circuit={circuit}
-          {...(committed ? { values } : {})}
-          title={strings.explorer.title}
-          scope={scope}
-          onScope={setScope}
-          table={false}
-          writtenWidth={4}
-          {...(data.focus ? { focus: data.focus } : {})}
-          pinned={pinned}
-          onPin={setPinned}
-          {...(committed ? { active } : {})}
-        />
+        <div ref={drawingRef}>
+          <CircuitView
+            circuit={circuit}
+            {...(committed ? { values } : {})}
+            title={strings.explorer.title}
+            scope={scope}
+            onScope={setScope}
+            table={false}
+            writtenWidth={4}
+            {...(focus.length ? { focus } : {})}
+            pinned={pinned}
+            onPin={(n) => {
+              setPinned(n);
+              setPinFocus(undefined);
+            }}
+            pinnedParts={pinnedParts}
+            {...(committed ? { band: steps } : {})}
+            {...(committed ? { active } : {})}
+          />
+        </div>
         <p className="machine-pin-note">{t.pinNote}</p>
+        {/* What a run has shown: under the drawing, where the learner is looking when it appears. */}
+        {reached && data.outcomes && (
+          <div className="fault-outcome" role="status">
+            <Prose markdown={data.outcomes} />
+          </div>
+        )}
+        {reached && faultAt >= 0 && data.faults[faultAt]?.outcome && (
+          <div className="fault-outcome" role="status">
+            <Prose markdown={data.faults[faultAt]?.outcome ?? ""} />
+          </div>
+        )}
+        {committed && data.reveal && (revealNow || revealed) && (
+          <div className="fault-outcome" role="status">
+            <Prose markdown={data.reveal.text} />
+          </div>
+        )}
         {committed && data.levels && (
           <div className="truth-table-wrap">
             <table className="truth-table datapath-table machine-levels-table">
@@ -482,18 +566,18 @@ export const MachineLevels = withProps(
                   <th scope="row">{t.line}</th>
                   <td className="memory-word">{lineText}</td>
                 </tr>
-                <tr>
-                  <th scope="row">{t.address}</th>
+                <tr className={rowPinned("PC")}>
+                  <th scope="row">{rowButton(t.address, "PC")}</th>
                   <td className="memory-word">{hex3(pc)}</td>
                 </tr>
-                <tr>
-                  <th scope="row">{t.machineCode}</th>
+                <tr className={rowPinned("FETCHED")}>
+                  <th scope="row">{rowButton(t.machineCode, "FETCHED")}</th>
                   <td className="memory-word">
                     {programLine?.instruction !== undefined ? hex8(programLine.instruction) : "X"}
                   </td>
                 </tr>
-                <tr>
-                  <th scope="row">{t.inIr}</th>
+                <tr className={rowPinned("IR")}>
+                  <th scope="row">{rowButton(t.inIr, "IR")}</th>
                   <td className="memory-word">
                     {known(ir) ? hex8(Number(ir.value)) : "X"}
                     <br />
@@ -507,13 +591,13 @@ export const MachineLevels = withProps(
                     })}
                   </td>
                 </tr>
-                <tr>
-                  <th scope="row">{t.state}</th>
+                <tr className={rowPinned("control/S")}>
+                  <th scope="row">{rowButton(t.state, "control/S")}</th>
                   <td className="memory-word">{next.state ?? "X"}</td>
                 </tr>
                 {data.signals.map((name) => (
-                  <tr key={name}>
-                    <th scope="row">{format(t.signal, { name })}</th>
+                  <tr key={name} className={rowPinned(`control/${name}`)}>
+                    <th scope="row">{rowButton(format(t.signal, { name }), `control/${name}`)}</th>
                     <td className="memory-word">{signal(name)}</td>
                   </tr>
                 ))}
@@ -551,7 +635,23 @@ export const MachineLevels = withProps(
           </div>
         )}
         {committed && data.trace && (
-          <TracePanel circuit={circuit} values={values} scope={scope} t={t} />
+          <TracePanel
+            circuit={circuit}
+            values={values}
+            scope={scope}
+            t={t}
+            marked={(net) =>
+              net === pinned || pinnedParts.has(net)
+                ? "trace-port-pinned"
+                : active.has(net)
+                  ? "trace-port-route"
+                  : ""
+            }
+            onPin={(net) => {
+              setPinned(net);
+              setPinFocus(run.circuit.nets[net]?.name);
+            }}
+          />
         )}
         {committed && data.compare && (
           <p className="machine-compare" role="status">
@@ -652,20 +752,6 @@ export const MachineLevels = withProps(
             </div>
           )}
         </div>
-        {reached && data.outcomes && <Prose markdown={data.outcomes} />}
-        {reached && faultAt >= 0 && data.faults[faultAt]?.outcome && (
-          <div className="fault-outcome" role="status">
-            <Prose markdown={data.faults[faultAt]?.outcome ?? ""} />
-          </div>
-        )}
-        {committed &&
-          data.reveal &&
-          ((data.reveal.scope !== undefined &&
-            (scope === data.reveal.scope || scope.startsWith(`${data.reveal.scope}/`))) ||
-            (data.reveal.end && reached) ||
-            (data.reveal.edge !== undefined && at >= data.reveal.edge)) && (
-            <Prose markdown={data.reveal.text} />
-          )}
       </div>
     );
   },
@@ -700,11 +786,17 @@ function RunStrip({
       })),
     [run],
   );
-  const current = Math.max(
-    0,
-    steps.findIndex((s) => at >= s.first && at < s.first + s.states.length),
-  );
+  // The step the run is in; at the run's last frame, after its last edge, the last step.
+  const within = steps.findIndex((s) => at >= s.first && at < s.first + s.states.length);
+  const current = within >= 0 ? within : at > 0 ? Math.max(0, steps.length - 1) : 0;
+  // "Earlier lines" and "Later lines" move the window; a move of the run brings it back to the
+  // step the run is in, so the marked edge never leaves it.
   const [shift, setShift] = useState(0);
+  const [shiftedAt, setShiftedAt] = useState(at);
+  if (shiftedAt !== at) {
+    setShiftedAt(at);
+    setShift(0);
+  }
   const WINDOW = 4;
   const start = Math.max(0, Math.min(steps.length - WINDOW, current - 1 + shift));
   const shown = steps.slice(start, start + WINDOW);
@@ -773,11 +865,16 @@ function TracePanel({
   values,
   scope,
   t,
+  marked,
+  onPin,
 }: {
   circuit: Circuit;
   values: readonly Word[];
   scope: string;
   t: Machine13Strings;
+  /** A port's mark: pinned, on the next edge's route, or none. */
+  marked: (net: number) => string;
+  onPin: (net: number) => void;
 }) {
   const levels =
     scope === "" ? [] : scope.split("/").map((_, i, all) => all.slice(0, i + 1).join("/"));
@@ -818,9 +915,15 @@ function TracePanel({
                 if (!block) return null;
                 const ports = (r: Readonly<Record<string, number>>) =>
                   Object.entries(r).map(([port, net]) => (
-                    <span key={port} className="trace-port">
+                    <button
+                      key={port}
+                      type="button"
+                      className={`trace-port ${marked(net)}`.trim()}
+                      aria-pressed={marked(net) === "trace-port-pinned"}
+                      onClick={() => onPin(net)}
+                    >
                       {format(t.tracePort, { port, value: portText(values[net]) })}
-                    </span>
+                    </button>
                   ));
                 return (
                   <tr key={path}>
@@ -997,4 +1100,59 @@ function wiringSentence(names: readonly string[], t: Machine13Strings): string {
   if (names.length === 1) return format(t.closedWiring, { part: names[0] ?? "" });
   const parts = `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
   return format(t.closedWiringMany, { parts });
+}
+
+/**
+ * The parts a word is joined from or split into: a join's inputs, and the outputs of the parts
+ * that take bits from it, through joins and splits in turn, so a pin on RESULT marks the groups'
+ * results inside the ALU and their slices' bits.
+ */
+function wordParts(circuit: Circuit, net: number): Set<number> {
+  const parts = new Set<number>();
+  const queue = [net];
+  while (queue.length) {
+    const n = queue.pop()!;
+    for (const c of circuit.components) {
+      const into = c.kind === "join" && Object.values(c.outputs).includes(n);
+      const outOf = (c.kind === "bit" || c.kind === "slice") && Object.values(c.inputs).includes(n);
+      const next = into ? Object.values(c.inputs) : outOf ? Object.values(c.outputs) : [];
+      for (const m of next)
+        if (m !== net && !parts.has(m)) {
+          parts.add(m);
+          queue.push(m);
+        }
+    }
+  }
+  return parts;
+}
+
+/**
+ * The block to show a wire in: the level on show if the wire is drawn there, else the top if it
+ * is, else the block whose path its name starts with.
+ */
+function drawnAt(circuit: Circuit, net: number, scope: string): string {
+  const ports = (path: string) =>
+    path === ""
+      ? [...circuit.inputs, ...circuit.outputs]
+          .map((p) => p.net)
+          .concat(
+            circuit.composites
+              .filter((c) => !c.path.includes("/"))
+              .flatMap((c) => [...Object.values(c.inputs), ...Object.values(c.outputs)]),
+          )
+      : circuit.composites
+          .filter(
+            (c) => c.path.startsWith(`${path}/`) && !c.path.slice(path.length + 1).includes("/"),
+          )
+          .flatMap((c) => [...Object.values(c.inputs), ...Object.values(c.outputs)]);
+  if (ports(scope).includes(net)) return scope;
+  if (ports("").includes(net)) return "";
+  const name = circuit.nets[net]?.name ?? "";
+  const cut = name.lastIndexOf("/");
+  return cut < 0 ? "" : name.slice(0, cut);
+}
+
+/** A label without its Markdown code marks, for an accessible name. */
+function plainText(label: string): string {
+  return label.replace(/`/g, "");
 }
