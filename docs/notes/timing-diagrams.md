@@ -97,3 +97,66 @@ every axis label has room; this round uses both.
   what its axis names; 5.4's lead explains ↑n and "↑ reset", its after text limits its claim to RST
   at 0, and its reset prediction asks the learner to apply the motivation's rule; 8.3's ↑5 sentences
   stand together.
+
+## Handover
+
+This session stops here at the managing session's request; a new session finishes the round. The
+numbers are those of the managing session's message "the check of the timing work at 656f8b1".
+
+**Done and committed.**
+- 1, the reset's rise: `c51f5f3`. `Simulator.clockCycle(clock, rise?)` in `packages/sim` now marks
+  a rise as `RESET_RISE` ("↑RST") when no label is given and an input named RST reads 1, so every
+  caller that clocks a reset is right without passing a label (`startDatapath`, `traps-run`,
+  `multicycle-run` and the rest). `RESET_RISE` lives in `@dd/sim`; `traces.ts` re-exports it, and
+  `riseLabel` is gone. `traces.test.ts` pins 9.3 ending at ↑23. Checked on the built site: 9.3
+  `colder-edges` and 9.4 `four-views` end at ↑23, 12.7 `night-hardware` at ↑54.
+
+**Done in code and words in `74cd98a`, not yet seen in a browser or run in Playwright.**
+- 2, `diagrams.spec.ts`: a new test clocks `retry-machine` 40 times, the 9.3 controller 30, and
+  runs `colder-edges` to its stop. Not run yet.
+- 3 and 4, empty boxes and phone answer boxes: `TimingDiagram.tsx` computes `minUnit` (the
+  fewest pixels a unit needs so that each word's stretch holds its text at 7.5 px a character plus
+  8, and the red line's stretch holds it on its longer side; capped at 80) and passes it to the
+  platform's `Timeline`. The drawing's `end` is now one step past the red line (`tail`: the
+  smallest gap between marks, 1 or 2), so the newest box is a full edge wide. A word in the red
+  line's stretch is written beside the line (after it, else before it, else at the stretch's
+  start). Measure each figure the message names: the cap of 80 may leave a short first box (an
+  edge timeline's stretch clipped at `from`) empty still.
+- 5 and 13: `Prediction.tsx` draws the circuit with `table={false}` and puts a `SignalTable` under
+  the result line; `SignalTable` takes `only`, the prediction's `signals`. 9.1 and 9.2 got lists
+  (K, J, C, then the signals each explanation uses).
+- 6: `focus` is the red line wherever there is a slider, so setup-hold opens on the edge and
+  follows the slider. Not measured at 390.
+- 7 and 8: `where()` reads the marks: "at ↑3" on a mark, "after ↑3" between, "before ↑57" before
+  the first; "after the run" only with no marks. New strings `timing.atMark`, `timing.beforeMark`.
+  13.1's window starts at edge 57: check its first label reads "before ↑57" and not "before ↑1".
+- 9, 10, 16, 18, 19, 20 and the 5.4 reset decision: words through brief T2
+  (`docs/notes/timing/briefs/T2.md`, drafts beside it), placed unchanged. The second-pass read of
+  each changed lesson (2.1, 3.1, 4.1, 5.1, 5.4, 8.3) is not done.
+- 11: `commitPredictions` collects the figures' ids first, and the Modules 3, 6 and 9 test asserts
+  no `.prediction` is left uncommitted.
+- 12: `laneValue` writes a named value by its name alone, in the lane and in the timing table
+  (TRY, FETCH). Playwright tests that expect "TRY 01" or "FETCH 000" in a timing table, if any,
+  will fail; `module5.spec.ts`'s "TRY 01" reads the encoded table, which is unchanged.
+- 14: a setup-hold tick is dropped only at a named mark's own time. Not measured.
+- 15: with `to`, the lanes draw from a trace clipped at `to` (`drawn`), to `to` plus one step. The
+  slider can now move into that tail, where it shows the values at `to`.
+- 17: the settings table's caption is a paragraph above it, labelling the table by
+  `aria-labelledby`; its heads after the first are not upper-cased.
+- 21: the content test counts a state machine with its trace pane and a datapath with timing lanes.
+
+**Not started.** The browser walk of every changed figure at 390 and 1280, the stored screenshots
+this changes (to be reviewed by the managing session, not updated here), the second-pass read, the
+full check.
+
+**State of the checks.** Vitest passes at `74cd98a` (143 files, 1508 tests). The full check on
+`0c14b7a` (main at `79c3040` merged, and the reset fix) was stopped in Playwright for the handover:
+formatting, copyright, the platform copy, tsc, Vitest and the build had passed, and the browser
+had passed 517 tests with 11 failures, all the stored screenshots this container always fails.
+
+**What surprised me.** The platform's `Timeline` now draws the lane names in a column of their own
+and scrolls the lanes beside it, and widens a run for its axis labels itself (`fitUnit`), so the
+course's `roomFor` and `stretched` in `TimingDiagram.tsx` may now be unnecessary; I left them. A
+`not.toContain` test between two feedback strings breaks when one becomes the other's first
+sentence (`stop-check.test.ts`, fixed). `pkill` of a preview server ends the calling shell with
+exit 144; it is harmless.
