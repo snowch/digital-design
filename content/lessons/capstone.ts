@@ -60,8 +60,9 @@ export const capstone: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.free,
           lead: PROSE.questionLead,
-          // Quiet: it opens on the prediction's frame, and shows no value there until the run moves.
-          props: { ...SAMPLE, devices: true, quiet: true },
+          // Held: it opens on the prediction's frame, and one step would show the answer, so its
+          // values and its steps wait until the prediction below is checked.
+          props: { ...SAMPLE, devices: true, holdUntil: "cap-predict" },
         },
       ],
     },

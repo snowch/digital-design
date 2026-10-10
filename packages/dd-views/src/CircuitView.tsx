@@ -83,6 +83,11 @@ export interface CircuitViewProps {
    * controller's state by name), in place of the word in hexadecimal; undefined keeps the word.
    */
   readonly readout?: (net: number) => string | undefined;
+  /**
+   * Module 13: wires whose value the figure keeps back for now (a word a lesson asks the learner
+   * to work out first): drawn without their value, in their title too; `readout` says why.
+   */
+  readonly withheld?: ReadonlySet<number>;
   readonly onPin?: (net: number | undefined) => void;
   /** Module 13: the nets marked as in use, the ones the next edge reads or writes (`edgeUses`). */
   readonly active?: ReadonlySet<number>;
@@ -231,6 +236,7 @@ export function CircuitView({
   onPin,
   pinnedParts,
   readout,
+  withheld,
   active,
 }: CircuitViewProps) {
   const written = (v: Word | undefined) =>
@@ -446,7 +452,7 @@ export function CircuitView({
           <g className="wires">
             {scene.wires.map((w, i) => {
               const { net, held } = drawnNets[i] ?? { net: undefined, held: false };
-              const value = net !== undefined ? values?.[net] : undefined;
+              const value = net !== undefined && !withheld?.has(net) ? values?.[net] : undefined;
               const level = levelOf(value);
               const name = net !== undefined ? (sub.nets[net]?.name ?? "") : "";
               const isHot = net !== undefined && hot === net;
@@ -507,7 +513,8 @@ export function CircuitView({
                   : part.kind === "output"
                     ? sub.outputs.find((p) => p.name === part.name)?.net
                     : undefined;
-              const pinValue = outNet !== undefined ? values?.[outNet] : undefined;
+              const pinValue =
+                outNet !== undefined && !withheld?.has(outNet) ? values?.[outNet] : undefined;
               if (isPin) {
                 // A word's pin is not a button; its bits are set under the drawing.
                 const oneBit = outNet === undefined || (sub.nets[outNet]?.width ?? 1) === 1;
@@ -669,7 +676,7 @@ export function CircuitView({
                     const net =
                       sub.components.find((c) => c.path === part.id)?.outputs[p.port] ??
                       composite?.outputs[p.port];
-                    const v = net !== undefined ? values?.[net] : undefined;
+                    const v = net !== undefined && !withheld?.has(net) ? values?.[net] : undefined;
                     // An output pin shows its own value, so a part driving one does not repeat
                     // it at its port, where ports 20 pixels apart would stack the labels. An
                     // output no wire leaves feeds nothing, so its value is not written either.
@@ -697,7 +704,7 @@ export function CircuitView({
       </div>
       <p className="wire-readout" aria-live="polite">
         {hot !== undefined
-          ? `${sub.nets[hot]?.name ?? ""}${values?.[hot] ? ` = ${readout?.(hot) ?? valueLabel(values[hot] as Word)}` : ""}`
+          ? `${sub.nets[hot]?.name ?? ""}${values?.[hot] ? ` = ${readout?.(hot) ?? (withheld?.has(hot) ? "" : valueLabel(values[hot] as Word))}` : ""}`
           : "\u00a0"}
       </p>
       {table && values && <SignalTable circuit={sub} values={values} readings={readings} />}

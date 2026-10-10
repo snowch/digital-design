@@ -108,7 +108,8 @@ splits or joins words says it holds no gate. So every trace ends at a gate or a 
   and MET as a row of five bits; the carries out of the slices for bits 7 to 4, written only inside
   the ALU's group `q1`; and HM, signed. With fixed readings each can be worked out from the text,
   and some can be guessed: a program that tests room B first has carries `0000`, found in two
-  tries, and HM is one of the program's own numbers. The questions ask for wires at the edge; a
+  tries, and HM holds the word the program's last load fetched, a reading or a loaded limit,
+  which a learner can guess among few. The questions ask for wires at the edge; a
   right answer does not show the learner traced them. Their answers are read off the recorded run of the learner's own program;
   a wire whose value is not known reads X, and X is an answer. A wrong answer gets the level to look at and what to
   read there.
@@ -240,15 +241,26 @@ machine's text elaborates in about 0.1 s and runs about 70 edges a second.
   focusable control in the figure has a `scroll-margin-top` from `--sticky-top`, and inside the
   drawing from `--sticky-drawing`, the band with the overview where it sticks; a browser test tabs
   backwards from the levels table through the strip. The rows' wire names are set in the prose
-  face. A figure can be `quiet`: no value shows on its opening frame until the run moves.
+  face. A figure can be held (`holdUntil`, as 10.2's are): no value shows and the run does not move
+  until a prediction the figure names is checked.
 - **13.1.** Each CPU block's note says what its mark says, part of the CPU.
 - **13.2.** The store's figure opens at frame 56; the ROM row is held back in both figures by line
   and edge (`holdRom`), not by the first press.
 - **13.3.** The XOR row is asked at `R2 <= R3`, a copy of B, where OP0 is 1: no two rows share an
   answer, which the facts test checks.
-- **13.5.** The question figure is quiet, so it shows nothing at the prediction's frame until the
-  run moves; the motivation no longer opens with the task as an instruction.
+- **13.5.** The question figure is held until the prediction below it is checked, since it opens
+  on the prediction's frame and one step would show the answer; the motivation no longer opens
+  with the task as an instruction.
 - **Prose.** Brief R5; `drafts/review-fixes.md`.
+
+## The last round
+
+- **13.2.** While the ROM row keeps the store's word back, so does every wire that holds it (its
+  readout, its title and its written value: `withheld`), and the row's note says nothing of it.
+- **13.5.** The question figure waits for the prediction (`holdUntil`), values and steps.
+- **Shared figure.** `--sticky-drawing` is set from the first load: the figure watches itself and
+  the overview from when it appears. A browser test checks it at load.
+- **Prose.** Brief R6.
 
 ## Platform candidates
 

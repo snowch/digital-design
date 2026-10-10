@@ -285,19 +285,44 @@ test("the step controls stay pressable over the whole figure", async ({ page }) 
   }
 });
 
-// 13.5's question figure opens on the frame its prediction asks about, and shows no value there
-// until the run moves.
-test("the capstone's question figure shows no value until the run moves", async ({ page }) => {
+// 13.2's investigation ends where the PC is at the store the construction asks for: while the ROM
+// row keeps its word back, the wire that holds it says so too, and no title gives it.
+test("a held word stays held on its wires", async ({ page }) => {
+  await openLesson(page, "full-path");
+  const figure = page.locator('[data-interactive="path-call"]');
+  await figure.scrollIntoViewIfNeeded();
+  const next = figure.getByRole("button", { name: T.nextEdge });
+  await next.click();
+  await next.click();
+  await expect(figure.locator(".machine-levels-table")).toContainText(T.romLater);
+  await figure
+    .getByRole("button", { name: format(T.rowPin, { row: T.machineCode, wire: "FETCHED" }) })
+    .click();
+  // The drawing scrolls to the wire under the pointer: move it off, so the readout is the pin's.
+  await page.mouse.move(0, 0);
+  await expect(figure.locator(".wire-readout")).toHaveText(`FETCHED = ${T.romLater}`);
+  const titles = await figure
+    .locator("svg.circuit:not(.circuit-overview) .wire title")
+    .allTextContents();
+  expect(titles.filter((x) => x.includes("480207C0"))).toEqual([]);
+});
+
+// 13.5's question figure opens on the frame its prediction asks about, where one step would show
+// the answer: its values and its steps wait until that prediction is checked.
+test("the capstone's question figure waits for the prediction", async ({ page }) => {
   await openLesson(page, "capstone");
   const figure = page.locator('[data-interactive="cap-free"]');
   await figure.scrollIntoViewIfNeeded();
-  await expect(figure.locator(".machine-quiet-note")).toHaveText(T.quietNote);
-  await expect(figure.locator("svg.circuit:not(.circuit-overview) .value-label")).toHaveCount(0);
-  await figure.getByRole("button", { name: T.nextEdge }).click();
+  await expect(figure.locator(".machine-quiet-note")).toHaveText(T.heldNote);
+  await expect(figure.locator(".datapath-tables")).toBeHidden();
+  await expect(figure.getByRole("button", { name: T.nextEdge })).toBeDisabled();
+  const predict = page.locator('[data-interactive="cap-predict"]');
+  await predict.scrollIntoViewIfNeeded();
+  await predict.getByLabel("1", { exact: true }).check();
+  await predict.getByRole("button", { name: DEFAULT_VIEW_STRINGS.prediction.commit }).click();
   await expect(figure.locator(".machine-quiet-note")).toHaveCount(0);
-  await expect(
-    figure.locator("svg.circuit:not(.circuit-overview) .value-label").first(),
-  ).toBeVisible();
+  await expect(figure.locator(".datapath-tables")).toBeVisible();
+  await expect(figure.getByRole("button", { name: T.nextEdge })).toBeEnabled();
 });
 
 // A control that takes focus from the keyboard is never left under the stuck band: tabbing
@@ -313,6 +338,15 @@ test("keyboard focus never lands under the stuck band", async ({ page }) => {
     const figure = page.locator('[data-interactive="path-call"]');
     await figure.scrollIntoViewIfNeeded();
     await figure.getByRole("button", { name: T.nextEdge }).click();
+    // Over the drawing, what is stuck is the band and, in a tall window, the overview too, from
+    // the first load on.
+    const [top, drawing] = await figure.evaluate((el) =>
+      ["--sticky-top", "--sticky-drawing"].map((v) =>
+        parseFloat((el as HTMLElement).style.getPropertyValue(v)),
+      ),
+    );
+    if (height > 860) expect(drawing!, `${width}x${height}`).toBeGreaterThan(top! + 100);
+    else expect(drawing, `${width}x${height}`).toBe(top);
     // From the last row's button of the levels table, backwards through the rows and the strip.
     await figure.locator(".machine-row-wire").last().focus();
     for (let k = 0; k < 14; k++) {

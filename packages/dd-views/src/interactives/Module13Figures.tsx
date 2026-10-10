@@ -136,10 +136,11 @@ const Props = z.object({
   /** The program's lines and their addresses, folded under its name. */
   listing: z.string().optional(),
   /**
-   * No value shows at the figure's opening frame until the learner first moves the run: a figure
-   * that opens on the frame a later prediction asks about gives nothing away there.
+   * Held until a prediction elsewhere on the page is checked, by its figure's id (as 10.2's held
+   * figures): no value shows and the run does not move, since the figure opens on the frame that
+   * prediction asks about, and one step would show its answer.
    */
-  quiet: z.boolean().default(false),
+  holdUntil: z.string().optional(),
 });
 type Data = z.infer<typeof Props>;
 
@@ -308,7 +309,6 @@ export const MachineLevels = withProps(
     const go = (k: number) => {
       const to = Math.max(0, Math.min(last, k));
       setAt(to);
-      if (to !== first) setMoved(true);
       // A fault's outcome shows once its run has reached the end, until the run starts again.
       if (to === last) setReached(true);
       else if (to === first) setReached(false);
@@ -316,9 +316,10 @@ export const MachineLevels = withProps(
     const [stored, setStored] = useSlot<Stored>(store, interactive.id);
     const asking = data.question !== undefined && data.options !== undefined;
     const committed = !asking || stored?.choice !== undefined;
-    // A quiet figure shows its values once the run has moved from where it opened.
-    const [moved, setMoved] = useState(false);
-    const live = committed && (!data.quiet || moved);
+    // A held figure waits, values and steps, until the prediction it names is checked.
+    const [predicted] = useSlot<Stored>(store, data.holdUntil ?? interactive.id);
+    const held = data.holdUntil !== undefined && predicted?.choice === undefined;
+    const live = committed && !held;
     // The answer is the run's own, from the edge the figure first shows.
     const answer = useMemo(
       () => (asking ? levelsAnswer(run, first, data.ask, data.net, data.form, data.bit) : ""),
@@ -478,7 +479,24 @@ export const MachineLevels = withProps(
       }
       return forms;
     }, [run.circuit]);
+    // While the ROM row keeps a line's word back, so does every wire that holds it now (FETCHED,
+    // MQ, the memory's reads): no title, label or readout gives what the row's cell holds back.
+    const romHeld =
+      data.holdRom !== undefined &&
+      programLine?.text === data.holdRom.line &&
+      at < data.holdRom.fetch &&
+      programLine.instruction !== undefined;
+    const withheld = useMemo(() => {
+      if (!romHeld || programLine?.instruction === undefined) return new Set<number>();
+      const word = hex8(programLine.instruction);
+      return new Set(
+        values.flatMap((w, n) =>
+          known(w) && w.value.toString(16).toUpperCase().padStart(8, "0").includes(word) ? [n] : [],
+        ),
+      );
+    }, [romHeld, programLine?.instruction, values]);
     const readout = (net: number) => {
+      if (withheld.has(net)) return t.romLater;
       const f = rowForms.get(net);
       const w = values[net];
       return f && known(w) ? f(w) : undefined;
@@ -496,9 +514,18 @@ export const MachineLevels = withProps(
       const root = rootRef.current;
       const band = bandRef.current;
       if (!root || !band) return;
+      // The overview is drawn only once the drawing has measured itself wider than its box, after
+      // this first runs: the figure itself is watched too, and the overview from when it appears.
+      let watched: Element | null = null;
+      const ro =
+        typeof ResizeObserver === "undefined" ? undefined : new ResizeObserver(() => set());
       const set = () => {
         root.style.setProperty("--sticky-top", `${band.offsetHeight}px`);
         const bar = root.querySelector<HTMLElement>(".overview-bar");
+        if (bar && bar !== watched) {
+          watched = bar;
+          ro?.observe(bar);
+        }
         const stuck = bar !== null && getComputedStyle(bar).position === "sticky";
         root.style.setProperty(
           "--sticky-drawing",
@@ -506,14 +533,11 @@ export const MachineLevels = withProps(
         );
       };
       set();
-      if (typeof ResizeObserver === "undefined") return;
-      const ro = new ResizeObserver(set);
-      ro.observe(band);
-      const bar = root.querySelector(".overview-bar");
-      if (bar) ro.observe(bar);
+      ro?.observe(band);
+      ro?.observe(root);
       window.addEventListener("resize", set);
       return () => {
-        ro.disconnect();
+        ro?.disconnect();
         window.removeEventListener("resize", set);
       };
     }, [committed]);
@@ -537,13 +561,18 @@ export const MachineLevels = withProps(
     const steps = (
       <div className="machine-steps" ref={bandRef}>
         <div className="explorer-actions debugger-actions">
-          <button type="button" className="button" disabled={at >= last} onClick={() => go(at + 1)}>
+          <button
+            type="button"
+            className="button"
+            disabled={held || at >= last}
+            onClick={() => go(at + 1)}
+          >
             {t.nextEdge}
           </button>
           <button
             type="button"
             className="button secondary"
-            disabled={at === 0}
+            disabled={held || at === 0}
             onClick={() => go(at - 1)}
           >
             {t.backEdge}
@@ -551,7 +580,7 @@ export const MachineLevels = withProps(
           <button
             type="button"
             className="button secondary"
-            disabled={at >= last}
+            disabled={held || at >= last}
             onClick={() => go(last)}
           >
             {t.toEnd}
@@ -642,10 +671,11 @@ export const MachineLevels = withProps(
             }}
             pinnedParts={pinnedParts}
             readout={readout}
+            withheld={withheld}
             {...(live ? { active } : {})}
           />
         </div>
-        {committed && !live && <p className="machine-quiet-note">{t.quietNote}</p>}
+        {committed && held && <p className="machine-quiet-note">{t.heldNote}</p>}
         <p className="machine-pin-note">{t.pinNote}</p>
         {/* What a run has shown: under the drawing, where the learner is looking when it appears,
             the comparison first and the paragraph that explains it after, so neither moves as
@@ -673,7 +703,7 @@ export const MachineLevels = withProps(
         {/* The run over time, under the drawing and what its runs have shown: above it, it put
             the length of the run between the step controls, or a challenge's answer boxes, and
             the drawing. */}
-        {committed && (data.trace || data.levels) && <RunStrip run={run} at={at} t={t} onGo={go} />}
+        {live && (data.trace || data.levels) && <RunStrip run={run} at={at} t={t} onGo={go} />}
         {live && data.levels && (
           <div className="truth-table-wrap">
             <table className="truth-table datapath-table machine-levels-table">
@@ -694,7 +724,9 @@ export const MachineLevels = withProps(
                   <td className="memory-word">{hex3(pc)}</td>
                 </tr>
                 <tr className={rowPinned("FETCHED")}>
-                  <th scope="row">{rowButton(t.machineCode, "FETCHED", t.romWire)}</th>
+                  <th scope="row">
+                    {rowButton(t.machineCode, "FETCHED", romHeld ? undefined : t.romWire)}
+                  </th>
                   <td className="memory-word">
                     {data.holdRom &&
                     programLine?.text === data.holdRom.line &&
