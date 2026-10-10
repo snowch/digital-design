@@ -82,9 +82,15 @@ export const STRINGS = {
       "This real circuit from Module 2 lights a lamp when the room is warm and the door is shut. Press WARM and DOOR to see it change.",
     /** The path through the course, in order: five stages, each over the modules it names. */
     journeyHeading: "Signals to computer in five stages",
-    /** Under the heading, above the stages: where Module 0, the way in, sits (brief C4). */
+    /**
+     * Under the heading, above the path: where Module 0, the way in, sits (brief C4). Cut down by
+     * brief C6 once Module 0's own line said what you do in it.
+     */
     journeyIntro:
-      "Module 0 comes first, 2 lessons where you run a finished machine and explore it down to one wire. The five stages that follow build the machine from there.",
+      "Module 0 comes first, before the five stages. The stages build the machine up from one wire, beginning in Module 1.",
+    /** Under Module 0's line, before the stages: what you do in it, as each stage's `about` says (brief C6). */
+    openingAbout:
+      "Run a finished machine with a shop's program, line by line; open the machine level by level, down to one wire.",
     stages: [
       {
         name: "Signals",
@@ -122,16 +128,14 @@ export const STRINGS = {
         to: 13,
       },
     ],
-    /** Under a stage: its modules, as the list below names them. */
+    /** On a stage's line, under its name: the modules it holds. */
     stageModules: (from: number, to: number) =>
       to === from + 1 ? `Modules ${from} and ${to}` : `Modules ${from} to ${to}`,
-    /** On a stage whose modules have no lessons yet. */
-    stageToWrite: "Still to be written",
     /**
-     * The heading of the list of every module the plan has, for readers who move by headings. It is
-     * not shown: the rule under the stages ends them, and each module below names itself.
+     * On a stage's line, in place of its challenges complete (`progress`), when its modules have no
+     * lessons yet.
      */
-    contents: (count: number) => `All ${count} modules`,
+    stageToWrite: "Still to be written",
     /** Under a module with no lessons yet. */
     toWrite: "This module is still to be written.",
     /** Under a module's name, open or closed: its lessons and its challenges complete (brief C2). */

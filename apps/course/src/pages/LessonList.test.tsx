@@ -21,6 +21,20 @@ const book = createBook(LESSONS, INTERACTIVES);
 const ordered = [...book.lessons].sort((a, b) => a.module - b.module || a.order - b.order);
 const first = ordered[0]!;
 
+/** The stage that holds a module, or none for Module 0. */
+const stageOf = (module: number) =>
+  STRINGS.cover.stages.find((s) => module >= s.from && module <= s.to);
+
+/** A stage's line on the front page, by the stage's name. */
+const stageLine = (name: string) => screen.getByRole("button", { name: new RegExp(`^${name} `) });
+
+/**
+ * A module's line, which a closed stage hides from the reader. Inside a stage it reads "Module 7:
+ * Arithmetic and logic …"; Module 0's, in the stages' form, reads "Module 0 What computers do …".
+ */
+const moduleLine = (module: number) =>
+  screen.getByRole("button", { name: new RegExp(`^${STRINGS.module(module)}\\b`), hidden: true });
+
 /** Stores a challenge's reference answer as the learner's work, so it passes when re-checked. */
 function pass(storage: ReturnType<typeof memoryStorage>, lessonId: string, count: number) {
   const lesson = book.lessons.find((l) => l.id === lessonId)!;
@@ -116,9 +130,9 @@ describe("the course's front page: the cover", () => {
       STRINGS.cover.heroCaption,
       STRINGS.cover.journeyHeading,
       STRINGS.cover.journeyIntro,
+      STRINGS.cover.openingAbout,
       ...STRINGS.cover.stages.flatMap((s) => [s.name, s.about]),
       STRINGS.cover.stageToWrite,
-      STRINGS.cover.contents(STRINGS.moduleNames.length),
       STRINGS.cover.toWrite,
       STRINGS.cover.moduleSummary(5, 3, 12),
       STRINGS.cover.moduleSummary(1, 0, 2),
@@ -145,7 +159,7 @@ describe("the course's front page: the path through the course", () => {
     render(<LessonList book={book} storage={memoryStorage()} />);
     const path = screen.getByRole("heading", { name: STRINGS.cover.journeyHeading })
       .parentElement as HTMLElement;
-    const stages = within(path).getAllByRole("listitem");
+    const stages = [...path.querySelectorAll(":scope > ol > li")];
     expect(stages).toHaveLength(STRINGS.cover.stages.length);
     const withLessons = new Set(book.lessons.map((l) => l.module));
     STRINGS.cover.stages.forEach((s, i) => {
@@ -158,6 +172,96 @@ describe("the course's front page: the path through the course", () => {
       if (written) expect(li).not.toHaveTextContent(STRINGS.cover.stageToWrite);
       else expect(li).toHaveTextContent(STRINGS.cover.stageToWrite);
     });
+  });
+
+  it("holds each module in its stage, every stage one closed line for a new reader", () => {
+    render(<LessonList book={book} storage={memoryStorage()} />);
+    STRINGS.cover.stages.forEach((stage, i) => {
+      const line = stageLine(stage.name);
+      expect(line).toHaveAttribute("aria-expanded", "false");
+      const lessons = book.lessons.filter((l) => stageOf(l.module) === stage);
+      const total = lessons.reduce((n, l) => n + l.challenges.length, 0);
+      expect(line).toHaveTextContent(STRINGS.progress(0, total));
+      // The stage's own list holds its modules' lines, in order, and nothing else.
+      const list = document.getElementById(`stage-${i + 1}-modules`)!;
+      expect(line).toHaveAttribute("aria-controls", list.id);
+      const held = [...list.querySelectorAll("section.module")].map((m) =>
+        m.getAttribute("aria-labelledby"),
+      );
+      expect(held).toEqual(
+        Array.from({ length: stage.to - stage.from + 1 }, (_, k) => `module-${stage.from + k}`),
+      );
+    });
+    // Module 0 stands before the stages, open, as the way in.
+    const zero = moduleLine(0);
+    expect(zero).toHaveAttribute("aria-expanded", "true");
+    expect(
+      zero.compareDocumentPosition(stageLine(STRINGS.cover.stages[0]!.name)) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it("draws Module 0's line in the stages' form, with what you do in it, open for a new reader", async () => {
+    const user = userEvent.setup();
+    render(<LessonList book={book} storage={memoryStorage()} />);
+    const zero = moduleLine(0);
+    const lessons = book.lessons.filter((l) => l.module === 0);
+    const total = lessons.reduce((n, l) => n + l.challenges.length, 0);
+    // The same line as a stage's: a mark, a name, what it covers and its progress.
+    expect(zero).toHaveClass("stage-toggle");
+    expect(zero.querySelector(".stage-icon")).not.toBeNull();
+    expect(zero).toHaveTextContent(STRINGS.moduleNames[0]!);
+    expect(zero).toHaveTextContent(STRINGS.module(0));
+    expect(zero).toHaveTextContent(STRINGS.cover.moduleSummary(lessons.length, 0, total));
+    const region = screen.getByRole("region", {
+      name: `${STRINGS.module(0)}: ${STRINGS.moduleNames[0]}`,
+    });
+    expect(within(region).getByText(STRINGS.cover.openingAbout)).toBeInTheDocument();
+    // Open, it shows Module 0's lessons, and pressed, it hides them.
+    const link = () =>
+      within(region).queryByRole("link", {
+        name: new RegExp(first.title.replace(/[?()]/g, "\\$&")),
+      });
+    expect(zero).toHaveAttribute("aria-expanded", "true");
+    expect(link()).toHaveAttribute("href", lessonHref(first.id));
+    await user.click(zero);
+    expect(zero).toHaveAttribute("aria-expanded", "false");
+    expect(link()).not.toBeInTheDocument();
+  });
+
+  it("opens the stage of a returning reader's module, with that module open in it", () => {
+    const later = ordered.find((l) => l.module === 2 && l.challenges.length > 1)!;
+    const storage = memoryStorage();
+    pass(storage, later.id, 1);
+    render(<LessonList book={book} storage={storage} />);
+    for (const stage of STRINGS.cover.stages)
+      expect(stageLine(stage.name)).toHaveAttribute(
+        "aria-expanded",
+        String(stage === stageOf(later.module)),
+      );
+    expect(moduleLine(later.module)).toHaveAttribute("aria-expanded", "true");
+    const lessons = document.getElementById(`module-${later.module}-lessons`)!;
+    expect(
+      within(lessons).getByRole("link", {
+        name: new RegExp(later.title.replace(/[?()]/g, "\\$&")),
+      }),
+    ).toHaveAttribute("href", lessonHref(later.id));
+  });
+
+  it("shows and hides a stage's modules when its line is pressed", async () => {
+    const user = userEvent.setup();
+    render(<LessonList book={book} storage={memoryStorage()} />);
+    const stage = STRINGS.cover.stages[1]!;
+    const line = stageLine(stage.name);
+    const module = () =>
+      screen.queryByRole("button", { name: new RegExp(`^${STRINGS.module(stage.from)}: `) });
+    expect(module()).not.toBeInTheDocument();
+    await user.click(line);
+    expect(line).toHaveAttribute("aria-expanded", "true");
+    expect(module()).toHaveAttribute("aria-expanded", "false");
+    await user.click(line);
+    expect(line).toHaveAttribute("aria-expanded", "false");
+    expect(module()).not.toBeInTheDocument();
   });
 
   it("writes a stage's modules as the course writes a run of numbers", () => {
@@ -177,7 +281,9 @@ describe("the course's front page: every module of the plan", () => {
   it("lists every module in order, with its lessons or a line saying it is still to be written", () => {
     render(<LessonList book={book} storage={memoryStorage()} />);
     // The module list's regions: the cover's band and its path are regions of their own.
-    const sections = screen.getAllByRole("region").filter((r) => r.classList.contains("module"));
+    const sections = screen
+      .getAllByRole("region", { hidden: true })
+      .filter((r) => r.classList.contains("module") || r.classList.contains("journey-opening"));
     const withLessons = new Set(book.lessons.map((l) => l.module));
     expect(sections).toHaveLength(STRINGS.moduleNames.length);
     STRINGS.moduleNames.forEach((name, module) => {
@@ -205,9 +311,7 @@ describe("the course's front page: every module of the plan", () => {
     for (const module of new Set(book.lessons.map((l) => l.module))) {
       const lessons = book.lessons.filter((l) => l.module === module);
       const total = lessons.reduce((n, l) => n + l.challenges.length, 0);
-      const line = screen.getByRole("button", {
-        name: new RegExp(`^${STRINGS.module(module)}: `),
-      });
+      const line = moduleLine(module);
       expect(line).toHaveTextContent(STRINGS.cover.moduleSummary(lessons.length, 0, total));
       expect(line).toHaveAttribute("aria-expanded", String(module === first.module));
       const shown = screen.queryAllByRole("link", {
@@ -222,9 +326,13 @@ describe("the course's front page: every module of the plan", () => {
     expect(last.module).not.toBe(first.module);
     render(<LessonList book={book} storage={memoryStorage()} from={last.id} />);
     for (const module of [first.module, last.module])
-      expect(
-        screen.getByRole("button", { name: new RegExp(`^${STRINGS.module(module)}: `) }),
-      ).toHaveAttribute("aria-expanded", "true");
+      expect(moduleLine(module)).toHaveAttribute("aria-expanded", "true");
+    // The stage that holds it opens too, and no other.
+    for (const stage of STRINGS.cover.stages)
+      expect(stageLine(stage.name)).toHaveAttribute(
+        "aria-expanded",
+        String(stage === stageOf(last.module)),
+      );
     expect(
       screen.getByRole("link", { name: new RegExp(last.title.replace(/[?()]/g, "\\$&")) }),
     ).toHaveAttribute("href", lessonHref(last.id));
@@ -234,9 +342,8 @@ describe("the course's front page: every module of the plan", () => {
     const user = userEvent.setup();
     render(<LessonList book={book} storage={memoryStorage()} />);
     const later = ordered.find((l) => l.module !== first.module)!;
-    const line = screen.getByRole("button", {
-      name: new RegExp(`^${STRINGS.module(later.module)}: `),
-    });
+    await user.click(stageLine(stageOf(later.module)!.name));
+    const line = moduleLine(later.module);
     const link = () =>
       screen.queryByRole("link", { name: new RegExp(later.title.replace(/[?()]/g, "\\$&")) });
     expect(link()).not.toBeInTheDocument();
@@ -265,9 +372,8 @@ describe("the course's front page: every module of the plan", () => {
     render(<LessonList book={counted} storage={storage} />);
     expect(runs).toHaveLength(first.challenges.length);
     const later = ordered.find((l) => l.module !== first.module)!;
-    const line = screen.getByRole("button", {
-      name: new RegExp(`^${STRINGS.module(later.module)}: `),
-    });
+    await user.click(stageLine(stageOf(later.module)!.name));
+    const line = moduleLine(later.module);
     await user.click(line);
     await user.click(line);
     expect(runs).toHaveLength(first.challenges.length);
@@ -282,9 +388,9 @@ describe("the course's front page: every module of the plan", () => {
     ).toHaveTextContent(STRINGS.progress(1, first.challenges.length));
     const lessons = book.lessons.filter((l) => l.module === first.module);
     const total = lessons.reduce((n, l) => n + l.challenges.length, 0);
-    expect(
-      screen.getByRole("button", { name: new RegExp(`^${STRINGS.module(first.module)}: `) }),
-    ).toHaveTextContent(STRINGS.cover.moduleSummary(lessons.length, 1, total));
+    expect(moduleLine(first.module)).toHaveTextContent(
+      STRINGS.cover.moduleSummary(lessons.length, 1, total),
+    );
   });
 });
 

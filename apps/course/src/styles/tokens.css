@@ -110,7 +110,8 @@
   --gutter: 16px;
   --motion: 160ms;
   /* The cover's band: the accent's own blue, deepened, with white words on it, and one brighter
-     blue for the way in. The five stages of the path each take a colour of the drawings' own. */
+     blue for the way in. The five stages of the path each take a colour of the drawings' own;
+     Module 0, before them, takes the words' own ink, in either theme. */
   --hero-bg-1: #1d4fa3;
   --hero-bg-2: #0e2758;
   --hero-fg: #ffffff;
@@ -119,6 +120,7 @@
   --hero-action: #ffffff;
   --hero-action-fg: #163b7a;
   --hero-trace: rgba(169, 212, 255, 0.16);
+  --stage-0: var(--fg);
   --stage-1: #1a7f37;
   --stage-2: #1d4fa3;
   --stage-3: #6d3fd1;

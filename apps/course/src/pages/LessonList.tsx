@@ -6,7 +6,12 @@
 // shows the path through the course in reading order, so the way in is never a puzzle (the author,
 // 6 October 2026: a reader who met the machine's parts by module asked where Module 1 was).
 // Each module's lessons show when its line is pressed, the module of the lesson the way in names,
-// and of the lesson just left, already open (the author: the page had grown long).
+// and of the lesson just left, already open (the author: the page had grown long). The modules sit
+// inside the five stages, each stage one line until it is pressed, the stage of an open module open
+// too (the author, 10 October 2026: the stages named their modules, and the list under them named
+// them again). Module 0 comes before the stages, as the path's opening line says, in a line of the
+// stages' own form, its mark, its number and what you do in it (the author: a bare module heading
+// above the stages looked out of place).
 
 import { useMemo, useState, type ReactNode } from "react";
 
@@ -65,38 +70,174 @@ const STAGE_ICONS: readonly ReactNode[] = [
   <path key="w" d="M3 4h18v12H3zM8 20h8M12 16v4" />,
 ];
 
-function Journey({ written }: { written: (module: number) => boolean }) {
+/** Module 0's mark, before the stages: a glass, for looking inside a finished machine. */
+const OPENING_ICON: ReactNode = <path d="M10.5 4.5a6 6 0 1 0 0 12a6 6 0 0 0 0-12zM15 15l5 5" />;
+
+/** A module's lessons, each a link with its challenges complete. */
+function LessonCards({
+  lessons,
+  completion,
+  id,
+  hidden,
+}: {
+  lessons: readonly Lesson[];
+  completion: ReadonlyMap<string, { passed: number; total: number }>;
+  id?: string;
+  hidden?: boolean;
+}) {
   return (
-    <section className="journey" aria-labelledby="journey-heading">
-      <h2 id="journey-heading">{STRINGS.cover.journeyHeading}</h2>
-      <p className="journey-intro">{STRINGS.cover.journeyIntro}</p>
-      <ol className="journey-stages">
-        {STRINGS.cover.stages.map((stage, i) => {
-          const modules = Array.from(
-            { length: stage.to - stage.from + 1 },
-            (_, k) => stage.from + k,
-          );
-          const toWrite = !modules.some(written);
-          return (
-            <li key={stage.name} className={`journey-stage${toWrite ? " stage-to-write" : ""}`}>
-              <span className={`stage-icon stage-${i + 1}`} aria-hidden="true">
-                <svg viewBox="0 0 24 24">{STAGE_ICONS[i]}</svg>
+    <ol id={id} className="lesson-list" hidden={hidden}>
+      {lessons.map((lesson) => {
+        const c = completion.get(lesson.id);
+        return (
+          <li key={lesson.id}>
+            <a href={lessonHref(lesson.id)} className="lesson-link">
+              <span className="lesson-link-title">{lesson.title}</span>
+              <span className="meta">
+                {c && c.total > 0 ? STRINGS.progress(c.passed, c.total) : STRINGS.noChallenges}
               </span>
-              <span className="stage-text">
-                <span className="stage-name">{stage.name}</span>
-                <span className="stage-modules">
-                  {STRINGS.cover.stageModules(stage.from, stage.to)}
-                </span>
-                <span className="stage-about">{stage.about}</span>
-                {toWrite && <span className="stage-status">{STRINGS.cover.stageToWrite}</span>}
-              </span>
-            </li>
-          );
-        })}
-      </ol>
+            </a>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+/**
+ * A line of the path, which shows what it holds when pressed: a stage and its modules, or Module 0,
+ * before the stages, and its lessons. Beside its mark, its name, the modules it covers and its
+ * progress; under them, what you do in it.
+ */
+function PathLine({
+  id,
+  listId,
+  mark,
+  markClass,
+  name,
+  range,
+  status,
+  about,
+  numberFirst = false,
+  isOpen,
+  onToggle,
+  children,
+}: {
+  /** The prefix of the ids of the line's name, range and status. */
+  id: string;
+  /** The id of what the line shows when pressed. */
+  listId: string;
+  mark: ReactNode;
+  markClass: string;
+  name: string;
+  range: string;
+  status: string;
+  about?: string;
+  /** Read out by its number first, as a module is; a stage is read out by its name first. */
+  numberFirst?: boolean;
+  isOpen: boolean;
+  onToggle: () => void;
+  children: ReactNode;
+}) {
+  const parts = numberFirst ? ["range", "name", "status"] : ["name", "range", "status"];
+  return (
+    <>
+      <h3 className="stage-heading">
+        <button
+          type="button"
+          className="stage-toggle"
+          aria-expanded={isOpen}
+          aria-controls={listId}
+          aria-labelledby={parts.map((p) => `${id}-${p}`).join(" ")}
+          onClick={onToggle}
+        >
+          <span className="module-chevron" aria-hidden="true" />
+          <span className={`stage-icon ${markClass}`} aria-hidden="true">
+            <svg viewBox="0 0 24 24">{mark}</svg>
+          </span>
+          <span className="stage-text">
+            <span className="stage-name" id={`${id}-name`}>
+              {name}
+            </span>
+            <span className="stage-modules" id={`${id}-range`}>
+              {range}
+            </span>
+            <span className="stage-status" id={`${id}-status`}>
+              {status}
+            </span>
+          </span>
+        </button>
+      </h3>
+      {about && <p className="stage-about">{about}</p>}
+      <div id={listId} className="stage-list" hidden={!isOpen}>
+        {children}
+      </div>
+    </>
+  );
+}
+
+/**
+ * A module's line inside its stage, which shows its lessons when pressed; a module still to be
+ * written has none.
+ */
+function ModuleRow({
+  module,
+  lessons,
+  isOpen,
+  onToggle,
+  completion,
+}: {
+  module: number;
+  lessons: readonly Lesson[];
+  isOpen: boolean;
+  onToggle: () => void;
+  completion: ReadonlyMap<string, { passed: number; total: number }>;
+}) {
+  const name = STRINGS.moduleNames[module];
+  const heading = name ? `${STRINGS.module(module)}: ${name}` : STRINGS.module(module);
+  if (lessons.length === 0)
+    return (
+      <section className="module module-to-write" aria-labelledby={`module-${module}`}>
+        <h4 id={`module-${module}`}>{heading}</h4>
+        <p className="meta">{STRINGS.cover.toWrite}</p>
+      </section>
+    );
+  const counts = lessons.map((l) => completion.get(l.id));
+  const passed = counts.reduce((n, c) => n + (c?.passed ?? 0), 0);
+  const total = counts.reduce((n, c) => n + (c?.total ?? 0), 0);
+  return (
+    <section className="module" aria-labelledby={`module-${module}`}>
+      <h4>
+        <button
+          type="button"
+          className="module-toggle"
+          aria-expanded={isOpen}
+          aria-controls={`module-${module}-lessons`}
+          aria-labelledby={`module-${module} module-${module}-summary`}
+          onClick={onToggle}
+        >
+          <span className="module-chevron" aria-hidden="true" />
+          <span className="module-name" id={`module-${module}`}>
+            {heading}
+          </span>
+          <span className="meta" id={`module-${module}-summary`}>
+            {STRINGS.cover.moduleSummary(lessons.length, passed, total)}
+          </span>
+        </button>
+      </h4>
+      <LessonCards
+        id={`module-${module}-lessons`}
+        lessons={lessons}
+        completion={completion}
+        hidden={!isOpen}
+      />
     </section>
   );
 }
+
+/** The modules of a stage, in order. */
+const stageModules = (stage: { from: number; to: number }) =>
+  Array.from({ length: stage.to - stage.from + 1 }, (_, k) => stage.from + k);
 
 export function LessonList({
   book,
@@ -143,6 +284,21 @@ export function LessonList({
     setOpen((was) => {
       const now = new Set(was);
       if (!now.delete(module)) now.add(module);
+      return now;
+    });
+  // A stage starts open when it holds a module that starts open; Module 0 is in no stage.
+  const [openStages, setOpenStages] = useState<ReadonlySet<number>>(
+    () =>
+      new Set(
+        STRINGS.cover.stages.flatMap((stage, i) =>
+          stageModules(stage).some((m) => open.has(m)) ? [i] : [],
+        ),
+      ),
+  );
+  const toggleStage = (i: number) =>
+    setOpenStages((was) => {
+      const now = new Set(was);
+      if (!now.delete(i)) now.add(i);
       return now;
     });
   const byModule = new Map<number, Lesson[]>();
@@ -208,67 +364,90 @@ export function LessonList({
         </div>
         <HeroCircuit />
       </section>
-      <Journey written={(m) => byModule.has(m)} />
-      {book.lessons.length === 0 && <p>{STRINGS.noLessons}</p>}
-      <h2 className="contents-heading visually-hidden">{STRINGS.cover.contents(modules.length)}</h2>
-      {modules.map((module) => {
-        const lessons = byModule.get(module) ?? [];
-        const name = STRINGS.moduleNames[module];
-        const heading = name ? `${STRINGS.module(module)}: ${name}` : STRINGS.module(module);
-        if (lessons.length === 0)
-          return (
-            <section
-              key={module}
-              className="module module-to-write"
-              aria-labelledby={`module-${module}`}
-            >
-              <h3 id={`module-${module}`}>{heading}</h3>
-              <p className="meta">{STRINGS.cover.toWrite}</p>
-            </section>
-          );
-        const isOpen = open.has(module);
-        const counts = lessons.map((l) => completion.get(l.id));
-        const passed = counts.reduce((n, c) => n + (c?.passed ?? 0), 0);
-        const total = counts.reduce((n, c) => n + (c?.total ?? 0), 0);
-        return (
-          <section key={module} className="module" aria-labelledby={`module-${module}`}>
-            <h3>
-              <button
-                type="button"
-                className="module-toggle"
-                aria-expanded={isOpen}
-                aria-controls={`module-${module}-lessons`}
-                onClick={() => toggle(module)}
+      <section className="journey" aria-labelledby="journey-heading">
+        <h2 id="journey-heading">{STRINGS.cover.journeyHeading}</h2>
+        <p className="journey-intro">{STRINGS.cover.journeyIntro}</p>
+        {book.lessons.length === 0 && <p>{STRINGS.noLessons}</p>}
+        {/* Module 0, and any module in no stage, as a line of the path's own form. */}
+        {modules
+          .filter((m) => !STRINGS.cover.stages.some((s) => m >= s.from && m <= s.to))
+          .map((m) => {
+            const lessons = byModule.get(m) ?? [];
+            const name = STRINGS.moduleNames[m];
+            const counts = lessons.map((l) => completion.get(l.id));
+            const passed = counts.reduce((n, c) => n + (c?.passed ?? 0), 0);
+            const total = counts.reduce((n, c) => n + (c?.total ?? 0), 0);
+            return (
+              <section
+                key={m}
+                className={`journey-stage journey-opening${lessons.length === 0 ? " stage-to-write" : ""}`}
+                aria-label={name ? `${STRINGS.module(m)}: ${name}` : STRINGS.module(m)}
               >
-                <span className="module-chevron" aria-hidden="true" />
-                <span className="module-name" id={`module-${module}`}>
-                  {heading}
-                </span>
-                <span className="meta">
-                  {STRINGS.cover.moduleSummary(lessons.length, passed, total)}
-                </span>
-              </button>
-            </h3>
-            <ol id={`module-${module}-lessons`} className="lesson-list" hidden={!isOpen}>
-              {lessons.map((lesson) => {
-                const c = completion.get(lesson.id);
-                return (
-                  <li key={lesson.id}>
-                    <a href={lessonHref(lesson.id)} className="lesson-link">
-                      <span className="lesson-link-title">{lesson.title}</span>
-                      <span className="meta">
-                        {c && c.total > 0
-                          ? STRINGS.progress(c.passed, c.total)
-                          : STRINGS.noChallenges}
-                      </span>
-                    </a>
-                  </li>
-                );
-              })}
-            </ol>
-          </section>
-        );
-      })}
+                <PathLine
+                  id={`module-${m}`}
+                  listId={`module-${m}-lessons`}
+                  mark={OPENING_ICON}
+                  markClass="stage-0"
+                  name={name ?? STRINGS.module(m)}
+                  range={STRINGS.module(m)}
+                  status={
+                    lessons.length === 0
+                      ? STRINGS.cover.stageToWrite
+                      : STRINGS.cover.moduleSummary(lessons.length, passed, total)
+                  }
+                  about={m === 0 ? STRINGS.cover.openingAbout : undefined}
+                  numberFirst
+                  isOpen={open.has(m)}
+                  onToggle={() => toggle(m)}
+                >
+                  {lessons.length === 0 ? (
+                    <p className="meta">{STRINGS.cover.toWrite}</p>
+                  ) : (
+                    <LessonCards lessons={lessons} completion={completion} />
+                  )}
+                </PathLine>
+              </section>
+            );
+          })}
+        <ol className="journey-stages">
+          {STRINGS.cover.stages.map((stage, i) => {
+            const inStage = stageModules(stage);
+            const toWrite = !inStage.some((m) => byModule.has(m));
+            const counts = inStage.flatMap((m) =>
+              (byModule.get(m) ?? []).map((l) => completion.get(l.id)),
+            );
+            const passed = counts.reduce((n, c) => n + (c?.passed ?? 0), 0);
+            const total = counts.reduce((n, c) => n + (c?.total ?? 0), 0);
+            return (
+              <li key={stage.name} className={`journey-stage${toWrite ? " stage-to-write" : ""}`}>
+                <PathLine
+                  id={`stage-${i + 1}`}
+                  listId={`stage-${i + 1}-modules`}
+                  mark={STAGE_ICONS[i]}
+                  markClass={`stage-${i + 1}`}
+                  name={stage.name}
+                  range={STRINGS.cover.stageModules(stage.from, stage.to)}
+                  status={toWrite ? STRINGS.cover.stageToWrite : STRINGS.progress(passed, total)}
+                  about={stage.about}
+                  isOpen={openStages.has(i)}
+                  onToggle={() => toggleStage(i)}
+                >
+                  {inStage.map((m) => (
+                    <ModuleRow
+                      key={m}
+                      module={m}
+                      lessons={byModule.get(m) ?? []}
+                      isOpen={open.has(m)}
+                      onToggle={() => toggle(m)}
+                      completion={completion}
+                    />
+                  ))}
+                </PathLine>
+              </li>
+            );
+          })}
+        </ol>
+      </section>
     </>
   );
 }
