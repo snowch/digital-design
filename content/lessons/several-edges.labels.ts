@@ -38,9 +38,9 @@ export const LABELS = {
     writeStates: "Complete the next-state logic and run the tests.",
   },
   options: {
-    p1Four: "[draft] p1Four",
+    p1Four: "4 edges, as each instruction above",
     p1Five: "5 edges",
-    p1Six: "[draft] p1Six",
+    p1Six: "6 edges",
   },
   faults: {
     fetchingHigh: "FETCHING stuck at 1",

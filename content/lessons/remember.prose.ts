@@ -14,7 +14,7 @@ export const PROSE = {
   motivation:
     "A light wired straight to a button is not a circuit of gates at all, only a wire. It goes dark the moment you let go.\n\nEverything from here needs a value kept from one moment to the next: a count, where you are in a sequence of instructions, the result of the last operation. The computer this course ends with is mostly circuits that remember. A circuit that remembers is where timing starts to matter.",
   prediction:
-    'Connect an output back to an input. The figures below do this with inverters in a loop and an OR gate on the way round, whose second input is called kick and forces the loop while it is 1.\n\nChoose an answer in each figure and press its "Check my prediction" button only after you have chosen.\n\nX is the simulator\'s mark for a wire that is not a known 0 or 1. Several causes lead to X: nothing has set the wire yet, or its value never stops changing.',
+    'Connect an output back to an input. The figures below do this with inverters in a loop and an OR gate on the way round, whose second input is called kick and forces the loop while it is 1.\n\nChoose an answer in each figure and press its "Check my prediction" button only after you have chosen.\n\nX is the simulator\'s mark for a wire that is not a known 0 or 1. Several causes lead to X: nothing has set the wire yet, or its value never stops changing.\n\nOnce you check, a **timing diagram** appears. It draws each signal as a line against time: high for 1, low for 0, and a hatched band for X. Above the lines, each step\'s name stands at the moment its inputs change: "kick", then "release". A red line marks a moment, after the run\'s last step. The table under the diagram gives each signal\'s value at the red line.',
   investigationLoopTwo:
     "The loop runs from inverter 1 (not1) to inverter 2 (not2), then through the OR gate back to inverter 1. Before any kick, q is X: nothing has set it yet.\n\nIn this Stepped model, a step is one round in which every gate looks at its inputs once and sets its output. After you press an input, the simulator steps until nothing changes. The status line says how many steps that took.\n\nPress kick to 1, then back to 0. Then drag the Step slider back and forth to watch the 1 go round the loop one gate per step.\n\nAfter kick returns to 0, the loop keeps q at 1.\n\nAn output fed back to an input like this is called feedback.",
   investigationLoopThree:
@@ -114,13 +114,10 @@ export const PROSE = {
     "It remembers which of two buttons was pressed last; A lights it, B puts it out.",
   faultLabAfterFault1:
     '"Feedback wire cut": the gate that drives LIGHT reads X where the other gate\'s output was (marked CUT). LIGHT is X unless B is pressed.',
-
   faultLabAfterFault2:
     '"LIGHT gate changed to OR": the light goes the wrong way: off while A is pressed, on while B is pressed. Release both and the values never stop changing, so LIGHT is X.',
-
   faultLabAfterFault3:
     '"Button A stuck at 1": the light stays 1 until B is pressed. The checks fail at "release B" because the light comes back on instead of staying off.',
-
   faultLabAfterNoFault:
     '"No fault", with A and B both pressed: both gates\' outputs are 0. A and B pressed together is the combination to avoid. Released in the same moment, both gates try to switch at once. The simulator cannot decide which gate wins, so LIGHT is X. In a real circuit one gate wins by being a little faster, and nothing says which.',
   raceLead:

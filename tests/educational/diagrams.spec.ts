@@ -519,6 +519,8 @@ test.describe("the diagrams", () => {
         .locator("figure.interactive")
         .filter({ has: page.getByRole("button", { name: V.prediction.commit }) })
         .all()) {
+        // A figure whose answers are not a choice of radios is left as first drawn.
+        if ((await figure.getByRole("radio").count()) < 2) continue;
         await figure.getByRole("radio").nth(1).check();
         await figure.getByRole("button", { name: V.prediction.commit }).click();
       }

@@ -181,9 +181,10 @@ export const SetupHold = withProps(
           from={data.edgeAt + data.show[0]}
           to={data.edgeAt + data.show[1]}
           shades={shades}
-          // The red line stands at the clock's edge, and the axis counts units from it.
+          // The red line stands at the clock's edge, and the axis counts units from it, every 20:
+          // at a phone's scale, ticks every 10 would crowd the band's label.
           cursor={data.edgeAt}
-          units={{ ticks: 10, origin: data.edgeAt }}
+          units={{ ticks: 20, origin: data.edgeAt }}
           table={false}
         />
         <p role="status" className="setup-hold-result">

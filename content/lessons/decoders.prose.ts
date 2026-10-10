@@ -13,7 +13,7 @@ export const PROSE = {
   motivation:
     'Each lamp answers its own yes-or-no question about S1 and S0: "Is S1 S0 my room\'s number?" Y2 asks "Is S1 S0 equal to 10?" S1 and S0 have four patterns, and each pattern lights exactly one lamp.\n\nFrom Module 2, you know an AND gate gives 1 only when every input is 1. A NOT gate turns a 0 into a 1.',
   prediction:
-    'The figure draws one lamp\'s circuit above its question. Choose your answer, then press "Check my prediction". The page shows what the simulator gave, with a timing diagram showing how S1, S0, and Y2 change. Press "Predict again" to clear the result and try another answer.',
+    'The figure draws one lamp\'s circuit above its question. Choose your answer, then press "Check my prediction". The page shows what the simulator gave, with the values written on the circuit; this run tries one setting, so nothing changes during it. Press "Predict again" to clear the result and try another answer.',
   p1Question:
     "The figure is one lamp's circuit: a NOT gate, notS0, turns S0 over; its output is the wire NS0. An AND gate, and2, takes S1 and NS0 and drives the lamp, Y2. S1 is 1 and S0 is 1. What is Y2?",
   p1Explain:
@@ -31,13 +31,10 @@ export const PROSE = {
     'The figure shows the decoder built from gates. Its parts are:\n\n- notS1: NOT of S1; its output wire is NS1\n- notS0: NOT of S0; its output wire is NS0\n- and0: NS1 AND NS0; it drives Y0\n- and1: NS1 AND S0; it drives Y1\n- and2: S1 AND NS0; it drives Y2\n- and3: S1 AND S0; it drives Y3\n\nPress a wire to see its name and value below the drawing. "Run checks" makes 4 checks, one per pattern of S1 and S0: "S1 0, S0 0", "S1 0, S0 1", "S1 1, S0 0", "S1 1, S0 1". Each check compares all four outputs with a healthy decoder. Choose each fault in turn. Before you run the checks, predict which checks will fail and how many lamps each failing check will light.',
   decoderFaultsAfter:
     "Each fault breaks the rule that each AND gate is 1 for one pattern alone: some patterns light two lamps, and some light none.",
-
   decoderFaultsAfterFault1:
     '"NS0 stuck at 1": 2 of the 4 checks fail. With S0 at 1, and0 and and2 should be blocked by NS0, but NS0 is stuck at 1. At "S1 0, S0 1" (01), Y0 and Y1 both light. At "S1 1, S0 1" (11), Y2 and Y3 both light. Two lamps light where only one should.',
-
   decoderFaultsAfterFault2:
     '"AND gate and3 changed to OR": 2 of the 4 checks fail. Y3 is now S1 OR S0, so it is 1 for 01, 10 and 11. At 01, Y1 and Y3 both light. At 10, Y2 and Y3 both light. At 00 and 11, the checks succeed.',
-
   decoderFaultsAfterFault3:
     '"NOT gate notS1 becomes a wire": all 4 checks fail. NS1 now equals S1 instead of its opposite, so and0 and and1 see S1 where they should see NOT S1. At 00 and at 01, no lamp lights. At 10, Y0 and Y2 both light. At 11, Y1 and Y3 both light.',
   explanation:
