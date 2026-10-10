@@ -7,8 +7,6 @@ import { z } from "zod";
 
 import { Simulator, parseWord, type Circuit, type Word } from "@dd/sim";
 
-import { riseLabel } from "../traces";
-
 export const Step = z.object({
   label: z.string().optional(),
   set: z.record(z.string(), z.union([z.number(), z.string()])).optional(),
@@ -29,7 +27,7 @@ export function runScript(circuit: Circuit, steps: readonly Step[]): Simulator {
     for (const [name, value] of Object.entries(step.set ?? {}))
       sim.setInput(name, toWord(circuit, name, value));
     // A clock step's label stands on its rise; a settle step's where its inputs changed.
-    if (step.clock) sim.clockCycle(step.clock, riseLabel(sim, step.label));
+    if (step.clock) sim.clockCycle(step.clock, step.label);
     else {
       sim.settle();
       sim.step(step.label ?? "");

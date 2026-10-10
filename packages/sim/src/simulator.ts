@@ -28,7 +28,10 @@
 
 import { driverOf, type Circuit, type Component, type NetId } from "./circuit";
 import { primitive } from "./primitives";
-import { equal, unknown, type Word } from "./values";
+import { equal, isKnown, unknown, type Word } from "./values";
+
+/** The mark of a rise taken with RST at 1: the reset's edge, which a figure names, not numbers. */
+export const RESET_RISE = "↑RST";
 
 export type TimeModel = "settle" | "delay";
 
@@ -316,13 +319,16 @@ export class Simulator {
   /**
    * Settle model, clocked discipline: with the inputs already set for this cycle, settle at the
    * low phase, raise `clock`, settle, advance, lower it, settle, advance. One cycle is two time
-   * units: the rising edge falls on an odd time. The rise is marked `rise`: a step's own label, or
-   * the bare arrow a figure numbers.
+   * units: the rising edge falls on an odd time. The rise is marked `rise`: a step's own label;
+   * else `RESET_RISE` while an input named RST is 1, so a figure that numbers its rises from the
+   * last reset never counts the reset's own; else the bare arrow a figure numbers.
    */
-  clockCycle(clock: NetId | string, rise = "↑"): { low: SettleResult; high: SettleResult } {
+  clockCycle(clock: NetId | string, rise?: string): { low: SettleResult; high: SettleResult } {
     const id = this.resolve(clock);
     const low = this.settle();
-    this.tick(rise);
+    const rst = this.circuit.inputs.find((i) => i.name === "RST");
+    const v = rst ? this.read(rst.net) : undefined;
+    this.tick(rise ?? (v && isKnown(v) && v.value === 1n ? RESET_RISE : "↑"));
     this.setInput(id, { width: 1, value: 1n, known: 1n });
     const high = this.settle();
     this.tick("↓");

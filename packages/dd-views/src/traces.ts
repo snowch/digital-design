@@ -3,12 +3,11 @@
 // Reading a trace: the value of a net at a time, and the segments of a lane for drawing.
 
 import {
+  RESET_RISE,
   equal,
-  isKnown,
   unknown,
   type Circuit,
   type NetId,
-  type Simulator,
   type Trace,
   type Word,
 } from "@dd/sim";
@@ -71,16 +70,11 @@ export function segmentsOf(
   return merged;
 }
 
-/** The mark a rise of the clock gets while the reset is held: the diagram names it as the reset. */
-export const RESET_RISE = "↑RST";
-
-/** The label a clock step's rise is marked with: its own, the reset's, or the bare arrow. */
-export function riseLabel(sim: Simulator, label?: string): string {
-  if (label) return label;
-  const rst = sim.circuit.inputs.find((i) => i.name === "RST");
-  const v = rst ? sim.read(rst.net) : undefined;
-  return v && isKnown(v) && v.value === 1n ? RESET_RISE : "↑";
-}
+/**
+ * The mark a rise of the clock gets while the reset is held: the diagram names it as the reset.
+ * The simulator's `clockCycle` marks it so, whoever clocks it.
+ */
+export { RESET_RISE };
 
 /**
  * The marks as a diagram writes them: each bare rise numbered from the last reset (↑1, ↑2), the

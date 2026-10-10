@@ -7,8 +7,6 @@ import { useCallback, useMemo, useState } from "react";
 
 import { Simulator, bit0, bit1, isKnown, parseWord, type Circuit, type Word } from "@dd/sim";
 
-import { riseLabel } from "./traces";
-
 export interface SettleSim {
   readonly sim: Simulator;
   readonly values: readonly Word[];
@@ -59,7 +57,7 @@ export function figureSim(
       const width = net !== undefined ? (circuit.nets[net]?.width ?? 1) : 1;
       sim.setInput(name, parseWord(String(value), width));
     }
-    if (step.clock) sim.clockCycle(step.clock, riseLabel(sim));
+    if (step.clock) sim.clockCycle(step.clock);
     else sim.settle();
   }
   return sim;
@@ -104,7 +102,7 @@ export function useSettleSim(
       bump();
     },
     clock: (name) => {
-      sim.clockCycle(name, riseLabel(sim));
+      sim.clockCycle(name);
       bump();
     },
     releaseAll: () => {
