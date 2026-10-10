@@ -320,13 +320,12 @@ export const MACHINE13_STRINGS: Machine13Strings = {
   capHalts:
     "With room A at {a} and room B at {b}, your program halts with cause {cause} before it stops.",
   capUnknown:
-    "[draft] With room A at {a} and room B at {b}, your program reaches `{line}` at `{address}`, where {registers} holds no value yet.",
+    "With room A at `{a}` and room B at `{b}`, your program reaches `{line}` at `{address}`, where `{registers}` holds no value yet: the model cannot branch or jump on a register that no instruction has written.",
   capNoStop:
     "With room A at {a} and room B at {b}, your program does not reach stop within its limit of instructions.",
-  capFormSigned: "[draft] capFormSigned",
-  capFormBits: "[draft] capFormBits {n}",
-  capUnanswered:
-    "This question has no answer yet, or the answer is not a value of the form asked for.",
+  capFormSigned: "The answer must be a signed decimal number, such as -34, or X.",
+  capFormBits: "`{n}` bits, each 0 or 1 (or X), highest first.",
+  capUnanswered: "This question has no answer yet.",
   capNoSetIf: "Your program has no set if, so this question has no edge to read.",
   capNoEdge: "Your program's run does not reach the edge this question names.",
   capFirst:
@@ -334,9 +333,10 @@ export const MACHINE13_STRINGS: Machine13Strings = {
   capLevels: {
     result:
       "Pause before the ALU edge of your first set if. Read RESULT where it leaves the ALU in the datapath, in hexadecimal, and write it as a signed decimal number.",
-    flags: "[draft] flags",
-    xorB: "[draft] xorB",
-    held: "[draft] held",
+    flags:
+      "At the ALU edge of your first set if, read the four flags where they leave the ALU, and MET where it leaves the condition block, in that order.",
+    xorB: "At the ALU edge of your first set if, open `datapath`, `alu`, `g0`, then `q1`, and read the output of `xorB` in each slice, bit 7 (the slice `bit3`) first.",
+    held: "At the ALU edge of your first set if, read HM in the datapath, and write it as a signed decimal number, or X if the trace shows X.",
   },
 
   joinsMap: "the nine parts, by block",

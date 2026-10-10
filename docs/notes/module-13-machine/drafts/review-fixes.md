@@ -110,3 +110,16 @@ Facts put right in placed text without a new draft, each a word or a number:
 ## Brief R3-3 (13.3, the second reading)
 
 - Placed as drafted; no fact needed a change.
+
+## Brief R3-1 (13.1, the second reading)
+
+- Placed as drafted; no fact needed a change.
+
+## Brief R3-5 (13.5, the second reading)
+
+- `c1Hints.4` named the slices `bit7` to `bit4`, and left a note saying so; the names start again
+  in each group, so in `q1` the slices for bits 7 to 4 are `bit3` to `bit0`, as the brief gave.
+  Corrected, the note removed.
+- `capLevels.xorB`: "bit 7 first" with "(the slice `bit3`)" added, since the drawing names the
+  slice, not the word's bit.
+- The field and case labels came back with full stops; removed, as the other labels have none.

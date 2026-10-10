@@ -1096,14 +1096,17 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       edgesLoad:
         "{actual} is not the number of edges. The memory's checks give their cause in MEMORY, and a load that traps there never reaches WRITE.",
       // Module 13, lesson 1 (brief 1D).
-      joinMq: "[draft] joinMq",
-      joinAddr: "[draft] joinAddr",
-      joinWaiting: "[draft] joinWaiting",
-      joinStatus: "[draft] joinStatus",
+      joinMq: "Open the datapath and follow MQ from where it enters to the part it goes into.",
+      joinAddr:
+        "Open the datapath and follow ADDR back from where it leaves to the part that drives it.",
+      joinWaiting:
+        "Open the control unit and follow WAITING from where it enters to the part it goes into.",
+      joinStatus:
+        "Open the datapath and follow STATUS back from where it leaves to the part that drives it.",
       joinIrEdge:
         "`{actual}` is not the edge at which the IR takes `resume`'s word. The IR takes an instruction's word at its FETCH edge; add up the edges each earlier line takes, from the reset.",
       joinPcEdge:
-        "`{actual}` is not the edge at which the PC takes `010`. `resume` takes three edges, and the PC takes the return point at the last of them.",
+        "`{actual}` is not the edge at which the PC takes `010`. The instruction `resume` takes three edges, and the PC takes the return point at the last of them.",
       // Module 13, lesson 2 (brief 2D).
       pathCode:
         "`{actual}` does not follow the rule for a set if line: its eight digits are K, J, A, B and Y, then three digits of constant; set if is kind A, and its job digit is a branch's condition.",
