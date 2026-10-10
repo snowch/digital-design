@@ -1,6 +1,6 @@
 {
   "repository": "snowch/learning-platform",
-  "commit": "36d21aec20f9e078cface046a44f509e9e5e84c1",
+  "commit": "9ab98e999f3566d415b56e975b77e899ba9036d3",
   "packages": [
     "lesson-schema",
     "lesson-runtime",
@@ -10,8 +10,8 @@
     "lesson-schema/package.json": "951c56f4de98ad03e531528f97a88eff8235abc86dc7de195547b5686e7edc4c",
     "lesson-schema/src/index.ts": "484bd9f8820b1375a85a7786f5a4330b7db3c122c5333208371c9f4b427a8521",
     "lesson-schema/src/jsonSchema.ts": "901647f37aedb744ce0d9f9cd73bf08978fca7a00bdcc31cc5a2a05d85ee190d",
-    "lesson-schema/src/schema.test.ts": "622099cda1f338c00d8a7ac92a9e4d44bf708ca10183537fb4c58a7bd53c5dc0",
-    "lesson-schema/src/schema.ts": "41aa4f41772672c808488ed8851cdc272a5db8193f512ec271889a15f52fc165",
+    "lesson-schema/src/schema.test.ts": "589f928ea178c3d0d3e2d4ed704be0b4933bd3b22ae119d999861231c9c070f8",
+    "lesson-schema/src/schema.ts": "b22a3e2f5d62e9e39be38e26d602a750cae6295f14fc5c36f82f2a135abe5335",
     "lesson-schema/src/validate.ts": "5d3cb0b60bc8d9d36ca8f5d5e0b8e4cee30560ffd018f66f4ab696cc84be4319",
     "lesson-schema/src/vocabulary.ts": "5820bc8c91430581fa276985780e4f7fbe9a4d68558e80653d6bcbcc515c33fd",
     "lesson-runtime/package.json": "e601a74a356e395a45fb51f7c5701fcd43c763afd104852bdd602ab3da373d14",

@@ -360,6 +360,11 @@ export const Lesson = z.object({
   module: z.number().int().min(0),
   /** Order within the course. */
   order: z.number().int().min(0),
+  /**
+   * An optional chapter, outside the numbered modules a course must have: a list of lessons shows
+   * it under a heading of its own and leaves it out of any count of modules still to be written.
+   */
+  optional: z.boolean().default(false),
   objectives: z.array(z.string().min(1)).min(1),
   /** Lesson ids a learner should have done first. */
   prerequisites: z.array(z.string()).default([]),

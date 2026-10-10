@@ -51,6 +51,11 @@ export function minimalLesson(overrides: Partial<LessonInput> = {}): LessonInput
 }
 
 describe("the lesson schema", () => {
+  it("marks a lesson as an optional chapter only when it says so", () => {
+    expect(parseLesson(minimalLesson()).optional).toBe(false);
+    expect(parseLesson(minimalLesson({ optional: true })).optional).toBe(true);
+  });
+
   it("accepts a minimal lesson and fills defaults", () => {
     const lesson = parseLesson(minimalLesson());
     expect(lesson.prerequisites).toEqual([]);
