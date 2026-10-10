@@ -850,7 +850,8 @@ function ControlPanes({
           trace={sim.trace}
           signals={[
             "CLK",
-            { net: inside("S"), label: "S", names },
+            // The state by its name alone, as the edge timelines and the prose write it: FETCH.
+            { net: inside("S"), label: "S", labels: names },
             ...data.timing
               .filter((n) => n !== "S" && n !== "CLK")
               .map((n) => ({ net: inside(n), label: n })),

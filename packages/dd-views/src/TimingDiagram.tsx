@@ -141,7 +141,12 @@ export function TimingDiagram({
         ...(units.marks ?? []).map((t) => ({ time: t, label: String(t) })),
       ].sort((a, b) => a.time - b.time)
     : [];
-  const shownMarks = units ? unitMarks : stepMarks;
+  // In units, the trace's own named marks (4.1's edge) stand with the ticks, a tick at a named
+  // time left out.
+  const named = new Set(stepMarks.map((m) => m.time));
+  const shownMarks = units
+    ? [...unitMarks.filter((m) => !named.has(m.time)), ...stepMarks].sort((a, b) => a.time - b.time)
+    : stepMarks;
   // Where the red line stands, in the run's own steps.
   const where = (t: number) => {
     if (t >= last) return strings.timing.afterRun;

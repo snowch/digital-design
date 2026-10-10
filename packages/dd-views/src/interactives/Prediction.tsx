@@ -14,7 +14,7 @@ import { Prose, useSlot, type InteractiveProps } from "@platform/lesson-runtime"
 import { PredictionChallenge } from "@platform/primitives";
 import { formatWord } from "@dd/sim";
 
-import { CircuitView } from "../CircuitView";
+import { CircuitView, valueLabel } from "../CircuitView";
 import { format, useViewStrings, youChose } from "../strings";
 import { TimingDiagram } from "../TimingDiagram";
 import { withProps } from "./props";
@@ -68,7 +68,9 @@ export const Prediction = withProps(
     const outcome = useMemo(() => {
       if (!stored) return undefined;
       const sim = runScript(circuit, data.run);
-      return { sim, value: formatWord(sim.read(data.watch)) };
+      const word = sim.read(data.watch);
+      // Compared in full; written as the drawings write it (a wide word in hexadecimal).
+      return { sim, value: formatWord(word), shown: valueLabel(word) };
     }, [stored, circuit, data.run, data.watch]);
     // The signals a table shows, by the name the page gives each and the net it reads.
     const shown = (
@@ -123,7 +125,7 @@ export const Prediction = withProps(
               }
             >
               {youChose(strings.prediction.youSaid, chosenLabel(stored.choice))}{" "}
-              {format(strings.prediction.circuitDid, { signal: data.watch, value: outcome.value })}{" "}
+              {format(strings.prediction.circuitDid, { signal: data.watch, value: outcome.shown })}{" "}
               {outcome.value === stored.choice
                 ? strings.prediction.match
                 : strings.prediction.noMatch}
