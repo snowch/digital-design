@@ -126,7 +126,10 @@ describe("lesson tracing's facts", () => {
         [3, 2, 1, 0].map((k) => `datapath/alu/g0/q0/bit${k}/BX`),
       ),
     ).toBe(answer("xorB"));
-    expect(bits(19, [3, 2, 1, 0].map(fa))).toBe(answer("carry"));
+    // The carries are asked at another line's ALU edge, the set if's, edge 28 (frame 27): the
+    // failure experiment's held carry, at R3 <= R1 - R2, gives none of them away.
+    expect(state(27)).toBe("ALU");
+    expect(bits(27, [3, 2, 1, 0].map(fa))).toBe(answer("carry"));
     // goto R15's last edge, its ALU edge, is edge 68: the PC takes 030. The construction traces the
     // PC at another edge, the call's WRITE edge.
     expect([state(67), at(67, "PC"), at(68, "PC")]).toEqual(["ALU", "40", "30"]);

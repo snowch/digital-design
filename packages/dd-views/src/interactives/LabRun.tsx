@@ -61,6 +61,11 @@ const Props = z.object({
       text: z.string(),
       everyText: z.boolean().default(false),
       program: z.string().optional(),
+      /**
+       * Every run the paragraph reports, each a text (by its place in `texts`) and a program: it
+       * shows once all of them are made, so it never quotes a run the learner has not made.
+       */
+      runs: z.array(z.tuple([z.number().int().min(0), z.string()])).default([]),
     })
     .optional(),
 });
@@ -110,6 +115,8 @@ export const LabRunFigure = withProps(
     const [runs, setRuns] = useState<readonly string[]>([]);
     // Which text has run which program, for a paragraph that reports them.
     const [made, setMade] = useState<ReadonlySet<string>>(new Set());
+    // A hidden line shows on a press, once the run that finds it has been made.
+    const [shown, setShown] = useState(false);
     // The part the last run's sentence names, for the text it ran; nothing before a run.
     const [named, setNamed] = useState<{ which: number; part?: string } | undefined>();
     const [stored, setStored] = useSlot<Stored>(store, interactive.id);
@@ -219,35 +226,41 @@ export const LabRunFigure = withProps(
                 label={format(t.labListing, { program: chosen.label })}
               />
             )}
-            {text?.to !== undefined &&
-              (!text.hidden || [...made].some((m) => m.startsWith(`${which}:`))) && (
-                <div className="lab-run-change">
-                  <p className="lab-run-change-heading">{t.labChange}</p>
-                  <pre className="hdl-code">
-                    <code>{text.to.trim()}</code>
-                  </pre>
+            {text?.hidden &&
+              text.to !== undefined &&
+              !shown &&
+              [...made].some((m) => m.startsWith(`${which}:${data.reveal?.program ?? ""}`)) && (
+                <div className="explorer-actions">
+                  <button type="button" className="button secondary" onClick={() => setShown(true)}>
+                    {t.labShowChange}
+                  </button>
                 </div>
               )}
+            {text?.to !== undefined && (!text.hidden || shown) && (
+              <div className="lab-run-change">
+                <p className="lab-run-change-heading">{t.labChange}</p>
+                <pre className="hdl-code">
+                  <code>{text.to.trim()}</code>
+                </pre>
+              </div>
+            )}
             {text && (
               <LabJoins
                 text={labVariant(data.hdl, text)}
                 mapOnly
+                counts={false}
                 {...(named?.which === which && named.part ? { marked: named.part } : {})}
               />
             )}
-            <p className="lab-joins-note">{t.joinsMarkNote}</p>
+            {/* Only a figure whose text has a wrong line can mark a part. */}
+            {data.texts.some((x) => x.to !== undefined) && (
+              <p className="lab-joins-note">{t.joinsMarkNote}</p>
+            )}
             <div className="explorer-actions">
               <button type="button" className="button" disabled={running} onClick={run}>
                 {running ? t.labRunning : t.labRun}
               </button>
             </div>
-            {data.reveal &&
-              (data.reveal.everyText
-                ? data.texts.every((_, k) => [...made].some((m) => m.startsWith(`${k}:`)))
-                : true) &&
-              (data.reveal.program === undefined ||
-                [...made].some((m) => m.endsWith(`:${data.reveal?.program}`))) &&
-              made.size > 0 && <Prose markdown={data.reveal.text} />}
             {runs.length > 0 && (
               <div className="lab-run-results" aria-live="polite">
                 <p className="lab-run-change-heading">{t.labRunsCaption}</p>
@@ -258,6 +271,15 @@ export const LabRunFigure = withProps(
                 </ul>
               </div>
             )}
+            {/* What the runs show, after them, once every run it reports is made. */}
+            {data.reveal &&
+              (data.reveal.everyText
+                ? data.texts.every((_, k) => [...made].some((m) => m.startsWith(`${k}:`)))
+                : true) &&
+              (data.reveal.program === undefined ||
+                [...made].some((m) => m.endsWith(`:${data.reveal?.program}`))) &&
+              data.reveal.runs.every(([k, id]) => made.has(`${k}:${id}`)) &&
+              made.size > 0 && <Prose markdown={data.reveal.text} />}
           </>
         )}
       </div>

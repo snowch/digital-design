@@ -125,24 +125,19 @@ describe("lesson whole-machine's facts", () => {
 
   it("answers the challenge from the drawing and the timing diagram", () => {
     const top = libraryCircuit("machine-final");
-    const driver = (bus: string) => {
-      const net = top.nets.find((n) => n.name === bus)?.id;
-      return top.composites.find(
-        (c) => !c.path.includes("/") && Object.values(c.outputs).includes(net ?? -1),
-      )?.path;
-    };
     const answer = (id: string) => JOIN_ANSWERS.find((a) => a.id === id)?.value;
-    const reader = (bus: string) => {
-      const net = top.nets.find((n) => n.name === bus)?.id;
+    // The part inside the datapath or the control unit at each bus's end: the drawing opened.
+    const inside = (bus: string, end: "inputs" | "outputs") => {
+      const net = top.nets.find((n) => n.name === bus)?.id ?? -1;
       return top.composites
-        .filter((c) => !c.path.includes("/") && Object.values(c.inputs).includes(net ?? -1))
-        .map((c) => c.path);
+        .filter((c) => c.path.split("/").length === 2 && /^(control|datapath)\//.test(c.path))
+        .filter((c) => Object.values(c[end]).includes(net))
+        .map((c) => c.name);
     };
-    // The store's word, HB, from the datapath to the memory port, where it arrives as D.
-    expect([driver("HB"), reader("HB")]).toEqual(["datapath", [answer("hb")]]);
-    expect(driver("WAITING")).toBe(answer("waiting"));
-    expect([driver("STATUS"), reader("STATUS")]).toEqual(["datapath", [answer("status")]]);
-    expect([driver("CAUSEM"), reader("CAUSEM")]).toEqual(["port", [answer("causem")]]);
+    expect(inside("MQ", "inputs")).toEqual([answer("mq")]);
+    expect(inside("ADDR", "outputs")).toEqual([answer("addr")]);
+    expect(inside("WAITING", "inputs")).toEqual([answer("waiting")]);
+    expect(inside("STATUS", "outputs")).toEqual([answer("status")]);
     // The edges of a program no figure runs: resume's FETCH is edge 15, where the IR takes
     // 81000000; its WRITE edge, 17, gives the PC the return point, 010.
     const edges = recordRun({

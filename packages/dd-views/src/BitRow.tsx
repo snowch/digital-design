@@ -15,6 +15,7 @@ export function BitRow({
   digits = false,
   label,
   showWeights = true,
+  low = 0,
 }: {
   bits: readonly Bit[];
   onFlip?: (index: number) => void;
@@ -24,6 +25,11 @@ export function BitRow({
   label?: string;
   /** Each bit's value in the number; left off where the question is what the number is. */
   showWeights?: boolean;
+  /**
+   * Module 13: the number of the wire the lowest box holds, for a row of wires that is not a
+   * number (the PC's bits 5 to 2 are numbered 5 to 2, not 3 to 0).
+   */
+  low?: number;
 }) {
   const strings = useViewStrings();
   const width = bits.length;
@@ -41,11 +47,11 @@ export function BitRow({
               const bit = bits[i] as Bit;
               const value =
                 weights === "digit" ? digitPlaceValue(n) : placeValue(width, n, weights);
-              const slots = { n, value, bit };
+              const slots = { n: n + low, value, bit };
               const inner = (
                 <>
                   <span className="bit-number" aria-hidden="true">
-                    {n}
+                    {n + low}
                   </span>
                   <span className="bit-value" aria-hidden="true">
                     {bit}
@@ -63,7 +69,10 @@ export function BitRow({
                   type="button"
                   className={`bit bit-${bit}`}
                   aria-pressed={bit === 1}
-                  aria-label={format(strings.bits.flip, slots)}
+                  aria-label={format(
+                    showWeights ? strings.bits.flip : strings.bits.flipBare,
+                    slots,
+                  )}
                   onClick={() => onFlip(i)}
                   data-bit={n}
                 >

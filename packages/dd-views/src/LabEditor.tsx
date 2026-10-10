@@ -101,8 +101,9 @@ export function labText(strings: ViewStrings, c: TextComparison, mine = true): s
             ? v.toString(2).padStart(2, "0")
             : d.what === "lamps"
               ? v.toString(2).padStart(3, "0")
-              : // A register's small word, an address most often, with its hexadecimal beside it.
-                /^R\d+$/.test(d.what) && v >= 0n && v < 0x800n
+              : // A register's small word, an address most often, with its hexadecimal beside it;
+                // below 10 the two read the same, and the hexadecimal adds nothing.
+                /^R\d+$/.test(d.what) && v >= 10n && v < 0x800n
                 ? format(t.labWordHex, { n: v.toString(), hex: hex3(v) })
                 : BigInt.asIntN(64, v).toString();
   return format(mine ? t.labDiffers : t.differs, {

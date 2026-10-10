@@ -79,6 +79,8 @@ export interface Machine13Strings {
   readonly pinNote: string;
   /** A table row's button: {row}, the row's label; {wire}, the wire it reads. */
   readonly rowPin: string;
+  /** In the row "Its word in the ROM", until the figure's first edge has run. */
+  readonly romLater: string;
   /** In a prediction's verdict, before the next edge: the explanation follows it. */
   readonly explainNext: string;
   readonly traceCaption: string;
@@ -134,6 +136,8 @@ export interface Machine13Strings {
   readonly labRunning: string;
   /** The heading over the line a text changes. */
   readonly labChange: string;
+  /** The button that shows a hidden changed line, once the run that finds it is made. */
+  readonly labShowChange: string;
   readonly labRunsCaption: string;
   /** One run: {text}, {program}, {result}. */
   readonly labRunLine: string;
@@ -159,6 +163,10 @@ export interface Machine13Strings {
   /** {registers}: "R1", or "R1 and R2". */
   readonly capUnknown: string;
   readonly capUnanswered: string;
+  /** An answer typed that is not a signed decimal number (nor X). */
+  readonly capFormSigned: string;
+  /** An answer typed that is not a row of {n} bits. */
+  readonly capFormBits: string;
   readonly capNoSetIf: string;
   readonly capNoEdge: string;
   /** For each trace question while the program fails one of its own tests. */
@@ -250,6 +258,7 @@ export const MACHINE13_STRINGS: Machine13Strings = {
   stripEarlier: "Earlier lines",
   stripLater: "Later lines",
   stripEdge: "Edge {n}, {state}",
+  romLater: "[draft] after the next edge",
   rowPin: "[draft] {row}: pin the wire {wire} on the drawing",
   pinNote:
     "Press a wire to pin it. It stays marked as you open blocks, and its name and value show under the drawing, in hexadecimal for a word.",
@@ -292,6 +301,7 @@ export const MACHINE13_STRINGS: Machine13Strings = {
   labProgramLegend: "Which program runs",
   labRun: "Run it",
   labRunning: "Running",
+  labShowChange: "[draft] Show the line this text changes",
   labChange: "The line this text changes",
   labRunsCaption: "The runs so far",
   labRunLine: "{text}, {program}: {result}",
@@ -313,6 +323,8 @@ export const MACHINE13_STRINGS: Machine13Strings = {
     "[draft] With room A at {a} and room B at {b}, your program reaches `{line}` at `{address}`, where {registers} holds no value yet.",
   capNoStop:
     "With room A at {a} and room B at {b}, your program does not reach stop within its limit of instructions.",
+  capFormSigned: "[draft] capFormSigned",
+  capFormBits: "[draft] capFormBits {n}",
   capUnanswered:
     "This question has no answer yet, or the answer is not a value of the form asked for.",
   capNoSetIf: "Your program has no set if, so this question has no edge to read.",
@@ -322,11 +334,9 @@ export const MACHINE13_STRINGS: Machine13Strings = {
   capLevels: {
     result:
       "Pause before the ALU edge of your first set if. Read RESULT where it leaves the ALU in the datapath, in hexadecimal, and write it as a signed decimal number.",
-    carry:
-      "At that same edge, read COUT where it leaves the ALU. It is the carry out of the ALU's top bit, not the condition.",
-    met: "At that same edge, read MET where it leaves the condition block in the datapath. It is worked out from the ALU's flags and the job digit.",
-    xorB: "At that same edge, open `datapath`, `alu`, `g0`, `q0`, then `bit0`, and read the output of the XOR gate `xorB`.",
-    held: "At that same edge, read HM in the datapath. It holds the word your last load fetched. Write it as a signed decimal number.",
+    flags: "[draft] flags",
+    xorB: "[draft] xorB",
+    held: "[draft] held",
   },
 
   joinsMap: "the nine parts, by block",

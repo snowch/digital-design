@@ -11,6 +11,7 @@
 import { useMemo, useState } from "react";
 
 import {
+  CAPSTONE_QUESTIONS,
   CAPSTONE_TRACE_INPUTS,
   capstoneAnswer,
   capstoneProgram,
@@ -139,8 +140,14 @@ export function gradeCapstone(
   };
   const traceCase = (c: (typeof cases)[number]): string | undefined => {
     const question = String(c.given["question"]) as CapstoneQuestion;
-    const given = readCapstoneAnswer(question, answers[question] ?? "");
-    if (given === undefined) return t.capUnanswered;
+    const typed = answers[question] ?? "";
+    const given = readCapstoneAnswer(question, typed);
+    // Nothing typed, or something not of the question's form: the refusal names the form.
+    if (given === undefined) {
+      if (!typed.trim()) return t.capUnanswered;
+      const q = CAPSTONE_QUESTIONS[question];
+      return q.form === "signed" ? t.capFormSigned : format(t.capFormBits, { n: q.read.length });
+    }
     const found = capstoneAnswer(runOf(text), question);
     if ("missing" in found) return found.missing === "setIf" ? t.capNoSetIf : t.capNoEdge;
     return given === found.answer ? undefined : (t.capLevels[question] ?? "");
@@ -216,6 +223,9 @@ export function CapstoneEditor(props: ChallengeEditorProps) {
           {t.capTrace}
         </button>
       </div>
+      {/* The answer boxes just above the trace: the step controls stay in the drawing's sticky
+          band, so the boxes, the controls and the drawing are within reach of one another. */}
+      <AnswerEditor {...props} />
       {refused !== undefined && <p className="capstone-refused">{refused}</p>}
       {interactive && refused === undefined && (
         <section className="capstone-trace" aria-label={t.capTraceCaption}>
@@ -227,7 +237,6 @@ export function CapstoneEditor(props: ChallengeEditorProps) {
           />
         </section>
       )}
-      <AnswerEditor {...props} />
     </div>
   );
 }

@@ -133,6 +133,7 @@ export const fullPath: LessonInput = {
           caption: LABELS.captions.store,
           lead: PROSE.storeLead,
           props: {
+            holdRom: true,
             ...LEVELS,
             // The handler's store to the display, edges 59 to 62: its effect shows on a device.
             start: 58,

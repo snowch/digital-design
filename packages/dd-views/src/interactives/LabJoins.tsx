@@ -131,10 +131,13 @@ export function LabJoins({
   text,
   mapOnly = false,
   marked,
+  counts = true,
 }: {
   text: string;
   mapOnly?: boolean;
   marked?: string;
+  /** Each part's count of open ports; off where every port is joined and nothing changes it. */
+  counts?: boolean;
 }) {
   const t = useViewStrings().machine13;
   const joins = labJoins(text);
@@ -184,7 +187,7 @@ export function LabJoins({
                     className={`lab-joins-item${marked === m ? " lab-joins-marked" : ""}`}
                   >
                     <code>{m}</code>
-                    <span className="lab-joins-count">{count(p)}</span>
+                    {counts && <span className="lab-joins-count">{count(p)}</span>}
                     {marked === m && <span className="lab-joins-link">{t.joinsRunMark}</span>}
                   </div>
                 );
@@ -198,7 +201,7 @@ export function LabJoins({
                   onClick={() => setChosen(m)}
                 >
                   <code>{m}</code>
-                  <span className="lab-joins-count">{count(p)}</span>
+                  {counts && <span className="lab-joins-count">{count(p)}</span>}
                   {part && linked.has(m) && (
                     <span className="lab-joins-link">
                       {format(t.joinsLinked, { part: part.module })}

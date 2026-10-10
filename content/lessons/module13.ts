@@ -273,7 +273,8 @@ handler: R5 <= C3
   },
   {
     id: "bits",
-    source: `// Signs, a set if that holds, an unsigned comparison, an overflow, a byte, DOOR and WARM.
+    source: `// Signs, a set if that holds, an unsigned comparison, an overflow, a byte, DOOR and WARM,
+// and a call to a label above it.
         R1 <= -5
         R2 <= 3
         R3 <= R1 < R2 signed     // holds: R3 takes 1
@@ -284,6 +285,10 @@ handler: R5 <= C3
         byte[0x400] <= R1
         R6 <= byte[0x400]
         word[display] <= R6
+        goto ahead
+twice:  R10 <= R2 + R2           // reached only by the call below
+        goto R15
+ahead:  call twice, R15          // a call to a label above it: its constant is negative
         stop
 least:  word -9223372036854775808`,
     inputs: {},
@@ -389,15 +394,15 @@ endmodule
 // 13.5 the capstone: a program of the learner's own, traced.
 
 /** The capstone's figures' program, not the challenge's task: CLASH when room B is colder. */
-export const CAPSTONE_SAMPLE = `// Is room B colder than room A? CLASH says so.
+export const CAPSTONE_SAMPLE = `// Is room A less than 10.0 degrees warmer than room B? The display shows 1 if so.
         R1 <= word[sensorA]
         R2 <= word[sensorB]
-        R3 <= R2 < R1 signed     // set if: 1 when room B is colder than room A
-        R3 <= R3 + R3
-        R3 <= R3 + R3            // CLASH is bit 2
-        word[lamps] <= R3
-        word[display] <= R1
-        stop`;
+        R3 <= R1 - R2            // the gap, room A minus room B
+        R4 <= word[limit]        // 10.0 degrees
+        R5 <= R3 < R4 signed     // set if: 1 when the gap is less than the limit
+        word[display] <= R5
+        stop
+limit:  word 100`;
 
 /** A program that does the capstone's task: how many rooms are colder than -20.0 degrees. */
 export const CAPSTONE_REFERENCE = `// How many rooms are colder than -20.0 degrees, and ALARM when both are.
@@ -418,6 +423,8 @@ export const CAPSTONE_CASES = [
   { id: "both", sensorA: -250, sensorB: -250, display: 2, lamps: 1 },
   { id: "neither", sensorA: -150, sensorB: -100, display: 0, lamps: 0 },
   { id: "edge", sensorA: -200, sensorB: -201, display: 1, lamps: 0 },
-  // A reading above 0: only a comparison read signed passes, since -200 read unsigned is large.
+  // A reading above 0, in each room: only a comparison read signed passes, since -200 read
+  // unsigned is large.
   { id: "warm", sensorA: 50, sensorB: -250, display: 1, lamps: 0 },
+  { id: "warmB", sensorA: -250, sensorB: 50, display: 1, lamps: 0 },
 ] as const;

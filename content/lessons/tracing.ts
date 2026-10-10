@@ -22,10 +22,11 @@ import { SHOP, SHOP_INPUTS } from "./module13";
  * bits, the highest bit first: one guess of all 0s or all 1s passes none of them.
  */
 export const TRACE_ANSWERS = [
-  { id: "xorB", value: "1001", detail: "traceXorB" },
-  { id: "carry", value: "1001", detail: "traceCarry" },
-  { id: "pcD", value: "1100", detail: "tracePcD" },
-  { id: "en", value: "00100000", detail: "traceEn" },
+  // Each a row of wires, highest first, numbered by its wires: the PC's bits are 5 to 2.
+  { id: "xorB", value: "1001", detail: "traceXorB", low: 0 },
+  { id: "carry", value: "0011", detail: "traceCarry", low: 0 },
+  { id: "pcD", value: "1100", detail: "tracePcD", low: 2 },
+  { id: "en", value: "00100000", detail: "traceEn", low: 0 },
 ] as const;
 
 /** The last hint: the whole answer, built from the answers so it cannot drift from them. */
@@ -60,7 +61,8 @@ export const tracing: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.free,
           lead: PROSE.freeLead,
-          props: { ...TRACE, start: 53 },
+          // Before the ALU edge of `word[lamps] <= R5`: the ALU's every port holds a known word.
+          props: { ...TRACE, start: 39 },
         },
       ],
     },
@@ -151,9 +153,16 @@ export const tracing: LessonInput = {
                 net: "datapath/alu/g0/C4",
                 value: 0,
                 label: LABELS.faults.alu,
-                outcome: PROSE.faultAlu,
               },
             ],
+            // The run shows only the comparison; where the held wire is shows once the learner
+            // has opened the group it is in, or pinned the wire itself.
+            reveal: {
+              text: PROSE.faultAlu,
+              scope: "datapath/alu/g0",
+              net: "datapath/alu/g0/C4",
+              afterFault: true,
+            },
           },
         },
       ],
@@ -202,7 +211,7 @@ export const tracing: LessonInput = {
         grader: "exact",
         cases: TRACE_ANSWERS.map((a) => ({
           label: LABELS.fields[a.id],
-          given: { field: a.id, form: "bits", detail: a.detail },
+          given: { field: a.id, form: "bits", detail: a.detail, wires: 1, low: a.low },
           expect: { value: a.value },
         })),
       },
@@ -221,6 +230,6 @@ export const tracing: LessonInput = {
     textbookExample:
       "The textbooks' tour of the levels of a computer, from a high-level statement through assembly and machine language to the microarchitecture and the logic gates, drawn once as a stack of layers (Patt and Patel's levels of transformation, Tanenbaum's multilevel machine), and Nand2Tetris's one-way build from NAND gates up to the Hack computer.",
     howThisDiffers:
-      "The levels are not a diagram but the course's own running machine, paused before any edge of any line the learner chooses, and opened block by block down to one gate on a path the learner chooses: each level opened is listed with the module of this course that built it and the values on its ports at that edge. Parts the simulator runs whole (the registers, the register file, the RAM, the selectors and adders of a whole word) open as the module that built them drew one bit, driven by the machine's own values, so every path ends at a gate or a flip-flop. The failure experiment holds one wire in the ALU at 0 and has the learner find it from the display down; the challenge asks five wires at named edges that only a trace answers.",
+      "The levels are not a diagram but the course's own running machine, paused before any edge of any line the learner chooses, and opened block by block down to one gate on a path the learner chooses: each level opened is listed with the module of this course that built it and the values on its ports at that edge. Parts the simulator runs whole (the registers, the register file, the RAM, the selectors and adders of a whole word) open as the module that built them drew one bit, driven by the machine's own values, so every path ends at a gate or a flip-flop. The failure experiment holds a carry between the ALU's groups at 0 and has the learner find it from the comparison down; the challenge asks four rows of wires at named edges of the shop's program, read by tracing to them (the XORs and the carries of one group of slices, D of four of the PC's bits, and the register file's enables).",
   },
 };

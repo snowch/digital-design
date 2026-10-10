@@ -91,27 +91,44 @@ export function capstoneProgram(source: string) {
   return assembleChecked(source, MODULE_13_ASSEMBLY);
 }
 
-/** The capstone's questions: an instruction, one of its edges, and the wire read there. */
+/**
+ * The capstone's questions, each read paused before the ALU edge of the program's first set if:
+ * a word read signed, or a row of single wires, highest first. A row cannot be found by trying
+ * 0 and then 1, and the gate's row differs with the operand a learner's set if puts in B.
+ */
 export const CAPSTONE_QUESTIONS = {
-  /** The ALU's output at the ALU edge of the first set if, signed. */
-  result: { instruction: "setIf", state: "ALU", read: "RESULT", form: "signed" },
-  /** The ALU's carry out at that edge. */
-  carry: { instruction: "setIf", state: "ALU", read: "COUT", form: "bit" },
-  /** The branch condition at that edge. */
-  met: { instruction: "setIf", state: "ALU", read: "MET", form: "bit" },
+  /** The ALU's output, signed. */
+  result: { instruction: "setIf", state: "ALU", read: ["RESULT"], form: "signed" },
+  /** The ALU's four flags, then the condition block's MET: five bits. */
+  flags: {
+    instruction: "setIf",
+    state: "ALU",
+    read: ["ZERO", "MINUS", "COUT", "OVER", "MET"],
+    form: "bits",
+  },
   /**
-   * A gate's output inside the ALU, at that edge: the XOR in the slice for bit 0 that turns B's
-   * bit over for a subtraction, worked on the learner's own operand.
+   * Gates inside the ALU: the XORs that turn B's bits 7 to 4 over for a subtraction, in the slices
+   * of the group `q1`, worked on the learner's own operand.
    */
   xorB: {
     instruction: "setIf",
     state: "ALU",
-    read: "datapath/alu/g0/q0/bit0/BX",
-    form: "bit",
+    read: [3, 2, 1, 0].map((k) => `datapath/alu/g0/q1/bit${k}/BX`),
+    form: "bits",
   },
-  /** HM at that edge: the word the last load fetched, held since, signed. */
-  held: { instruction: "setIf", state: "ALU", read: "HM", form: "signed" },
-} as const;
+  /** HM: a held word, signed. */
+  held: { instruction: "setIf", state: "ALU", read: ["HM"], form: "signed" },
+} as const satisfies Readonly<
+  Record<
+    string,
+    {
+      instruction: "setIf";
+      state: "ALU";
+      read: readonly string[];
+      form: "signed" | "bits";
+    }
+  >
+>;
 export type CapstoneQuestion = keyof typeof CAPSTONE_QUESTIONS;
 
 /** The inputs every trace question is asked at: Module 0's readings. */
@@ -151,26 +168,26 @@ export function capstoneAnswer(run: RecordedRun, question: CapstoneQuestion): Ca
     }
   if (at === undefined) return { missing: "edge" };
   const values = run.frames[at] ?? [];
-  const w = netWord(run.circuit, values, q.read);
-  if (!w || w.known !== (1n << BigInt(w.width)) - 1n) return { answer: "X" };
-  switch (q.form) {
-    case "signed":
-      return { answer: BigInt.asIntN(w.width, w.value).toString() };
-    case "bit":
-      return { answer: String(w.value & 1n) };
+  const words = q.read.map((name) => netWord(run.circuit, values, name));
+  // A wire whose value is not known reads X: a held word no load has written yet, for one.
+  const known = (w: (typeof words)[number]) =>
+    w !== undefined && w.known === (1n << BigInt(w.width)) - 1n;
+  if (q.form === "signed") {
+    const w = words[0];
+    return { answer: w && known(w) ? BigInt.asIntN(w.width, w.value).toString() : "X" };
   }
+  return { answer: words.map((w) => (w && known(w) ? String(w.value & 1n) : "X")).join("") };
 }
 
 /** The learner's answer as the question's form reads it, or undefined if it reads as nothing. */
 export function readCapstoneAnswer(question: CapstoneQuestion, text: string): string | undefined {
-  const t = text.trim();
+  const t = text.trim().toUpperCase();
   if (!t) return undefined;
-  switch (CAPSTONE_QUESTIONS[question].form) {
-    case "signed":
-      return /^[+-]?\d+$/.test(t) ? BigInt(t).toString() : undefined;
-    case "bit":
-      return t === "0" || t === "1" ? t : undefined;
-  }
+  const q = CAPSTONE_QUESTIONS[question];
+  // X: what the trace shows for a wire whose value is not known.
+  if (q.form === "signed")
+    return t === "X" ? "X" : /^[+-]?\d+$/.test(t) ? BigInt(t).toString() : undefined;
+  return new RegExp(`^[01X]{${q.read.length}}$`).test(t) ? t : undefined;
 }
 
 /** The run of a learner's program the questions are read from, at Module 0's readings. */

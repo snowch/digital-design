@@ -89,6 +89,11 @@ const Props = z.object({
   compare: z.boolean().default(false),
   /** Faults the learner may choose, each recording the run again with it. */
   faults: z.array(FaultSpec).default([]),
+  /**
+   * The row "Its word in the ROM" held back until the first edge has run: a figure whose
+   * construction asks for that word works it out before the row gives it.
+   */
+  holdRom: z.boolean().default(false),
   /** A prediction of the next edge, asked before any value shows. */
   question: z.string().optional(),
   options: z.array(z.object({ value: z.string(), label: z.string() })).optional(),
@@ -118,6 +123,13 @@ const Props = z.object({
       end: z.boolean().default(false),
       /** Or once the run has passed this edge, counted from the reset. */
       edge: z.number().int().min(0).optional(),
+      /** Or once the learner has pinned this wire, by its name. */
+      net: z.string().optional(),
+      /**
+       * And only after a run with a fault chosen has reached its end: a fault's explanation that
+       * names where it is shows once the learner has found it after the run that shows it.
+       */
+      afterFault: z.boolean().default(false),
     })
     .optional(),
   /** The program's lines and their addresses, folded under its name. */
@@ -405,7 +417,11 @@ export const MachineLevels = withProps(
       ((data.reveal.scope !== undefined &&
         (scope === data.reveal.scope || scope.startsWith(`${data.reveal.scope}/`))) ||
         (data.reveal.end === true && reached) ||
-        (data.reveal.edge !== undefined && at >= data.reveal.edge));
+        (data.reveal.edge !== undefined && at >= data.reveal.edge) ||
+        (data.reveal.net !== undefined &&
+          pinned !== undefined &&
+          run.circuit.nets[pinned]?.name === data.reveal.net)) &&
+      (!data.reveal.afterFault || (reached && faultAt >= 0));
     const [revealed, setRevealed] = useState(false);
     if (revealNow && !revealed) setRevealed(true);
     const isPinned = (name: string) => {
@@ -573,7 +589,11 @@ export const MachineLevels = withProps(
                 <tr className={rowPinned("FETCHED")}>
                   <th scope="row">{rowButton(t.machineCode, "FETCHED")}</th>
                   <td className="memory-word">
-                    {programLine?.instruction !== undefined ? hex8(programLine.instruction) : "X"}
+                    {data.holdRom && at <= first
+                      ? t.romLater
+                      : programLine?.instruction !== undefined
+                        ? hex8(programLine.instruction)
+                        : "X"}
                   </td>
                 </tr>
                 <tr className={rowPinned("IR")}>

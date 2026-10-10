@@ -17,14 +17,18 @@ import { LABELS } from "./whole-machine.labels";
 import { PROSE } from "./whole-machine.prose";
 import { SHOP, SHOP_INPUTS } from "./module13";
 
-/** The challenge's questions: the block that drives each of four buses, and two edges of a run no figure shows. */
+/**
+ * The challenge's questions: the part inside the CPU at the end of each of four buses, which only
+ * the drawing opened shows, and two edges of a run no figure shows.
+ */
 export const JOIN_ANSWERS = [
-  // Each bus by what it carries, and the block at its other end: reading the word a store writes,
-  // driving the events that wait, reading C0's two bits, reading the memory step's cause.
-  { id: "hb", form: "choice", value: "port", detail: "joinHb" },
-  { id: "waiting", form: "choice", value: "port", detail: "joinWaiting" },
-  { id: "status", form: "choice", value: "control", detail: "joinStatus" },
-  { id: "causem", form: "choice", value: "control", detail: "joinCausem" },
+  // Each bus by what it carries, and the part inside the datapath or the control unit at its end:
+  // the part that takes a load's word, the part that drives the address, the part that reads the
+  // events waiting, and the part that drives C0's two bits.
+  { id: "mq", form: "choice", value: "heldM", detail: "joinMq" },
+  { id: "addr", form: "choice", value: "pickAddr", detail: "joinAddr" },
+  { id: "waiting", form: "choice", value: "trapLogic", detail: "joinWaiting" },
+  { id: "status", form: "choice", value: "cregs", detail: "joinStatus" },
   { id: "irEdge", form: "number", value: "15", detail: "joinIrEdge" },
   { id: "pcEdge", form: "number", value: "17", detail: "joinPcEdge" },
 ] as const;
@@ -37,11 +41,15 @@ export const EDGES_PROGRAM = `        R1 <= handler
         stop
 handler: resume`;
 
-const BLOCKS = [
-  { value: "control", label: LABELS.blocks.control },
-  { value: "datapath", label: LABELS.blocks.datapath },
-  { value: "port", label: LABELS.blocks.port },
-];
+/** Each question's choices: parts inside the block the bus enters or leaves, by their names. */
+const PARTS: Readonly<Record<string, readonly string[]>> = {
+  mq: ["heldM", "heldR", "ir", "registers"],
+  addr: ["pc", "heldR", "pickAddr", "alu"],
+  waiting: ["decoder", "controller", "mode", "trapLogic"],
+  status: ["ir", "cregs", "heldR", "pc"],
+};
+const partOptions = (id: string) =>
+  (PARTS[id] ?? []).map((name) => ({ value: name, label: `\`${name}\`` }));
 
 /** The lanes of the buses between the blocks, over the system call and the handler. */
 const LANES = [
@@ -100,6 +108,8 @@ export const wholeMachine: LessonInput = {
             inputs: SHOP_INPUTS,
             start: 47,
             shown: [6, 15],
+            // The prediction needs the address of `show:`: the program, with its addresses.
+            listing: LABELS.listing,
             question: PROSE.p1Question,
             options: [
               { value: "030", label: "030" },
@@ -234,7 +244,12 @@ export const wholeMachine: LessonInput = {
       interface: { inputs: [], outputs: [] },
       fields: JOIN_ANSWERS.map((a) =>
         a.form === "choice"
-          ? { id: a.id, label: LABELS.fields[a.id], kind: "choice" as const, options: BLOCKS }
+          ? {
+              id: a.id,
+              label: LABELS.fields[a.id],
+              kind: "choice" as const,
+              options: partOptions(a.id),
+            }
           : { id: a.id, label: LABELS.fields[a.id], kind: "text" as const },
       ),
       tests: {

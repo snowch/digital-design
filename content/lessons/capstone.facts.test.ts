@@ -32,28 +32,45 @@ const signed = (name: string, frame: number) => {
 };
 
 describe("lesson capstone's facts", () => {
-  it("runs the figures' program as the model does, in 31 edges", () => {
+  it("runs the figures' program as the model does, in 28 edges", () => {
     expect(run.difference).toBeUndefined();
-    expect(run.frames.length - 1).toBe(31);
+    expect(run.frames.length - 1).toBe(28);
   });
 
-  it("pauses before edge 13, the set if's ALU edge: Y -66, MINUS 1, OVER 0, COUT 0, MET 1", () => {
-    expect(edgeView(run.circuit, run.frames[12]!).state).toBe("ALU");
-    expect(run.steps[2]?.text).toBe("R3 <= R2 < R1 signed");
-    expect(signed("RESULT", 12)).toBe("-66");
-    expect(["MINUS", "OVER", "COUT", "MET"].map((n) => signed(n, 12))).toEqual([
+  it("pauses before edge 22, the set if's ALU edge: 66 minus 100, RESULT -34, COUT 0, MET 1", () => {
+    expect(edgeView(run.circuit, run.frames[21]!).state).toBe("ALU");
+    expect(run.steps[4]?.text).toBe("R5 <= R3 < R4 signed");
+    expect(["datapath/ALUA", "datapath/ALUB", "RESULT"].map((n) => signed(n, 21))).toEqual([
+      "66",
+      "100",
+      "-34",
+    ]);
+    expect(["ZERO", "MINUS", "COUT", "OVER", "MET"].map((n) => signed(n, 21))).toEqual([
+      "0",
       "-1",
       "0",
       "0",
       "-1",
     ]);
     // The prediction's answer, as the figure asks it: MET after the next edge.
-    expect(levelsAnswer(run, 12, "net", "MET")).toBe("1");
-    expect(PROSE.prediction).toContain("edge 13");
-    expect(PROSE.invAfter).toContain("COUT is 0, RESULT is -66, MET is 1.");
+    expect(levelsAnswer(run, 21, "net", "MET")).toBe("1");
+    expect(PROSE.prediction).toContain("edge 22");
   });
 
-  it("MET held at 0: R3 is 0 on the machine and 1 by the model", () => {
+  it("shows at its own edge no answer a learner's program is likely to give", () => {
+    // A learner's first set if compares a reading with -200, or the two readings, after loading
+    // them: B is -200, -184 or -250, and HM holds a reading. The figures' set if compares the gap
+    // with a limit loaded last: B is 100, and HM holds 100.
+    const row = [3, 2, 1, 0].map((k) => signed(`datapath/alu/g0/q1/bit${k}/BX`, 21));
+    expect(row.map((b) => (b === "0" ? "0" : "1")).join("")).toBe("1001");
+    const likelyRows = [-200n, -184n, -250n].map((b) =>
+      [7, 6, 5, 4].map((k) => String(((BigInt.asUintN(64, b) >> BigInt(k)) & 1n) ^ 1n)).join(""),
+    );
+    expect(likelyRows).not.toContain("1001");
+    expect(signed("HM", 21)).toBe("100");
+  });
+
+  it("MET held at 0: R5 is 0 on the machine and 1 by the model", () => {
     const r = recordRun({
       libraryId: "machine-final",
       program: CAPSTONE_SAMPLE,
@@ -62,7 +79,7 @@ describe("lesson capstone's facts", () => {
     });
     const said = compareText(MACHINE13_STRINGS, r, r.frames.length - 1);
     expect(said).toBe(
-      "After `R3 <= R2 < R1 signed` at `008`, R3 is 0 on the machine and 1 by the model.",
+      "After `R5 <= R3 < R4 signed` at `010`, R5 is 0 on the machine and 1 by the model.",
     );
     expect(PROSE.failAfter).toContain(said);
   });
@@ -75,13 +92,19 @@ describe("lesson capstone's facts", () => {
     }
   });
 
-  it("fails a program whose set ifs read unsigned on room A at 50 alone", () => {
-    const { program } = capstoneProgram(CAPSTONE_REFERENCE.replaceAll(" signed", " unsigned"));
-    const fails = CAPSTONE_CASES.filter((c) => {
-      const end = modelEnd(program!, { sensorA: BigInt(c.sensorA), sensorB: BigInt(c.sensorB) });
-      return end.display !== BigInt(c.display) || end.lamps !== c.lamps;
+  it("fails a program that reads either room's comparison unsigned, on that room above 0", () => {
+    const signedAt = [...CAPSTONE_REFERENCE.matchAll(/ signed/g)].map((m) => m.index!);
+    expect(signedAt).toHaveLength(2);
+    const failing = signedAt.map((at) => {
+      const text = `${CAPSTONE_REFERENCE.slice(0, at)} unsigned${CAPSTONE_REFERENCE.slice(at + 7)}`;
+      const { program } = capstoneProgram(text);
+      return CAPSTONE_CASES.filter((c) => {
+        const end = modelEnd(program!, { sensorA: BigInt(c.sensorA), sensorB: BigInt(c.sensorB) });
+        return end.display !== BigInt(c.display) || end.lamps !== c.lamps;
+      }).map((c) => c.id);
     });
-    expect(fails.map((c) => c.id)).toEqual(["warm"]);
+    // Room A's comparison read unsigned fails room A at 50; room B's fails room B at 50.
+    expect(failing).toEqual([["warm"], ["warmB"]]);
   });
 
   it("the last hint's program and answers pass every test", () => {
@@ -118,12 +141,12 @@ describe("lesson capstone's facts", () => {
       text: CAPSTONE_REFERENCE.replace("R6 <= -200", "R6 <= -100"),
       answers,
     });
-    expect(wrong.failures.slice(-5).map((f) => f.detail)).toEqual(
-      Array(5).fill(MACHINE13_STRINGS.capFirst),
+    expect(wrong.failures.slice(-4).map((f) => f.detail)).toEqual(
+      Array(4).fill(MACHINE13_STRINGS.capFirst),
     );
     expect(v.failures.map((f) => f.label)).toContain(
       capstone.challenges![0]!.tests.kind === "answers"
-        ? capstone.challenges![0]!.tests.cases[5]!.label
+        ? capstone.challenges![0]!.tests.cases[6]!.label
         : "",
     );
   });

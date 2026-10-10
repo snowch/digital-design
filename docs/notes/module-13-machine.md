@@ -101,11 +101,13 @@ splits or joins words says it holds no gate. So every trace ends at a gate or a 
 - **The lab's figures** (`lab-run`) run the course's text with one line changed, never one of the
   six joins, and never show the line it replaces.
 - **The capstone** (`CapstoneEditor.tsx`, grader `machine13-capstone`, `dd-model/src/capstone.ts`):
-  the learner's program is run on the model for five pairs of readings, one of which only a
-  comparison read signed passes; five questions name a wire paused before the ALU edge of the
-  program's first set if (RESULT, COUT, MET, the XOR gate `xorB` in the ALU's slice for bit 0, and
-  HM, which holds the last load's word), and their answers are read off the recorded run of the
-  learner's own program. A wrong answer gets the level to look at and what to
+  the learner's program is run on the model for six pairs of readings; in two, one room reads at
+  or above 0, and each fails a program that reads that room's comparison unsigned. Four questions
+  name wires paused before the ALU edge of the program's first set if: RESULT, signed; the ALU's
+  flags and MET as a row of five bits; the XORs in the slices for bits 7 to 4, whose row differs
+  with the operand the learner's set if puts in B; and HM, signed. A row cannot be found by
+  trying 0 and then 1. Their answers are read off the recorded run of the learner's own program;
+  a wire whose value is not known reads X, and X is an answer. A wrong answer gets the level to look at and what to
   read there.
 
 ## Measured

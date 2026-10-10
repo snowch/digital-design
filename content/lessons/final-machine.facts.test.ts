@@ -36,7 +36,7 @@ describe("lesson final-machine's facts", () => {
   it("runs every program on the course's text as the model does, in the steps it states", () => {
     const runs = Object.fromEntries(LAB_RUNS.map((p) => [p.id, result(undefined, p.id)]));
     for (const r of Object.values(runs)) expect(r.difference).toBeUndefined();
-    const steps = { shop: 19, user: 11, timer: 17, door: 10, bits: 11, refused: 11, rom: 2 };
+    const steps = { shop: 19, user: 11, timer: 17, door: 10, bits: 15, refused: 11, rom: 2 };
     expect(Object.fromEntries(Object.entries(runs).map(([k, r]) => [k, r.steps]))).toEqual(steps);
     // The motivation's list gives each program's count, in the figures' order.
     const said = [...PROSE.motivation.matchAll(/(\d+) instructions and traps\./g)].map(
@@ -63,7 +63,7 @@ describe("lesson final-machine's facts", () => {
   it("the investigation: each wrong line, and the programs that find it", () => {
     expect(differ(LAB_TEXTS.branch)).toEqual(["timer"]);
     expect(differ(LAB_TEXTS.ie)).toEqual(["timer", "door"]);
-    expect(differ(LAB_TEXTS.call)).toEqual(["shop"]);
+    expect(differ(LAB_TEXTS.call)).toEqual(["shop", "bits"]);
     expect(result(LAB_TEXTS.branch, "timer").text).toBe(
       "After `if R5 == R6 goto back` at `038`, the PC is 044 on the machine and 03C by the model.",
     );
@@ -154,6 +154,13 @@ describe("lesson final-machine's facts", () => {
         ],
       ],
       ["1'b1: WIDE = {52'hFFFFFFFFFFFFF, IR[11:0]};", ["1'b1: WIDE = {52'h0, IR[11:0]};"]],
+      // The second reading's: a call to a label that never goes there, and a target made
+      // without the constant's sign.
+      ["if ((BRANCH & MET) | CALL) NEXT = TARGET;", ["if (BRANCH & MET) NEXT = TARGET;"]],
+      [
+        "assign TARGET = PC + {WIDE[61:0], 2'b00};",
+        ["assign TARGET = PC + {50'h0, IR[11:0], 2'b00};"],
+      ],
     ];
     for (const [from, tos] of wrong) {
       expect(MACHINE13_TEXT, from).toContain(from);

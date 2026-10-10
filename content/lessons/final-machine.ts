@@ -146,7 +146,18 @@ export const finalMachine: LessonInput = {
             hdl: MACHINE13_TEXT,
             texts: [LAB_TEXTS.branch, LAB_TEXTS.ie, LAB_TEXTS.call],
             programs: LAB_RUNS,
-            reveal: { text: PROSE.invAfter, everyText: true },
+            // Shown once every run it quotes is made: texts 0, 1 and 2 are the branch, IE and call.
+            reveal: {
+              text: PROSE.invAfter,
+              everyText: true,
+              runs: [
+                [0, "timer"],
+                [1, "timer"],
+                [1, "door"],
+                [2, "shop"],
+                [2, "bits"],
+              ],
+            },
           },
         },
       ],
@@ -169,7 +180,12 @@ export const finalMachine: LessonInput = {
             // before the join is named.
             texts: [{ ...LAB_TEXTS.door, label: LABELS.texts.mystery, hidden: true }],
             programs: LAB_RUNS,
-            reveal: { text: PROSE.failAfter, program: "door" },
+            // "Six programs agree": shown once all seven have run on the text.
+            reveal: {
+              text: PROSE.failAfter,
+              program: "door",
+              runs: LAB_RUNS.map((r) => [0, r.id] as [number, string]),
+            },
           },
         },
       ],
@@ -226,6 +242,6 @@ export const finalMachine: LessonInput = {
     textbookExample:
       "The textbooks' last step of building a processor: Nand2Tetris's CPU and Computer chips completed in its HDL from given parts and tested against a supplied script of expected outputs, and Harris and Harris's or Patterson and Hennessy's multicycle processor assembled from its datapath and control unit in Verilog and checked with a testbench that looks for one value written to memory at the end.",
     howThisDiffers:
-      "The learner joins the course's own nine parts, each the one an earlier module of this course built, with the trap hardware and the two instructions the learner added, in one challenge with three ways in by its own buttons: an outline with six joins left out and marked, the parts placed with no port joined, or the ports alone. The test is not one value at the end but the course's instruction-level model run beside the learner's text on five programs written for the lab, each reaching a different part (the two added instructions, user mode's refusal, a system call and the timer, the door, a store with no handler), compared after every instruction and every trap; a failure names the first line that disagreed and the value that differs, never the join. The figures run the course's text with one line changed, never a line the learner must write in the outline, to show that a test finds a wrong join only where its program reaches it.",
+      "The learner joins the course's own nine parts, each the one an earlier module of this course built, with the trap hardware and the two instructions the learner added, in one challenge with three ways in by its own buttons: an outline with six joins left out and marked, the parts placed with no port joined, or the ports alone. The test is not one value at the end but the course's instruction-level model run beside the learner's text on seven programs written for the lab, each reaching a different part (the two added instructions, user mode's refusal of an address, a system call and the timer, the door, signs, bytes and WARM with a call to a label above it, a system job refused in user mode, a store with no handler), compared after every instruction and every trap; a failure names the first line that disagreed and the value that differs, never the join. The figures run the course's text with one line changed, never a line the learner must write in the outline, to show that a test finds a wrong join only where its program reaches it.",
   },
 };

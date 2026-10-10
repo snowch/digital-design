@@ -40,9 +40,8 @@ export const LABELS = {
   },
   fields: {
     result: "RESULT, paused before the ALU edge of your first set if, signed decimal",
-    carry: "COUT, paused before that edge",
-    met: "MET, paused before that edge",
-    xorB: "The output of `xorB` in the slice `bit0`, paused before that edge",
+    flags: "[draft] flags",
+    xorB: "[draft] xorB",
     held: "HM, paused before that edge, signed decimal",
   },
   cases: {
@@ -51,10 +50,10 @@ export const LABELS = {
     neither: "Room A -150, room B -100",
     edge: "Room A -200, room B -201",
     warm: "Room A 50, room B -250",
+    warmB: "[draft] Room A -250, room B 50",
     result: "RESULT, paused before the ALU edge of your first set if, signed decimal",
-    carry: "COUT, paused before that edge",
-    met: "MET, paused before that edge",
-    xorB: "The output of `xorB` in the slice `bit0`, paused before that edge",
+    flags: "[draft] flags",
+    xorB: "[draft] xorB",
     held: "HM, paused before that edge, signed decimal",
   },
 } as const;

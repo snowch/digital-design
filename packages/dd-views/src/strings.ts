@@ -206,6 +206,8 @@ export interface ViewStrings {
   readonly bits: {
     readonly row: string;
     readonly flip: string;
+    /** A bit pressed in a row of wires that is not a number: its wire's number, no worth. */
+    readonly flipBare: string;
     readonly fixed: string;
     /** A bit shown with its worth inside its hexadecimal digit (8, 4, 2 or 1). */
     readonly inDigit: string;
@@ -877,6 +879,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
   bits: {
     row: "Bits",
     flip: "Bit {n}, worth {value}, now {bit}; press to change.",
+    flipBare: "[draft] Bit {n}, now {bit}; press to change.",
     fixed: "Bit {n}, worth {value}, {bit}.",
     inDigit: "Bit {n}, worth {value} in its digit, {bit}.",
     bare: "Bit {n}, {bit}.",
@@ -1093,13 +1096,10 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       edgesLoad:
         "{actual} is not the number of edges. The memory's checks give their cause in MEMORY, and a load that traps there never reaches WRITE.",
       // Module 13, lesson 1 (brief 1D).
-      joinHb:
-        "The word a store writes leaves the datapath; follow it to the block it enters, where it takes another name.",
-      joinWaiting:
-        "Find the bus of the events waiting; the block it leaves on its right drives it.",
-      joinStatus: "C0 is in the datapath; follow its two bits to the block they enter.",
-      joinCausem:
-        "A memory step's cause comes from the memory port; follow it to the block that decides whether to trap.",
+      joinMq: "[draft] joinMq",
+      joinAddr: "[draft] joinAddr",
+      joinWaiting: "[draft] joinWaiting",
+      joinStatus: "[draft] joinStatus",
       joinIrEdge:
         "`{actual}` is not the edge at which the IR takes `resume`'s word. The IR takes an instruction's word at its FETCH edge; add up the edges each earlier line takes, from the reset.",
       joinPcEdge:

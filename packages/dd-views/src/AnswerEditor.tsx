@@ -143,6 +143,15 @@ export const AnswerEditor: ComponentType<ChallengeEditorProps> = ({
   const answers = answersOf(challenge, artifact);
   const set = (id: string, value: string) =>
     onChange({ ...artifact, answers: { ...(artifact.answers ?? {}), [id]: value } });
+  // Module 13: a row of wires that is not a number, as its case says: no worths, and its boxes
+  // numbered from the wire the lowest holds.
+  const rowOf = (id: string) => {
+    const given =
+      challenge.tests.kind === "answers"
+        ? challenge.tests.cases.find((c) => c.given["field"] === id)?.given
+        : undefined;
+    return given?.["wires"] === 1 ? { showWeights: false, low: Number(given["low"] ?? 0) } : {};
+  };
   return (
     <div className="answer-editor">
       {challenge.fields.map((f) => {
@@ -164,6 +173,7 @@ export const AnswerEditor: ComponentType<ChallengeEditorProps> = ({
                 bits={bits}
                 label={plain(f.label)}
                 weights={f.weights ?? "unsigned"}
+                {...rowOf(f.id)}
                 onFlip={(i) => set(f.id, bits.map((b, k) => (k === i ? 1 - b : b)).join(""))}
               />
             </div>
