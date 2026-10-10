@@ -15,8 +15,8 @@ export const LABELS = {
   titles: {
     question: "A program of your own",
     motivation: "Questions about your own run",
-    prediction: "MET after the ALU edge",
-    investigation: "COUT beside MET",
+    prediction: "COUT after the ALU edge",
+    investigation: "MET beside COUT",
     construction: "Answering from your own run",
     failureExperiment: "MET held at 0",
     explanation: "Where each answer is drawn",
@@ -28,12 +28,12 @@ export const LABELS = {
     c1: "Your program, traced",
   },
   captions: {
-    free: "The figure's program on the whole machine, ready to trace.",
+    free: "The figure's program on the whole machine, paused before the ALU edge of its set if, ready to trace.",
     predict:
-      "The same program, paused before the ALU edge of its set if, with a question about MET.",
+      "The same program, paused before the ALU edge of its set if, with a question about COUT.",
     carry: "The same program, paused before the ALU edge of its set if, for COUT and MET.",
     fault: "The same program with MET held at 0, beside the model.",
-    cap: "The challenge: your program, its six tests and four questions about its run.",
+    cap: "The challenge: your program, its tests and questions about its run.",
   },
   faults: {
     met: "MET held at 0",
@@ -41,8 +41,9 @@ export const LABELS = {
   fields: {
     result: "RESULT, paused before the ALU edge of your first set if, signed decimal",
     flags: "The row ZERO, MINUS, COUT, OVER, MET, paused before the ALU edge of your first set if",
-    xorB: "The outputs of `xorB` in the slices for bits 7 to 4, paused before the ALU edge of your first set if",
-    held: "HM, paused before that edge, signed decimal",
+    carry:
+      "The carry out of the slices for bits 7 to 4, paused before the ALU edge of your first set if",
+    held: "HM, paused before the ALU edge of your first set if, signed decimal",
   },
   cases: {
     mixed: "Room A -184, room B -250",
@@ -51,9 +52,11 @@ export const LABELS = {
     edge: "Room A -200, room B -201",
     warm: "Room A 50, room B -250",
     warmB: "Room A -250, room B 50",
+    edgeB: "Room A -201, room B -200",
     result: "RESULT, paused before the ALU edge of your first set if, signed decimal",
     flags: "The row ZERO, MINUS, COUT, OVER, MET, paused before the ALU edge of your first set if",
-    xorB: "The outputs of `xorB` in the slices for bits 7 to 4, paused before the ALU edge of your first set if",
-    held: "HM, paused before that edge, signed decimal",
+    carry:
+      "The carry out of the slices for bits 7 to 4, paused before the ALU edge of your first set if",
+    held: "HM, paused before the ALU edge of your first set if, signed decimal",
   },
 } as const;

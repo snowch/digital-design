@@ -1,7 +1,7 @@
 // Copyright © 2026 Christopher Snow
 
 // Module 13's capstone: a program of the learner's own for the shop, and questions about its run
-// on the whole machine that only a trace answers. The editor holds the program, a button that
+// on the whole machine that a trace answers directly. The editor holds the program, a button that
 // runs it on the whole machine in the trace figure of lesson 3, and the answers. The grade runs
 // the program on the instruction-level model for each case of the task, then reads each
 // question's answer off the recorded run of the learner's own program (`capstoneAnswer`), so the
@@ -20,6 +20,7 @@ import {
   readCapstoneAnswer,
   type CapstoneQuestion,
   type Program,
+  type UnknownUse,
 } from "@dd/dd-model";
 import type { Challenge, Interactive, Lesson } from "@platform/lesson-schema";
 import {
@@ -59,15 +60,22 @@ const lampsText = (n: number) => n.toString(2).padStart(3, "0");
 function unknownText(
   t: ViewStrings["machine13"],
   rooms: { readonly a: string; readonly b: string },
-  end: { readonly line: string; readonly address: number; readonly registers: readonly number[] },
+  end: {
+    readonly line: string;
+    readonly address: number;
+    readonly registers: readonly number[];
+    readonly why: UnknownUse;
+  },
 ): string {
-  const names = end.registers.map((r) => `R${r}`);
+  const names = end.registers.map((r) => `\`R${r}\``);
   return format(t.capUnknown, {
     ...rooms,
     line: end.line,
     address: end.address.toString(16).toUpperCase().padStart(3, "0"),
     registers:
       names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names.at(-1)}` : (names[0] ?? ""),
+    them: names.length > 1 ? t.capUnknownThem.many : t.capUnknownThem.one,
+    why: t.capUnknownWhy[end.why],
   });
 }
 
@@ -223,14 +231,15 @@ export function CapstoneEditor(props: ChallengeEditorProps) {
           {t.capTrace}
         </button>
       </div>
-      {/* The answer boxes just above the trace: the step controls stay in the drawing's sticky
-          band, so the boxes, the controls and the drawing are within reach of one another. */}
-      <AnswerEditor {...props} />
+      {/* Why the trace cannot run, beside the button that asked for it. */}
       {refused !== undefined && (
         <p className="capstone-refused" role="status">
           {refused.replace(/`([^`]*)`/g, "$1")}
         </p>
       )}
+      {/* The answer boxes just above the trace: the step controls stay at the top of the window
+          over the whole trace, so the boxes, the controls and the drawing are within reach. */}
+      <AnswerEditor {...props} />
       {interactive && refused === undefined && (
         <section className="capstone-trace" aria-label={t.capTraceCaption}>
           <MachineLevels

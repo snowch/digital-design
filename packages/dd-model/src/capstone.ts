@@ -36,9 +36,15 @@ export interface ModelEnd {
         readonly kind: "unknown";
         readonly line: string;
         readonly address: number;
+        /** The registers the instruction reads that hold no value yet. */
         readonly registers: readonly number[];
+        /** What the instruction needs them for. */
+        readonly why: UnknownUse;
       };
 }
+
+/** What an instruction the model refused needed its unknown registers for. */
+export type UnknownUse = "address" | "branch" | "jump" | "control";
 
 /** Run a program on the model with Module 13's options, from reset, until it stops or halts. */
 export function modelEnd(
@@ -71,18 +77,27 @@ export function modelEnd(
   };
 }
 
-/** Where the model refused: the line at the PC, and its registers that hold no value yet. */
+/**
+ * Where the model refused: the line at the PC, the registers it reads that hold no value yet, and
+ * what it reads them for, by its kind (`docs/isa.md`): a load's or a store's base register, a
+ * branch's two, a jump's or a call's target, or the word a control register takes.
+ */
 function unknownAt(program: Program, s: CpuState): ModelEnd["end"] {
   const line = program.lines.find((l) => BigInt(l.address) === s.pc);
   const word = line?.instruction ?? 0;
-  // The fields A and B (`docs/isa.md`): the registers an instruction reads.
-  const read = [(word >>> 20) & 15, (word >>> 16) & 15];
+  const kind = (word >>> 28) & 15;
+  const a = (word >>> 20) & 15;
+  const b = (word >>> 16) & 15;
+  const why: UnknownUse =
+    kind === 3 || kind === 4 ? "address" : kind === 5 ? "branch" : kind === 8 ? "control" : "jump";
+  const read = why === "branch" ? [a, b] : [a];
   const unknown = [...new Set(read)].filter((r) => s.regs[r] === undefined);
   return {
     kind: "unknown",
     line: line?.text ?? "",
     address: Number(s.pc),
     registers: unknown.length ? unknown : read.slice(0, 1),
+    why,
   };
 }
 
@@ -93,8 +108,9 @@ export function capstoneProgram(source: string) {
 
 /**
  * The capstone's questions, each read paused before the ALU edge of the program's first set if:
- * a word read signed, or a row of single wires, highest first. A row cannot be found by trying
- * 0 and then 1, and the gate's row differs with the operand a learner's set if puts in B.
+ * a word read signed, or a row of single wires, highest first. RESULT fixes the edge; the flags
+ * and MET, and the carries of four slices, vary with both of the learner's operands, and the
+ * carries are written only inside the ALU's slices; HM checks the learner found the held word.
  */
 export const CAPSTONE_QUESTIONS = {
   /** The ALU's output, signed. */
@@ -107,13 +123,18 @@ export const CAPSTONE_QUESTIONS = {
     form: "bits",
   },
   /**
-   * Gates inside the ALU: the XORs that turn B's bits 7 to 4 over for a subtraction, in the slices
-   * of the group `q1`, worked on the learner's own operand.
+   * The carry out of each slice for bits 7 to 4, the group `q1`, bit 7 first: the slice `bit3`'s
+   * carry out is the group's, C8, and the others are the next slice's carry in.
    */
-  xorB: {
+  carry: {
     instruction: "setIf",
     state: "ALU",
-    read: [3, 2, 1, 0].map((k) => `datapath/alu/g0/q1/bit${k}/BX`),
+    read: [
+      "datapath/alu/g0/C8",
+      "datapath/alu/g0/q1/C3",
+      "datapath/alu/g0/q1/C2",
+      "datapath/alu/g0/q1/C1",
+    ],
     form: "bits",
   },
   /** HM: a held word, signed. */

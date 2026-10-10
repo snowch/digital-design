@@ -28,12 +28,16 @@ export const LABELS = {
   challengeTitles: {
     c1: "Where the parts meet",
   },
+  cpuMark: "part of the CPU",
+  cpuNote: "CPU",
   captions: {
     makers:
       "The whole machine running the shop's program, with a table of which module built each part.",
     predict:
       "The shop's program is paused before the WRITE edge of a call through a register, with a question about the PC.",
     timeline: "A timing diagram of signals crossing joins, from edge 57 to edge 64.",
+    cpu: "The whole machine, with the two blocks that make up the CPU marked.",
+    tool: "The whole machine running the shop's program, for the challenge's four buses.",
     load: "The shop's program is paused before a load, with the signals of its edges.",
     answers: "Six questions about the joins and the edges.",
     faults: "The shop's program with one join held at a fixed value, which you choose.",
@@ -44,8 +48,8 @@ export const LABELS = {
     cause: "CAUSE held at `00`",
   },
   fields: {
-    mq: "The part inside the datapath that takes the word a load brings back",
-    addr: "The part inside the datapath that drives the address the memory reads",
+    hb: "The part inside the datapath that drives the word a store writes",
+    irIn: "The part inside the control unit that takes the instruction word it decodes",
     waiting: "The part inside the control unit that reads the events waiting for an interrupt",
     status: "The part inside the datapath that drives C0's two bits",
     irEdge: "The edge at which the IR takes the word of `resume`",

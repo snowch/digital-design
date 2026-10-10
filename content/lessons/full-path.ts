@@ -136,7 +136,9 @@ export const fullPath: LessonInput = {
             holdRom: true,
             ...LEVELS,
             // The handler's store to the display, edges 59 to 62: its effect shows on a device.
-            start: 58,
+            // Paused a step early, before the call's trap edge, where FETCHED still carries
+            // another word: before the store's FETCH edge it would carry the store's own.
+            start: 57,
             signals: ["OP2", "OP1", "OP0", "MSTORE", "PCEN"],
             devices: true,
             focus: ["port", "datapath"],

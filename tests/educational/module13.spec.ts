@@ -172,6 +172,11 @@ test.describe("the final-machine lab", () => {
       timeout: 30_000,
     });
     await expect(figure.locator(".lab-joins-marked code")).toHaveText(["memory"]);
+    // The run that differs offers the changed line; nothing shows it, or reasons to it, before
+    // the press.
+    await expect(figure.locator(".lab-run-change")).toHaveCount(0);
+    await figure.getByRole("button", { name: T.labShowChange }).click();
+    await expect(figure.locator(".lab-run-change")).toBeVisible();
   });
 
   test("the prediction is answered by running the programs", async ({ page }) => {
@@ -228,29 +233,54 @@ test.describe("the capstone", () => {
   });
 });
 
-// The step controls and the drawing's overview share one sticky band: with the drawing centred
-// in the window, "Next edge" is the element under its own centre, and the band leaves at least
-// half the screen to the drawing.
-test("the step controls stay pressable with the drawing centred", async ({ page }) => {
-  for (const [lessonId, id] of [
-    ["whole-machine", "load-joins"],
-    ["capstone", "cap-carry"],
+// The step controls and the status line stay at the top of the window over the whole figure,
+// tables included: with the drawing, a row of the levels table or the last table centred, "Next
+// edge" is the element under its own centre. They leave at least half the window to the page, with
+// a three-line status on a 375 by 812 phone, where the drawing's overview scrolls away with the
+// page; in a tall window the overview sticks under them, over the drawing only.
+test("the step controls stay pressable over the whole figure", async ({ page }) => {
+  for (const [width, height] of [
+    [375, 812],
+    [844, 390],
+    [1280, 900],
   ] as const) {
-    await openLesson(page, lessonId);
-    const figure = page.locator(`[data-interactive="${id}"]`);
-    const drawing = figure.locator("svg.circuit:not(.circuit-overview)").first();
-    await drawing.evaluate((el) => el.scrollIntoView({ block: "center" }));
+    await page.setViewportSize({ width, height });
+    await openLesson(page, "full-path");
+    const figure = page.locator('[data-interactive="path-call"]');
+    await figure.scrollIntoViewIfNeeded();
     const next = figure.getByRole("button", { name: T.nextEdge });
-    const box = (await next.boundingBox())!;
-    const hit = await page.evaluate(
-      ([x, y]) => document.elementFromPoint(x!, y!)?.closest("button")?.textContent ?? "",
-      [box.x + box.width / 2, box.y + box.height / 2],
-    );
-    expect(hit, id).toBe(T.nextEdge);
-    const band = (await figure.locator(".overview-bar").first().boundingBox())!;
-    expect(band.height, id).toBeLessThanOrEqual(page.viewportSize()!.height / 2);
+    await next.click();
+    for (const target of [
+      figure.locator("svg.circuit:not(.circuit-overview)").first(),
+      figure.locator(".machine-levels-table tr").nth(3),
+      figure.locator(".datapath-tables table").last(),
+    ]) {
+      await target.evaluate((el) => el.scrollIntoView({ block: "center" }));
+      const box = (await next.boundingBox())!;
+      const hit = await page.evaluate(
+        ([x, y]) => document.elementFromPoint(x!, y!)?.closest("button")?.textContent ?? "",
+        [box.x + box.width / 2, box.y + box.height / 2],
+      );
+      expect(hit, `${width}x${height}`).toBe(T.nextEdge);
+      const steps = (await figure.locator(".machine-steps").boundingBox())!;
+      const bar = (await figure.locator(".overview-bar").boundingBox())!;
+      // What stays at the top: the controls, and the overview when it is stuck under them.
+      const sticky = await figure
+        .locator(".overview-bar")
+        .evaluate((el) => getComputedStyle(el).position === "sticky");
+      expect(sticky, `${width}x${height}`).toBe(height > 860);
+      const covered =
+        sticky && bar.y <= steps.y + steps.height + 1 ? bar.y + bar.height : steps.y + steps.height;
+      expect(covered, `${width}x${height}`).toBeLessThanOrEqual(height / 2);
+    }
+    const lines = await figure
+      .locator(".machine-steps .debugger-status")
+      .evaluate((el) =>
+        Math.round(el.getBoundingClientRect().height / parseFloat(getComputedStyle(el).lineHeight)),
+      );
+    if (width === 375) expect(lines).toBeGreaterThanOrEqual(3);
     const before = await figure.locator(".debugger-status").textContent();
-    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+    await next.click();
     await expect(figure.locator(".debugger-status")).not.toHaveText(before ?? "");
   }
 });

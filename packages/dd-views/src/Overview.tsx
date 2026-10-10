@@ -12,7 +12,7 @@
 // is a copy of the drawing as it is after each render, its words and its controls taken out.
 
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
-import type { KeyboardEvent, PointerEvent as ReactPointerEvent, ReactNode } from "react";
+import type { KeyboardEvent, PointerEvent as ReactPointerEvent } from "react";
 
 import {
   WORDS_HIDDEN_BELOW,
@@ -199,6 +199,19 @@ export function useZoom(
 }
 
 /**
+ * How far down the window a band stuck above the strip reaches (`--sticky-top`, set by a figure
+ * that keeps its own controls stuck over the whole figure), 0 when there is none.
+ */
+function stickyTop(bar: HTMLElement): number {
+  return parseFloat(getComputedStyle(bar).getPropertyValue("--sticky-top")) || 0;
+}
+
+/** The bottom of what covers the top of the window: the strip, or a band stuck above it. */
+function coveredTo(bar: HTMLElement): number {
+  return Math.max(bar.getBoundingClientRect().bottom, stickyTop(bar));
+}
+
+/**
  * The strip: the whole drawing in `box`, small, without its words, with a frame on the part on
  * screen. Pressing or dragging in it moves the drawing there; from a keyboard it is one control
  * whose arrow keys move the drawing half a box at a time. It stays at the top of the window while
@@ -209,17 +222,11 @@ export function OverviewStrip({
   width,
   height,
   zoom,
-  band,
 }: {
   box: HTMLDivElement | null;
   width: number;
   height: number;
   zoom: ZoomControl;
-  /**
-   * Module 13: controls that change the drawing (a run's step buttons and its status line), held
-   * in the same sticky band above the strip, so neither covers the other.
-   */
-  band?: ReactNode;
 }) {
   const strings = useViewStrings().circuit;
   const id = useId();
@@ -234,7 +241,7 @@ export function OverviewStrip({
     return visibleRegion(
       svg.getBoundingClientRect(),
       box.getBoundingClientRect(),
-      bar.current.getBoundingClientRect().bottom,
+      coveredTo(bar.current),
       window.innerHeight,
       width,
       height,
@@ -257,7 +264,7 @@ export function OverviewStrip({
     const top = bar.current.getBoundingClientRect();
     bar.current.classList.toggle(
       "stuck",
-      top.top <= 1 && box.getBoundingClientRect().top < top.bottom,
+      top.top <= stickyTop(bar.current) + 1 && box.getBoundingClientRect().top < top.bottom,
     );
   }, [region, box, width, strings.overviewValue]);
 
@@ -330,7 +337,7 @@ export function OverviewStrip({
     const scale = (d.right - d.left) / width;
     box.scrollLeft += (x - (view.x0 + view.x1) / 2) * scale;
     if (press && (y < view.y0 + 20 || y > view.y1 - 20)) {
-      const top = Math.max(bar.current.getBoundingClientRect().bottom, 0);
+      const top = Math.max(coveredTo(bar.current), 0);
       window.scrollBy(0, d.top + y * scale - (top + window.innerHeight) / 2);
     }
     paint();
@@ -357,7 +364,6 @@ export function OverviewStrip({
 
   return (
     <div className="overview-bar" ref={bar}>
-      {band}
       <div className="overview-head">
         <span className="overview-label" id={`${id}-label`}>
           {strings.overviewLabel}

@@ -127,17 +127,31 @@ describe("lesson whole-machine's facts", () => {
     const top = libraryCircuit("machine-final");
     const answer = (id: string) => JOIN_ANSWERS.find((a) => a.id === id)?.value;
     // The part inside the datapath or the control unit at each bus's end: the drawing opened.
-    const inside = (bus: string, end: "inputs" | "outputs") => {
+    const inside = (bus: string, end: "inputs" | "outputs", block = "(control|datapath)") => {
       const net = top.nets.find((n) => n.name === bus)?.id ?? -1;
       return top.composites
-        .filter((c) => c.path.split("/").length === 2 && /^(control|datapath)\//.test(c.path))
+        .filter((c) => c.path.split("/").length === 2 && new RegExp(`^${block}/`).test(c.path))
         .filter((c) => Object.values(c[end]).includes(net))
         .map((c) => c.name);
     };
-    expect(inside("MQ", "inputs")).toEqual([answer("mq")]);
-    expect(inside("ADDR", "outputs")).toEqual([answer("addr")]);
+    expect(inside("HB", "outputs")).toEqual([answer("hb")]);
+    expect(inside("IR", "inputs", "control")).toEqual([answer("irIn")]);
     expect(inside("WAITING", "inputs")).toEqual([answer("waiting")]);
     expect(inside("STATUS", "outputs")).toEqual([answer("status")]);
+    // The two ends the page leaves to the drawing: no section's words, and no hint but the last,
+    // name the part that drives HB or the part inside the control unit that takes IR.
+    const words = [
+      ...wholeMachine.sections.flatMap((s) => [
+        s.prose,
+        ...(s.interactives ?? []).flatMap((i) => [i.lead ?? "", i.caption ?? ""]),
+      ]),
+      ...Object.values(PROSE as Readonly<Record<string, unknown>>).filter(
+        (v): v is string => typeof v === "string",
+      ),
+      ...PROSE.c1Hints.slice(0, -1),
+    ].join("\n");
+    for (const id of ["hb", "irIn"]) expect(words, id).not.toContain(`\`${answer(id)}\``);
+    expect(words).not.toMatch(/\bhold\b[^.]*\bHB\b|\bHB\b[^.]*\bhold\b/);
     // The edges of a program no figure runs: resume's FETCH is edge 15, where the IR takes
     // 81000000; its WRITE edge, 17, gives the PC the return point, 010.
     const edges = recordRun({

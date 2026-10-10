@@ -478,7 +478,8 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
  */
 .overview-bar {
   position: sticky;
-  top: 0;
+  /* Under a figure's own band of controls, where it has one (Module 13). */
+  top: var(--sticky-top, 0px);
   z-index: 2;
   background: var(--bg-raised);
   padding-block: var(--space-2);
@@ -3329,12 +3330,23 @@ svg.stack-depth {
 .lab-editor > .explorer-actions {
   flex-wrap: wrap;
 }
-/* The step controls and the line saying where the run is sit in the drawing's sticky band, above
-   its overview, so they stay in reach while the drawing scrolls past and nothing covers them. */
+/* The step controls and the line saying where the run is stay at the top of the window over the
+   whole figure, its tables and bit views too; the drawing's overview sticks under them, over the
+   drawing only. In a short window (a phone, or one held sideways) the overview scrolls away with
+   the page and only the controls stay, so most of the window is left to the drawing. */
 .machine-steps {
-  padding: 0 0 var(--space-1);
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--bg-raised);
+  padding: var(--space-1) 0;
   margin-bottom: var(--space-1);
   border-bottom: 1px solid var(--border);
+}
+@media (max-height: 860px) {
+  .machine-levels .overview-bar {
+    position: static;
+  }
 }
 .machine-steps .debugger-status {
   margin: var(--space-1) 0 0;
@@ -3400,6 +3412,25 @@ svg.stack-depth {
 }
 /* A port in the table of levels is a button that pins its wire. A phone breaks the cell between
    ports, never inside a port's digits. */
+/* On a phone the three columns do not fit beside one another (a 64-bit port is 16 digits): each
+   level's row stacks its cells, the inputs and the outputs each under their column's name. */
+@media (max-width: 520px) {
+  .machine-trace-table thead {
+    display: none;
+  }
+  .machine-trace-table tr,
+  .machine-trace-table th,
+  .machine-trace-table td {
+    display: block;
+  }
+  .machine-trace-table td::before {
+    content: attr(data-label);
+    display: block;
+    font-family: var(--font-text);
+    font-weight: 600;
+    color: var(--fg-muted);
+  }
+}
 .machine-trace-table .trace-port {
   display: inline-block;
   margin: 0 var(--space-2) var(--space-1) 0;
@@ -3437,6 +3468,16 @@ svg.stack-depth {
   text-decoration: underline;
   text-underline-offset: 3px;
   cursor: pointer;
+}
+/* On its own line; inline-block, so the label's underline does not carry into it. */
+.machine-row-wire-name {
+  display: inline-block;
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 400;
+  color: var(--fg-muted);
+  text-decoration: none;
 }
 .machine-row-pinned th,
 .machine-row-pinned td {
