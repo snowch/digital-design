@@ -43,6 +43,8 @@ export interface TimingDiagramProps {
   readonly to?: number;
   readonly cursor?: number;
   readonly onCursor?: (time: number) => void;
+  /** The time a drawing wider than its wrapper opens on, when it is not the red line. */
+  readonly focus?: number;
   readonly shades?: readonly Shade[];
   /**
    * Time in units, for the gate-delay figures of the lesson that defines them (4.1): the red line
@@ -117,6 +119,7 @@ export function TimingDiagram({
   to,
   cursor,
   onCursor,
+  focus,
   shades = [],
   units,
   table = true,
@@ -135,7 +138,8 @@ export function TimingDiagram({
   const tail = Math.max(1, Math.min(2, ...gaps.filter((g) => g > 0)));
   const end = Math.max(last + tail, from + 1);
   const drawn = useMemo(
-    () => (to === undefined ? trace : { ...trace, events: trace.events.filter((e) => e.time <= to) }),
+    () =>
+      to === undefined ? trace : { ...trace, events: trace.events.filter((e) => e.time <= to) },
     [trace, to, trace.events.length],
   );
   const wanted = signals ?? [
@@ -176,6 +180,18 @@ export function TimingDiagram({
     return named ?? valueLabel(v);
   };
   const at = cursor ?? last;
+  // A slider on a run in steps stops at the run's last change: past it nothing changes. The drawing
+  // runs on one step further, so the newest box is a full one.
+  const lastChange = Math.max(
+    from,
+    ...trace.events.filter((e) => e.time <= last).map((e) => e.time),
+    ...stepMarks.filter((m) => m.time <= last).map((m) => m.time),
+  );
+  const moveCursor = onCursor
+    ? units
+      ? onCursor
+      : (t: number) => onCursor(Math.min(t, lastChange))
+    : undefined;
   // The axis's marks: the run's steps as the lesson counts them, or, in units, a mark every
   // `ticks` units from the start and at each time the figure names.
   const unitMarks = units
@@ -215,8 +231,9 @@ export function TimingDiagram({
     if (next) return format(strings.timing.beforeMark, { mark: next.label });
     return t >= last ? strings.timing.afterRun : strings.timing.atStart;
   };
-  // Room for every value: the fewest pixels a unit needs so that each word's stretch holds it, and
-  // the stretch the red line stands in holds it on the longer side of the line.
+  // Room for every value: the fewest pixels a unit needs so that each word's stretch holds it. With
+  // a slider the red line may stand anywhere, so a stretch must hold the word on one side of the
+  // line at the worst place, its middle: the scale then does not change as the slider moves.
   const minUnit = useMemo(() => {
     let need = 0;
     for (const lane of lanes) {
@@ -224,13 +241,17 @@ export function TimingDiagram({
       for (const sg of segmentsOf(circuit, drawn, lane.net, from, end)) {
         if (levelOf(sg.value) === "unknown") continue;
         const w = laneValue(lane.names, sg.value, lane.labels).length * CHAR_W + VALUE_PAD;
-        const room =
-          at >= sg.from && at < sg.to ? Math.max(sg.to - at, at - sg.from) : sg.to - sg.from;
+        const whole = sg.to - sg.from;
+        const room = onCursor
+          ? whole / 2
+          : at >= sg.from && at < sg.to
+            ? Math.max(sg.to - at, at - sg.from)
+            : whole;
         if (room > 0) need = Math.max(need, w / room);
       }
     }
     return Math.min(VALUE_UNIT_MAX, need);
-  }, [circuit, drawn, lanes, from, end, at, drawn.events.length]);
+  }, [circuit, drawn, lanes, from, end, at, onCursor, drawn.events.length]);
   // A running figure grows its trace in place, and a press between edges moves no time: the event
   // count tells the table that the trace changed.
   const events = trace.events.length;
@@ -250,7 +271,7 @@ export function TimingDiagram({
       marks={shownMarks}
       cursor={at}
       minUnit={minUnit}
-      {...(onCursor ? { onCursor } : {})}
+      {...(moveCursor ? { onCursor: moveCursor } : {})}
       cursorLabel={
         units
           ? format(strings.timing.cursor, { time: at })
@@ -261,7 +282,7 @@ export function TimingDiagram({
       // A drawing wider than its wrapper opens on the red line and follows it, as a slider moves it
       // or a running figure grows: a figure with no cursor has it at the trace's end, the moment
       // its question asks about. With no slider, a shaded band is what it opens on.
-      focus={onCursor ? at : (shades[0]?.from ?? at)}
+      focus={focus ?? (onCursor ? at : (shades[0]?.from ?? at))}
       defs={({ id }) => (
         <pattern
           id={`${id}-hatch`}
@@ -282,7 +303,7 @@ export function TimingDiagram({
               width={Math.max(0, (Math.min(s.to, end) - Math.max(s.from, from)) * unit)}
               height={height - AXIS_H}
             />
-            <text x={x(Math.max(s.from, from)) + 3} y={AXIS_H - 8} className="shade-label">
+            <text x={x(Math.max(s.from, from)) + 3} y={AXIS_H - 5} className="shade-label">
               {s.label}
             </text>
           </g>

@@ -731,9 +731,7 @@ export function SignalTable({
     ...circuit.inputs.map((p) => ({ role: strings.circuit.input, ...p })),
     ...circuit.outputs.map((p) => ({ role: strings.circuit.output, ...p })),
   ];
-  const rows = only
-    ? only.flatMap((name) => ports.filter((p) => p.name === name))
-    : ports;
+  const rows = only ? only.flatMap((name) => ports.filter((p) => p.name === name)) : ports;
   return (
     <StateInspector
       className={`signal-table${readings.length ? " with-readings" : ""}`}

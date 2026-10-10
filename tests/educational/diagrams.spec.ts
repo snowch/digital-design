@@ -485,15 +485,15 @@ test.describe("the diagrams", () => {
     };
     await clockN("state-machines", "retry-machine", 40, ["GO"]);
     await clockN("several-edges", "controller", 30, []);
-    // A datapath figure run to its stop.
-    await openLesson(page, "several-edges");
-    const colder = page.locator('[data-interactive="colder-edges"]');
-    await colder.scrollIntoViewIfNeeded();
-    await colder.getByRole("button", { name: V.datapath.run }).click();
-    await expect(colder.locator(".datapath-status")).toContainText(
+    // A datapath figure run to its stop: the one whose lanes overlap when the run is long.
+    await openLesson(page, "trap-hardware");
+    const night = page.locator('[data-interactive="night-hardware"]');
+    await night.scrollIntoViewIfNeeded();
+    await night.getByRole("button", { name: V.datapath.run }).click();
+    await expect(night.locator(".datapath-status")).toContainText(
       V.datapath.stopped.split("{")[0]!,
     );
-    expect(await textCollisions(page), "several-edges colder-edges, run").toEqual([]);
+    expect(await textCollisions(page), "trap-hardware night-hardware, run").toEqual([]);
   });
 
   test("Module 2: no label overlaps another or leaves its drawing, before and after use", async ({

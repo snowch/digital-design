@@ -136,10 +136,10 @@ export const encoding: LessonInput = {
               { label: LABELS.words.call, text: "0x6000F005" },
             ],
             // The prediction's own instruction waits for the prediction: its layouts answer it. So
-            // does the load, whose layouts, with the bullet under the figure, would answer it too.
+            // do the load and the call, which move a field as it does.
             holdUntil: {
               prediction: "predict-moved",
-              texts: ["R2 <= R1 + 100", "R2 <= word[sensorA]"],
+              texts: ["R2 <= R1 + 100", "R2 <= word[sensorA]", "0x6000F005"],
             },
           },
         },

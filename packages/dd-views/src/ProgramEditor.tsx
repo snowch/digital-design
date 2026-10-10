@@ -169,6 +169,12 @@ export function gradeProgram(
     // Module 12: every failed run says first where it stopped and how, and names a fault at one
     // of the learner's own lines.
     if (traps && r.end) parts.push(format(ended(r.end.key) ?? r.end.key, r.end.values));
+    // The sentences about the stop stand together, the stop first.
+    if (traps) {
+      if (stopIn === "unnamed") parts.push(m12.stopUnnamed);
+      else if (stopIn === "handler") parts.push(m12.stopInHandler);
+      else if (stopIn === "below") parts.push(m12.stopBelow);
+    }
     if (traps && r.ownFault) parts.push(format(m12.ownFault, r.ownFault));
     if (wrongLeft.length)
       parts.push(
@@ -184,9 +190,6 @@ export function gradeProgram(
     if (sentence && wrongLeft.length) parts.push(sentence);
     if (traps) {
       const must = key !== undefined ? m12.ends[String(key)] : undefined;
-      if (stopIn === "unnamed") parts.push(m12.stopUnnamed);
-      else if (stopIn === "handler") parts.push(m12.stopInHandler);
-      else if (stopIn === "below") parts.push(m12.stopBelow);
       if ((endWrong || stopIn !== undefined) && must) parts.push(must);
     } else if (r.wrong.includes("end") && endKey !== "stop") parts.push(t.mustStop);
     failures.push({
