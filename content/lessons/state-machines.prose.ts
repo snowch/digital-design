@@ -29,7 +29,7 @@ export const PROSE = {
   c2Task:
     "The text box starts with the whole controller's text. Change the WAIT arm: if OK is 1, the next state is IDLE; otherwise if TICK is 1, TRY; otherwise WAIT. Nothing else changes. GIVE_UP still ignores OK.\n\nInputs: GO, OK, FAIL, TICK, RST, CLK. Outputs: SEND, SIREN, S (the state's code).\n\nThe tests run the controller through every state, including an edge in WAIT with OK 1 and TICK 1 together (OK wins: the next state is IDLE), an edge in GIVE_UP with OK 1, one test where GO falls while CLK is 1, and one where OK rises while CLK is 1.",
   construction:
-    "The next-state logic is read off the table, row by row, with nothing simplified. Module 3's decoder turns the state's bits S1 and S0 into one line per state: Y0 for IDLE, Y1 for TRY, Y2 for WAIT, Y3 for GIVE_UP. Each row is one AND gate: the state's line AND the row's inputs, with an input the row needs at 0 coming through a NOT gate. Each bit of the next state is an OR of the rows whose next state has a 1 in that bit. You draw bit 1 of the next state, N1.",
+    "The next-state logic is read off the table, row by row, with nothing simplified. Module 3's decoder turns the state's bits S1 and S0 into one line per state: Y0 for IDLE, Y1 for TRY, Y2 for WAIT, Y3 for GIVE_UP. A row that gives a bit of the next state a 1 is one AND gate: the state's line AND the row's inputs, with an input the row needs at 0 coming through a NOT gate. A row that leads to IDLE, `00`, has no gate, and a row that reads no input has only its state's line as its term. Each bit of the next state is an OR of the rows whose next state has a 1 in that bit. You draw bit 1 of the next state, N1.",
   explanation:
     "Between edges, the next-state logic works out the code of the next state from the state and the inputs. That code waits at the register's D. At the edge the register takes it, and the next-state logic starts again from the new state.\n\nRows 2 and 3 lead to IDLE, `00`, and need no gate: when no row gives a bit a 1, the OR gives 0. Row 9 reads no input, so its term is GIVE_UP's line itself. The gates are row1, row4, row5, row6, row7, row8 and two OR gates.\n\nSEND and SIREN come from the output logic, which reads the state alone. An input that changes between edges cannot change them; only an edge can.",
   modelVsReality:
@@ -39,7 +39,7 @@ export const PROSE = {
   nextStateInsideAfter:
     "At any moment at most one row's gate gives 1, the row that applies. When the row leads to IDLE, none does. Each gate is a row of the table, and the table is the state diagram written out.",
   nextStateInsideLead:
-    "The figure shows the controller opened at its next-state logic. After a reset it runs in IDLE and the decoder's Y0 is 1. With GO at 0, no row's gate gives a 1, so next is `00`.\n\nPress GO to 1: row1 gives 1, the OR gate for bit 0 gives 1, and next is `01`. Press \"Clock CLK\" and the state becomes `01`, TRY, and Y1 is 1.\n\nTry the inputs in TRY and watch which row's gate lights.",
+    "The figure shows the controller opened at its next-state logic. After a reset it runs in IDLE and the decoder's Y0 is 1. With GO at 0, no row's gate gives a 1, so next is `00`.\n\nThe input pins in this view only show their values. To set GO, choose the controller's name on the trail above the drawing, press GO to 1 there, and then press the next-state logic block to open it again; the values stay as set. With GO at 1, row1 gives 1, the OR gate for bit 0 gives 1, and next is `01`. Press \"Clock CLK\" and the state becomes `01`, TRY, and Y1 is 1.\n\nTry the inputs in TRY and watch which row's gate lights.",
   p1Explain:
     "The state is TRY, `01`. GO took the circuit from IDLE to TRY. In TRY the circuit waits for an answer or a TICK, so GO going back to 0 changes nothing. TRY stays TRY at every edge until OK, FAIL or TICK.",
   p1Question:
@@ -53,7 +53,7 @@ export const PROSE = {
   p3Question:
     "After a reset, GO becomes 1 for one edge, FAIL becomes 1 for one edge, and then RST and TICK both become 1 for one edge. What is the state?",
   predictResetLead:
-    "The motivation gave you the rule for a reset: a reset always loads `00`, IDLE, whatever row the table marks. This prediction asks you to apply that rule to a run, and the figure draws the circuit above its question.",
+    "Earlier on this page, the motivation said what a rising edge does to the register when RST is 1. This prediction asks you to apply that to a run, and the figure draws the circuit above its question.",
   prediction:
     'The two figures below run the circuit, each drawn as three blocks: next-state logic, a register, and output logic. S is an output showing the state\'s code. Choose an answer and then press "Check my prediction".',
   question:

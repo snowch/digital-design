@@ -324,11 +324,11 @@ test.describe("Module 10's figures", () => {
     await expect(figure.getByText("Word: 13123000").first()).toBeVisible();
     await expect(figure.locator(".layout-field.moved")).toHaveCount(0);
     await expect(figure.locator(".layout-moved")).toHaveText(T.layoutStill);
-    // Before the prediction is checked, its own instruction and the load are held back, and the
+    // Before the prediction is checked, its own instruction, the load and the call are held back, and the
     // figure says how many wait.
-    await expect(figure.getByRole("radio")).toHaveCount(4);
+    await expect(figure.getByRole("radio")).toHaveCount(3);
     await expect(figure.getByRole("radio", { name: /memory\[7D8\]/ })).toHaveCount(0);
-    await expect(figure.locator(".layout-held")).toHaveText(format(T.layoutsHeld, { n: 2 }));
+    await expect(figure.locator(".layout-held")).toHaveText(format(T.layoutsHeld, { n: 3 }));
     // A choice made before the check is kept by its name when the held instructions appear.
     const jump = figure.getByRole("radio").nth(2);
     const jumpName = (await jump.evaluate((e) => e.closest("label")?.textContent)) ?? "";

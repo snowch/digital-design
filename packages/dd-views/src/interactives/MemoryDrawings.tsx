@@ -413,7 +413,14 @@ export function RoomsDrawing({
   );
   const said = [
     t.boxes.roomsLabel,
-    ...(litRoom ? [format(t.boxes.roomLit, { name: litRoom.name, depth: litRoom.depth + 1 })] : []),
+    ...(litRoom
+      ? [
+          format(litRoom.depth === 0 ? t.boxes.roomLitHall : t.boxes.roomLit, {
+            name: litRoom.name,
+            depth: litRoom.depth + 1,
+          }),
+        ]
+      : []),
     ...(doorOf ? [format(t.boxes.doorFollowed, { name: doorOf.name, door: door + 1 })] : []),
   ].join(". ");
   // Where the drawing sits in a short box (a phone's debugger), the box keeps the marked room in view.

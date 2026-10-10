@@ -160,3 +160,7 @@ course's `roomFor` and `stretched` in `TimingDiagram.tsx` may now be unnecessary
 `not.toContain` test between two feedback strings breaks when one becomes the other's first
 sentence (`stop-check.test.ts`, fixed). `pkill` of a preview server ends the calling shell with
 exit 144; it is harmless.
+
+## Round 3 (T3)
+
+Items 1 to 15 of the managing session's list. Checked: item 1 was real (the band label shared the axis's second row; it now sits 3 px lower); item 2 real (`SetupHold` passed no focus; `TimingDiagram` takes `focus`); item 3 real (a slider figure now sizes a word by half its stretch, so the scale holds); item 7 real in code and in all four figures (input pins are pressable only at the top level, `CircuitView.tsx`), so the four leads send the learner up the trail, through brief T3. Slider ends (item 10) are clamped in `TimingDiagram`, not in the platform's `Timeline`: the thumb stops at the last change. Item 8 holds the call back as the load is. The stop's sentences stand together in `ProgramEditor.tsx` (item 12). Full check: only the stored screenshots fail in this container.
