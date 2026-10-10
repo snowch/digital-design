@@ -13,7 +13,7 @@ export const PROSE = {
   motivation:
     "AND and XOR are one gate per bit. Adding is the adder you built in the last lesson. Subtraction seems to need a new circuit. It does not: A minus B is A plus minus B. Module 1's signed reading lets you check which word reads as minus B. The prediction below tries one way to make that word from B.",
   prediction:
-    'The figure draws its circuit above the question. Choose an answer, then press "Check my prediction". The page shows what the simulator gave, with a timing diagram.',
+    'The figure draws its circuit above the question. Choose an answer, then press "Check my prediction". The page shows what the simulator gave, with the values written on the circuit.',
   p1Question:
     "The figure takes a 4-bit word B. A NOT gate called notB turns every bit of B over. Its output is the word NB. An adder block adds NB and `0000` (a part labelled CONST, named zero), with its carry in, CIN, fixed at 1 (another CONST, named one). Its SUM is the output NEG. So NEG is NOT B plus 1. B is `0011`, which is 3. What is NEG?",
   p1Explain:
@@ -31,10 +31,8 @@ export const PROSE = {
     'This figure is a 4-bit add-or-subtract unit made of four slices of the kind you drew. They are labelled "add/sub" and named bit0 to bit3, arranged in a staircase from bit 0 at the bottom left to bit 3 at the top right. Split blocks give each slice its bits of A and B, and a join block makes SUM. A plain-wire part, carryIn, takes SUB and drives the wire C0, bit 0\'s carry in. Each slice\'s COUT is the next one\'s carry in: wires C1, C2, C3. bit3\'s COUT is COUT. Press a wire to see its name and value. Press a slice to open it and see its XOR gate, xorB, and its full adder. "Run checks" makes 4 checks: "6 + 3", "6 - 3", "3 - 6" and "5 - 5". Each compares SUM and COUT with a healthy unit\'s. Choose each fault in turn, and say first which checks you expect to fail.',
   addsubFaultsAfterFault1:
     '"C0 stuck at 0": 3 of 4 checks fail: "6 - 3", "3 - 6" and "5 - 5", every subtraction. Without the carry into bit 0 the unit gives A + NOT B, which is one less than A - B.',
-
   addsubFaultsAfterFault2:
     '"Bit 1\'s xorB changed to OR": 2 of 4 checks fail: "6 - 3" and "3 - 6". While SUB is 1 the OR gate gives 1 whatever bit 1 of B is. In "5 - 5", bit 1 of B is 0, and NOT 0 is 1 anyway, so it succeeds. Additions succeed, because with SUB at 0 the OR gate passes B.',
-
   addsubFaultsAfterFault3:
     '"C2 stuck at 0": 3 of 4 checks fail: "6 + 3", "3 - 6" and "5 - 5": each needs a carry from bit 1 into bit 2. "6 - 3" makes no such carry, and succeeds.',
   explanation:

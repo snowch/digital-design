@@ -28,7 +28,7 @@ import {
 import { Prose, useSlot, type InteractiveProps } from "@platform/lesson-runtime";
 import { PredictionChallenge, useWidth } from "@platform/primitives";
 
-import { format, useViewStrings } from "../strings";
+import { format, useViewStrings, youChose } from "../strings";
 import {
   RunAsk,
   ShopInputs,
@@ -144,7 +144,7 @@ export const ProgramListing = withProps(
                     role="status"
                     className={stored.choice === answer ? "prediction-match" : "prediction-nomatch"}
                   >
-                    {format(strings.prediction.youSaid, { choice: optionLabel(stored.choice) })}{" "}
+                    {youChose(strings.prediction.youSaid, optionLabel(stored.choice))}{" "}
                     {format(data.ask?.what === "run" ? t.answer : t.assemblerAnswer, {
                       answer: optionLabel(answer),
                     })}{" "}
@@ -301,7 +301,7 @@ export const StackDepth = withProps(
           height={H}
           viewBox={`0 0 ${W} ${H}`}
           role="img"
-          aria-label={`${t.depthCaption}. ${format(t.depthMost, { n: run.deepest })}`}
+          aria-label={`${t.depthCaption} ${format(t.depthMost, { n: run.deepest })}`}
         >
           <line className="depth-axis" x1={left} y1={top} x2={left} y2={H - bottom} />
           <line className="depth-axis" x1={left} y1={H - bottom} x2={W - right} y2={H - bottom} />

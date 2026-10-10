@@ -107,6 +107,7 @@ export const alu: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.predictMinus,
           props: {
+            show: "circuit",
             question: PROSE.p1Question,
             libraryId: "negate-4",
             run: [{ label: "B = 0011", set: { B: "0011" } }],

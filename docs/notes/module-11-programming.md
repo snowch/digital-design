@@ -210,6 +210,18 @@ at `7C0`, past the RAM, apart from the popped words, whose hidden text now names
 10.2's layouts hold the prediction's own instruction, and its packed words wait, until the
 prediction is checked; its call bullet says a field moves.
 
+The fourth reading (10 October, night; brief Y8). On a phone 11.5's rooms box shows one room and a
+part, so a reader could not count the rooms above the marked one: each row of the drawing now starts
+with how many rooms deep its room is, the hall's 1, bold on the lit room, and step 3 points to it.
+11.3's run is drawn whole only where the window is at least 51rem tall as well as 60rem wide: at
+1366 by 768, 1280 by 720 and 1024 by 768 the stop's mark lay below the window, about 800 pixels
+under the buttons' top; a shorter window keeps the 9rem box that follows the newest row, and a test
+checks all four sizes. 10.2's layouts hold back the load as well, since its outlined Y and the
+bullet under the figure answered the prediction; a line under the choices says how many wait, and
+the choice is kept by its text, not its place. The packed words' lead no longer says the wait the
+figure says, and the explanation's third paragraph names the second selector and no longer says
+again that K chooses. The depth chart's name has one full stop.
+
 ## What was reused, built, and could be extracted
 
 Reused unchanged: the reference machine (`machine.ts`, with Module 9's options), the schema, the

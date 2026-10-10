@@ -878,6 +878,16 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
   letter-spacing: 0.06em;
   border-bottom: 2px solid var(--border-strong);
 }
+/* A prediction's settings: the signals' heads as the drawing names them (and3, not AND3). */
+.prediction-settings thead th + th {
+  text-transform: none;
+  letter-spacing: normal;
+}
+.prediction-settings-caption {
+  margin: 0 0 var(--space-2);
+  font-weight: 650;
+  font-size: var(--text-md);
+}
 .signal-table tbody tr:last-child td,
 .signal-table tbody tr:last-child th,
 .truth-table tbody tr:last-child td,
@@ -985,10 +995,14 @@ figure.interactive > :not(figcaption):not(.figure-lead):not(.figure-after) {
 .timing-diagram .axis line {
   stroke: var(--border-strong);
 }
-.timing-diagram .tick-label,
 .timing-diagram .mark-label {
   fill: var(--fg-muted);
   font-size: 12px;
+}
+/* The axis says what the lesson counts, with its marks (the run's steps, or 4.1's units): the
+   shared timeline's bare numbers, a lone "0" at the top of a short run, read as a value. */
+.timing-diagram .tick-label {
+  display: none;
 }
 .timing-lanes .lane-label {
   font-weight: 700;
@@ -2245,6 +2259,11 @@ button.bit {
 .layout-range,
 .layout-moved {
   margin: var(--space-1) 0 0;
+}
+/* Under the choices: how many wait for the prediction above (10.2). */
+.layout-held {
+  margin: var(--space-1) 0 0;
+  color: var(--fg-muted);
 }
 .explorer-help,
 .explorer-meaning-heading,
@@ -3612,12 +3631,17 @@ svg.run-lanes-drawing {
   .debugger-listing-wrap:not(.rows-open):has(~ .debugger-near-desk) {
     max-height: 22rem;
   }
-  /* A short run (11.3) drawn whole under its listing, its first call's arrows with its last. */
-  .debugger-near-desk .run-lanes-box.run-lanes-whole {
-    max-height: none;
-  }
   .debugger-near-phone {
     display: none;
+  }
+}
+/* A short run (11.3) drawn whole under its listing, its first call's arrows with its last, where
+   the window is tall enough for the whole drawing to sit on the screen with the buttons: about
+   800 pixels from the buttons' top to the stop's mark. A shorter window keeps the box that follows
+   the newest row. */
+@media (min-width: 60rem) and (min-height: 51rem) {
+  .debugger-near-desk .run-lanes-box.run-lanes-whole {
+    max-height: none;
   }
 }
 /* The lanes' drawing in a box of fixed height that follows its newest row, so a long run does
@@ -3686,7 +3710,8 @@ svg.run-lanes-drawing {
   }
 }
 /* Hatched, in the drawing and in its key: the lanes' bars are solid --accent, so the band that says
-   interrupts are on takes a pattern no other mark uses. */
+   interrupts are on takes a pattern no other mark uses. The band in the drawing has no outline:
+   drawn once per row, it crossed the band at every row's edge, where nothing changes. */
 .run-lanes-drawing .lane-hatch-ground {
   fill: var(--bg);
 }
@@ -3698,7 +3723,6 @@ svg.run-lanes-drawing {
   background: repeating-linear-gradient(45deg, var(--fg) 0 1.5px, var(--bg) 1.5px 3px);
   outline: 1px solid var(--fg-muted);
 }
-/* No outline: drawn once per row, it crossed the band at every row's edge, where nothing changes. */
 .run-lanes-legend .lane-key-now {
   border-radius: 50%;
   background: var(--focus);
@@ -3757,6 +3781,13 @@ svg.store-rooms {
   fill: var(--accent-soft);
   stroke: var(--accent-strong);
   stroke-width: 3;
+}
+.store-rooms .room-depth {
+  fill: var(--fg-muted);
+}
+.store-rooms .room-lit .room-depth {
+  fill: var(--accent-strong);
+  font-weight: 700;
 }
 .store-rooms .room-door-line {
   stroke: var(--fg-muted);

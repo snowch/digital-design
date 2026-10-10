@@ -26,7 +26,7 @@ export const PROSE = {
   nightLead:
     '1. Press "Clock edge" until the store at `014` reaches MEMORY. Read TRAP and the controller\'s state.\n2. Press "Clock edge" once and read the control registers.\n3. Press "Run until it stops".',
   nightAfter:
-    "The store to room B's sensor, at `014`, traps at edge 24, in MEMORY. The handler runs, and `resume` goes back to `018`. At the end, C1 holds `01`, C2 holds `018`, C3 holds `34` and C4 holds `024`. The program stops at `020` after 53 edges. The display shows -184, and the lamps show NIGHT.",
+    "The store to room B's sensor, at `014`, traps at edge 24, in MEMORY. The handler runs, and `resume` goes back to `018`. At the end, C1 holds `01`, C2 holds `018`, C3 holds `34` and C4 holds `024`. The program stops at `020` after 54 edges. The display shows -184, and the lamps show NIGHT.",
   construction:
     "The controller's state diagram and the trap logic tell you how many edges each of four cases takes. You can work out each count without running anything.",
   answersLead: "Work out each answer, then run the tests.",

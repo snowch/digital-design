@@ -55,7 +55,7 @@ import {
 import { Prose, useSlot, type InteractiveProps } from "@platform/lesson-runtime";
 import { FaultInjector, PredictionChallenge } from "@platform/primitives";
 
-import { format, useViewStrings } from "../strings";
+import { format, useViewStrings, youChose } from "../strings";
 import type { Machine10Strings } from "../strings10";
 import { FaultSpec, toFault } from "./FaultLab";
 import { withProps } from "./props";
@@ -230,7 +230,7 @@ export const MachineCompare = withProps(
                     role="status"
                     className={stored.choice === answer ? "prediction-match" : "prediction-nomatch"}
                   >
-                    {format(strings.prediction.youSaid, { choice: optionLabel(stored.choice) })}{" "}
+                    {youChose(strings.prediction.youSaid, optionLabel(stored.choice))}{" "}
                     {format(t.answer, { answer: optionLabel(answer) })}{" "}
                     {stored.choice === answer
                       ? strings.prediction.match
@@ -456,8 +456,10 @@ export const LayoutCompare = withProps(
     const answer = useMemo(() => (asking ? layoutAnswer(data) : ""), [asking, data]);
     const optionLabel = (v: string) =>
       (data.options?.find((o) => o.value === v)?.label ?? v).replace(/\.$/, "");
-    const [chosen, setChosen] = useState(0);
-    const given = instructions[chosen] ?? instructions[0];
+    // The choice is kept by its text, so an instruction held back and then shown keeps the
+    // learner's choice where it was.
+    const [chosen, setChosen] = useState<string>();
+    const given = instructions.find((c) => c.text === chosen) ?? instructions[0];
     const instruction = useMemo(() => (given ? wordOfText(given.text) : 0), [given]);
     const course = courseLayout(instruction);
     const packed = packedLayout(instruction);
@@ -481,7 +483,7 @@ export const LayoutCompare = withProps(
                     role="status"
                     className={stored.choice === answer ? "prediction-match" : "prediction-nomatch"}
                   >
-                    {format(strings.prediction.youSaid, { choice: optionLabel(stored.choice) })}{" "}
+                    {youChose(strings.prediction.youSaid, optionLabel(stored.choice))}{" "}
                     {format(t.layoutAnswer, { answer: optionLabel(answer) })}{" "}
                     {stored.choice === answer
                       ? strings.prediction.match
@@ -495,17 +497,20 @@ export const LayoutCompare = withProps(
         {committed && instructions.length > 1 && (
           <fieldset className="carry-cases">
             <legend>{strings.machine8.choose}</legend>
-            {instructions.map((c, k) => (
+            {instructions.map((c) => (
               <label key={c.label} className="fault-choice">
                 <input
                   type="radio"
                   name={`${interactive.id}-choice`}
-                  checked={chosen === k}
-                  onChange={() => setChosen(k)}
+                  checked={c === given}
+                  onChange={() => setChosen(c.text)}
                 />
                 <span>{c.label}</span>
               </label>
             ))}
+            {held.size > 0 && (
+              <p className="layout-held">{format(t.layoutsHeld, { n: held.size })}</p>
+            )}
           </fieldset>
         )}
         {committed && (
@@ -990,7 +995,7 @@ export const SwapCompare = withProps(
                     role="status"
                     className={stored.choice === answer ? "prediction-match" : "prediction-nomatch"}
                   >
-                    {format(strings.prediction.youSaid, { choice: optionLabel(stored.choice) })}{" "}
+                    {youChose(strings.prediction.youSaid, optionLabel(stored.choice))}{" "}
                     {format(t.swapAnswer, { answer: optionLabel(answer) })}{" "}
                     {stored.choice === answer
                       ? strings.prediction.match
@@ -1258,7 +1263,7 @@ export const ProgramCompare = withProps(
                     role="status"
                     className={stored.choice === answer ? "prediction-match" : "prediction-nomatch"}
                   >
-                    {format(strings.prediction.youSaid, { choice: optionLabel(stored.choice) })}{" "}
+                    {youChose(strings.prediction.youSaid, optionLabel(stored.choice))}{" "}
                     {format(t.programAnswer, { answer: optionLabel(answer) })}{" "}
                     {stored.choice === answer
                       ? strings.prediction.match

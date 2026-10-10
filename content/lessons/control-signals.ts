@@ -96,10 +96,13 @@ export const controlSignals: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.predictJump,
           props: {
+            show: "circuit",
             question: PROSE.p1Question,
             libraryId: "decoder",
             run: [{ set: { K: 7, J: 0, C: 0 } }],
             watch: "BCONST",
+            // The signals the explanation reasons with, after the word's fields.
+            signals: ["K", "J", "C", "BCONST", "OP2", "OP1", "OP0", "WRITEY", "JUMP"],
             options: [
               { value: "0", label: LABELS.options.p1Zero },
               { value: "1", label: LABELS.options.p1One },

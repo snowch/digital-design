@@ -26,10 +26,11 @@ export function runScript(circuit: Circuit, steps: readonly Step[]): Simulator {
   for (const step of steps) {
     for (const [name, value] of Object.entries(step.set ?? {}))
       sim.setInput(name, toWord(circuit, name, value));
-    if (step.clock) sim.clockCycle(step.clock);
+    // A clock step's label stands on its rise; a settle step's where its inputs changed.
+    if (step.clock) sim.clockCycle(step.clock, step.label);
     else {
       sim.settle();
-      sim.tick(step.label ?? "");
+      sim.step(step.label ?? "");
     }
   }
   return sim;
@@ -45,7 +46,7 @@ export function outputsPerStep(circuit: Circuit, steps: readonly Step[]): Record
     if (step.clock) sim.clockCycle(step.clock);
     else {
       sim.settle();
-      sim.tick(step.label ?? "");
+      sim.step(step.label ?? "");
     }
     out.push(sim.outputs());
   }

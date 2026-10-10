@@ -114,6 +114,7 @@ export const adders: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.predictSum,
           props: {
+            show: "circuit",
             question: PROSE.p1Question,
             libraryId: "half-adder-gates",
             run: [{ label: "A = 1, B = 1", set: { A: 1, B: 1 } }],

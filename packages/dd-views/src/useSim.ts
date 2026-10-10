@@ -69,6 +69,8 @@ export function useSettleSim(
   prime?: readonly PrimeStep[],
 ): SettleSim {
   const [generation, setGeneration] = useState(0);
+  // Each reset counts, so the simulator below is read again from the map it replaced.
+  const [resets, setResets] = useState(0);
   const [sims] = useState(() => new Map<Circuit, Simulator>());
   const sim = useMemo(() => {
     let s = sims.get(circuit);
@@ -79,7 +81,7 @@ export function useSettleSim(
     }
     return s;
     // The starting values are read once per circuit, as the circuit itself is.
-  }, [circuit, sims]);
+  }, [circuit, sims, resets]);
   const bump = useCallback(() => setGeneration((g) => g + 1), []);
   const values = useMemo(() => sim.snapshotValues(), [sim, generation]);
   const converged = sim.lastSettle?.converged ?? true;
@@ -113,6 +115,7 @@ export function useSettleSim(
     },
     reset: () => {
       sims.set(circuit, figureSim(circuit, initial, prime));
+      setResets((r) => r + 1);
       bump();
     },
   };

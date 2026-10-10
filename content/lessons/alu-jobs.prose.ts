@@ -12,7 +12,7 @@ export const PROSE = {
   motivation:
     "OR is one gate per bit, as AND and XOR are. Copy B needs no gate: B already reaches every slice. Count up and count down are both additions. Count up is A + 1. Count down is A - 1, which is A plus minus 1. The slice's adder can do both. What changes is the word the adder adds to A.",
   prediction:
-    'When you choose an answer and press "Check my prediction", the page shows what the simulator gave, with a timing diagram.',
+    'When you choose an answer and press "Check my prediction", the page shows what the simulator gave, with the values written on the closed ALU\'s pins.',
   p1Question:
     "The figure shows the closed 4-bit ALU, with word inputs A and B, select inputs OP2, OP1 and OP0, and outputs Y and COUT. The office's count of minutes is at `0000`: A is `0000`, B is `0000`. The code is `111`, count down. What is Y?",
   p1Explain:
@@ -37,10 +37,8 @@ export const PROSE = {
     'The figure shows a 4-bit ALU built from four slices, named bit0 to bit3, drawn as a staircase from bit 0 at the bottom left to bit 3 at the top right. Split blocks give each slice its bits of A and B. A join block combines the slices\' Y outputs. Two gates, xorC0 and andC0, make C0 from OP2, OP1 and OP0. Each slice\'s COUT passes to the next slice\'s carry in, through wires C1, C2 and C3. Press any wire to see its name and value.\n\n"Run checks" runs 8 checks, one per job, each on A = 3 and B = 5: "3 AND 5", "3 XOR 5", "3 + 5", "3 - 5", "3 OR 5", "copy 5", "3 + 1" and "3 - 1". Each check sets A, B and the code itself and compares Y and COUT with a healthy ALU\'s. The fault options are "C0 stuck at 0", "OP2 stuck at 0" and "C2 stuck at 0". Choose each fault in turn, predict which checks will fail, then run them. The results appear after the checks run.',
   jobFaultsAfterFault1:
     '"C0 stuck at 0": 2 of 8 checks fail, the two that need C0 = 1: "3 - 5" and "3 + 1". Each result is one less. "3 - 5" gives `1101`, "3 + 1" gives `0011`.',
-
   jobFaultsAfterFault2:
     '"OP2 stuck at 0": 4 of 8 checks fail: "3 OR 5", "copy 5", "3 + 1" and "3 - 1". Each new job does Module 3\'s job with the same OP1 and OP0: OR gives AND\'s `0001`, copy B gives XOR\'s `0110`, count up gives add\'s `1000`, count down gives subtract\'s `1110`.',
-
   jobFaultsAfterFault3:
     '"C2 stuck at 0": 4 of 8 checks fail, all four arithmetic jobs: "3 + 5", "3 - 5", "3 + 1" and "3 - 1". All four make a carry from bit 1 into bit 2. The four bit-by-bit jobs all pass: their D is all 0s, so no carry is made.',
   explanation:

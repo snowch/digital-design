@@ -10,7 +10,7 @@ export const PROSE = {
   addOneAfter:
     "The register never takes `0110`, `0100` or `0000`. It takes D only at an edge. The adder settles between edges. Every flip-flop gets CLK itself, so all four bits change at the one edge, after the carries have settled. With Q `1111` and EN 1, NEXT is `0000` and COUT is 1. That is TICK.",
   addOneLead:
-    "The figure shows the add one block alone, in the stepped model. Q is set to `0111` and EN to 0, so NEXT is `0111`. Press EN to 1. The carry takes 5 steps to pass along the chain and settle.\n\nMove the Step slider back to step 0 and forward one step at a time. Each step, the carry reaches one more half adder. NEXT passes through `0110`, `0100` and `0000` before it settles at `1000`. Press bits of Q to try other numbers, such as `1111`.",
+    "The figure shows the add one block alone, in the stepped model. Q is set to `0111` and EN to 0, so NEXT is `0111`. The input pins in this block only show their values, so you set them on the whole circuit. To set EN to 1, choose the circuit's name on the trail above the drawing, press EN there, then open the add one block again. The settings stay. The carry takes 5 steps to pass along the chain and settle.\n\nMove the Step slider back to step 0 and forward one step at a time. Each step, the carry reaches one more half adder. NEXT passes through `0110`, `0100` and `0000` before it settles at `1000`. To try other numbers, such as `1111`, press the bits of Q the same way.",
   buildCountTickLead:
     "The shop's wait needs a 4-bit counter with TICK. Draw it from the same parts as the construction.",
   buildCountTwoLead:

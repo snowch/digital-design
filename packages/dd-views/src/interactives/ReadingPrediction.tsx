@@ -22,7 +22,7 @@ import { PredictionChallenge } from "@platform/primitives";
 
 import { BitRow } from "../BitRow";
 import { SignalPlot } from "../SignalPlot";
-import { format, useViewStrings } from "../strings";
+import { format, useViewStrings, youChose } from "../strings";
 import { withProps } from "./props";
 
 const Ask = z.discriminatedUnion("kind", [
@@ -102,7 +102,7 @@ export const ReadingPrediction = withProps(
               role="status"
               className={answer === stored.choice ? "prediction-match" : "prediction-nomatch"}
             >
-              {format(strings.prediction.youSaid, { choice: label(stored.choice) })}{" "}
+              {youChose(strings.prediction.youSaid, label(stored.choice))}{" "}
               {format(strings.readingPrediction.modelGave, { value: answerText(answer) })}{" "}
               {answer === stored.choice ? strings.prediction.match : strings.prediction.noMatch}
             </p>

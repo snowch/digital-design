@@ -719,10 +719,13 @@ export function SignalTable({
   caption,
   readings = [],
   words = false,
+  only,
 }: {
   circuit: Circuit;
   values: readonly Word[];
   caption?: string;
+  /** The ports to list, by name and in this order; every input and output by default. */
+  only?: readonly string[];
   readings?: readonly ("unsigned" | "signed")[];
   /**
    * Module 8: a word of 8 bits or more in hexadecimal, as a lesson that writes its causes and
@@ -731,10 +734,11 @@ export function SignalTable({
   words?: boolean;
 }) {
   const strings = useViewStrings();
-  const rows = [
+  const ports = [
     ...circuit.inputs.map((p) => ({ role: strings.circuit.input, ...p })),
     ...circuit.outputs.map((p) => ({ role: strings.circuit.output, ...p })),
   ];
+  const rows = only ? only.flatMap((name) => ports.filter((p) => p.name === name)) : ports;
   return (
     <StateInspector
       className={`signal-table${readings.length ? " with-readings" : ""}`}

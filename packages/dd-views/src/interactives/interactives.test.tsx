@@ -232,7 +232,10 @@ describe("the setup and hold experiment", () => {
     }
     await user.click(screen.getByRole("button", { name: format(S.setupHold.replay, { seed: 2 }) }));
     expect(screen.getByRole("status")).toHaveTextContent(/Roll 2:/);
-    expect(document.querySelector(".mark-label")).toHaveTextContent(S.setupHold.edge);
+    // The edge is named among the axis's marks, beside the ticks that count units from it.
+    expect([...document.querySelectorAll(".mark-label")].map((m) => m.textContent)).toContain(
+      S.setupHold.edge,
+    );
   });
 });
 
@@ -264,11 +267,10 @@ describe("the latch internals", () => {
     const next = screen.getByRole("button", { name: S.internals.next });
     await user.click(next);
     await user.click(next);
-    const time = document.querySelector(".internals-time");
-    expect(Number(time?.textContent?.replace(/\D/g, ""))).toBeGreaterThan(0);
+    // The time is given once, by the diagram's slider.
+    const timeNow = () => Number((screen.getByRole("slider") as HTMLInputElement).value);
+    expect(timeNow()).toBeGreaterThan(0);
     // Step on until the cursor is inside the second phase.
-    const timeNow = () =>
-      Number(document.querySelector(".internals-time")?.textContent?.replace(/\D/g, ""));
     for (let i = 0; i < 20 && timeNow() < 100; i++) await user.click(next);
     expect(timeNow()).toBeGreaterThanOrEqual(100);
     expect(timeNow()).toBeLessThan(200);
