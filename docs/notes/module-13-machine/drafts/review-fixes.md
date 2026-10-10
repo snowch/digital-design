@@ -97,3 +97,16 @@ Facts put right in placed text without a new draft, each a word or a number:
 - `title.next-trap`: "trap or resume PC" dropped that the block also passes the ordinary next PC on;
   placed as "next PC, trap or resume". `title.next` ("choose next PC") is not placed: Modules 8 to
   12 draw the same block as "next PC", and changing `next-trap` alone makes the two titles differ.
+
+## Brief R3-2 (13.2, the second reading)
+
+- `generalisation`: kept its last sentence announcing the next lesson, which the brief cut (the
+  reflection keeps that announcement); cut.
+
+## Brief R3-4 (13.4, the second reading)
+
+- `motivation`: the signs program's list came back with two "and"s; the first cut.
+
+## Brief R3-3 (13.3, the second reading)
+
+- Placed as drafted; no fact needed a change.

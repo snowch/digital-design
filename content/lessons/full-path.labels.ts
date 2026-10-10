@@ -31,7 +31,7 @@ export const LABELS = {
     whole: "The whole machine runs the shop's program, with the instruction shown at every level.",
     predict:
       "The shop's program is paused before the FETCH edge of a set if, and asks what the IR takes.",
-    call: "The shop's program is stopped before its system call, with the control registers shown.",
+    call: "The shop's program is paused before its system call, with the control registers shown.",
     store: "The shop's program is paused before the handler's store to the display.",
     faults: "The shop's program runs with one control signal broken, and you choose which.",
     answers: "Five questions ask about one line at every level.",

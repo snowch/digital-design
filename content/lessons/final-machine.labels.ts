@@ -18,7 +18,7 @@ export const LABELS = {
     prediction: "A timer that counts a trap",
     investigation: "Which program finds which line",
     construction: "Three ways in",
-    failureExperiment: "A door that never opens",
+    failureExperiment: "One join wrong, found from its failure",
     explanation: "Reading a failure",
     generalisation: "How a CPU is checked",
     challenge: "The whole machine",
