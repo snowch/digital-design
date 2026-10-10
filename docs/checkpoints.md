@@ -659,3 +659,74 @@ Module 13, the whole machine, is being built from its plan, in five lessons:
 
 After it come a report on the whole course against `docs/plan.md`'s "Course acceptance", and then
 the two optional chapters.
+
+## The course against its acceptance
+
+`docs/plan.md` ends its plan with the course's acceptance: what a learner can do at the end, and a
+final demonstration. The managing session wrote this report on 10 October 2026, after merging
+Module 13's fourth round, and checked each clause against the lessons on `main`.
+
+### What exists
+
+Every module of the plan has its lessons: Module 0 to Module 13, 59 lessons and 118 challenges.
+The content tests parse every lesson and fail one without its ten sections, its originality note,
+or challenges whose reference passes and whose starting point fails, and the term gate holds every
+lesson to the words earlier lessons introduced. Each module was reviewed before it merged; the
+later modules were read several times, Module 13 three times and checked twice after, each finding
+attacked by a sceptic before it was acted on.
+
+### Each clause
+
+| The plan's clause | Where the learner does it (the challenges are graded) |
+| --- | --- |
+| construct basic logic | 2.1 `gates` (two lamps from a rule), 2.2 `nand` (NOT, AND and XOR from NAND), 2.3 `fewer-gates` (circuits under a gate budget) |
+| combinational circuits | 3.1 `selectors`, 3.2 `decoders` (a decoder and a comparator), 3.3 `adders` (a ripple adder and an overflow lamp), 3.4 `alu` (an ALU slice) |
+| sequential circuits | 4.1 `remember`: the two-button light, the follow-and-keep circuit, a flip-flop, a D latch as text |
+| registers | 5.1 `registers`, 5.2 `counters`, 5.3 `register-transfer`; 5.4 and 5.5 a controller as a state machine |
+| memory | 6.1 `ram`, 6.2 `register-file`, 6.3 `bytes`, 6.4 `memory-map` (the shop's memory, with its devices at addresses) |
+| an ALU | 7.1 to 7.4: eight jobs, four flags, 64 bits, test words that expose a stuck carry, and the whole ALU written |
+| a datapath | 8.1 to 8.5: the datapath written in text, a part at a time, to the whole datapath with branches |
+| control | 9.1 to 9.4: the decoder's control signals, illegal instructions, a controller of several edges, its output logic |
+| execute an instruction | 8.3 `fetch` and 9.3 `several-edges` step an instruction edge by edge; 9.5 `new-instruction` adds one end to end; 13.2 `full-path` follows one at every level |
+| write and debug assembly | Module 11: 11.1 `assembly` to 11.5 `recursion`, 11.6 `debugging` (programs mended from their runs and a log), 11.7 `log-report` (a program the shop can use) |
+| understand traps and interrupts | Module 12: 12.1 `traps`, 12.2 `saving-state`, 12.3 `user-mode`, 12.5 `interrupts`, 12.6 `nesting`, 12.7 `trap-hardware` |
+| execute a system call | 12.4 `system-calls` (the handler's job that reads a room's sensor for a user program), 12.8 `system-call-mechanism` (the handler that runs the shop's programs) |
+| trace the whole path back down toward logic | 13.2 `full-path`, 13.3 `tracing` (a value followed from a line to one gate), 13.5 `capstone` |
+
+**The final demonstration.** The plan asks for "user program → assembly → machine code → fetch →
+decode → register read → ALU/memory → register write → PC update → next instruction, pausable and
+inspectable at every step". 13.5 has the learner write the program: the editor assembles it as they
+type, the tests run it on the model, and "Run my program on the whole machine" runs it on the
+machine built from the course's parts. The machine figure, there and in 13.2, runs one edge at a
+time: a strip lists each line's edges (fetch, read, the ALU, memory, write), a table gives the line
+at every level (the address, its word in the ROM, the IR, the controller's state, each signal),
+every block opens down to its gates, and a wire can be pinned as blocks open. 13.2's construction
+asks for the machine code of a line from the run itself.
+
+### The plan's other promises
+
+- **SystemVerilog, module by module**: the subset grows as the plan's table says, and a construct
+  the learner has not met is refused with a plain message. In 13.4's lab the learner writes the
+  whole machine's top module, joining the course's parts.
+- **The graded projects in three tiers**: the projects exist, from Module 2's circuits from NAND to
+  13.4's machine. The three tiers exist in the last three: 11.7 gives three ways into its program,
+  12.8 two, and 13.4 three starts ("Start from the outline", "Start from the parts", "Start from
+  nothing"). The eight earlier projects, the Boolean circuit to the instruction, have one way in,
+  with five hints each; the specification and the tests are never hidden, as the plan asks.
+
+### What is not done
+
+- **The two optional chapters**, a compiler and a kernel, which the plan builds after Module 13.
+- **An offline run of the machine's text through Yosys or Verilator**, which the plan leaves as a
+  separate task after Module 13.
+- **Tiers for the eight earlier graded projects** (above).
+- **Work in progress**: the timing diagrams' second round and the last figures fixes for Modules 10
+  to 12 are on the Module 12 build's branch; five small items for Module 13 are with its build. Each
+  is checked before it merges, as everything above was.
+
+### For the author
+
+1. Build the two optional chapters now, or close the course at Module 13?
+2. The eight earlier graded projects: accept one way in with five hints, or add the guided and
+   engineering starts the later three have?
+3. The offline Yosys or Verilator run: wanted, and if so, before or after the chapters?
