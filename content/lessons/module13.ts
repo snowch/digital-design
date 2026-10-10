@@ -394,10 +394,10 @@ endmodule
 // 13.5 the capstone: a program of the learner's own, traced.
 
 /** The capstone's figures' program, not the challenge's task: CLASH when room B is colder. */
-export const CAPSTONE_SAMPLE = `// Is room A less than 10.0 degrees warmer than room B? The display shows 1 if so.
+export const CAPSTONE_SAMPLE = `// Is room B less than 10.0 degrees warmer than room A? The display shows 1 if so.
         R1 <= word[sensorA]
         R2 <= word[sensorB]
-        R3 <= R1 - R2            // the gap, room A minus room B
+        R3 <= R2 - R1            // the gap, room B minus room A
         R4 <= word[limit]        // 10.0 degrees
         R5 <= R3 < R4 signed     // set if: 1 when the gap is less than the limit
         word[display] <= R5
@@ -427,4 +427,7 @@ export const CAPSTONE_CASES = [
   // unsigned is large.
   { id: "warm", sensorA: 50, sensorB: -250, display: 1, lamps: 0 },
   { id: "warmB", sensorA: -250, sensorB: 50, display: 1, lamps: 0 },
+  // Exactly -200 in room B, as in room A two cases up: a comparison that counts -200 as cold, in
+  // either room, fails.
+  { id: "edgeB", sensorA: -201, sensorB: -200, display: 1, lamps: 0 },
 ] as const;

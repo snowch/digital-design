@@ -12,7 +12,7 @@
 //   instruction-level model after every step, which names the first that disagrees, as every
 //   machine since Module 8 has been held to. Every value is read off the recorded nets.
 
-import { useMemo, useRef, useState, type ReactNode } from "react";
+import { useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { z } from "zod";
 
 import {
@@ -335,7 +335,6 @@ export const MachineLevels = withProps(
       setPinFocus(name);
       drawingRef.current?.scrollIntoView?.({ block: "nearest" });
     };
-    // The wires the next edge changes: the joins in use at this edge, marked on the drawing.
     // The wires the next edge uses: back from what it writes, along each selector's chosen
     // input (`edgeUses`), marked on the drawing at every level.
     const active = useMemo(
@@ -407,8 +406,6 @@ export const MachineLevels = withProps(
     }, [circuit, scope]);
     const scopeKind = circuit.composites.find((c) => c.path === scope)?.kind;
 
-    // The step buttons and the status line, held in one sticky band with the drawing's overview,
-    // so the controls stay beside the drawing they change and neither covers the other.
     // A paragraph a run reveals shows once its condition has held, and stays: stepping back
     // past the edge does not take back what the learner has read.
     const revealNow =
@@ -422,15 +419,18 @@ export const MachineLevels = withProps(
           pinned !== undefined &&
           run.circuit.nets[pinned]?.name === data.reveal.net)) &&
       (!data.reveal.afterFault || (reached && faultAt >= 0));
+    // A fault's explanation is the exception: it holds only while its run is the one on show, so
+    // "Start again" or "No fault" takes it back with the run it explains.
     const [revealed, setRevealed] = useState(false);
-    if (revealNow && !revealed) setRevealed(true);
+    if (revealNow && !revealed && !data.reveal?.afterFault) setRevealed(true);
     const isPinned = (name: string) => {
       const net = run.circuit.nets.find((n) => n.name === name);
       return net !== undefined && (net.id === pinned || pinnedParts.has(net.id));
     };
     const rowPinned = (name: string) => (isPinned(name) ? "machine-row-pinned" : undefined);
-    // A row's heading is a button: it pins the wire the row reads and brings it into view.
-    const rowButton = (label: string, name: string) => (
+    // A row's heading is a button: it pins the wire the row reads, named under its label, and
+    // brings it into view.
+    const rowButton = (label: string, name: string, wire?: string) => (
       <button
         type="button"
         className="machine-row-wire"
@@ -442,10 +442,56 @@ export const MachineLevels = withProps(
         onClick={() => pinWire(name)}
       >
         {label}
+        <span className="machine-row-wire-name" aria-hidden="true">
+          {wire ?? format(t.rowWire, { wire: name.split("/").pop() ?? name })}
+        </span>
       </button>
     );
+    // A row's wire, pinned, reads under the drawing as its row writes it.
+    const rowForms = useMemo(() => {
+      const byName = new Map<string, (w: Word) => string>([
+        ["PC", (w) => hex3(w.value)],
+        ["FETCHED", (w) => hex8(Number(w.value))],
+        ["IR", (w) => hex8(Number(w.value))],
+        [
+          "control/S",
+          (w) =>
+            Object.entries(CONTROL_STATES).find(
+              ([, c]) => c === w.value.toString(2).padStart(3, "0"),
+            )?.[0] ?? valueLabel(w),
+        ],
+      ]);
+      const forms = new Map<number, (w: Word) => string>();
+      for (const [name, f] of byName) {
+        const net = run.circuit.nets.find((n) => n.name === name);
+        if (net) forms.set(net.id, f);
+      }
+      return forms;
+    }, [run.circuit]);
+    const readout = (net: number) => {
+      const f = rowForms.get(net);
+      const w = values[net];
+      return f && known(w) ? f(w) : undefined;
+    };
+    // The step buttons and the status line stay at the top of the window over the whole figure,
+    // tables and bit views too, so a lead that alternates a press with a row under the drawing
+    // keeps the button in reach. The drawing's overview sticks under them, over the drawing only
+    // (`--sticky-top`), and only in a window tall enough to keep most of it for the drawing.
+    const rootRef = useRef<HTMLDivElement>(null);
+    const bandRef = useRef<HTMLDivElement>(null);
+    useLayoutEffect(() => {
+      const root = rootRef.current;
+      const band = bandRef.current;
+      if (!root || !band) return;
+      const set = () => root.style.setProperty("--sticky-top", `${band.offsetHeight}px`);
+      set();
+      if (typeof ResizeObserver === "undefined") return;
+      const ro = new ResizeObserver(set);
+      ro.observe(band);
+      return () => ro.disconnect();
+    }, [committed]);
     const steps = (
-      <div className="machine-steps">
+      <div className="machine-steps" ref={bandRef}>
         <div className="explorer-actions debugger-actions">
           <button type="button" className="button" disabled={at >= last} onClick={() => go(at + 1)}>
             {t.nextEdge}
@@ -481,7 +527,7 @@ export const MachineLevels = withProps(
       </div>
     );
     return (
-      <div className="explorer machine-levels" data-interactive={interactive.id}>
+      <div className="explorer machine-levels" data-interactive={interactive.id} ref={rootRef}>
         {asking && (
           <div className="carry-question">
             <Prose markdown={data.question ?? ""} />
@@ -529,7 +575,7 @@ export const MachineLevels = withProps(
           />
         )}
         {data.listing && <ProgramListing source={data.program} label={data.listing} />}
-        {committed && (data.trace || data.levels) && <RunStrip run={run} at={at} t={t} onGo={go} />}
+        {committed && steps}
         <div ref={drawingRef}>
           <CircuitView
             circuit={circuit}
@@ -546,12 +592,19 @@ export const MachineLevels = withProps(
               setPinFocus(undefined);
             }}
             pinnedParts={pinnedParts}
-            {...(committed ? { band: steps } : {})}
+            readout={readout}
             {...(committed ? { active } : {})}
           />
         </div>
         <p className="machine-pin-note">{t.pinNote}</p>
-        {/* What a run has shown: under the drawing, where the learner is looking when it appears. */}
+        {/* What a run has shown: under the drawing, where the learner is looking when it appears,
+            the comparison first and the paragraph that explains it after, so neither moves as
+            the tables below grow. */}
+        {committed && data.compare && (
+          <p className="machine-compare" role="status">
+            {withCode(compareText(t, run, at))}
+          </p>
+        )}
         {reached && data.outcomes && (
           <div className="fault-outcome" role="status">
             <Prose markdown={data.outcomes} />
@@ -567,6 +620,10 @@ export const MachineLevels = withProps(
             <Prose markdown={data.reveal.text} />
           </div>
         )}
+        {/* The run over time, under the drawing and what its runs have shown: above it, it put
+            the length of the run between the step controls, or a challenge's answer boxes, and
+            the drawing. */}
+        {committed && (data.trace || data.levels) && <RunStrip run={run} at={at} t={t} onGo={go} />}
         {committed && data.levels && (
           <div className="truth-table-wrap">
             <table className="truth-table datapath-table machine-levels-table">
@@ -587,7 +644,7 @@ export const MachineLevels = withProps(
                   <td className="memory-word">{hex3(pc)}</td>
                 </tr>
                 <tr className={rowPinned("FETCHED")}>
-                  <th scope="row">{rowButton(t.machineCode, "FETCHED")}</th>
+                  <th scope="row">{rowButton(t.machineCode, "FETCHED", t.romWire)}</th>
                   <td className="memory-word">
                     {data.holdRom && at <= first
                       ? t.romLater
@@ -672,11 +729,6 @@ export const MachineLevels = withProps(
               setPinFocus(run.circuit.nets[net]?.name);
             }}
           />
-        )}
-        {committed && data.compare && (
-          <p className="machine-compare" role="status">
-            {withCode(compareText(t, run, at))}
-          </p>
         )}
         <div className="datapath-tables" hidden={!committed}>
           {data.shown.length > 0 && (
@@ -952,8 +1004,12 @@ function TracePanel({
                       <br />
                       {makerText(t, block.kind, block.path) ?? ""}
                     </th>
-                    <td className="memory-word">{ports(block.inputs)}</td>
-                    <td className="memory-word">{ports(block.outputs)}</td>
+                    <td className="memory-word" data-label={t.traceIn}>
+                      {ports(block.inputs)}
+                    </td>
+                    <td className="memory-word" data-label={t.traceOut}>
+                      {ports(block.outputs)}
+                    </td>
                   </tr>
                 );
               })}
@@ -1147,29 +1203,30 @@ function wordParts(circuit: Circuit, net: number): Set<number> {
 }
 
 /**
- * The block to show a wire in: the level on show if the wire is drawn there, else the top if it
- * is, else the block whose path its name starts with.
+ * The block to show a wire in: the level on show if the wire is drawn there, else the shallowest
+ * block that draws it (the PC inside the datapath, S inside the controller). A wire is drawn in a
+ * block when it joins two things there: parts directly inside, or the block's own ports.
  */
-function drawnAt(circuit: Circuit, net: number, scope: string): string {
-  const ports = (path: string) =>
-    path === ""
-      ? [...circuit.inputs, ...circuit.outputs]
-          .map((p) => p.net)
-          .concat(
-            circuit.composites
-              .filter((c) => !c.path.includes("/"))
-              .flatMap((c) => [...Object.values(c.inputs), ...Object.values(c.outputs)]),
-          )
-      : circuit.composites
-          .filter(
-            (c) => c.path.startsWith(`${path}/`) && !c.path.slice(path.length + 1).includes("/"),
-          )
-          .flatMap((c) => [...Object.values(c.inputs), ...Object.values(c.outputs)]);
-  if (ports(scope).includes(net)) return scope;
-  if (ports("").includes(net)) return "";
-  const name = circuit.nets[net]?.name ?? "";
-  const cut = name.lastIndexOf("/");
-  return cut < 0 ? "" : name.slice(0, cut);
+export function drawnAt(circuit: Circuit, net: number, scope: string): string {
+  const parent = (path: string) => {
+    const cut = path.lastIndexOf("/");
+    return cut < 0 ? "" : path.slice(0, cut);
+  };
+  const ends = new Map<string, number>();
+  const end = (at: string) => ends.set(at, (ends.get(at) ?? 0) + 1);
+  for (const p of [...circuit.inputs, ...circuit.outputs]) if (p.net === net) end("");
+  for (const c of circuit.components)
+    if (Object.values(c.inputs).includes(net) || Object.values(c.outputs).includes(net))
+      end(parent(c.path));
+  for (const c of circuit.composites)
+    if (Object.values(c.inputs).includes(net) || Object.values(c.outputs).includes(net)) {
+      end(parent(c.path));
+      end(c.path);
+    }
+  const drawn = [...ends].filter(([, n]) => n >= 2).map(([at]) => at);
+  if (drawn.includes(scope)) return scope;
+  const depth = (path: string) => (path === "" ? 0 : path.split("/").length);
+  return drawn.sort((a, b) => depth(a) - depth(b))[0] ?? scope;
 }
 
 /** A label without its Markdown code marks, for an accessible name. */

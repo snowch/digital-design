@@ -53,14 +53,14 @@ const Props = z.object({
   options: z.array(z.object({ value: z.string(), label: z.string() })).optional(),
   explain: z.string().default(""),
   /**
-   * A paragraph shown once the runs it reports are made: every text run at least once, or the
-   * program named run on the text, as the figure's own runs, never at load.
+   * A paragraph shown once the runs it reports are made, as the figure's own runs, never at load;
+   * with `afterChange`, only once the learner has also pressed to see the line the text changes,
+   * so its reasoning never decides for them.
    */
   reveal: z
     .object({
       text: z.string(),
-      everyText: z.boolean().default(false),
-      program: z.string().optional(),
+      afterChange: z.boolean().default(false),
       /**
        * Every run the paragraph reports, each a text (by its place in `texts`) and a program: it
        * shows once all of them are made, so it never quotes a run the learner has not made.
@@ -115,8 +115,10 @@ export const LabRunFigure = withProps(
     const [runs, setRuns] = useState<readonly string[]>([]);
     // Which text has run which program, for a paragraph that reports them.
     const [made, setMade] = useState<ReadonlySet<string>>(new Set());
-    // A hidden line shows on a press, once the run that finds it has been made.
+    // A hidden line shows on a press, once a run of its text has differed from the model, whichever
+    // program made it: the page never names the program that finds it.
     const [shown, setShown] = useState(false);
+    const [differed, setDiffered] = useState<ReadonlySet<number>>(new Set());
     // The part the last run's sentence names, for the text it ran; nothing before a run.
     const [named, setNamed] = useState<{ which: number; part?: string } | undefined>();
     const [stored, setStored] = useSlot<Stored>(store, interactive.id);
@@ -145,6 +147,7 @@ export const LabRunFigure = withProps(
         const part = partNamed(d?.what, d?.machineStop?.kind === "trap");
         setNamed({ which, ...(part ? { part } : {}) });
         setMade((old) => new Set([...old, `${which}:${chosen.id}`]));
+        if ("blocked" in r || d !== undefined) setDiffered((old) => new Set([...old, which]));
         setRuns((old) => [
           format(t.labRunLine, { text: text.label, program: chosen.label, result }),
           ...old,
@@ -229,7 +232,7 @@ export const LabRunFigure = withProps(
             {text?.hidden &&
               text.to !== undefined &&
               !shown &&
-              [...made].some((m) => m.startsWith(`${which}:${data.reveal?.program ?? ""}`)) && (
+              differed.has(which) && (
                 <div className="explorer-actions">
                   <button type="button" className="button secondary" onClick={() => setShown(true)}>
                     {t.labShowChange}
@@ -273,11 +276,7 @@ export const LabRunFigure = withProps(
             )}
             {/* What the runs show, after them, once every run it reports is made. */}
             {data.reveal &&
-              (data.reveal.everyText
-                ? data.texts.every((_, k) => [...made].some((m) => m.startsWith(`${k}:`)))
-                : true) &&
-              (data.reveal.program === undefined ||
-                [...made].some((m) => m.endsWith(`:${data.reveal?.program}`))) &&
+              (!data.reveal.afterChange || shown) &&
               data.reveal.runs.every(([k, id]) => made.has(`${k}:${id}`)) &&
               made.size > 0 && <Prose markdown={data.reveal.text} />}
           </>

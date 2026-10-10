@@ -79,12 +79,12 @@ export interface CircuitViewProps {
   /** Module 13: the parts a pinned word is joined from or split into, marked with it. */
   readonly pinnedParts?: ReadonlySet<number>;
   /**
-   * Module 13: controls that change the drawing, kept at the top of the window with the overview
-   * while the drawing is on screen (`OverviewStrip`'s band).
+   * Module 13: a wire's value as the figure's own table writes it (the PC as an address, the
+   * controller's state by name), in place of the word in hexadecimal; undefined keeps the word.
    */
-  readonly band?: ReactNode;
+  readonly readout?: (net: number) => string | undefined;
   readonly onPin?: (net: number | undefined) => void;
-  /** Module 13: the nets marked as in use, the ones the next edge changes. */
+  /** Module 13: the nets marked as in use, the ones the next edge reads or writes (`edgeUses`). */
   readonly active?: ReadonlySet<number>;
 }
 
@@ -230,7 +230,7 @@ export function CircuitView({
   pinned,
   onPin,
   pinnedParts,
-  band,
+  readout,
   active,
 }: CircuitViewProps) {
   const written = (v: Word | undefined) =>
@@ -418,11 +418,8 @@ export function CircuitView({
           width={scene.width}
           height={scene.height}
           zoom={zoom}
-          {...(band !== undefined ? { band } : {})}
         />
-      ) : (
-        band !== undefined && <div className="overview-bar">{band}</div>
-      )}
+      ) : null}
       {large ? (
         <p className="scroll-note">{strings.circuit.zoomNote}</p>
       ) : (
@@ -705,7 +702,7 @@ export function CircuitView({
       </div>
       <p className="wire-readout" aria-live="polite">
         {hot !== undefined
-          ? `${sub.nets[hot]?.name ?? ""}${values?.[hot] ? ` = ${valueLabel(values[hot] as Word)}` : ""}`
+          ? `${sub.nets[hot]?.name ?? ""}${values?.[hot] ? ` = ${readout?.(hot) ?? valueLabel(values[hot] as Word)}` : ""}`
           : "\u00a0"}
       </p>
       {table && values && <SignalTable circuit={sub} values={values} readings={readings} />}

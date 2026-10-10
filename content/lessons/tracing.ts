@@ -24,7 +24,10 @@ import { SHOP, SHOP_INPUTS } from "./module13";
 export const TRACE_ANSWERS = [
   // Each a row of wires, highest first, numbered by its wires: the PC's bits are 5 to 2.
   { id: "xorB", value: "1001", detail: "traceXorB", low: 0 },
-  { id: "carry", value: "0011", detail: "traceCarry", low: 0 },
+  // At the same edge as xorB, `R3 <= R1 - R2`'s ALU edge, which no figure opens on: the only
+  // other edge of the shop whose carries are not all 0 or all 1, the set if's, is the
+  // investigation's own.
+  { id: "carry", value: "1001", detail: "traceCarry", low: 0 },
   { id: "pcD", value: "1100", detail: "tracePcD", low: 2 },
   { id: "en", value: "00100000", detail: "traceEn", low: 0 },
 ] as const;

@@ -2,7 +2,8 @@
 
 // The numbers lesson tracing states, read off the final machine's run of the shop's program: the
 // ALU's subtraction traced to one gate, HR's bit 1, the PC's bit 3 through the call's WRITE edge,
-// the wire held at 0 in the ALU, and the challenge's five bits.
+// the wire held at 0 in the ALU, and the challenge's four rows: each row's message names the row's
+// own line, and no figure opens on an edge where a row's wires hold its answer.
 
 import { describe, expect, it } from "vitest";
 
@@ -19,6 +20,7 @@ import {
   type RecordedRun,
 } from "@dd/dd-model";
 import {
+  DEFAULT_VIEW_STRINGS,
   MACHINE13_STRINGS,
   compareText,
   gradeAnswers,
@@ -39,6 +41,32 @@ const state = (frame: number) => edgeView(c, run.frames[frame] ?? []).state;
 const drive = (frame: number, path: string, k: number, index = 0) =>
   bitDrive(c, run.frames[frame]!, bitPartOf(c, path)!, k, index)!;
 const answer = (id: string) => TRACE_ANSWERS.find((a) => a.id === id)?.value;
+const cout = (k: number) =>
+  c.nets[c.composites.find((x) => x.path === `datapath/alu/g0/q0/bit${k}/fa`)!.outputs["COUT"]!]!
+    .name;
+/** A row the challenge asks for, read at a frame: the wires it names, highest first. */
+const row = (id: string, frame: number): string => {
+  const bits = (names: readonly string[]) => names.map((n) => at(frame, n)).join("");
+  switch (id) {
+    case "xorB":
+      return bits([3, 2, 1, 0].map((k) => `datapath/alu/g0/q0/bit${k}/BX`));
+    case "carry":
+      return bits([3, 2, 1, 0].map(cout));
+    case "pcD":
+      return [5, 4, 3, 2].map((k) => String(drive(frame, "datapath/pc", k).inputs.D)).join("");
+    default:
+      return [7, 6, 5, 4, 3, 2, 1, 0]
+        .map((r) => String(drive(frame, "datapath/registers", 0, r).inputs.EN))
+        .join("");
+  }
+};
+/** The line each row is read at. */
+const ROW_LINES: Readonly<Record<string, string>> = {
+  xorB: "R3 <= R1 - R2",
+  carry: "R3 <= R1 - R2",
+  pcD: "goto R15",
+  en: "R5 <= R3 >= R4 signed",
+};
 
 describe("lesson tracing's facts", () => {
   it("pauses before edge 28, the set if's ALU edge: 66 minus 100, HR holding 100", () => {
@@ -110,39 +138,19 @@ describe("lesson tracing's facts", () => {
   });
 
   it("answers the four traces, each a row of bits", () => {
-    const bits = (frame: number, nets: readonly string[]) => nets.map((n) => at(frame, n)).join("");
-    const fa = (k: number) => {
-      const out = c.composites.find((x) => x.path === `datapath/alu/g0/q0/bit${k}/fa`)!.outputs[
-        "COUT"
-      ]!;
-      return c.nets[out]!.name;
-    };
     // R3 <= R1 - R2's ALU edge is edge 20: the frame before it is 19. B is R2, -250: its bits 3 to
-    // 0 are 0110, which the XORs turn over for the subtraction.
+    // 0 are 0110, which the XORs turn over for the subtraction; A's are 1000, and the carries out
+    // of A plus B turned over plus 1 are 1001.
     expect(state(19)).toBe("ALU");
-    expect(
-      bits(
-        19,
-        [3, 2, 1, 0].map((k) => `datapath/alu/g0/q0/bit${k}/BX`),
-      ),
-    ).toBe(answer("xorB"));
-    // The carries are asked at another line's ALU edge, the set if's, edge 28 (frame 27): the
-    // failure experiment's held carry, at R3 <= R1 - R2, gives none of them away.
-    expect(state(27)).toBe("ALU");
-    expect(bits(27, [3, 2, 1, 0].map(fa))).toBe(answer("carry"));
+    expect(row("xorB", 19)).toBe(answer("xorB"));
+    expect(row("carry", 19)).toBe(answer("carry"));
     // goto R15's last edge, its ALU edge, is edge 68: the PC takes 030. The construction traces the
     // PC at another edge, the call's WRITE edge.
     expect([state(67), at(67, "PC"), at(68, "PC")]).toEqual(["ALU", "40", "30"]);
-    expect([5, 4, 3, 2].map((k) => String(drive(67, "datapath/pc", k).inputs.D)).join("")).toBe(
-      answer("pcD"),
-    );
+    expect(row("pcD", 67)).toBe(answer("pcD"));
     // The set if's WRITE edge: only the register Y names, R5, is enabled.
     expect(state(28)).toBe("WRITE");
-    expect(
-      [7, 6, 5, 4, 3, 2, 1, 0]
-        .map((r) => String(drive(28, "datapath/registers", 0, r).inputs.EN))
-        .join(""),
-    ).toBe(answer("en"));
+    expect(row("en", 28)).toBe(answer("en"));
   });
 
   it("builds its last hint from the answers, and the hint's answers pass the challenge", () => {
@@ -151,5 +159,30 @@ describe("lesson tracing's facts", () => {
     for (const a of TRACE_ANSWERS) expect(hint).toContain(a.value);
     const answers = Object.fromEntries(TRACE_ANSWERS.map((a) => [a.id, a.value]));
     expect(gradeAnswers(ch, { answers }).passed).toBe(true);
+  });
+
+  it("names each row's own line in its message, and in the task", () => {
+    const task = parseLesson(tracing).challenges[0]!.task;
+    for (const a of TRACE_ANSWERS) {
+      const line = ROW_LINES[a.id]!;
+      expect(DEFAULT_VIEW_STRINGS.answers.details[a.detail], a.id).toContain(`\`${line}\``);
+      for (const other of Object.values(ROW_LINES))
+        if (other !== line)
+          expect(DEFAULT_VIEW_STRINGS.answers.details[a.detail], a.id).not.toContain(
+            `\`${other}\``,
+          );
+      expect(task).toContain(`\`${line}\``);
+    }
+  });
+
+  it("opens no figure on an edge where a row's wires hold the row's answer", () => {
+    const starts = parseLesson(tracing)
+      .sections.flatMap((s) => s.interactives ?? [])
+      .filter((i) => i.kind === "machine-levels")
+      .map((i) => Number((i.props as { start?: number }).start ?? 0));
+    expect(new Set(starts)).toEqual(new Set([39, 27, 47, 0]));
+    for (const start of starts)
+      for (const a of TRACE_ANSWERS)
+        expect(row(a.id, start), `${a.id} at ${start}`).not.toBe(a.value);
   });
 });

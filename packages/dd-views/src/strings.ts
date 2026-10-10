@@ -1096,9 +1096,9 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       edgesLoad:
         "{actual} is not the number of edges. The memory's checks give their cause in MEMORY, and a load that traps there never reaches WRITE.",
       // Module 13, lesson 1 (brief 1D).
-      joinMq: "Open the datapath and follow MQ from where it enters to the part it goes into.",
-      joinAddr:
-        "Open the datapath and follow ADDR back from where it leaves to the part that drives it.",
+      joinHb:
+        "Open the datapath and follow HB back from where it leaves to the part that drives it.",
+      joinIr: "Open the control unit and follow IR from where it enters to the part it goes into.",
       joinWaiting:
         "Open the control unit and follow WAITING from where it enters to the part it goes into.",
       joinStatus:
@@ -1122,7 +1122,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       traceXorB:
         "Your row is {actual}. Pause at the ALU edge of `R3 <= R1 - R2`, open the ALU down to the group `q0`, and read `xorB` in each slice. It turns B's bit over when the ALU subtracts.",
       traceCarry:
-        "Your row is {actual}. At the ALU edge of `R3 <= R1 - R2`, open each slice's full adder and read its carry out, starting with bit 3.",
+        "Your row is {actual}. Pause at the ALU edge of `R3 <= R1 - R2`, open the ALU down to the group `q0`, and read the carry out of each slice's full adder, bit 3 first.",
       tracePcD:
         "Your row is {actual}. Pause at the ALU edge of `goto R15`. Show the PC's bits from the list of parts that never open. D is the bit of the address the jump goes to.",
       traceEn:
