@@ -641,6 +641,11 @@ into G1 to G8. All are done; the briefs are `docs/notes/figures-11-12/briefs/Y1.
   only the handler's lines: the stop after the last program is the start's, in the motivation, the
   explanation and the challenge.
 
+The full check on the review's fixes (`ec6b4fb`, with `main` at `59b05ca` merged): formatting,
+copyright, the platform copy, types and the build passed; Vitest 129 files, 1351 tests passed; the
+browser 868 passed, 56 skipped, 10 failed, the ten stored screenshots that fail in a build
+container on `main` too. The log's exit line: `EXIT 1`, from those ten alone.
+
 ## The mechanical walk
 
 The built site, every Module 12 page at 375 and 1280 pixels, light and dark, with every run
