@@ -139,9 +139,10 @@ export function autoLayout(
   };
   const xOf = new Map<number, number>();
   // Module 13: a fixed value in the first column writes its name under it and its bits (or, for a
-  // wide word, its hexadecimal digits) inside it, both centred on a narrow box, so a long one
-  // would start left of the drawing. The columns start far enough in for the widest of them.
-  // Estimated at 7 pixels a character of 12-pixel text, in cells of 20 pixels.
+  // wide word, its hexadecimal digits) inside it, both centred on its box, so a long one would
+  // start left of the drawing. The columns start far enough in for the widest of them: a name's
+  // 12-pixel letters at about 6.5 pixels each, a value's at 7.2, against a box 60 pixels wide, in
+  // cells of 20 pixels.
   const lead = byWidth
     ? Math.max(
         0,
@@ -149,8 +150,8 @@ export function autoLayout(
           .filter((p) => p.kind === "const")
           .map((p) => {
             const bits = p.width ?? 1;
-            const chars = Math.max(p.id.length, bits > 8 ? Math.ceil(bits / 4) : bits);
-            return Math.ceil((chars * 7) / 20 / 2 - (colsOf?.(p) ?? 0) / 2);
+            const text = Math.max(p.id.length * 6.5, (bits > 8 ? Math.ceil(bits / 4) : bits) * 7.2);
+            return Math.ceil((text / 2 - 30) / 20);
           }),
       )
     : 0;

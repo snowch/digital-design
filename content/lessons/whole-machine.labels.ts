@@ -11,7 +11,7 @@ export const LABELS = {
     "Name the three blocks of the whole machine, and the module that built each part.",
     "Say what a join is, and find the block that drives a bus.",
     "Follow the words of a load across the joins, edge by edge.",
-    "Explain why a join can break a machine whose parts each pass their tests.",
+    "Explain why a join can break the whole machine although every part works alone.",
   ],
   titles: {
     question: "The whole machine",

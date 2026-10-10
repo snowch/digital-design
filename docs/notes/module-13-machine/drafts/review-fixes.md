@@ -74,3 +74,19 @@ Facts put right in placed text without a new draft, each a word or a number:
 - `invAfter` (after the facts test): the quoted sentences wrote the PC's and R15's values in
   backticks, from the brief; the figure writes them plain. Backticks removed so each quotation is
   the figure's sentence, which the facts test now checks whole.
+
+## The second read, start to finish
+
+- `tracing`: "the strip under the buttons" (three times): the strip sits above the drawing and the
+  buttons; now "the strip above the drawing".
+- `full-path` `question`: the sentences on the parts that run whole (R2-7) moved after "Every level
+  shows the same edge.", so "Its table" keeps the figure as its referent.
+- `capstone` `question`: "Press any edge in the run above the drawing …" cut; the lead under it
+  says the same.
+- `capstone` `modelVsReality`: the first paragraph (several instructions at once, copies of
+  memory, instructions of many edges) cut: lessons 1, 2 and 3's model notes each name one of them.
+  "also" cut from the testbench sentence that now opens the note.
+- Brief R2-8, labels that no longer matched their sections: `tracing` `titles.motivation` came back
+  as the list itself; cut to "Four tools", with "for a trace" added. `capstone`
+  `titles.generalisation` said "your own design"; the section is about designers', so "a real
+  design". The objectives take the full stop the others have.

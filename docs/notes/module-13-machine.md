@@ -30,6 +30,9 @@ lists every fact or form put right in a draft, and every cut made on the second 
 | `final-machine` | the joins the learner's text makes between the parts | the lab's drawing: a map of the nine parts in lesson 1's blocks, and a part's ports as wires to what the text joins them to, open ports as rings |
 | `final-machine` | where a run's first difference sits | each `lab-run` figure's map of the nine parts, the part holding the value the run's sentence names marked after the run; no port's join is drawn, since the figures run the course's own text |
 | `capstone` | the learner's own program run on the whole machine | lesson 3's trace figure on the learner's program, under the editor |
+| every lesson's machine figure | the run over time: each line's edges side by side, by state | the run strip above the drawing, the next edge marked; a press pauses there |
+| every lesson's machine figure | the route a value takes at one edge | the joins the next edge changes drawn bold, and a pressed wire pinned and marked at every level it is drawn |
+| `tracing`, `capstone` | where each wire sits among the levels | the drawing opened block by block, with the table of levels beside it |
 
 Tables kept beside drawings, and why:
 
@@ -86,29 +89,35 @@ splits or joins words says it holds no gate. So every trace ends at a gate or a 
 
 - **The lab** (`LabEditor.tsx`, grader `machine13-lab`): three starts by the challenge's own
   buttons, replacing changed work only after asking. The outline leaves out six joins, each marked
-  `JOIN:` with a constant or nothing in its place; it elaborates, runs, and fails all five
-  programs; each join left out alone fails at least one (the facts test). Five programs written for
+  `JOIN:` with a constant or nothing in its place; it elaborates, runs, and fails all seven
+  programs; each join left out alone, or filled with a wrong wire or constant, fails at least one,
+  and so does each wrong text the reading review found (the facts test). Seven programs written for
   the lab: the shop's (both added kinds, a system call), a fault in user mode, a system call then
-  the timer, the door, and a store to the ROM with no handler. A failure names the first line after
+  the timer, the door, signs, bytes and WARM, a system job in user mode, and a store to the ROM
+  with no handler. Each program's lines, with their addresses, are listed under the lab's text and
+  under each `lab-run` figure. A failure names the first line after
   which the text and the model disagree and the value that differs, never the join. The verdict is
   plain text, so its sentences quote the line rather than mark it as code.
 - **The lab's figures** (`lab-run`) run the course's text with one line changed, never one of the
   six joins, and never show the line it replaces.
 - **The capstone** (`CapstoneEditor.tsx`, grader `machine13-capstone`, `dd-model/src/capstone.ts`):
-  the learner's program is run on the model for four pairs of readings; five questions name a wire
-  at an edge of the program's first set if or first store, and their answers are read off the
-  recorded run of the learner's own program. A wrong answer gets the level to look at and what to
+  the learner's program is run on the model for five pairs of readings, one of which only a
+  comparison read signed passes; five questions name a wire paused before the ALU edge of the
+  program's first set if (RESULT, COUT, MET, the XOR gate `xorB` in the ALU's slice for bit 0, and
+  HM, which holds the last load's word), and their answers are read off the recorded run of the
+  learner's own program. A wrong answer gets the level to look at and what to
   read there.
 
 ## Measured
 
-In the build container's Chromium, against the dev server, at 1280 and 390 pixels wide:
+In the build container's Chromium, against the dev server, at 1280 and 390 pixels wide (the lab's
+grade measured again after the reading review, against the built site, at 1280):
 
 | What | Time |
 | --- | --- |
-| The lab's grade of the outline: one elaboration, five programs, 196 edges | 2.2 s |
+| The lab's grade of the outline: one elaboration, seven programs, 274 edges | 2.4 s |
 | One `lab-run` figure run | 0.2 to 1.1 s, by program |
-| The capstone's grade of the reference: four model runs, one recorded run of 39 edges | 0.5 s |
+| The capstone's grade of the reference: five model runs, one recorded run of 39 edges | 0.5 s |
 | The capstone's trace figure opening on the learner's program | 0.9 s |
 
 A slow phone may take several times as long; the lab stays inside the plan's ten seconds unless it
@@ -126,6 +135,11 @@ machine's text elaborates in about 0.1 s and runs about 70 edges a second.
   `MachineFigures.tsx`: the edge timeline takes `from`, as Module 12's note asked.
 - `packages/hdl/src/parser.ts`: the message for `initial`.
 - None of the files the brief set aside until Module 12 is on `main` was edited.
+- After the reading review: `layout.ts` starts the columns far enough in for a long fixed value in
+  the first column, and `CircuitView.tsx` writes a fixed word wider than 8 bits in hexadecimal,
+  so the control registers' and the word for Y's 0s stay inside their drawings; `FINAL_INSIDE`
+  places the next PC by hand and moves four of the datapath's parts half a row, with one route,
+  so every block inside the datapath passes the drawing tests when opened (a new test opens each).
 
 ## After the managing session's first look
 
@@ -147,6 +161,26 @@ machine's text elaborates in about 0.1 s and runs about 70 edges a second.
   `machine-traps` with `MODULE_12`; drop the set if and the call through a register from the shop's
   program, the lab's texts and the capstone's task; and redo the facts the prose states. The
   machine's own code (`final` in `traps.ts`, `FINAL_INSIDE`, `MODULE_13`) can stay unused.
+
+## After the reading review
+
+- **Shared figure.** Each fault's outcome shows once its run has made it; figures open with the
+  block their words name in view (`focus`), on the whole machine, since the datapath opened is a
+  step the leads ask for; the joins the next edge changes are drawn bold and a pressed wire stays
+  pinned at every level; the step controls stay in reach; the run strip replaces the two lists of
+  "Pause before an edge"; a paragraph that reports a run shows only after that run; the final
+  machine's blocks have plain titles; inline code renders as code and a refusal names the form a
+  box wants.
+- **Lesson 4.** Seven programs, so each wrong text the review found fails; result sentences give C3
+  in two hexadecimal digits, a register's small word with its hexadecimal, and whether the model
+  stopped or halted; the failure experiment's changed line is hidden until the run.
+- **Lesson 5.** Two questions reach below the datapath's ports (a gate inside the ALU; a held word
+  from an earlier instruction), and a fifth case needs a comparison read signed.
+- **Prose.** Briefs R2-1 to R2-8 redrafted what the findings named; `drafts/review-fixes.md` logs
+  every fact fixed. Each lesson was read start to finish afterwards; what that read cut is logged
+  there too.
+- **Tests.** A test fails a lesson whose prose holds a key it never reads; the capstone's and lesson
+  3's last hints are built from their answers and graded.
 
 ## Platform candidates
 

@@ -14,7 +14,7 @@ export const LABELS = {
   ],
   titles: {
     question: "A path of your own",
-    motivation: "Three tools for a trace",
+    motivation: "Four tools for a trace",
     prediction: "One bit of HR",
     investigation: "From the datapath to one gate",
     construction: "Through the PC",
