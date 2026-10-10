@@ -162,7 +162,7 @@ export const MACHINE12_STRINGS: Machine12Strings = {
     waitDoor:
       "A run must end at the handler's stop for job 4. Job 6 must put C1 and C2 back before its resume.",
     shopHandler:
-      "A run must end at the handler's stop after the last program, with a record for every program.",
+      "A run must end at the start's stop after the last program, with a record for every program.",
   },
   eventsCaption: "The timer and the door",
   timer: "Timer",
@@ -223,6 +223,6 @@ export const MACHINE12_STRINGS: Machine12Strings = {
     waitDoor:
       "Job 6 must let the door and the timer in while it counts, then give the program back its mode, its return point and every register but R1 and R2.",
     shopHandler:
-      "The handler must run each program in the table in user mode with interrupts off, offer jobs 1 to 4, leave each program's record (0 for job 4, else its cause) at 400 plus 8 times its number, and stop after the last.",
+      "The runner must run each program in the table in user mode with interrupts off, offer jobs 1 to 4, leave each program's record (0 for job 4, else its cause) at 400 plus 8 times its number, and stop in the start after the last program.",
   },
 };
