@@ -71,8 +71,8 @@ export const STRINGS = {
     /** Under the tagline: how the course goes about it. */
     lead: "By Module 8, reused parts form one machine that runs programs. For each circuit you predict, build, run, break and explain. Each idea and each name arrives when the circuit you are building raises a question that needs it. Every simulation runs the real circuit, not an animation. Everything runs and stays in your browser.",
     /** The way in, on two lines: the module, then its first lesson's question under it. */
-    startLine: (module: number) => `Start with Module ${module}`,
-    continueLine: (module: number) => `Continue with Module ${module}`,
+    startLine: (where: string) => `Start with ${where}`,
+    continueLine: (where: string) => `Continue with ${where}`,
     /**
      * Beside the opening words: Module 2's freezer-room alarm, live. Drafted by the prose process
      * (brief C1, docs/notes/cover/briefs/C1.md).
@@ -87,7 +87,7 @@ export const STRINGS = {
      * brief C6 once Module 0's own line said what you do in it.
      */
     journeyIntro:
-      "Module 0 comes first, before the five stages. The stages build the machine up from one wire, beginning in Module 1.",
+      "Module 0 comes first, before the five stages. The stages build the machine up from a single wire, beginning in Module 1; 2 optional chapters follow them.",
     /** Under Module 0's line, before the stages: what you do in it, as each stage's `about` says (brief C6). */
     openingAbout:
       "Run a finished machine with a shop's program, line by line; open the machine level by level, down to one wire.",
@@ -144,7 +144,20 @@ export const STRINGS = {
       return total > 0 ? `${count}, ${passed} of ${total} challenges complete` : count;
     },
     /** The way on for a reader who has passed a challenge: the first lesson not finished. */
-    continueWith: (module: number, title: string) => `Continue with Module ${module}: ${title}`,
+    continueWith: (where: string, title: string) => `Continue with ${where}: ${title}`,
+    /**
+     * The optional chapters' line, after the five stages, in a stage's form (brief C7,
+     * docs/notes/beyond-the-machine/briefs). Its name is the course plan's heading for them; the
+     * way in and the links between lessons name a chapter by it, where a lesson's module goes.
+     */
+    beyond: {
+      name: "Beyond the machine",
+      /** Where a stage names its modules. */
+      range: "Optional chapters",
+      /** Under the line: what you do in the chapters, as a stage's `about` says. */
+      about:
+        "Watch a program write a shop's line as machine lines, one at a time; let a timer swap the machine between 2 programs.",
+    },
   },
   /** Every module the plan has (`docs/plan.md`), by number from 0, in plain words. */
   // Module 0: the names live with the lessons, so a lesson can name a module in these words.
@@ -168,5 +181,7 @@ export const STRINGS = {
     next: "Next",
     /** On the last lesson written so far, above "Back to the lessons". */
     notYet: "Next lesson is still to be written.",
+    /** In place of the line above, after the last lesson when it is an optional chapter (brief C7). */
+    end: "The course ends here.",
   },
 };

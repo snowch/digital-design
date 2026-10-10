@@ -323,7 +323,9 @@ deferred ones." The author asked whether to keep them, and decided:
 4. **They are built last**, after Module 13, so they cannot delay the core course.
 5. **The lesson schema will need a flag for an optional chapter**, so the list of lessons shows
    them under their own heading and leaves them out of its count of modules still to be written.
-   Not done yet: nothing needs it until the first chapter is written.
+   Done on 10 October 2026: the schema's `optional`, made in `snowch/learning-platform` at
+   9ab98e9 and synced; the chapters are module 14, orders 1 and 2, and the front page lists them
+   after the five stages under "Beyond the machine" (`docs/platform.md`).
 
 Why: each is a software project as large as several hardware modules, which the circuit builder
 and simulator barely help with; computer-systems already covers the ground with real tools; and

@@ -11,7 +11,9 @@
 // too (the author, 10 October 2026: the stages named their modules, and the list under them named
 // them again). Module 0 comes before the stages, as the path's opening line says, in a line of the
 // stages' own form, its mark, its number and what you do in it (the author: a bare module heading
-// above the stages looked out of place).
+// above the stages looked out of place). The optional chapters, lessons flagged `optional`, come
+// after the stages in one more line of that form, "Beyond the machine", and are counted in no module
+// (docs/plan.md, the decision of 5 October 2026, point 5).
 
 import { useMemo, useState, type ReactNode } from "react";
 
@@ -72,6 +74,13 @@ const STAGE_ICONS: readonly ReactNode[] = [
 
 /** Module 0's mark, before the stages: a glass, for looking inside a finished machine. */
 const OPENING_ICON: ReactNode = <path d="M10.5 4.5a6 6 0 1 0 0 12a6 6 0 0 0 0-12zM15 15l5 5" />;
+
+/** The optional chapters' mark, after the stages: a path that goes on past the end of a line. */
+const BEYOND_ICON: ReactNode = <path d="M3 12h10M9 8l4 4-4 4M17 12h.5M20.5 12h.5" />;
+
+/** Where a lesson sits, as the way in and the links between lessons name it. */
+export const placeOf = (lesson: { module: number; optional: boolean }) =>
+  lesson.optional ? STRINGS.cover.beyond.name : STRINGS.module(lesson.module);
 
 /** A module's lessons, each a link with its challenges complete. */
 function LessonCards({
@@ -275,11 +284,14 @@ export function LessonList({
   const next: Lesson | undefined = started ? (unfinished ?? ordered[0]) : ordered[0];
   // The page lists every module, each one line until it is pressed; the module of the lesson the
   // button above names starts open, and so does the module of the lesson the reader has just left
-  // (the author: the page had grown long with every lesson shown).
+  // (the author: the page had grown long with every lesson shown). The optional chapters' line
+  // opens the same way, for a chapter.
+  const left = book.lessons.find((l) => l.id === from);
   const [open, setOpen] = useState<ReadonlySet<number>>(() => {
-    const left = book.lessons.find((l) => l.id === from)?.module;
-    return new Set([next?.module, left].filter((m): m is number => m !== undefined));
+    const opened = [next, left].filter((l) => l !== undefined && !l.optional);
+    return new Set(opened.map((l) => l!.module));
   });
+  const [beyondOpen, setBeyondOpen] = useState(() => !!next?.optional || !!left?.optional);
   const toggle = (module: number) =>
     setOpen((was) => {
       const now = new Set(was);
@@ -302,7 +314,12 @@ export function LessonList({
       return now;
     });
   const byModule = new Map<number, Lesson[]>();
-  for (const l of ordered) byModule.set(l.module, [...(byModule.get(l.module) ?? []), l]);
+  for (const l of ordered)
+    if (!l.optional) byModule.set(l.module, [...(byModule.get(l.module) ?? []), l]);
+  const chapters = ordered.filter((l) => l.optional);
+  const chapterCounts = chapters.map((l) => completion.get(l.id));
+  const chaptersPassed = chapterCounts.reduce((n, c) => n + (c?.passed ?? 0), 0);
+  const chaptersTotal = chapterCounts.reduce((n, c) => n + (c?.total ?? 0), 0);
   // Every module the plan has, and any other a lesson names.
   const modules = [...new Set([...STRINGS.moduleNames.keys(), ...byModule.keys()])].sort(
     (a, b) => a - b,
@@ -339,8 +356,8 @@ export function LessonList({
                 href={lessonHref(next.id)}
                 aria-label={
                   started && unfinished
-                    ? STRINGS.cover.continueWith(next.module, next.title)
-                    : STRINGS.preface.start(next.module, next.title)
+                    ? STRINGS.cover.continueWith(placeOf(next), next.title)
+                    : `${STRINGS.cover.startLine(placeOf(next))}: ${next.title}`
                 }
               >
                 <span className="hero-start-arrow" aria-hidden="true">
@@ -349,8 +366,8 @@ export function LessonList({
                 <span className="hero-start-text">
                   <strong>
                     {started && unfinished
-                      ? STRINGS.cover.continueLine(next.module)
-                      : STRINGS.cover.startLine(next.module)}
+                      ? STRINGS.cover.continueLine(placeOf(next))
+                      : STRINGS.cover.startLine(placeOf(next))}
                   </strong>
                   <span>{next.title}</span>
                 </span>
@@ -447,6 +464,30 @@ export function LessonList({
             );
           })}
         </ol>
+        {/* The optional chapters, after the stages, as a line of the path's own form. */}
+        <section
+          className={`journey-stage journey-beyond${chapters.length === 0 ? " stage-to-write" : ""}`}
+          aria-label={STRINGS.cover.beyond.name}
+        >
+          <PathLine
+            id="beyond"
+            listId="beyond-lessons"
+            mark={BEYOND_ICON}
+            markClass="stage-beyond"
+            name={STRINGS.cover.beyond.name}
+            range={STRINGS.cover.beyond.range}
+            status={
+              chapters.length === 0
+                ? STRINGS.cover.stageToWrite
+                : STRINGS.progress(chaptersPassed, chaptersTotal)
+            }
+            about={STRINGS.cover.beyond.about}
+            isOpen={beyondOpen}
+            onToggle={() => setBeyondOpen((was) => !was)}
+          >
+            {chapters.length > 0 && <LessonCards lessons={chapters} completion={completion} />}
+          </PathLine>
+        </section>
       </section>
     </>
   );

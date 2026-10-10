@@ -15,7 +15,7 @@ import { LESSONS } from "@dd/content";
 
 import { PREFACE_HREF, lessonHref } from "../route";
 import { STRINGS } from "../strings";
-import { LessonList } from "./LessonList";
+import { LessonList, placeOf } from "./LessonList";
 
 const book = createBook(LESSONS, INTERACTIVES);
 const ordered = [...book.lessons].sort((a, b) => a.module - b.module || a.order - b.order);
@@ -56,7 +56,7 @@ describe("the course's front page: the cover", () => {
     pass(storage, first.id, 1);
     const { unmount } = render(<LessonList book={book} storage={storage} />);
     expect(
-      screen.getByRole("link", { name: STRINGS.cover.continueWith(first.module, first.title) }),
+      screen.getByRole("link", { name: STRINGS.cover.continueWith(placeOf(first), first.title) }),
     ).toHaveAttribute("href", lessonHref(first.id));
     unmount();
     // With the first lesson finished, the way on is the second.
@@ -64,7 +64,7 @@ describe("the course's front page: the cover", () => {
     const second = ordered[1]!;
     render(<LessonList book={book} storage={storage} />);
     expect(
-      screen.getByRole("link", { name: STRINGS.cover.continueWith(second.module, second.title) }),
+      screen.getByRole("link", { name: STRINGS.cover.continueWith(placeOf(second), second.title) }),
     ).toHaveAttribute("href", lessonHref(second.id));
   });
 
@@ -76,14 +76,14 @@ describe("the course's front page: the cover", () => {
     pass(storage, later.id, 1);
     const { unmount } = render(<LessonList book={book} storage={storage} />);
     expect(
-      screen.getByRole("link", { name: STRINGS.cover.continueWith(later.module, later.title) }),
+      screen.getByRole("link", { name: STRINGS.cover.continueWith(placeOf(later), later.title) }),
     ).toHaveAttribute("href", lessonHref(later.id));
     unmount();
     // That lesson finished, the way on is the next lesson, though Module 0 is still unfinished.
     pass(storage, later.id, later.challenges.length);
     render(<LessonList book={book} storage={storage} />);
     expect(
-      screen.getByRole("link", { name: STRINGS.cover.continueWith(after.module, after.title) }),
+      screen.getByRole("link", { name: STRINGS.cover.continueWith(placeOf(after), after.title) }),
     ).toHaveAttribute("href", lessonHref(after.id));
   });
 
@@ -93,7 +93,7 @@ describe("the course's front page: the cover", () => {
       name: STRINGS.preface.start(first.module, first.title),
     });
     // The link reads as the module, then the first lesson's question under it.
-    expect(start).toHaveTextContent(STRINGS.cover.startLine(first.module));
+    expect(start).toHaveTextContent(STRINGS.cover.startLine(placeOf(first)));
     expect(start).toHaveTextContent(first.title);
     const path = screen.getByRole("heading", { name: STRINGS.cover.journeyHeading });
     expect(start.compareDocumentPosition(path) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
@@ -138,8 +138,16 @@ describe("the course's front page: the cover", () => {
       STRINGS.cover.moduleSummary(1, 0, 2),
       STRINGS.cover.moduleSummary(3, 0, 0),
       ...STRINGS.moduleNames,
+      STRINGS.cover.beyond.name,
+      STRINGS.cover.beyond.range,
+      STRINGS.cover.beyond.about,
+      STRINGS.cover.startLine(STRINGS.cover.beyond.name),
+      STRINGS.cover.continueLine(STRINGS.cover.beyond.name),
+      STRINGS.pager.notYet,
+      STRINGS.pager.end,
     ];
-    const terms = [...new Set(LESSONS.flatMap((l) => l.introduces))];
+    // The optional chapters' own terms too, which the cover's line for them may not use.
+    const terms = [...new Set([...LESSONS.flatMap((l) => l.introduces), "compiler", "kernel"])];
     expect(terms.length).toBeGreaterThan(50);
     const used = terms.filter((t) => cover.some((text) => termPattern(t).test(text)));
     expect(used).toEqual([]);
@@ -322,7 +330,7 @@ describe("the course's front page: every module of the plan", () => {
   });
 
   it("opens the module of the lesson the reader has just left, as well as the way in's", () => {
-    const last = ordered[ordered.length - 1]!;
+    const last = ordered.filter((l) => !l.optional).at(-1)!;
     expect(last.module).not.toBe(first.module);
     render(<LessonList book={book} storage={memoryStorage()} from={last.id} />);
     for (const module of [first.module, last.module])
@@ -434,5 +442,101 @@ describe("saved work a grader cannot run", () => {
     expect(screen.getAllByRole("link").length).toBeGreaterThan(0);
     const { container } = render(<LessonView book={book} lesson={capstone} storage={stored()} />);
     expect(container.querySelector(`[data-challenge="${challenge.id}"] textarea`)).not.toBeNull();
+  });
+});
+
+/**
+ * A book with one optional chapter after every lesson: a copy of the first lesson, flagged, at
+ * module 14, as the course plan numbers the chapters "Beyond the machine".
+ */
+function withChapter() {
+  const chapter = {
+    ...LESSONS[0]!,
+    id: "fixture-chapter",
+    title: "A chapter after the machine?",
+    module: 14,
+    order: 1,
+    optional: true,
+    introduces: [],
+  };
+  const fixture = createBook([...LESSONS, chapter], INTERACTIVES);
+  const numbered = fixture.lessons.filter((l) => !l.optional);
+  return { fixture, chapter: fixture.lessons.find((l) => l.id === chapter.id)!, numbered };
+}
+
+const beyondLine = () =>
+  screen.getByRole("button", { name: new RegExp(`^${STRINGS.cover.beyond.name} `) });
+
+describe("the course's front page: the optional chapters", () => {
+  it("lists them after the five stages, in a line of their own, counted in no module", () => {
+    const { fixture, chapter } = withChapter();
+    render(<LessonList book={fixture} storage={memoryStorage()} />);
+    const line = beyondLine();
+    expect(line).toHaveTextContent(STRINGS.cover.beyond.range);
+    expect(line).toHaveTextContent(STRINGS.progress(0, chapter.challenges.length));
+    expect(line).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByText(STRINGS.cover.beyond.about)).toBeInTheDocument();
+    // After the last stage's line, and no line names its module.
+    const lastStage = stageLine(STRINGS.cover.stages.at(-1)!.name);
+    expect(lastStage.compareDocumentPosition(line) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(
+      screen.queryByRole("button", { name: new RegExp(`^${STRINGS.module(14)}\\b`), hidden: true }),
+    ).not.toBeInTheDocument();
+    const modules = screen
+      .getAllByRole("region", { hidden: true })
+      .filter((r) => r.classList.contains("module") || r.classList.contains("journey-opening"));
+    expect(modules).toHaveLength(STRINGS.moduleNames.length);
+    // Its lesson is listed under it, shown when the line is pressed.
+    const link = screen.getByRole("link", {
+      name: new RegExp(chapter.title.replace("?", "\\?")),
+      hidden: true,
+    });
+    expect(link).toHaveAttribute("href", lessonHref(chapter.id));
+    expect(link).not.toBeVisible();
+  });
+
+  it("marks the line still to be written while no chapter is", () => {
+    render(<LessonList book={book} storage={memoryStorage()} />);
+    if (book.lessons.some((l) => l.optional)) return;
+    expect(beyondLine()).toHaveTextContent(STRINGS.cover.stageToWrite);
+  });
+
+  it("shows and hides the chapters when the line is pressed", async () => {
+    const { fixture, chapter } = withChapter();
+    render(<LessonList book={fixture} storage={memoryStorage()} />);
+    const link = () =>
+      screen.getByRole("link", {
+        name: new RegExp(chapter.title.replace("?", "\\?")),
+        hidden: true,
+      });
+    await userEvent.click(beyondLine());
+    expect(beyondLine()).toHaveAttribute("aria-expanded", "true");
+    expect(link()).toBeVisible();
+    await userEvent.click(beyondLine());
+    expect(link()).not.toBeVisible();
+  });
+
+  it("opens the line for a chapter the reader has just left", () => {
+    const { fixture, chapter } = withChapter();
+    render(<LessonList book={fixture} storage={memoryStorage()} from={chapter.id} />);
+    expect(beyondLine()).toHaveAttribute("aria-expanded", "true");
+    for (const stage of STRINGS.cover.stages)
+      expect(stageLine(stage.name)).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("offers the first chapter, by the line's name, to a reader who has finished the last module", () => {
+    const { fixture, chapter, numbered } = withChapter();
+    const last = numbered.at(-1)!;
+    const storage = memoryStorage();
+    const store = new LessonStore(storage, fixture.id, last.id);
+    for (const c of last.challenges)
+      store.setChallenge(c.id, (x) => ({ ...x, artifact: c.reference }));
+    render(<LessonList book={fixture} storage={storage} />);
+    const way = screen.getByRole("link", {
+      name: STRINGS.cover.continueWith(STRINGS.cover.beyond.name, chapter.title),
+    });
+    expect(way).toHaveAttribute("href", lessonHref(chapter.id));
+    expect(way).toHaveTextContent(STRINGS.cover.continueLine(STRINGS.cover.beyond.name));
+    expect(beyondLine()).toHaveAttribute("aria-expanded", "true");
   });
 });

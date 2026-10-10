@@ -47,7 +47,9 @@ test("the links at the bottom of a lesson lead on and back, from the keyboard", 
 test("the last lesson written so far leads back to the list of lessons", async ({ page }) => {
   const last = LESSONS[LESSONS.length - 1]!;
   await openLesson(page, last.id);
-  await expect(pager(page)).toContainText(STRINGS.pager.notYet);
+  // After the last optional chapter, the last lesson of the course, the line says the course ends.
+  const optional = (last as { optional?: boolean }).optional === true;
+  await expect(pager(page)).toContainText(optional ? STRINGS.pager.end : STRINGS.pager.notYet);
   await press(page, "back");
   // The list of lessons is the one page that links to the page before the first lesson this way.
   await expect(page.getByRole("link", { name: STRINGS.prefaceLink })).toBeVisible();

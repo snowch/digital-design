@@ -6,7 +6,7 @@
 // course needs JavaScript. So the build writes the cover's own words into index.html
 // (vite.config.ts): the description a search result shows, what a shared link's preview shows,
 // and, for a page that runs no script, the cover itself, its opening, its path (Module 0, then five
-// stages) and what it assumes. They come from strings.ts, so they say what the cover says and cannot drift.
+// stages, then the optional chapters) and what it assumes. They come from strings.ts, so they say what the cover says and cannot drift.
 // The head also names the course's icon, for a tab and a phone's home screen, and the manifest a
 // browser installs the course from (web-manifest.ts), each under the site's base path.
 
@@ -59,6 +59,8 @@ export function staticPage(html: string, base = "/"): string {
     `<p><strong>${escape(STRINGS.moduleNames[0] ?? STRINGS.module(0))}</strong> ` +
       `(${escape(STRINGS.module(0))}): ${escape(cover.openingAbout)}</p>`,
     `<ol>${stages.join("")}</ol>`,
+    `<p><strong>${escape(cover.beyond.name)}</strong> (${escape(cover.beyond.range)}): ` +
+      `${escape(cover.beyond.about)}</p>`,
     `<p>${escape(STRINGS.assumes)}</p>`,
     `<p>${escape(STRINGS.noScript)}</p>`,
     "</noscript>",

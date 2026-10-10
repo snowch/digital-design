@@ -5,7 +5,7 @@
 // lessons are added: the lesson before and the lesson after in the list's order, the page before
 // the first lesson, and the way back to the list after the last.
 
-import { render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { INTERACTIVES, createBook } from "@dd/dd-views";
@@ -54,11 +54,41 @@ describe("the links at the bottom of a lesson", () => {
   });
 
   it("lead from the last lesson written so far back to the list, saying the next is not written", () => {
-    const { after } = pager(lessons[lessons.length - 1]!.id);
+    const last = lessons.filter((l) => !l.optional).at(-1)!;
+    if (lessons.at(-1) !== last) return;
+    const { after } = pager(last.id);
     expect(after).toHaveAttribute("href", "#/");
     expect(after).not.toHaveAttribute("rel");
     expect(after).toHaveTextContent(STRINGS.pager.notYet);
     expect(after).toHaveTextContent(STRINGS.backToLessons);
+  });
+
+  it("name an optional chapter by its line, and say after the last one that the course ends", () => {
+    const chapter = {
+      ...LESSONS[0]!,
+      id: "fixture-chapter",
+      module: 14,
+      order: 1,
+      optional: true,
+      introduces: [],
+    };
+    const fixture = createBook([...LESSONS, chapter], INTERACTIVES);
+    const last = fixture.lessons.at(-2)!;
+    render(<LessonPager book={fixture} lessonId={last.id} />);
+    const nav = screen.getByRole("navigation", { name: STRINGS.pager.label });
+    const toChapter = within(nav).getAllByRole("link")[1]!;
+    expect(toChapter).toHaveAttribute("href", lessonHref(chapter.id));
+    expect(toChapter).toHaveTextContent(STRINGS.cover.beyond.name);
+    expect(toChapter).not.toHaveTextContent(STRINGS.module(14));
+    cleanup();
+    render(<LessonPager book={fixture} lessonId={chapter.id} />);
+    const [before, after] = within(
+      screen.getByRole("navigation", { name: STRINGS.pager.label }),
+    ).getAllByRole("link");
+    expect(before).toHaveTextContent(STRINGS.module(last.module));
+    expect(after).toHaveAttribute("href", "#/");
+    expect(after).toHaveTextContent(STRINGS.pager.end);
+    expect(after).not.toHaveTextContent(STRINGS.pager.notYet);
   });
 
   it("draw nothing for a lesson the list does not have", () => {

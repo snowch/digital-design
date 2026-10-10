@@ -42,6 +42,13 @@ challenge may be graded case by case against a `text` or `data` reference, and a
 model the book has a note for. `snowch/learning-platform`'s `docs/adoption.md` records the move
 and the proof that this course was unaffected.
 
+On 10 October 2026 the schema gained `optional`, a boolean that defaults to false, at the
+platform's commit 9ab98e9, synced here: a lesson flagged so is a chapter outside the numbered
+modules. The course's list of lessons draws such lessons after the five stages, in one line
+headed "Beyond the machine", counts them in no module, and names them by that line wherever it
+would name a module (`apps/course/src/pages/LessonList.tsx`, `LessonPager.tsx`). The decision of
+5 October 2026 in `docs/plan.md`, point 5, asked for it.
+
 ## The shared primitives
 
 Extracted on 6 October 2026, after Slice 2, under the rule of two: each was built inside

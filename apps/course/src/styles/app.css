@@ -353,7 +353,8 @@ ol {
   --chevron: 0.55rem;
 }
 /* Module 0's line, before the stages and in their form; its lessons show where a stage's modules do. */
-.journey-opening {
+.journey-opening,
+.journey-beyond {
   max-width: var(--measure);
 }
 .stage-heading {
@@ -403,7 +404,8 @@ ol {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.stage-0 {
+.stage-0,
+.stage-beyond {
   color: var(--stage-0);
 }
 .stage-1 {
