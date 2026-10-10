@@ -16,6 +16,7 @@ import {
 } from "@dd/dd-model";
 import {
   doorReturns,
+  noRoomLines,
   laneNames,
   lanesOf,
   roomsFrom,
@@ -325,8 +326,15 @@ describe("what the figures pass draws", () => {
     const names = new Map(Object.entries(p.labels).map(([n, a]) => [a, n]));
     let st = debugStart(p.rom);
     const followed: string[] = [];
+    const lines = noRoomLines(p);
+    // Each step at which the drawing rings a door: on a call about no room, its four lines.
+    const ringed: string[] = [];
     for (let k = 0; k < 2000 && !st.stopped; k++) {
       st = debugStep(st, QUIET_INPUTS);
+      if (st.cpu.regs[1] === 0n && lines.has(Number(st.cpu.pc)))
+        ringed.push(
+          `${names.get(Number(st.cpu.regs[10]))} ${returns.indexOf(Number(st.cpu.regs[15])) + 1}`,
+        );
       if (st.cpu.pc === BigInt(p.labels["warmRooms"]!) && st.cpu.regs[1] === 0n)
         followed.push(
           `${names.get(Number(st.cpu.regs[10]))} ${returns.indexOf(Number(st.cpu.regs[15])) + 1}`,
@@ -343,6 +351,8 @@ describe("what the figures pass draws", () => {
       "chillB 1",
       "chillB 2",
     ]);
+    // Four steps for each of the seven calls, each ringing the door that call came through.
+    expect(ringed).toEqual(followed.flatMap((d) => [d, d, d, d]));
   });
 
   it("11.4: while overBy first runs, 7B8 saves R15 and 7B0 saves R10, R14 at 7B0", () => {

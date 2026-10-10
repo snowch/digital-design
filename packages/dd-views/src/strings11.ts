@@ -148,6 +148,8 @@ export interface Machine11Strings {
      * ("the handler", "overBy"); {transfer} is what the move writes, such as R15 ← 00C. The
      * sentence's first letter is made a capital on the page.
      */
+    /** The drawing's name where its lanes are a program and its functions (Module 11). */
+    readonly titleCalls: string;
     readonly moveCall: string;
     readonly moveBack: string;
     readonly moveTrap: string;
@@ -369,7 +371,8 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   depthRan: "{n} instructions run",
   depthRanOne: "1 instruction run",
   depthMost: "At most, the stack held {n} words.",
-  depthCalls: "The marks under the chart's axis are the {n} calls the run made.",
+  // No count: 11.5's prediction asks how many calls, and this line shows at load.
+  depthCalls: "The marks under the chart's axis are the calls the run made.",
   logCol: "What is checked",
   readingsCol: "Readings",
   asks: "Should show",
@@ -393,6 +396,7 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   lanes: {
     title:
       "The run drawn as lanes side by side, time running down, where each lane is one stretch of lines the run goes to and the arrows between lanes are the moves",
+    titleCalls: "[draft] titleCalls",
     moveCall: "a call goes to {to}, a function that {from} calls: {transfer}.",
     moveBack: "the function {from} goes back to {to}: {transfer}.",
     moveTrap: "an instruction in {from} traps, and the machine goes to {to}: {transfer}.",

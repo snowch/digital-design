@@ -3240,6 +3240,22 @@ svg.run-lanes-drawing {
 .debugger-near .run-lanes-box {
   max-height: 9rem;
 }
+/* On a phone the rooms sit after the stack: a short box that keeps the marked room in view. */
+.debugger-near-phone .store-rooms-box {
+  max-height: 7rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+@media (max-width: 59.99rem) {
+  /* With the rooms under the stack, the listing and the stack are shorter, so the marked room is
+     on the screen with the buttons. */
+  .debugger-body:has(.debugger-near-phone .store-rooms-box) .debugger-listing-wrap:not(.rows-open) {
+    max-height: 7rem;
+  }
+  .debugger-body:has(.debugger-near-phone .store-rooms-box) .stack-frames:not(.rows-open) {
+    max-height: 5rem;
+  }
+}
 .trap-timeline-body .trap-edges {
   max-height: 13rem;
 }
@@ -3350,13 +3366,13 @@ svg.store-rooms {
   fill: var(--fg-muted);
 }
 .store-rooms .room-door-followed circle {
-  fill: var(--accent-soft);
+  fill: var(--bg);
   stroke: var(--accent-strong);
   stroke-width: 3;
   stroke-dasharray: none;
 }
 .store-rooms .room-door-followed text {
-  fill: var(--accent-strong);
+  fill: var(--fg);
   font-weight: 700;
 }
 .memory-boxes .box-past .box-word {

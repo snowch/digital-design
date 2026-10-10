@@ -168,10 +168,12 @@ a table. Now drawn, each a view of the debugger's state and stepped with it:
   doors only, no count of calls) and in the investigation, where the room R1 names is lit beside
   the stack. The construction's second store stays as words: reading them is its skill.
 
-11.6 and 11.7 are as they were. 11.1's debuggers showed only the words of the program in their
-listing; the pass gave both `words: true`, and the review took it off the failure experiment's
-editable one, where any program typed in would show its words and give the last challenge's skill
-away. 11.1's other debugger keeps it. The drawings' facts are pinned in
+11.6 and 11.7 are as they were. Before the pass, 11.1's debuggers drew their listing with no word column: B12
+had set `words: true` on both, but the debugger's props schema dropped the key until the pass's
+schema fix (a9ce1e3) let it reach the page. The review took it off the failure experiment's
+editable debugger, where any program typed in would show its words and give the last challenge's
+skill away; the second reading took it off the investigation's too, where row `008` showed the
+prediction's constant before it was checked. So neither of 11.1's debuggers shows words. The drawings' facts are pinned in
 `content/lessons/drawings.facts.test.ts`, and the diagrams test runs each to its end and reads its
 labels at both widths. The briefs and drafts are in `docs/notes/figures-11-12/`.
 

@@ -374,7 +374,7 @@ export function RunLanesDrawing({
           height={H}
           viewBox={`0 0 ${W} ${H}`}
           role="img"
-          aria-label={t.title}
+          aria-label={config.lanes.some((l) => l.handler) ? t.title : t.titleCalls}
         >
           {/* The interrupts band is hatched: no bar, band or mark in the drawing is drawn so. */}
           {config.interrupts && (

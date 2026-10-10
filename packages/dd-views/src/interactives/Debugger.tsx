@@ -1060,6 +1060,8 @@ function MemoryPanel({
   const rows = Array.from({ length: region.words }, (_, k) => first + 8 * k);
   // The name a line gives an address, beside it: the rooms and the log by the program's names.
   const nameAt = namesByAddress(program);
+  // The first word past a list's end carries the drawing's note in the table too.
+  const endAt = region.ends ? first + 8 * region.ends.after : undefined;
   return (
     <section className="debugger-panel debugger-memory" aria-label={region.title}>
       <p className="layout-title" aria-hidden="true">
@@ -1115,6 +1117,9 @@ function MemoryPanel({
                     {hex3(address)}
                     {nameAt.get(address) && (
                       <span className="memory-name">{` ${nameAt.get(address)}`}</span>
+                    )}
+                    {address === endAt && region.ends && (
+                      <span className="memory-name">{` ${region.ends.note}`}</span>
                     )}
                   </td>
                   <td className="memory-word">
@@ -1237,8 +1242,12 @@ function StackPanel({
         <p className="visually-hidden">
           {`${t.boxes.popped}: ${state.pushed
             .filter((a) => BigInt(a) < sp)
-            .map((a) => hex3(a))
-            .join(", ")}`}
+            .map((a) => {
+              const reg = state.saved?.[a];
+              const value = valueText(memoryWord(state.cpu, a));
+              return `${hex3(a)} ${value}${reg !== undefined ? ` ${format(t.boxes.saves, { reg: `R${reg}` })}` : ""}`;
+            })
+            .join("; ")}`}
         </p>
       )}
       {sp === undefined ? (

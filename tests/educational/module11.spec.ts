@@ -29,10 +29,17 @@ const T = DEFAULT_VIEW_STRINGS.machine11;
  * view its lead points at: the log in memory, or the stack.
  */
 const LONG_DEBUGGERS = [
-  ["lists", "walk", ".debugger-memory"],
-  ["debugging", "find-it", ".debugger-memory"],
-  ["stack", "pushed", ".debugger-stack"],
-  ["recursion", "frames", ".debugger-stack"],
+  ["lists", "walk", [".debugger-memory"]],
+  ["debugging", "find-it", [".debugger-memory"]],
+  // The run's lanes, to their newest item: the end of the run as well.
+  ["functions", "call-and-return", [".run-lanes-drawing > :last-child"]],
+  ["stack", "pushed", [".debugger-stack"]],
+  // The room R1 names, or the door a call about no room came through.
+  [
+    "recursion",
+    "frames",
+    [".debugger-stack", ".store-rooms .room-lit, .store-rooms .room-door-followed"],
+  ],
 ] as const;
 
 const MODULE_11 = [
@@ -296,7 +303,7 @@ test.describe("Module 11's lab", () => {
         height,
       );
     };
-    for (const [lessonId, id, view] of LONG_DEBUGGERS) {
+    for (const [lessonId, id, views] of LONG_DEBUGGERS) {
       await openLesson(page, lessonId);
       const figure = page.locator(`[data-interactive="${id}"]`);
       const actions = figure.locator(".debugger-actions");
@@ -308,12 +315,18 @@ test.describe("Module 11's lab", () => {
       const check = async () => {
         await inView(actions, `${lessonId}'s buttons`);
         await inView(figure.locator(".watch-list"), `${lessonId}'s watch`);
-        await inView(figure.locator(view).first(), `${lessonId}'s ${view}`);
+        for (const view of views) {
+          const shown = figure.locator(view).filter({ visible: true });
+          // A view that marks something only at some steps is checked where it is drawn.
+          if ((await shown.count()) === 0 && view.includes("room-")) continue;
+          await inView(shown.last(), `${lessonId} ${id}'s ${view}`);
+        }
         // The line about to run is inside the listing's box, not scrolled out of it.
         const row = await figure.locator("tr[aria-current]").boundingBox();
         const wrap = await listing.boundingBox();
-        expect(row!.y).toBeGreaterThanOrEqual(wrap!.y);
-        expect(row!.y + row!.height).toBeLessThanOrEqual(wrap!.y + wrap!.height);
+        expect(row!.y).toBeGreaterThanOrEqual(wrap!.y - 1);
+        // Within a pixel: a box of rows in rem ends between whole pixels.
+        expect(row!.y + row!.height).toBeLessThanOrEqual(wrap!.y + wrap!.height + 1);
         await inView(figure.locator("tr[aria-current]"));
       };
       const step = figure.getByRole("button", { name: T.step, exact: true });

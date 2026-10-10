@@ -186,7 +186,7 @@ export {
 } from "./Debugger";
 export { TrapTimeline, edgeText as trapEdgeText, transferValue } from "./Module12Figures";
 export { lanesOf, laneNames, itemsShown, type LaneItem, type LanesConfig } from "./RunLanes";
-export { doorReturns, roomsFrom } from "./MemoryDrawings";
+export { doorReturns, noRoomLines, roomsFrom } from "./MemoryDrawings";
 export {
   LogResults,
   ProgramListing,

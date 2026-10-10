@@ -7,6 +7,8 @@
 // words in memory, the room the current call names lit. Each is a view of the debugger's state,
 // stepped with it: nothing here runs the program.
 
+import { useEffect, useRef } from "react";
+
 import { memoryWord, type DebugState, type Program } from "@dd/dd-model";
 
 import { format, useViewStrings } from "../strings";
@@ -231,7 +233,10 @@ export function StackBoxes({ state, names }: { state: DebugState; names: Map<num
       );
   // R14's place when no push has stored its word yet: its address and the arrow, no box.
   const onWord = sp !== undefined && state.pushed.some((a) => BigInt(a) === sp);
-  if (sp !== undefined && !onWord && sp >= 0x400n && sp < 0x7c0n)
+  // At 7C0, where the stack is empty, R14's place is drawn while popped words are: the arrow
+  // does not vanish with the last pop.
+  const popped = sp !== undefined && state.pushed.some((a) => BigInt(a) < sp);
+  if (sp !== undefined && !onWord && sp >= 0x400n && (sp < 0x7c0n || (sp === 0x7c0n && popped)))
     rows.push({
       address: Number(sp),
       value: undefined,
@@ -320,14 +325,40 @@ export function roomsFrom(state: DebugState, program: Program, hall: number): Ro
  * function calling itself (11.5's `warmRooms`, behind its first door, then its second).
  */
 export function doorReturns(program: Program): number[] {
-  const out: number[] = [];
+  return selfCalls(program).map((c) => c.back);
+}
+
+/** Each call of a function by itself: its target and the line it comes back to. */
+function selfCalls(program: Program): { target: number; back: number }[] {
+  const out: { target: number; back: number }[] = [];
   program.lines.forEach((l, i) => {
     const m = /^call\s+(\w+)/.exec(l.text.trim());
     const target = m ? program.labels[m[1]!] : undefined;
     const next = program.lines[i + 1];
-    if (target !== undefined && target <= l.address && next) out.push(next.address);
+    if (target !== undefined && target <= l.address && next)
+      out.push({ target, back: next.address });
   });
   return out;
+}
+
+/**
+ * The lines a call about no room runs: the function's first two lines, which find R1 at 0 and
+ * branch, and the two lines the branch goes to, which give 0 and go back. While the PC is on one of
+ * them with R1 at 0, the call is about the door it came through.
+ */
+export function noRoomLines(program: Program): Set<number> {
+  const entry = selfCalls(program)[0]?.target;
+  const at = (address: number) => program.lines.findIndex((l) => l.address === address);
+  const k = entry === undefined ? -1 : at(entry);
+  const test = program.lines[k + 1];
+  const to = /goto\s+(\w+)/.exec(test?.text ?? "")?.[1];
+  const none = to !== undefined ? program.labels[to] : undefined;
+  const j = none === undefined ? -1 : at(none);
+  return new Set(
+    [program.lines[k], test, program.lines[j], program.lines[j + 1]]
+      .filter((l) => l !== undefined && k >= 0 && j >= 0)
+      .map((l) => l!.address),
+  );
 }
 
 /**
@@ -355,8 +386,11 @@ export function RoomsDrawing({
   const rowH = 32;
   const lit = still ? undefined : state.cpu.regs[1];
   const returns = doorReturns(program);
+  // Only while a call about no room runs, from its pause to its `goto R15`: between pauses R1,
+  // R10 and R15 hold other words, and a ring there would name a door no call came through.
+  const noRoom = noRoomLines(program).has(Number(state.cpu.pc));
   const door =
-    !still && lit === 0n && returns.length === 2
+    !still && lit === 0n && noRoom && returns.length === 2
       ? returns.indexOf(Number(state.cpu.regs[15] ?? -1n))
       : -1;
   const doorRoom = door >= 0 ? state.cpu.regs[10] : undefined;
@@ -379,50 +413,61 @@ export function RoomsDrawing({
     ...(litRoom ? [format(t.boxes.roomLit, { name: litRoom.name })] : []),
     ...(doorOf ? [format(t.boxes.doorFollowed, { name: doorOf.name, door: door + 1 })] : []),
   ].join(". ");
+  // Where the drawing sits in a short box (a phone's debugger), the box keeps the marked room in view.
+  const boxRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const box = boxRef.current;
+    const mark = box?.querySelector<SVGGraphicsElement>(".room-lit, .room-door-followed");
+    if (!box || !mark || box.scrollHeight <= box.clientHeight) return;
+    const top = mark.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop;
+    box.scrollTop = Math.max(0, top - 4);
+  });
   return (
     <div className="store-rooms-figure" ref={ref}>
-      <svg
-        className="store-rooms"
-        width={W}
-        height={H}
-        viewBox={`0 0 ${W} ${H}`}
-        role="img"
-        aria-label={said}
-      >
-        {rooms.map((r, i) => {
-          const x = 4 + r.depth * indent;
-          const y = ys[i]!;
-          const doorX = x + boxW + 12;
-          const isLit = !r.again && lit !== undefined && lit === BigInt(r.address);
-          return (
-            <g key={`${r.address}-${i}`} className={isLit ? "room room-lit" : "room"}>
-              {r.parent !== undefined && (
-                <path
-                  className="room-door-line"
-                  d={`M ${x - indent + 8} ${ys[parentRow(i)]! + 24} V ${y + 12} H ${x}`}
-                  fill="none"
-                />
-              )}
-              <rect className="room-box" x={x} y={y} width={boxW} height={24} rx={4} />
-              <text className="room-name" x={x + 7} y={y + 16}>
-                {r.again ? format(t.boxes.roomAgain, { name: r.name }) : label(r)}
-              </text>
-              {!r.again &&
-                r.doors.map((d, k) => (
-                  <g
-                    key={k}
-                    className={`room-door${d === 0 ? " room-door-none" : ""}${r === doorOf && k === door ? " room-door-followed" : ""}`}
-                  >
-                    <circle cx={doorX + k * 22} cy={y + 12} r={6} />
-                    <text x={doorX + k * 22} y={y + 16} textAnchor="middle">
-                      {d === 0 ? "0" : String(k + 1)}
-                    </text>
-                  </g>
-                ))}
-            </g>
-          );
-        })}
-      </svg>
+      <div className="store-rooms-box" ref={boxRef}>
+        <svg
+          className="store-rooms"
+          width={W}
+          height={H}
+          viewBox={`0 0 ${W} ${H}`}
+          role="img"
+          aria-label={said}
+        >
+          {rooms.map((r, i) => {
+            const x = 4 + r.depth * indent;
+            const y = ys[i]!;
+            const doorX = x + boxW + 12;
+            const isLit = !r.again && lit !== undefined && lit === BigInt(r.address);
+            return (
+              <g key={`${r.address}-${i}`} className={isLit ? "room room-lit" : "room"}>
+                {r.parent !== undefined && (
+                  <path
+                    className="room-door-line"
+                    d={`M ${x - indent + 8} ${ys[parentRow(i)]! + 24} V ${y + 12} H ${x}`}
+                    fill="none"
+                  />
+                )}
+                <rect className="room-box" x={x} y={y} width={boxW} height={24} rx={4} />
+                <text className="room-name" x={x + 7} y={y + 16}>
+                  {r.again ? format(t.boxes.roomAgain, { name: r.name }) : label(r)}
+                </text>
+                {!r.again &&
+                  r.doors.map((d, k) => (
+                    <g
+                      key={k}
+                      className={`room-door${d === 0 ? " room-door-none" : ""}${r === doorOf && k === door ? " room-door-followed" : ""}`}
+                    >
+                      <circle cx={doorX + k * 22} cy={y + 12} r={6} />
+                      <text x={doorX + k * 22} y={y + 16} textAnchor="middle">
+                        {d === 0 ? "0" : String(k + 1)}
+                      </text>
+                    </g>
+                  ))}
+              </g>
+            );
+          })}
+        </svg>
+      </div>
       <p className="word-boxes-key">{still ? t.boxes.roomsKeyStill : t.boxes.roomsKey}</p>
     </div>
   );
