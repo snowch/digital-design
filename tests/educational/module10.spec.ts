@@ -315,7 +315,7 @@ test.describe("Module 10's figures", () => {
     await expect(figure.locator(".layout-field.moved")).toHaveText(["Y2"]);
   });
 
-  test("the layouts open on a register job, which nothing moves; a load's Y moves", async ({
+  test("the layouts open on a register job, which nothing moves; a load's Y moves once checked", async ({
     page,
   }) => {
     await openLesson(page, "encoding");
@@ -324,7 +324,23 @@ test.describe("Module 10's figures", () => {
     await expect(figure.getByText("Word: 13123000").first()).toBeVisible();
     await expect(figure.locator(".layout-field.moved")).toHaveCount(0);
     await expect(figure.locator(".layout-moved")).toHaveText(T.layoutStill);
-    // By its name: the prediction's own instruction is held back until the prediction is checked.
+    // Before the prediction is checked, its own instruction and the load are held back, and the
+    // figure says how many wait.
+    await expect(figure.getByRole("radio")).toHaveCount(4);
+    await expect(figure.getByRole("radio", { name: /memory\[7D8\]/ })).toHaveCount(0);
+    await expect(figure.locator(".layout-held")).toHaveText(format(T.layoutsHeld, { n: 2 }));
+    // A choice made before the check is kept by its name when the held instructions appear.
+    const jump = figure.getByRole("radio").nth(2);
+    const jumpName = (await jump.evaluate((e) => e.closest("label")?.textContent)) ?? "";
+    await jump.check();
+    const predict = page.locator("#ix-predict-moved");
+    await predict.scrollIntoViewIfNeeded();
+    await predict.getByRole("radio").first().check();
+    await predict.getByRole("button", { name: V.prediction.commit }).click();
+    await figure.scrollIntoViewIfNeeded();
+    await expect(figure.getByRole("radio")).toHaveCount(6);
+    await expect(figure.locator(".layout-held")).toHaveCount(0);
+    await expect(figure.getByRole("radio", { name: jumpName, exact: true })).toBeChecked();
     await figure.getByRole("radio", { name: /memory\[7D8\]/ }).check();
     await expect(figure.getByText("Word: 380207D8")).toBeVisible();
     await expect(figure.locator(".layout-field.moved")).toHaveText(["Y2"]);
