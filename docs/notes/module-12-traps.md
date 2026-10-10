@@ -670,6 +670,11 @@ brief Y4:
   the task, the figure, the tests and the feedback agree. The title and the question keep "the
   handler", which there means the job the lesson asks for.
 
+The full check on both halves of the second reading (`32047fa`, with `main` at 9c637e9 merged):
+formatting, copyright, the platform copy, types and the build passed; Vitest 129 files, 1353 tests
+passed; the browser 868 passed, 56 skipped, 10 failed, the ten stored screenshots that fail in a
+build container on `main` too. `EXIT 1`, from those ten alone.
+
 ## The mechanical walk
 
 The built site, every Module 12 page at 375 and 1280 pixels, light and dark, with every run
