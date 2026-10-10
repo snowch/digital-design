@@ -612,6 +612,35 @@ the platform copy, types and the build passed; Vitest 129 files, 1347 tests pass
 866 passed, 56 skipped, 10 failed, the ten stored screenshots that fail in a build container on
 `main` too. The log's exit line: `EXIT 1`, from those ten alone.
 
+### The review of the figures pass (10 October)
+
+Nine readers, each attacked by a sceptic: nothing blocking, 25 should fix and 34 minor, gathered
+into G1 to G8. All are done; the briefs are `docs/notes/figures-11-12/briefs/Y1.md` to `Y3.md`.
+
+- G1: the drawing sits beside the trap timeline's list where the figure is wide and above it, short,
+  on a phone; the debugger's under its listing on a wide screen. Both follow their newest row, and
+  the outcomes sit under the status line. The one-screen test now holds 12.4 at edge 40 and 12.5 at
+  edge 47.
+- G2 and G3: a lane's mode block starts at the move into it; the timer's mark comes after the bar
+  of the edge at which its count reaches 0, the door's before the bar of the edge it arrives at,
+  both pinned against the bars in `drawings.facts.test.ts`.
+- G4: each move is said by its kind, marks are in the hidden list at their places, the hidden list
+  waits for its first move, and `lanes.title` no longer calls the start and the handler parts of
+  the program. The stop is marked where the run stops, in its lane.
+- G5, G7, G8: the leads say the drawing starts with the start's run already made, name "Next move"
+  among the steps (12.1 with its edges, 6, 12 and 15), introduce the mode's band in 12.4 and the
+  interrupts' band in 12.5, and say the drawing is empty until the first press; the key names the
+  dot.
+- 12.1's failure experiment draws its endless loop: three crossings, each `resume` writing
+  PC ← `014`, then a square where the drawing ends while the run goes on (`NO_SKIP_DRAWN`, 17
+  edges; the debugger takes the run one edge past it, not to its cut-off).
+- 12.6: the lane is named, not counted; `savedLead` says what each door choice shows, checked on
+  the runs (at 5 the door opens in the start and job 5 is not interrupted; at 30 its interrupt
+  waits for job 5's stores; never, none); the interrupts' band shows where job 5 lets them in.
+- 12.8 steps by moves only, its status line says each move and the stop, and "the handler" names
+  only the handler's lines: the stop after the last program is the start's, in the motivation, the
+  explanation and the challenge.
+
 ## The mechanical walk
 
 The built site, every Module 12 page at 375 and 1280 pixels, light and dark, with every run

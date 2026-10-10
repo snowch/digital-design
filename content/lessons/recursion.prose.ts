@@ -52,7 +52,7 @@ export const PROSE = {
   modelVsReality:
     "Real records that lead two ways, rooms or anything else, are kept as this lesson keeps them: each one holds the addresses of the next.\n\nA real program that walks such records usually keeps a list of the records still to visit. It does this rather than calling itself, when the way in can be long. A call's words on the stack cost more than an address on a list.",
   roomsLead:
-    "The figure shows the rooms as the program keeps them: three words per room. The first word is the reading. The second and third words hold the addresses of the rooms behind the room's two doors, or 0 where a door leads nowhere. Find the hall at `0A0`: its doors hold `0B8`, the prep room, and `0D0`, the vault.\n\nBelow the words, the same rooms are drawn from those words. Each room is a box with its name and reading. A door to a room is joined to that room by a line, drawn below and to the right. A door that leads nowhere is drawn as a circle with 0.",
+    "The figure shows the rooms as the program keeps them: three words per room. The first word is the reading. The second and third words hold the addresses of the rooms behind the room's two doors, or 0 where a door leads nowhere. Find the hall at `0A0`: its doors hold `0B8`, the prep room, and `0D0`, the vault.\n\nBelow the words, the same rooms are drawn from those words, and a key under the drawing says how to read it.",
   longStoreLead:
     "The second store's rooms, three words each, as the program keeps them. The hall is at `0A0` again. Follow the doors from there.",
   storeDepthLead: "Work out each answer from the rooms, then run the tests.",
@@ -62,7 +62,7 @@ export const PROSE = {
   farthestLead:
     "Write `farthest`, step through its calls with the stack shown, then run the tests.",
   framesLead:
-    '1. Press "Run to a breakpoint" again and again. Each pause is a new call of `warmRooms`, with the room\'s address in R1, or 0 for a door that leads nowhere.\n2. Watch the stack grow by 4 words each time a call finds a room, and shrink as calls return.\n3. Compare R14 at each pause with how many rooms deep the call is.\n\nThe drawing of the rooms lights the room whose address R1 holds, the room the current call of `warmRooms` is about.',
+    "1. Press \"Run to a breakpoint\" again and again. Each pause is a new call of `warmRooms`, with the room's address in R1, or 0 for a door that leads nowhere.\n2. Watch the stack grow by 4 words each time a call finds a room, and shrink as calls return.\n3. Compare R14 at each pause with how many rooms deep the call is.\n\nThe drawing sits under the listing on a wide screen, and after the stack on a narrow one. At each pause, R1 holds the address of the room the new call is about, and the drawing lights that room. At the seven pauses where R1 holds 0, the call came through a door that leads nowhere. R10 still holds the calling room's address. R15 holds `060` after a call through the first door, and `070` after a call through the second. The drawing marks that door of that room. Between pauses, the light follows R1, not the call.",
   depthLead:
     "The figure counts the words on the stack after each instruction of the whole run. The stack rises and falls with the way in: it climbs as the calls go deeper, falls as they return, and climbs again for the next door.",
 } as const;

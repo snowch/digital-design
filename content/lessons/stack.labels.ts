@@ -30,7 +30,7 @@ export const LABELS = {
   captions: {
     lost: "sumOver with no stack, in the debugger.",
     predict: "The program's listing, with a question about the word at 7B8.",
-    pushed: "`sumOver` with a stack, in the debugger, the stack drawn as words.",
+    pushed: "sumOver with a stack, in the debugger, the stack drawn as boxes.",
     depth: "The words on the stack over the lesson's whole run.",
     addresses: "Four questions about the stack in a run of sumKept.",
     checkListing: "The program with sumKept, which the lesson does not run.",

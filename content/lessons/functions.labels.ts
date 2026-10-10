@@ -31,8 +31,7 @@ export const LABELS = {
   captions: {
     twoWays: "The same work, written twice, then written once and called twice.",
     predict: "The program's listing, with a question about R15.",
-    callReturn:
-      "The function `overBy`, called twice, in the debugger, with the run drawn as lanes.",
+    callReturn: "The function overBy, called twice, in the debugger, with the run drawn as lanes.",
     spoiled: "Two programs, one whose overBy changes R10.",
     larger: "The larger amount: a main program that calls overBy twice, and its tests.",
     range: "The function outOfRange and its tests.",
@@ -48,6 +47,6 @@ export const LABELS = {
   roomPrefixB: "room B",
   fridgePrefix: "Fridge at",
   lanes: {
-    main: "Main program",
+    main: "The main program",
   },
 } as const;
