@@ -24,7 +24,7 @@ export const PROSE = {
   investigation:
     "The figure runs the program in the debugger with room A at -170 and room B at -190. A breakpoint pauses the run on the first line of `overBy`. Each time it pauses, a call has just reached that line.",
   callLead:
-    '1. The watch shows R1, R2, R15 and the PC.\n2. Press "Run to a breakpoint": the program pauses at `overBy` with the first call\'s arguments in R1 and R2, and R15 holding `00C`.\n3. Press "Step" until the PC is back in the program that made the call, and watch R1 take the result.\n4. Do the same for the second call.',
+    '1. The watch shows R1, R2, R15 and the PC.\n2. Press "Run to a breakpoint": the program pauses at `overBy` with the first call\'s arguments in R1 and R2, and R15 holding `00C`.\n3. Press "Step" until the PC is back in the main program, the program that made the call. Watch R1 take the result.\n4. Do the same for the second call.\n\nThe run is also drawn as lanes, one for the main program and one for `overBy`, with time running down the page. On a wide screen the drawing sits under the listing; on a narrow one, it sits after the watch. The drawing is empty until you press a button, and it grows with each step. Each call is an arrow from the main program to `overBy`, labelled with R15\'s new word; each `goto R15` is an arrow back, labelled with the PC\'s new word.',
   callAfter:
     "The first call gives `overBy` -170 and -180. Its result is 10, shown on the display. The second call gives -190 and -200. Its result is 10 too, so ALARM turns on. The program runs 22 instructions and stops at `02C`.",
   construction:

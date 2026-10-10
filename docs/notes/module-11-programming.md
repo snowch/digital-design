@@ -151,6 +151,42 @@ Every figure runs the model: the listing is the assembler's output, the debugger
 `machine.ts`, the depth chart is a recorded run's R14, and the results are `runScenario`'s ends.
 None is drawn from data typed into the lesson.
 
+The figures pass (8 October, with Module 12's; branch `figures-11-12`): the plan asked for "a
+list in memory walked by a loop, the register that holds the address moving down it" and "the
+stack as it grows and shrinks across calls, its frames marked", and both had shipped as rows of
+a table. Now drawn, each a view of the debugger's state and stepped with it:
+
+- 11.2: the log as boxes at their addresses, an arrow from each register that holds one, the word
+  the last step stored outlined; in the opening figure and in the investigation, whose log now
+  runs one word past the last reading so R1's arrow ends at `070`, after the prediction.
+- 11.3: the run as lanes under the investigation's debugger, the main program and `overBy`, each
+  call an arrow labelled `R15 ← 00C` or `R15 ← 01C`, each `goto R15` an arrow back with the PC.
+- 11.4: the stack in the investigation as boxes, grouped by call, each word marked with the
+  register it saves (the debugger now records it at each push), R14's arrow on the top. (The pass
+  drew it from `7B8` down, upside down from the lesson's lists; the review put R14's word first.)
+- 11.5: the cold store drawn as rooms from the room words, under the question's words (rooms and
+  doors only, no count of calls) and in the investigation, where the room R1 names is lit beside
+  the stack. The construction's second store stays as words: reading them is its skill.
+
+11.6 and 11.7 are as they were. 11.1's debuggers showed only the words of the program in their
+listing; the pass gave both `words: true`, and the review took it off the failure experiment's
+editable one, where any program typed in would show its words and give the last challenge's skill
+away. 11.1's other debugger keeps it. The drawings' facts are pinned in
+`content/lessons/drawings.facts.test.ts`, and the diagrams test runs each to its end and reads its
+labels at both widths. The briefs and drafts are in `docs/notes/figures-11-12/`.
+
+The review of the pass (10 October; briefs Y1 to Y3): the drawings now sit within reach of the
+step buttons, under the listing on a wide screen and after the watch or the stack on a narrow one,
+in boxes of fixed height that follow the newest row. 11.2's log sets `070` apart, dashed under a
+dotted line, as past the log's end; its thick-outline sentence went, since no step stores into a
+drawn word. 11.3's lanes say each move in its own words ("a call goes to overBy"), and its
+outcome no longer repeats the prediction. 11.4's stack draws R14's word first, keeps popped words
+drawn and set apart, shows R14's place between a push's two lines with no box, and draws a folded
+run of calls as its heading alone. 11.5's rooms mark the door a call about no room came through
+(R10 the room, R15 `060` or `070` the door), say the lit room's name to a screen reader, and the
+question's figure has a key of its own with no run in it. Module 11's text column in the
+program-compare figure is headed "Line". No caption carries a backtick, and a content test says so.
+
 ## What was reused, built, and could be extracted
 
 Reused unchanged: the reference machine (`machine.ts`, with Module 9's options), the schema, the

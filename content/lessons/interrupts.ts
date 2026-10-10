@@ -119,6 +119,13 @@ export const interrupts: LessonInput = {
             edges: 136,
             mode: true,
             interrupts: true,
+            lanes: {
+              lanes: [
+                { at: "0x000", name: LABELS.lanes.start },
+                { at: "handler", name: LABELS.lanes.handler, handler: true },
+                { at: "program", name: LABELS.lanes.program },
+              ],
+            },
             outcomes: PROSE.timelineAfter,
           },
         },

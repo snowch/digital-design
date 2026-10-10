@@ -21,7 +21,7 @@ async function textCollisions(page: Page): Promise<Collision[]> {
   return page.evaluate(() => {
     const out: { figure: string; problem: string }[] = [];
     const svgs = document.querySelectorAll<SVGSVGElement>(
-      "svg.timing-diagram, svg.timing-lanes, svg.circuit:not(.circuit-overview), svg.signal-plot, svg.signal-path, svg.scene, svg.column-sum, svg.state-diagram, svg.stack-depth",
+      "svg.timing-diagram, svg.timing-lanes, svg.circuit:not(.circuit-overview), svg.signal-plot, svg.signal-path, svg.scene, svg.column-sum, svg.state-diagram, svg.stack-depth, svg.run-lanes-drawing, svg.memory-boxes, svg.store-rooms",
     );
     for (const svg of svgs) {
       const figure = svg.closest("figure")?.id ?? svg.className.baseVal;
@@ -572,6 +572,42 @@ test.describe("the diagrams", () => {
     for (const lesson of LESSONS) {
       await openLesson(page, lesson.id);
       expect(await crowding(page), lesson.id).toEqual([]);
+    }
+  });
+
+  // Modules 11 and 12's drawings of a run: the lanes, memory as boxes, the stack and the rooms,
+  // each run to its end (or stepped where its end is far), then read for colliding labels.
+  test("Modules 11 and 12: the run's lanes, memory's boxes and the rooms are clear once run", async ({
+    page,
+  }) => {
+    const runs: readonly (readonly [string, string, RegExp])[] = [
+      ["lists", "walk", /^Run to the end$/],
+      ["functions", "call-and-return", /^Run to the end$/],
+      ["stack", "pushed", /^Run to the end$/],
+      ["recursion", "frames", /^Run to the end$/],
+      ["traps", "night-timeline", /^Run to the end$/],
+      ["system-calls", "calls-timeline", /^Run to the end$/],
+      ["interrupts", "door-timeline", /^Run to the end$/],
+      ["nesting", "fault-timeline", /^Run to the end$/],
+      ["nesting", "nest-saved", /^Run to the end$/],
+      ["system-call-mechanism", "shop-lanes", /^Run to the end$/],
+    ];
+    for (const [lesson, id, button] of runs) {
+      await openLesson(page, lesson);
+      const figure = page.locator(`[data-interactive="${id}"]`);
+      await figure.scrollIntoViewIfNeeded();
+      // A run that pauses at breakpoints is pressed until its button says it runs to the end.
+      for (let k = 0; k < 40; k++) {
+        const end = figure.getByRole("button", { name: button });
+        if ((await end.count()) > 0 && (await end.first().isEnabled())) {
+          await end.first().click();
+          break;
+        }
+        const pause = figure.getByRole("button", { name: /^Run to a breakpoint$/ });
+        if ((await pause.count()) === 0 || !(await pause.first().isEnabled())) break;
+        await pause.first().click();
+      }
+      expect(await textCollisions(page), `${lesson} ${id}`).toEqual([]);
     }
   });
 

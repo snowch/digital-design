@@ -31,8 +31,8 @@ export const LABELS = {
   captions: {
     depth: "The words on the stack over the whole run from the hall.",
     predict: "The program's listing, with a question about its calls.",
-    frames: "The calls of warmRooms and the stack, in the debugger.",
-    rooms: "The cold store's rooms as words in memory.",
+    frames: "The calls of warmRooms, the stack and the rooms, in the debugger.",
+    rooms: "The cold store's rooms, as words in memory and drawn.",
     longStore: "The second store's rooms as words in memory.",
     storeDepth: "Three questions about a run on the second store.",
     wayBack: "warmRooms on rooms where the icebox leads back to the vault.",
@@ -53,4 +53,5 @@ export const LABELS = {
     both: "A hall with a room behind each door",
   },
   callPrefix: "Call farthest with",
+  roomsDrawn: "The cold store's rooms, drawn",
 } as const;

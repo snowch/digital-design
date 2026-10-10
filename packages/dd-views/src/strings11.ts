@@ -139,6 +139,66 @@ export interface Machine11Strings {
   /** The button under a box of rows (the listing, memory, the stack, the edges): open, then close. */
   readonly rowsAll: string;
   readonly rowsFewer: string;
+  /** The run drawn as lanes (Modules 11 and 12). */
+  readonly lanes: {
+    /** The drawing's name for a screen reader. */
+    readonly title: string;
+    /**
+     * A move in words, by its kind. {from} and {to} are lanes' names, "the" in lower case
+     * ("the handler", "overBy"); {transfer} is what the move writes, such as R15 ← 00C. The
+     * sentence's first letter is made a capital on the page.
+     */
+    readonly moveCall: string;
+    readonly moveBack: string;
+    readonly moveTrap: string;
+    readonly moveInterrupt: string;
+    readonly moveResume: string;
+    readonly moveJump: string;
+    /** A mark in words: {lane} is where it is; {label} what a store wrote. */
+    readonly markDoor: string;
+    readonly markTimer: string;
+    readonly markStore: string;
+    readonly markStop: string;
+    readonly markCut: string;
+    /** Beside the drawing's marks: the run stops here; the drawing stops here, the run goes on. */
+    readonly stops: string;
+    readonly cut: string;
+    /** The key: the dot that marks where the run is now; the band for interrupts on. */
+    readonly nowKey: string;
+    readonly interruptsBand: string;
+    /** Where the door opens, and where the timer reaches 0, between two instructions. */
+    readonly doorOpens: string;
+    readonly timerReaches: string;
+    /** The band's key: the machine in system mode, and in user mode. */
+    readonly systemBand: string;
+    readonly userBand: string;
+    /** The trap timeline's buttons that run on to the next move between lanes, and back to the last. */
+    readonly nextMove: string;
+    readonly backMove: string;
+  };
+  /** Memory drawn as boxes, the stack the same way, and the cold store as rooms. */
+  readonly boxes: {
+    /** {title}: the region's title; the drawing's name for a screen reader. */
+    readonly label: string;
+    /** Under a drawing whose last step stored a word: the outline marks it. */
+    readonly changed: string;
+    /** {reg}: the register whose word a push stored there. */
+    readonly saves: string;
+    /** The heading over words a pop has passed. */
+    readonly popped: string;
+    readonly stackLabel: string;
+    readonly roomsLabel: string;
+    /** {name}: a room a door leads back to, drawn already above. */
+    readonly roomAgain: string;
+    /** Under the rooms: what the door marks and the lit room say. */
+    readonly roomsKey: string;
+    /** The key of a rooms drawing with no run: the boxes and the circles only. */
+    readonly roomsKeyStill: string;
+    /** Said after the drawing's label: the lit room. */
+    readonly roomLit: string;
+    /** Said after the drawing's label: the door a call about no room followed. */
+    readonly doorFollowed: string;
+  };
   readonly startSkeleton: string;
   readonly startEmpty: string;
   /** Asking before a start replaces a program the learner changed. */
@@ -328,6 +388,50 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   wordInText: "{decimal} ({hex} in hexadecimal)",
   rowsAll: "Show every row",
   rowsFewer: "Show fewer rows",
+  lanes: {
+    title:
+      "The run drawn as lanes side by side, time running down, where each lane is one stretch of lines the run goes to and the arrows between lanes are the moves",
+    moveCall: "a call goes to {to}, a function that {from} calls: {transfer}.",
+    moveBack: "the function {from} goes back to {to}: {transfer}.",
+    moveTrap: "an instruction in {from} traps, and the machine goes to {to}: {transfer}.",
+    moveInterrupt:
+      "an interrupt comes while {from} runs, and the machine goes to {to}: {transfer}.",
+    moveResume: "{from} resumes {to}: {transfer}.",
+    moveJump: "{from} goes back to {to}: {transfer}.",
+    markDoor: "the freezer door opens while {lane} runs.",
+    markTimer: "the timer reaches 0 while {lane} runs.",
+    markStore: "{lane} stores a word that the lesson marks: {label}.",
+    markStop: "the run stops in {lane}.",
+    markCut: "the drawing ends here, in {lane}, but the run goes on.",
+    stops: "the run stops",
+    cut: "drawing ends, run goes on",
+    nowKey: "where the run has got to",
+    interruptsBand: "interrupts are on",
+    doorOpens: "freezer door opens",
+    timerReaches: "timer reaches 0",
+    systemBand: "system mode",
+    userBand: "user mode",
+    nextMove: "Next move",
+    backMove: "Previous move",
+  },
+  boxes: {
+    label:
+      "{title} drawn as words in boxes at their addresses, with an arrow from each register that holds an address",
+    changed: "The box with the thick outline is the word the last step stored.",
+    saves: "saves {reg}",
+    popped: "Off the stack, still in the RAM",
+    stackLabel:
+      "The stack drawn as boxes, R14's word at the top, then the words below it grouped by the call that pushed them, and the words a pop has passed set apart above",
+    roomsLabel: "The rooms reachable from the hall, each with its reading and its two doors",
+    roomAgain: "{name}, drawn above",
+    roomsKey:
+      "The lit room is the room whose address R1 holds. Each room is a box with its name and reading. Its two doors are circles to its right. A circle with 1 or 2 is a door to a room. A dashed circle with 0 is a door that leads nowhere. When R1 holds 0, a door drawn with a thick ring is the door the current call came through. Each room behind a door is drawn below, a step to the right, with a line from the box of the room it opens from.",
+    roomsKeyStill:
+      "Each room is a box with its name and reading. Its two doors are circles to its right. A circle with 1 or 2 is a door to a room. A dashed circle with 0 is a door that leads nowhere. Each room behind a door is drawn below, a step to the right, with a line from the box of the room it opens from.",
+    roomLit: "{name} is lit, and R1 holds its address.",
+    doorFollowed:
+      "Door {door} of {name} is marked. R1 holds 0, and the current call came through that door.",
+  },
   startSkeleton: "Start from the outline",
   startEmpty: "Start from an empty program",
   // Brief 8M.

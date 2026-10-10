@@ -15,6 +15,7 @@ import {
   step,
   type ControlRegisters,
   type CpuState,
+  type StepRecord,
   type StopReason,
 } from "./machine";
 
@@ -46,12 +47,14 @@ export interface TimelineEdge {
   readonly control: ControlRegisters;
   /** Instructions run before the edge. */
   readonly ran: number;
+  /** Module 12: the waiting events after the edge, bit 0 the timer and bit 1 the door. */
+  readonly waiting: number;
 }
 
 const FORMS: readonly TransferForm[] = ["bits", "bits", "address", "cause", "address"];
 
 /** The transfers one step made, from its record and the states either side of it. */
-function transfersOf(before: CpuState, after: CpuState, edge: ReturnType<typeof step>) {
+function transfersOf(before: CpuState, after: CpuState, edge: { readonly record: StepRecord }) {
   const r = edge.record;
   const out: Transfer[] = [];
   if (r.trap) {
@@ -98,42 +101,58 @@ export function timelineRun(
 ): { readonly program?: Program; readonly edges: readonly TimelineEdge[] } {
   const { program } = assembleChecked(source);
   if (!program) return { edges: [] };
-  const lineAt = new Map(
-    program.lines.filter((l) => l.instruction !== undefined).map((l) => [l.address, l] as const),
-  );
+  const lineAt = linesByAddress(program);
   let state = resetMachine(program.rom);
   let ran = 0;
   const edges: TimelineEdge[] = [];
   for (let n = 1; n <= limit && !state.stopped; n++) {
     const r = step(state, inputsAt(plan, ran), MODULE_12);
-    const at = lineAt.get(Number(state.pc));
-    const resume = r.record.fields?.k === 8 && r.record.fields.j === 1 && !r.record.trap;
-    const kind = r.record.trap
-      ? "trap"
-      : resume && !r.record.stopped
-        ? "resume"
-        : kindOf(r.record.stopped);
-    const cause =
-      r.record.trap?.cause ??
-      (r.record.stopped?.kind === "trap" ? r.record.stopped.cause : undefined);
-    edges.push({
-      n,
-      pc: state.pc,
-      ...(at ? { line: at.text } : {}),
-      ...(at?.label ? { label: at.label } : {}),
-      kind,
-      ...(cause !== undefined ? { cause } : {}),
-      transfers: resume
-        ? [
-            { target: "C0", value: state.control[1], form: "bits" },
-            { target: "PC", value: r.state.pc, form: "address" },
-          ]
-        : transfersOf(state, r.state, r),
-      control: r.state.control,
-      ran,
-    });
+    edges.push(timelineEdge(n, state, r.state, r.record, ran, lineAt));
     if (!r.record.trap && !r.record.stopped) ran++;
     state = r.state;
   }
   return { program, edges };
+}
+
+/**
+ * One edge of a run, from the states either side of a step and its record: what it was, and every
+ * transfer it made. The trap timeline and the debugger's drawing of lanes both read edges so.
+ */
+export function timelineEdge(
+  n: number,
+  state: CpuState,
+  after: CpuState,
+  record: StepRecord,
+  ran: number,
+  lineAt: ReadonlyMap<number, { readonly text: string; readonly label?: string }>,
+): TimelineEdge {
+  const at = lineAt.get(Number(state.pc));
+  const resume = record.fields?.k === 8 && record.fields.j === 1 && !record.trap;
+  const kind = record.trap ? "trap" : resume && !record.stopped ? "resume" : kindOf(record.stopped);
+  const cause =
+    record.trap?.cause ?? (record.stopped?.kind === "trap" ? record.stopped.cause : undefined);
+  return {
+    n,
+    pc: state.pc,
+    ...(at ? { line: at.text } : {}),
+    ...(at?.label ? { label: at.label } : {}),
+    kind,
+    ...(cause !== undefined ? { cause } : {}),
+    transfers: resume
+      ? [
+          { target: "C0", value: state.control[1], form: "bits" },
+          { target: "PC", value: after.pc, form: "address" },
+        ]
+      : transfersOf(state, after, { record }),
+    control: after.control,
+    ran,
+    waiting: after.waiting,
+  };
+}
+
+/** The lines of a program by address, as the timeline names them. */
+export function linesByAddress(program: Program) {
+  return new Map(
+    program.lines.filter((l) => l.instruction !== undefined).map((l) => [l.address, l] as const),
+  );
 }

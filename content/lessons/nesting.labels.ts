@@ -32,12 +32,13 @@ export const LABELS = {
     late: "The debugger shows a handler whose long job keeps the door waiting.",
     predict: "The handler's listing shows job 2 faulting on room 5, with a question about C2.",
     timeline:
-      "The timeline shows the run from the program's call, edge by edge, with the mode after each.",
+      "The run from the program's call, edge by edge, with the mode after each, drawn as lanes.",
     savedListing: "The listing shows the handler with job 5 saving C1 and C2.",
     answers:
       "Four questions ask about the registers when the door's interrupt comes in during the wait.",
     unsaved: "The debugger shows a job 5 that lets interrupts in without saving C1 and C2.",
-    saved: "The debugger shows job 5 saving C1 and C2, with the door's time to choose.",
+    saved:
+      "Job 5 saving C1 and C2 in the debugger, with the door's time to choose, the run drawn as lanes.",
     wait: "The handler's job 6 is yours to change, with its tests.",
   },
   keptTitle: "C1 and C2 saved at 410 and 418",
@@ -53,4 +54,10 @@ export const LABELS = {
     "Show 5, count, show 6, the door shut",
     "Count 30, interrupts off, the door opening during the count",
   ],
+  lanes: {
+    start: "The start",
+    handler: "The handler",
+    program: "The program",
+    again: "The handler again",
+  },
 } as const;
