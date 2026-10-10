@@ -91,6 +91,7 @@ export interface Machine13Strings {
   readonly closedOpen: string;
   /** {part}: a part that only splits or joins words, with no gate in it. */
   readonly closedWiring: string;
+  readonly closedWiringMany: string;
   readonly bitWhich: string;
   readonly bitRegister: string;
   readonly bitByte: string;
@@ -241,12 +242,14 @@ export const MACHINE13_STRINGS: Machine13Strings = {
 
   controlCaption: "The control registers",
 
-  stripLegend: "The run. Each line shows its address, its text and its edges. Press an edge to pause the run before it.",
+  stripLegend:
+    "The run. Each line shows its address, its text and its edges. Press an edge to pause the run before it.",
   stripEarlier: "Earlier lines",
   stripLater: "Later lines",
   stripEdge: "Edge {n}, {state}",
-  pinNote: "Press a wire to pin it. It stays marked as you open blocks, and its name and value show under the drawing, in hexadecimal for a word.",
-  explainNext: "Press \"Next edge\" to see why. The explanation appears after that edge.",
+  pinNote:
+    "Press a wire to pin it. It stays marked as you open blocks, and its name and value show under the drawing, in hexadecimal for a word.",
+  explainNext: 'Press "Next edge" to see why. The explanation appears after that edge.',
   traceCaption: "The levels you have opened",
   traceLevel: "Level",
   traceIn: "Inputs",
@@ -255,6 +258,8 @@ export const MACHINE13_STRINGS: Machine13Strings = {
   closedCaption: "Parts here that never open",
   closedOpen: "{part}: show one bit, as Module {module} drew it",
   closedWiring: "{part} only splits or joins words; it has no gate.",
+  closedWiringMany:
+    "{parts} only split or join words; they have no gate, and a trace passes through them.",
   bitWhich: "Bit",
   bitRegister: "Register",
   bitByte: "Byte at",
@@ -272,8 +277,9 @@ export const MACHINE13_STRINGS: Machine13Strings = {
     'After "{line}" at {address}, {what} is {machine} on your machine and {model} by the model.',
   labHalts: 'At "{line}" at {address}, your machine halts with cause {cause}; the model does not.',
   labStopsOnly: 'At "{line}" at {address}, your machine stops; the model does not.',
-  labRunsOnStop: "At \"{line}\" at {address}, the model stops at stop; your machine goes on.",
-  labRunsOnHalt: "At \"{line}\" at {address}, the model halts with cause {cause}; your machine goes on.",
+  labRunsOnStop: 'At "{line}" at {address}, the model stops at stop; your machine goes on.',
+  labRunsOnHalt:
+    'At "{line}" at {address}, the model halts with cause {cause}; your machine goes on.',
   labWordHex: "{n} ({hex})",
   labListing: "{program}, line by line",
   labPrograms: "The seven test programs",
@@ -289,7 +295,8 @@ export const MACHINE13_STRINGS: Machine13Strings = {
     "The machine and the model agree after every one of its {n} instructions and traps.",
   labRunStops: "At `{line}` at `{address}`, the machine stops; the model does not.",
   labRunGoesOnStop: "At `{line}` at `{address}`, the model stops at `stop`; the machine goes on.",
-  labRunGoesOnHalt: "At `{line}` at `{address}`, the model halts with cause `{cause}`; the machine goes on.",
+  labRunGoesOnHalt:
+    "At `{line}` at `{address}`, the model halts with cause `{cause}`; the machine goes on.",
   labAnswer: "The runs answer: {answer}.",
 
   capTrace: "Run my program on the whole machine",

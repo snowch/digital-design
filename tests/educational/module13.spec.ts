@@ -37,6 +37,13 @@ async function answerAll(
     if (f.kind === "choice") {
       const label = f.options?.find((o) => o.value === value)?.label ?? value;
       await field.locator("select").selectOption({ label });
+    } else if (f.kind === "bits") {
+      // A row of bits, pressed to match, highest bit first.
+      for (let i = 0; i < value.length; i++) {
+        const bit = field.locator(`button[data-bit="${value.length - 1 - i}"]`);
+        if (((await bit.getAttribute("aria-pressed")) === "true") !== (value[i] === "1"))
+          await bit.click();
+      }
     } else await field.locator("input").fill(value);
   }
 }
@@ -58,9 +65,12 @@ for (const lessonId of ["whole-machine", "full-path", "tracing"]) {
     const section = challenge(page, c.id);
     await section.scrollIntoViewIfNeeded();
     const answers = c.reference.answers ?? {};
-    // A wrong answer: a typed field's answer with a digit added.
+    // A wrong answer: a typed field's answer with a digit added, or a row's first bit turned over.
     const typed = c.fields.find((f) => f.kind !== "choice")!;
-    await answerAll(section, c, { ...answers, [typed.id]: `${answers[typed.id] ?? ""}1` });
+    const was = answers[typed.id] ?? "";
+    const wrong =
+      typed.kind === "bits" ? `${was[0] === "1" ? "0" : "1"}${was.slice(1)}` : `${was}1`;
+    await answerAll(section, c, { ...answers, [typed.id]: wrong });
     await runTests(section);
     await expect(status(section)).not.toHaveText(
       format(S.challenge.passing, { total: testCount(c) }),
@@ -81,7 +91,7 @@ test.describe("the final-machine lab", () => {
     await section.scrollIntoViewIfNeeded();
     await runTests(section);
     const details = section.locator(".verdict-detail");
-    await expect(details).toHaveCount(5, { timeout: 60_000 });
+    await expect(details).toHaveCount(7, { timeout: 60_000 });
     for (const d of await details.allTextContents()) {
       expect(d).toMatch(/^(After|At) "/);
       expect(d).not.toContain("JOIN");

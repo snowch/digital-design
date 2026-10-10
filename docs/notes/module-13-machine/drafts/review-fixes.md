@@ -67,3 +67,10 @@ Facts put right in placed text without a new draft, each a word or a number:
 - `fields.xorB`, `cases.xorB`: capital letter, as the other labels.
 - `c1Whole` came back with `{program}` inside a code block; the course now puts the program in
   plain, so the block is the draft's.
+
+## Brief R2-7 (13.2's parts that run whole; the parts with no gate)
+
+- Placed as drafted; no fact needed a change.
+- `invAfter` (after the facts test): the quoted sentences wrote the PC's and R15's values in
+  backticks, from the brief; the figure writes them plain. Backticks removed so each quotation is
+  the figure's sentence, which the facts test now checks whole.

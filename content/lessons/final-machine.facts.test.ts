@@ -33,18 +33,17 @@ const differ = (text: Text) =>
 const all = `${Object.values(PROSE).flat().join("\n")}`;
 
 describe("lesson final-machine's facts", () => {
-  it("runs every program on the course's text as the model does, in the edges it states", () => {
-    const edges = Object.fromEntries(LAB_RUNS.map((p) => [p.id, result(undefined, p.id)]));
-    for (const r of Object.values(edges)) expect(r.difference).toBeUndefined();
-    expect(Object.fromEntries(Object.entries(edges).map(([k, r]) => [k, r.edges]))).toEqual({
-      shop: 69,
-      user: 36,
-      timer: 53,
-      door: 31,
-      rom: 7,
-    });
-    for (const n of [69, 36, 53, 31, 7]) expect(PROSE.motivation).toContain(`${n} edges`);
-  }, 120_000);
+  it("runs every program on the course's text as the model does, in the steps it states", () => {
+    const runs = Object.fromEntries(LAB_RUNS.map((p) => [p.id, result(undefined, p.id)]));
+    for (const r of Object.values(runs)) expect(r.difference).toBeUndefined();
+    const steps = { shop: 19, user: 11, timer: 17, door: 10, bits: 11, refused: 11, rom: 2 };
+    expect(Object.fromEntries(Object.entries(runs).map(([k, r]) => [k, r.steps]))).toEqual(steps);
+    // The motivation's list gives each program's count, in the figures' order.
+    const said = [...PROSE.motivation.matchAll(/(\d+) instructions and traps\./g)].map(
+      (m) => +m[1]!,
+    );
+    expect(said).toEqual(LAB_RUNS.map((p) => steps[p.id as keyof typeof steps]));
+  }, 180_000);
 
   it("ends each program with the cause the prose names", () => {
     expect(result(undefined, "rom").difference).toBeUndefined();
@@ -75,14 +74,22 @@ describe("lesson final-machine's facts", () => {
       "At `R5 <= C3` at `020`, the machine halts with cause `82`; the model does not halt.",
     );
     expect(result(LAB_TEXTS.call, "shop").text).toBe(
-      "After `call R6, R15` at `02C`, R15 is 44 on the machine and 48 by the model.",
+      "After `call R6, R15` at `02C`, R15 is 44 (02C) on the machine and 48 (030) by the model.",
     );
     for (const s of [
       "044 on the machine and 03C",
       "030 on the machine and 044",
-      "44 on the machine and 48",
+      "44 (02C) on the machine and 48 (030)",
     ])
       expect(PROSE.invAfter).toContain(s);
+    // The paragraph quotes each sentence whole.
+    for (const [t, p] of [
+      [LAB_TEXTS.branch, "timer"],
+      [LAB_TEXTS.ie, "timer"],
+      [LAB_TEXTS.ie, "door"],
+      [LAB_TEXTS.call, "shop"],
+    ] as const)
+      expect(PROSE.invAfter).toContain(result(t, p).text);
   }, 180_000);
 
   it("the failure experiment: DOOR held at 0 differs on the door program alone", () => {
@@ -166,7 +173,7 @@ describe("lesson final-machine's facts", () => {
     expect(gradeLab(challenge as never, { hdl: MACHINE13_TEXT }).passed).toBe(true);
     const outline = gradeLab(challenge as never, { hdl: guidedStart() });
     expect(outline.blocked).toBeUndefined();
-    expect(outline.failures.map((f) => f.index)).toEqual([0, 1, 2, 3, 4]);
+    expect(outline.failures.map((f) => f.index)).toEqual([0, 1, 2, 3, 4, 5, 6]);
   }, 180_000);
 
   it("blocks the parts start at its first port, and the empty start", () => {

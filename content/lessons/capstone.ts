@@ -99,8 +99,9 @@ export const capstone: LessonInput = {
           props: {
             ...SAMPLE,
             start: 12,
-            scope: "datapath",
-            focus: ["alu", "condition"],
+            // Opens on the whole machine, the datapath in view; opening it, the step the lead asks for,
+            // shows the ALU and the condition block.
+            focus: ["datapath", "alu", "condition"],
             reveal: { text: PROSE.invAfter, scope: "datapath/alu" },
           },
         },
@@ -186,10 +187,9 @@ export const capstone: LessonInput = {
       },
       hints: [
         ...PROSE.c1Hints,
-        PROSE.c1Whole.replace("{program}", CAPSTONE_REFERENCE).replace(
-          "{answers}",
-          CAPSTONE_FIELDS.map((f) => f.reference).join(", "),
-        ),
+        PROSE.c1Whole
+          .replace("{program}", CAPSTONE_REFERENCE)
+          .replace("{answers}", CAPSTONE_FIELDS.map((f) => f.reference).join(", ")),
       ],
       reference: {
         text: CAPSTONE_REFERENCE,

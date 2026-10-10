@@ -864,10 +864,10 @@ function TracePanel({
           {/* The parts with no gate after the buttons, as sentences: the trace passes through. */}
           {closed.some((p) => p.bit === "wiring") && (
             <p className="machine-wiring">
-              {closed
-                .filter((p) => p.bit === "wiring")
-                .map((p) => format(t.closedWiring, { part: p.name }))
-                .join(" ")}
+              {wiringSentence(
+                closed.filter((p) => p.bit === "wiring").map((p) => p.name),
+                t,
+              )}
             </p>
           )}
           {part && <BitView part={part} circuit={circuit} values={values} t={t} />}
@@ -990,4 +990,11 @@ function BitView({
       )}
     </div>
   );
+}
+
+/** One sentence for the parts that only split or join words, however many there are. */
+function wiringSentence(names: readonly string[], t: Machine13Strings): string {
+  if (names.length === 1) return format(t.closedWiring, { part: names[0] ?? "" });
+  const parts = `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+  return format(t.closedWiringMany, { parts });
 }

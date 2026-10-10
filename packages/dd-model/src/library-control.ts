@@ -1120,9 +1120,39 @@ function lowered(at: At, from: number, dy: number): Record<string, readonly [num
  * machine: a decoder without kind A has no such part, and the entries for it are not read.
  */
 export const FINAL_INSIDE: Readonly<Record<string, At>> = {
+  // The next PC: as laid out by column, with the target's adder two rows lower, so the name under
+  // TAKE's OR gate clears the adder's label above it.
+  next: {
+    "in:BRANCH": [0, 1],
+    "in:CALL": [0, 4],
+    "in:JUMP": [0, 7],
+    "in:MET": [0, 10],
+    "in:PC": [0, 13],
+    "in:RESULT": [0, 16],
+    "in:WIDE": [0, 19],
+    andTake: [9, 1],
+    orTake: [18, 1],
+    plus4: [9, 5],
+    times4: [9, 9],
+    target: [18, 7],
+    pickTake: [26, 1],
+    pickJump: [33, 1],
+    "out:NEXT": [39, 1],
+    "out:PC4": [39, 4],
+  },
   "control-unit-final": CONTROL_INSIDE["control-unit-traps"] as At,
   // The set split a cell higher, so its last signal, SET, clears the load's word below it.
-  "datapath-final": { ...(CONTROL_INSIDE["datapath-traps"] as At), toNext: [54, 21.5] },
+  "datapath-final": {
+    ...(CONTROL_INSIDE["datapath-traps"] as At),
+    toNext: [54, 21.5],
+    // The digits, the registers, the constant made a word and the operand hold half a row lower,
+    // so the IR's word runs level into the digits and HB level into pickB.
+    digits: [20, 13],
+    registers: [27, 15],
+    widen: [27, 26.5],
+    hold: [33, 17],
+    heldR: [54, 6],
+  },
   "kind-lines": {
     ...(CONTROL_INSIDE["kind-lines"] as At),
     kind10: [22, 39],
@@ -1159,6 +1189,8 @@ export const FINAL_KIND_ROUTES: Readonly<Record<string, Routes>> = {
     "toNext.SET>yWord.SET": [67],
     // MET up over the next PC and down into the word register Y takes.
     "condition.MET>yWord.MET": [59.5, 13.5, 66.5],
+    // HB up over the ALU's inputs and along to its pin, clear of the control split below.
+    "hold.HB>output:HB.a": [38.5, 11.6],
   },
   "kind-lines": {
     ...(CONTROL_KIND_ROUTES["kind-lines"] as Routes),

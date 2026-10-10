@@ -127,9 +127,15 @@ export function shownWord(value: Word | undefined, words: boolean): string {
 function constText(circuit: Circuit, path: string): string {
   const c = circuit.components.find((x) => x.path === path);
   const width = Number(c?.params?.["width"] ?? 1);
-  return BigInt(String(c?.params?.["value"] ?? "0"))
-    .toString(2)
-    .padStart(width, "0");
+  const value = BigInt(String(c?.params?.["value"] ?? "0"));
+  // Module 13: a wide fixed word, such as the 0s above a narrow word widened to 64 bits, is
+  // written in hexadecimal, as every wide word is, a digit per four bits.
+  if (width > 8)
+    return value
+      .toString(16)
+      .toUpperCase()
+      .padStart(Math.ceil(width / 4), "0");
+  return value.toString(2).padStart(width, "0");
 }
 
 /** Blocks drawn closed for good: a split or a join holds no gates worth opening. */

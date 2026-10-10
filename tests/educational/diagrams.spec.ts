@@ -497,6 +497,30 @@ test.describe("the diagrams", () => {
     }
   });
 
+  // Module 13's datapath holds most of the final machine's blocks, each drawn only once a learner
+  // opens it, so each is opened in turn and held to the rules every drawing is held to.
+  test("Module 13: every block inside the datapath is clear when opened", async ({ page }) => {
+    test.setTimeout(300_000);
+    await openLesson(page, "capstone");
+    const figure = page.locator("#ix-cap-carry");
+    await figure.scrollIntoViewIfNeeded();
+    const open = figure.getByRole("button", { name: new RegExp(`${V.circuit.open}$`) });
+    const crumbs = figure.getByRole("navigation", { name: V.circuit.where }).getByRole("button");
+    // The figure opens on the whole machine; opening the datapath is the lead's first step.
+    await figure.getByRole("button", { name: /^datapath datapath\. / }).click();
+    expect(await textCollisions(page), "datapath").toEqual([]);
+    expect(await wireFaults(page), "datapath").toEqual([]);
+    const names = await open.evaluateAll((els) => els.map((e) => e.getAttribute("aria-label")!));
+    expect(names.length).toBeGreaterThan(5);
+    for (const name of names) {
+      await figure.getByRole("button", { name, exact: true }).click();
+      expect(await textCollisions(page), name).toEqual([]);
+      expect(await wireFaults(page), name).toEqual([]);
+      // Back to the datapath: the trail's second button, after the whole machine.
+      await crumbs.nth(1).click();
+    }
+  });
+
   test("the drawing editor: parts tidied before any wire is drawn keep their words apart", async ({
     page,
   }) => {

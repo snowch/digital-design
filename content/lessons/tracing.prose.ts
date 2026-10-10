@@ -49,7 +49,6 @@ export const PROSE = {
     "A common mistake is to pause at the wrong edge of a line. A line's edges run in order from its FETCH edge, and for a register job the ALU edge is the third. Another mistake is to write a row lowest bit first.",
     "A smaller example, with no part of the task: at the ALU edge of `R5 <= R3 >= R4 signed`, SUM in the slice for bit 1 gives 1, as the investigation found.",
     "Part of the answer: the register file writes one register at an edge, and EN is 1 only for the register that Y names. At the ALU edge of `R3 <= R1 - R2`, B holds R2, -250, whose bits 3 to 0 are `0110` before the XORs turn them over.",
-    "The whole answer: 0, 1, 0, 1, 0, in the order of the list.",
   ],
   reflection:
     "You can now follow any value, at any edge, from a line of the program down to a gate or a flip-flop, and say what each level hides.\n\nEvery part you traced was the course's own, and so were the joins between them.\n\nThe next lesson asks: can you join the parts into the whole machine yourself, so that it runs the shop's programs as the model does?",

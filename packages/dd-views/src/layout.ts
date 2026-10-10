@@ -138,7 +138,23 @@ export function autoLayout(
     return ports.size;
   };
   const xOf = new Map<number, number>();
-  let x = 0;
+  // Module 13: a fixed value in the first column writes its name under it and its bits (or, for a
+  // wide word, its hexadecimal digits) inside it, both centred on a narrow box, so a long one
+  // would start left of the drawing. The columns start far enough in for the widest of them.
+  // Estimated at 7 pixels a character of 12-pixel text, in cells of 20 pixels.
+  const lead = byWidth
+    ? Math.max(
+        0,
+        ...(columns.get(0) ?? [])
+          .filter((p) => p.kind === "const")
+          .map((p) => {
+            const bits = p.width ?? 1;
+            const chars = Math.max(p.id.length, bits > 8 ? Math.ceil(bits / 4) : bits);
+            return Math.ceil((chars * 7) / 20 / 2 - (colsOf?.(p) ?? 0) / 2);
+          }),
+      )
+    : 0;
+  let x = lead;
   for (const c of [...columns.keys()].sort((a, b) => a - b)) {
     xOf.set(c, byWidth ? x : c * COLUMN_STEP);
     const widest = Math.max(...(columns.get(c) ?? []).map((p) => colsOf?.(p) ?? 0));
