@@ -143,16 +143,38 @@ export interface Machine11Strings {
   readonly lanes: {
     /** The drawing's name for a screen reader. */
     readonly title: string;
-    /** {from} and {to}: two lanes' names; {transfer}: what the move writes, such as R15 ← 00C. */
-    readonly move: string;
+    /**
+     * A move in words, by its kind. {from} and {to} are lanes' names, "the" in lower case
+     * ("the handler", "overBy"); {transfer} is what the move writes, such as R15 ← 00C. The
+     * sentence's first letter is made a capital on the page.
+     */
+    readonly moveCall: string;
+    readonly moveBack: string;
+    readonly moveTrap: string;
+    readonly moveInterrupt: string;
+    readonly moveResume: string;
+    readonly moveJump: string;
+    /** A mark in words: {lane} is where it is; {label} what a store wrote. */
+    readonly markDoor: string;
+    readonly markTimer: string;
+    readonly markStore: string;
+    readonly markStop: string;
+    readonly markCut: string;
+    /** Beside the drawing's marks: the run stops here; the drawing stops here, the run goes on. */
+    readonly stops: string;
+    readonly cut: string;
+    /** The key: the dot that marks where the run is now; the band for interrupts on. */
+    readonly nowKey: string;
+    readonly interruptsBand: string;
     /** Where the door opens, and where the timer reaches 0, between two instructions. */
     readonly doorOpens: string;
     readonly timerReaches: string;
     /** The band's key: the machine in system mode, and in user mode. */
     readonly systemBand: string;
     readonly userBand: string;
-    /** The trap timeline's button that runs on to the next move between lanes. */
+    /** The trap timeline's buttons that run on to the next move between lanes, and back to the last. */
     readonly nextMove: string;
+    readonly backMove: string;
   };
   /** Memory drawn as boxes, the stack the same way, and the cold store as rooms. */
   readonly boxes: {
@@ -162,12 +184,20 @@ export interface Machine11Strings {
     readonly changed: string;
     /** {reg}: the register whose word a push stored there. */
     readonly saves: string;
+    /** The heading over words a pop has passed. */
+    readonly popped: string;
     readonly stackLabel: string;
     readonly roomsLabel: string;
     /** {name}: a room a door leads back to, drawn already above. */
     readonly roomAgain: string;
     /** Under the rooms: what the door marks and the lit room say. */
     readonly roomsKey: string;
+    /** The key of a rooms drawing with no run: the boxes and the circles only. */
+    readonly roomsKeyStill: string;
+    /** Said after the drawing's label: the lit room. */
+    readonly roomLit: string;
+    /** Said after the drawing's label: the door a call about no room followed. */
+    readonly doorFollowed: string;
   };
   readonly startSkeleton: string;
   readonly startEmpty: string;
@@ -361,24 +391,43 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   lanes: {
     title:
       "The run drawn as lanes, one for each part of the program that runs, with the moves between them",
-    move: "{from} passed the run to {to}, and the move wrote {transfer}",
+    moveCall: "[draft] moveCall {from} {to} {transfer}",
+    moveBack: "[draft] moveBack {from} {to} {transfer}",
+    moveTrap: "[draft] moveTrap {from} {to} {transfer}",
+    moveInterrupt: "[draft] moveInterrupt {from} {to} {transfer}",
+    moveResume: "[draft] moveResume {from} {to} {transfer}",
+    moveJump: "[draft] moveJump {from} {to} {transfer}",
+    markDoor: "[draft] markDoor {lane}",
+    markTimer: "[draft] markTimer {lane}",
+    markStore: "[draft] markStore {lane} {label}",
+    markStop: "[draft] markStop {lane}",
+    markCut: "[draft] markCut {lane}",
+    stops: "[draft] stops",
+    cut: "[draft] cut",
+    nowKey: "[draft] nowKey",
+    interruptsBand: "[draft] interruptsBand",
     doorOpens: "freezer door opens",
     timerReaches: "timer reaches 0",
     systemBand: "system mode",
     userBand: "user mode",
     nextMove: "Next move",
+    backMove: "[draft] backMove",
   },
   boxes: {
     label:
       "{title} drawn as words in boxes at their addresses, with an arrow from each register that holds an address",
     changed: "The box with the thick outline is the word the last step stored.",
     saves: "saves {reg}",
+    popped: "[draft] popped",
     stackLabel:
       "The stack drawn as words in boxes, from the top of the RAM down, grouped by the call that pushed them",
     roomsLabel: "The rooms reachable from the hall, each with its reading and its two doors",
     roomAgain: "{name}, drawn above",
     roomsKey:
       "Each room is a box with its name and reading; the lit room is the one whose address R1 holds, the room the current call is about. Its two doors are circles to its right: a circle with 1 or 2 is a door to a room drawn below it, joined by a line, and a dashed circle with 0 is a door that leads nowhere.",
+    roomsKeyStill: "[draft] roomsKeyStill",
+    roomLit: "[draft] roomLit {name}",
+    doorFollowed: "[draft] doorFollowed {name} {door}",
   },
   startSkeleton: "Start from the outline",
   startEmpty: "Start from an empty program",

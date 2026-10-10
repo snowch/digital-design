@@ -1142,6 +1142,8 @@ const ProgramProps = z.object({
   romBytes: z.boolean().default(true),
   /** One program run on two machines: its listing shows once, above the first run's counts. */
   oneListing: z.boolean().default(false),
+  /** Module 11: the text column headed "Line", as the debugger heads it, not "Instruction". */
+  lineHeader: z.boolean().default(false),
   /** Shown once the learner has run the programs. */
   outcomes: z.string().optional(),
   question: z.string().optional(),
@@ -1251,7 +1253,9 @@ export const ProgramCompare = withProps(
                       <thead>
                         <tr>
                           <th scope="col">{t.address}</th>
-                          <th scope="col">{t.instruction}</th>
+                          <th scope="col">
+                            {data.lineHeader ? strings.machine11.line : t.instruction}
+                          </th>
                         </tr>
                       </thead>
                       <tbody>

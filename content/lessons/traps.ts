@@ -25,6 +25,9 @@ import {
 } from "./module12";
 
 /** Room A's and room B's readings in the night program's runs. */
+/** The edges 12.1's failure experiment draws: the store, then three crossings to the handler and back. */
+export const NO_SKIP_DRAWN = 17;
+
 export const NIGHT_INPUTS = { SENSORA: "-184", SENSORB: "-250" };
 
 /** What the construction asks of a run of the quiz program, which the lesson does not run. */
@@ -160,6 +163,14 @@ export const traps: LessonInput = {
             registers: [5],
             traps: true,
             control: true,
+            // The run never ends: three crossings drawn, then the drawing stops, and says so.
+            lanes: {
+              lanes: [
+                { at: "0x000", name: LABELS.lanes.program },
+                { at: "handler", name: LABELS.lanes.handler, handler: true },
+              ],
+              upTo: NO_SKIP_DRAWN,
+            },
             outcomes: PROSE.noSkipAfter,
           },
         },

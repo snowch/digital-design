@@ -27,9 +27,24 @@ interface BoxRow {
   readonly changed: boolean;
   /** A heading drawn above the word: the call that pushed it. */
   readonly group?: string;
+  /** Past the end of a list, or popped from the stack: drawn dashed, set apart by a rule. */
+  readonly past?: boolean;
+  /** No box: only the address and the arrows (R14 at a word no push has stored). */
+  readonly empty?: boolean;
+  /** A heading alone, with no word under it (a folded run of calls). */
+  readonly heading?: boolean;
 }
 
-function WordBoxes({ rows, label }: { rows: readonly BoxRow[]; label: string }) {
+function WordBoxes({
+  rows,
+  label,
+  keyAlways = false,
+}: {
+  rows: readonly BoxRow[];
+  label: string;
+  /** The key line keeps its place when no word changed, so what is below does not jump. */
+  keyAlways?: boolean;
+}) {
   const t = useViewStrings().machine11;
   const [ref, width] = useWidth<HTMLDivElement>(420);
   const W = Math.max(260, Math.min(width, 520));
@@ -42,7 +57,7 @@ function WordBoxes({ rows, label }: { rows: readonly BoxRow[]; label: string }) 
     const groupY = r.group !== undefined ? y : undefined;
     if (r.group !== undefined) y += 20;
     const at = y;
-    y += ROW;
+    if (!r.heading) y += ROW;
     return { r, at, groupY };
   });
   const H = y + 4;
@@ -61,20 +76,39 @@ function WordBoxes({ rows, label }: { rows: readonly BoxRow[]; label: string }) 
         role="img"
         aria-label={label}
       >
-        {placed.map(({ r, at, groupY }) => (
-          <g key={r.address} className={r.changed ? "box-row box-changed" : "box-row"}>
+        {placed.map(({ r, at, groupY }, i) => (
+          <g
+            key={r.heading ? `heading-${i}` : r.address}
+            className={`box-row${r.changed ? " box-changed" : ""}${r.past ? " box-past" : ""}`}
+          >
+            {r.past && i === placed.findIndex((p) => p.r.past) && (
+              <line className="box-end" x1={addrX} x2={W - 4} y1={at} y2={at} />
+            )}
             {groupY !== undefined && (
               <text className="box-group" x={addrX} y={groupY + 14}>
                 {r.group}
               </text>
             )}
-            <text className="box-address" x={addrX} y={at + 13}>
-              {hex3(r.address)}
-            </text>
-            <rect className="box-word" x={boxX} y={at + 1} width={boxW} height={ROW - 2} rx={3} />
-            <text className="box-value" x={boxX + boxW / 2} y={at + 13} textAnchor="middle">
-              {r.value === undefined ? signedText(r.value) : valueText(r.value)}
-            </text>
+            {!r.heading && (
+              <text className="box-address" x={addrX} y={at + 13}>
+                {hex3(r.address)}
+              </text>
+            )}
+            {!r.empty && (
+              <>
+                <rect
+                  className="box-word"
+                  x={boxX}
+                  y={at + 1}
+                  width={boxW}
+                  height={ROW - 2}
+                  rx={3}
+                />
+                <text className="box-value" x={boxX + boxW / 2} y={at + 13} textAnchor="middle">
+                  {r.value === undefined ? signedText(r.value) : valueText(r.value)}
+                </text>
+              </>
+            )}
             {r.note && (
               <text className="box-note" x={noteX} y={at + 13}>
                 {r.note}
@@ -88,7 +122,14 @@ function WordBoxes({ rows, label }: { rows: readonly BoxRow[]; label: string }) 
           </g>
         ))}
       </svg>
-      {rows.some((r) => r.changed) && <p className="word-boxes-key">{t.boxes.changed}</p>}
+      {(keyAlways || rows.some((r) => r.changed)) && (
+        <p
+          className="word-boxes-key"
+          style={rows.some((r) => r.changed) ? undefined : { visibility: "hidden" }}
+        >
+          {t.boxes.changed}
+        </p>
+      )}
     </div>
   );
 }
@@ -112,21 +153,27 @@ export function MemoryBoxes({
   title,
   state,
   names,
+  ends,
 }: {
   first: number;
   words: number;
   title: string;
   state: DebugState;
   names: Map<number, string>;
+  /** Where the list ends: the words after it drawn dashed, the first with the note. */
+  ends?: { readonly after: number; readonly note: string };
 }) {
   const t = useViewStrings().machine11;
   const changedAt = storedAt(state);
   const rows: BoxRow[] = Array.from({ length: words }, (_, k) => {
     const address = first + 8 * k;
+    const past = ends !== undefined && k >= ends.after;
+    const note = past && k === ends.after ? ends.note : names.get(address);
     return {
       address,
       value: memoryWord(state.cpu, address),
-      ...(names.get(address) ? { note: names.get(address) } : {}),
+      ...(note ? { note } : {}),
+      ...(past ? { past } : {}),
       pointers: pointersAt(state, address),
       changed: address === changedAt,
     };
@@ -134,10 +181,15 @@ export function MemoryBoxes({
   return <WordBoxes rows={rows} label={format(t.boxes.label, { title })} />;
 }
 
-/** The stack as boxes, from the top of the RAM down to R14, grouped by call. */
+/**
+ * The stack as boxes, R14's word first, as the lesson's lists put it: words a pop has passed (no
+ * longer on the stack, but still in the RAM, where a push stored them) set apart above, then R14's
+ * place, then the stack's words grouped by the call that pushed them, the innermost call first.
+ */
 export function StackBoxes({ state, names }: { state: DebugState; names: Map<number, string> }) {
   const t = useViewStrings().machine11;
   const changedAt = storedAt(state);
+  const sp = state.cpu.regs[14];
   const callName = (frame: number) => {
     const c = state.calls[frame];
     if (!c) return t.frameMain;
@@ -146,37 +198,71 @@ export function StackBoxes({ state, names }: { state: DebugState; names: Map<num
       address: hex3(c.at),
     });
   };
+  const saves = (address: number) => {
+    const reg = state.saved?.[address];
+    return reg !== undefined ? { note: format(t.boxes.saves, { reg: `R${reg}` }) } : {};
+  };
   const rows: BoxRow[] = [];
+  // Words a push stored below R14: popped, set apart.
+  if (sp !== undefined)
+    state.pushed
+      .filter((a) => BigInt(a) < sp)
+      .forEach((a, k) =>
+        rows.push({
+          address: a,
+          value: memoryWord(state.cpu, a),
+          ...saves(a),
+          pointers: [],
+          changed: a === changedAt,
+          past: true,
+          ...(k === 0 ? { group: t.boxes.popped } : {}),
+        }),
+      );
+  // R14's place when no push has stored its word yet: its address and the arrow, no box.
+  const onWord = sp !== undefined && state.pushed.some((a) => BigInt(a) === sp);
+  if (sp !== undefined && !onWord && sp >= 0x400n && sp < 0x7c0n)
+    rows.push({
+      address: Number(sp),
+      value: undefined,
+      pointers: ["R14"],
+      changed: false,
+      empty: true,
+    });
   for (const item of stackGroups(state, names)) {
-    // The words of each group from the highest address down, as the stack grows.
-    const words = [...item.group.rows].sort((a, b) => b.address - a.address);
-    words.forEach((w, k) => {
-      const reg = state.saved?.[w.address];
+    const heading =
+      item.kind === "fold"
+        ? format(t.stackFolded, {
+            n: item.n,
+            name: callName(item.group.frame),
+            words: item.n * item.group.rows.length,
+          })
+        : callName(item.group.frame);
+    if (item.kind === "fold") {
+      // A run of like calls folded: its heading alone.
+      rows.push({
+        address: -1,
+        value: undefined,
+        pointers: [],
+        changed: false,
+        group: heading,
+        empty: true,
+        heading: true,
+      });
+      continue;
+    }
+    item.group.rows.forEach((w, k) =>
       rows.push({
         address: w.address,
         value: w.value,
-        ...(reg !== undefined ? { note: format(t.boxes.saves, { reg: `R${reg}` }) } : {}),
-        pointers: pointersAt(state, w.address).filter((p) => p === "R14"),
+        ...saves(w.address),
+        pointers: sp !== undefined && BigInt(w.address) === sp ? ["R14"] : [],
         changed: w.address === changedAt,
-        ...(k === 0
-          ? {
-              group:
-                item.kind === "fold"
-                  ? format(t.stackFolded, {
-                      n: item.n,
-                      name: callName(item.group.frame),
-                      words: item.n * item.group.rows.length,
-                    })
-                  : callName(item.group.frame),
-            }
-          : {}),
-      });
-    });
+        ...(k === 0 ? { group: heading } : {}),
+      }),
+    );
   }
-  // Highest address first: the stack's bottom at the top of the drawing, growing down.
-  const ordered = rows;
-  if (ordered.length === 0) return null;
-  return <WordBoxes rows={ordered} label={t.boxes.stackLabel} />;
+  if (rows.length === 0) return null;
+  return <WordBoxes rows={rows} label={t.boxes.stackLabel} keyAlways />;
 }
 
 /** A room of the cold store, from its three words: the reading, then the two doors. */
@@ -217,15 +303,38 @@ export function roomsFrom(state: DebugState, program: Program, hall: number): Ro
   return out;
 }
 
-/** The cold store as rooms and doors, the room R1 names lit. */
+/**
+ * The return points of a function's calls of itself, in the order its lines make them: where a
+ * call through each door comes back to. A call line whose target is a label at or above it is a
+ * function calling itself (11.5's `warmRooms`, behind its first door, then its second).
+ */
+export function doorReturns(program: Program): number[] {
+  const out: number[] = [];
+  program.lines.forEach((l, i) => {
+    const m = /^call\s+(\w+)/.exec(l.text.trim());
+    const target = m ? program.labels[m[1]!] : undefined;
+    const next = program.lines[i + 1];
+    if (target !== undefined && target <= l.address && next) out.push(next.address);
+  });
+  return out;
+}
+
+/**
+ * The cold store as rooms and doors, the room R1 names lit. Where R1 holds 0, a call about a door
+ * that leads nowhere, the door it followed is marked: the room R10 still holds, the caller's, and
+ * the door R15's return point names. `still` is a figure with no run, whose key says only what the
+ * boxes and circles are.
+ */
 export function RoomsDrawing({
   state,
   program,
   hall,
+  still = false,
 }: {
   state: DebugState;
   program: Program;
   hall: number;
+  still?: boolean;
 }) {
   const t = useViewStrings().machine11;
   const [ref, width] = useWidth<HTMLDivElement>(420);
@@ -233,7 +342,13 @@ export function RoomsDrawing({
   const W = Math.max(260, Math.min(width, 520));
   const indent = 22;
   const rowH = 32;
-  const lit = state.cpu.regs[1];
+  const lit = still ? undefined : state.cpu.regs[1];
+  const returns = doorReturns(program);
+  const door =
+    !still && lit === 0n && returns.length === 2
+      ? returns.indexOf(Number(state.cpu.regs[15] ?? -1n))
+      : -1;
+  const doorRoom = door >= 0 ? state.cpu.regs[10] : undefined;
   const label = (r: Room) => `${r.name} ${signedText(r.reading)}`;
   const boxW = Math.max(...rooms.map((r) => label(r).length)) * CHAR + 14;
   const ys = rooms.map((_, i) => 6 + i * rowH);
@@ -244,6 +359,15 @@ export function RoomsDrawing({
     for (let k = i - 1; k >= 0; k--) if (rooms[k]!.depth === depth - 1) return k;
     return 0;
   };
+  const litRoom = rooms.find((r) => !r.again && lit !== undefined && lit === BigInt(r.address));
+  const doorOf = rooms.find(
+    (r) => !r.again && doorRoom !== undefined && doorRoom === BigInt(r.address),
+  );
+  const said = [
+    t.boxes.roomsLabel,
+    ...(litRoom ? [format(t.boxes.roomLit, { name: litRoom.name })] : []),
+    ...(doorOf ? [format(t.boxes.doorFollowed, { name: doorOf.name, door: door + 1 })] : []),
+  ].join(". ");
   return (
     <div className="store-rooms-figure" ref={ref}>
       <svg
@@ -252,7 +376,7 @@ export function RoomsDrawing({
         height={H}
         viewBox={`0 0 ${W} ${H}`}
         role="img"
-        aria-label={t.boxes.roomsLabel}
+        aria-label={said}
       >
         {rooms.map((r, i) => {
           const x = 4 + r.depth * indent;
@@ -274,7 +398,10 @@ export function RoomsDrawing({
               </text>
               {!r.again &&
                 r.doors.map((d, k) => (
-                  <g key={k} className={d === 0 ? "room-door room-door-none" : "room-door"}>
+                  <g
+                    key={k}
+                    className={`room-door${d === 0 ? " room-door-none" : ""}${r === doorOf && k === door ? " room-door-followed" : ""}`}
+                  >
                     <circle cx={doorX + k * 22} cy={y + 12} r={6} />
                     <text x={doorX + k * 22} y={y + 16} textAnchor="middle">
                       {d === 0 ? "0" : String(k + 1)}
@@ -285,7 +412,7 @@ export function RoomsDrawing({
           );
         })}
       </svg>
-      <p className="word-boxes-key">{t.boxes.roomsKey}</p>
+      <p className="word-boxes-key">{still ? t.boxes.roomsKeyStill : t.boxes.roomsKey}</p>
     </div>
   );
 }

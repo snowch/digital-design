@@ -14,7 +14,7 @@ import {
   timelineRun,
   type InputPlan,
 } from "@dd/dd-model";
-import { laneNames, lanesOf, roomsFrom, type LaneItem } from "@dd/dd-views";
+import { doorReturns, laneNames, lanesOf, roomsFrom, type LaneItem } from "@dd/dd-views";
 import { parseLesson, type LessonInput } from "@platform/lesson-schema";
 
 import { functions } from "./functions";
@@ -61,6 +61,28 @@ function moves(lesson: LessonInput, id: string, limit = 400): string[] {
     );
 }
 
+/** The same run with its bars: each stay as "lane a–b", the edges its bar covers, in order. */
+function bars(lesson: LessonInput, id: string, limit = 400): string[] {
+  const p = propsOf(lesson, id) as {
+    program: string;
+    doorOpensAt?: number;
+    lanes: { lanes: { at: string; name: string; handler?: boolean }[]; again?: string };
+  };
+  const plan: InputPlan = {
+    ...QUIET_INPUTS,
+    ...(p.doorOpensAt !== undefined ? { doorOpensAt: p.doorOpensAt } : {}),
+  };
+  const { program, edges } = timelineRun(p.program, plan, limit);
+  const names = laneNames(p.lanes);
+  return lanesOf(edges, program!, p.lanes).map((it) =>
+    it.kind === "stay"
+      ? `${names[it.lane]} ${it.first}–${it.last}`
+      : it.kind === "move"
+        ? `${names[it.from]} → ${names[it.to]} at ${it.edge}`
+        : `${names[it.lane]}: ${it.what} at ${it.edge}`,
+  );
+}
+
 /** Lane names without the page's words: the figure's own names stand in for them. */
 const plain = (list: readonly string[], names: Record<string, string>) =>
   list.map((m) =>
@@ -79,6 +101,7 @@ describe("what the figures pass draws", () => {
       "overBy → main: PC ← 00C",
       "main → overBy: R15 ← 01C",
       "overBy → main: PC ← 01C",
+      "main: stop",
     ]);
   });
 
@@ -97,8 +120,20 @@ describe("what the figures pass draws", () => {
 
   it("12.1: the store traps with C2 014 and C3 34, and the handler resumes it at 018", () => {
     expect(plain(moves(traps, "night-timeline"), MODULE_12_NAMES(traps, "night-timeline"))).toEqual(
-      ["program → handler: C2 ← 014, C3 ← 34", "handler → program: PC ← 018"],
+      ["program → handler: C2 ← 014, C3 ← 34", "handler → program: PC ← 018", "program: stop"],
     );
+  });
+
+  it("12.1: without the skip, the drawing stops after three crossings, each resume to 014", () => {
+    expect(plain(moves(traps, "no-skip"), MODULE_12_NAMES(traps, "no-skip"))).toEqual([
+      "program → handler: C2 ← 014, C3 ← 34",
+      "handler → program: PC ← 014",
+      "program → handler: C2 ← 014, C3 ← 34",
+      "handler → program: PC ← 014",
+      "program → handler: C2 ← 014, C3 ← 34",
+      "handler → program: PC ← 014",
+      "program: cut",
+    ]);
   });
 
   it("12.4: three calls cross to the handler and back to the line after each call", () => {
@@ -111,6 +146,7 @@ describe("what the figures pass draws", () => {
       "program → handler: C2 ← 07C, C3 ← 41",
       "handler → program: PC ← 07C",
       "program → handler: C2 ← 084, C3 ← 41",
+      "handler: stop",
     ]);
   });
 
@@ -128,6 +164,23 @@ describe("what the figures pass draws", () => {
       "program → handler: C2 ← 0BC, C3 ← 41",
       "handler → program: PC ← 0BC",
       "program → handler: C2 ← 0C4, C3 ← 41",
+      "handler: stop",
+    ]);
+  });
+
+  it("12.5: the door's mark comes before the bar of the edge it arrives at; the timer's after the bar of the edge it reaches 0 at", () => {
+    const b = plain(
+      bars(interrupts, "door-timeline"),
+      MODULE_12_NAMES(interrupts, "door-timeline"),
+    );
+    const around = (what: string) => {
+      const k = b.findIndex((x) => x.startsWith(`program: ${what}`));
+      return b.slice(k - 1, k + 2);
+    };
+    // Items count edges from 0: the door is first waiting after edge 16, the timer after edge 46.
+    expect([around("door"), around("timer")]).toEqual([
+      ["program 7–14", "program: door at 15", "program 15–15"],
+      ["program 30–45", "program: timer at 45", "program → handler at 46"],
     ]);
   });
 
@@ -175,6 +228,7 @@ describe("what the figures pass draws", () => {
       "handler → second: PC ← 114",
       "second → handler: C2 ← 11C, C3 ← 41",
       "handler → start: PC ← 010",
+      "start: stop",
     ]);
   });
 
@@ -197,6 +251,34 @@ describe("what the figures pass draws", () => {
     ]);
     const doors = rooms.flatMap((r) => r.doors);
     expect([doors.length, doors.filter((d) => d !== 0).length]).toEqual([12, 5]);
+  });
+
+  it("11.5: each pause with R1 = 0 follows a door of the room R10 holds, door 1 or 2 by R15", () => {
+    const p = assembleChecked(
+      (propsOf(recursion, "frames") as { program: string }).program,
+    ).program!;
+    const returns = doorReturns(p);
+    const names = new Map(Object.entries(p.labels).map(([n, a]) => [a, n]));
+    let st = debugStart(p.rom);
+    const followed: string[] = [];
+    for (let k = 0; k < 2000 && !st.stopped; k++) {
+      st = debugStep(st, QUIET_INPUTS);
+      if (st.cpu.pc === BigInt(p.labels["warmRooms"]!) && st.cpu.regs[1] === 0n)
+        followed.push(
+          `${names.get(Number(st.cpu.regs[10]))} ${returns.indexOf(Number(st.cpu.regs[15])) + 1}`,
+        );
+    }
+    expect(returns.map((a) => a.toString(16))).toEqual(["60", "70"]);
+    // The seven doors to nowhere, each met once, in the order the run meets them.
+    expect(followed).toEqual([
+      "prep 1",
+      "prep 2",
+      "icebox 1",
+      "icebox 2",
+      "chillA 2",
+      "chillB 1",
+      "chillB 2",
+    ]);
   });
 
   it("11.4: while overBy first runs, 7B8 saves R15 and 7B0 saves R10, R14 at 7B0", () => {

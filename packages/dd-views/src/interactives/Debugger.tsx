@@ -182,6 +182,8 @@ export interface MemoryRegion {
   readonly title: string;
   /** Drawn as boxes, the registers that hold an address as arrows into them; the table kept for a screen reader. */
   readonly drawn?: boolean;
+  /** In the drawing, where a list ends: after this many words a rule, with its note beside it. */
+  readonly ends?: { readonly after: number; readonly note: string };
 }
 
 export interface DebuggerOptions {
@@ -397,11 +399,38 @@ export function DebuggerView({
   const laneItems = useMemo(
     () =>
       lanesConfig
-        ? lanesOf(laneRun(program, start, inputs, machine, limit), program, lanesConfig)
+        ? lanesOf(
+            laneRun(program, start, inputs, machine, limit, lanesConfig.upTo),
+            program,
+            lanesConfig,
+          )
         : [],
     [program, start, inputs, machine, limit, options.lanes],
   );
   const stepsDone = state.ran + state.traps.length;
+  // The drawings that follow the run (the lanes, 11.5's rooms) sit within reach of the buttons:
+  // under the listing on a wide screen, after the watch on a narrow one. Each place is shown at its
+  // own width only, so a screen reader meets one.
+  const roomsHall = options.rooms ? placeOf(options.rooms.hall, program.labels) : undefined;
+  const nearView =
+    lanesConfig || (options.rooms && roomsHall !== undefined) ? (
+      <>
+        {options.rooms && roomsHall !== undefined && (
+          <section className="debugger-panel debugger-rooms" aria-label={options.rooms.title}>
+            <p className="layout-title" aria-hidden="true">
+              {options.rooms.title}
+            </p>
+            <RoomsDrawing state={state} program={program} hall={roomsHall} />
+          </section>
+        )}
+        {lanesConfig && (
+          <section className="debugger-panel debugger-lanes">
+            <RunLanesDrawing items={laneItems} config={lanesConfig} shown={stepsDone} />
+          </section>
+        )}
+      </>
+    ) : null;
+  const nearPhone = nearView && <div className="debugger-near debugger-near-phone">{nearView}</div>;
   // Without its listing, the figure walks from pause to pause only, and ends at the last pause
   // before the program's end: its run never reaches the stop.
   const compact = options.listing === false && options.runLabel !== undefined;
@@ -479,6 +508,7 @@ export function DebuggerView({
               state={state}
               program={program}
               hall={placeOf(options.rooms.hall, program.labels)!}
+              still
             />
           </section>
         )}
@@ -645,6 +675,7 @@ export function DebuggerView({
             </table>
           </div>
         )}
+        {nearView && <div className="debugger-near debugger-near-desk">{nearView}</div>}
       </div>
       <div className={`debugger-values${options.registersFirst ? " registers-first" : ""}`}>
         {options.watch && (
@@ -714,6 +745,8 @@ export function DebuggerView({
             )}
           </section>
         )}
+        {/* On a phone the drawings follow the watch, or the stack where there is one. */}
+        {options.watch && !options.stack && nearPhone}
         {(options.memory ?? []).map((region) => (
           <MemoryPanel key={region.from} region={region} program={program} state={state} t={t} />
         ))}
@@ -726,18 +759,7 @@ export function DebuggerView({
             drawn={options.stackDrawn === true}
           />
         )}
-        {options.rooms && placeOf(options.rooms.hall, program.labels) !== undefined && (
-          <section className="debugger-panel debugger-rooms" aria-label={options.rooms.title}>
-            <p className="layout-title" aria-hidden="true">
-              {options.rooms.title}
-            </p>
-            <RoomsDrawing
-              state={state}
-              program={program}
-              hall={placeOf(options.rooms.hall, program.labels)!}
-            />
-          </section>
-        )}
+        {(options.stack || !options.watch) && nearPhone}
         {options.control && (
           <ControlPanel
             state={state}
@@ -829,11 +851,6 @@ export function DebuggerView({
           </section>
         </div>
       </div>
-      {lanesConfig && (
-        <div className="debugger-lanes">
-          <RunLanesDrawing items={laneItems} config={lanesConfig} shown={stepsDone} />
-        </div>
-      )}
     </div>
   );
 }
@@ -1053,6 +1070,7 @@ function MemoryPanel({
           title={region.title}
           state={state}
           names={nameAt}
+          {...(region.ends ? { ends: region.ends } : {})}
         />
       )}
       <div
@@ -1212,6 +1230,15 @@ function StackPanel({
         )}
       </div>
       {drawn && <StackBoxes state={state} names={names} />}
+      {/* The words the drawing sets apart as popped, for a screen reader, before the stack's. */}
+      {drawn && sp !== undefined && state.pushed.some((a) => BigInt(a) < sp) && (
+        <p className="visually-hidden">
+          {`${t.boxes.popped}: ${state.pushed
+            .filter((a) => BigInt(a) < sp)
+            .map((a) => hex3(a))
+            .join(", ")}`}
+        </p>
+      )}
       {sp === undefined ? (
         <p className="watch-note">{t.stackUnset}</p>
       ) : items.length === 0 ? (
@@ -1244,6 +1271,11 @@ function StackPanel({
                       <span className="memory-word">
                         <WordValue value={r.value} t={t} />
                       </span>
+                      {state.saved?.[r.address] !== undefined && (
+                        <span className="stack-saves">
+                          {format(t.boxes.saves, { reg: `R${state.saved[r.address]}` })}
+                        </span>
+                      )}
                       {BigInt(r.address) === sp && <span className="stack-top">{"← R14"}</span>}
                     </li>
                   ))}
@@ -1357,6 +1389,7 @@ const Region = z.object({
   words: z.number().int().min(1).max(64),
   title: z.string(),
   drawn: z.boolean().optional(),
+  ends: z.object({ after: z.number().int().min(1), note: z.string() }).optional(),
 });
 
 const LaneSpecs = z.object({
@@ -1366,6 +1399,10 @@ const LaneSpecs = z.object({
   again: z.string().optional(),
   marks: z.array(z.string()).optional(),
   mode: z.boolean().optional(),
+  /** Whether a second band shows when interrupts are on (12.6, where job 5 lets them in). */
+  interrupts: z.boolean().optional(),
+  /** The most edges drawn, for a run that never ends (12.1's failure experiment). */
+  upTo: z.number().int().min(1).optional(),
 });
 
 /** A question about a run from reset, answered by running the reference. */
@@ -1609,11 +1646,13 @@ function laneRun(
   inputs: InputPlan,
   machine: MachineOptions,
   limit: number,
+  /** The most edges drawn: the run is taken one edge past them, to know whether it goes on. */
+  upTo?: number,
 ): TimelineEdge[] {
   const lineAt = linesByAddress(program);
   const edges: TimelineEdge[] = [];
   let s = start;
-  while (!s.stopped && s.ran < limit) {
+  while (!s.stopped && s.ran < limit && (upTo === undefined || edges.length <= upTo)) {
     const next = debugStep(s, inputs, machine);
     if (!next.last || next.stopped?.kind === "unknown") break;
     edges.push(timelineEdge(edges.length + 1, s.cpu, next.cpu, next.last, s.ran, lineAt));

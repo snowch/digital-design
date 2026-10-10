@@ -206,6 +206,7 @@ export const nesting: LessonInput = {
               ],
               again: LABELS.lanes.again,
               marks: ["0x410", "0x418"],
+              interrupts: true,
             },
             outcomes: PROSE.savedAfter,
           },

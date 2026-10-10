@@ -31,6 +31,7 @@ import { withProps } from "./props";
 import {
   RunLanesDrawing,
   itemsShown,
+  laneItemText,
   laneNames,
   lanesOf,
   transferValue,
@@ -141,49 +142,58 @@ export const TrapTimeline = withProps(
       const row = box?.querySelector<HTMLElement>("li[aria-current]");
       if (!box || !row) return;
       const top = row.offsetTop - box.offsetTop;
+      // The newest edge is the last: the box follows it, its bottom at the box's, or its top where
+      // it is taller than the box.
       if (top < box.scrollTop || top + row.offsetHeight > box.scrollTop + box.clientHeight)
-        box.scrollTop = Math.max(0, top - box.clientHeight / 3);
+        box.scrollTop = Math.max(0, Math.min(top, top + row.offsetHeight - box.clientHeight));
     }, [at, open]);
     const current = at > 0 ? shown[at - 1] : undefined;
     const ended = at >= shown.length && shown.length > 0;
     const lanesConfig: LanesConfig | undefined = data.lanes && {
       ...data.lanes,
       mode: data.mode,
+      interrupts: data.interrupts,
     };
     const items = useMemo(
       () => (lanesConfig && run.program ? lanesOf(run.edges, run.program, lanesConfig) : []),
-      [run, data.lanes, data.mode, data.doorOpensAt],
+      [run, data.lanes, data.mode, data.interrupts],
     );
     // The edges run so far, counted from reset.
     const ranTo = data.from + at;
-    // The next edge at which the run moves between lanes, or the end.
-    const nextMove = () => {
-      const m = items.find((it) => it.kind === "move" && it.edge >= ranTo);
-      setAt(Math.min(shown.length, m && m.kind === "move" ? m.edge - data.from + 1 : shown.length));
-    };
-    const lastMove = itemsShown(items, ranTo)
-      .filter((it) => it.kind === "move")
+    // Where "Next move" stops: just after each move, and each mark, past the figure's start.
+    const stops = items
+      .filter((it) => it.kind !== "stay")
+      .map((it) => ("edge" in it ? it.edge : 0) - data.from + 1)
+      .filter((k) => k > 0 && k <= shown.length);
+    const nextMove = () => setAt(stops.find((k) => k > at) ?? shown.length);
+    const previousMove = () => setAt([...stops].reverse().find((k) => k < at) ?? 0);
+    const lastSaid = itemsShown(items, ranTo)
+      .filter((it): it is Exclude<typeof it, { kind: "stay" }> => it.kind !== "stay")
       .at(-1);
     const names = lanesConfig ? laneNames(lanesConfig) : [];
     const statusLine = data.list
       ? current
         ? `${format(t.edge, { n: current.n })}: ${edgeText(t, current)}`
         : t.noEdge
-      : lastMove && lastMove.kind === "move"
-        ? format(t11.lanes.move, {
-            from: names[lastMove.from] ?? "",
-            to: names[lastMove.to] ?? "",
-            transfer: lastMove.label,
-          })
+      : at > 0 && lastSaid
+        ? laneItemText(t11.lanes, names, lastSaid)
         : t.noEdge;
     return (
       <div className="machine-figure trap-timeline" data-interactive={interactive.id}>
         <div className="explorer-actions debugger-actions">
-          <button type="button" className="button" disabled={ended} onClick={() => setAt(at + 1)}>
-            {t.nextEdge}
-          </button>
+          {/* Without its list, the figure steps by moves only: an edge's step would show nothing. */}
+          {data.list && (
+            <button type="button" className="button" disabled={ended} onClick={() => setAt(at + 1)}>
+              {t.nextEdge}
+            </button>
+          )}
           {lanesConfig && (
-            <button type="button" className="button secondary" disabled={ended} onClick={nextMove}>
+            <button
+              type="button"
+              className={data.list ? "button secondary" : "button"}
+              disabled={ended}
+              onClick={nextMove}
+            >
               {t11.lanes.nextMove}
             </button>
           )}
@@ -191,9 +201,9 @@ export const TrapTimeline = withProps(
             type="button"
             className="button secondary"
             disabled={at === 0}
-            onClick={() => setAt(at - 1)}
+            onClick={() => (data.list ? setAt(at - 1) : previousMove())}
           >
-            {t.backEdge}
+            {data.list ? t.backEdge : t11.lanes.backMove}
           </button>
           <button
             type="button"
@@ -215,52 +225,60 @@ export const TrapTimeline = withProps(
         <p className="debugger-status" role="status">
           {statusLine}
         </p>
-        {lanesConfig && <RunLanesDrawing items={items} config={lanesConfig} shown={ranTo} />}
-        {data.list && <p className="layout-title">{t.timelineTitle}</p>}
-        {data.list && (
-          <ol className={`trap-edges${open ? " rows-open" : ""}`} ref={boxRef} id={boxId}>
-            {shown.slice(0, at).map((e, i) => (
-              <li
-                key={e.n}
-                className={`trap-edge trap-edge-${e.kind}`}
-                aria-current={i === at - 1 ? "step" : undefined}
-              >
-                <p className="trap-edge-head">
-                  <span className="trap-edge-n">{format(t.edge, { n: e.n })}</span> {edgeText(t, e)}
-                </p>
-                {e.transfers.length === 0 ? (
-                  <p className="trap-edge-none">{t.nothingChanges}</p>
-                ) : (
-                  <ul className="trap-transfers" aria-label={t.transfersLabel}>
-                    {e.transfers.map((x) => (
-                      <li
-                        key={x.target}
-                        className={`memory-word${/^C\d$/.test(x.target) ? " transfer-control" : ""}`}
-                      >
-                        {`${x.target} ← `}
-                        <TransferValue x={x} t11={t11} />
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {data.mode && (
-                  <p className="trap-edge-mode">
-                    {format(t.modeAfter, { mode: statusText(t, e.control[0], data.interrupts) })}
-                  </p>
-                )}
-              </li>
-            ))}
-          </ol>
-        )}
-        {data.list && (hidden || open) && (
-          <RowsToggle
-            open={open}
-            onToggle={() => setOpen(!open)}
-            controls={boxId}
-            t={strings.machine11}
-          />
-        )}
+        {/* The result under the buttons, where a reader who ran to the end is. */}
         {ended && data.outcomes && <Prose markdown={data.outcomes} />}
+        <div className={lanesConfig && data.list ? "trap-timeline-body" : undefined}>
+          {lanesConfig && <RunLanesDrawing items={items} config={lanesConfig} shown={ranTo} />}
+          <div>
+            {data.list && <p className="layout-title">{t.timelineTitle}</p>}
+            {data.list && (
+              <ol className={`trap-edges${open ? " rows-open" : ""}`} ref={boxRef} id={boxId}>
+                {shown.slice(0, at).map((e, i) => (
+                  <li
+                    key={e.n}
+                    className={`trap-edge trap-edge-${e.kind}`}
+                    aria-current={i === at - 1 ? "step" : undefined}
+                  >
+                    <p className="trap-edge-head">
+                      <span className="trap-edge-n">{format(t.edge, { n: e.n })}</span>{" "}
+                      {edgeText(t, e)}
+                    </p>
+                    {e.transfers.length === 0 ? (
+                      <p className="trap-edge-none">{t.nothingChanges}</p>
+                    ) : (
+                      <ul className="trap-transfers" aria-label={t.transfersLabel}>
+                        {e.transfers.map((x) => (
+                          <li
+                            key={x.target}
+                            className={`memory-word${/^C\d$/.test(x.target) ? " transfer-control" : ""}`}
+                          >
+                            {`${x.target} ← `}
+                            <TransferValue x={x} t11={t11} />
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {data.mode && (
+                      <p className="trap-edge-mode">
+                        {format(t.modeAfter, {
+                          mode: statusText(t, e.control[0], data.interrupts),
+                        })}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            )}
+            {data.list && (hidden || open) && (
+              <RowsToggle
+                open={open}
+                onToggle={() => setOpen(!open)}
+                controls={boxId}
+                t={strings.machine11}
+              />
+            )}
+          </div>
+        </div>
       </div>
     );
   },

@@ -45,4 +45,5 @@ export const LABELS = {
   limitPrefix: "limit",
   emptyLog: "empty",
   nextReading: "Next reading",
+  logEnd: "[draft] logEnd",
 } as const;

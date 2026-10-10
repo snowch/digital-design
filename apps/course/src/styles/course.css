@@ -3205,8 +3205,63 @@ svg.run-lanes-drawing {
   vertical-align: middle;
   border-radius: 2px;
 }
-.debugger-lanes {
-  grid-column: 1 / -1;
+/* The drawings that follow a run sit within reach of its buttons: under the listing on a wide
+   screen, after the watch on a narrow one; each place is shown at its own width only. */
+.debugger-near-desk {
+  display: none;
+  margin-top: var(--space-3);
+}
+@media (min-width: 60rem) {
+  .debugger-near-desk {
+    display: block;
+  }
+  .debugger-near-phone {
+    display: none;
+  }
+}
+/* The lanes' drawing in a box of fixed height that follows its newest row, so a long run does
+   not push what the steps are about off the screen. */
+.run-lanes-box {
+  max-height: 14rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+/* On a phone a trap timeline's drawing and its list are stacked under the buttons: both kept short,
+   so the newest row of each is on the screen with the buttons. */
+.trap-timeline-body .run-lanes-box {
+  max-height: 9rem;
+}
+.trap-timeline-body .trap-edges {
+  max-height: 13rem;
+}
+@media (min-width: 60rem) {
+  .run-lanes-box,
+  .trap-timeline-body .run-lanes-box {
+    max-height: 24rem;
+  }
+  .trap-timeline-body .trap-edges {
+    max-height: 24rem;
+  }
+  /* The trap timeline's drawing beside its list where the figure is wide. */
+  .trap-timeline-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-4);
+    align-items: start;
+  }
+}
+.run-lanes-drawing .lane-interrupts-on,
+.run-lanes-legend .lane-interrupts-on {
+  fill: var(--accent);
+  background: var(--accent);
+}
+.run-lanes-legend .lane-key-now {
+  border-radius: 50%;
+  background: var(--focus);
+}
+.run-lanes-drawing .lane-mark-stop rect,
+.run-lanes-drawing .lane-mark-cut rect {
+  fill: var(--fg-muted);
 }
 
 /* Memory drawn as boxes, the stack the same way, and the cold store as rooms (Module 11). */
@@ -3269,4 +3324,21 @@ svg.store-rooms {
 }
 .store-rooms .room-door text {
   fill: var(--fg-muted);
+}
+.store-rooms .room-door-followed circle {
+  fill: var(--accent-soft);
+  stroke: var(--accent-strong);
+  stroke-width: 3;
+  stroke-dasharray: none;
+}
+.store-rooms .room-door-followed text {
+  fill: var(--accent-strong);
+  font-weight: 700;
+}
+.memory-boxes .box-past .box-word {
+  stroke-dasharray: 4 3;
+}
+.memory-boxes .box-end {
+  stroke: var(--fg-muted);
+  stroke-dasharray: 2 3;
 }
