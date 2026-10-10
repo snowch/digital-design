@@ -277,18 +277,21 @@ export function leftFor(key: string, run: ScenarioRun): string {
       : causes.join(", ");
   }
   if (key === "waiting") return bits2(BigInt(cpu.waiting));
-  // Where a run that ended at a `stop` stopped: the name the tests' program gives the line; for a
-  // line of the learner's own, before the tests' lines, "start" before the line named `handler`
-  // and "handler" from it on (or "handler" for any, where no line is named so); else its address.
-  if (key === "stopAt") {
+  // Where a run that ended at a `stop` stopped: the name the tests' program gives the line, or
+  // "handler" for any line of the learner's own, before the tests' lines; else its address.
+  if (key === "stopAt" || key === "stopIn") {
     if (s.stopped?.kind !== "machine" || s.stopped.reason.kind !== "stop") return "";
     const pc = Number(s.stopped.pc);
     const labels = run.program?.labels ?? {};
     // The tests' own lines start at `program`, or at the capstone's table, `programs`.
     const from = labels["program"] ?? labels["programs"];
     if (from !== undefined && pc < from) {
+      if (key === "stopAt") return "handler";
+      // 12.8 alone asks which part of the learner's text stopped: the start's lines are those
+      // above the line named `handler`, which the task says to name so; "unnamed" where no line is.
       const handler = labels["handler"];
-      return handler !== undefined && pc < handler ? "start" : "handler";
+      if (handler === undefined) return "unnamed";
+      return pc < handler ? "start" : "handler";
     }
     const name = Object.entries(labels).find(([, a]) => a === pc)?.[0];
     return name ?? hex3(BigInt(pc));

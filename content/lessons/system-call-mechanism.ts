@@ -44,8 +44,10 @@ export function runAsks(c: RunCase): Record<string, string> {
     // C1 holds the status of the last program at its last trap: user mode, interrupts off.
     C1: "00",
     ...(c.kept ?? {}),
-    // The stop after the last program is the start's: a `stop` among the handler's lines fails.
-    stopAt: "start",
+    stopAt: "handler",
+    // The stop after the last program is the start's: above the line `handler`, which the task
+    // says to name so. A `stop` from that line on, or a text with no such line, fails here alone.
+    stopIn: "start",
   };
 }
 

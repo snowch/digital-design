@@ -35,6 +35,10 @@ export interface Machine12Strings {
   /** {name}: a register, named in a failure as it was at the run's last trap. */
   readonly atTrap: string;
   /** {address}, {cause}: a fault at one of the learner's own lines. */
+  /** 12.8: the run stopped at a `stop` of the learner's own, but no line is named `handler`. */
+  readonly stopUnnamed: string;
+  /** 12.8: the run stopped at a `stop` at or after the line `handler`, so it is the handler's. */
+  readonly stopAfterHandler: string;
   readonly ownFault: string;
   /** Over a test's lines, in a challenge: the tests add them after the learner's. */
   readonly dataAdded: string;
@@ -143,6 +147,8 @@ export const MACHINE12_STRINGS: Machine12Strings = {
       "The debugger ended the run before the instruction at {address}: it copies {reg} into a control register, and nothing has set {reg}.",
   },
   atTrap: "{name} as the program left it at its last trap",
+  stopUnnamed: "[draft] stopUnnamed",
+  stopAfterHandler: "[draft] stopAfterHandler {address}",
   ownFault:
     "An instruction you wrote, in the start or the handler, at {address} faulted with cause {cause} (it is not one of the tests' lines).",
   dataAdded: "The tests add these lines, which hold the program, after your start and handler:",

@@ -3288,10 +3288,7 @@ svg.run-lanes-drawing {
   background: repeating-linear-gradient(45deg, var(--fg) 0 1.5px, var(--bg) 1.5px 3px);
   outline: 1px solid var(--fg-muted);
 }
-.run-lanes-drawing .lane-interrupts-on {
-  stroke: var(--fg-muted);
-  stroke-width: 1;
-}
+/* No outline: drawn once per row, it crossed the band at every row's edge, where nothing changes. */
 .run-lanes-legend .lane-key-now {
   border-radius: 50%;
   background: var(--focus);
