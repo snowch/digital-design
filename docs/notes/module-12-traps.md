@@ -706,6 +706,12 @@ keeps its meaning (every `stop` a jump to one `stop` above `handler:`), and chec
 The empty start's comment no longer leaves "the lamps from R2;" on a line of its own, and the
 reflection says a runner, not a handler, is over the programs.
 
+The full check on the fourth reading (`88c26a6`, with `main` at `c5b2acb` merged): formatting,
+copyright, the platform copy, types and the build passed; Vitest 143 files, 1485 tests passed; the
+browser 917 passed, 62 skipped, 11 failed, all stored screenshots: the ten that fail in this
+container, and desktop "state machines", whose timing diagram the timing work changed. None is
+updated here; the managing session compares them in its own container.
+
 ## The mechanical walk
 
 The built site, every Module 12 page at 375 and 1280 pixels, light and dark, with every run
