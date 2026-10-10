@@ -44,9 +44,11 @@ replaced 13. The managing session's list (S1 to S24) is answered here; the brief
   `snowch/learning-platform` and may not edit. The course gives a narrow value a shorter form or
   leaves it to the table; a minimum unit is the platform's change to make. The same holds for a
   third row of axis labels (S8): the course gives its labels room instead.
-- **9.2's CAUSED** is written in binary on the circuit (an 8-bit word) and in hexadecimal in the
-  prose; and **5.4's** status line gives a state's name with its code in brackets where the lane
-  writes them side by side. Both are left for the managing session to decide.
+- **9.2's CAUSED** stays in bits on the drawing, which writes every small word in bits, as it does
+  K and J; where the prose reads it off the drawing, it gives the bits once beside the cause
+  (brief Y9). **5.4's** status line keeps the code in brackets, which in a plain sentence do what the
+  code font does in the prose. The managing session decided both.
+
 
 ## The check
 
