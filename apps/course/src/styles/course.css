@@ -3219,6 +3219,10 @@ svg.run-lanes-drawing {
   .debugger-listing-wrap:not(.rows-open):has(~ .debugger-near-desk) {
     max-height: 22rem;
   }
+  /* A short run (11.3) drawn whole under its listing, its first call's arrows with its last. */
+  .debugger-near-desk .run-lanes-box.run-lanes-whole {
+    max-height: none;
+  }
   .debugger-near-phone {
     display: none;
   }
@@ -3242,7 +3246,7 @@ svg.run-lanes-drawing {
 }
 /* On a phone the rooms sit after the stack: a short box that keeps the marked room in view. */
 .debugger-near-phone .store-rooms-box {
-  max-height: 7rem;
+  max-height: 3.5rem;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -3252,8 +3256,21 @@ svg.run-lanes-drawing {
   .debugger-body:has(.debugger-near-phone .store-rooms-box) .debugger-listing-wrap:not(.rows-open) {
     max-height: 7rem;
   }
+  .debugger-body:has(.debugger-near-phone .store-rooms-box),
+  .debugger-body:has(.debugger-near-phone .store-rooms-box) .debugger-values {
+    gap: var(--space-2);
+  }
+  /* On a phone the rooms' panel shows no title of its own: the key under the drawing says what it
+     is, and the panel keeps its name for a screen reader. The room it saves keeps the mark on the
+     screen with the buttons at every pause, at 375 by 812. */
+  .debugger-near-phone .debugger-rooms .layout-title {
+    display: none;
+  }
+  .debugger-near-phone .debugger-rooms {
+    padding-top: var(--space-1);
+  }
   .debugger-body:has(.debugger-near-phone .store-rooms-box) .stack-frames:not(.rows-open) {
-    max-height: 5rem;
+    max-height: 8.625rem;
   }
 }
 .trap-timeline-body .trap-edges {
@@ -3365,7 +3382,7 @@ svg.store-rooms {
 .store-rooms .room-door-followed circle {
   fill: var(--bg);
   stroke: var(--accent-strong);
-  stroke-width: 3;
+  stroke-width: 2;
   stroke-dasharray: none;
 }
 .store-rooms .room-door-followed text {

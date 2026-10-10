@@ -10,7 +10,7 @@ export const LABELS = {
     "Run a table of programs one after another, each in user mode.",
     "Offer jobs 1 to 4 by call system.",
     "End a program that faults, and record why.",
-    "Store the handler's own state in the RAM, out of the programs' registers.",
+    "Store the runner's own state in the RAM, out of the programs' registers.",
   ],
   titles: {
     question: "A handler for the shop",

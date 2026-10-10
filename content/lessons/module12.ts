@@ -1346,7 +1346,8 @@ ended:  R8 <= word[0x480]       // record R9 for program R8, at 0x400 + 8 × R8
         word[0x480] <= R8       // the next program
         goto start`;
 
-export const RUN_REFERENCE = `// The shop's handler: run each program the table names, in user mode, through jobs 1 to 4.
+export const RUN_REFERENCE = `// The shop's runner: run each program the table names, in user mode, through jobs 1 to 4.
+// The start's lines come first, its stop included. The handler's first line is named handler.
 ${RUN_START}
 ${RUN_HANDLER_HEAD}
 ${RUN_ROOM}
@@ -1365,7 +1366,8 @@ const RUN_FIRST = `        R1 <= handler
  * of each program and the end of each, with its record, left to the learner, so no figure shows
  * them.
  */
-export const RUN_SKELETON = `// The shop's handler: run each program the table names, in user mode, through jobs 1 to 4.
+export const RUN_SKELETON = `// The shop's runner: run each program the table names, in user mode, through jobs 1 to 4.
+// The start's lines come first, its stop included. The handler's first line is named handler.
 ${RUN_FIRST}
 // start: run program number word[0x480] from the table, in user mode with interrupts off;
 // after the last program, stop.
@@ -1380,7 +1382,9 @@ finish: stop
 ended:  stop`;
 
 /** The empty start: the requirements as comments. */
-export const RUN_EMPTY = `// The shop's handler. The tests add a table, programs, after it: its first word is how many
+export const RUN_EMPTY = `// The shop's runner is a start, then the handler. The start's lines, its stop included, go above
+// the handler's first line, which is named handler. The tests add a table, programs, after it:
+// its first word is how many
 // programs, then each program's address. Run each in user mode with interrupts off, in order,
 // from the first. Offer jobs 1 to 4 by call system: 1 shows R2; 2 puts room R2's reading in R1
 // (R2 is 0 for room A, 1 for room B; any other R2 puts 0 in R1); 3 sets the lamps from R2;

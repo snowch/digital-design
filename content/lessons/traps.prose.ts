@@ -42,7 +42,7 @@ export const PROSE = {
   failureExperiment:
     "The figure runs the night program with a shorter handler. It stores the cause at `400` and runs `resume` at once. It does not change C2.\n\nWatch C2 in the control registers panel.",
   noSkipLead:
-    'Predict how the run ends, then press "Run to the end".\n\nUnder the listing, the run is drawn as lanes, the night program and the handler, as in the timeline; on a narrow screen, the drawing comes before the control registers\' panel. It is empty until the first press, and it grows with each step.',
+    'Predict how the run ends, then press "Run to the end".\n\nUnder the listing, the run is drawn as lanes, the night program and the handler, as in the timeline; on a narrow screen, the drawing comes after the control registers\' panel. It is empty until the first press, and it grows with each step.',
   noSkipAfter:
     "The debugger cuts the run off after 5000 instructions. NIGHT never lights.\n\nC2 still holds `014` when `resume` runs, so the PC goes back to the store to room B's sensor.\n\nThe store faults again and traps again. The handler resumes the program again, and the run goes round for ever.\n\nThe drawing shows the first three crossings, and each `resume`'s arrow is labelled PC ← `014`. After the third `resume` it stops, at a zigzag across the night program's lane, while the run goes on.",
   explanation:

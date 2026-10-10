@@ -433,7 +433,7 @@ export const MACHINE11_STRINGS: Machine11Strings = {
     roomsLabel: "The rooms reachable from the hall, each with its reading and its two doors",
     roomAgain: "{name}, drawn above",
     roomsKey:
-      "Each room is a box with its name and its reading. The lit box is the room whose address R1 holds. Its two doors are circles to its right: a circle with 1 or 2 is a door to a room, and a dashed circle with 0 is a door that leads nowhere. A door with a thick ring is the door the running call came through. Each room behind a door is drawn below, set in a little to the right, and a line runs to it from the box of the room it opens from.",
+      "Each room is a box with its name and its reading. Its two doors are circles to its right: a circle with 1 or 2 is a door to a room, and a dashed circle with 0 is a door that leads nowhere. The lit box is the room whose address R1 holds. A door with a thick ring is the door the running call came through. Each room behind a door is drawn below, set in a little to the right, and a line runs to it from the box of the room it opens from.",
     roomsKeyStill:
       "Each room is a box with its name and its reading. Its two doors are circles to its right: a circle with 1 or 2 is a door to a room, and a dashed circle with 0 is a door that leads nowhere. Each room behind a door is drawn below, set in a little to the right, and a line runs to it from the box of the room it opens from.",
     roomLit: "{name} is lit, and R1 holds its address.",

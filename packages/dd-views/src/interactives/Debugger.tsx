@@ -1240,14 +1240,21 @@ function StackPanel({
       {/* The words the drawing sets apart as popped, for a screen reader, before the stack's. */}
       {drawn && sp !== undefined && state.pushed.some((a) => BigInt(a) < sp) && (
         <p className="visually-hidden">
-          {`${t.boxes.popped}: ${state.pushed
+          {`${t.boxes.popped}: `}
+          {/* Each word as the stack's own items give it, its hexadecimal named. */}
+          {state.pushed
             .filter((a) => BigInt(a) < sp)
-            .map((a) => {
+            .map((a, k) => {
               const reg = state.saved?.[a];
-              const value = valueText(memoryWord(state.cpu, a));
-              return `${hex3(a)} ${value}${reg !== undefined ? ` ${format(t.boxes.saves, { reg: `R${reg}` })}` : ""}`;
-            })
-            .join("; ")}`}
+              return (
+                <span key={a}>
+                  {k > 0 ? "; " : ""}
+                  {`${hex3(a)} `}
+                  <WordValue value={memoryWord(state.cpu, a)} t={t} />
+                  {reg !== undefined ? ` ${format(t.boxes.saves, { reg: `R${reg}` })}` : ""}
+                </span>
+              );
+            })}
         </p>
       )}
       {sp === undefined ? (
@@ -1412,6 +1419,8 @@ const LaneSpecs = z.object({
   mode: z.boolean().optional(),
   /** Whether a second band shows when interrupts are on (12.6, where job 5 lets them in). */
   interrupts: z.boolean().optional(),
+  /** A short run drawn whole on a wide screen (11.3), not in a box that follows its newest row. */
+  whole: z.boolean().optional(),
   /** The most edges drawn, for a run that never ends (12.1's failure experiment). */
   upTo: z.number().int().min(1).optional(),
 });

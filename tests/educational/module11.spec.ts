@@ -38,7 +38,10 @@ const LONG_DEBUGGERS = [
   [
     "recursion",
     "frames",
-    [".debugger-stack", ".store-rooms .room-lit, .store-rooms .room-door-followed"],
+    [
+      ".debugger-stack",
+      ".store-rooms .room-lit .room-box, .store-rooms .room-door-followed circle",
+    ],
   ],
 ] as const;
 
@@ -337,6 +340,50 @@ test.describe("Module 11's lab", () => {
       await check();
       await figure.getByRole("button", { name: T.back, exact: true }).click();
       await check();
+    }
+  });
+
+  test("11.5 at every pause: the buttons, the newest call's words and the marked room are on one screen", async ({
+    page,
+  }) => {
+    const height = page.viewportSize()?.height ?? 0;
+    await openLesson(page, "recursion");
+    const figure = page.locator('[data-interactive="frames"]');
+    const actions = figure.locator(".debugger-actions");
+    await actions.evaluate((e) => {
+      e.scrollIntoView({ block: "start" });
+      window.scrollBy(0, -16);
+    });
+    const onScreen = async (what: Locator, name: string) => {
+      const box = (await what.boundingBox())!;
+      expect(box.y, `${name}: top`).toBeGreaterThanOrEqual(0);
+      expect(box.y + box.height, `${name}: bottom`).toBeLessThanOrEqual(height);
+    };
+    const run = figure.getByRole("button", { name: T.runToPause, exact: true });
+    for (let pause = 1; pause <= 13; pause++) {
+      await run.click();
+      await onScreen(actions, `pause ${pause}: the buttons`);
+      // The newest call's group, all its words, inside the stack's box and on the screen.
+      const frame = figure.locator(".stack-frame").filter({ visible: true }).first();
+      if ((await frame.count()) > 0) {
+        const words = frame.locator(".stack-word");
+        await onScreen(words.last(), `pause ${pause}: the newest call's last word`);
+        const box = (await figure.locator(".stack-frames").boundingBox())!;
+        for (const w of await words.all()) {
+          const r = (await w.boundingBox())!;
+          expect(r.y, `pause ${pause}: a word inside the stack's box`).toBeGreaterThanOrEqual(
+            box.y - 1,
+          );
+          expect(
+            r.y + r.height,
+            `pause ${pause}: a word inside the stack's box`,
+          ).toBeLessThanOrEqual(box.y + box.height + 1);
+        }
+      }
+      const mark = figure
+        .locator(".store-rooms .room-lit .room-box, .store-rooms .room-door-followed circle")
+        .filter({ visible: true });
+      if ((await mark.count()) > 0) await onScreen(mark.last(), `pause ${pause}: the marked room`);
     }
   });
 

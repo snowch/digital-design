@@ -6,6 +6,8 @@
 // 6V, docs/notes/module-10-instruction-set/briefs/6V.md) and checked against the figures.
 
 export interface Machine10Strings {
+  /** A figure that waits for a prediction above it to be checked. */
+  readonly heldNote: string;
   // The two machines compared (machine-compare).
   readonly singleName: string;
   readonly multiName: string;
@@ -191,6 +193,7 @@ export interface Machine10Strings {
 }
 
 export const MACHINE10_STRINGS: Machine10Strings = {
+  heldNote: "[draft] heldNote",
   singleName: "Module 8's machine",
   multiName: "Module 9's machine",
   seenCaption: "What a program can see",

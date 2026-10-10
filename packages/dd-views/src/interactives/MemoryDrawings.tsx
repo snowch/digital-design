@@ -216,6 +216,18 @@ export function StackBoxes({ state, names }: { state: DebugState; names: Map<num
     return reg !== undefined ? { note: format(t.boxes.saves, { reg: `R${reg}` }) } : {};
   };
   const rows: BoxRow[] = [];
+  // R14's place when no push has stored its word yet: its address and the arrow, no box.
+  const onWord = sp !== undefined && state.pushed.some((a) => BigInt(a) === sp);
+  // At 7C0, where the stack is empty, R14's place is drawn while popped words are: the arrow
+  // does not vanish with the last pop.
+  const popped = sp !== undefined && state.pushed.some((a) => BigInt(a) < sp);
+  const place: BoxRow | undefined =
+    sp !== undefined && !onWord && sp >= 0x400n && (sp < 0x7c0n || (sp === 0x7c0n && popped))
+      ? { address: Number(sp), value: undefined, pointers: ["R14"], changed: false, empty: true }
+      : undefined;
+  // At 7C0, past the RAM, R14's place stands first, apart from the popped words' heading; below
+  // 7C0 it stands where its address falls, after them and above the stack's words.
+  if (place && sp === 0x7c0n) rows.push(place);
   // Words a push stored below R14: popped, set apart.
   if (sp !== undefined)
     state.pushed
@@ -231,19 +243,7 @@ export function StackBoxes({ state, names }: { state: DebugState; names: Map<num
           ...(k === 0 ? { group: t.boxes.popped } : {}),
         }),
       );
-  // R14's place when no push has stored its word yet: its address and the arrow, no box.
-  const onWord = sp !== undefined && state.pushed.some((a) => BigInt(a) === sp);
-  // At 7C0, where the stack is empty, R14's place is drawn while popped words are: the arrow
-  // does not vanish with the last pop.
-  const popped = sp !== undefined && state.pushed.some((a) => BigInt(a) < sp);
-  if (sp !== undefined && !onWord && sp >= 0x400n && (sp < 0x7c0n || (sp === 0x7c0n && popped)))
-    rows.push({
-      address: Number(sp),
-      value: undefined,
-      pointers: ["R14"],
-      changed: false,
-      empty: true,
-    });
+  if (place && sp !== 0x7c0n) rows.push(place);
   for (const item of stackGroups(state, names)) {
     const heading =
       item.kind === "fold"
@@ -417,10 +417,13 @@ export function RoomsDrawing({
   const boxRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const box = boxRef.current;
-    const mark = box?.querySelector<SVGGraphicsElement>(".room-lit, .room-door-followed");
+    // The room's own box, or the ringed door: not the line drawn up to it from the room above.
+    const mark = box?.querySelector<SVGGraphicsElement>(
+      ".room-lit .room-box, .room-door-followed circle",
+    );
     if (!box || !mark || box.scrollHeight <= box.clientHeight) return;
     const top = mark.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop;
-    box.scrollTop = Math.max(0, top - 4);
+    box.scrollTop = Math.max(0, top - 1);
   });
   return (
     <div className="store-rooms-figure" ref={ref}>

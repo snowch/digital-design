@@ -55,6 +55,8 @@ export interface LanesConfig {
   readonly interrupts?: boolean;
   /** The most edges drawn: a run that goes on past them is drawn to there, and says so. */
   readonly upTo?: number;
+  /** A short run drawn whole on a wide screen, not in a box that follows its newest row (11.3). */
+  readonly whole?: boolean;
 }
 
 /** One stretch of the run inside one lane. */
@@ -367,7 +369,7 @@ export function RunLanesDrawing({
           </li>
         ))}
       </ol>
-      <div className="run-lanes-box" ref={boxRef}>
+      <div className={`run-lanes-box${config.whole ? " run-lanes-whole" : ""}`} ref={boxRef}>
         <svg
           className="run-lanes-drawing"
           width={W}

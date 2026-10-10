@@ -147,8 +147,10 @@ export const MACHINE12_STRINGS: Machine12Strings = {
       "The debugger ended the run before the instruction at {address}: it copies {reg} into a control register, and nothing has set {reg}.",
   },
   atTrap: "{name} as the program left it at its last trap",
-  stopUnnamed: "[draft] stopUnnamed",
-  stopAfterHandler: "[draft] stopAfterHandler {address}",
+  stopUnnamed:
+    "No line of your text is named handler, so the test cannot tell the start's stop from the handler's lines. Name the handler's first line handler.",
+  stopAfterHandler:
+    "The run ended at the stop at {address}, which comes at or after the line named handler, so the test counts it as the handler's. The start's stop must come above that line.",
   ownFault:
     "An instruction you wrote, in the start or the handler, at {address} faulted with cause {cause} (it is not one of the tests' lines).",
   dataAdded: "The tests add these lines, which hold the program, after your start and handler:",

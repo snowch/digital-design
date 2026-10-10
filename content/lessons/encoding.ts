@@ -135,6 +135,8 @@ export const encoding: LessonInput = {
               { label: LABELS.words.load, text: "R2 <= word[sensorA]" },
               { label: LABELS.words.call, text: "0x6000F005" },
             ],
+            // The prediction's own instruction waits for the prediction: its layouts answer it.
+            holdUntil: { prediction: "predict-moved", texts: ["R2 <= R1 + 100"] },
           },
         },
         {
@@ -183,8 +185,10 @@ export const encoding: LessonInput = {
           timeModel: "none",
           caption: LABELS.captions.packedRead,
           lead: PROSE.packedReadLead,
-          after: PROSE.packedReadAfter,
           props: {
+            // Its words and what they show answer the prediction: they wait until it is checked.
+            holdUntil: "predict-moved",
+            outcome: PROSE.packedReadAfter,
             calculator: false,
             words: [
               { label: LABELS.words.packedAdd, text: "0x22120064" },
