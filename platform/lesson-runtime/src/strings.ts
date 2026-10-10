@@ -5,6 +5,7 @@
 // The sentences were drafted by the course's prose process (see CLAUDE.md) from a brief of facts,
 // and checked against the code that uses them. Slots in braces are filled by `format`. A book
 // may replace any of them through LessonView's `strings` prop.
+import type { ReactNode } from "react";
 
 export interface Strings {
   readonly section: Readonly<Record<string, string>>;
@@ -18,9 +19,15 @@ export interface Strings {
     readonly timeModel: Readonly<Record<string, string>>;
     /** The time-model badge's accessible name; {model} is the badge's text. */
     readonly badgeLabel: string;
+    /** A figure's role as its badge names it, by the role's name in the lesson. */
+    readonly role: Readonly<Record<string, string>>;
+    /** The badge's accessible name on a figure with a role; {role} is the badge's text. */
+    readonly roleBadgeLabel: string;
     readonly unknownInteractive: string;
     readonly brokenInteractive: string;
   };
+  /** How a course draws inline code in prose, if it draws more than the words. */
+  readonly code?: (props: { readonly children: ReactNode }) => ReactNode;
   readonly challenge: {
     readonly run: string;
     readonly notRun: string;
@@ -28,6 +35,10 @@ export interface Strings {
     readonly failing: string;
     readonly complete: string;
     readonly blocked: string;
+    /** Under `blocked`, when the book's grader threw instead of giving a verdict; {message} is the error's. */
+    readonly graderError: string;
+    /** In the editor's place, when the book's editor could not draw the saved work; {message} is the error's. */
+    readonly brokenEditor: string;
     readonly failedTest: string;
     readonly inputs: string;
     readonly actual: string;
@@ -74,6 +85,8 @@ export const DEFAULT_STRINGS: Strings = {
       delay: "Gate delays",
     },
     badgeLabel: "Time model: {model}",
+    role: {},
+    roleBadgeLabel: "What this figure asks of you: {role}",
     unknownInteractive: "Unknown interactive type: {kind}",
     brokenInteractive: "The {kind} figure could not be shown: {message}",
   },
@@ -84,6 +97,10 @@ export const DEFAULT_STRINGS: Strings = {
     failing: "{passed} of {total} tests passed",
     complete: "Complete",
     blocked: "Tests could not run",
+    graderError:
+      'The checking code stopped with an error while it checked your work, so it could not report which tests passed. Your work is kept, so you can change it and press "Run tests" again, or press "Clear work" to go back to the starting point. The error says: {message}',
+    brokenEditor:
+      'The editor cannot show the work saved for this challenge. The buttons below still work, and pressing "Clear work" puts the challenge back to its starting point, which the editor then shows. The error says: {message}',
     failedTest: "{label}",
     inputs: "Inputs",
     actual: "Actual",

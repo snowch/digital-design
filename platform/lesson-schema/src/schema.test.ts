@@ -68,6 +68,22 @@ describe("the lesson schema", () => {
     expect(() => parseLesson(fourHints)).toThrow(/hints/);
   });
 
+  it("takes a section's details only with words on its control and in its body", () => {
+    const base = minimalLesson();
+    const withDetails = (details: { summary: string; prose: string }): LessonInput => ({
+      ...base,
+      sections: base.sections.map((s) => (s.kind === "question" ? { ...s, details } : s)),
+    });
+    const ok = parseLesson(withDetails({ summary: "About the model", prose: "It is **small**." }));
+    expect(ok.sections[0]?.details).toEqual({
+      summary: "About the model",
+      prose: "It is **small**.",
+    });
+    expect(ok.sections[1]?.details).toBeUndefined();
+    expect(() => parseLesson(withDetails({ summary: "", prose: "Text." }))).toThrow(/summary/);
+    expect(() => parseLesson(withDetails({ summary: "About", prose: "" }))).toThrow(/prose/);
+  });
+
   it("holds the ten sections to the course's order", () => {
     const swapped = minimalLesson();
     const s = swapped.sections as { kind: string }[];
@@ -231,6 +247,23 @@ describe("the term gate", () => {
       "earlier-module",
     ]);
     expect(termProblems([first, laterModule])).toEqual([]);
+  });
+
+  it("reads a section's details as well as its prose", () => {
+    const first = parseLesson(minimalLesson({ id: "first", order: 1, introduces: ["latch"] }));
+    const base = minimalLesson({ id: "earlier", order: 0 });
+    const withDetails = (details: { summary: string; prose: string }) =>
+      parseLesson({
+        ...base,
+        sections: base.sections.map((s) => (s.kind === "question" ? { ...s, details } : s)),
+      });
+    expect(
+      termProblems([first, withDetails({ summary: "More", prose: "The door latches." })]),
+    ).toHaveLength(1);
+    expect(
+      termProblems([first, withDetails({ summary: "About the latch", prose: "A door." })]),
+    ).toHaveLength(1);
+    expect(termProblems([first, withDetails({ summary: "More", prose: "A door." })])).toEqual([]);
   });
 });
 

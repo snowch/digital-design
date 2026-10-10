@@ -76,4 +76,6 @@ export interface Book {
   readonly grade: (challenge: Challenge, artifact: Artifact) => Verdict;
   /** What each of the book's models means in its words, for the badge's note and the note every lesson states. */
   readonly timeModelNotes: Readonly<Partial<Record<TimeModel, string>>>;
+  /** What each role a figure may declare asks of the reader, for the badge's note, before the model's. */
+  readonly roleNotes?: Readonly<Record<string, string>>;
 }

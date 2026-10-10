@@ -22,6 +22,7 @@ export {
   AXIS_H,
   LANE_H,
   Timeline,
+  fitUnit,
   layoutMarks,
   type TimelineGeometry,
   type TimelineMark,
