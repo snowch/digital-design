@@ -106,6 +106,22 @@ step.
 
 ## Decisions since the brief
 
+### 10 October 2026: Bit Lab goes with the calculator, not the course
+
+The author asked whether their Bit Lab page (bitwise jobs, a ripple-carry adder, subtraction and
+four flags, drawn as gates) belongs in the course, and placed it with
+`snowch/programmer-calculator` instead, for the reasons of 6 October below:
+
+- the course already builds its content on the simulator, in `adders` (3.3), `alu` (3.4),
+  `alu-jobs` (7.1) and `flags` (7.2);
+- it names the flags with the processor letters C, V, Z and N, and teaches shifts, which the
+  course's ALU does not have;
+- it follows Harris and Harris's flag convention, sends the reader on to their chapter 5 and
+  Nand2Tetris's second project, and names commercial instruction sets;
+- it works its values out in the page rather than running a circuit.
+
+The calculator may link to those four lessons. No lesson links to Bit Lab.
+
 ### 8 October 2026: Module 13, the final machine
 
 Module 13 was built with the three recommendations of `docs/notes/module-13-plan.md`, as the

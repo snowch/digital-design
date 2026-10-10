@@ -130,6 +130,10 @@ for them before calling a lesson finished:
 - a definite article in front of a noun the lesson has not introduced;
 - a term doing work before it is defined;
 - a table or a signal list nobody chose for this lesson, rendered because the component had it;
+- an idea that is a shape (a path through a program, words laid out in memory, parts and the
+  joins between them, a run over time) carried only in a table or in sentences. A table beside a
+  drawing can index it; a table in its place cannot. Modules 11 and 12 shipped their lists, their
+  stack and a trap's crossing that way, and their reviews passed them;
 - the same argument made twice, far apart;
 - a number spelled as a word that the simulator did not produce.
 
