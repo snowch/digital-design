@@ -135,8 +135,12 @@ export const encoding: LessonInput = {
               { label: LABELS.words.load, text: "R2 <= word[sensorA]" },
               { label: LABELS.words.call, text: "0x6000F005" },
             ],
-            // The prediction's own instruction waits for the prediction: its layouts answer it.
-            holdUntil: { prediction: "predict-moved", texts: ["R2 <= R1 + 100"] },
+            // The prediction's own instruction waits for the prediction: its layouts answer it. So
+            // does the load, whose layouts, with the bullet under the figure, would answer it too.
+            holdUntil: {
+              prediction: "predict-moved",
+              texts: ["R2 <= R1 + 100", "R2 <= word[sensorA]"],
+            },
           },
         },
         {

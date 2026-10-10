@@ -1,12 +1,12 @@
 // Copyright © 2026 Christopher Snow
 
-// Where a handler's `stop` may stand. In 12.1, 12.4, 12.5 and 12.6 any `stop` of the learner's own
+// Where a handler's `stop` may stand. In 12.1, 12.3 to 12.6 any `stop` of the learner's own
 // ends a run as the handler's, wherever it sits in the text; 12.8 alone asks that the run end at
 // the start's, the lines above the one named `handler`, and says so when it does not.
 
 import { describe, expect, it } from "vitest";
 
-import { DEFAULT_VIEW_STRINGS, format, grade } from "@dd/dd-views";
+import { DEFAULT_VIEW_STRINGS, grade } from "@dd/dd-views";
 import { parseLesson, type LessonInput } from "@platform/lesson-schema";
 
 import { interrupts } from "./interrupts";
@@ -14,6 +14,7 @@ import { nesting } from "./nesting";
 import { systemCallMechanism } from "./system-call-mechanism";
 import { systemCalls } from "./system-calls";
 import { traps } from "./traps";
+import { userMode } from "./user-mode";
 
 const challenge = (lesson: LessonInput, id: string) =>
   parseLesson(lesson).challenges.find((c) => c.id === id)!;
@@ -27,18 +28,22 @@ const isStop = (line: string) =>
       .trim(),
   );
 
-/** The text with its `stop` lines moved to just above the line `handler:`. */
+/**
+ * The same program with its stop above the line `handler:`: each `stop` becomes a jump to one
+ * `stop` placed there, so the run ends at the same moment and with the same words.
+ */
 function stopsAboveHandler(text: string): string {
-  const lines = text.split("\n");
-  const stops = lines.filter(isStop);
-  const rest = lines.filter((l) => !isStop(l));
-  const at = rest.findIndex((l) => /^handler:/.test(l.trim()));
-  return [...rest.slice(0, at), ...stops, ...rest.slice(at)].join("\n");
+  const lines = text
+    .split("\n")
+    .map((l) => (isStop(l) ? l.replace(/\bstop\b/, "goto stopped") : l));
+  const at = lines.findIndex((l) => /^handler:/.test(l.trim()));
+  return [...lines.slice(0, at), "stopped: stop", ...lines.slice(at)].join("\n");
 }
 
 describe("where a handler's stop may stand", () => {
   for (const [lesson, id] of [
     [traps, "skip-refused"],
+    [userMode, "start-user"],
     [systemCalls, "sensor-service"],
     [interrupts, "door-timer"],
     [nesting, "wait-door"],
@@ -63,8 +68,19 @@ describe("where a handler's stop may stand", () => {
     const late = grade(c, { text: atEnd });
     expect(late.passed).toBe(false);
     const S12 = DEFAULT_VIEW_STRINGS.machine12;
-    const address = /at ([0-9A-F]{3})\./.exec(late.failures[0]?.detail ?? "")?.[1] ?? "";
-    expect(late.failures[0]?.detail).toContain(format(S12.stopAfterHandler, { address }));
+    // No stop of the learner's sits above handler:, so the feedback says to move the start's.
+    expect(late.failures[0]?.detail).toContain(S12.stopBelow);
+    expect(late.failures[0]?.detail).not.toContain(S12.stopInHandler);
+    // The construction's step 1 done: the start written, its stop above handler:, while finish:
+    // and ended: still only stop. The run ends at the handler's stop, which the feedback names
+    // once, and does not ask to move the start's stop.
+    const step1 = text.slice(0, text.indexOf("finish:")) + "finish: stop\nended:  stop\n";
+    const given = grade(c, { text: step1 });
+    expect(given.passed).toBe(false);
+    const run1 = given.failures[0]?.detail ?? "";
+    expect(run1).toContain(S12.stopInHandler);
+    expect(run1).not.toContain(S12.stopBelow);
+    expect(run1.match(/\b0[0-9A-F]{2}\b/g)?.length).toBe(1);
     // The line `handler` renamed: no line says where the handler starts, so it fails, saying so.
     const renamed = text.replace(/\bhandler\b/g, "choice");
     const unnamed = grade(c, { text: renamed });

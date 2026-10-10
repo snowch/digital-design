@@ -55,6 +55,8 @@ export interface Machine10Strings {
   /** {names}: the fields that sit in other digits than in the course's layout. */
   readonly layoutMoved: string;
   readonly layoutStill: string;
+  /** {n}: the instructions held back until the prediction above is checked (10.2). */
+  readonly layoutsHeld: string;
   /** After a prediction: the fields the packed layout moves, {answer}. */
   readonly layoutAnswer: string;
 
@@ -232,6 +234,8 @@ export const MACHINE10_STRINGS: Machine10Strings = {
   layoutRange: "Constant: {bits} bits, {min} to {max}.",
   layoutMoved: "Moved: {names}.",
   layoutStill: "No field moves.",
+  layoutsHeld:
+    "{n} more instructions are held back, and they show here once the prediction above is checked.",
   layoutAnswer: "The packed layout moves: {answer}.",
 
   wordLabel: "Instruction (8 hexadecimal digits)",

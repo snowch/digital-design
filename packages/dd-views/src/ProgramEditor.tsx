@@ -158,7 +158,8 @@ export function gradeProgram(
     const traps = c.given["traps"] !== undefined;
     const m12 = strings.machine12;
     const endWrong = r.wrong.includes("end") || r.wrong.includes("stopAt");
-    // 12.8: a stop of the learner's own that is not the start's, and why.
+    // 12.8: a stop of the learner's own that is not the start's, and why; the sentence before it
+    // has said which stop it was.
     const stopIn = r.wrong.includes("stopIn") ? r.actual["stopIn"] : undefined;
     const wrongLeft = r.wrong.filter((k) => k !== "end" && k !== "stopAt" && k !== "stopIn");
     const parts: string[] = [];
@@ -184,7 +185,8 @@ export function gradeProgram(
     if (traps) {
       const must = key !== undefined ? m12.ends[String(key)] : undefined;
       if (stopIn === "unnamed") parts.push(m12.stopUnnamed);
-      else if (stopIn === "handler") parts.push(format(m12.stopAfterHandler, r.end?.values ?? {}));
+      else if (stopIn === "handler") parts.push(m12.stopInHandler);
+      else if (stopIn === "below") parts.push(m12.stopBelow);
       if ((endWrong || stopIn !== undefined) && must) parts.push(must);
     } else if (r.wrong.includes("end") && endKey !== "stop") parts.push(t.mustStop);
     failures.push({

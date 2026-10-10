@@ -456,8 +456,10 @@ export const LayoutCompare = withProps(
     const answer = useMemo(() => (asking ? layoutAnswer(data) : ""), [asking, data]);
     const optionLabel = (v: string) =>
       (data.options?.find((o) => o.value === v)?.label ?? v).replace(/\.$/, "");
-    const [chosen, setChosen] = useState(0);
-    const given = instructions[chosen] ?? instructions[0];
+    // The choice is kept by its text, so an instruction held back and then shown keeps the
+    // learner's choice where it was.
+    const [chosen, setChosen] = useState<string>();
+    const given = instructions.find((c) => c.text === chosen) ?? instructions[0];
     const instruction = useMemo(() => (given ? wordOfText(given.text) : 0), [given]);
     const course = courseLayout(instruction);
     const packed = packedLayout(instruction);
@@ -495,17 +497,20 @@ export const LayoutCompare = withProps(
         {committed && instructions.length > 1 && (
           <fieldset className="carry-cases">
             <legend>{strings.machine8.choose}</legend>
-            {instructions.map((c, k) => (
+            {instructions.map((c) => (
               <label key={c.label} className="fault-choice">
                 <input
                   type="radio"
                   name={`${interactive.id}-choice`}
-                  checked={chosen === k}
-                  onChange={() => setChosen(k)}
+                  checked={c === given}
+                  onChange={() => setChosen(c.text)}
                 />
                 <span>{c.label}</span>
               </label>
             ))}
+            {held.size > 0 && (
+              <p className="layout-held">{format(t.layoutsHeld, { n: held.size })}</p>
+            )}
           </fieldset>
         )}
         {committed && (

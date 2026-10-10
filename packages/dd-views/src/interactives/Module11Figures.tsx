@@ -301,7 +301,7 @@ export const StackDepth = withProps(
           height={H}
           viewBox={`0 0 ${W} ${H}`}
           role="img"
-          aria-label={`${t.depthCaption}. ${format(t.depthMost, { n: run.deepest })}`}
+          aria-label={`${t.depthCaption} ${format(t.depthMost, { n: run.deepest })}`}
         >
           <line className="depth-axis" x1={left} y1={top} x2={left} y2={H - bottom} />
           <line className="depth-axis" x1={left} y1={H - bottom} x2={W - right} y2={H - bottom} />

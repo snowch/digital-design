@@ -383,6 +383,9 @@ export function RoomsDrawing({
   const rooms = roomsFrom(state, program, hall);
   const W = Math.max(260, Math.min(width, 520));
   const indent = 22;
+  // Each row starts with how many rooms deep its room is, the hall's 1: a reader at a pause reads
+  // the lit room's depth there rather than counting the rows above it, on a phone out of view.
+  const depthW = 16;
   const rowH = 32;
   const lit = still ? undefined : state.cpu.regs[1];
   const returns = doorReturns(program);
@@ -410,7 +413,7 @@ export function RoomsDrawing({
   );
   const said = [
     t.boxes.roomsLabel,
-    ...(litRoom ? [format(t.boxes.roomLit, { name: litRoom.name })] : []),
+    ...(litRoom ? [format(t.boxes.roomLit, { name: litRoom.name, depth: litRoom.depth + 1 })] : []),
     ...(doorOf ? [format(t.boxes.doorFollowed, { name: doorOf.name, door: door + 1 })] : []),
   ].join(". ");
   // Where the drawing sits in a short box (a phone's debugger), the box keeps the marked room in view.
@@ -437,7 +440,7 @@ export function RoomsDrawing({
           aria-label={said}
         >
           {rooms.map((r, i) => {
-            const x = 4 + r.depth * indent;
+            const x = 4 + depthW + r.depth * indent;
             const y = ys[i]!;
             const doorX = x + boxW + 12;
             const isLit = !r.again && lit !== undefined && lit === BigInt(r.address);
@@ -450,6 +453,9 @@ export function RoomsDrawing({
                     fill="none"
                   />
                 )}
+                <text className="room-depth" x={4} y={y + 16}>
+                  {r.depth + 1}
+                </text>
                 <rect className="room-box" x={x} y={y} width={boxW} height={24} rx={4} />
                 <text className="room-name" x={x + 7} y={y + 16}>
                   {r.again ? format(t.boxes.roomAgain, { name: r.name }) : label(r)}
