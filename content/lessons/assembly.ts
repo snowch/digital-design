@@ -148,7 +148,7 @@ export const assembly: LessonInput = {
             program: ROOM_A_MISTAKES,
             editable: true,
             inputs: { SENSORA: "-170", SENSORB: "-250" },
-            words: true,
+            // No words here: making a typed program's words by hand is the last challenge's skill.
             outcomes: PROSE.mistakesAfter,
           },
         },

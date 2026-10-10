@@ -47,6 +47,17 @@ describe("the course's lessons", () => {
     expect(marked).toEqual([]);
   });
 
+  it("writes its captions as plain text: a caption is shown unformatted and names its figure", () => {
+    const marked = LESSONS.flatMap((l) =>
+      l.sections.flatMap((s) =>
+        s.interactives
+          .filter((x) => x.caption.includes("`"))
+          .map((x) => `${l.id} ${x.id}: ${x.caption}`),
+      ),
+    );
+    expect(marked).toEqual([]);
+  });
+
   it("uses no rationed term before the lesson that introduces it", () => {
     expect(termProblems(LESSONS)).toEqual([]);
   });

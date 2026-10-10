@@ -34,7 +34,7 @@ export const LABELS = {
     decoderOpen: "Open the decoder's blocks and change K and J.",
     writeWrites: "Write the two signals and run the tests.",
     decoderFaults: "Choose a fault and run the checks.",
-    writeSignals: "Complete the `case` and run the tests.",
+    writeSignals: "Complete the case and run the tests.",
   },
   options: {
     p1Zero: "BCONST is 0, B takes RB.",

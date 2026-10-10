@@ -124,6 +124,13 @@ export const systemCalls: LessonInput = {
             inputs: NIGHT_INPUTS,
             from: 7,
             mode: true,
+            lanes: {
+              lanes: [
+                { at: "0x000", name: LABELS.lanes.start },
+                { at: "handler", name: LABELS.lanes.handler, handler: true },
+                { at: "program", name: LABELS.lanes.program },
+              ],
+            },
             outcomes: PROSE.timelineAfter,
           },
         },

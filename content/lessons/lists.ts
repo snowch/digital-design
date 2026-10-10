@@ -87,7 +87,9 @@ export const lists: LessonInput = {
             registers: [1],
             pause: [LOAD_LINE],
             runLabel: LABELS.nextReading,
-            memory: [{ from: "count", words: DAY_LOG.length + 1, title: LABELS.memoryTitle }],
+            memory: [
+              { from: "count", words: DAY_LOG.length + 1, title: LABELS.memoryTitle, drawn: true },
+            ],
           },
         },
       ],
@@ -138,7 +140,16 @@ export const lists: LessonInput = {
             watched: ["R1", "R2", "R3", "word[R1]"],
             watchAddresses: ["R1"],
             registers: [0, 1, 2, 3, 4, 5],
-            memory: [{ from: "log", words: DAY_LOG.length, title: LABELS.logTitle }],
+            // One word past the log, set apart, so R1's last move visibly leaves the log.
+            memory: [
+              {
+                from: "log",
+                words: DAY_LOG.length + 1,
+                title: LABELS.logTitle,
+                drawn: true,
+                ends: { after: DAY_LOG.length, note: LABELS.logEnd },
+              },
+            ],
           },
         },
       ],
@@ -170,6 +181,7 @@ export const lists: LessonInput = {
           caption: LABELS.captions.signs,
           lead: PROSE.signsLead,
           props: {
+            lineHeader: true,
             programs: [
               { label: LABELS.programs.signed, program: countWarmerOn(DEFROST_LOG, "signed") },
               { label: LABELS.programs.unsigned, program: countWarmerOn(DEFROST_LOG, "unsigned") },

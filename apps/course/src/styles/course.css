@@ -3454,3 +3454,228 @@ svg.stack-depth {
 .machine-bit-status {
   font-weight: 600;
 }
+
+/* The run as lanes (Modules 11 and 12): a column for each part of the program that runs, time
+   running down, each move an arrow across labelled with what it writes. */
+.run-lanes {
+  margin: var(--space-3) 0;
+}
+.run-lanes-names {
+  display: flex;
+  list-style: none;
+  margin: 0 0 var(--space-1);
+  padding: 0;
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
+}
+.run-lanes-names li {
+  text-align: center;
+  overflow-wrap: anywhere;
+  padding: 0 2px;
+}
+svg.run-lanes-drawing {
+  display: block;
+  max-width: 100%;
+}
+.run-lanes-drawing .lane-rule {
+  stroke: var(--border);
+  stroke-dasharray: 2 4;
+}
+.run-lanes-drawing .lane-stay {
+  fill: var(--accent);
+}
+.run-lanes-drawing .lane-mode-system,
+.run-lanes-legend .lane-mode-system {
+  fill: var(--fg-muted);
+  background: var(--fg-muted);
+}
+.run-lanes-drawing .lane-mode-user,
+.run-lanes-legend .lane-mode-user {
+  fill: var(--warn);
+  background: var(--warn);
+}
+.run-lanes-drawing text {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  fill: var(--fg);
+}
+.run-lanes-drawing .lane-move line {
+  stroke: var(--fg);
+  stroke-width: 1.5;
+}
+.run-lanes-drawing .lane-move path {
+  fill: var(--fg);
+}
+.run-lanes-drawing .lane-move-trap line,
+.run-lanes-drawing .lane-move-interrupt line {
+  stroke: var(--bad);
+}
+.run-lanes-drawing .lane-move-trap path,
+.run-lanes-drawing .lane-move-interrupt path {
+  fill: var(--bad);
+}
+.run-lanes-drawing .lane-mark circle {
+  fill: var(--bg);
+  stroke: var(--bad);
+  stroke-width: 2;
+}
+.run-lanes-drawing .lane-mark-store circle {
+  stroke: var(--accent-strong);
+}
+.run-lanes-drawing .lane-now {
+  fill: var(--focus);
+}
+.run-lanes-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  list-style: none;
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  font-size: var(--text-sm);
+}
+.run-lanes-legend .lane-key {
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+  margin-right: var(--space-1);
+  vertical-align: middle;
+  border-radius: 2px;
+}
+/* The drawings that follow a run sit within reach of its buttons: under the listing on a wide
+   screen, after the watch on a narrow one; each place is shown at its own width only. */
+.debugger-near-desk {
+  display: none;
+  margin-top: var(--space-3);
+}
+@media (min-width: 60rem) {
+  .debugger-near-desk {
+    display: block;
+  }
+  .debugger-near-phone {
+    display: none;
+  }
+}
+/* The lanes' drawing in a box of fixed height that follows its newest row, so a long run does
+   not push what the steps are about off the screen. */
+.run-lanes-box {
+  max-height: 14rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+/* On a phone a trap timeline's drawing and its list are stacked under the buttons: both kept short,
+   so the newest row of each is on the screen with the buttons. */
+.trap-timeline-body .run-lanes-box {
+  max-height: 9rem;
+}
+.trap-timeline-body .trap-edges {
+  max-height: 13rem;
+}
+@media (min-width: 60rem) {
+  .run-lanes-box,
+  .trap-timeline-body .run-lanes-box {
+    max-height: 24rem;
+  }
+  .trap-timeline-body .trap-edges {
+    max-height: 24rem;
+  }
+  /* The trap timeline's drawing beside its list where the figure is wide. */
+  .trap-timeline-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-4);
+    align-items: start;
+  }
+}
+.run-lanes-drawing .lane-interrupts-on,
+.run-lanes-legend .lane-interrupts-on {
+  fill: var(--accent);
+  background: var(--accent);
+}
+.run-lanes-legend .lane-key-now {
+  border-radius: 50%;
+  background: var(--focus);
+}
+.run-lanes-drawing .lane-mark-stop rect,
+.run-lanes-drawing .lane-mark-cut rect {
+  fill: var(--fg-muted);
+}
+
+/* Memory drawn as boxes, the stack the same way, and the cold store as rooms (Module 11). */
+svg.memory-boxes,
+svg.store-rooms {
+  display: block;
+  max-width: 100%;
+}
+.memory-boxes text,
+.store-rooms text {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  fill: var(--fg);
+}
+.memory-boxes .box-address,
+.memory-boxes .box-note {
+  fill: var(--fg-muted);
+}
+.memory-boxes .box-group {
+  font-family: var(--font-text);
+  font-size: 12px;
+  fill: var(--fg-muted);
+}
+.memory-boxes .box-word {
+  fill: var(--bg-raised);
+  stroke: var(--border-strong);
+}
+.memory-boxes .box-changed .box-word {
+  stroke: var(--accent-strong);
+  stroke-width: 3;
+}
+.memory-boxes .box-pointer {
+  fill: var(--accent-strong);
+  font-weight: 600;
+}
+.word-boxes-key {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
+}
+.store-rooms .room-box {
+  fill: var(--bg-raised);
+  stroke: var(--border-strong);
+}
+.store-rooms .room-lit .room-box {
+  fill: var(--accent-soft);
+  stroke: var(--accent-strong);
+  stroke-width: 3;
+}
+.store-rooms .room-door-line {
+  stroke: var(--fg-muted);
+  stroke-width: 1.5;
+}
+.store-rooms .room-door circle {
+  fill: var(--bg);
+  stroke: var(--fg-muted);
+}
+.store-rooms .room-door-none circle {
+  stroke-dasharray: 2 2;
+}
+.store-rooms .room-door text {
+  fill: var(--fg-muted);
+}
+.store-rooms .room-door-followed circle {
+  fill: var(--accent-soft);
+  stroke: var(--accent-strong);
+  stroke-width: 3;
+  stroke-dasharray: none;
+}
+.store-rooms .room-door-followed text {
+  fill: var(--accent-strong);
+  font-weight: 700;
+}
+.memory-boxes .box-past .box-word {
+  stroke-dasharray: 4 3;
+}
+.memory-boxes .box-end {
+  stroke: var(--fg-muted);
+  stroke-dasharray: 2 3;
+}

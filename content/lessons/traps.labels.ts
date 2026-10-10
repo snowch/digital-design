@@ -31,7 +31,8 @@ export const LABELS = {
     halts: "The night program with no handler, run in the debugger until the machine halts.",
     predict:
       "The night program with a handler, as a listing, with a question about C2 before the run.",
-    timeline: "The timeline of the night program's run with its handler, one edge at a time.",
+    timeline:
+      "The timeline of the night program's run with its handler, one edge at a time, drawn as lanes too.",
     quizListing: "A program with a word load that faults, which this lesson does not run.",
     answers: "Four questions about the registers after the trap in that program.",
     noSkip: "The night program with a handler that only resumes, run in the debugger.",
@@ -52,4 +53,8 @@ export const LABELS = {
     "a load from an address where there is no memory",
   ],
   countTitle: "The word at 400",
+  lanes: {
+    program: "The night program",
+    handler: "The handler",
+  },
 } as const;

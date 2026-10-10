@@ -85,6 +85,7 @@ export const functions: LessonInput = {
           caption: LABELS.captions.twoWays,
           lead: PROSE.twoWaysLead,
           props: {
+            lineHeader: true,
             programs: [
               { label: LABELS.programs.twice, program: TWO_ROOMS_WRITTEN_TWICE },
               { label: LABELS.programs.once, program: TWO_ROOMS },
@@ -144,6 +145,12 @@ export const functions: LessonInput = {
             pause: ["overBy"],
             watch: true,
             watched: ["R1", "R2", "R15", "PC"],
+            lanes: {
+              lanes: [
+                { at: "0x000", name: LABELS.lanes.main },
+                { at: "overBy", name: "overBy" },
+              ],
+            },
             outcomes: PROSE.callAfter,
           },
         },
@@ -176,6 +183,7 @@ export const functions: LessonInput = {
           caption: LABELS.captions.spoiled,
           lead: PROSE.spoiledLead,
           props: {
+            lineHeader: true,
             programs: [
               { label: LABELS.programs.keeps, program: KEEPS_R10 },
               { label: LABELS.programs.spoils, program: KEEPS_R10_BROKEN },

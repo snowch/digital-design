@@ -206,6 +206,49 @@ test.describe("Module 12's lab", () => {
     }
   });
 
+  test("a trap timeline's buttons, its newest edge and the drawing's newest row stay on one screen", async ({
+    page,
+  }) => {
+    const height = page.viewportSize()?.height ?? 0;
+    const inside = async (what: Locator, box: Locator, name: string) => {
+      const a = (await what.boundingBox())!;
+      const b = (await box.boundingBox())!;
+      expect(a.y, `${name}: inside its box`).toBeGreaterThanOrEqual(b.y - 1);
+      expect(a.y + a.height, `${name}: inside its box`).toBeLessThanOrEqual(b.y + b.height + 1);
+      expect(a.y, `${name}: on the screen`).toBeGreaterThanOrEqual(0);
+      expect(a.y + a.height, `${name}: on the screen`).toBeLessThanOrEqual(height);
+    };
+    // 12.4 at edge 40, past its third call; 12.5 at edge 47, the timer's interrupt.
+    for (const [lessonId, id, edge] of [
+      ["system-calls", "calls-timeline", 40],
+      ["interrupts", "door-timeline", 47],
+    ] as const) {
+      await openLesson(page, lessonId);
+      const figure = page.locator(`[data-interactive="${id}"]`);
+      const from =
+        (
+          lessonData(lessonId)
+            .sections.flatMap((x) => x.interactives)
+            .find((x) => x.id === id)!.props as { from?: number }
+        ).from ?? 0;
+      await figure.evaluate((e) => e.scrollIntoView({ block: "start" }));
+      const next = figure.getByRole("button", { name: T12.nextEdge, exact: true });
+      for (let k = from; k < edge; k++) await next.click();
+      const buttons = (await figure.locator(".debugger-actions").boundingBox())!;
+      expect(buttons.y, `${lessonId}'s buttons`).toBeGreaterThanOrEqual(0);
+      await inside(
+        figure.locator("li[aria-current]"),
+        figure.locator(".trap-edges"),
+        `${lessonId}'s edge`,
+      );
+      await inside(
+        figure.locator(".lane-now"),
+        figure.locator(".run-lanes-box"),
+        `${lessonId}'s drawing`,
+      );
+    }
+  });
+
   test("a debugger's listing opens to every row, and closed keeps the line about to run in view", async ({
     page,
   }) => {
