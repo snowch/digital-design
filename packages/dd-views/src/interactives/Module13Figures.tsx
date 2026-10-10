@@ -90,10 +90,11 @@ const Props = z.object({
   /** Faults the learner may choose, each recording the run again with it. */
   faults: z.array(FaultSpec).default([]),
   /**
-   * The row "Its word in the ROM" held back until the first edge has run: a figure whose
-   * construction asks for that word works it out before the row gives it.
+   * The row "Its word in the ROM" held back while the PC is at this line, until the run has passed
+   * its FETCH edge (counted from the reset): a lesson whose construction asks for the line's word
+   * has the learner work it out before any row gives it.
    */
-  holdRom: z.boolean().default(false),
+  holdRom: z.object({ line: z.string(), fetch: z.number().int().min(1) }).optional(),
   /** A prediction of the next edge, asked before any value shows. */
   question: z.string().optional(),
   options: z.array(z.object({ value: z.string(), label: z.string() })).optional(),
@@ -134,6 +135,11 @@ const Props = z.object({
     .optional(),
   /** The program's lines and their addresses, folded under its name. */
   listing: z.string().optional(),
+  /**
+   * No value shows at the figure's opening frame until the learner first moves the run: a figure
+   * that opens on the frame a later prediction asks about gives nothing away there.
+   */
+  quiet: z.boolean().default(false),
 });
 type Data = z.infer<typeof Props>;
 
@@ -302,6 +308,7 @@ export const MachineLevels = withProps(
     const go = (k: number) => {
       const to = Math.max(0, Math.min(last, k));
       setAt(to);
+      if (to !== first) setMoved(true);
       // A fault's outcome shows once its run has reached the end, until the run starts again.
       if (to === last) setReached(true);
       else if (to === first) setReached(false);
@@ -309,6 +316,9 @@ export const MachineLevels = withProps(
     const [stored, setStored] = useSlot<Stored>(store, interactive.id);
     const asking = data.question !== undefined && data.options !== undefined;
     const committed = !asking || stored?.choice !== undefined;
+    // A quiet figure shows its values once the run has moved from where it opened.
+    const [moved, setMoved] = useState(false);
+    const live = committed && (!data.quiet || moved);
     // The answer is the run's own, from the edge the figure first shows.
     const answer = useMemo(
       () => (asking ? levelsAnswer(run, first, data.ask, data.net, data.form, data.bit) : ""),
@@ -479,16 +489,33 @@ export const MachineLevels = withProps(
     // (`--sticky-top`), and only in a window tall enough to keep most of it for the drawing.
     const rootRef = useRef<HTMLDivElement>(null);
     const bandRef = useRef<HTMLDivElement>(null);
+    // What covers the top of the window is kept as two lengths, so a control that takes focus
+    // scrolls out from under it (`scroll-margin-top`): the band alone, over the tables and the
+    // strip, and the band with the overview, over the drawing, while the overview sticks.
     useLayoutEffect(() => {
       const root = rootRef.current;
       const band = bandRef.current;
       if (!root || !band) return;
-      const set = () => root.style.setProperty("--sticky-top", `${band.offsetHeight}px`);
+      const set = () => {
+        root.style.setProperty("--sticky-top", `${band.offsetHeight}px`);
+        const bar = root.querySelector<HTMLElement>(".overview-bar");
+        const stuck = bar !== null && getComputedStyle(bar).position === "sticky";
+        root.style.setProperty(
+          "--sticky-drawing",
+          `${band.offsetHeight + (stuck ? (bar?.offsetHeight ?? 0) : 0)}px`,
+        );
+      };
       set();
       if (typeof ResizeObserver === "undefined") return;
       const ro = new ResizeObserver(set);
       ro.observe(band);
-      return () => ro.disconnect();
+      const bar = root.querySelector(".overview-bar");
+      if (bar) ro.observe(bar);
+      window.addEventListener("resize", set);
+      return () => {
+        ro.disconnect();
+        window.removeEventListener("resize", set);
+      };
     }, [committed]);
     const steps = (
       <div className="machine-steps" ref={bandRef}>
@@ -579,7 +606,7 @@ export const MachineLevels = withProps(
         <div ref={drawingRef}>
           <CircuitView
             circuit={circuit}
-            {...(committed ? { values } : {})}
+            {...(live ? { values } : {})}
             title={strings.explorer.title}
             scope={scope}
             onScope={setScope}
@@ -593,14 +620,15 @@ export const MachineLevels = withProps(
             }}
             pinnedParts={pinnedParts}
             readout={readout}
-            {...(committed ? { active } : {})}
+            {...(live ? { active } : {})}
           />
         </div>
+        {committed && !live && <p className="machine-quiet-note">{t.quietNote}</p>}
         <p className="machine-pin-note">{t.pinNote}</p>
         {/* What a run has shown: under the drawing, where the learner is looking when it appears,
             the comparison first and the paragraph that explains it after, so neither moves as
             the tables below grow. */}
-        {committed && data.compare && (
+        {live && data.compare && (
           <p className="machine-compare" role="status">
             {withCode(compareText(t, run, at))}
           </p>
@@ -624,7 +652,7 @@ export const MachineLevels = withProps(
             the length of the run between the step controls, or a challenge's answer boxes, and
             the drawing. */}
         {committed && (data.trace || data.levels) && <RunStrip run={run} at={at} t={t} onGo={go} />}
-        {committed && data.levels && (
+        {live && data.levels && (
           <div className="truth-table-wrap">
             <table className="truth-table datapath-table machine-levels-table">
               <caption>{t.levelsCaption}</caption>
@@ -646,7 +674,9 @@ export const MachineLevels = withProps(
                 <tr className={rowPinned("FETCHED")}>
                   <th scope="row">{rowButton(t.machineCode, "FETCHED", t.romWire)}</th>
                   <td className="memory-word">
-                    {data.holdRom && at <= first
+                    {data.holdRom &&
+                    programLine?.text === data.holdRom.line &&
+                    at < data.holdRom.fetch
                       ? t.romLater
                       : programLine?.instruction !== undefined
                         ? hex8(programLine.instruction)
@@ -711,7 +741,7 @@ export const MachineLevels = withProps(
             </table>
           </div>
         )}
-        {committed && data.trace && (
+        {live && data.trace && (
           <TracePanel
             circuit={circuit}
             values={values}
@@ -730,7 +760,7 @@ export const MachineLevels = withProps(
             }}
           />
         )}
-        <div className="datapath-tables" hidden={!committed}>
+        <div className="datapath-tables" hidden={!live}>
           {data.shown.length > 0 && (
             <div className="truth-table-wrap">
               <table className="truth-table datapath-table">

@@ -140,3 +140,10 @@ Facts put right in placed text without a new draft, each a word or a number:
   the brief gave it.
 - R4-S `capUnknown`: `{registers}` came back without code marks; kept, since the challenge's
   results show this sentence as plain text.
+- R4-5 `motivation`: the first paragraph came back without the task, so "The display half" had
+  nothing to refer to; a second draft from the same brief (its note) gave it the task as an
+  instruction. Not logged at the time. Cut in R5, and the join drafted from brief R5.
+
+## After the check of the third round (brief R5)
+
+- `capstone` `prediction`: "The question asks about COUT." cut: it points at the figure's question.

@@ -62,7 +62,7 @@ const row = (id: string, frame: number): string => {
 };
 /** The line each row is read at. */
 const ROW_LINES: Readonly<Record<string, string>> = {
-  xorB: "R3 <= R1 - R2",
+  xorB: "R2 <= R3",
   carry: "R3 <= R1 - R2",
   pcD: "goto R15",
   en: "R5 <= R3 >= R4 signed",
@@ -138,11 +138,12 @@ describe("lesson tracing's facts", () => {
   });
 
   it("answers the four traces, each a row of bits", () => {
-    // R3 <= R1 - R2's ALU edge is edge 20: the frame before it is 19. B is R2, -250: its bits 3 to
-    // 0 are 0110, which the XORs turn over for the subtraction; A's are 1000, and the carries out
-    // of A plus B turned over plus 1 are 1001.
+    // R2 <= R3's ALU edge is edge 55: the frame before it is 54. The job is copy B, code 101, so
+    // OP0 is 1 and each XOR turns B's bit over: B is R3, 66, whose bits 3 to 0 are 0010.
+    expect([state(54), at(54, "OP0"), at(54, "HB")]).toEqual(["ALU", "1", "42"]);
+    expect(row("xorB", 54)).toBe(answer("xorB"));
+    // R3 <= R1 - R2's ALU edge is edge 20: A's bits 3 to 0 are 1000, B turned over 1001, plus 1.
     expect(state(19)).toBe("ALU");
-    expect(row("xorB", 19)).toBe(answer("xorB"));
     expect(row("carry", 19)).toBe(answer("carry"));
     // goto R15's last edge, its ALU edge, is edge 68: the PC takes 030. The construction traces the
     // PC at another edge, the call's WRITE edge.
@@ -173,6 +174,11 @@ describe("lesson tracing's facts", () => {
           );
       expect(task).toContain(`\`${line}\``);
     }
+  });
+
+  it("gives no two rows one answer", () => {
+    const values = TRACE_ANSWERS.map((a) => a.value);
+    expect(new Set(values).size).toBe(values.length);
   });
 
   it("opens no figure on an edge where a row's wires hold the row's answer", () => {

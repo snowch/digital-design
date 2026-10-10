@@ -29,7 +29,6 @@ export const LABELS = {
     c1: "Where the parts meet",
   },
   cpuMark: "part of the CPU",
-  cpuNote: "CPU",
   captions: {
     makers:
       "The whole machine running the shop's program, with a table of which module built each part.",

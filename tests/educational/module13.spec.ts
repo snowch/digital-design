@@ -285,6 +285,57 @@ test("the step controls stay pressable over the whole figure", async ({ page }) 
   }
 });
 
+// 13.5's question figure opens on the frame its prediction asks about, and shows no value there
+// until the run moves.
+test("the capstone's question figure shows no value until the run moves", async ({ page }) => {
+  await openLesson(page, "capstone");
+  const figure = page.locator('[data-interactive="cap-free"]');
+  await figure.scrollIntoViewIfNeeded();
+  await expect(figure.locator(".machine-quiet-note")).toHaveText(T.quietNote);
+  await expect(figure.locator("svg.circuit:not(.circuit-overview) .value-label")).toHaveCount(0);
+  await figure.getByRole("button", { name: T.nextEdge }).click();
+  await expect(figure.locator(".machine-quiet-note")).toHaveCount(0);
+  await expect(
+    figure.locator("svg.circuit:not(.circuit-overview) .value-label").first(),
+  ).toBeVisible();
+});
+
+// A control that takes focus from the keyboard is never left under the stuck band: tabbing
+// backwards from the levels table into the strip under the drawing, each edge button and each
+// row's button lands below the band, inside the window (WCAG 2.4.11).
+test("keyboard focus never lands under the stuck band", async ({ page }) => {
+  for (const [width, height] of [
+    [1280, 900],
+    [390, 844],
+  ] as const) {
+    await page.setViewportSize({ width, height });
+    await openLesson(page, "full-path");
+    const figure = page.locator('[data-interactive="path-call"]');
+    await figure.scrollIntoViewIfNeeded();
+    await figure.getByRole("button", { name: T.nextEdge }).click();
+    // From the last row's button of the levels table, backwards through the rows and the strip.
+    await figure.locator(".machine-row-wire").last().focus();
+    for (let k = 0; k < 14; k++) {
+      await page.keyboard.press("Shift+Tab");
+      const where = await page.evaluate(() => {
+        const el = document.activeElement as HTMLElement | null;
+        const band = el?.closest(".machine-levels")?.querySelector(".machine-steps");
+        if (!el || !band || band.contains(el) || !el.closest(".machine-levels")) return undefined;
+        const r = el.getBoundingClientRect();
+        return {
+          top: r.top,
+          bottom: r.bottom,
+          band: band.getBoundingClientRect().bottom,
+          text: el.textContent ?? "",
+        };
+      });
+      if (!where) continue;
+      expect(where.top, `${width}x${height}: ${where.text}`).toBeGreaterThanOrEqual(where.band - 1);
+      expect(where.bottom, `${width}x${height}: ${where.text}`).toBeLessThanOrEqual(height + 1);
+    }
+  }
+});
+
 // The levels table is an index into the drawing: a row's heading pins the wire it reads.
 test("a row of the levels table pins its wire on the drawing", async ({ page }) => {
   await openLesson(page, "full-path");

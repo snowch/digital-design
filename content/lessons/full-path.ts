@@ -46,6 +46,9 @@ const LEVELS = {
   devices: true,
 };
 
+/** The construction's store, whose word the ROM row keeps back until its FETCH edge, edge 59. */
+const STORE_HELD = { line: "word[display] <= R2", fetch: 59 };
+
 export const fullPath: LessonInput = {
   id: "full-path",
   title: LABELS.title,
@@ -113,6 +116,9 @@ export const fullPath: LessonInput = {
           props: {
             ...LEVELS,
             start: 56,
+            // Its lead ends after the trap edge, where the PC is at the store the construction asks
+            // for: the ROM row keeps that word back.
+            holdRom: STORE_HELD,
             // Shown once the run has passed the call's READ edge, the edge it reports.
             reveal: { text: PROSE.callAfter, edge: 58 },
             control: true,
@@ -133,12 +139,12 @@ export const fullPath: LessonInput = {
           caption: LABELS.captions.store,
           lead: PROSE.storeLead,
           props: {
-            holdRom: true,
+            holdRom: STORE_HELD,
             ...LEVELS,
             // The handler's store to the display, edges 59 to 62: its effect shows on a device.
-            // Paused a step early, before the call's trap edge, where FETCHED still carries
-            // another word: before the store's FETCH edge it would carry the store's own.
-            start: 57,
+            // Paused before the call's FETCH edge, frame 56, where no wire holds the store's word:
+            // from the next frame MQ and the ROM's second read hold it, from the one after FETCHED.
+            start: 56,
             signals: ["OP2", "OP1", "OP0", "MSTORE", "PCEN"],
             devices: true,
             focus: ["port", "datapath"],

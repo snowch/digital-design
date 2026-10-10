@@ -83,6 +83,8 @@ export interface Machine13Strings {
   readonly rowWire: string;
   /** Under "Its word in the ROM": FETCHED, and when it carries the row's word. */
   readonly romWire: string;
+  /** Under a figure that shows no value until the run is moved from where it opened. */
+  readonly quietNote: string;
   /** In the row "Its word in the ROM", until the figure's first edge has run. */
   readonly romLater: string;
   /** In a prediction's verdict, before the next edge: the explanation follows it. */
@@ -269,6 +271,7 @@ export const MACHINE13_STRINGS: Machine13Strings = {
   romLater: "Shows after the next edge.",
   rowPin: "{row}: pin {wire} on the drawing",
   rowWire: "Reads wire {wire}",
+  quietNote: "Values show once you move the run: press an edge in the strip, or a button above.",
   romWire: "Wire FETCHED carries this row's word only before a FETCH edge.",
   pinNote:
     "Press a wire to pin it: it keeps an orange halo as you open blocks, and its name and value show under the drawing, in hexadecimal for a word. A blue band marks the wires the next edge uses, along their whole length and with all their branches. It starts at each register, held word, memory or device the edge writes, and goes back along each selector's chosen input to where the value starts; it does not mark the address a store writes to, nor the input that chooses a selector's input, such as TRAP.",
