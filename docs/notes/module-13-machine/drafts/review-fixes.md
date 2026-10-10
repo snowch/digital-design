@@ -147,3 +147,7 @@ Facts put right in placed text without a new draft, each a word or a number:
 ## After the check of the third round (brief R5)
 
 - `capstone` `prediction`: "The question asks about COUT." cut: it points at the figure's question.
+
+## The last round (brief R6)
+
+- `heldNote`: placed as drafted.
