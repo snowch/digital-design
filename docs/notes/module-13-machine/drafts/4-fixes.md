@@ -18,3 +18,5 @@
   4C `generalisation` repeated the failure experiment's "none of those four opens the door"; cut.
 - V3b `labAnswer`: "The runs answer: {answer}." The prediction's verdict used the datapath's
   "The machine gave", which reads wrongly for a choice of programs.
+- V6: digits, widen and memory already have titles from Modules 8 and 6, the same as their kinds; those three drafts not placed.
+- V6: condition keeps Module 8's title, "condition"; yWord-final takes Module 8's "word for Y" (yWord), one name for one thing.

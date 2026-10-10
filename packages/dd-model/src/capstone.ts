@@ -7,7 +7,6 @@
 // recorded run of the learner's own program, so no two learners' answers need be the same.
 
 import { assembleChecked, type Program } from "./assemble";
-import { bitDrive, bitPartOf } from "./bit-views";
 import { recordRun, type RecordedRun } from "./final-run";
 import {
   MODULE_13,
@@ -66,10 +65,18 @@ export const CAPSTONE_QUESTIONS = {
   carry: { instruction: "setIf", state: "ALU", read: "COUT", form: "bit" },
   /** The branch condition at that edge. */
   met: { instruction: "setIf", state: "ALU", read: "MET", form: "bit" },
-  /** The address the memory reads at the MEMORY edge of the first store. */
-  address: { instruction: "store", state: "MEMORY", read: "ADDR", form: "address" },
-  /** D of the PC's bit 4 at the WRITE edge of the first set if. */
-  pcBit: { instruction: "setIf", state: "WRITE", read: "pc:4", form: "bit" },
+  /**
+   * A gate's output inside the ALU, at that edge: the XOR in the slice for bit 0 that turns B's
+   * bit over for a subtraction, worked on the learner's own operand.
+   */
+  xorB: {
+    instruction: "setIf",
+    state: "ALU",
+    read: "datapath/alu/g0/q0/bit0/BX",
+    form: "bit",
+  },
+  /** HM at that edge: the word the last load fetched, held since, signed. */
+  held: { instruction: "setIf", state: "ALU", read: "HM", form: "signed" },
 } as const;
 export type CapstoneQuestion = keyof typeof CAPSTONE_QUESTIONS;
 
@@ -111,12 +118,6 @@ export function capstoneAnswer(run: RecordedRun, question: CapstoneQuestion): Ca
     }
   if (at === undefined) return { missing: "edge" };
   const values = run.frames[at] ?? [];
-  if (q.read.startsWith("pc:")) {
-    const k = Number(q.read.slice(3));
-    const part = bitPartOf(run.circuit, "datapath/pc");
-    const d = part ? bitDrive(run.circuit, values, part, k)?.inputs["D"] : undefined;
-    return { answer: d === undefined ? "X" : String(d) };
-  }
   const w = netWord(run.circuit, values, q.read);
   if (!w || w.known !== (1n << BigInt(w.width)) - 1n) return { answer: "X" };
   switch (q.form) {
@@ -124,8 +125,6 @@ export function capstoneAnswer(run: RecordedRun, question: CapstoneQuestion): Ca
       return { answer: BigInt.asIntN(w.width, w.value).toString() };
     case "bit":
       return { answer: String(w.value & 1n) };
-    case "address":
-      return { answer: w.value.toString(16).toUpperCase().padStart(3, "0") };
   }
 }
 
@@ -138,12 +137,6 @@ export function readCapstoneAnswer(question: CapstoneQuestion, text: string): st
       return /^[+-]?\d+$/.test(t) ? BigInt(t).toString() : undefined;
     case "bit":
       return t === "0" || t === "1" ? t : undefined;
-    case "address": {
-      const hex = t.replace(/^0x/i, "");
-      return /^[0-9a-f]+$/i.test(hex)
-        ? BigInt(`0x${hex}`).toString(16).toUpperCase().padStart(3, "0")
-        : undefined;
-    }
   }
 }
 

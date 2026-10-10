@@ -36,7 +36,11 @@ export const LAB_RUNS = LAB_PROGRAMS.map((p) => ({
   id: p.id,
   label: LABELS.programs[p.id],
   source: p.source,
-  inputs: { ...p.inputs, ...("door" in p ? { door: p.door } : {}) },
+  inputs: {
+    ...p.inputs,
+    ...("door" in p ? { door: p.door } : {}),
+    ...("warm" in p ? { warm: p.warm } : {}),
+  },
 }));
 
 /** The texts the figures run: the course's, each with one line changed. */
@@ -138,11 +142,11 @@ export const finalMachine: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.lines,
           lead: PROSE.invLead,
-          after: PROSE.invAfter,
           props: {
             hdl: MACHINE13_TEXT,
             texts: [LAB_TEXTS.branch, LAB_TEXTS.ie, LAB_TEXTS.call],
             programs: LAB_RUNS,
+            reveal: { text: PROSE.invAfter, everyText: true },
           },
         },
       ],
@@ -159,8 +163,14 @@ export const finalMachine: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.door,
           lead: PROSE.failLead,
-          after: PROSE.failAfter,
-          props: { hdl: MACHINE13_TEXT, texts: [LAB_TEXTS.door], programs: LAB_RUNS },
+          props: {
+            hdl: MACHINE13_TEXT,
+            // The changed line shows only once the text has run: the learner reads the failure
+            // before the join is named.
+            texts: [{ ...LAB_TEXTS.door, label: LABELS.texts.mystery, hidden: true }],
+            programs: LAB_RUNS,
+            reveal: { text: PROSE.failAfter, program: "door" },
+          },
         },
       ],
     },

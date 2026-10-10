@@ -343,10 +343,12 @@ function exact(
   // not wrong in value, so it gets the form's sentence (`bitsForm`), not the case's own detail.
   if (given["form"] === "bits") {
     const typed = (answers[field] ?? "").replace(/\s/g, "");
-    const want2 = want.padStart(2, "0");
-    if (/^[01]{1,2}$/.test(typed))
+    // Module 13: a group of bits as wide as the answer, bit 0 last; two bits at the least.
+    const wide = Math.max(2, want.length);
+    const want2 = want.padStart(wide, "0");
+    if (new RegExp(`^[01]{1,${wide}}$`).test(typed))
       return {
-        pass: typed.padStart(2, "0") === want2,
+        pass: typed.padStart(wide, "0") === want2,
         inputs: {},
         actual: { [field]: typed },
         expected: { [field]: want2 },

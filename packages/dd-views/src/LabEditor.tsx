@@ -17,6 +17,7 @@ import type { Circuit } from "@dd/sim";
 
 import { WriteEditor, portProblem } from "./book";
 import { LabJoins } from "./interactives/LabJoins";
+import { ProgramListing } from "./interactives/ProgramListing";
 import { DEFAULT_VIEW_STRINGS, format, useViewStrings, type ViewStrings } from "./strings";
 
 export const LAB_GRADER = "machine13-lab";
@@ -81,18 +82,29 @@ export function labText(strings: ViewStrings, c: TextComparison, mine = true): s
         cause: d.machineStop.cause.toString(16).toUpperCase(),
       });
     if (d.machineStop) return format(mine ? t.labStopsOnly : t.labRunStops, slots);
-    return format(mine ? t.labRunsOn : t.labRunGoesOn, slots);
+    // The model stopped at `stop`, or halted with a cause; the machine went on.
+    if (d.modelStop?.kind === "trap")
+      return format(mine ? t.labRunsOnHalt : t.labRunGoesOnHalt, {
+        ...slots,
+        cause: d.modelStop.cause.toString(16).toUpperCase().padStart(2, "0"),
+      });
+    return format(mine ? t.labRunsOnStop : t.labRunGoesOnStop, slots);
   }
   const value = (v: bigint | undefined) =>
     v === undefined
       ? t.unknown
-      : /^C[234]$|^PC$/.test(d.what)
+      : /^C[24]$|^PC$/.test(d.what)
         ? hex3(v)
-        : /^C[01]$|^waiting$/.test(d.what)
-          ? v.toString(2).padStart(2, "0")
-          : d.what === "lamps"
-            ? v.toString(2).padStart(3, "0")
-            : v.toString();
+        : d.what === "C3"
+          ? v.toString(16).toUpperCase().padStart(2, "0")
+          : /^C[01]$|^waiting$/.test(d.what)
+            ? v.toString(2).padStart(2, "0")
+            : d.what === "lamps"
+              ? v.toString(2).padStart(3, "0")
+              : // A register's small word, an address most often, with its hexadecimal beside it.
+                /^R\d+$/.test(d.what) && v >= 0n && v < 0x800n
+                ? format(t.labWordHex, { n: v.toString(), hex: hex3(v) })
+                : BigInt.asIntN(64, v).toString();
   return format(mine ? t.labDiffers : t.differs, {
     ...slots,
     what: t.what[d.what] ?? d.what,
@@ -109,6 +121,9 @@ export function labPlan(given: Readonly<Record<string, string | number | undefin
     ...(n("sensorA") !== undefined ? { sensorA: n("sensorA") as bigint } : {}),
     ...(n("sensorB") !== undefined ? { sensorB: n("sensorB") as bigint } : {}),
     ...(given["door"] !== undefined ? { doorOpensAt: Number(given["door"]) } : {}),
+    ...(given["warm"] !== undefined
+      ? { warm: Number(given["warm"]) ? (1 as const) : (0 as const) }
+      : {}),
   };
 }
 
@@ -200,6 +215,18 @@ export function LabEditor(props: ChallengeEditorProps) {
       </div>
       <WriteEditor {...props} />
       <LabJoins text={text} />
+      {challenge.tests.kind === "answers" && (
+        <div className="lab-listings">
+          <p className="lab-run-change-heading">{t.labPrograms}</p>
+          {challenge.tests.cases.map((c) => (
+            <ProgramListing
+              key={c.label}
+              source={String(c.given["source"] ?? "")}
+              label={c.label}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

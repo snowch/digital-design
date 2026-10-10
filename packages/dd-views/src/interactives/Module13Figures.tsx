@@ -16,6 +16,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { z } from "zod";
 
 import {
+  BIT_DRAWINGS,
   CONTROL_STATES,
   bitDrive,
   bitPartOf,
@@ -38,6 +39,7 @@ import { makerOf } from "../makers";
 import { format, useViewStrings } from "../strings";
 import type { Machine13Strings } from "../strings13";
 import { WordValue } from "./Debugger";
+import { ProgramListing } from "./ProgramListing";
 import { FaultSpec, toFault } from "./FaultLab";
 import { withProps } from "./props";
 
@@ -104,6 +106,21 @@ const Props = z.object({
    * show that never open, the drawing of one bit each, as the module that built it drew it.
    */
   trace: z.boolean().default(false),
+  /**
+   * A paragraph shown only once the learner has made what it reports: opened the block at
+   * `scope` (or one inside it) after committing, or reached the run's last edge (`end`).
+   */
+  reveal: z
+    .object({
+      text: z.string(),
+      scope: z.string().optional(),
+      end: z.boolean().default(false),
+      /** Or once the run has passed this edge, counted from the reset. */
+      edge: z.number().int().min(0).optional(),
+    })
+    .optional(),
+  /** The program's lines and their addresses, folded under its name. */
+  listing: z.string().optional(),
 });
 type Data = z.infer<typeof Props>;
 
@@ -173,8 +190,8 @@ export function levelsAnswer(
 }
 
 /** A part's maker in words: "Module 6", or "Module 8, grown in 9, 10 and 12". */
-export function makerText(t: Machine13Strings, kind: string): string | undefined {
-  const m = makerOf(kind);
+export function makerText(t: Machine13Strings, kind: string, path?: string): string | undefined {
+  const m = makerOf(kind, path);
   if (!m) return undefined;
   if (!m.grown?.length) return format(t.builtModule, { n: m.built });
   const list =
@@ -252,6 +269,9 @@ export const MachineLevels = withProps(
     const [at, setAt] = useState(first);
     const [reached, setReached] = useState(false);
     const [scope, setScope] = useState(data.scope);
+    // A wire the learner pressed stays pinned as blocks open: a net keeps its number at every
+    // level, so its value shows wherever it is drawn.
+    const [pinned, setPinned] = useState<number | undefined>();
     const go = (k: number) => {
       const to = Math.max(0, Math.min(last, k));
       setAt(to);
@@ -269,6 +289,18 @@ export const MachineLevels = withProps(
       (data.options?.find((o) => o.value === v)?.label ?? v).replace(/\.$/, "");
 
     const values = run.frames[at] ?? [];
+    // The wires the next edge changes: the joins in use at this edge, marked on the drawing.
+    const active = useMemo(() => {
+      const now = run.frames[at] ?? [];
+      const after = run.frames[at + 1];
+      const out = new Set<number>();
+      if (!after) return out;
+      now.forEach((w, n) => {
+        const v = after[n];
+        if (v && (v.value !== w.value || v.known !== w.known)) out.add(n);
+      });
+      return out;
+    }, [run, at]);
     const circuit = run.circuit;
     const state = datapathState(circuit, values);
     const next = edgeView(circuit, values);
@@ -356,6 +388,7 @@ export const MachineLevels = withProps(
                     {stored.choice === answer
                       ? strings.prediction.match
                       : strings.prediction.noMatch}
+                    {data.explain && at === first ? ` ${t.explainNext}` : ""}
                   </p>
                 )
               }
@@ -378,7 +411,7 @@ export const MachineLevels = withProps(
           />
         )}
         {committed && (
-          <>
+          <div className="machine-steps">
             <div className="explorer-actions debugger-actions">
               <button
                 type="button"
@@ -416,9 +449,24 @@ export const MachineLevels = withProps(
             <p className="debugger-status" role="status">
               {withCode(status)}
             </p>
-            {data.trace && <PauseChooser run={run} t={t} onGo={go} />}
-          </>
+          </div>
         )}
+        {data.listing && <ProgramListing source={data.program} label={data.listing} />}
+        {committed && (data.trace || data.levels) && <RunStrip run={run} at={at} t={t} onGo={go} />}
+        <CircuitView
+          circuit={circuit}
+          {...(committed ? { values } : {})}
+          title={strings.explorer.title}
+          scope={scope}
+          onScope={setScope}
+          table={false}
+          writtenWidth={4}
+          {...(data.focus ? { focus: data.focus } : {})}
+          pinned={pinned}
+          onPin={setPinned}
+          {...(committed ? { active } : {})}
+        />
+        <p className="machine-pin-note">{t.pinNote}</p>
         {committed && data.levels && (
           <div className="truth-table-wrap">
             <table className="truth-table datapath-table machine-levels-table">
@@ -473,16 +521,6 @@ export const MachineLevels = withProps(
             </table>
           </div>
         )}
-        <CircuitView
-          circuit={circuit}
-          {...(committed ? { values } : {})}
-          title={strings.explorer.title}
-          scope={scope}
-          onScope={setScope}
-          table={false}
-          writtenWidth={4}
-          {...(data.focus ? { focus: data.focus } : {})}
-        />
         {data.makers && (
           <div className="truth-table-wrap">
             <table className="truth-table datapath-table machine-makers">
@@ -490,7 +528,7 @@ export const MachineLevels = withProps(
                 {`${t.makersCaption}: ${
                   scope === ""
                     ? t.whole
-                    : `${scope}${scopeKind && makerText(t, scopeKind) ? ` (${makerText(t, scopeKind)})` : ""}`
+                    : `${scope}${scopeKind && makerText(t, scopeKind, scope) ? ` (${makerText(t, scopeKind, scope)})` : ""}`
                 }`}
               </caption>
               <thead>
@@ -505,7 +543,7 @@ export const MachineLevels = withProps(
                     <th scope="row" className="memory-word">
                       {p.name}
                     </th>
-                    <td>{makerText(t, p.kind)}</td>
+                    <td>{makerText(t, p.kind, p.path)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -615,75 +653,110 @@ export const MachineLevels = withProps(
           )}
         </div>
         {reached && data.outcomes && <Prose markdown={data.outcomes} />}
+        {reached && faultAt >= 0 && data.faults[faultAt]?.outcome && (
+          <div className="fault-outcome" role="status">
+            <Prose markdown={data.faults[faultAt]?.outcome ?? ""} />
+          </div>
+        )}
+        {committed &&
+          data.reveal &&
+          ((data.reveal.scope !== undefined &&
+            (scope === data.reveal.scope || scope.startsWith(`${data.reveal.scope}/`))) ||
+            (data.reveal.end && reached) ||
+            (data.reveal.edge !== undefined && at >= data.reveal.edge)) && (
+            <Prose markdown={data.reveal.text} />
+          )}
       </div>
     );
   },
 );
 
-/** Lesson 3: choose a line of the program and an edge of it, and pause the run before it. */
-function PauseChooser({
+/**
+ * The run over time, by the step controls: each step of the run (an instruction, or a trap) with
+ * its edges side by side, by state, numbered from the reset, the next edge marked. A press pauses
+ * the run before that edge. A window of steps around the next edge shows, and moves with it.
+ */
+function RunStrip({
   run,
+  at,
   t,
   onGo,
 }: {
   run: RecordedRun;
+  at: number;
   t: Machine13Strings;
   onGo: (frame: number) => void;
 }) {
-  // Each line the run reaches, at its first step, with that step's edges by state.
-  const lines = useMemo(() => {
-    const seen = new Set<string>();
-    return run.steps.flatMap((s) => {
-      const key = s.pc.toString();
-      if (seen.has(key) || !s.text) return [];
-      seen.add(key);
-      const states = Array.from(
-        { length: s.last - s.first },
-        (_, i) => edgeView(run.circuit, run.frames[s.first + i] ?? []).state ?? "X",
-      );
-      return [{ pc: s.pc, text: s.text, first: s.first, states }];
-    });
-  }, [run]);
-  const [line, setLine] = useState(0);
-  const [edge, setEdge] = useState(0);
-  const chosen = lines[line];
+  const steps = useMemo(
+    () =>
+      run.steps.map((s) => ({
+        pc: s.pc,
+        text: s.text,
+        first: s.first,
+        states: Array.from(
+          { length: s.last - s.first },
+          (_, i) => edgeView(run.circuit, run.frames[s.first + i] ?? []).state ?? "X",
+        ),
+      })),
+    [run],
+  );
+  const current = Math.max(
+    0,
+    steps.findIndex((s) => at >= s.first && at < s.first + s.states.length),
+  );
+  const [shift, setShift] = useState(0);
+  const WINDOW = 4;
+  const start = Math.max(0, Math.min(steps.length - WINDOW, current - 1 + shift));
+  const shown = steps.slice(start, start + WINDOW);
   return (
-    <fieldset className="pause-chooser">
-      <legend>{t.pauseLegend}</legend>
-      <label>
-        <span>{t.pauseLine}</span>
-        <select
-          value={line}
-          onChange={(e) => {
-            setLine(Number(e.target.value));
-            setEdge(0);
-          }}
-        >
-          {lines.map((l, i) => (
-            <option key={l.pc.toString()} value={i}>
-              {`${hex3(l.pc)}  ${l.text}`}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label>
-        <span>{t.pauseEdge}</span>
-        <select value={edge} onChange={(e) => setEdge(Number(e.target.value))}>
-          {(chosen?.states ?? []).map((st, i) => (
-            <option key={i} value={i}>
-              {format(t.pauseEdgeOption, { k: i + 1, state: st })}
-            </option>
-          ))}
-        </select>
-      </label>
+    <div className="run-strip" role="group" aria-label={t.stripLegend}>
+      <p className="run-strip-legend">{t.stripLegend}</p>
       <button
         type="button"
-        className="button secondary"
-        onClick={() => chosen && onGo(chosen.first + edge)}
+        className="button secondary run-strip-move"
+        disabled={start === 0}
+        onClick={() => setShift((k) => k - WINDOW)}
       >
-        {t.pauseGo}
+        {t.stripEarlier}
       </button>
-    </fieldset>
+      <ol className="run-strip-steps" start={start + 1}>
+        {shown.map((s, i) => (
+          <li key={start + i} className="run-strip-step">
+            <span className="run-strip-line">
+              <code>{`${hex3(s.pc)}  ${s.text || t.noLine}`}</code>
+            </span>
+            <span className="run-strip-edges">
+              {s.states.map((st, k) => {
+                const frame = s.first + k;
+                const next = frame === at;
+                return (
+                  <button
+                    key={k}
+                    type="button"
+                    className={`button secondary run-strip-edge${next ? " run-strip-next" : ""}${frame < at ? " run-strip-done" : ""}`}
+                    aria-current={next ? "step" : undefined}
+                    onClick={() => {
+                      setShift(0);
+                      onGo(frame);
+                    }}
+                  >
+                    {format(t.stripEdge, { n: frame + 1, state: st })}
+                  </button>
+                );
+              })}
+            </span>
+          </li>
+        ))}
+      </ol>
+      <button
+        type="button"
+        className="button secondary run-strip-move"
+        disabled={start + WINDOW >= steps.length}
+        onClick={() => setShift((k) => k + WINDOW)}
+      >
+        {t.stripLater}
+      </button>
+    </div>
   );
 }
 
@@ -754,7 +827,7 @@ function TracePanel({
                     <th scope="row">
                       <span className="memory-word">{block.name}</span>
                       <br />
-                      {makerText(t, block.kind) ?? ""}
+                      {makerText(t, block.kind, block.path) ?? ""}
                     </th>
                     <td className="memory-word">{ports(block.inputs)}</td>
                     <td className="memory-word">{ports(block.outputs)}</td>
@@ -779,7 +852,11 @@ function TracePanel({
                     aria-pressed={open === p.path}
                     onClick={() => setOpen(open === p.path ? undefined : p.path)}
                   >
-                    {format(t.closedOpen, { part: p.name, module: p.module })}
+                    {format(t.closedOpen, {
+                      part: p.name,
+                      // The module whose drawing of one bit opens, as the heading over it says.
+                      module: p.bit === "wiring" ? p.module : BIT_DRAWINGS[p.bit][1],
+                    })}
                   </button>
                 </li>
               ))}

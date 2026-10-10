@@ -28,11 +28,11 @@ export const LABELS = {
     c1: "The whole machine",
   },
   captions: {
-    course: "The course's text of the whole machine, run on five programs against the model.",
+    course: "The course's own text, run on the seven programs.",
     predict: "A text whose timer counts a trap's edge, run on two programs.",
-    lines: "Three texts, each with one line changed, run on five programs.",
-    door: "A text whose memory never sees the door, run on five programs.",
-    lab: "Your text of the whole machine, run on five programs against the model.",
+    lines: "Three texts, each with one line changed, run on seven programs.",
+    door: "A text with one join wrong, run on seven programs.",
+    lab: "Your text, with the joins it makes, tested on the seven programs.",
   },
   texts: {
     course: "The course's text",
@@ -41,12 +41,15 @@ export const LABELS = {
     ie: "Interrupts on in system mode",
     call: "A call keeps the PC",
     door: "DOOR held at 0",
+    mystery: "A text with one join wrong",
   },
   programs: {
     shop: "The shop's program",
     user: "A fault in user mode",
     timer: "A system call, then the timer",
     door: "The door",
+    bits: "Signs, bytes and WARM",
+    refused: "A system job in user mode",
     rom: "A store to the ROM",
   },
   options: {

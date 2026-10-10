@@ -116,6 +116,51 @@ describe("lesson final-machine's facts", () => {
     }
   }, 300_000);
 
+  it("finds each of the outline's six joins filled wrongly, and the review's wrong texts", () => {
+    const wrong: readonly (readonly [string, readonly string[]])[] = [
+      [
+        "assign USER = ~STATUS[0];",
+        ["assign USER = STATUS[0];", "assign USER = ~STATUS[1];", "assign USER = 1'b1;"],
+      ],
+      [".WAITING(WAITING),  //", [".WAITING(2'b11),  //", ".WAITING(STATUS),  //"]],
+      [".NOHANDLER(NOHANDLER),  //", [".NOHANDLER(1'b1),  //", ".NOHANDLER(TRAP),  //"]],
+      [".CAUSE(CAUSE),  //", [".CAUSE(CAUSET),  //", ".CAUSE(CAUSEM),  //", ".CAUSE(CAUSEF),  //"]],
+      [
+        "if (SET) YIN = {63'h0, MET};",
+        [
+          "if (SET) YIN = {63'h0, ZERO};",
+          "if (SET) YIN = {63'h0, OVER};",
+          "if (SET) YIN = {63'h0, COUT};",
+          "if (SET) YIN = 64'h0;",
+        ],
+      ],
+      ["if (TRAP) NEXTT = C4;", ["if (TRAP) NEXTT = C2;", "if (TRAP) NEXTT = PC4;"]],
+      // The review's: a join whose own wire has the same name, inputs held at 0, a lost sign.
+      [".CAUSED(CAUSET), .CAUSEM", [".CAUSED(CAUSED), .CAUSEM"]],
+      [".WARM(WARM)", [".WARM(1'b0)"]],
+      [".STORE(MSTORE), .BYTE(BYTE)", [".STORE(MSTORE), .BYTE(1'b0)"]],
+      [
+        ".COUT(COUT), .OVER(OVER),\n    .MET(MET));",
+        [
+          ".COUT(1'b0), .OVER(OVER),\n    .MET(MET));",
+          ".COUT(COUT), .OVER(1'b0),\n    .MET(MET));",
+        ],
+      ],
+      ["1'b1: WIDE = {52'hFFFFFFFFFFFFF, IR[11:0]};", ["1'b1: WIDE = {52'h0, IR[11:0]};"]],
+    ];
+    for (const [from, tos] of wrong) {
+      expect(MACHINE13_TEXT, from).toContain(from);
+      for (const to of tos) {
+        const text = MACHINE13_TEXT.replace(from, to);
+        const found = LAB_RUNS.some((p) => {
+          const r = labRun(text, p);
+          return "blocked" in r || r.difference !== undefined;
+        });
+        expect(found, to).toBe(true);
+      }
+    }
+  }, 600_000);
+
   const challenge = finalMachine.challenges![0]!;
   it("grades the course's text as passing and the outline as failing every test", () => {
     expect(gradeLab(challenge as never, { hdl: MACHINE13_TEXT }).passed).toBe(true);

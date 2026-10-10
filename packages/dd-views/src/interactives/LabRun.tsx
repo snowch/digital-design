@@ -16,6 +16,7 @@ import { PredictionChallenge } from "@platform/primitives";
 
 import { labCircuit, labPlan, labText } from "../LabEditor";
 import { LabJoins, partNamed } from "./LabJoins";
+import { ProgramListing } from "./ProgramListing";
 import { format, useViewStrings } from "../strings";
 import { withCode } from "./Module13Figures";
 import { withProps } from "./props";
@@ -30,6 +31,8 @@ const Props = z.object({
         label: z.string(),
         from: z.string().optional(),
         to: z.string().optional(),
+        /** The changed line shows only once this text has run: a failure read before its join. */
+        hidden: z.boolean().default(false),
       }),
     )
     .min(1),
@@ -49,6 +52,17 @@ const Props = z.object({
   /** Each option's value is the ids of the programs that differ, joined by "+", or "none". */
   options: z.array(z.object({ value: z.string(), label: z.string() })).optional(),
   explain: z.string().default(""),
+  /**
+   * A paragraph shown once the runs it reports are made: every text run at least once, or the
+   * program named run on the text, as the figure's own runs, never at load.
+   */
+  reveal: z
+    .object({
+      text: z.string(),
+      everyText: z.boolean().default(false),
+      program: z.string().optional(),
+    })
+    .optional(),
 });
 type Data = z.infer<typeof Props>;
 
@@ -57,7 +71,10 @@ interface Stored {
 }
 
 /** A text of the figure: the course's with its one change made. */
-export function labVariant(hdl: string, text: Data["texts"][number]): string {
+export function labVariant(
+  hdl: string,
+  text: { readonly from?: string; readonly to?: string },
+): string {
   if (text.from === undefined) return hdl;
   if (!hdl.includes(text.from)) throw new Error(`lab-run: no ${JSON.stringify(text.from)}`);
   return hdl.replace(text.from, text.to ?? "");
@@ -91,6 +108,8 @@ export const LabRunFigure = withProps(
     const [program, setProgram] = useState(0);
     const [running, setRunning] = useState(false);
     const [runs, setRuns] = useState<readonly string[]>([]);
+    // Which text has run which program, for a paragraph that reports them.
+    const [made, setMade] = useState<ReadonlySet<string>>(new Set());
     // The part the last run's sentence names, for the text it ran; nothing before a run.
     const [named, setNamed] = useState<{ which: number; part?: string } | undefined>();
     const [stored, setStored] = useSlot<Stored>(store, interactive.id);
@@ -118,6 +137,7 @@ export const LabRunFigure = withProps(
         const d = "blocked" in r ? undefined : r.difference;
         const part = partNamed(d?.what, d?.machineStop?.kind === "trap");
         setNamed({ which, ...(part ? { part } : {}) });
+        setMade((old) => new Set([...old, `${which}:${chosen.id}`]));
         setRuns((old) => [
           format(t.labRunLine, { text: text.label, program: chosen.label, result }),
           ...old,
@@ -193,14 +213,21 @@ export const LabRunFigure = withProps(
                 </label>
               )}
             </div>
-            {text?.to !== undefined && (
-              <div className="lab-run-change">
-                <p className="lab-run-change-heading">{t.labChange}</p>
-                <pre className="hdl-code">
-                  <code>{text.to.trim()}</code>
-                </pre>
-              </div>
+            {chosen && (
+              <ProgramListing
+                source={chosen.source}
+                label={format(t.labListing, { program: chosen.label })}
+              />
             )}
+            {text?.to !== undefined &&
+              (!text.hidden || [...made].some((m) => m.startsWith(`${which}:`))) && (
+                <div className="lab-run-change">
+                  <p className="lab-run-change-heading">{t.labChange}</p>
+                  <pre className="hdl-code">
+                    <code>{text.to.trim()}</code>
+                  </pre>
+                </div>
+              )}
             {text && (
               <LabJoins
                 text={labVariant(data.hdl, text)}
@@ -214,6 +241,13 @@ export const LabRunFigure = withProps(
                 {running ? t.labRunning : t.labRun}
               </button>
             </div>
+            {data.reveal &&
+              (data.reveal.everyText
+                ? data.texts.every((_, k) => [...made].some((m) => m.startsWith(`${k}:`)))
+                : true) &&
+              (data.reveal.program === undefined ||
+                [...made].some((m) => m.endsWith(`:${data.reveal?.program}`))) &&
+              made.size > 0 && <Prose markdown={data.reveal.text} />}
             {runs.length > 0 && (
               <div className="lab-run-results" aria-live="polite">
                 <p className="lab-run-change-heading">{t.labRunsCaption}</p>

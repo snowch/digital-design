@@ -272,6 +272,40 @@ handler: R5 <= C3
     door: 5,
   },
   {
+    id: "bits",
+    source: `// Signs, a set if that holds, an unsigned comparison, an overflow, a byte, DOOR and WARM.
+        R1 <= -5
+        R2 <= 3
+        R3 <= R1 < R2 signed     // holds: R3 takes 1
+        R4 <= R1 < R2 unsigned   // -5 read unsigned is large: R4 takes 0
+        R8 <= word[least]
+        R9 <= R8 < R2 signed     // the subtraction overflows; the least word is the less: 1
+        R5 <= word[signals]      // DOOR and WARM
+        byte[0x400] <= R1
+        R6 <= byte[0x400]
+        word[display] <= R6
+        stop
+least:  word -9223372036854775808`,
+    inputs: {},
+    warm: 1,
+  },
+  {
+    id: "refused",
+    source: `// A system job in user mode: user mode refuses stop, and the handler shows why.
+        R1 <= handler
+        C4 <= R1
+        R1 <= 0
+        C1 <= R1                // user mode, interrupts off
+        R1 <= program
+        C2 <= R1
+        resume
+handler: R5 <= C3
+        word[display] <= R5
+        stop
+program: stop`,
+    inputs: {},
+  },
+  {
     id: "rom",
     source: `// A store to the ROM, with no handler.
         R1 <= 7
@@ -384,4 +418,6 @@ export const CAPSTONE_CASES = [
   { id: "both", sensorA: -250, sensorB: -250, display: 2, lamps: 1 },
   { id: "neither", sensorA: -150, sensorB: -100, display: 0, lamps: 0 },
   { id: "edge", sensorA: -200, sensorB: -201, display: 1, lamps: 0 },
+  // A reading above 0: only a comparison read signed passes, since -200 read unsigned is large.
+  { id: "warm", sensorA: 50, sensorB: -250, display: 1, lamps: 0 },
 ] as const;

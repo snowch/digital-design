@@ -44,13 +44,14 @@ describe("lesson whole-machine's facts", () => {
     const t = MACHINE13_STRINGS;
     const kind = (path: string) =>
       libraryCircuit("machine-final").composites.find((c) => c.path === path)?.kind ?? "";
-    const made = (path: string) => makerText(t, kind(path))?.replace(/\[draft\] /g, "");
+    const made = (path: string) => makerText(t, kind(path), path)?.replace(/\[draft\] /g, "");
     expect(made("control")).toBe("Module 9, grown in 10 and 12");
     expect(made("datapath")).toBe("Module 8, grown in 9, 10 and 12");
     expect(made("port")).toBe("Module 9, grown in 12");
     expect(made("datapath/registers")).toBe("Module 6");
     expect(made("datapath/alu")).toBe("Module 7");
-    expect(made("datapath/pc")).toBe("Module 5");
+    // The PC: Module 8 introduced it, though its kind of register is Module 5's.
+    expect(made("datapath/pc")).toBe("Module 8");
     expect(made("datapath/ir")).toBe("Module 9");
     expect(made("datapath/cregs")).toBe("Module 12");
     expect(made("control/decoder")).toBe("Module 9, grown in 10");
@@ -129,10 +130,17 @@ describe("lesson whole-machine's facts", () => {
       )?.path;
     };
     const answer = (id: string) => JOIN_ANSWERS.find((a) => a.id === id)?.value;
-    expect(driver("HB")).toBe(answer("hb"));
+    const reader = (bus: string) => {
+      const net = top.nets.find((n) => n.name === bus)?.id;
+      return top.composites
+        .filter((c) => !c.path.includes("/") && Object.values(c.inputs).includes(net ?? -1))
+        .map((c) => c.path);
+    };
+    // The store's word, HB, from the datapath to the memory port, where it arrives as D.
+    expect([driver("HB"), reader("HB")]).toEqual(["datapath", [answer("hb")]]);
     expect(driver("WAITING")).toBe(answer("waiting"));
-    expect(driver("STATUS")).toBe(answer("status"));
-    expect(driver("CAUSEM")).toBe(answer("causem"));
+    expect([driver("STATUS"), reader("STATUS")]).toEqual(["datapath", [answer("status")]]);
+    expect([driver("CAUSEM"), reader("CAUSEM")]).toEqual(["port", [answer("causem")]]);
     // The edges of a program no figure runs: resume's FETCH is edge 15, where the IR takes
     // 81000000; its WRITE edge, 17, gives the PC the return point, 010.
     const edges = recordRun({

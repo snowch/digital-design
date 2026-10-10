@@ -50,7 +50,7 @@ describe("lesson capstone's facts", () => {
     // The prediction's answer, as the figure asks it: MET after the next edge.
     expect(levelsAnswer(run, 12, "net", "MET")).toBe("1");
     expect(PROSE.prediction).toContain("edge 13");
-    expect(PROSE.invAfter).toContain("COUT is 0. Y is -66, and MET is 1.");
+    expect(PROSE.invAfter).toContain("COUT is 0, RESULT is -66, MET is 1.");
   });
 
   it("MET held at 0: R3 is 0 on the machine and 1 by the model", () => {
@@ -73,6 +73,28 @@ describe("lesson capstone's facts", () => {
       const end = modelEnd(program!, { sensorA: BigInt(c.sensorA), sensorB: BigInt(c.sensorB) });
       expect([end.end.kind, end.display, end.lamps]).toEqual(["stop", BigInt(c.display), c.lamps]);
     }
+  });
+
+  it("fails a program whose set ifs read unsigned on room A at 50 alone", () => {
+    const { program } = capstoneProgram(CAPSTONE_REFERENCE.replaceAll(" signed", " unsigned"));
+    const fails = CAPSTONE_CASES.filter((c) => {
+      const end = modelEnd(program!, { sensorA: BigInt(c.sensorA), sensorB: BigInt(c.sensorB) });
+      return end.display !== BigInt(c.display) || end.lamps !== c.lamps;
+    });
+    expect(fails.map((c) => c.id)).toEqual(["warm"]);
+  });
+
+  it("the last hint's program and answers pass every test", () => {
+    const challenge = capstone.challenges![0]!;
+    const hint = challenge.hints![4]!;
+    expect(hint).toContain(CAPSTONE_REFERENCE);
+    const answers = CAPSTONE_FIELDS.map((f) => f.reference);
+    expect(hint).toContain(answers.join(", "));
+    const v = gradeCapstone(challenge as never, {
+      text: CAPSTONE_REFERENCE,
+      answers: Object.fromEntries(CAPSTONE_FIELDS.map((f) => [f.id, f.reference])),
+    });
+    expect([v.passed, v.total]).toEqual([true, 10]);
   });
 
   it("reads the reference program's five answers off its own run", () => {
@@ -101,7 +123,7 @@ describe("lesson capstone's facts", () => {
     );
     expect(v.failures.map((f) => f.label)).toContain(
       capstone.challenges![0]!.tests.kind === "answers"
-        ? capstone.challenges![0]!.tests.cases[4]!.label
+        ? capstone.challenges![0]!.tests.cases[5]!.label
         : "",
     );
   });

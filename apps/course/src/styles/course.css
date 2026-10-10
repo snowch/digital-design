@@ -3323,10 +3323,79 @@ svg.stack-depth {
 .lab-editor > .explorer-actions {
   flex-wrap: wrap;
 }
+/* The step controls and the line saying where the run is stay in reach while the drawing and the
+   tables under them scroll past. */
+.machine-steps {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--bg-raised);
+  padding: var(--space-1) 0;
+  border-bottom: 1px solid var(--border);
+}
+.machine-steps .debugger-status {
+  margin: var(--space-1) 0 0;
+}
+/* The run over time: each step with its edges side by side, the next edge marked. */
+.run-strip {
+  margin: var(--space-2) 0;
+}
+.run-strip-legend {
+  margin: 0 0 var(--space-1);
+  font-weight: 600;
+}
+.run-strip-steps {
+  list-style: none;
+  margin: var(--space-1) 0;
+  padding: 0;
+}
+.run-strip-step {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+  padding: var(--space-1) 0;
+  border-top: 1px solid var(--border);
+}
+.run-strip-line {
+  flex: 1 1 12rem;
+}
+.run-strip-edges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+.run-strip-edge {
+  min-height: 40px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+.run-strip-done {
+  color: var(--fg-muted);
+}
+.run-strip-next {
+  border: 2px solid var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.machine-pin-note {
+  margin: var(--space-1) 0;
+  color: var(--fg-muted);
+}
+.circuit .wire-active path:not(.wire-hit):not(.wire-halo) {
+  stroke-width: 5;
+}
+.circuit .wire-pinned .wire-halo {
+  opacity: 0.45;
+}
+.fault-outcome {
+  margin-top: var(--space-2);
+}
+.machine-trace-table td {
+  overflow-wrap: anywhere;
+}
 .machine-trace-table .trace-port {
   display: inline-block;
   margin-right: var(--space-2);
-  white-space: nowrap;
 }
 .machine-closed-list {
   list-style: none;

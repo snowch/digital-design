@@ -76,7 +76,16 @@ export const MAKERS: Readonly<Record<string, Maker>> = {
   memory: { built: 6, grown: [8, 9, 12] },
 };
 
+/**
+ * Parts whose kind another part shares but whose maker differs: the PC is a register of Module 5's
+ * kind, but Module 8 introduced it and its challenge wrote it, as the IR and the controller are
+ * credited to Module 9, which introduced them.
+ */
+export const MAKERS_BY_PATH: Readonly<Record<string, Maker>> = {
+  "datapath/pc": { built: 8 },
+};
+
 /** The maker of a part by its kind, or undefined for a kind the list leaves out. */
-export function makerOf(kind: string): Maker | undefined {
-  return MAKERS[kind];
+export function makerOf(kind: string, path?: string): Maker | undefined {
+  return (path !== undefined ? MAKERS_BY_PATH[path] : undefined) ?? MAKERS[kind];
 }

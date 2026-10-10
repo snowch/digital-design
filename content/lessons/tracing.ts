@@ -17,14 +17,19 @@ import { LABELS } from "./tracing.labels";
 import { PROSE } from "./tracing.prose";
 import { SHOP, SHOP_INPUTS } from "./module13";
 
-/** The challenge: five wires at named edges, each found by a trace. */
+/**
+ * The challenge: four groups of wires at named edges, each found by a trace, each answer a row of
+ * bits, the highest bit first: one guess of all 0s or all 1s passes none of them.
+ */
 export const TRACE_ANSWERS = [
-  { id: "xorB", value: "0", detail: "traceXorB" },
-  { id: "sum1", value: "1", detail: "traceSum1" },
-  { id: "pcD", value: "1", detail: "tracePcD" },
-  { id: "r5En", value: "1", detail: "traceR5En" },
-  { id: "r4En", value: "0", detail: "traceR4En" },
+  { id: "xorB", value: "1001", detail: "traceXorB" },
+  { id: "carry", value: "1001", detail: "traceCarry" },
+  { id: "pcD", value: "1100", detail: "tracePcD" },
+  { id: "en", value: "00100000", detail: "traceEn" },
 ] as const;
+
+/** The last hint: the whole answer, built from the answers so it cannot drift from them. */
+export const TRACE_WHOLE_ANSWER = TRACE_ANSWERS.map((a) => a.value);
 
 const TRACE = {
   program: SHOP,
@@ -53,7 +58,7 @@ export const tracing: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.free,
           lead: PROSE.freeLead,
-          props: { ...TRACE, start: 27 },
+          props: { ...TRACE, start: 53 },
         },
       ],
     },
@@ -95,8 +100,11 @@ export const tracing: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.sum,
           lead: PROSE.sumLead,
-          after: PROSE.sumAfter,
-          props: { ...TRACE, start: 27 },
+          props: {
+            ...TRACE,
+            start: 27,
+            reveal: { text: PROSE.sumAfter, scope: "datapath/alu/g0/q0/bit1/fa/ha2" },
+          },
         },
       ],
     },
@@ -111,7 +119,12 @@ export const tracing: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.pc,
           lead: PROSE.pcLead,
-          props: { ...TRACE, start: 47, shown: [6, 15] },
+          props: {
+            ...TRACE,
+            start: 47,
+            shown: [6, 15],
+            reveal: { text: PROSE.pcAfter, edge: 48 },
+          },
         },
       ],
     },
@@ -133,7 +146,7 @@ export const tracing: LessonInput = {
             faults: [
               {
                 kind: "stuck-at",
-                net: "datapath/alu/g0/q0/bit1/SUM",
+                net: "datapath/alu/g0/C4",
                 value: 0,
                 label: LABELS.faults.alu,
                 outcome: PROSE.faultAlu,
@@ -179,18 +192,25 @@ export const tracing: LessonInput = {
       fields: TRACE_ANSWERS.map((a) => ({
         id: a.id,
         label: LABELS.fields[a.id],
-        kind: "text" as const,
+        kind: "bits" as const,
+        width: a.value.length,
       })),
       tests: {
         kind: "answers",
         grader: "exact",
         cases: TRACE_ANSWERS.map((a) => ({
           label: LABELS.fields[a.id],
-          given: { field: a.id, form: "number", detail: a.detail },
+          given: { field: a.id, form: "bits", detail: a.detail },
           expect: { value: a.value },
         })),
       },
-      hints: [...PROSE.c1Hints],
+      hints: [
+        PROSE.c1Hints[0],
+        PROSE.c1Hints[1],
+        PROSE.c1Hints[2],
+        PROSE.c1Hints[3],
+        PROSE.c1Whole.replace("{answers}", TRACE_WHOLE_ANSWER.join(", ")),
+      ],
       reference: { answers: Object.fromEntries(TRACE_ANSWERS.map((a) => [a.id, a.value])) },
     },
   ],

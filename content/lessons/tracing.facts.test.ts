@@ -6,6 +6,8 @@
 
 import { describe, expect, it } from "vitest";
 
+import { parseLesson } from "@platform/lesson-schema";
+
 import {
   bitDrive,
   bitPartOf,
@@ -14,14 +16,19 @@ import {
   netWord,
   recordRun,
   stuckAt,
-  datapathState,
   type RecordedRun,
 } from "@dd/dd-model";
-import { MACHINE13_STRINGS, compareText, levelsAnswer, makerText } from "@dd/dd-views";
+import {
+  MACHINE13_STRINGS,
+  compareText,
+  gradeAnswers,
+  levelsAnswer,
+  makerText,
+} from "@dd/dd-views";
 import type { Word } from "@dd/sim";
 
 import { SHOP, SHOP_INPUTS } from "./module13";
-import { TRACE_ANSWERS } from "./tracing";
+import { TRACE_ANSWERS, tracing } from "./tracing";
 
 const run = recordRun({ libraryId: "machine-final", program: SHOP, inputs: SHOP_INPUTS });
 const c = run.circuit;
@@ -85,36 +92,61 @@ describe("lesson tracing's facts", () => {
     expect(at(47, "RESULT")).toBe("34");
   });
 
-  it("finds the wire held at 0: R3 is 64, not 66, and only bit 1 differs", () => {
+  it("finds the carry held at 0 between the ALU's first two groups of four: R3 is 50, not 66", () => {
     const r: RecordedRun = recordRun(
       {
         libraryId: "machine-final",
         program: SHOP,
         inputs: SHOP_INPUTS,
-        fault: stuckAt("datapath/alu/g0/q0/bit1/SUM", 0),
+        fault: stuckAt("datapath/alu/g0/C4", 0),
       },
       300,
     );
     expect(compareText(MACHINE13_STRINGS, r, r.frames.length - 1)).toBe(
-      "After `R3 <= R1 - R2` at `010`, R3 is 64 on the machine and 66 by the model.",
+      "After `R3 <= R1 - R2` at `010`, R3 is 50 on the machine and 66 by the model.",
     );
-    expect(datapathState(r.circuit, r.frames.at(-1)!).display).toBe(64n);
-    expect((64 ^ 66).toString(2)).toBe("10");
+    // Off Module 0's path: its stuck wire was SUM in the slice for bit 1.
+    expect("datapath/alu/g0/C4").not.toContain("bit1");
   });
 
-  it("answers the five traces", () => {
-    // R3 <= R1 - R2's ALU edge is edge 20: the frame before it is 19.
+  it("answers the four traces, each a row of bits", () => {
+    const bits = (frame: number, nets: readonly string[]) => nets.map((n) => at(frame, n)).join("");
+    const fa = (k: number) => {
+      const out = c.composites.find((x) => x.path === `datapath/alu/g0/q0/bit${k}/fa`)!.outputs[
+        "COUT"
+      ]!;
+      return c.nets[out]!.name;
+    };
+    // R3 <= R1 - R2's ALU edge is edge 20: the frame before it is 19. B is R2, -250: its bits 3 to
+    // 0 are 0110, which the XORs turn over for the subtraction.
     expect(state(19)).toBe("ALU");
-    expect(at(19, "datapath/alu/g0/q0/bit2/BX")).toBe(answer("xorB"));
-    expect(at(19, "datapath/alu/g0/q0/bit1/SUM")).toBe(answer("sum1"));
-    // goto R15's last edge, its ALU edge, is edge 68: the PC takes 030, whose bit 4 is 1. The
-    // construction traces the PC at another edge, the call's WRITE edge.
+    expect(
+      bits(
+        19,
+        [3, 2, 1, 0].map((k) => `datapath/alu/g0/q0/bit${k}/BX`),
+      ),
+    ).toBe(answer("xorB"));
+    expect(bits(19, [3, 2, 1, 0].map(fa))).toBe(answer("carry"));
+    // goto R15's last edge, its ALU edge, is edge 68: the PC takes 030. The construction traces the
+    // PC at another edge, the call's WRITE edge.
     expect([state(67), at(67, "PC"), at(68, "PC")]).toEqual(["ALU", "40", "30"]);
-    expect(String(drive(67, "datapath/pc", 4).inputs.D)).toBe(answer("pcD"));
+    expect([5, 4, 3, 2].map((k) => String(drive(67, "datapath/pc", k).inputs.D)).join("")).toBe(
+      answer("pcD"),
+    );
+    // The set if's WRITE edge: only the register Y names, R5, is enabled.
     expect(state(28)).toBe("WRITE");
-    expect(String(drive(28, "datapath/registers", 0, 5).inputs.EN)).toBe(answer("r5En"));
-    expect(String(drive(28, "datapath/registers", 0, 4).inputs.EN)).toBe(answer("r4En"));
-    // R2 is -250: B's bit 2 is 1 before the XOR turns it over.
-    expect((-250n >> 2n) & 1n).toBe(1n);
+    expect(
+      [7, 6, 5, 4, 3, 2, 1, 0]
+        .map((r) => String(drive(28, "datapath/registers", 0, r).inputs.EN))
+        .join(""),
+    ).toBe(answer("en"));
+  });
+
+  it("builds its last hint from the answers, and the hint's answers pass the challenge", () => {
+    const ch = parseLesson(tracing).challenges[0]!;
+    const hint = ch.hints.at(-1)!;
+    for (const a of TRACE_ANSWERS) expect(hint).toContain(a.value);
+    const answers = Object.fromEntries(TRACE_ANSWERS.map((a) => [a.id, a.value]));
+    expect(gradeAnswers(ch, { answers }).passed).toBe(true);
   });
 });

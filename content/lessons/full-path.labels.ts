@@ -30,9 +30,9 @@ export const LABELS = {
   captions: {
     whole: "The whole machine runs the shop's program, with the instruction shown at every level.",
     predict:
-      "The shop's program is stopped before the FETCH edge of a set if, and a question asks about the IR.",
+      "The shop's program is paused before the FETCH edge of a set if, and asks what the IR takes.",
     call: "The shop's program is stopped before its system call, with the control registers shown.",
-    store: "The shop's program is stopped before a store to the lamps.",
+    store: "The shop's program is paused before the handler's store to the display.",
     faults: "The shop's program runs with one control signal broken, and you choose which.",
     answers: "Five questions ask about one line at every level.",
   },
@@ -41,8 +41,8 @@ export const LABELS = {
     set: "SET held at 0",
   },
   fields: {
-    code: "The word of `R5 <= R3 < R4 signed`",
-    edges: "The edges that `R7 <= R5 | R6` takes",
+    code: "The word of `R9 <= R2 >= R7 unsigned`",
+    edges: "The edges that `R4 <= word[R2]` takes",
     job: "The ALU's job at its ALU edge",
     yin: "The word register Y takes at its WRITE edge",
     pc: "The PC after its last edge",

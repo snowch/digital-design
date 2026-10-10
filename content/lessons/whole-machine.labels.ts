@@ -5,6 +5,7 @@
 // against the lesson.
 
 export const LABELS = {
+  listing: "The shop's program, line by line",
   title: "Which parts make the whole machine, and where do they meet?",
   objectives: [
     "Name the three blocks of the whole machine, and the module that built each part.",
@@ -32,7 +33,7 @@ export const LABELS = {
       "The whole machine running the shop's program, with a table of which module built each part.",
     predict:
       "The shop's program stopped before the WRITE edge of a call through a register, with a question about the PC.",
-    timeline: "A timing diagram of signals crossing joins, from edge 57 to edge 68.",
+    timeline: "A timing diagram of signals crossing joins, from edge 57 to edge 64.",
     load: "The shop's program stopped before a load, with the signals of its edges.",
     answers: "Six questions about the joins and the edges.",
     faults: "The shop's program with one join held at a fixed value, which you choose.",
@@ -43,10 +44,10 @@ export const LABELS = {
     cause: "CAUSE held at `00`",
   },
   fields: {
-    hb: "The block that drives HB",
-    waiting: "The block that drives WAITING",
-    status: "The block that drives STATUS",
-    causem: "The block that drives CAUSEM",
+    hb: "The block that reads the word a store writes",
+    waiting: "The block that drives the events waiting for an interrupt",
+    status: "The block that reads C0's two bits",
+    causem: "The block that reads the cause of a memory step's trap",
     irEdge: "The edge at which the IR takes the word of `resume`",
     pcEdge: "The edge at which the PC takes `010`",
   },

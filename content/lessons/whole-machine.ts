@@ -19,10 +19,12 @@ import { SHOP, SHOP_INPUTS } from "./module13";
 
 /** The challenge's questions: the block that drives each of four buses, and two edges of a run no figure shows. */
 export const JOIN_ANSWERS = [
-  { id: "hb", form: "choice", value: "datapath", detail: "joinHb" },
+  // Each bus by what it carries, and the block at its other end: reading the word a store writes,
+  // driving the events that wait, reading C0's two bits, reading the memory step's cause.
+  { id: "hb", form: "choice", value: "port", detail: "joinHb" },
   { id: "waiting", form: "choice", value: "port", detail: "joinWaiting" },
-  { id: "status", form: "choice", value: "datapath", detail: "joinStatus" },
-  { id: "causem", form: "choice", value: "port", detail: "joinCausem" },
+  { id: "status", form: "choice", value: "control", detail: "joinStatus" },
+  { id: "causem", form: "choice", value: "control", detail: "joinCausem" },
   { id: "irEdge", form: "number", value: "15", detail: "joinIrEdge" },
   { id: "pcEdge", form: "number", value: "17", detail: "joinPcEdge" },
 ] as const;
@@ -77,6 +79,7 @@ export const wholeMachine: LessonInput = {
             inputs: SHOP_INPUTS,
             levels: false,
             makers: true,
+            listing: LABELS.listing,
           },
         },
       ],
@@ -127,7 +130,8 @@ export const wholeMachine: LessonInput = {
             program: SHOP,
             inputs: SHOP_INPUTS,
             from: 56,
-            edges: 12,
+            // Eight edges, so each is wide enough to write an eight-digit word in its lane.
+            edges: 8,
             signals: LANES,
           },
         },
@@ -148,6 +152,8 @@ export const wholeMachine: LessonInput = {
             program: SHOP,
             inputs: SHOP_INPUTS,
             start: 7,
+            focus: ["port"],
+            reveal: { text: PROSE.loadAfter, edge: 12 },
             signals: ["FETCHING", "MLOAD", "HOLDM", "WREG"],
             shown: [1],
           },

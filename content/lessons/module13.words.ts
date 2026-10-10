@@ -25,7 +25,7 @@ export const MACHINE13_WORDS = {
   parts: [
     "Every part the course supplies is placed below, with all its ports and none joined.",
     "Join each port, inside its brackets, to a wire.",
-    "The wires are declared above, named as the drawing names them.",
+    "The wires are declared above, named as lesson 1's drawing names them.",
     "Write the small parts that go between them: the PC, the address the memory reads, the IR, the held words, USER and IE, TICK, WIDE, the ALU's two inputs, the word Y takes, the target and the next PC.",
   ],
   empty: [

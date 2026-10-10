@@ -81,13 +81,14 @@ numbers. Say "Module 8" for an earlier module, and "lesson 3" for a lesson of th
 
 - **The final machine** is Module 12's machine of several edges with its trap hardware, and the two
   instructions the learner added: the call through a register (kind 9) and set if (kind A). Its
-  decoder is the one Module 10's capstone built, which knows both. Its datapath has a fourth source
+  decoder is the one Module 10's capstone built, which knows both. Its datapath has a fifth source
   for the word register Y takes: the branch condition MET as a word, 0 or 1, chosen by the control
   signal SET.
-- **Whose parts run.** The machine is built from the course's parts. Each of them passes the tests
-  the learner's own part passed in its lesson. The machine does not run the learner's own earlier
-  answers: each lesson keeps its own work. Say this plainly; never suggest the learner's answers
-  run.
+- **Whose parts run.** The machine is built from the course's parts: the course's own versions of
+  the parts the learner designed, often wider (the register file has sixteen registers of 64 bits,
+  where Module 6's had four of 4 bits). Do not say they pass the learner's tests: no test checks
+  that. The machine does not run the learner's own earlier answers: each lesson keeps its own
+  work. Say this plainly; never suggest the learner's answers run.
 - Its drawing has three blocks: **the control unit** (`control`), **the datapath** (`datapath`) and
   **the memory port** (`port`). Each opens, level by level, down to gates.
 

@@ -48,7 +48,7 @@ Tables kept beside drawings, and why:
 
 - **`machine-final`** (`packages/dd-model/src/traps.ts`, option `final`) is Module 12's
   `machine-traps` with Module 10's capstone's decoder, which knows the call through a register
-  (kind 9) and set if (kind A), SET on the control bus, and a fourth source for the word Y takes,
+  (kind 9) and set if (kind A), SET on the control bus, and a fifth source for the word Y takes (after HR, HM, PC + 4 and CWORD),
   MET as a word. The changed blocks take kinds of their own (`-final`), drawn by hand in
   `library-control.ts` (`FINAL_INSIDE`, `FINAL_KIND_ROUTES`), and every scope passes the drawing
   checks (`dd-views/src/final-machine.test.ts`).

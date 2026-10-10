@@ -7,7 +7,7 @@
 // id, and graded case by case by the grader the challenge names (dd-model/graders). A failure
 // says which case failed, what the answers gave and what was expected, in the field's terms.
 
-import type { ComponentType } from "react";
+import type { ComponentType, ReactNode } from "react";
 
 import {
   ANSWER_GRADERS,
@@ -23,6 +23,17 @@ import type { ChallengeEditorProps, Verdict, VerdictFailure } from "@platform/le
 
 import { BitRow } from "./BitRow";
 import { DEFAULT_VIEW_STRINGS, format, type ViewStrings } from "./strings";
+
+/** Text with `code` in backticks, as plain text: a verdict and a select show no Markdown. */
+const plain = (text: string) => text.replace(/`([^`]*)`/g, "$1");
+
+/** A sentence's first letter in capitals, as feedback that opens on a lower-case choice needs. */
+const capital = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
+
+/** A label with `code` in backticks, drawn as code. */
+function withCodeSpans(text: string): ReactNode[] {
+  return text.split(/`([^`]*)`/).map((piece, i) => (i % 2 ? <code key={i}>{piece}</code> : piece));
+}
 
 /** The answers as graded: a row of bits nobody has touched counts as all 0, as it is shown. */
 export function answersOf(challenge: Challenge, artifact: Artifact): Record<string, string> {
@@ -44,6 +55,11 @@ export function gradeAnswers(
   if (!grader) throw new Error(`no answer grader ${graderId}`);
   const answers = answersOf(challenge, artifact);
   const labelOf = (id: string) => challenge.fields.find((f) => f.id === id)?.label ?? id;
+  // The form a field's answer takes, as its case names it: a number, hexadecimal digits, bits.
+  const formOf = (id: string) => {
+    const form = cases.find((c) => c.given["field"] === id)?.given["form"];
+    return typeof form === "string" ? form : undefined;
+  };
   const term = (key: string) => strings.answers.terms[key] ?? labelOf(key);
   // A choice is shown by what the learner read for it, not by its value.
   const shown = (key: string, v: string) =>
@@ -80,27 +96,36 @@ export function gradeAnswers(
           ? format(strings.answers.unanswered, { fields: r.missing.map(labelOf).join(", ") })
           : strings.answers.invalidFor[r.invalid] !== undefined
             ? strings.answers.invalidFor[r.invalid]!
-            : format(strings.answers.invalid, { field: labelOf(r.invalid) });
+            : formOf(r.invalid) !== undefined &&
+                strings.answers.invalidForm[formOf(r.invalid) as string] !== undefined
+              ? format(strings.answers.invalidForm[formOf(r.invalid) as string]!, {
+                  field: plain(labelOf(r.invalid)),
+                })
+              : format(strings.answers.invalid, { field: plain(labelOf(r.invalid)) });
       return { passed: false, total: cases.length, failures: [], blocked };
     }
     if (!r.pass)
       failures.push({
         index,
-        label: c.label,
+        label: plain(c.label),
         inputs: named(r.inputs),
         actual: named(r.actual),
         expected: named(r.expected),
         // Module 0: a sentence in place of values that would give the answer away.
         ...(r.detail && strings.answers.details[r.detail.key] !== undefined
           ? {
-              detail: format(
-                strings.answers.details[r.detail.key]!,
-                Object.fromEntries(
-                  Object.entries(r.detail.values ?? {}).map(([k, v]) => {
-                    const said = r.detail?.field ? shown(r.detail.field, v) : v;
-                    // Inside a sentence, a choice's label starts in lower case.
-                    return [k, said === v ? v : said.charAt(0).toLowerCase() + said.slice(1)];
-                  }),
+              detail: capital(
+                plain(
+                  format(
+                    strings.answers.details[r.detail.key]!,
+                    Object.fromEntries(
+                      Object.entries(r.detail.values ?? {}).map(([k, v]) => {
+                        const said = r.detail?.field ? shown(r.detail.field, v) : v;
+                        // Inside a sentence, a choice's label starts in lower case.
+                        return [k, said === v ? v : said.charAt(0).toLowerCase() + said.slice(1)];
+                      }),
+                    ),
+                  ),
                 ),
               ),
             }
@@ -133,11 +158,11 @@ export const AnswerEditor: ComponentType<ChallengeEditorProps> = ({
           return (
             <div key={f.id} className="answer-field answer-bits" data-field={f.id}>
               <p className="answer-label" id={`${id}-label`}>
-                {f.label}
+                {withCodeSpans(f.label)}
               </p>
               <BitRow
                 bits={bits}
-                label={f.label}
+                label={plain(f.label)}
                 weights={f.weights ?? "unsigned"}
                 onFlip={(i) => set(f.id, bits.map((b, k) => (k === i ? 1 - b : b)).join(""))}
               />
@@ -148,13 +173,13 @@ export const AnswerEditor: ComponentType<ChallengeEditorProps> = ({
         if (f.kind === "choice")
           return (
             <label key={f.id} className="answer-field" data-field={f.id}>
-              <span className="answer-label">{f.label}</span>
+              <span className="answer-label">{withCodeSpans(f.label)}</span>
               <span className="answer-input">
                 <select id={id} value={value} onChange={(e) => set(f.id, e.target.value)}>
                   <option value="" />
                   {(f.options ?? []).map((o) => (
                     <option key={o.value} value={o.value}>
-                      {o.label}
+                      {plain(o.label)}
                     </option>
                   ))}
                 </select>
@@ -163,7 +188,7 @@ export const AnswerEditor: ComponentType<ChallengeEditorProps> = ({
           );
         return (
           <label key={f.id} className="answer-field" data-field={f.id}>
-            <span className="answer-label">{f.label}</span>
+            <span className="answer-label">{withCodeSpans(f.label)}</span>
             <span className="answer-input">
               <input
                 id={id}

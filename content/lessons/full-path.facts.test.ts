@@ -131,22 +131,23 @@ describe("lesson full-path's facts", () => {
   });
 
   it("answers the challenge", () => {
-    expect(word("R5 <= R3 < R4 signed")).toBe(answer("code"));
+    expect(word("R9 <= R2 >= R7 unsigned")).toBe(answer("code"));
     // The line asked about is in a program no figure runs.
     const own = recordRun({ libraryId: "machine-final", program: PATH_PROGRAM, inputs: {} });
-    const s = own.steps.find((x) => x.text === "R7 <= R5 | R6")!;
+    const s = own.steps.find((x) => x.text === "R4 <= word[R2]")!;
     expect(s.pc).toBe(0x1cn);
     expect(String(s.last - s.first)).toBe(answer("edges"));
-    // Its ALU edge is its third: OP2 OP1 OP0 100, OR.
+    // Its ALU edge is its third: OP2 OP1 OP0 010, add, for the address R2 + 0.
     expect(state(own, s.first + 2)).toBe("ALU");
     expect([
       at(own, s.first + 2, "OP2"),
       at(own, s.first + 2, "OP1"),
       at(own, s.first + 2, "OP0"),
-    ]).toEqual(["1", "0", "0"]);
-    expect(answer("job")).toBe("or");
-    expect(state(own, s.first + 3)).toBe("WRITE");
-    expect(BigInt(`0x${at(own, s.first + 3, "YIN")}`).toString()).toBe(answer("yin"));
+    ]).toEqual(["0", "1", "0"]);
+    expect(answer("job")).toBe("add");
+    // Y takes the word the load fetched, 25, not the ALU's address.
+    expect(state(own, s.first + 4)).toBe("WRITE");
+    expect(BigInt(`0x${at(own, s.first + 4, "YIN")}`).toString()).toBe(answer("yin"));
     expect(at(own, s.last, "PC").padStart(3, "0")).toBe(answer("pc"));
     for (const sec of fullPath.sections)
       for (const i of sec.interactives ?? [])

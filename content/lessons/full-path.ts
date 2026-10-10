@@ -17,22 +17,22 @@ import { PROSE } from "./full-path.prose";
 import { SHOP, SHOP_INPUTS } from "./module13";
 
 /** The challenge: a line's levels, worked out and read off the run. */
-/** The program of the challenge's line, `R7 <= R5 | R6` at `01C`, which no figure runs. */
-export const PATH_PROGRAM = `        R5 <= 12
-        R6 <= 10
+/** The program of the challenge's line, `R4 <= word[R2]` at `01C`, which no figure runs. */
+export const PATH_PROGRAM = `        R2 <= 1024
+        R5 <= 25
+        word[R2] <= R5
         nothing
         nothing
         nothing
         nothing
-        nothing
-        R7 <= R5 | R6
+        R4 <= word[R2]
         stop`;
 
 export const PATH_ANSWERS = [
-  { id: "code", form: "hex", value: "A6345000", detail: "pathCode" },
-  { id: "edges", form: "number", value: "4", detail: "pathEdges" },
-  { id: "job", form: "choice", value: "or", detail: "pathJob" },
-  { id: "yin", form: "number", value: "14", detail: "pathYin" },
+  { id: "code", form: "hex", value: "A5279000", detail: "pathCode" },
+  { id: "edges", form: "number", value: "5", detail: "pathEdges" },
+  { id: "job", form: "choice", value: "add", detail: "pathJob" },
+  { id: "yin", form: "number", value: "25", detail: "pathYin" },
   { id: "pc", form: "hex", value: "020", detail: "pathPc" },
 ] as const;
 
@@ -83,6 +83,8 @@ export const fullPath: LessonInput = {
           props: {
             ...LEVELS,
             start: 25,
+            scope: "datapath",
+            focus: ["ir"],
             question: PROSE.p1Question,
             options: [
               { value: "A7435000", label: "A7435000" },
@@ -109,8 +111,15 @@ export const fullPath: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.call,
           lead: PROSE.callLead,
-          after: PROSE.callAfter,
-          props: { ...LEVELS, start: 56, control: true },
+          props: {
+            ...LEVELS,
+            start: 56,
+            // Shown once the run has passed the call's READ edge, the edge it reports.
+            reveal: { text: PROSE.callAfter, edge: 58 },
+            control: true,
+            scope: "datapath",
+            focus: ["cregs", "nextTrap"],
+          },
         },
       ],
     },
@@ -125,7 +134,15 @@ export const fullPath: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.store,
           lead: PROSE.storeLead,
-          props: { ...LEVELS, start: 37, signals: ["OP2", "OP1", "OP0", "MSTORE", "PCEN"] },
+          props: {
+            ...LEVELS,
+            // The handler's store to the display, edges 59 to 62: its effect shows on a device.
+            start: 58,
+            signals: ["OP2", "OP1", "OP0", "MSTORE", "PCEN"],
+            devices: true,
+            focus: ["port", "datapath"],
+            reveal: { text: PROSE.storeAfter, edge: 62 },
+          },
         },
       ],
     },

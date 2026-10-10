@@ -69,13 +69,16 @@ export interface Machine13Strings {
   readonly controlCaption: string;
 
   // The trace (lesson 3 on).
-  /** The choice of where to pause: a line, an edge of it, and the button. */
-  readonly pauseLegend: string;
-  readonly pauseLine: string;
-  readonly pauseEdge: string;
-  readonly pauseGo: string;
-  /** {k}: an edge of the line, counted from its FETCH edge, 1 first; {state}: its state. */
-  readonly pauseEdgeOption: string;
+  /** The run over time, by the step controls: its legend, its moves, and one edge's button. */
+  readonly stripLegend: string;
+  readonly stripEarlier: string;
+  readonly stripLater: string;
+  /** {n}: the edge, counted from the reset; {state}: its state. */
+  readonly stripEdge: string;
+  /** Under the drawing: a wire can be pressed, and stays pinned as blocks open. */
+  readonly pinNote: string;
+  /** In a prediction's verdict, before the next edge: the explanation follows it. */
+  readonly explainNext: string;
   readonly traceCaption: string;
   readonly traceLevel: string;
   readonly traceIn: string;
@@ -110,7 +113,16 @@ export interface Machine13Strings {
   readonly labDiffers: string;
   readonly labHalts: string;
   readonly labStopsOnly: string;
-  readonly labRunsOn: string;
+  /** The model stops at `stop` at {line} at {address}; the learner's machine goes on. */
+  readonly labRunsOnStop: string;
+  /** The model halts there with cause {cause}; the learner's machine goes on. */
+  readonly labRunsOnHalt: string;
+  /** A register's small word: {n} in decimal, {hex} its three hexadecimal digits. */
+  readonly labWordHex: string;
+  /** {program}: a program's name, over its lines and their addresses. */
+  readonly labListing: string;
+  /** Over the test programs' listings, under the lab's text. */
+  readonly labPrograms: string;
 
   // The lab's runs of a text, in a figure (lesson 4).
   readonly labTextLegend: string;
@@ -127,7 +139,8 @@ export interface Machine13Strings {
   /** The machine stops at `stop` at {line} at {address}; the model does not. */
   readonly labRunStops: string;
   /** The model stops or halts at {line} at {address}; the machine goes on. */
-  readonly labRunGoesOn: string;
+  readonly labRunGoesOnStop: string;
+  readonly labRunGoesOnHalt: string;
   /** After a prediction: {answer}, the option the runs give. */
   readonly labAnswer: string;
 
@@ -228,11 +241,12 @@ export const MACHINE13_STRINGS: Machine13Strings = {
 
   controlCaption: "The control registers",
 
-  pauseLegend: "Pause before an edge",
-  pauseLine: "Line of the program",
-  pauseEdge: "Which edge of that line",
-  pauseGo: "Go there",
-  pauseEdgeOption: "Edge {k}, {state}",
+  stripLegend: "The run. Each line shows its address, its text and its edges. Press an edge to pause the run before it.",
+  stripEarlier: "Earlier lines",
+  stripLater: "Later lines",
+  stripEdge: "Edge {n}, {state}",
+  pinNote: "Press a wire to pin it. It stays marked as you open blocks, and its name and value show under the drawing, in hexadecimal for a word.",
+  explainNext: "Press \"Next edge\" to see why. The explanation appears after that edge.",
   traceCaption: "The levels you have opened",
   traceLevel: "Level",
   traceIn: "Inputs",
@@ -258,7 +272,11 @@ export const MACHINE13_STRINGS: Machine13Strings = {
     'After "{line}" at {address}, {what} is {machine} on your machine and {model} by the model.',
   labHalts: 'At "{line}" at {address}, your machine halts with cause {cause}; the model does not.',
   labStopsOnly: 'At "{line}" at {address}, your machine stops; the model does not.',
-  labRunsOn: 'At "{line}" at {address}, the model stops or halts; your machine goes on.',
+  labRunsOnStop: "At \"{line}\" at {address}, the model stops at stop; your machine goes on.",
+  labRunsOnHalt: "At \"{line}\" at {address}, the model halts with cause {cause}; your machine goes on.",
+  labWordHex: "{n} ({hex})",
+  labListing: "{program}, line by line",
+  labPrograms: "The seven test programs",
 
   labTextLegend: "Which text runs",
   labProgramLegend: "Which program runs",
@@ -270,7 +288,8 @@ export const MACHINE13_STRINGS: Machine13Strings = {
   labRunAgrees:
     "The machine and the model agree after every one of its {n} instructions and traps.",
   labRunStops: "At `{line}` at `{address}`, the machine stops; the model does not.",
-  labRunGoesOn: "At `{line}` at `{address}`, the model stops or halts; the machine goes on.",
+  labRunGoesOnStop: "At `{line}` at `{address}`, the model stops at `stop`; the machine goes on.",
+  labRunGoesOnHalt: "At `{line}` at `{address}`, the model halts with cause `{cause}`; the machine goes on.",
   labAnswer: "The runs answer: {answer}.",
 
   capTrace: "Run my program on the whole machine",
@@ -290,14 +309,12 @@ export const MACHINE13_STRINGS: Machine13Strings = {
     "Your program does not do the task yet, so this question is not graded; make the program pass its tests first.",
   capLevels: {
     result:
-      "Pause before the ALU edge of your first set if. Read Y where it leaves the ALU in the datapath, as a signed number.",
+      "Pause before the ALU edge of your first set if. Read RESULT where it leaves the ALU in the datapath, in hexadecimal, and write it as a signed decimal number.",
     carry:
       "At that same edge, read COUT where it leaves the ALU. It is the carry out of the ALU's top bit, not the condition.",
     met: "At that same edge, read MET where it leaves the condition block in the datapath. It is worked out from the ALU's flags and the job digit.",
-    address:
-      "Pause before the MEMORY edge of your first store. Read ADDR, the address the memory port reads, which comes from HR at that edge.",
-    pcBit:
-      'Pause before the WRITE edge of your first set if. Show the PC\'s bit 4 from "Parts here that never open", and read D.',
+    xorB: "At that same edge, open `datapath`, `alu`, `g0`, `q0`, then `bit0`, and read the output of the XOR gate `xorB`.",
+    held: "At that same edge, read HM in the datapath. It holds the word your last load fetched. Write it as a signed decimal number.",
   },
 
   joinsMap: "the nine parts, by block",

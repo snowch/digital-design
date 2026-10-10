@@ -71,6 +71,14 @@ export interface CircuitViewProps {
    * it changes, as when a learner chooses a fault, and the strip's frame follows.
    */
   readonly focus?: readonly string[];
+  /**
+   * Module 13: the wire pressed, by net, held by the figure so it stays pinned as blocks open and
+   * close: a net keeps its number at every level, so its value shows wherever the wire is drawn.
+   */
+  readonly pinned?: number;
+  readonly onPin?: (net: number | undefined) => void;
+  /** Module 13: the nets marked as in use, the ones the next edge changes. */
+  readonly active?: ReadonlySet<number>;
 }
 
 type Level = "high" | "low" | "unknown" | "none";
@@ -206,6 +214,9 @@ export function CircuitView({
   writtenWidth,
   overview,
   focus,
+  pinned,
+  onPin,
+  active,
 }: CircuitViewProps) {
   const written = (v: Word | undefined) =>
     v !== undefined && (writtenWidth === undefined || v.width <= writtenWidth);
@@ -295,7 +306,9 @@ export function CircuitView({
   // A wire's name and value show while it is pointed at or focused, and stay after a press or a
   // tap until another wire is pressed, so a phone, which has no pointing, shows them too.
   const [hovered, setHovered] = useState<number | undefined>();
-  const [pressed, setPressed] = useState<number | undefined>();
+  const [ownPressed, setOwnPressed] = useState<number | undefined>();
+  const pressed = onPin ? pinned : ownPressed;
+  const setPressed = (net: number | undefined) => (onPin ? onPin(net) : setOwnPressed(net));
   const hot = hovered ?? pressed;
   const [scrollRef, overflows] = useOverflows<HTMLDivElement>();
   // Module 8: the box's width, for a drawing too wide for it, which gets the strip and zoom.
@@ -424,7 +437,7 @@ export function CircuitView({
               return (
                 <g
                   key={i}
-                  className={`wire wire-${level}${wide ? " wire-word" : ""}${isHot ? " wire-hot" : ""}${held ? " wire-held" : ""}`}
+                  className={`wire wire-${level}${wide ? " wire-word" : ""}${isHot ? " wire-hot" : ""}${held ? " wire-held" : ""}${net !== undefined && active?.has(net) ? " wire-active" : ""}${onPin && net !== undefined && net === pinned ? " wire-pinned" : ""}`}
                   data-net={name}
                   role="button"
                   tabIndex={0}

@@ -21,30 +21,29 @@ export const LABELS = {
     failureExperiment: "A wire held at 0",
     explanation: "What each level hides",
     generalisation: "Levels and boxes",
-    challenge: "Five traces",
+    challenge: "Four traces",
     reflection: "Joining the parts yourself",
   },
   challengeTitles: {
-    c1: "Five traces",
+    c1: "Four traces",
   },
   captions: {
-    free: "The whole machine paused before the ALU edge of a set if, ready to trace.",
+    free: "The whole machine, paused before the READ edge of a copy, ready to trace.",
     predict:
       "The machine paused before the ALU edge of a set if, with a question about one bit of HR.",
     sum: "The machine paused before the ALU edge of a set if, for a trace of one bit of the ALU's result.",
     pc: "The whole machine paused before the WRITE edge of a call through a register.",
     fault: "The shop's program with one wire in the ALU held at 0.",
-    answers: "Five wires to trace at named edges.",
+    answers: "Four rows of wires to trace at named edges.",
     tool: "The whole machine, for the challenge's traces.",
   },
   faults: {
     alu: "A wire in the ALU held at 0",
   },
   fields: {
-    xorB: "xorB in the slice for bit 2",
-    sum1: "SUM in the slice for bit 1",
-    pcD: "D of the PC's bit 4",
-    r5En: "EN of R5's bit 0",
-    r4En: "EN of R4's bit 0",
+    xorB: "xorB in the slices for bits 3 to 0",
+    carry: "The carry out of the full adder in the slices for bits 3 to 0",
+    pcD: "D of the PC's bits 5 to 2",
+    en: "EN of bit 0 of R7 to R0",
   },
 } as const;

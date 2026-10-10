@@ -25,8 +25,8 @@ export const CAPSTONE_FIELDS = [
   { id: "result", reference: "16" },
   { id: "carry", reference: "1" },
   { id: "met", reference: "0" },
-  { id: "address", reference: "7C0" },
-  { id: "pcBit", reference: "1" },
+  { id: "xorB", reference: "1" },
+  { id: "held", reference: "-250" },
 ] as const;
 
 const SAMPLE = {
@@ -96,8 +96,13 @@ export const capstone: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.carry,
           lead: PROSE.invLead,
-          after: PROSE.invAfter,
-          props: { ...SAMPLE, start: 12 },
+          props: {
+            ...SAMPLE,
+            start: 12,
+            scope: "datapath",
+            focus: ["alu", "condition"],
+            reveal: { text: PROSE.invAfter, scope: "datapath/alu" },
+          },
         },
       ],
     },
@@ -113,12 +118,19 @@ export const capstone: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.fault,
           lead: PROSE.failLead,
-          after: PROSE.failAfter,
           props: {
             ...SAMPLE,
             compare: true,
             devices: true,
-            faults: [{ kind: "stuck-at", net: "datapath/MET", value: 0, label: LABELS.faults.met }],
+            faults: [
+              {
+                kind: "stuck-at",
+                net: "datapath/MET",
+                value: 0,
+                label: LABELS.faults.met,
+                outcome: PROSE.failAfter,
+              },
+            ],
           },
         },
       ],
@@ -172,7 +184,13 @@ export const capstone: LessonInput = {
           })),
         ],
       },
-      hints: [...PROSE.c1Hints],
+      hints: [
+        ...PROSE.c1Hints,
+        PROSE.c1Whole.replace("{program}", CAPSTONE_REFERENCE).replace(
+          "{answers}",
+          CAPSTONE_FIELDS.map((f) => f.reference).join(", "),
+        ),
+      ],
       reference: {
         text: CAPSTONE_REFERENCE,
         answers: Object.fromEntries(CAPSTONE_FIELDS.map((f) => [f.id, f.reference])),
@@ -184,6 +202,6 @@ export const capstone: LessonInput = {
     textbookExample:
       "The textbooks' closing exercise: a program written for the finished computer and run on it (Nand2Tetris's programs for the Hack computer, run on its CPU emulator; Harris and Harris's or Patterson and Hennessy's test programs run on the processor they built in Verilog, checked by one value written to memory at the end), with the levels below the program left to the simulator.",
     howThisDiffers:
-      "The learner's program, for the course's own shop (how many freezer rooms are colder than -20.0 degrees, with ALARM when both are), must use the set if the learner added in Module 10, and is graded twice: on the instruction-level model for four pairs of readings, and by five questions about one wire at one edge of its own run on the whole machine (the ALU's output, its carry out and the branch condition at the first set if's ALU edge, the memory's address at the first store's MEMORY edge, and D of a PC bit at the set if's WRITE edge). The answers are read off the recorded run of the learner's own program, so no two learners' answers need agree, and a wrong answer is told the level to look at, never the value. The figures trace a short program of their own, set COUT beside MET at a subtraction that borrows, and hold MET at 0 to be found from the comparison with the model. The model note shows a testbench as code to read and says the course's engine does not run it.",
+      "The learner's program, for the course's own shop (how many freezer rooms are colder than -20.0 degrees, Module 10's count of cold rooms, with ALARM when both are), must use the set if the learner added in Module 10, and is graded twice: on the instruction-level model for five pairs of readings, one of which only a comparison read signed passes, and by five questions about one wire paused before the ALU edge of its own first set if on the whole machine (the ALU's output, its carry out, the branch condition, the output of one XOR gate inside the ALU's slice for bit 0, and HM, which still holds the last load's word). The answers are read off the recorded run of the learner's own program, so no two learners' answers need agree, and a wrong answer is told the level to look at, never the value. The figures trace a short program of their own, set COUT beside MET in Module 3's terms, and hold MET at 0 to be found from the comparison with the model. The model note shows a testbench as code to read and says the course's engine does not run it.",
   },
 };

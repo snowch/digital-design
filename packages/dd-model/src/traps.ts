@@ -29,7 +29,7 @@
 // Module 13's final machine (option `final`) is this one with the two instructions the learner
 // added: the decoder of Module 10's capstone, which knows the call through a register at kind 9
 // (CALL and JUMP at once, so it goes READ to WRITE as a call does and takes its PC from the ALU)
-// and set if at kind A (its line is SET, which subtracts as a branch does); and a fourth source
+// and set if at kind A (its line is SET, which subtracts as a branch does); and a fifth source
 // for the word register Y takes, the branch condition MET as a word, chosen by SET. The blocks
 // that change take kinds of their own ("-final"), since each is drawn by hand with its ports.
 
