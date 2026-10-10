@@ -4,12 +4,13 @@
 // model note and the model-versus-reality note. Interactives come from the book's registry by
 // kind; the `challenge` kind is the runtime's own.
 
-import { Component, useState, type ErrorInfo, type ReactNode } from "react";
+import { useState } from "react";
 
 import type { Interactive, Lesson } from "@platform/lesson-schema";
 import { NO_MODEL, timeModelsUsed } from "@platform/lesson-schema";
 
 import type { Book } from "./book";
+import { Boundary } from "./Boundary";
 import { ChallengeRunner } from "./ChallengeRunner";
 import { Prose } from "./Prose";
 import { StringsContext, useStrings } from "./StringsContext";
@@ -23,25 +24,6 @@ export interface LessonViewProps {
   /** Where a lesson id links to, for the prerequisites list. */
   readonly lessonHref?: (lessonId: string) => string;
   readonly strings?: Strings;
-}
-
-/** A figure that throws shows its error where it would have been; the lesson around it stands. */
-class FigureBoundary extends Component<
-  { children: ReactNode; fallback: (message: string) => ReactNode },
-  { error?: string }
-> {
-  override state: { error?: string } = {};
-  static getDerivedStateFromError(error: unknown): { error: string } {
-    return { error: error instanceof Error ? error.message : String(error) };
-  }
-  override componentDidCatch(_error: unknown, _info: ErrorInfo): void {
-    // The message is already on the page.
-  }
-  override render(): ReactNode {
-    return this.state.error !== undefined
-      ? this.props.fallback(this.state.error)
-      : this.props.children;
-  }
 }
 
 function InteractiveFigure({
@@ -80,11 +62,22 @@ function InteractiveFigure({
   // A badge only on a figure that runs the simulator: it names the rules that made what the
   // figure shows, and opens that model's note where the reader is, not at the foot of the page.
   // A figure that runs nothing gets no badge: a label saying what a figure is not tells nothing.
+  // A figure that declares a role (what it asks of the reader) is badged by the role instead, and
+  // its note is the role's alone: the model's note is stated once, at the foot of the lesson, not
+  // again in every badge. A role with no note gets a badge that opens nothing.
   const simulated = interactive.timeModel !== NO_MODEL;
-  const badge = strings.lesson.timeModel[interactive.timeModel] ?? interactive.timeModel;
-  const note = simulated
-    ? book.timeModelNotes[interactive.timeModel as keyof Book["timeModelNotes"]]
-    : undefined;
+  const role = interactive.role;
+  const badge =
+    role !== undefined
+      ? (strings.lesson.role[role] ?? role)
+      : (strings.lesson.timeModel[interactive.timeModel] ?? interactive.timeModel);
+  const note =
+    (role !== undefined
+      ? book.roleNotes?.[role]
+      : simulated
+        ? book.timeModelNotes[interactive.timeModel as keyof Book["timeModelNotes"]]
+        : undefined) || undefined;
+  const badged = simulated || role !== undefined;
   const [noteOpen, setNoteOpen] = useState(false);
   const noteId = `ix-${interactive.id}-model`;
   return (
@@ -93,17 +86,22 @@ function InteractiveFigure({
       id={`ix-${interactive.id}`}
       data-kind={interactive.kind}
       data-time-model={interactive.timeModel}
+      data-role={role}
     >
       {interactive.lead && <Prose markdown={interactive.lead} className="figure-lead" />}
       <figcaption>
-        {simulated &&
+        {badged &&
           (note !== undefined ? (
             <button
               type="button"
               className="time-model-toggle"
               aria-expanded={noteOpen}
               aria-controls={noteId}
-              aria-label={format(strings.lesson.badgeLabel, { model: badge })}
+              aria-label={
+                role !== undefined
+                  ? format(strings.lesson.roleBadgeLabel, { role: badge })
+                  : format(strings.lesson.badgeLabel, { model: badge })
+              }
               onClick={() => setNoteOpen((open) => !open)}
             >
               <span className="badge time-model">
@@ -121,7 +119,8 @@ function InteractiveFigure({
           </div>
         )}
       </figcaption>
-      <FigureBoundary
+      {/* A figure that throws shows its error where it would have been; the lesson around it stands. */}
+      <Boundary
         fallback={(message) => (
           <p role="note" className="interactive-problem">
             {format(strings.lesson.brokenInteractive, { kind: interactive.kind, message })}
@@ -129,7 +128,7 @@ function InteractiveFigure({
         )}
       >
         {body}
-      </FigureBoundary>
+      </Boundary>
       {interactive.after && <Prose markdown={interactive.after} className="figure-after" />}
     </figure>
   );
@@ -139,6 +138,12 @@ function LessonBody({ book, lesson, storage, lessonHref }: Omit<LessonViewProps,
   const strings = useStrings();
   const store = useLessonStore(storage, book.id, lesson.id);
   const models = timeModelsUsed(lesson);
+  // The note on each model the lesson's figures run, once, at its foot. A book that explains its
+  // model in the lessons' own prose gives no note for it, and then the heading goes too.
+  const modelNotes = models.flatMap((model) => {
+    const note = book.timeModelNotes[model as keyof Book["timeModelNotes"]];
+    return note ? [{ model, note }] : [];
+  });
   const byId = new Map(book.lessons.map((l) => [l.id, l]));
   return (
     <article className="lesson" aria-labelledby="lesson-title" data-lesson={lesson.id}>
@@ -148,7 +153,9 @@ function LessonBody({ book, lesson, storage, lessonHref }: Omit<LessonViewProps,
           <h2 id="lesson-objectives">{strings.lesson.objectives}</h2>
           <ul>
             {lesson.objectives.map((o) => (
-              <li key={o}>{o}</li>
+              <li key={o}>
+                <Prose markdown={o} inline />
+              </li>
             ))}
           </ul>
         </section>
@@ -183,6 +190,12 @@ function LessonBody({ book, lesson, storage, lessonHref }: Omit<LessonViewProps,
               <span className="section-title">{section.title}</span>
             </h2>
             {section.prose && <Prose markdown={section.prose} />}
+            {section.details && (
+              <details className="lesson-details">
+                <summary>{section.details.summary}</summary>
+                <Prose markdown={section.details.prose} />
+              </details>
+            )}
             {section.interactives.map((x) => (
               <InteractiveFigure
                 key={x.id}
@@ -195,13 +208,12 @@ function LessonBody({ book, lesson, storage, lessonHref }: Omit<LessonViewProps,
           </section>
         );
       })}
-      {models.length > 0 && (
+      {modelNotes.length > 0 && (
         <aside className="lesson-model-note" aria-labelledby="lesson-model-note">
           <h2 id="lesson-model-note">{strings.lesson.modelNote}</h2>
-          {models.map((m) => {
-            const note = book.timeModelNotes[m as keyof Book["timeModelNotes"]];
-            return note ? <Prose key={m} markdown={note} /> : null;
-          })}
+          {modelNotes.map(({ model, note }) => (
+            <Prose key={model} markdown={note} />
+          ))}
         </aside>
       )}
       <aside className="lesson-model-vs-reality" aria-labelledby="lesson-model-vs-reality">

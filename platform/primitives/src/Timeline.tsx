@@ -2,10 +2,12 @@
 
 // Lanes over a time axis, with a cursor: the frame every timeline shares. The lanes' names stand
 // in a column of their own that stays put while the lanes scroll beside it; the axis writes its
-// marked times on a second row where two labels would touch; a slider moves the cursor, which a
-// keyboard and a finger can both do; and a drawing wider than its wrapper opens on what matters
-// and keeps the cursor in view. What a lane holds (levels, values, events) is the caller's to
-// draw, given the lane's top edge and the x of a time.
+// marked times on a second row where two labels would touch, and widens the drawing until every
+// label has room on one of the two; a slider moves the cursor, which a keyboard and a finger can
+// both do; and a drawing wider than its wrapper opens on what matters and keeps the cursor in
+// view. A long run scrolls sideways rather than shrinking below what its labels, and the caller's
+// values (`minUnit`), need. What a lane holds (levels, values, events) is the caller's to draw,
+// given the lane's top edge and the x of a time.
 
 import { useEffect, useId, useRef, type ReactNode } from "react";
 
@@ -17,6 +19,8 @@ const LANE_GAP = 10;
 const LABEL_W_MIN = 64;
 /** The axis's height, above the first lane. */
 export const AXIS_H = 52;
+/** The widest the axis's labels may push a drawing, which then scrolls sideways in its wrapper. */
+const WIDEST = 16000;
 
 export interface TimelineMark {
   readonly time: number;
@@ -43,6 +47,11 @@ export interface TimelineProps {
   readonly marks: readonly TimelineMark[];
   /** The time the cursor stands at. */
   readonly cursor: number;
+  /**
+   * The fewest pixels a unit of time gets, so that what the caller writes in its lanes fits the
+   * stretch it labels. A run that needs more room than its wrapper scrolls sideways.
+   */
+  readonly minUnit?: number;
   /** Moves the cursor; without it the cursor has no slider. */
   readonly onCursor?: (time: number) => void;
   /** The slider's name, with the time in it. */
@@ -63,21 +72,23 @@ export interface TimelineProps {
   readonly children?: ReactNode;
 }
 
-/** The axis's labels, each on the first of two rows where it touches no label before it. */
-export function layoutMarks(
+type PlacedMark = { time: number; label: string; row: number; anchor: "start" | "middle" | "end" };
+
+/** The axis's labels placed, and whether every one found a row where it touches no other. */
+function placeMarks(
   marks: readonly TimelineMark[],
   from: number,
   end: number,
   x: (time: number) => number,
   width: number,
-): { time: number; label: string; row: number; anchor: "start" | "middle" | "end" }[] {
+): { rows: PlacedMark[]; fitted: boolean } {
   // Each label's extent follows its anchor: the last mark's label runs leftwards from its time,
   // so it is checked against the one before it by its whole width, not half of it. A label too
   // long to centre near either end is anchored inwards instead.
   const anchorAt = (t: number) => (t <= from ? "start" : t >= end ? "end" : "middle");
-  const rows: { time: number; label: string; row: number; anchor: "start" | "middle" | "end" }[] =
-    [];
+  const rows: PlacedMark[] = [];
   const rightEdge = [-Infinity, -Infinity];
+  let fitted = true;
   for (const m of marks) {
     const px = x(m.time);
     const w = m.label.length * 7.5;
@@ -87,10 +98,44 @@ export function layoutMarks(
     const left = anchor === "start" ? px : anchor === "end" ? px - w : px - w / 2;
     const fits = (row: number) => left >= (rightEdge[row] ?? -Infinity) + 12;
     const row = fits(0) ? 0 : fits(1) ? 1 : 0;
+    if (!fits(row)) fitted = false;
     rows.push({ time: m.time, label: m.label, row, anchor });
     rightEdge[row] = left + w;
   }
-  return rows;
+  return { rows, fitted };
+}
+
+/** The axis's labels, each on the first of two rows where it touches no label before it. */
+export function layoutMarks(
+  marks: readonly TimelineMark[],
+  from: number,
+  end: number,
+  x: (time: number) => number,
+  width: number,
+): PlacedMark[] {
+  return placeMarks(marks, from, end, x, width).rows;
+}
+
+/**
+ * The pixels a unit of time gets: `base`, widened until every mark's label fits one of the axis's
+ * two rows, unless the drawing would grow wider than any reader scrolls. Numbered edges after a
+ * long run once ran into each other, a label that fitted neither row being written over the first.
+ */
+export function fitUnit(
+  marks: readonly TimelineMark[],
+  from: number,
+  end: number,
+  base: number,
+): number {
+  const span = Math.max(1, end - from);
+  let unit = base;
+  for (let k = 0; k < 32; k++) {
+    const width = span * unit + 16;
+    if (placeMarks(marks, from, end, (t) => (t - from) * unit, width).fitted) break;
+    if (span * unit * 1.25 + 16 > WIDEST) break;
+    unit *= 1.25;
+  }
+  return unit;
 }
 
 export function Timeline({
@@ -99,6 +144,7 @@ export function Timeline({
   end,
   marks,
   cursor,
+  minUnit = 0,
   onCursor,
   cursorLabel,
   title,
@@ -112,11 +158,17 @@ export function Timeline({
   const id = useId();
   const span = Math.max(1, end - from);
   const ticks = marks.filter((m) => m.time >= from && m.time <= end);
-  // Readable at one pixel per unit at the least; a long run scrolls sideways in its wrapper.
-  // A short run is stretched until its longest mark label fits inside it: a one-step prediction
-  // labelled "WARM 1, DOOR 1" once drew a label wider than its whole drawing.
+  // Readable at two pixels per unit at the least, and at the caller's own least; a long run
+  // scrolls sideways in its wrapper. A short run is stretched until its longest mark label fits
+  // inside it: a one-step prediction labelled "WARM 1, DOOR 1" once drew a label wider than its
+  // whole drawing. Then every mark's label is given room on the axis's two rows.
   const longestMark = Math.max(0, ...ticks.map((m) => m.label.length * 7.5));
-  const unit = Math.max(2, Math.min(48, 700 / span), longestMark / span);
+  const unit = fitUnit(
+    ticks,
+    from,
+    end,
+    Math.max(2, Math.min(48, 700 / span), longestMark / span, minUnit),
+  );
   // The lane names are a drawing of their own that stays put while the lanes scroll beside it,
   // sized to the longest name at about 7.5 pixels a character.
   const labelW = Math.max(LABEL_W_MIN, Math.max(0, ...lanes.map((l) => l.label.length)) * 7.5 + 16);

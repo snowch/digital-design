@@ -201,6 +201,12 @@ export const Interactive = z.object({
   kind: z.string().min(1),
   /** Which of the book's models it runs, said on the page; `none` for a figure that runs none. */
   timeModel: TimeModel,
+  /**
+   * What the figure asks of the reader, in the course's own word for it (an experiment, an
+   * instrument to inspect with, a reference): the runtime names it in the figure's badge. A figure
+   * without one is badged by the model it runs.
+   */
+  role: z.string().min(1).optional(),
   /** A caption a screen reader and the page both get. */
   caption: z.string().min(1),
   /** Markdown shown directly above the figure, inside its section. */
@@ -211,11 +217,25 @@ export const Interactive = z.object({
 });
 export type Interactive = z.infer<typeof Interactive>;
 
+/**
+ * A part of a section the reader opens if they want it: detail the section's next step does not
+ * need, kept where it first matters instead of in the running prose. The runtime shows it closed,
+ * after the section's prose and before its figures.
+ */
+export const Details = z.object({
+  /** The words on the control that opens it: plain text, no Markdown. */
+  summary: z.string().min(1),
+  /** Markdown. */
+  prose: z.string().min(1),
+});
+export type Details = z.infer<typeof Details>;
+
 export const Section = z.object({
   kind: SectionKind,
   title: z.string().min(1),
   /** Markdown. */
   prose: z.string(),
+  details: Details.optional(),
   interactives: z.array(Interactive).default([]),
 });
 export type Section = z.infer<typeof Section>;

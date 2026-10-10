@@ -6,16 +6,21 @@
 // in the editor has been graded in this visit and passed. Saved work is graded as the runner
 // mounts, which is how a challenge passed last week shows as complete today, and an edit after a
 // pass clears the verdict until the tests run again. There is no other path to the badge.
+//
+// Neither the grader nor the editor can take the box down. A grader that throws gives a verdict
+// that says the tests could not run (`gradeSafely`); an editor that cannot draw the saved work
+// shows why in its place, with the buttons still under it, and "Clear work" draws it afresh.
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { Artifact, Challenge, Lesson } from "@platform/lesson-schema";
 
 import type { Book, Verdict } from "./book";
+import { Boundary } from "./Boundary";
 import { HintLadder } from "./HintLadder";
 import { Prose } from "./Prose";
 import { useStrings } from "./StringsContext";
-import { artifactFor, useStored, type LessonStore } from "./state";
+import { artifactFor, gradeSafely, useStored, type LessonStore } from "./state";
 import { format } from "./strings";
 import { VerdictView } from "./VerdictView";
 
@@ -36,13 +41,19 @@ export function ChallengeRunner({
   const artifact = artifactFor(stored, challenge);
   const idPrefix = `challenge-${challenge.id}`;
 
+  const explain = useCallback(
+    (message: string) => format(strings.challenge.graderError, { message }),
+    [strings],
+  );
   // The verdict for the artifact as it stands. Saved work is graded on mount; nothing is read
   // from storage as a result.
   const [verdict, setVerdict] = useState<Verdict | undefined>(() =>
-    saved ? book.grade(challenge, saved.artifact) : undefined,
+    saved ? gradeSafely(book, challenge, saved.artifact, explain) : undefined,
   );
   const [confirming, setConfirming] = useState(false);
   const [resetNote, setResetNote] = useState(false);
+  // Each reset draws the editor afresh, so an editor that failed on the old work tries again.
+  const [drawn, setDrawn] = useState(0);
 
   const onChange = useCallback(
     (next: Artifact) => {
@@ -54,7 +65,7 @@ export function ChallengeRunner({
   );
 
   const run = useCallback(() => {
-    const result = book.grade(challenge, artifact);
+    const result = gradeSafely(book, challenge, artifact, explain);
     setVerdict(result);
     setResetNote(false);
     store.setChallenge(challenge.id, (c) => ({
@@ -63,13 +74,14 @@ export function ChallengeRunner({
       attempts: c.attempts + 1,
       ...(result.passed && !c.firstPassedAt ? { firstPassedAt: new Date().toISOString() } : {}),
     }));
-  }, [book, challenge, artifact, store]);
+  }, [book, challenge, artifact, store, explain]);
 
   const reset = useCallback(() => {
     store.resetChallenge(challenge.id);
     setVerdict(undefined);
     setConfirming(false);
     setResetNote(true);
+    setDrawn((n) => n + 1);
   }, [store, challenge.id]);
 
   // If storage changes under us (a reset of the whole lesson), drop a verdict for work that is gone.
@@ -104,13 +116,22 @@ export function ChallengeRunner({
         )}
       </h3>
       <Prose markdown={challenge.task} className="challenge-task" />
-      <book.ChallengeEditor
-        lesson={lesson}
-        challenge={challenge}
-        artifact={artifact}
-        onChange={onChange}
-        {...(verdict ? { verdict } : {})}
-      />
+      <Boundary
+        key={drawn}
+        fallback={(message) => (
+          <p role="note" className="interactive-problem">
+            {format(strings.challenge.brokenEditor, { message })}
+          </p>
+        )}
+      >
+        <book.ChallengeEditor
+          lesson={lesson}
+          challenge={challenge}
+          artifact={artifact}
+          onChange={onChange}
+          {...(verdict ? { verdict } : {})}
+        />
+      </Boundary>
       <div className="challenge-actions">
         <button type="button" className="button primary challenge-run" onClick={run}>
           {strings.challenge.run}

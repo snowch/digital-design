@@ -9,6 +9,8 @@ import { expect, test, type Page } from "@playwright/test";
 
 import { testCount } from "@platform/lesson-schema";
 
+import { STRINGS } from "../../apps/course/src/strings";
+
 import {
   LESSON,
   LESSONS,
@@ -25,6 +27,8 @@ import {
   writeText,
 } from "./helpers";
 
+const STAGES = STRINGS.cover.stages;
+
 function watchConsole(page: Page): string[] {
   const errors: string[] = [];
   page.on("console", (m) => {
@@ -34,9 +38,19 @@ function watchConsole(page: Page): string[] {
   return errors;
 }
 
-/** Opens a module's line on the front page, where each module's lessons are hidden until pressed. */
+/**
+ * Opens a module's line on the front page, where each module's lessons are hidden until pressed,
+ * after opening the stage that holds it: the modules from 1 on sit inside the five stages.
+ */
 async function openModule(page: Page, module: number) {
-  const line = page.getByRole("button", { name: new RegExp(`^Module ${module}: `) });
+  const stage = STAGES.find((s) => module >= s.from && module <= s.to);
+  if (stage) {
+    const row = page.getByRole("button", { name: new RegExp(`^${stage.name} `) });
+    if ((await row.getAttribute("aria-expanded")) !== "true") await row.click();
+    await expect(row).toHaveAttribute("aria-expanded", "true");
+  }
+  // "Module 7: Arithmetic and logic …" inside a stage; Module 0's line reads "Module 0 What …".
+  const line = page.getByRole("button", { name: new RegExp(`^Module ${module}\\b`) });
   if ((await line.getAttribute("aria-expanded")) !== "true") await line.click();
   await expect(line).toHaveAttribute("aria-expanded", "true");
 }

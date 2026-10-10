@@ -42,6 +42,8 @@ export interface Storage {
   get(key: string): string | null;
   set(key: string, value: string): void;
   remove(key: string): void;
+  /** Every key this storage holds, so a whole book's work can be cleared at once. */
+  keys(): readonly string[];
 }
 
 export function memoryStorage(): Storage {
@@ -50,6 +52,7 @@ export function memoryStorage(): Storage {
     get: (k) => map.get(k) ?? null,
     set: (k, v) => void map.set(k, v),
     remove: (k) => void map.delete(k),
+    keys: () => [...map.keys()],
   };
 }
 
@@ -89,6 +92,17 @@ export function browserStorage(): Storage {
         local()?.removeItem(key);
       } catch {
         // Nothing to do; the memory copy is gone.
+      }
+    },
+    keys() {
+      try {
+        const s = local();
+        if (!s) return fallback.keys();
+        const out = new Set<string>(fallback.keys());
+        for (let i = 0; i < s.length; i++) out.add(s.key(i) ?? "");
+        return [...out];
+      } catch {
+        return fallback.keys();
       }
     },
   };
@@ -189,6 +203,17 @@ export class LessonStore {
   }
 }
 
+/**
+ * Forgets every lesson's stored work for one book: every key the book's storage holds, so a
+ * reader can start the whole course again. The caller remounts what reads the state.
+ */
+export function resetBook(storage: Storage, bookId: string): void {
+  const prefix = `${bookId}:v${STATE_VERSION}:`;
+  for (const key of storage.keys()) {
+    if (key.startsWith(prefix)) storage.remove(key);
+  }
+}
+
 /** The stored artifact to grade for a challenge: the learner's, or the lesson's starting point. */
 export function artifactFor(store: StoredLesson, challenge: Challenge): Artifact {
   return store.challenges[challenge.id]?.artifact ?? challenge.initial;
@@ -199,6 +224,27 @@ export interface Completion {
   readonly passed: number;
   readonly total: number;
   readonly verdicts: Readonly<Record<string, Verdict>>;
+}
+
+/**
+ * A book's grade that cannot take the page down. Saved work is graded again on every load, by the
+ * challenge as it mounts and by a book's list of lessons, so a grader that throws on one saved
+ * artifact would break those pages on every later visit, with the learner's way out (clearing the
+ * work) on the broken page. A throw becomes a verdict that says the tests could not run, in the
+ * words `explain` makes of the error's own; the work stays as it was.
+ */
+export function gradeSafely(
+  book: Book,
+  challenge: Challenge,
+  artifact: Artifact,
+  explain: (message: string) => string = (message) => message,
+): Verdict {
+  try {
+    return book.grade(challenge, artifact);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return { passed: false, total: 0, failures: [], blocked: explain(message) };
+  }
 }
 
 /**
@@ -213,7 +259,7 @@ export function verifyCompletion(book: Book, lesson: Lesson, stored: StoredLesso
     // Work never touched is not graded: the starting point may pass a trivial test by accident,
     // and a lesson nobody opened is not complete.
     if (!saved) continue;
-    const verdict = book.grade(c, saved.artifact);
+    const verdict = gradeSafely(book, c, saved.artifact);
     verdicts[c.id] = verdict;
     if (verdict.passed) passed++;
   }

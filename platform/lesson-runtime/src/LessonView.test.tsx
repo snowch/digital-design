@@ -64,6 +64,101 @@ describe("LessonView", () => {
     expect(within(none).queryByRole("button", { expanded: false })).toBeNull();
   });
 
+  it("badges a figure that declares a role by the role, and opens the role's note alone", async () => {
+    const user = userEvent.setup();
+    const withRole = {
+      ...lesson,
+      sections: lesson.sections.map((s) => ({
+        ...s,
+        interactives: s.interactives.map((x) =>
+          x.id === "loop" ? { ...x, role: "experiment" } : x,
+        ),
+      })),
+    };
+    const roleNote = "Commit first, then compare what the model shows with what you expected.";
+    const roleBook = { ...fixtureBook([withRole]), roleNotes: { experiment: roleNote } };
+    const strings = {
+      ...DEFAULT_STRINGS,
+      lesson: { ...DEFAULT_STRINGS.lesson, role: { experiment: "Experiment" } },
+    };
+    render(
+      <LessonView book={roleBook} lesson={withRole} storage={memoryStorage()} strings={strings} />,
+    );
+    const loop = document.getElementById("ix-loop") as HTMLElement;
+    expect(loop).toHaveAttribute("data-role", "experiment");
+    const badge = within(loop).getByRole("button", {
+      name: format(DEFAULT_STRINGS.lesson.roleBadgeLabel, { role: "Experiment" }),
+    });
+    expect(badge).toHaveTextContent("Experiment");
+    await user.click(badge);
+    const note = loop.querySelector(".time-model-note") as HTMLElement;
+    expect(note).toBeVisible();
+    expect(note.textContent).toContain(roleNote);
+    // The model's note is stated once, at the foot, not again in every badge.
+    expect(note.textContent).not.toContain(roleBook.timeModelNotes.settle ?? "");
+    const foot = document.querySelector(".lesson-model-note") as HTMLElement;
+    expect(foot.textContent).toContain(roleBook.timeModelNotes.settle ?? "");
+  });
+
+  it("gives a role with no note a badge that opens nothing", () => {
+    const withRole = {
+      ...lesson,
+      sections: lesson.sections.map((s) => ({
+        ...s,
+        interactives: s.interactives.map((x) =>
+          x.id === "loop" ? { ...x, role: "reference" } : x,
+        ),
+      })),
+    };
+    render(
+      <LessonView book={fixtureBook([withRole])} lesson={withRole} storage={memoryStorage()} />,
+    );
+    const loop = document.getElementById("ix-loop") as HTMLElement;
+    expect(loop.querySelector(".badge")).toHaveTextContent("reference");
+    expect(loop.querySelector(".time-model-toggle")).toBeNull();
+    expect(loop.querySelector(".time-model-note")).toBeNull();
+  });
+
+  it("states no model note at the foot when the book gives none", () => {
+    const quiet = { ...fixtureBook([lesson]), timeModelNotes: {} };
+    render(<LessonView book={quiet} lesson={lesson} storage={memoryStorage()} />);
+    expect(document.querySelector(".lesson-model-note")).toBeNull();
+    // A figure badged by its model still names it, and opens nothing.
+    const loop = document.getElementById("ix-loop") as HTMLElement;
+    expect(loop.querySelector(".badge")).not.toBeNull();
+    expect(loop.querySelector(".time-model-toggle")).toBeNull();
+  });
+
+  it("shows a section's details closed, after its prose and before its figures", async () => {
+    const user = userEvent.setup();
+    const detailed = {
+      ...lesson,
+      sections: lesson.sections.map((s) =>
+        s.kind === "investigation"
+          ? { ...s, details: { summary: "How the loop is built", prose: "Two **inverters**." } }
+          : s,
+      ),
+    };
+    render(
+      <LessonView book={fixtureBook([detailed])} lesson={detailed} storage={memoryStorage()} />,
+    );
+    const section = document.querySelector('section[data-kind="investigation"]') as HTMLElement;
+    const details = section.querySelector("details.lesson-details") as HTMLDetailsElement;
+    expect(details).not.toBeNull();
+    expect(details.open).toBe(false);
+    expect(within(details).getByText("How the loop is built").tagName).toBe("SUMMARY");
+    expect(within(details).getByText("inverters").tagName).toBe("STRONG");
+    // After the section's prose and before its first figure.
+    const prose = within(section).getByText("investigation").closest("p") as HTMLElement;
+    const figure = document.getElementById("ix-loop") as HTMLElement;
+    expect(prose.compareDocumentPosition(details) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(details.compareDocumentPosition(figure) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    await user.click(within(details).getByText("How the loop is built"));
+    expect(details.open).toBe(true);
+    // A section without details has none.
+    expect(document.querySelectorAll("details.lesson-details")).toHaveLength(1);
+  });
+
   it("mounts the challenge section's challenge through the runner", () => {
     render(<LessonView book={book} lesson={lesson} storage={memoryStorage()} />);
     expect(screen.getByRole("heading", { level: 3, name: /Remember a press/ })).toBeInTheDocument();
@@ -100,6 +195,17 @@ describe("LessonView", () => {
       screen.queryByRole("heading", { name: DEFAULT_STRINGS.lesson.modelVsReality }),
     ).toBeNull();
     expect(screen.queryByRole("heading", { name: DEFAULT_STRINGS.lesson.modelNote })).toBeNull();
+  });
+
+  it("draws code in an objective as the prose draws it, inside the objective's list item", () => {
+    const coded = fixtureLesson({ objectives: ["Say what `resume` writes.", "Build a latch."] });
+    render(<LessonView book={fixtureBook([coded])} lesson={coded} storage={memoryStorage()} />);
+    const objectives = screen.getByRole("region", { name: DEFAULT_STRINGS.lesson.objectives });
+    const items = within(objectives).getAllByRole("listitem");
+    expect(items[0]).toHaveTextContent("Say what resume writes.");
+    expect(within(items[0]!).getByText("resume").tagName).toBe("CODE");
+    expect(items[0]!.querySelector("p")).toBeNull();
+    expect(items[1]).toHaveTextContent("Build a latch.");
   });
 
   it("links prerequisites by title through the app's router", () => {

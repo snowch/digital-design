@@ -127,7 +127,10 @@ export function VerdictView({
   return (
     <ol
       className="verdict failures"
-      aria-label={strings.challenge.failing.replace(/\{\w+\}/g, "").trim()}
+      aria-label={format(strings.challenge.failing, {
+        passed: verdict.total - verdict.failures.length,
+        total: verdict.total,
+      })}
     >
       {verdict.failures.map((f) => (
         <FailureView key={f.index} failure={f} feedback={feedback} />

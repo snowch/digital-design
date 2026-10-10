@@ -21,6 +21,7 @@ export function learnerText(lesson: Lesson): string[] {
   const out: string[] = [lesson.title, ...lesson.objectives, lesson.modelVsReality];
   for (const s of lesson.sections) {
     out.push(s.title, s.prose);
+    if (s.details) out.push(s.details.summary, s.details.prose);
     for (const x of s.interactives) {
       out.push(x.caption);
       if (x.lead) out.push(x.lead);
