@@ -229,6 +229,6 @@ export const MACHINE12_STRINGS: Machine12Strings = {
     waitDoor:
       "Job 6 must let the door and the timer in while it counts, then give the program back its mode, its return point and every register but R1 and R2.",
     shopHandler:
-      "The runner must run each program in the table in user mode with interrupts off, offer jobs 1 to 4, leave each program's record (0 for job 4, else its cause) at 400 plus 8 times its number, and stop in the start after the last program.",
+      "The runner must run each program in the table in user mode with interrupts off, offer jobs 1 to 4, and leave each program's record (0 for job 4, else its cause) at 400 plus 8 times its number.",
   },
 };
