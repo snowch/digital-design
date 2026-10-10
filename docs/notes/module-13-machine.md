@@ -30,7 +30,7 @@ lists every fact or form put right in a draft, and every cut made on the second 
 | `final-machine` | the joins the learner's text makes between the parts | the lab's drawing: a map of the nine parts in lesson 1's blocks, and a part's ports as wires to what the text joins them to, open ports as rings |
 | `final-machine` | where a run's first difference sits | each `lab-run` figure's map of the nine parts, the part holding the value the run's sentence names marked after the run; no port's join is drawn, since the figures run the course's own text |
 | `capstone` | the learner's own program run on the whole machine | lesson 3's trace figure on the learner's program, under the editor |
-| every lesson's machine figure | the run over time: each line's edges side by side, by state | the run strip above the drawing, the next edge marked; a press pauses there |
+| every lesson's machine figure | the run over time: each line's edges side by side, by state | the run strip under the drawing, the next edge marked; a press pauses there |
 | every lesson's machine figure | the route a value takes at one edge | the wires the next edge uses under a band of colour (`edgeUses`), and a pressed wire pinned and marked at every level it is drawn |
 | `tracing`, `capstone` | where each wire sits among the levels | the drawing opened block by block, with the table of levels beside it |
 
@@ -107,8 +107,9 @@ splits or joins words says it holds no gate. So every trace ends at a gate or a 
   wires paused before the ALU edge of the program's first set if: RESULT, signed; the ALU's flags
   and MET as a row of five bits; the carries out of the slices for bits 7 to 4, written only inside
   the ALU's group `q1`; and HM, signed. With fixed readings each can be worked out from the text,
-  and a program that tests room B first has carries `0000`; what the questions check is that the
-  learner found the edge and read the wires. Their answers are read off the recorded run of the learner's own program;
+  and some can be guessed: a program that tests room B first has carries `0000`, found in two
+  tries, and HM is one of the program's own numbers. The questions ask for wires at the edge; a
+  right answer does not show the learner traced them. Their answers are read off the recorded run of the learner's own program;
   a wire whose value is not known reads X, and X is an answer. A wrong answer gets the level to look at and what to
   read there.
 
@@ -215,8 +216,9 @@ machine's text elaborates in about 0.1 s and runs about 70 edges a second.
 - **13.1.** The two questions the page answered now ask about HB's driver (`hold`) and IR's end in
   the control unit (`digits`), which the facts test checks no reading or hint before the last
   names. The challenge has the machine under it; the explanation marks the CPU on the drawing.
-- **13.2.** The store's figure opens before the call's trap edge, where no wire it draws carries the
-  store's word (only the ROM's second read port, inside the memory, does).
+- **13.2.** The store's figure opens before the call's FETCH edge, frame 56, where no wire of any
+  width holds the store's word; the ROM row keeps it back in both of the lesson's later figures
+  until the store's FETCH edge.
 - **13.3.** The carry row is asked at `R3 <= R1 - R2`, where no figure opens; the shop's program has
   no other edge with carries that are not all 0 or all 1. Its bit 3 is the carry the failure
   experiment holds, which that run shows at 0. The facts test checks each row's message names its
@@ -231,6 +233,22 @@ machine's text elaborates in about 0.1 s and runs about 70 edges a second.
   reads and what for. The facts test runs 96 likely first set ifs and checks no figure's first
   frame shows any of their answers.
 - **Prose.** Briefs R4-S and R4-1 to R4-5; `drafts/review-fixes.md` logs every fact fixed.
+
+## After the check of the third round
+
+- **Shared figure.** A control that takes focus scrolls out from under the stuck band: every
+  focusable control in the figure has a `scroll-margin-top` from `--sticky-top`, and inside the
+  drawing from `--sticky-drawing`, the band with the overview where it sticks; a browser test tabs
+  backwards from the levels table through the strip. The rows' wire names are set in the prose
+  face. A figure can be `quiet`: no value shows on its opening frame until the run moves.
+- **13.1.** Each CPU block's note says what its mark says, part of the CPU.
+- **13.2.** The store's figure opens at frame 56; the ROM row is held back in both figures by line
+  and edge (`holdRom`), not by the first press.
+- **13.3.** The XOR row is asked at `R2 <= R3`, a copy of B, where OP0 is 1: no two rows share an
+  answer, which the facts test checks.
+- **13.5.** The question figure is quiet, so it shows nothing at the prediction's frame until the
+  run moves; the motivation no longer opens with the task as an instruction.
+- **Prose.** Brief R5; `drafts/review-fixes.md`.
 
 ## Platform candidates
 

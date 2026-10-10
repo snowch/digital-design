@@ -94,23 +94,33 @@ describe("lesson full-path's facts", () => {
   it("works out the handler's store to the display, edges 59 to 62", () => {
     expect(word("word[display] <= R2")).toBe("480207C0");
     expect(at(run, 59, "IR")).toBe("480207C0");
-    // The figure pauses before edge 58, the call's trap edge, where no wire it draws yet carries
-    // the store's word: FETCHED does from the next frame, before the store's FETCH edge.
-    const figure = parseLesson(fullPath)
-      .sections.flatMap((s) => s.interactives ?? [])
-      .find((i) => i.id === "path-store")!;
-    const start = (figure.props as { start: number }).start;
-    expect(start).toBe(57);
-    expect(state(run, start)).toBe("READ");
-    expect(at(run, start, "TRAP")).toBe("1");
-    // Only the ROM's second read port, inside the memory, a level the construction never opens,
-    // carries it: no wire of the top level or of the datapath does.
-    expect(
-      run.frames[start]!.flatMap((w, n) =>
-        w.width === 32 && w.value === 0x480207c0n ? [run.circuit.nets[n]!.name] : [],
-      ),
-    ).toEqual(["port/memory/ROMHIGH"]);
-    expect(at(run, start + 1, "FETCHED")).toBe("480207C0");
+    // The figure pauses before edge 57, the call's FETCH edge, where no wire of any width holds
+    // the store's word: from the next frame MQ and the ROM's reads do, then FETCHED.
+    const figures = parseLesson(fullPath).sections.flatMap((s) => s.interactives ?? []);
+    const props = (id: string) =>
+      figures.find((i) => i.id === id)!.props as {
+        start: number;
+        holdRom?: { line: string; fetch: number };
+      };
+    const start = props("path-store").start;
+    expect(start).toBe(56);
+    expect(state(run, start)).toBe("FETCH");
+    const holding = (frame: number) =>
+      run.frames[frame]!.flatMap((w, n) =>
+        w.known === (1n << BigInt(w.width)) - 1n &&
+        w.value.toString(16).toUpperCase().includes("480207C0")
+          ? [run.circuit.nets[n]!.name]
+          : [],
+      );
+    expect(holding(start)).toEqual([]);
+    expect(holding(start + 1)).toContain("MQ");
+    expect(at(run, start + 2, "FETCHED")).toBe("480207C0");
+    // At frame 58, where the investigation's lead ends and the PC is at the store, both figures'
+    // ROM row keeps the word back until the store's FETCH edge, 59.
+    const store = run.program.lines.find((l) => l.address === 0x44)!;
+    for (const id of ["path-call", "path-store"])
+      expect(props(id).holdRom, id).toEqual({ line: store.text, fetch: 59 });
+    expect([state(run, 58), at(run, 58, "PC")]).toEqual(["FETCH", "44"]);
     expect([59, 60, 61, 62].map((e) => state(run, e - 1))).toEqual([
       "FETCH",
       "READ",

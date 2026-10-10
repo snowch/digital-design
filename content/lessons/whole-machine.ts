@@ -237,7 +237,8 @@ export const wholeMachine: LessonInput = {
             canOpen: false,
             highlight: ["control", "datapath"],
             highlightLabel: LABELS.cpuMark,
-            notes: { control: [LABELS.cpuNote], datapath: [LABELS.cpuNote] },
+            // Each block is part of the CPU, not the CPU: its note says so, as its mark does.
+            notes: { control: [LABELS.cpuMark], datapath: [LABELS.cpuMark] },
             focus: ["control", "datapath"],
           },
         },

@@ -60,7 +60,8 @@ export const capstone: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.free,
           lead: PROSE.questionLead,
-          props: { ...SAMPLE, devices: true },
+          // Quiet: it opens on the prediction's frame, and shows no value there until the run moves.
+          props: { ...SAMPLE, devices: true, quiet: true },
         },
       ],
     },

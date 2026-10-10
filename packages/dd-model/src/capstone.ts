@@ -109,8 +109,9 @@ export function capstoneProgram(source: string) {
 /**
  * The capstone's questions, each read paused before the ALU edge of the program's first set if:
  * a word read signed, or a row of single wires, highest first. RESULT fixes the edge; the flags
- * and MET, and the carries of four slices, vary with both of the learner's operands, and the
- * carries are written only inside the ALU's slices; HM checks the learner found the held word.
+ * and MET, and the carries of four slices, depend on the learner's operands, and the carries are
+ * written only inside the ALU's group `q1`; HM is a held word. Some answers can be guessed (four
+ * alike carries, HM one of the program's numbers): a right answer does not show a trace was made.
  */
 export const CAPSTONE_QUESTIONS = {
   /** The ALU's output, signed. */

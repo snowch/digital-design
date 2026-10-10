@@ -3348,6 +3348,17 @@ svg.stack-depth {
     position: static;
   }
 }
+/* A control that takes focus, from the keyboard too, scrolls out from under what is stuck above it:
+   the band of controls, and over the drawing the overview as well (WCAG 2.4.11). */
+.machine-levels :is(button, select, input, textarea, a, summary, [tabindex]) {
+  scroll-margin-top: calc(var(--sticky-top, 0px) + var(--space-2));
+}
+.machine-levels .circuit-view :is(button, [tabindex]) {
+  scroll-margin-top: calc(var(--sticky-drawing, 0px) + var(--space-2));
+}
+.machine-levels .machine-steps :is(button, select, input, a, [tabindex]) {
+  scroll-margin-top: 0;
+}
 .machine-steps .debugger-status {
   margin: var(--space-1) 0 0;
 }
@@ -3395,6 +3406,10 @@ svg.stack-depth {
 .machine-pin-note {
   margin: var(--space-1) 0;
   color: var(--fg-muted);
+}
+.machine-quiet-note {
+  margin: var(--space-1) 0;
+  font-weight: 600;
 }
 /* Module 13: the wires the next edge uses, under a band of the accent colour, which a bus shows as
    plainly as a one-bit wire (a wider stroke did not: a bus is drawn wide already). */
@@ -3473,7 +3488,7 @@ svg.stack-depth {
 .machine-row-wire-name {
   display: inline-block;
   width: 100%;
-  font-family: var(--font-mono);
+  font-family: var(--font-text);
   font-size: var(--text-sm);
   font-weight: 400;
   color: var(--fg-muted);

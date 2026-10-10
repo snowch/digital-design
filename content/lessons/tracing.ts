@@ -23,10 +23,12 @@ import { SHOP, SHOP_INPUTS } from "./module13";
  */
 export const TRACE_ANSWERS = [
   // Each a row of wires, highest first, numbered by its wires: the PC's bits are 5 to 2.
-  { id: "xorB", value: "1001", detail: "traceXorB", low: 0 },
-  // At the same edge as xorB, `R3 <= R1 - R2`'s ALU edge, which no figure opens on: the only
-  // other edge of the shop whose carries are not all 0 or all 1, the set if's, is the
-  // investigation's own.
+  // At `R2 <= R3`'s ALU edge, a copy of B: OP0 is 1, so each XOR turns B's bit over, though the
+  // job then takes OP0 in its place. No figure opens on it.
+  { id: "xorB", value: "1101", detail: "traceXorB", low: 0 },
+  // At `R3 <= R1 - R2`'s ALU edge, which no figure opens on: the only other edge of the shop
+  // whose carries are not all 0 or all 1, the set if's, is the investigation's own. No two rows
+  // share an answer (the facts test checks).
   { id: "carry", value: "1001", detail: "traceCarry", low: 0 },
   { id: "pcD", value: "1100", detail: "tracePcD", low: 2 },
   { id: "en", value: "00100000", detail: "traceEn", low: 0 },
