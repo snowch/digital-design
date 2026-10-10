@@ -68,9 +68,45 @@ function resolveNet(circuit: Circuit, name: string): number | undefined {
   );
 }
 
+/** The widest a unit of time is drawn, in pixels, as the shared timeline draws it. */
+const UNIT_MAX = 48;
+const UNITS_SHOWN = 700;
+
+/**
+ * A short run whose named steps are wider than the unit of time they stand a unit apart in: the
+ * run stretched in time, every time multiplied, so each step's name has room beside the next (the
+ * shared timeline draws a unit at most 48 pixels wide, and a step's name can be three times that).
+ */
+function roomFor(trace: Trace, from: number, resetLabel: string): number {
+  const marks = marksShown(trace.marks, resetLabel);
+  if (marks.length < 2) return 1;
+  let gap = Infinity;
+  let widest = 0;
+  marks.forEach((m, k) => {
+    const next = marks[k + 1];
+    if (next && next.time > m.time) gap = Math.min(gap, next.time - m.time);
+    widest = Math.max(widest, m.label.length * 7.5 + 12);
+  });
+  const span = Math.max(1, traceEnd(trace) + 1 - from);
+  const most = Math.max(1, Math.floor(UNITS_SHOWN / UNIT_MAX / span));
+  return Math.max(1, Math.min(most, 8, Math.ceil(widest / (UNIT_MAX * gap))));
+}
+
+/** Every time in a trace multiplied from `from`. */
+function stretched(trace: Trace, from: number, by: number): Trace {
+  if (by === 1) return trace;
+  const at = (t: number) => from + (t - from) * by;
+  return {
+    ...trace,
+    events: trace.events.map((e) => ({ ...e, time: at(e.time) })),
+    stimuli: trace.stimuli.map((e) => ({ ...e, time: at(e.time) })),
+    marks: trace.marks.map((m) => ({ ...m, time: at(m.time) })),
+  };
+}
+
 export function TimingDiagram({
   circuit,
-  trace,
+  trace: given,
   signals,
   from = 0,
   to,
@@ -81,6 +117,10 @@ export function TimingDiagram({
   table = true,
 }: TimingDiagramProps) {
   const strings = useViewStrings();
+  // A figure with no slider, whose times nobody reads, gets room for its steps' names.
+  const by =
+    onCursor || units || to !== undefined ? 1 : roomFor(given, from, strings.timing.resetRise);
+  const trace = useMemo(() => stretched(given, from, by), [given, from, by, given.events.length]);
   // The run's last instant, where the red line stands by default; the drawing runs one unit past
   // it, so the values the last step left are drawn, not only listed.
   const last = to ?? traceEnd(trace);
@@ -145,7 +185,13 @@ export function TimingDiagram({
   // time left out.
   const named = new Set(stepMarks.map((m) => m.time));
   const shownMarks = units
-    ? [...unitMarks.filter((m) => !named.has(m.time)), ...stepMarks].sort((a, b) => a.time - b.time)
+    ? [
+        // A tick within one step of a named time is left out, so the name keeps its row.
+        ...unitMarks.filter(
+          (m) => ![...named].some((t) => Math.abs(t - m.time) <= (units.ticks ?? 1)),
+        ),
+        ...stepMarks,
+      ].sort((a, b) => a.time - b.time)
     : stepMarks;
   // Where the red line stands, in the run's own steps.
   const where = (t: number) => {

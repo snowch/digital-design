@@ -28,7 +28,9 @@ async function textCollisions(page: Page): Promise<Collision[]> {
       const box = svg.getBoundingClientRect();
       const labels = [...svg.querySelectorAll("text")]
         .filter((t) => (t.textContent ?? "").trim() !== "")
-        .map((t) => ({ text: (t.textContent ?? "").trim(), r: t.getBoundingClientRect() }));
+        .map((t) => ({ text: (t.textContent ?? "").trim(), r: t.getBoundingClientRect() }))
+        // Text drawn with no size is not shown (the shared timeline's bare numbers, hidden).
+        .filter((t) => t.r.width > 0 && t.r.height > 0);
       for (let i = 0; i < labels.length; i++) {
         const a = labels[i]!;
         if (
