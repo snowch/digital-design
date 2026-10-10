@@ -14,7 +14,7 @@ import { useWidth } from "../useWidth";
 import { hex3, signedText, stackGroups, valueText } from "./Debugger";
 
 const CHAR = 7.3;
-const ROW = 18;
+const ROW = 17;
 
 /** One drawn word: where it is, what it holds, and what the page says beside it. */
 interface BoxRow {
@@ -55,17 +55,25 @@ function WordBoxes({
   let y = 4;
   const placed = rows.map((r) => {
     const groupY = r.group !== undefined ? y : undefined;
-    if (r.group !== undefined) y += 20;
+    if (r.group !== undefined) y += 16;
     const at = y;
     if (!r.heading) y += ROW;
     return { r, at, groupY };
   });
-  const H = y + 4;
+  const H = y + 2;
+  // A row's note, then the arrows from its registers; where both do not fit, the arrows first.
+  const pointerText = (r: BoxRow) => `← ${r.pointers.join(", ")}`;
+  const arrowsFirst = (r: BoxRow) =>
+    r.note !== undefined &&
+    r.pointers.length > 0 &&
+    noteX + r.note.length * CHAR + 10 + pointerText(r).length * CHAR > W - 4;
   const pointerX = (r: BoxRow) => {
+    if (arrowsFirst(r)) return noteX;
     const after = noteX + (r.note ? r.note.length * CHAR + 10 : 0);
-    const text = `← ${r.pointers.join(", ")}`;
-    return Math.min(after, W - 4 - text.length * CHAR);
+    return Math.min(after, W - 4 - pointerText(r).length * CHAR);
   };
+  const noteAt = (r: BoxRow) =>
+    arrowsFirst(r) ? noteX + pointerText(r).length * CHAR + 10 : noteX;
   return (
     <div className="word-boxes" ref={ref}>
       <svg
@@ -85,7 +93,7 @@ function WordBoxes({
               <line className="box-end" x1={addrX} x2={W - 4} y1={at} y2={at} />
             )}
             {groupY !== undefined && (
-              <text className="box-group" x={addrX} y={groupY + 14}>
+              <text className="box-group" x={addrX} y={groupY + 12}>
                 {r.group}
               </text>
             )}
@@ -110,13 +118,13 @@ function WordBoxes({
               </>
             )}
             {r.note && (
-              <text className="box-note" x={noteX} y={at + 13}>
+              <text className="box-note" x={noteAt(r)} y={at + 13}>
                 {r.note}
               </text>
             )}
             {r.pointers.length > 0 && (
               <text className="box-pointer" x={pointerX(r)} y={at + 13}>
-                {`← ${r.pointers.join(", ")}`}
+                {pointerText(r)}
               </text>
             )}
           </g>
@@ -168,12 +176,15 @@ export function MemoryBoxes({
   const rows: BoxRow[] = Array.from({ length: words }, (_, k) => {
     const address = first + 8 * k;
     const past = ends !== undefined && k >= ends.after;
-    const note = past && k === ends.after ? ends.note : names.get(address);
+    const note = names.get(address);
+    // The first word past the list's end carries the note as a heading over the words after it.
+    const heading = past && k === ends.after ? { group: ends.note } : {};
     return {
       address,
       value: memoryWord(state.cpu, address),
       ...(note ? { note } : {}),
       ...(past ? { past } : {}),
+      ...heading,
       pointers: pointersAt(state, address),
       changed: address === changedAt,
     };

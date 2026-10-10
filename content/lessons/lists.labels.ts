@@ -45,5 +45,5 @@ export const LABELS = {
   limitPrefix: "limit",
   emptyLog: "empty",
   nextReading: "Next reading",
-  logEnd: "This word is past the log's end",
+  logEnd: "past the log's end",
 } as const;
