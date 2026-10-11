@@ -140,7 +140,9 @@ describe("lesson full-path's facts", () => {
     expect(datapathState(run.circuit, run.frames[62]!).display).toBe(66n);
   });
 
-  describe("the broken signals", () => {
+  // Each run records the whole machine with a fault, several seconds apiece on a slow machine:
+  // the default five seconds is too short there (as module13.test.ts, d014187).
+  describe("the broken signals", { timeout: 60_000 }, () => {
     const broken = (net: string, value: 0 | 1) =>
       recordRun(
         {

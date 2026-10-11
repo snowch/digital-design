@@ -171,7 +171,9 @@ describe("lesson whole-machine's facts", () => {
         expect((i.props as { program?: string }).program).not.toBe(EDGES_PROGRAM);
   });
 
-  describe("the broken joins", () => {
+  // Each run records the whole machine with a fault, several seconds apiece on a slow machine:
+  // the default five seconds is too short there (as module13.test.ts, d014187).
+  describe("the broken joins", { timeout: 60_000 }, () => {
     const broken = (net: string, value: 0 | 1) =>
       recordRun(
         {
