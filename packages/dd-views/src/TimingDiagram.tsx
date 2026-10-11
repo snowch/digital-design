@@ -136,7 +136,15 @@ export function TimingDiagram({
   const stepMarks = marksShown(trace.marks, strings.timing.resetRise);
   const gaps = stepMarks.slice(1).map((m, k) => m.time - (stepMarks[k]?.time ?? m.time));
   const tail = Math.max(1, Math.min(2, ...gaps.filter((g) => g > 0)));
-  const end = Math.max(last + tail, from + 1);
+  // A slider on a run in steps ends at the run's last change: past it nothing changes, so a
+  // position there would be dead. Any other drawing runs on one step further, so the newest box
+  // is a full one.
+  const lastChange = Math.max(
+    from + 1,
+    ...trace.events.filter((e) => e.time <= last).map((e) => e.time),
+    ...stepMarks.filter((m) => m.time <= last).map((m) => m.time),
+  );
+  const end = onCursor && !units ? lastChange : Math.max(last + tail, from + 1);
   const drawn = useMemo(
     () =>
       to === undefined ? trace : { ...trace, events: trace.events.filter((e) => e.time <= to) },
@@ -179,19 +187,7 @@ export function TimingDiagram({
     const named = v && names ? names[formatWord(v)] : undefined;
     return named ?? valueLabel(v);
   };
-  const at = cursor ?? last;
-  // A slider on a run in steps stops at the run's last change: past it nothing changes. The drawing
-  // runs on one step further, so the newest box is a full one.
-  const lastChange = Math.max(
-    from,
-    ...trace.events.filter((e) => e.time <= last).map((e) => e.time),
-    ...stepMarks.filter((m) => m.time <= last).map((m) => m.time),
-  );
-  const moveCursor = onCursor
-    ? units
-      ? onCursor
-      : (t: number) => onCursor(Math.min(t, lastChange))
-    : undefined;
+  const at = Math.min(cursor ?? last, end);
   // The axis's marks: the run's steps as the lesson counts them, or, in units, a mark every
   // `ticks` units from the start and at each time the figure names.
   const unitMarks = units
@@ -271,7 +267,7 @@ export function TimingDiagram({
       marks={shownMarks}
       cursor={at}
       minUnit={minUnit}
-      {...(moveCursor ? { onCursor: moveCursor } : {})}
+      {...(onCursor ? { onCursor } : {})}
       cursorLabel={
         units
           ? format(strings.timing.cursor, { time: at })

@@ -164,3 +164,7 @@ exit 144; it is harmless.
 ## Round 3 (T3)
 
 Items 1 to 15 of the managing session's list. Checked: item 1 was real (the band label shared the axis's second row; it now sits 3 px lower); item 2 real (`SetupHold` passed no focus; `TimingDiagram` takes `focus`); item 3 real (a slider figure now sizes a word by half its stretch, so the scale holds); item 7 real in code and in all four figures (input pins are pressable only at the top level, `CircuitView.tsx`), so the four leads send the learner up the trail, through brief T3. Slider ends (item 10) are clamped in `TimingDiagram`, not in the platform's `Timeline`: the thumb stops at the last change. Item 8 holds the call back as the load is. The stop's sentences stand together in `ProgramEditor.tsx` (item 12). Full check: only the stored screenshots fail in this container.
+
+## Round 3, follow-ups
+
+The managing session's two points. 4.1's setup-hold keeps D's change in view: the view's focus is D's change and follows the slider, because a phone shows about 100 units and D's change at -80 and Q's at +30 are further apart than that, so the cause has priority. An edge timeline's drawing now ends at its last change when it has a slider, so the slider's last position is that change and none is dead; the step past it, which gave the newest box a full width, is kept for figures without a slider.

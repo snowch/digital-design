@@ -159,17 +159,6 @@ export const SetupHold = withProps(
         kind: "setup",
       },
     ];
-    // The view opens where the band and Q's change both show, and follows D's change: centred
-    // between D's change and Q's, kept within reach of both the band's start and Q's change.
-    const qChange = 3 * data.delay;
-    // A phone shows about 100 units; half of that, less a margin.
-    const reach = 45;
-    const viewAt =
-      data.edgeAt +
-      Math.min(
-        data.window[0] + reach,
-        Math.max(qChange - reach, (Math.min(offset, data.window[0]) + qChange) / 2),
-      );
     const relation = offset < 0 ? strings.setupHold.before : strings.setupHold.after;
 
     return (
@@ -195,7 +184,9 @@ export const SetupHold = withProps(
           // The red line stands at the clock's edge, and the axis counts units from it, every 20:
           // at a phone's scale, ticks every 10 would crowd the band's label.
           cursor={data.edgeAt}
-          focus={viewAt}
+          // The view follows D's change: a phone shows about 100 units, too few for D's change at
+          // -80 and Q's at +30 together, so D's change, the cause, is the one kept in view.
+          focus={data.edgeAt + offset}
           units={{ ticks: 20, origin: data.edgeAt }}
           table={false}
         />
