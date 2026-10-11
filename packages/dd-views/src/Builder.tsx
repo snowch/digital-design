@@ -82,6 +82,19 @@ function freeSpot(drawing: Drawing, kind: string): { x: number; y: number } {
   }
 }
 
+/** Parts of the given kinds, placed where the palette would put them and named as it names them. */
+export function placeParts(drawing: Drawing, kinds: readonly string[]): Drawing {
+  let next = drawing;
+  for (const kind of kinds) {
+    const spot = freeSpot(next, kind);
+    next = {
+      ...next,
+      parts: [...next.parts, { id: nextId(next, kind), kind, x: spot.x, y: spot.y }],
+    };
+  }
+  return next;
+}
+
 export function Builder({ drawing, onChange, palette, highlight = [], title }: BuilderProps) {
   const strings = useViewStrings();
   const id = useId();

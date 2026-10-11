@@ -24,6 +24,8 @@ export const LABELS = {
     challenge: "The shop's memory, drawn",
     reflection: "The end of Module 6",
   },
+  /** The second way in to the shop's memory project: docs/notes/real-tools/second-way-in.md. */
+  startParts: "Start from the parts",
   challengeTitles: {
     c1: "Writing the limits as a ROM",
     c2: "Drawing the shop's memory",

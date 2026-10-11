@@ -24,6 +24,8 @@ export const LABELS = {
     challenge: "XOR from NAND",
     reflection: "Universality and efficiency",
   },
+  /** The second way in to the XOR project: docs/notes/real-tools/second-way-in.md. */
+  startGates: "Start from the gates",
   challengeTitles: {
     c1: "NOT from NAND",
     c2: "AND from NAND",

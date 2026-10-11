@@ -40,7 +40,8 @@ import type {
 import { bitAt, parseWord, runSuite, type Circuit } from "@dd/sim";
 
 import { AnswerEditor, gradeAnswers } from "./AnswerEditor";
-import { Builder } from "./Builder";
+import { Builder, placeParts } from "./Builder";
+import { StartChooser } from "./StartChooser";
 import { rememberVerdicts } from "./grade-cache";
 import { CircuitView, levelOf, SignalTable } from "./CircuitView";
 import { HdlPanel } from "./HdlPanel";
@@ -428,6 +429,29 @@ function clockOf(challenge: Challenge): string | undefined {
   return challenge.tests.steps.find((s) => s.clock)?.clock;
 }
 
+/**
+ * A challenge's second way in, from its starting data: a drawn challenge lists the parts it places,
+ * unjoined; a written one gives the text. The first way is the blank start, which every challenge
+ * has. The label is the lesson's own (`*.labels.ts`).
+ */
+interface SecondWay {
+  readonly label: string;
+  readonly parts?: readonly string[];
+  readonly hdl?: string;
+}
+
+function secondWayOf(challenge: Challenge): SecondWay | undefined {
+  const second = (challenge.initial.data as { second?: SecondWay } | undefined)?.second;
+  return second && typeof second.label === "string" ? second : undefined;
+}
+
+/** What a drawing is, for telling whether the learner has changed it: its parts, not where they are. */
+const signature = (d: Drawing) =>
+  d.parts
+    .map((p) => `${p.id}:${p.kind}`)
+    .sort()
+    .join(",");
+
 function DrawEditor({ challenge, artifact, onChange, verdict }: ChallengeEditorProps) {
   const strings = useViewStrings();
   const iface = challenge.interface;
@@ -471,9 +495,30 @@ function DrawEditor({ challenge, artifact, onChange, verdict }: ChallengeEditorP
     onDrawing(withInterface(circuitToDrawing(result.circuit), iface));
   };
 
+  const second = secondWayOf(challenge);
+  const starts = useMemo(() => {
+    const blank = withInterface(emptyDrawing(iface), iface);
+    return { blank, second: second?.parts ? placeParts(blank, second.parts) : blank };
+  }, [iface, second]);
   const marked = markedPath(verdict);
   return (
     <div className="draw-editor">
+      {second?.parts && (
+        <StartChooser
+          ways={[
+            { id: "blank", label: strings.editor.startBlankDrawing },
+            { id: "second", label: second.label },
+          ]}
+          wouldReplaceWork={() =>
+            drawing.wires.length > 0 ||
+            (signature(drawing) !== signature(starts.blank) &&
+              signature(drawing) !== signature(starts.second))
+          }
+          onPick={(id) => onDrawing(id === "blank" ? starts.blank : starts.second)}
+          replaceLabel={strings.editor.replaceDrawing}
+          keepLabel={strings.editor.keepDrawing}
+        />
+      )}
       <Builder
         drawing={drawing}
         onChange={onDrawing}
@@ -533,9 +578,25 @@ export function WriteEditor({ challenge, artifact, onChange, verdict }: Challeng
     () => circuitOf(challenge, { hdl: text }, strings),
     [challenge, text, strings],
   );
+  const second = secondWayOf(challenge);
+  const blankText = challenge.initial.hdl ?? "";
   const marked = markedPath(verdict);
   return (
     <div className="write-editor">
+      {second?.hdl !== undefined && (
+        <StartChooser
+          ways={[
+            { id: "blank", label: strings.editor.startBlankText },
+            { id: "second", label: second.label },
+          ]}
+          wouldReplaceWork={() => text.trim() !== "" && text !== blankText && text !== second.hdl}
+          onPick={(id) =>
+            onChange({ ...artifact, hdl: id === "blank" ? blankText : (second.hdl ?? "") })
+          }
+          replaceLabel={strings.editor.replaceText}
+          keepLabel={strings.editor.keepText}
+        />
+      )}
       <HdlPanel
         text={text}
         onChange={(hdl) => onChange({ ...artifact, hdl })}

@@ -357,6 +357,22 @@ export const memoryMap: LessonInput = {
         "not",
       ],
       allowedConstructs: DRAW_CONSTRUCTS,
+      // The second way in: the five blocks, placed and not joined. The two AND gates, the
+      // write-enable gating and the edge rule stay with the learner.
+      initial: {
+        data: {
+          second: {
+            label: LABELS.startParts,
+            parts: [
+              "decoder-2",
+              "table-rom",
+              "byte-memory",
+              "word-register-16",
+              "word-selector-16",
+            ],
+          },
+        },
+      },
       tests: {
         kind: "sequence",
         steps: [

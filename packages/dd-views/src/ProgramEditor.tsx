@@ -33,6 +33,7 @@ import {
   valueText,
   type DebuggerOptions,
 } from "./interactives/Debugger";
+import { StartChooser } from "./StartChooser";
 import { DEFAULT_VIEW_STRINGS, format, useViewStrings, type ViewStrings } from "./strings";
 
 export const PROGRAM_GRADER = "program";
@@ -229,7 +230,6 @@ export function ProgramEditor({ challenge, artifact, onChange }: ChallengeEditor
     return challenge.tests.cases;
   }, [challenge]);
   const [chosen, setChosen] = useState(0);
-  const [asking, setAsking] = useState<"skeleton" | "empty" | undefined>(undefined);
   const run = runs[chosen] ?? runs[0];
   const traps = runs.some((c) => c.given["traps"] !== undefined);
   const scenario = useMemo(() => (run ? scenarioOf(run.given) : {}), [run]);
@@ -255,53 +255,30 @@ export function ProgramEditor({ challenge, artifact, onChange }: ChallengeEditor
   return (
     <div className="write-editor program-editor">
       {start.tiers && (
-        <div className="explorer-actions">
-          {(
-            [
-              ["skeleton", t.startSkeleton, challenge.initial.text ?? ""],
-              ["empty", t.startEmpty, start.empty ?? ""],
-            ] as const
-          ).map(([which, label, next]) =>
-            asking === which ? (
-              <span key={which} className="challenge-reset-confirm" role="group" aria-label={label}>
-                <button
-                  type="button"
-                  className="button danger"
-                  onClick={() => {
-                    setAsking(undefined);
-                    onChange({ ...artifact, text: next });
-                  }}
-                >
-                  {t.replaceConfirm}
-                </button>
-                <button
-                  type="button"
-                  className="button secondary"
-                  onClick={() => setAsking(undefined)}
-                >
-                  {t.replaceCancel}
-                </button>
-              </span>
-            ) : (
-              <button
-                key={which}
-                type="button"
-                className="button secondary"
-                onClick={() =>
-                  // Replacing a program the learner has changed asks first, as clearing work does.
-                  text.trim() &&
-                  text !== next &&
-                  text !== challenge.initial.text &&
-                  text !== start.empty
-                    ? setAsking(which)
-                    : onChange({ ...artifact, text: next })
-                }
-              >
-                {label}
-              </button>
-            ),
-          )}
-        </div>
+        <StartChooser
+          ways={[
+            { id: "skeleton", label: t.startSkeleton },
+            { id: "empty", label: t.startEmpty },
+          ]}
+          wouldReplaceWork={(id) => {
+            // Replacing a program the learner has changed asks first, as clearing work does.
+            const next = id === "skeleton" ? (challenge.initial.text ?? "") : (start.empty ?? "");
+            return (
+              text.trim() !== "" &&
+              text !== next &&
+              text !== challenge.initial.text &&
+              text !== start.empty
+            );
+          }}
+          onPick={(id) =>
+            onChange({
+              ...artifact,
+              text: id === "skeleton" ? (challenge.initial.text ?? "") : (start.empty ?? ""),
+            })
+          }
+          replaceLabel={t.replaceConfirm}
+          keepLabel={t.replaceCancel}
+        />
       )}
       <ProgramText
         // Module 12's challenges write a start and a handler, not a program: the box says so.

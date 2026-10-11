@@ -99,14 +99,19 @@ export async function draw(
   section: Locator,
   drawing: Drawing,
   by: "pointer" | "keyboard" = "pointer",
+  /** The kinds of part a second way in has already placed: they are wired, not added again. */
+  placed: readonly string[] = [],
 ): Promise<void> {
   const ids = new Map<string, string>();
   const counts = new Map<string, number>();
+  const already = new Map<string, number>();
+  for (const kind of placed) already.set(kind, (already.get(kind) ?? 0) + 1);
   for (const part of drawing.parts) {
     if (part.kind === "input" || part.kind === "output") continue;
     const n = (counts.get(part.kind) ?? 0) + 1;
     counts.set(part.kind, n);
     ids.set(part.id, partName(part.kind, n));
+    if ((already.get(part.kind) ?? 0) >= n) continue;
     await section
       .getByRole("button", { name: format(V.builder.add, { label: labelFor(part.kind) }) })
       .click();

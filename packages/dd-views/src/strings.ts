@@ -98,6 +98,13 @@ export interface ViewStrings {
     readonly imported: string;
     readonly importPorts: string;
     readonly writeTitle: string;
+    /** A challenge with a second way in: the first way, the blank start, and the words on the confirmation. */
+    readonly startBlankDrawing: string;
+    readonly startBlankText: string;
+    readonly replaceDrawing: string;
+    readonly keepDrawing: string;
+    readonly replaceText: string;
+    readonly keepText: string;
     readonly notSettled: string;
   };
   readonly grade: {
@@ -799,6 +806,12 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     imported: "Imported.",
     importPorts: "The text must have inputs and outputs {ports}.",
     writeTitle: "Your circuit, as text",
+    startBlankDrawing: "Start from the pins",
+    startBlankText: "Start from the module line",
+    replaceDrawing: "Replace my drawing",
+    keepDrawing: "Keep my drawing",
+    replaceText: "Replace my text",
+    keepText: "Keep my text",
     notSettled: "The circuit never settled. Some signals kept changing.",
   },
   grade: {

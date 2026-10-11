@@ -272,6 +272,12 @@ endmodule
       palette: ["nand"],
       allowedConstructs: GATE_CONSTRUCTS,
       limits: NAND_ONLY,
+      // The second way in: the five gates the last lesson's XOR is made of, placed and not joined.
+      initial: {
+        data: {
+          second: { label: LABELS.startGates, parts: ["nand", "nand", "nand", "nand", "nand"] },
+        },
+      },
       tests: { kind: "combinational", vectors: rows2([0, 1, 1, 0]) },
       hints: [...PROSE.c3Hints],
       reference: { hdl: XOR_NAND_TEXT },

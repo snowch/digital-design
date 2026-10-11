@@ -7,8 +7,6 @@
 // and on the instruction-level model, compared after every instruction and every trap; a failure
 // names the first instruction that disagreed, and how, never the join.
 
-import { useState } from "react";
-
 import { QUIET_INPUTS, compareFinalCircuit, type TextComparison } from "@dd/dd-model";
 import { elaborate, machine13Modules, type Construct } from "@dd/hdl";
 import type { Challenge } from "@platform/lesson-schema";
@@ -18,6 +16,7 @@ import type { Circuit } from "@dd/sim";
 import { WriteEditor, portProblem } from "./book";
 import { LabJoins } from "./interactives/LabJoins";
 import { ProgramListing } from "./interactives/ProgramListing";
+import { StartChooser } from "./StartChooser";
 import { DEFAULT_VIEW_STRINGS, format, useViewStrings, type ViewStrings } from "./strings";
 
 export const LAB_GRADER = "machine13-lab";
@@ -166,7 +165,6 @@ export function LabEditor(props: ChallengeEditorProps) {
   const t = useViewStrings().machine13;
   const starts = (challenge.initial.data ?? {}) as LabStarts;
   const text = artifact.hdl ?? challenge.initial.hdl ?? "";
-  const [asking, setAsking] = useState<string | undefined>();
   const ways: readonly (readonly [string, string, string])[] = [
     ["outline", t.labOutline, challenge.initial.hdl ?? ""],
     ["parts", t.labParts, starts.parts ?? ""],
@@ -175,45 +173,19 @@ export function LabEditor(props: ChallengeEditorProps) {
   const isStart = (x: string) => ways.some(([, , start]) => start === x);
   return (
     <div className="lab-editor">
-      <div className="explorer-actions">
-        {ways.map(([which, label, next]) =>
-          asking === which ? (
-            <span key={which} className="challenge-reset-confirm" role="group" aria-label={label}>
-              <button
-                type="button"
-                className="button danger"
-                onClick={() => {
-                  setAsking(undefined);
-                  onChange({ ...artifact, hdl: next });
-                }}
-              >
-                {t.labReplace}
-              </button>
-              <button
-                type="button"
-                className="button secondary"
-                onClick={() => setAsking(undefined)}
-              >
-                {t.labKeep}
-              </button>
-            </span>
-          ) : (
-            <button
-              key={which}
-              type="button"
-              className="button secondary"
-              onClick={() =>
-                // Replacing a text the learner has changed asks first, as clearing work does.
-                text.trim() && text !== next && !isStart(text)
-                  ? setAsking(which)
-                  : onChange({ ...artifact, hdl: next })
-              }
-            >
-              {label}
-            </button>
-          ),
-        )}
-      </div>
+      <StartChooser
+        ways={ways.map(([id, label]) => ({ id, label }))}
+        wouldReplaceWork={(id) => {
+          // Replacing a text the learner has changed asks first, as clearing work does.
+          const next = ways.find(([which]) => which === id)?.[2] ?? "";
+          return text.trim() !== "" && text !== next && !isStart(text);
+        }}
+        onPick={(id) =>
+          onChange({ ...artifact, hdl: ways.find(([which]) => which === id)?.[2] ?? "" })
+        }
+        replaceLabel={t.labReplace}
+        keepLabel={t.labKeep}
+      />
       <WriteEditor {...props} />
       <LabJoins text={text} />
       {challenge.tests.kind === "answers" && (

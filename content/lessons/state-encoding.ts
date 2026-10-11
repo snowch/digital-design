@@ -40,6 +40,23 @@ const zcode = (name: string) => stateNamed(ZERO_IDLE, name).code;
 const DEFROST_HEADER =
   "module defrost(input logic TICK, input logic CLEAR, input logic WARM, input logic RST, input logic CLK, output logic COMP, output logic HEAT, output logic [1:0] S);";
 
+/** The frame the second way in starts from: everything hints 3 and 5 give before the other arms. */
+const DEFROST_FRAME = `${DEFROST_HEADER}
+  typedef enum logic [1:0] {COOL = 2'b00, DEFROST = 2'b01, DRAIN = 2'b10} state_t;
+  state_t state;
+  state_t next;
+  always_ff @(posedge CLK) begin
+    if (RST) state <= COOL;
+    else state <= next;
+  end
+  always_comb begin
+    case (state)
+      COOL: if (TICK) next = DEFROST; else next = COOL;
+    endcase
+  end
+endmodule
+`;
+
 /** The names a timing diagram writes for the retry controller's codes. */
 const NAMES = { "00": "IDLE", "01": "TRY", "10": "WAIT", "11": "GIVE_UP" };
 
@@ -310,7 +327,11 @@ export const stateEncoding: LessonInput = {
         outputs: [{ name: "COMP" }, { name: "HEAT" }, { name: "S", width: 2 }],
       },
       allowedConstructs: [...TEXT_CONSTRUCTS, "enum"],
-      initial: { hdl: `${DEFROST_HEADER}\n\nendmodule\n` },
+      initial: {
+        hdl: `${DEFROST_HEADER}\n\nendmodule\n`,
+        // The second way in: the register, the names and the case with COOL's arm (hint 3).
+        data: { second: { label: LABELS.startFrame, hdl: DEFROST_FRAME } },
+      },
       tests: {
         kind: "sequence",
         steps: [

@@ -15,6 +15,8 @@ export const LABELS = {
     writeZeroIdle: "Change the codes as shown and run the tests.",
     zeroIdleMachine: "Open the next-state logic and clock the controller.",
   },
+  /** The second way in to the defrost project: the labels of docs/notes/real-tools/second-way-in.md. */
+  startFrame: "Start from the frame",
   challengeTitles: {
     c1: "The controller with IDLE at zero",
     c2: "The defrost controller",
