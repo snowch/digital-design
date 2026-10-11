@@ -69,7 +69,7 @@ export const BEYOND_STRINGS: BeyondStrings = {
     number: "{piece} is a number, so the next register takes it: {instruction}.",
     job: "{piece} is two registers joined by a job, so the next register takes the result: {instruction}.",
     branch:
-      "{piece} has both sides in registers: the compiler writes {instruction}, a signed branch past the rest on the turned-over comparison, swapped for > and <=.",
+      "{piece} has both sides in registers: the compiler writes {instruction}, a signed branch past the rest on the turned-over comparison. When the comparison is > or <=, the registers swap places.",
     store: "{piece} writes a device from a register, so the compiler writes {instruction}.",
   },
 

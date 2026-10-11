@@ -48,3 +48,9 @@ it" put in place of that sentence. The draft: "Commit to the word first. Press "
 the figure reaches edge 21, the branch's ALU edge. The figure scrolls to the datapath, where the
 condition block is drawn closed. Press the condition block to open it, and its gates show. Then
 watch MET and the PC."
+
+After the managing session's check of 9778573: the branch rule's "swapped for > and <=" read as if
+the branch were swapped; redrafted, kept as returned: "{piece} has both sides in registers: the
+compiler writes {instruction}, a signed branch past the rest on the turned-over comparison. When
+the comparison is > or <=, the registers swap places." (Either reading holds: a comparison and its
+turned-over form fall in the same pair, > and <=.)

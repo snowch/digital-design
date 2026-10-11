@@ -3840,6 +3840,10 @@ svg.store-rooms {
   outline: 2px solid var(--accent-strong);
   border-radius: 2px;
 }
+/* The listing's caption on one line, even above a narrow table of one or two rows. */
+.compile-listing caption {
+  white-space: nowrap;
+}
 .compile-rule {
   margin: var(--space-2) 0 0;
   max-width: var(--measure);
