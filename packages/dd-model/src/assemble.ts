@@ -70,6 +70,8 @@ export type AssemblyProblemCode =
   | "unreadable"
   | "romFull"
   | "unknownName"
+  /** A device's name where a line wants a number or a register: the name alone is an address. */
+  | "deviceName"
   /** Not the assembler's: a test calls a function no line of the program names. */
   | "noFunction"
   | "twice"
@@ -380,6 +382,10 @@ function number(text: string, line: number): number {
   if (/^-?0x[0-9a-f]+$/i.test(t))
     return t.startsWith("-") ? -parseInt(t.slice(3), 16) : parseInt(t, 16);
   if (/^-?\d+$/.test(t)) return parseInt(t, 10);
+  // Beyond the machine: the shop's rule written as it says it, `R3 <= sensorA - sensorB`, reaches
+  // here with a device's name, which is an address, not a number nothing defines.
+  if (t in DEVICE_NAMES)
+    throw new AssemblyError(line, `${t} is a device's address here`, "deviceName", { name: t });
   if (/^[A-Za-z_][A-Za-z0-9_]*$/.test(t) && !/^R\d{1,2}$/.test(t))
     throw new AssemblyError(line, `nothing defines the name ${t}`, "unknownName", { name: t });
   throw new AssemblyError(line, `${JSON.stringify(t)} is not a number`, "notNumber", { text: t });

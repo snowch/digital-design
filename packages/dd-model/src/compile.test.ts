@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { assemble } from "./assemble";
+import { assemble, assembleChecked } from "./assemble";
 import { compile, runCompiled } from "./compile";
 import { instructionHex } from "./machine";
 import { MEET_PROGRAMS } from "./meet";
@@ -169,5 +169,12 @@ describe("the compiler", () => {
     expect(codes("sensorA <= 3")).toEqual(["form"]);
     expect(codes("if sensorA then lamps <= 1")).toEqual(["form"]);
     expect(compile("lamps <= 2047\nlamps <= -2048").problems).toEqual([]);
+  });
+
+  it("leaves the assembler refusing the shop's line as it says it, a device's name being an address", () => {
+    expect(
+      assembleChecked("R3 <= sensorA - sensorB\nstop").problems.map((p) => [p.code, p.values.name]),
+    ).toEqual([["deviceName", "sensorB"]]);
+    expect(assembleChecked("R1 <= sensorA\nstop").problems).toEqual([]);
   });
 });

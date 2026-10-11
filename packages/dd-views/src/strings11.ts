@@ -258,6 +258,8 @@ export const MACHINE11_STRINGS: Machine11Strings = {
     unreadable: "Each line is one instruction. Write it as a transfer, such as R3 <= R1 + R2.",
     romFull: "The program and data need {bytes} bytes, and the ROM holds {rom}.",
     unknownName: "No line names {name}. Check the spelling, or add it with a colon before a line.",
+    deviceName:
+      "In assembly a device's name alone stands for its address, not its reading, so to read {name} load its word on a line of its own, as R1 <= word[{name}] does.",
     twice: "{name} names another line already. Each name names one line.",
     dataTarget: "{name} is data. A branch or call goes to an instruction line.",
     wordTooWide: "{text} does not fit in a {size}.",

@@ -5,7 +5,8 @@
 // own compiler, takes such a line and writes the course's instructions for it, one at a time, while
 // the learner watches the line shrink: each piece it takes becomes an instruction, and the piece's
 // register takes its place. The compiled CLASH line then runs on the whole machine, and its `>=`,
-// which the machine has no instruction for, is followed down to the condition block's gates. The
+// written as a branch on the comparison turned over, `<`, is followed down to the condition block's
+// gates, MINUS XOR OVER. The
 // compiler's output for the shop's two rules is Module 0's first program, the gap worked out twice.
 //
 // An optional chapter (module 14, `optional`), listed after the five stages under "Beyond the
@@ -156,6 +157,7 @@ export const compiler: LessonInput = {
             signals: ["OP2", "OP1", "OP0", "BRANCH"],
             shown: [3, 4],
             devices: true,
+            scope: "datapath/condition",
             focus: ["datapath/condition"],
             reveal: { text: PROSE.branchAfter, edge: 21 },
           },

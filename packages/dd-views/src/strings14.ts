@@ -12,21 +12,22 @@ export interface BeyondStrings {
   readonly readingsLegend: string;
   /** Over the line as first written. */
   readonly written: string;
-  /** Over the line as it stands now: {line}, the line's number in the text. */
+  /** Over the line as it stands now. */
   readonly lineNow: string;
   /** In place of the line once nothing of it is left. */
   readonly nothingLeft: string;
   /** Before the rule that applies to the marked piece. */
   readonly ruleHeading: string;
-  /** Each rule in one sentence. */
+  /** Each rule in one sentence, for the marked {piece} and the {instruction} it becomes. */
   readonly rules: Readonly<Record<"read" | "number" | "job" | "branch" | "store", string>>;
   /** While the question waits for a prediction, in place of the rule. */
   readonly ruleHidden: string;
   readonly next: string;
   readonly back: string;
   readonly again: string;
-  /** {n} instructions written of {total}. */
+  /** {n} instructions written of {total}; and for one. */
   readonly progress: string;
+  readonly progressOne: string;
   /** The listing so far. */
   readonly listingCaption: string;
   readonly address: string;
@@ -60,22 +61,24 @@ export const BEYOND_STRINGS: BeyondStrings = {
   linesLegend: "Line to compile",
   readingsLegend: "Readings for the run",
   written: "The line as you wrote it",
-  lineNow: "The line as it stands: {line}",
+  lineNow: "The line as it stands",
   nothingLeft: "Nothing of the line is left.",
   ruleHeading: "The rule:",
   rules: {
-    read: "A device's name the line reads puts its word in the next register: R1 <= word[sensorA].",
-    number: "A number goes into the next register first: R4 <= 100.",
-    job: "Two registers joined by a job give the next register their result: R3 <= R1 - R2.",
+    read: "{piece} is a device's name the line reads, so the next register takes its word: {instruction}.",
+    number: "{piece} is a number, so the next register takes it: {instruction}.",
+    job: "{piece} is two registers joined by a job, so the next register takes the result: {instruction}.",
     branch:
-      "A branch skips the rest of the line when the comparison fails, written as the comparison turned over and read signed, swapping the two registers for > and <=.",
-    store: "A device the line writes takes a register's word: word[lamps] <= R5.",
+      "{piece} has both sides in registers: the compiler writes {instruction}, a signed branch past the rest on the turned-over comparison, swapped for > and <=.",
+    store: "{piece} writes a device from a register, so the compiler writes {instruction}.",
   },
+
   ruleHidden: "The rule shows once you have checked your prediction.",
   next: "Next instruction",
   back: "Back",
   again: "Start again",
   progress: "{n} instructions written of {total}",
+  progressOne: "1 instruction written of {total}",
   listingCaption: "The instructions written",
   address: "Address",
   instruction: "Instruction",

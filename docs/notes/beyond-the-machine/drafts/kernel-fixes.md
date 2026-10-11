@@ -21,3 +21,11 @@ L1 to L3's returns as kept are in this folder; L4's landed verbatim in `kernel.l
 The second reading, start to finish (1,326 words before it):
 - the explanation restated what `480` and `488` hold, which the investigation says: the three
   sentences cut, "The two words" became "The words at `480` and `488`".
+
+## After the managing session's review (items 10 to 15)
+
+Code: the two save areas are drawn (`drawn: true`). Cut by hand: the construction's prose and task
+no longer give the stop's address, `210` (item 10). Brief R2 (`../briefs/R2.md`), kept as returned
+in `R2.json`: the investigation gains the layout and the sentence on the X words, the lead's first
+press stops at `load`, and the explanation's 20 words say the 20th is spare. The note's sentence on
+R13's address is corrected.

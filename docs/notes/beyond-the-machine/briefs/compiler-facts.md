@@ -177,5 +177,9 @@ shows 0, with the shop's readings and with room A at -30 and room B at 80.
 The compiled CLASH program runs on the course's final machine (Module 13's) with the shop's
 readings in 22 edges. The branch's FETCH edge is edge 19 and its ALU edge is edge 21. Before edge 21
 MET is already 1: 66 is less than 100. At edge 21 HR takes -34 (66 minus 100) and the PC takes
-`01C`, the address of `stop`, so CLASH stays dark. The line's `>=`, a comparison the machine has no
-instruction for, ends at the condition block's gates: MINUS XOR OVER, which Module 7 built.
+`01C`, the address of `stop`, so CLASH stays dark. The line's `>=` is written as a branch on the
+comparison turned over, `<`, and `<` ends at the condition block's gates: MINUS XOR OVER, which
+Module 7 built. (The machine has branches for `>=` and `<`; it has none for `>` or `<=`.)
+
+*Corrected after the managing session's review: the first version said the machine has no
+instruction for `>=`, which is false.*

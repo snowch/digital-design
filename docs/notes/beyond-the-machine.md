@@ -76,7 +76,6 @@ All are pinned in `compile.test.ts`, `compiler.facts.test.ts` and `kernel.facts.
 
 ## What the build would change
 
-- The kernel's construction asks for R13's address, which the investigation's memory region shows
-  for any moment. The plan accepted it; a review may ask for a word whose value, not place, must be
-  worked out.
+- The kernel's construction asks for R13's address. No figure names a save area's rows by
+  register, so the address is worked out from the layout the task gives.
 - The plan's risk 13 (the assembler's sentence for a job on two names) is not made here.

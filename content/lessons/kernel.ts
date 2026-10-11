@@ -59,8 +59,8 @@ const KERNEL_LANES = [
 /** The kernel's words in the RAM: the two addresses, then each program's save area. */
 const SAVE_AREAS = [
   { from: "0x480", words: 2, title: LABELS.memory.areas },
-  { from: "0x500", words: 20, title: LABELS.memory.gap },
-  { from: "0x5A0", words: 20, title: LABELS.memory.report },
+  { from: "0x500", words: 20, title: LABELS.memory.gap, drawn: true },
+  { from: "0x5A0", words: 20, title: LABELS.memory.report, drawn: true },
 ];
 
 /** The record a run must leave for each program, at the end of its save area. */

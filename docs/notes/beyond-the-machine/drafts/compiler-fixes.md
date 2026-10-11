@@ -23,3 +23,17 @@ The second reading, start to finish (1,384 words before it):
 K4's return landed verbatim in `compiler.labels.ts`, `compiler.prose.ts` (task, lead, hints) and
 `packages/dd-views/src/strings14.ts` (the figure's words, the refusals, the run sentences), with
 the fixes above.
+
+## After the managing session's review (items 1 to 9, 16)
+
+Code: `branch-gates` opens with `scope: "datapath/condition"`; the figure's rule sentence is built
+from the marked piece and its instruction (`{piece}`, `{instruction}`), its choice labels set code
+as code, "The line as it stands" loses its line number, one instruction is singular
+(`progressOne`, a form fix), and the listing shows only once it has a row. The assembler gains
+`deviceName`, the refusal for a device's name where a line wants a number (risk 13).
+
+Brief R1 (`../briefs/R1.md`), drafts in `R1.json`: `branchAfter`, `motivation`, `explanation`,
+`investigation`, the five rules and `deviceName`. One fix: `branchAfter`'s last sentence began
+"It", which pointed at the condition block: "The machine". Cut by hand: `stepsOutcomes` to its last
+sentence (item 4: it stated both lines' results whichever line had run). The fact sheet's
+"no instruction for `>=`" corrected, and the lesson's header comment.

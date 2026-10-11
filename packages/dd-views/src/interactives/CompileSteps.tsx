@@ -56,6 +56,23 @@ export function compileAnswer(given: z.input<typeof Props>): string {
   return c.steps[data.ask.step]?.instruction ?? "";
 }
 
+/** A choice's label, with its `code` spans set as code. */
+function Label({ text }: { text: string }) {
+  return (
+    <>
+      {text
+        .split(/(`[^`]*`)/)
+        .map((part, i) =>
+          part.startsWith("`") && part.endsWith("`") && part.length > 1 ? (
+            <code key={i}>{part.slice(1, -1)}</code>
+          ) : (
+            part
+          ),
+        )}
+    </>
+  );
+}
+
 /** The line with a span marked, as three parts. */
 function Marked({ text, span }: { text: string; span?: readonly [number, number] }) {
   if (!span) return <code>{text}</code>;
@@ -168,7 +185,9 @@ export const CompileSteps = withProps(
                     restart(0);
                   }}
                 />
-                <span>{l.label}</span>
+                <span>
+                  <Label text={l.label} />
+                </span>
               </label>
             ))}
           </fieldset>
@@ -199,12 +218,21 @@ export const CompileSteps = withProps(
           )}
           {step && (
             <p className="compile-rule">
-              <strong>{t.ruleHeading}</strong> {waiting ? t.ruleHidden : t.rules[step.rule]}
+              <strong>{t.ruleHeading}</strong>{" "}
+              {waiting
+                ? t.ruleHidden
+                : format(t.rules[step.rule], {
+                    piece: step.before.slice(step.piece[0], step.piece[1]),
+                    instruction: step.instruction,
+                  })}
             </p>
           )}
         </div>
         <p role="status" className="datapath-status">
-          {format(t.progress, { n: Math.min(at, total), total })}
+          {format(Math.min(at, total) === 1 ? t.progressOne : t.progress, {
+            n: Math.min(at, total),
+            total,
+          })}
         </p>
         <div className="explorer-actions">
           <button
@@ -227,49 +255,53 @@ export const CompileSteps = withProps(
             {t.again}
           </button>
         </div>
-        <div className="truth-table-wrap">
-          <table className="truth-table datapath-table compile-listing">
-            <caption>{t.listingCaption}</caption>
-            <thead>
-              <tr>
-                {done && <th scope="col">{t.address}</th>}
-                <th scope="col">{t.instruction}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {compiled.instructions.slice(0, shownRows).map((ins, i) => {
-                const w = words[i];
-                const fromStep = steps.findIndex((s) => s.made.at(-1) === i);
-                const lit = marked?.made.includes(i) ?? false;
-                const name = compiled.program.split("\n")[i]?.match(/^(\w+): /)?.[1];
-                return (
-                  <tr key={i} className={lit ? "compile-made" : undefined}>
-                    {done && <td className="memory-word">{w ? hex3(w.address) : ""}</td>}
-                    <td className="memory-word">
-                      {fromStep >= 0 ? (
-                        <button
-                          type="button"
-                          className="compile-row"
-                          aria-pressed={pressed === fromStep}
-                          aria-label={format(t.rowLabel, { instruction: ins.text })}
-                          onClick={() => setPressed((p) => (p === fromStep ? undefined : fromStep))}
-                        >
-                          {name ? `${name}: ` : ""}
-                          {ins.text}
-                        </button>
-                      ) : (
-                        <span>
-                          {name ? `${name}: ` : ""}
-                          {ins.text}
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        {shownRows > 0 && (
+          <div className="truth-table-wrap">
+            <table className="truth-table datapath-table compile-listing">
+              <caption>{t.listingCaption}</caption>
+              <thead>
+                <tr>
+                  {done && <th scope="col">{t.address}</th>}
+                  <th scope="col">{t.instruction}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {compiled.instructions.slice(0, shownRows).map((ins, i) => {
+                  const w = words[i];
+                  const fromStep = steps.findIndex((s) => s.made.at(-1) === i);
+                  const lit = marked?.made.includes(i) ?? false;
+                  const name = compiled.program.split("\n")[i]?.match(/^(\w+): /)?.[1];
+                  return (
+                    <tr key={i} className={lit ? "compile-made" : undefined}>
+                      {done && <td className="memory-word">{w ? hex3(w.address) : ""}</td>}
+                      <td className="memory-word">
+                        {fromStep >= 0 ? (
+                          <button
+                            type="button"
+                            className="compile-row"
+                            aria-pressed={pressed === fromStep}
+                            aria-label={format(t.rowLabel, { instruction: ins.text })}
+                            onClick={() =>
+                              setPressed((p) => (p === fromStep ? undefined : fromStep))
+                            }
+                          >
+                            {name ? `${name}: ` : ""}
+                            {ins.text}
+                          </button>
+                        ) : (
+                          <span>
+                            {name ? `${name}: ` : ""}
+                            {ins.text}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
         {shownRows > 0 && <p className="meta">{t.linkHint}</p>}
         {done && (
           <>
@@ -285,7 +317,9 @@ export const CompileSteps = withProps(
                       checked={reading === i}
                       onChange={() => setReading(i)}
                     />
-                    <span>{r.label}</span>
+                    <span>
+                      <Label text={r.label} />
+                    </span>
                   </label>
                 ))}
               </fieldset>

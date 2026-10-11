@@ -39,11 +39,22 @@ describe("the compiler at work", () => {
     });
     const next = screen.getByRole("button", { name: t.next });
     expect(container.querySelector(".compile-now mark")).toHaveTextContent("sensorA");
-    expect(screen.getByText(t.rules.read)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        format(t.rules.read, { piece: "sensorA", instruction: "R1 <= word[sensorA]" }),
+      ),
+    ).toBeInTheDocument();
     await user.click(next);
+    // The rule names the piece now marked, not a fixed example.
+    expect(
+      screen.getByText(
+        format(t.rules.read, { piece: "sensorB", instruction: "R2 <= word[sensorB]" }),
+      ),
+    ).toBeInTheDocument();
     expect(container.querySelector(".compile-now code")).toHaveTextContent(
       "display <= R1 - sensorB",
     );
+    expect(screen.getByText(format(t.progressOne, { total: 4 }))).toBeInTheDocument();
     for (let i = 0; i < 3; i++) await user.click(next);
     expect(next).toBeDisabled();
     expect(screen.getByText(t.nothingLeft)).toBeInTheDocument();
@@ -84,10 +95,14 @@ describe("the compiler at work", () => {
     );
     expect(screen.getByRole("button", { name: t.next })).toBeDisabled();
     expect(screen.getByText(t.ruleHidden)).toBeInTheDocument();
-    expect(screen.queryByText(t.rules.branch)).not.toBeInTheDocument();
+    const branchRule = format(t.rules.branch, {
+      piece: "if R3 >= R4 then",
+      instruction: options[0]!,
+    });
+    expect(screen.queryByText(branchRule)).not.toBeInTheDocument();
     await user.click(screen.getByLabelText(options[0]!));
     await user.click(screen.getByRole("button", { name: S.prediction.commit }));
-    expect(screen.getByText(t.rules.branch)).toBeInTheDocument();
+    expect(screen.getByText(branchRule)).toBeInTheDocument();
     expect(screen.getByText("Turned over.")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: t.next }));
     expect(container.querySelector(".compile-listing")).toHaveTextContent(options[0]!);
