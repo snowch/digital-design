@@ -87,7 +87,7 @@ export const STRINGS = {
      * brief C6 once Module 0's own line said what you do in it.
      */
     journeyIntro:
-      "Module 0 comes first, before the five stages. The stages build the machine up from a single wire, beginning in Module 1; 2 optional chapters follow them.",
+      "Module 0 comes first, before the five stages. The stages build the machine up from one wire, beginning in Module 1; two optional chapters follow them.",
     /** Under Module 0's line, before the stages: what you do in it, as each stage's `about` says (brief C6). */
     openingAbout:
       "Run a finished machine with a shop's program, line by line; open the machine level by level, down to one wire.",
@@ -156,7 +156,7 @@ export const STRINGS = {
       range: "Optional chapters",
       /** Under the line: what you do in the chapters, as a stage's `about` says. */
       about:
-        "Watch a program write a shop's line as machine lines, one at a time; let a timer swap the machine between 2 programs.",
+        "Watch a program write a shop's line as machine lines, one at a time; let a timer swap the machine between two programs.",
     },
   },
   /** Every module the plan has (`docs/plan.md`), by number from 0, in plain words. */
