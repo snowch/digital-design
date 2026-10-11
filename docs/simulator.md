@@ -120,3 +120,56 @@ subset: `always_ff` is a flip-flop or a register, `always_comb` is a mux tree, t
 instantiation, and no `initial`. Arithmetic is `+` and `-` only, worked out at the width
 SystemVerilog uses and built from the course's own ripple adder (Module 7). Everything the subset refuses is
 refused with a sentence that names the construct.
+
+## Real tools
+
+The course says that what the learner writes is SystemVerilog. A separate job checks that real
+tools agree. `npm run check:real-tools` (CI: the `real-tools` job of `.github/workflows/real-tools.yml`,
+on every push to main; `scripts/check.sh` does not run it, because it needs two installs) does
+three things, in `scripts/real-tools/`.
+
+1. **Collect** (`collect.mts`). It writes every text the course shows or accepts to files,
+   computed from the lessons and the model, never listed by hand: each HDL challenge's reference
+   solution and starting text; each figure's own text (`props.hdl` and the variants it runs); the
+   generator's text for every circuit in the library, for every drawing a challenge gives or
+   accepts, and for the state machines in the style a figure shows; and the course's modules
+   (`registers`, `alu`, `memory` ...), as the generator writes them, so that a text which uses one
+   has a definition to be read against. Fenced snippets in hints and prose are fragments to be
+   put inside a module, not modules, and are not collected; the reference solutions they spell
+   out are.
+2. **Lint and synthesise** (`run.py`). Verilator 5.020 with `--lint-only -Wall`, and Yosys 0.69
+   with `read_verilog -sv`, `hierarchy -check`, `proc`, `synth` and `check`. A warning that
+   `waivers.json` does not cover fails the run, and so does a waiver that covers nothing.
+3. **Compare meaning** (`simulate.py`). For every text the engine can run on its own (the
+   challenge references with their own tests, the library circuits, the state machines) the engine
+   runs a stimulus and records every output. A testbench applies the same stimulus to the text in
+   Verilator, and every output bit the engine knows must agree. Verilator has two values for a bit
+   and the engine three, so a bit the engine calls X is not compared. The stimulus is the
+   challenge's tests; for a library circuit or a machine, every input row if the inputs are ten
+   bits or fewer, and otherwise 48 or 128 seeded pseudo-random steps with a clock pulse and an
+   occasional reset. Texts over 250 000 bytes (the whole datapath's gates) are linted and
+   synthesised but not simulated.
+
+The versions are pinned: the Verilator is the apt package of Ubuntu 24.04 (the job runs on
+`ubuntu-24.04`), the Yosys is `scripts/real-tools/requirements.txt`. Yosys before 0.4x rejects the
+array list of the ROM lesson (`'{16'hFF06, ...}`) as a syntax error; 0.69 reads it.
+
+### What is waived, and why
+
+Every waiver is in `scripts/real-tools/waivers.json` with its reason; this is the list. "Where"
+is how narrowly it applies.
+
+| Tool | Warning | Where | Why |
+| --- | --- | --- | --- |
+| Verilator | DECLFILENAME | all | the checker names each file, the learner never does |
+| Verilator | UNUSEDSIGNAL | all | a circuit keeps every port it has; a check reads some bits of a word; the generator writes every gate of a drawing, read or not |
+| Verilator | UNOPTFLAT | texts the course itself finds a loop in | memory built from gates that read each other, which the generator warns about in a comment |
+| Verilator | WIDTHEXPAND | two named references | `{COUT, SUM} = A + B + CIN` adds a one-bit carry to two N-bit words, and SystemVerilog widens it to the left side's N+1 bits, as the wide-alu lesson teaches |
+| Verilator | PINMISSING | references, starting texts, figures | a text may leave unconnected an output of a course module that it does not read |
+| Verilator | PINCONNECTEMPTY, UNDRIVEN | starting texts | the blanks the learner fills |
+| Verilator | UNUSEDPARAM | the course's modules | a module is written at one width, and declares `N` so that `alu #(.N(64))` is a legal use |
+| Yosys | logic loop (`check`) | texts the course itself finds a loop in | a latch built from gates, on purpose |
+| Yosys | wire used but undriven | starting texts | the blanks the learner fills |
+
+Mismatches the check found, and what was done about each, are in `docs/notes/real-tools.md`.
+

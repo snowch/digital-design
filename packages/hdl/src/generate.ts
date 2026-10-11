@@ -48,8 +48,20 @@ export function generate(circuit: Circuit): Generated {
   // Flip-flops and registers are written as behaviour; everything under them is skipped.
   // Only the outermost: a register's flip-flops are written by the register's one `always_ff`.
   // Module 6: a memory or a ROM built as a component is written as an array, as it is read.
+  // A closed block of kind `memory` or `rom` is an array only if it is one (`memoryBlock`: the
+  // cells and nothing else, read at Q); the machine's memory map is also a block called `memory`,
+  // and the program ROM a block of kind `rom` that holds the fetch checks too. Those are gates
+  // around cells, and the cells are written as arrays of their own.
+  const holdsCells = (c: CompositeDef) =>
+    Object.keys(c.outputs).every((p) => /^Q\d*$/.test(p)) &&
+    circuit.components.some(
+      (x) => x.path === `${c.path}/cells` && (x.kind === "memory" || x.kind === "rom"),
+    );
   const clocked = circuit.composites.filter(
-    (c) => c.kind === "dff" || c.kind === "register" || c.kind === "memory" || c.kind === "rom",
+    (c) =>
+      c.kind === "dff" ||
+      c.kind === "register" ||
+      ((c.kind === "memory" || c.kind === "rom") && holdsCells(c)),
   );
   const behavioural = clocked.filter(
     (c) => !clocked.some((o) => o !== c && c.path.startsWith(`${o.path}/`)),
@@ -66,6 +78,7 @@ export function generate(circuit: Circuit): Generated {
   }
 
   const body: string[] = [];
+  const taken = new Set<string>(names.values());
   const declared = new Set<NetId>([
     ...circuit.inputs.map((i) => i.net),
     ...circuit.outputs.map((o) => o.net),
@@ -127,13 +140,19 @@ export function generate(circuit: Circuit): Generated {
 
   const emittedBehavioural = new Set<string>();
   for (const c of circuit.components) {
+    // A memory or ROM placed as a bare component, in a block of some other kind (the register
+    // file's two banks), is written as an array too: the generator must not drop storage.
+    if ((c.kind === "memory" || c.kind === "rom") && !under(c.path)) {
+      body.push(...memoryText(bareMemory(c), names, declare, taken));
+      continue;
+    }
     const owner = under(c.path);
     if (owner) {
       if (emittedBehavioural.has(owner.path)) continue;
       emittedBehavioural.add(owner.path);
       body.push(
         ...(owner.kind === "memory" || owner.kind === "rom"
-          ? memoryText(owner, circuit, names, declare)
+          ? memoryText(compositeMemory(owner, circuit), names, declare, taken)
           : alwaysFf(owner, names, declare, width, readOutside)),
       );
       continue;
@@ -144,7 +163,17 @@ export function generate(circuit: Circuit): Generated {
     body.push(`  assign ${names.get(out)} = ${expr(c)};`);
   }
 
-  const loops = combinationalLoops(circuit, (path) => under(path) !== undefined, names);
+  // A memory's own state loop is storage the text writes as an array, not a loop of gates.
+  const bareMemories = new Set(
+    circuit.components
+      .filter((c) => (c.kind === "memory" || c.kind === "rom") && !under(c.path))
+      .map((c) => c.path),
+  );
+  const loops = combinationalLoops(
+    circuit,
+    (path) => under(path) !== undefined || bareMemories.has(path),
+    names,
+  );
   for (const loop of loops) {
     const text = `${loop.join(" and ")}: ${LOOP_NOTE}`;
     warnings.push(text);
@@ -208,43 +237,122 @@ function alwaysFf(
   return lines;
 }
 
+/** What the text of a memory needs: its shape, its nets by port, and a name for its array. */
+interface MemoryView {
+  readonly path: string;
+  readonly name: string;
+  readonly kind: "memory" | "rom";
+  readonly words: number;
+  readonly width: number;
+  readonly init: string;
+  /** The address of the write, if the memory can be written. */
+  readonly write?: {
+    readonly address: NetId;
+    readonly data: NetId;
+    readonly enable: NetId;
+    readonly clock: NetId;
+  };
+  /** Each read: the output net and the address it follows. */
+  readonly reads: readonly { readonly out: NetId; readonly address: NetId }[];
+}
+
+/** A memory drawn as a closed block of its own kind (`memory`, `rom`): the block's ports. */
+function compositeMemory(c: CompositeDef, circuit: Circuit): MemoryView {
+  const cells = circuit.components.find((x) => x.path === `${c.path}/cells`);
+  const single = c.inputs["A"] !== undefined;
+  const reads = Object.keys(c.outputs)
+    .filter((p) => p.startsWith("Q"))
+    .map((port) => ({
+      out: c.outputs[port] as NetId,
+      address: (single ? c.inputs["A"] : c.inputs[`R${port.slice(1)}`]) as NetId,
+    }));
+  const write =
+    c.kind === "memory"
+      ? {
+          address: (single ? c.inputs["A"] : c.inputs["WA"]) as NetId,
+          data: c.inputs["D"] as NetId,
+          enable: c.inputs["WE"] as NetId,
+          clock: c.inputs["CLK"] as NetId,
+        }
+      : undefined;
+  return {
+    path: c.path,
+    name: c.name,
+    kind: c.kind as "memory" | "rom",
+    words: Number(cells?.params?.["words"] ?? 1),
+    width: Number(cells?.params?.["width"] ?? 1),
+    init: String(cells?.params?.["init"] ?? "").trim(),
+    ...(write ? { write } : {}),
+    reads,
+  };
+}
+
+/** A memory placed as a bare component: its own inputs and outputs are the ports. */
+function bareMemory(c: Component): MemoryView {
+  const reads = Object.keys(c.outputs)
+    .filter((p) => /^Q\d*$/.test(p))
+    .map((port) => ({
+      out: c.outputs[port] as NetId,
+      address: c.inputs[`R${port.slice(1) || "0"}`] as NetId,
+    }));
+  return {
+    path: c.path,
+    name: c.path.replace(/\//g, "_"),
+    kind: c.kind as "memory" | "rom",
+    words: Number(c.params?.["words"] ?? 1),
+    width: Number(c.params?.["width"] ?? 1),
+    init: String(c.params?.["init"] ?? "").trim(),
+    ...(c.kind === "memory" && c.inputs["WE"] !== undefined
+      ? {
+          write: {
+            address: c.inputs["WA"] as NetId,
+            data: c.inputs["D"] as NetId,
+            enable: c.inputs["WE"] as NetId,
+            clock: c.inputs["CLK"] as NetId,
+          },
+        }
+      : {}),
+    reads,
+  };
+}
+
 /**
  * Module 6: a memory as an array. Its words are declared after its name, filled from a list of
  * values if it was made with one, each read is an `assign` of one word by its address, and the
- * write is an `always_ff` of its own.
+ * write is an `always_ff` of its own. The list names every word, as a list must: the engine's
+ * words past the end of a list are 0, so the text writes them, and a word given as `x` is `'bx`.
  */
 function memoryText(
-  c: CompositeDef,
-  circuit: Circuit,
+  m: MemoryView,
   names: Map<NetId, string>,
   declare: (n: NetId) => void,
+  taken: Set<string>,
 ): string[] {
-  const cells = circuit.components.find((x) => x.path === `${c.path}/cells`);
-  const words = Number(cells?.params?.["words"] ?? 1);
-  const width = Number(cells?.params?.["width"] ?? 1);
-  const init = String(cells?.params?.["init"] ?? "").trim();
-  const name = identifier(c.name);
-  const digits = Math.ceil(width / 4);
-  const list = init
-    ? ` = '{${init
-        .split(/\s+/)
-        .map((v) => `${width}'h${v.toUpperCase().padStart(digits, "0")}`)
-        .join(", ")}}`
+  let name = identifier(m.name);
+  for (let i = 2; taken.has(name); i++) name = `${identifier(m.name)}_${i}`;
+  taken.add(name);
+  const digits = Math.ceil(m.width / 4);
+  const given = m.init ? m.init.split(/[\s,]+/) : [];
+  const word = (v: string | undefined) =>
+    v === undefined
+      ? `${m.width}'h${"0".repeat(digits)}`
+      : v.toLowerCase() === "x"
+        ? `${m.width}'bx`
+        : `${m.width}'h${v.toUpperCase().padStart(digits, "0")}`;
+  const list = m.init
+    ? ` = '{${Array.from({ length: m.words }, (_, k) => word(given[k])).join(", ")}}`
     : "";
-  const vector = width === 1 ? "logic" : `logic [${width - 1}:0]`;
-  const lines = [`  ${vector} ${name} [0:${words - 1}]${list};`];
-  const single = c.inputs["A"] !== undefined;
-  const reads = Object.keys(c.outputs).filter((p) => p.startsWith("Q"));
-  for (const port of reads) {
-    const q = c.outputs[port] as NetId;
-    const address = (single ? c.inputs["A"] : c.inputs[`R${port.slice(1)}`]) as NetId;
-    declare(q);
-    lines.push(`  assign ${names.get(q)} = ${name}[${names.get(address)}];`);
+  const vector = m.width === 1 ? "logic" : `logic [${m.width - 1}:0]`;
+  const lines = [`  ${vector} ${name} [0:${m.words - 1}]${list};`];
+  for (const read of m.reads) {
+    declare(read.out);
+    lines.push(`  assign ${names.get(read.out)} = ${name}[${names.get(read.address)}];`);
   }
-  if (c.kind === "memory") {
-    const g = (p: string) => names.get(c.inputs[p] as NetId);
-    const at = single ? g("A") : g("WA");
-    lines.push(`  always_ff @(posedge ${g("CLK")}) if (${g("WE")}) ${name}[${at}] <= ${g("D")};`);
+  if (m.write) {
+    const g = (n: NetId) => names.get(n);
+    lines.push(
+      `  always_ff @(posedge ${g(m.write.clock)}) if (${g(m.write.enable)}) ${name}[${g(m.write.address)}] <= ${g(m.write.data)};`,
+    );
   }
   return lines;
 }

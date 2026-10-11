@@ -557,6 +557,12 @@ export function machineText(m: Machine, options: MachineTextOptions): string {
     lines.push(`  logic ${range}state;`, `  logic ${range}next;`);
   }
   const zero = stateOfCode(m, "0".repeat(bits));
+  // A signal of a list of names takes only a name (IEEE 1800-2017 6.19.3), so a reset to a code no
+  // state has cannot be written in this style. Real tools refuse the text; the generator refuses first.
+  if (enumStyle && !zero)
+    throw new RangeError(
+      `${m.name} has no state with the all-zero code, so its reset cannot be written as a name`,
+    );
   const resetTo = enumStyle && zero ? zero.name : zeros;
   lines.push("  always_ff @(posedge CLK) begin");
   lines.push(`    if (RST) state <= ${resetTo};`, "    else state <= next;", "  end");

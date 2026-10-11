@@ -135,3 +135,27 @@ describe("the round trip", () => {
     });
   });
 });
+
+describe("the generator drops no storage", () => {
+  it("writes a memory placed as a bare component as an array", async () => {
+    const { registerFile64 } = await import("@dd/dd-model");
+    const { CircuitBuilder } = await import("@dd/sim");
+    const { generate } = await import("./generate");
+    const b = new CircuitBuilder("regs");
+    const net = (n: string, w: number) => b.input(n, w);
+    const outs = registerFile64(b, {
+      RA: net("RA", 4),
+      RB: net("RB", 4),
+      WA: net("WA", 4),
+      D: net("D", 64),
+      WE: net("WE", 1),
+      CLK: net("CLK", 1),
+    });
+    b.output("QA", outs.QA);
+    b.output("QB", outs.QB);
+    const text = generate(b.build()).text;
+    expect(text).toMatch(/logic \[31:0\] \w+ \[0:15\];/);
+    expect(text).toContain("always_ff @(posedge CLK) if (WE)");
+    expect(text).not.toContain("form a loop");
+  });
+});

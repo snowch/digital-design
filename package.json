@@ -26,7 +26,8 @@
     "format:check": "prettier --check .",
     "check": "./scripts/check.sh",
     "schema": "vite-node scripts/export-schema.mts",
-    "sync-platform": "node scripts/sync-platform.mjs"
+    "sync-platform": "node scripts/sync-platform.mjs",
+    "check:real-tools": "./scripts/real-tools/check.sh"
   },
   "devDependencies": {
     "@playwright/test": "1.56.1",

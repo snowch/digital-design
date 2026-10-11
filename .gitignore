@@ -6,3 +6,4 @@ test-results/
 .vite/
 *.local
 .DS_Store
+real-tools-out/

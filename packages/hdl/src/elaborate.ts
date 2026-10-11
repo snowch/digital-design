@@ -34,6 +34,10 @@ import { LOOP_NOTE } from "./generate";
 import { parseModules } from "./parser";
 import { arrayWrite, type ArrayMemory } from "./memory";
 
+/** Said when a signal declared with a list of names is given a number. */
+const ENUM_NUMBER =
+  "`{signal}` takes only a name from the list of names `{type}`, or another signal of that list. A number is refused even when it is right. Write the name whose value that number is.";
+
 export interface ElaborateOptions {
   /** The constructs the lesson has met. Omit to allow the whole subset. */
   readonly allowed?: readonly Construct[];
@@ -142,6 +146,9 @@ class Elaborator {
   /** Module 5: each enumerated type's width, and each of its names with its value. */
   private readonly enumTypes = new Map<string, number>();
   private readonly enumConsts = new Map<string, { value: bigint; width: number }>();
+  /** Real tools: the list each name belongs to, and the list each signal was declared with. */
+  private readonly enumOfName = new Map<string, string>();
+  private readonly enumOfSignal = new Map<string, string>();
   private readonly driven = new Map<NetId, Position>();
   private readonly warnings: Message[] = [];
   private readonly g: { delay?: number };
@@ -216,6 +223,7 @@ class Elaborator {
             : 1;
       if (this.signals.has(d.name) || this.arrays.has(d.name))
         throw new HdlError(d.at, `${d.name} is declared twice`);
+      if (d.type !== undefined) this.enumOfSignal.set(d.name, d.type);
       if (d.array) {
         this.declareArray(d.name, width, d.array, d.init, d.at);
         continue;
@@ -235,6 +243,7 @@ class Elaborator {
             item.target.select !== undefined,
           );
           this.claim(target.net, item.at, target.width);
+          this.checkEnumValue(item.target.name, item.value);
           this.into(item.value, target.net, target.width);
           break;
         }
@@ -467,6 +476,7 @@ class Elaborator {
         throw new HdlError(member.at, `${member.name} has the same value as ${earlier}`);
       seen.set(value, member.name);
       this.enumConsts.set(member.name, { value, width });
+      this.enumOfName.set(member.name, e.name);
       next = value + 1n;
     }
   }
@@ -512,6 +522,24 @@ class Elaborator {
     this.driven.set(net, at);
   }
 
+  /**
+   * Real tools: a signal declared with a `typedef enum` list takes only a name from that list, or
+   * another signal of the list. A number is refused (IEEE 1800-2017 6.19.3), whatever its width.
+   */
+  private checkEnumValue(target: string, value: Expression): void {
+    const type = this.enumOfSignal.get(target);
+    if (type === undefined || this.enumValued(value, type)) return;
+    throw new HdlError(value.at, ENUM_NUMBER.replace("{signal}", target).replace("{type}", type));
+  }
+
+  private enumValued(e: Expression, type: string): boolean {
+    if (e.kind === "identifier")
+      return this.enumOfName.get(e.name) === type || this.enumOfSignal.get(e.name) === type;
+    if (e.kind === "ternary")
+      return this.enumValued(e.then, type) && this.enumValued(e.otherwise, type);
+    return false;
+  }
+
   /** Every name assigned anywhere in a statement. */
   private collectTargets(s: Statement, out: Set<string>): void {
     switch (s.kind) {
@@ -548,6 +576,7 @@ class Elaborator {
         return;
       case "assignment": {
         const target = this.target(s.target.name, s.target.at, s.target.select !== undefined);
+        this.checkEnumValue(s.target.name, s.value);
         const value = this.expression(s.value, target.width);
         // Inside always_ff or always_comb, as in an assign: a value of the wrong width is the
         // learner's mistake to be told about, not a fault for the simulator to stumble on.

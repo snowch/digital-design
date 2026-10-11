@@ -105,3 +105,18 @@ endmodule`;
     ]);
   });
 });
+
+describe("a signal of a list of names (real tools refuse a number for it)", () => {
+  it("is refused a number, in an always_ff and in an assign", () => {
+    const text = LIGHTS.replace("if (RST) L <= OFF;", "if (RST) L <= 2'b00;");
+    const r = elaborate(text);
+    expect(r.circuit).toBeUndefined();
+    expect(r.messages[0]?.text).toContain("`L` takes only a name from the list of names `level_t`");
+    expect(r.messages[0]?.at?.line).toBe(5);
+  });
+
+  it("takes a name, another signal of the list, or a choice between names", () => {
+    const text = LIGHTS.replace("if (RST) L <= OFF;", "if (RST) L <= GO ? OFF : LOW;");
+    expect(elaborate(text).messages).toEqual([]);
+  });
+});

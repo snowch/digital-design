@@ -1,0 +1,56 @@
+{
+  "verilator": [
+    {
+      "code": "DECLFILENAME",
+      "where": {},
+      "reason": "The checker names each file after the text's lesson and challenge; the learner never names a file."
+    },
+    {
+      "code": "UNUSEDSIGNAL",
+      "where": {},
+      "reason": "A lesson's circuit keeps every port its drawing has, a check reads some bits of a word, and the generator writes every gate of a drawing, read or not. Nothing here changes what the circuit does."
+    },
+    {
+      "code": "UNOPTFLAT",
+      "where": { "loop": true },
+      "reason": "The course builds memory from gates that read each other, on purpose, and the generator warns about it in a comment. Only a text the course itself finds a loop in is waived."
+    },
+    {
+      "code": "WIDTHEXPAND",
+      "where": { "ids": ["wide-alu.adder-text.reference", "alu-tests.alu-text.reference"] },
+      "reason": "`{COUT, SUM} = A + B + CIN` adds a one-bit carry to two N-bit words. SystemVerilog widens every operand to the left side's N+1 bits, which is what the wide-alu lesson teaches the sum to do."
+    },
+    {
+      "code": "PINMISSING",
+      "where": { "categories": ["reference", "initial", "figure"] },
+      "reason": "A text may leave unconnected an output of a course module that it does not read (the ALU's flags in the jobs challenge). The language allows it."
+    },
+    {
+      "code": "PINCONNECTEMPTY",
+      "where": { "categories": ["initial"] },
+      "reason": "A starting text leaves a port's connection empty (`.ADDR()`) for the learner to fill."
+    },
+    {
+      "code": "UNDRIVEN",
+      "where": { "categories": ["initial"] },
+      "reason": "A starting text leaves an output undriven for the learner to drive."
+    },
+    {
+      "code": "UNUSEDPARAM",
+      "where": { "filePrefix": "supplied/" },
+      "reason": "A course module is written out at one width, so its parameter N is declared, for `alu #(.N(64))` to be legal, and read nowhere."
+    }
+  ],
+  "yosys": [
+    {
+      "code": "LOOP",
+      "where": { "loop": true },
+      "reason": "`check` reports a logic loop in a latch built from gates. The course builds them on purpose."
+    },
+    {
+      "code": "NODRIVER",
+      "where": { "categories": ["initial"] },
+      "reason": "A starting text leaves outputs undriven for the learner to drive."
+    }
+  ]
+}
