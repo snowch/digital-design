@@ -56,18 +56,30 @@ def lint(entry):
     return found
 
 
+def warm_yosys():
+    """Runs Yosys once on its own, before any worker does.
+
+    The WebAssembly Yosys (yowasp) compiles its module on first use and writes the result into a
+    cache file, in place and without a lock. Workers that start together on a cold cache read a
+    file another is still writing, or have the file cut short under them, and die silently. So the
+    cache is filled by one process first.
+    """
+    r = subprocess.run([YOSYS, "-V"], cwd=OUT, capture_output=True, text=True)
+    if r.returncode != 0:
+        sys.exit(f"{YOSYS} -V failed with exit code {r.returncode}:\n{r.stdout}{r.stderr}")
+
+
 def synth(entry):
-    """Yosys's findings: (code, file, message). Errors are code ERROR."""
+    """Yosys's findings: (code, file, message). Errors are code ERROR, with everything Yosys said."""
     files = " ".join([*entry["deps"], entry["file"]])
     script = (
         f"read_verilog -sv {files}; hierarchy -check -top {entry['top']}; "
         f"proc; synth -top {entry['top']}; check"
     )
     r = subprocess.run([YOSYS, "-q", "-p", script], cwd=OUT, capture_output=True, text=True)
-    found = []
     text = r.stdout + r.stderr
-    lines = text.splitlines()
-    for line in lines:
+    found = []
+    for line in text.splitlines():
         if line.startswith("ERROR"):
             found.append(("ERROR", None, line))
         elif "found logic loop" in line:
@@ -79,7 +91,14 @@ def synth(entry):
         elif line.startswith("Warning"):
             found.append(("WARNING", None, line))
     if r.returncode != 0 and not any(c == "ERROR" for c, _, _ in found):
-        found.append(("ERROR", None, text.strip()[-300:]))
+        found.append(
+            (
+                "ERROR",
+                None,
+                f"{os.path.basename(YOSYS)} exited with code {r.returncode} and no ERROR line. "
+                f"Command: {script}\nOutput:\n{text if text.strip() else '(none)'}",
+            )
+        )
     return found
 
 
@@ -107,6 +126,7 @@ def main():
     def work(entry):
         return entry, lint(entry), synth(entry)
 
+    warm_yosys()
     workers = os.cpu_count() or 2
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
         for entry, v, y in pool.map(work, entries):
