@@ -108,6 +108,11 @@ export const BEYOND_STRINGS: BeyondStrings = {
     compilerBothSigns:
       "Rules 3 and 4 point here: the gap is room B minus room A, and it is read signed.",
     compilerClose: "Rule 4 points here: the branch must skip the lamps when the comparison fails.",
+    kernelSetUp:
+      "The start must write the second program's C2, C1 and R14 words, and its R1 and R2 words, and `488` must name its save area.",
   },
-  ends: {},
+  ends: {
+    kernelSetUp:
+      "A run must end at the kernel's `stop`, after both programs have ended, with a record for each.",
+  },
 };

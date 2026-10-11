@@ -76,6 +76,7 @@ import { finalMachine } from "./final-machine";
 import { capstone } from "./capstone";
 // Beyond the machine
 import { compiler } from "./compiler";
+import { kernelLesson } from "./kernel";
 
 const INPUTS: readonly LessonInput[] = [
   // Module 0, meet the machine.
@@ -151,6 +152,7 @@ const INPUTS: readonly LessonInput[] = [
   capstone,
   // Beyond the machine, the optional chapters
   compiler,
+  kernelLesson,
 ];
 
 export const LESSONS: readonly Lesson[] = INPUTS.map(parseLesson).sort(

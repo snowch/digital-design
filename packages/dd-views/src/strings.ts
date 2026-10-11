@@ -1110,6 +1110,13 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
         "`{actual}` is not the edge at which the IR takes `resume`'s word. The IR takes an instruction's word at its FETCH edge; add up the edges each earlier line takes, from the reset.",
       joinPcEdge:
         "`{actual}` is not the edge at which the PC takes `010`. The instruction `resume` takes three edges, and the PC takes the return point at the last of them.",
+      // Beyond the machine, the kernel chapter (brief L2).
+      saveC2:
+        "`{actual}` is not the value the timer's interrupt leaves in C2, which is the address of the instruction the report has not yet run.",
+      saveR13:
+        "`{actual}` is not R13's word: the save area starts at `5A0`, R0 comes first, and each word is 8 bytes, so R13 lies 13 steps of 8 bytes past `5A0`.",
+      saveC1:
+        "`{actual}` is not the report's status: the start wrote user mode with interrupts on into each program's C1 word, and the switch saves what C1 held for the program.",
       // Module 13, lesson 2 (brief 2D).
       pathCode:
         "`{actual}` does not follow the rule for a set if line: its eight digits are K, J, A, B and Y, then three digits of constant; set if is kind A, and its job digit is a branch's condition.",
