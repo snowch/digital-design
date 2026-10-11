@@ -9,6 +9,7 @@ import { MACHINE10_STRINGS, type Machine10Strings } from "./strings10";
 import { MACHINE11_STRINGS, type Machine11Strings } from "./strings11";
 import { MACHINE12_STRINGS, type Machine12Strings } from "./strings12";
 import { MACHINE13_STRINGS, type Machine13Strings } from "./strings13";
+import { BEYOND_STRINGS, type BeyondStrings } from "./strings14";
 
 export interface ViewStrings {
   /** Any challenge whose grader stops with an error: the work fails, and says why. */
@@ -388,6 +389,8 @@ export interface ViewStrings {
   readonly machine12: Machine12Strings;
   /** Module 13's figure words (strings13.ts). */
   readonly machine13: Machine13Strings;
+  /** The optional chapters' figure words (strings14.ts). */
+  readonly beyond: BeyondStrings;
 }
 
 /** Module 8: the words of the instruction-fields, widening, edges, memory-map and branches figures. */
@@ -1381,6 +1384,8 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
   machine12: MACHINE12_STRINGS,
   // Module 13 (strings13.ts).
   machine13: MACHINE13_STRINGS,
+  // Beyond the machine (strings14.ts).
+  beyond: BEYOND_STRINGS,
   // Module 0. Drafted by the prose process (docs/notes/module-0-machine/briefs/6V.md).
   meet: {
     lines: {

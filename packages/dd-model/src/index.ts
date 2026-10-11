@@ -60,3 +60,6 @@ export * from "./bit-views";
 export { TRAP_PROGRAMS as TRAP_PROGRAMS_FOR_TESTS } from "./traps-programs";
 export * from "./capstone";
 export * from "./edge-uses";
+
+// Beyond the machine, the compiler chapter: the course's own compiler.
+export * from "./compile";

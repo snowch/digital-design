@@ -60,6 +60,9 @@ import {
   SwapCompare,
 } from "./Module10Figures";
 
+// Beyond the machine, the compiler chapter
+import { CompileSteps } from "./CompileSteps";
+
 /** The interactives lessons may name by kind. */
 export const INTERACTIVES: Readonly<Record<string, ComponentType<InteractiveProps>>> = {
   "circuit-explorer": CircuitExplorer,
@@ -119,6 +122,8 @@ export const INTERACTIVES: Readonly<Record<string, ComponentType<InteractiveProp
   "lab-run": LabRunFigure,
   // Module 0, meet the machine
   "machine-at-work": MachineAtWork,
+  // Beyond the machine, the compiler chapter
+  "compile-steps": CompileSteps,
   ladder: Ladder,
 };
 
@@ -192,6 +197,8 @@ export {
 export { TrapTimeline, edgeText as trapEdgeText, transferValue } from "./Module12Figures";
 export { MachineLevels, compareText, formOf, levelsAnswer, makerText } from "./Module13Figures";
 export { LabRunFigure, labAnswer, labRun, labVariant } from "./LabRun";
+// Beyond the machine
+export { CompileSteps, compileAnswer } from "./CompileSteps";
 export { lanesOf, laneNames, itemsShown, type LaneItem, type LanesConfig } from "./RunLanes";
 export { doorReturns, noRoomLines, roomsFrom } from "./MemoryDrawings";
 export {

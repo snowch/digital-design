@@ -179,10 +179,15 @@ export function gradeProgram(
       parts.push(format(ended(r.end.key) ?? r.end.key, r.end.values));
     const key = c.given["detail"];
     const sentence =
-      key !== undefined ? (t.details[String(key)] ?? m12.details[String(key)]) : undefined;
+      key !== undefined
+        ? (t.details[String(key)] ??
+          m12.details[String(key)] ??
+          strings.beyond.details[String(key)])
+        : undefined;
     if (sentence && wrongLeft.length) parts.push(sentence);
     if (traps) {
-      const must = key !== undefined ? m12.ends[String(key)] : undefined;
+      const must =
+        key !== undefined ? (m12.ends[String(key)] ?? strings.beyond.ends[String(key)]) : undefined;
       if (stopIn === "unnamed") parts.push(m12.stopUnnamed);
       else if (stopIn === "handler") parts.push(format(m12.stopAfterHandler, r.end?.values ?? {}));
       if ((endWrong || stopIn !== undefined) && must) parts.push(must);

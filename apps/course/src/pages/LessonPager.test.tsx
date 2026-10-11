@@ -72,7 +72,7 @@ describe("the links at the bottom of a lesson", () => {
       optional: true,
       introduces: [],
     };
-    const fixture = createBook([...LESSONS, chapter], INTERACTIVES);
+    const fixture = createBook([...LESSONS.filter((l) => !l.optional), chapter], INTERACTIVES);
     const last = fixture.lessons.at(-2)!;
     render(<LessonPager book={fixture} lessonId={last.id} />);
     const nav = screen.getByRole("navigation", { name: STRINGS.pager.label });

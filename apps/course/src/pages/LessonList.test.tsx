@@ -316,7 +316,7 @@ describe("the course's front page: every module of the plan", () => {
 
   it("shows one line for each module, with only the module of the way in open", () => {
     render(<LessonList book={book} storage={memoryStorage()} />);
-    for (const module of new Set(book.lessons.map((l) => l.module))) {
+    for (const module of new Set(book.lessons.filter((l) => !l.optional).map((l) => l.module))) {
       const lessons = book.lessons.filter((l) => l.module === module);
       const total = lessons.reduce((n, l) => n + l.challenges.length, 0);
       const line = moduleLine(module);
@@ -459,7 +459,7 @@ function withChapter() {
     optional: true,
     introduces: [],
   };
-  const fixture = createBook([...LESSONS, chapter], INTERACTIVES);
+  const fixture = createBook([...LESSONS.filter((l) => !l.optional), chapter], INTERACTIVES);
   const numbered = fixture.lessons.filter((l) => !l.optional);
   return { fixture, chapter: fixture.lessons.find((l) => l.id === chapter.id)!, numbered };
 }

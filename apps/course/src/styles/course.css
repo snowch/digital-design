@@ -3789,3 +3789,43 @@ svg.store-rooms {
   stroke: var(--fg-muted);
   stroke-dasharray: 2 3;
 }
+
+/* Beyond the machine: the compiler at work. The line as first written and as it stands now, the
+   piece the compiler takes next marked; the listing's rows press to mark the piece they came from. */
+.compile-line {
+  margin: var(--space-2) 0;
+}
+.compile-text {
+  margin: 0;
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}
+.compile-text code {
+  font-size: 1rem;
+}
+.compile-piece {
+  background: var(--accent-soft);
+  color: var(--fg);
+  outline: 2px solid var(--accent-strong);
+  border-radius: 2px;
+}
+.compile-rule {
+  margin: var(--space-2) 0 0;
+  max-width: var(--measure);
+}
+.compile-row {
+  min-height: 40px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 4px);
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.compile-row[aria-pressed="true"],
+.compile-made .compile-row,
+.compile-made td {
+  background: var(--accent-soft);
+}
