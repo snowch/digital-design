@@ -157,7 +157,6 @@ export const compiler: LessonInput = {
             signals: ["OP2", "OP1", "OP0", "BRANCH"],
             shown: [3, 4],
             devices: true,
-            scope: "datapath/condition",
             focus: ["datapath/condition"],
             reveal: { text: PROSE.branchAfter, edge: 21 },
           },

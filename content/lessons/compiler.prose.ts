@@ -27,7 +27,7 @@ export const PROSE = {
   construction:
     "The compiled CLASH line now runs on the whole machine from Module 13, with the shop's readings. The figure stops before the branch's FETCH edge, edge 19. The IR takes a word at that edge, and the figure asks for that word. As in 13.2, work it out from the line `if R3 < R4 signed goto after1` and its fields. Kind 5 is a branch. Job 6 is \"less than, read signed\". A is R3, B is R4, and Y is unused. The constant counts the instructions the branch goes on, to `stop`.",
   branchLead:
-    'Commit to the word first. Then press "Next edge" until the figure reaches edge 21, the branch\'s ALU edge. The condition block is open there. Watch MET and the PC as it does.',
+    'Commit to the word first. Press "Next edge" until the figure reaches edge 21, the branch\'s ALU edge. Press the datapath to open it, then press the condition block inside it, and its gates show. Then watch MET and the PC.',
   branchQuestion: "What word does the IR hold after the next edge?",
   branchExplain:
     'The IR takes `56340003`. K is 5, a branch. J is 6, less than, read signed. A is 3, for R3. B is 4, for R4. Y is 0, unused. The constant `003` is three instructions on: past `R5 <= 4` and the store, to `stop`.\nThe wrong options each break one field. `57340003` has job 7, "not less": the comparison is not turned over. `56430003` swaps R3 and R4. `56340007` counts the wrong distance.',

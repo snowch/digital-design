@@ -37,3 +37,14 @@ Brief R1 (`../briefs/R1.md`), drafts in `R1.json`: `branchAfter`, `motivation`, 
 "It", which pointed at the condition block: "The machine". Cut by hand: `stepsOutcomes` to its last
 sentence (item 4: it stated both lines' results whichever line had run). The fact sheet's
 "no instruction for `>=`" corrected, and the lesson's header comment.
+
+Item 2, second round: `scope: "datapath/condition"` drew the condition block's inside as the figure
+first shows, where two of its wires run closer than half a cell and cross (`diagrams.spec.ts`,
+"no two wires run closer than half a cell"). The rule binds a drawing as first shown, not a block
+the learner opens, so `scope` went and `branchLead` was redrafted to have the learner open the
+block. The draft said the figure scrolls to a datapath where the condition block shows closed; the
+datapath is itself closed: "Press the datapath to open it, then press the condition block inside
+it" put in place of that sentence. The draft: "Commit to the word first. Press "Next edge" until
+the figure reaches edge 21, the branch's ALU edge. The figure scrolls to the datapath, where the
+condition block is drawn closed. Press the condition block to open it, and its gates show. Then
+watch MET and the PC."
