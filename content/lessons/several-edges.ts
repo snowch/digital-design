@@ -188,10 +188,12 @@ export const severalEdges: LessonInput = {
             shown: [2, 3],
             buses: ["IR", "HR"],
             question: PROSE.p1Question,
+            // Options the figure before it does not rule out: it shows four edges for each of its
+            // two instructions, so 1 and 3 would be ruled out by elimination.
             options: [
-              { value: "1", label: LABELS.options.p1One },
-              { value: "3", label: LABELS.options.p1Three },
+              { value: "4", label: LABELS.options.p1Four },
               { value: "5", label: LABELS.options.p1Five },
+              { value: "6", label: LABELS.options.p1Six },
             ],
             ask: "edges",
             explain: PROSE.p1Explain,

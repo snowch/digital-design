@@ -17,7 +17,7 @@ export const PROSE = {
   p1Question:
     "The freezer is cold, so WARM is 0. The door is shut, so DOOR is 0. The wire from the NOT part to the OR part is called SHUT. What does this first try give for ALARM?",
   p1Explain:
-    "ALARM is 1. DOOR is 0, so the NOT part gives SHUT = 1. The OR part has SHUT = 1, and one input at 1 is enough for an OR, so ALARM is 1. The first try lights the lamp with a cold freezer and door shut, which the rule does not want, so the OR part is the wrong part. The timing diagram shows each signal's value after the run.",
+    "ALARM is 1. DOOR is 0, so the NOT part gives SHUT = 1. The OR part has SHUT = 1, and one input at 1 is enough for an OR, so ALARM is 1. The first try lights the lamp with a cold freezer and door shut, which the rule does not want, so the OR part is the wrong part. The drawing above now shows each wire's value, SHUT included. The table under the status line lists WARM, DOOR and ALARM, the inputs and the output; SHUT appears only on the drawing.",
   exploreNotLead:
     "Each part in the circuit does one fixed rule on its inputs. Its output depends only on its inputs now: change an input and the output follows. A part like this is a **gate**. This figure shows one NOT gate. It has input A and output Y. A NOT gate is also called an inverter. Press A to flip it between 0 and 1, and watch Y. The table under the drawing lists both values of A with the Y each gives. The row for your inputs now is shaded and marked 'Applies now'.",
   exploreAndLead:
@@ -71,13 +71,10 @@ export const PROSE = {
     "In the figures, every gate answers at once. A real gate does not. It takes a short time to respond after an input changes.\n\nA real gate's inputs and output are voltages, as in Module 1. A gate reads each input against a threshold and drives its output to one of two voltages. The output is clean, 0 or 1, even if an input voltage has drifted a little.\n\nA cut wire in hardware is not X: the input pin floats, and may read 0, 1, or drift with noise. The simulator shows X because it cannot know. Real gates come in chips that contain several gates each. This lesson's lamps are invented for the course.",
   alarmFaultsOutcomes:
     "Each fault breaks some rows but leaves others right. A test that tries only some rows can miss a fault. That is why each challenge tests every row.",
-
   alarmFaultsOutcomesFault1:
     'With "An extra NOT gate is in the wire SHUT": the AND gate sees the opposite of SHUT. 2 of 4 rows fail: when WARM is 1 and DOOR is 0, ALARM is 0 (expected 1); when WARM is 1 and DOOR is 1, ALARM is 1 (expected 0).',
-
   alarmFaultsOutcomesFault2:
     'With "The wire SHUT from NOT to AND is cut": 2 of 4 rows fail, the ones with WARM 1, where ALARM is X. With WARM 0, ALARM stays 0, because an AND gate with one input at 0 gives 0 whatever its other input is.',
-
   alarmFaultsOutcomesFault3:
     'With "The door switch is broken and DOOR stays 0 even when open": DOOR is 0 whatever the door does. 1 row fails: when WARM is 1 and the door is open, ALARM is 1 when it should be 0. The lamp would light while staff load warm stock with the door open.',
   doorStuckExplain:

@@ -289,9 +289,15 @@ export function leftFor(key: string, run: ScenarioRun): string {
       if (key === "stopAt") return "handler";
       // 12.8 alone asks which part of the learner's text stopped: the start's lines are those
       // above the line named `handler`, which the task says to name so; "unnamed" where no line is.
+      // A stop at or after `handler` is "handler" where the start has a stop of its own, which the
+      // run did not reach, and "below" where it has none, so the start's stop is the one to move.
       const handler = labels["handler"];
       if (handler === undefined) return "unnamed";
-      return pc < handler ? "start" : "handler";
+      if (pc < handler) return "start";
+      const startStops = (run.program?.lines ?? []).some(
+        (l) => l.address < handler && /^(\w+:\s*)?stop\b/.test(l.text.trim()),
+      );
+      return startStops ? "handler" : "below";
     }
     const name = Object.entries(labels).find(([, a]) => a === pc)?.[0];
     return name ?? hex3(BigInt(pc));

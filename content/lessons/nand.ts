@@ -62,6 +62,7 @@ export const nand: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.predictTied,
           props: {
+            show: "circuit",
             question: PROSE.p1Question,
             libraryId: "nand-tied",
             run: [{ label: LABELS.steps.a1, set: { A: 1 } }],

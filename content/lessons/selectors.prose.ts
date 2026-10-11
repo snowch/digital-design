@@ -13,7 +13,7 @@ export const PROSE = {
   motivation:
     "Wiring both receivers' 16 wires to the display's 16 wires does not work. Each display wire would then have two senders. A wire can have only one sender: a gate's output, or an input of the circuit. When room A sends 0 and room B sends 1 on the same wire, nothing decides which one the display should get.\n\nSo a circuit must decide, for each of the 16 bits, which room's bit reaches the display. S makes the choice. Start with one bit of the 16. Call room A's bit A, room B's bit B, and the display's wire for that bit Y. The same circuit, repeated, will serve the other 15 bits.",
   prediction:
-    "The first prediction asks what an OR gate gives when it joins room A's bit and room B's bit. The second asks what an AND gate gives when S controls room A's bit. Each figure draws its circuit above a question. You choose an answer, then press \"Check my prediction\". The figure then shows what the simulator gave and a timing diagram of the inputs and Y.",
+    "The first prediction asks what an OR gate gives when it joins room A's bit and room B's bit. The second asks what an AND gate gives when S controls room A's bit. Each figure draws its circuit above a question. You choose an answer, then press \"Check my prediction\". The first figure then writes the simulator's values on its circuit and lists them in a table under the status line; the second figure, which runs two settings, gives a table with a row for each setting.",
   p1Question:
     "One OR gate, named orY, joins room A's bit A and room B's bit B. Its output, Y, goes to the display. Room A sends 0, room B sends 1, and the display should show room A's bit. What is Y?",
   p1Explain:
@@ -35,10 +35,8 @@ export const PROSE = {
     'The figure shows a 2-way selector built from gates. It has these parts:\n\n- notS: NOT of S; its output wire is NS\n- andA: A AND NS; its output wire is PA\n- andB: S AND B; its output wire is PB\n- orY: PA OR PB; its output is Y\n\nThe wires are not labelled in the drawing. To see a wire\'s name and value, press it.\n\n"Run checks" runs 5 checks. Each sets S, A and B to one pattern and compares Y with the healthy selector\'s Y. The 5 checks are:\n\n- "S 0, A 1, B 0"\n- "S 0, A 0, B 1"\n- "S 1, A 1, B 0"\n- "S 1, A 0, B 1"\n- "S 0, A 1, B 1"\n\nChoose each fault in turn. Before you run the checks, say which checks you expect to fail.',
   selectorFaultsAfterFault1:
     '"NOT gate notS becomes a wire": 3 of 5 checks fail: "S 0, A 1, B 0", "S 1, A 1, B 0" and "S 0, A 1, B 1". andA takes S instead of NS. Both AND gates pass while S is 1 and block while S is 0. Y is 0 when S is 0 and A OR B when S is 1.',
-
   selectorFaultsAfterFault2:
     '"Input S is stuck at 1": 2 of 5 checks fail: "S 0, A 1, B 0" and "S 0, A 0, B 1". Y is always B. The check "S 0, A 1, B 1" still gives the right Y, because A and B are the same.',
-
   selectorFaultsAfterFault3:
     '"OR gate orY becomes XOR": No check fails. An XOR gate gives 1 when exactly one input is 1. PA and PB are never both 1: andA takes NS and andB takes S, so they never pass together. It is true for every one of the 8 patterns of S, A and B, not only the 5 checks. So OR and XOR give the same Y for every input, and no check could catch this fault.',
   explanation:

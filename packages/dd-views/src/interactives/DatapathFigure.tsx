@@ -47,7 +47,7 @@ import { CircuitView, valueLabel } from "../CircuitView";
 import { TimingDiagram } from "../TimingDiagram";
 import { MicroOps, SignalsTable } from "./ControlViews";
 import { StateDiagram } from "./StateMachine";
-import { format, useViewStrings } from "../strings";
+import { format, useViewStrings, youChose } from "../strings";
 import { FaultSpec, faultPlace, toFault } from "./FaultLab";
 import { withProps } from "./props";
 
@@ -457,7 +457,7 @@ export const DatapathFigure = withProps(
                     role="status"
                     className={stored.choice === answer ? "prediction-match" : "prediction-nomatch"}
                   >
-                    {format(strings.prediction.youSaid, { choice: optionLabel(stored.choice) })}{" "}
+                    {youChose(strings.prediction.youSaid, optionLabel(stored.choice))}{" "}
                     {format(t.answer, { answer: optionLabel(answer) })}{" "}
                     {stored.choice === answer
                       ? strings.prediction.match
@@ -848,10 +848,10 @@ function ControlPanes({
         <TimingDiagram
           circuit={circuit}
           trace={sim.trace}
-          title={t.timingTitle}
           signals={[
             "CLK",
-            { net: inside("S"), label: "S", names },
+            // The state by its name alone, as the edge timelines and the prose write it: FETCH.
+            { net: inside("S"), label: "S", labels: names },
             ...data.timing
               .filter((n) => n !== "S" && n !== "CLK")
               .map((n) => ({ net: inside(n), label: n })),

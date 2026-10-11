@@ -43,7 +43,7 @@ import {
 import { Prose, useSlot, type InteractiveProps } from "@platform/lesson-runtime";
 import { PredictionChallenge } from "@platform/primitives";
 
-import { format, useViewStrings } from "../strings";
+import { format, useViewStrings, youChose } from "../strings";
 import type { Machine11Strings } from "../strings11";
 import type { Machine12Strings } from "../strings12";
 import { withProps } from "./props";
@@ -1618,7 +1618,7 @@ export const DebuggerFigure = withProps(
                   role="status"
                   className={stored.choice === answer ? "prediction-match" : "prediction-nomatch"}
                 >
-                  {format(strings.prediction.youSaid, { choice: optionLabel(stored.choice) })}{" "}
+                  {youChose(strings.prediction.youSaid, optionLabel(stored.choice))}{" "}
                   {format(t.answer, { answer: optionLabel(answer) })}{" "}
                   {stored.choice === answer ? strings.prediction.match : strings.prediction.noMatch}
                 </p>

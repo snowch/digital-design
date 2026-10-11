@@ -45,6 +45,7 @@ export const remember: LessonInput = {
   order: 1,
   objectives: [...LABELS.objectives],
   introduces: [
+    "timing diagram",
     "feedback",
     "latch",
     "transparent",

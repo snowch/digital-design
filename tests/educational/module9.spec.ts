@@ -223,7 +223,7 @@ test.describe("Module 9's figures", () => {
     const figure = page.locator("#ix-predict-load-edges");
     await figure.scrollIntoViewIfNeeded();
     await expect(figure.getByRole("button", { name: V.datapath.clock })).toHaveCount(0);
-    await figure.getByRole("radio").nth(2).check();
+    await figure.getByRole("radio", { name: "5 edges", exact: true }).check();
     await figure.getByRole("button", { name: V.prediction.commit }).click();
     await expect(figure.locator("[role=status]").first()).toContainText(V.prediction.match);
     await expect(figure.getByRole("button", { name: V.datapath.clock })).toBeVisible();

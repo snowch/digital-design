@@ -94,6 +94,7 @@ export const decoders: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.predictLamp,
           props: {
+            show: "circuit",
             question: PROSE.p1Question,
             libraryId: "lamp-2",
             run: [{ label: "S1 = 1, S0 = 1", set: { S1: 1, S0: 1 } }],
@@ -215,6 +216,7 @@ export const decoders: LessonInput = {
           caption: LABELS.captions.predictDoors,
           lead: PROSE.predictDoorsLead,
           props: {
+            show: "settings",
             question: PROSE.p2Question,
             libraryId: "encoder-word",
             run: [

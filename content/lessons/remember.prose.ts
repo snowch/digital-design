@@ -14,7 +14,7 @@ export const PROSE = {
   motivation:
     "A light wired straight to a button is not a circuit of gates at all, only a wire. It goes dark the moment you let go.\n\nEverything from here needs a value kept from one moment to the next: a count, where you are in a sequence of instructions, the result of the last operation. The computer this course ends with is mostly circuits that remember. A circuit that remembers is where timing starts to matter.",
   prediction:
-    'Connect an output back to an input. The figures below do this with inverters in a loop and an OR gate on the way round, whose second input is called kick and forces the loop while it is 1.\n\nChoose an answer in each figure and press its "Check my prediction" button only after you have chosen.\n\nX is the simulator\'s mark for a wire that is not a known 0 or 1. Several causes lead to X: nothing has set the wire yet, or its value never stops changing.',
+    'Connect an output back to an input. The figures below do this with inverters in a loop and an OR gate on the way round, whose second input is called kick and forces the loop while it is 1.\n\nChoose an answer in each figure and press its "Check my prediction" button only after you have chosen.\n\nX is the simulator\'s mark for a wire that is not a known 0 or 1. Several causes lead to X: nothing has set the wire yet, or its value never stops changing.\n\nOnce you check, a **timing diagram** appears. It draws each signal as a line against time: high for 1, low for 0, and a hatched band for X. Each run sets the inputs a few times. Each setting has a name, which stands above the lines at the moment the setting changes the inputs: "kick", then "release". A red line marks a moment, at the last setting. The table under the diagram gives each signal\'s value at the red line.',
   investigationLoopTwo:
     "The loop runs from inverter 1 (not1) to inverter 2 (not2), then through the OR gate back to inverter 1. Before any kick, q is X: nothing has set it yet.\n\nIn this Stepped model, a step is one round in which every gate looks at its inputs once and sets its output. After you press an input, the simulator steps until nothing changes. The status line says how many steps that took.\n\nPress kick to 1, then back to 0. Then drag the Step slider back and forth to watch the 1 go round the loop one gate per step.\n\nAfter kick returns to 0, the loop keeps q at 1.\n\nAn output fed back to an input like this is called feedback.",
   investigationLoopThree:
@@ -27,7 +27,7 @@ export const PROSE = {
   buildDLatchLead:
     "The two-button circuit is a latch. Its inputs are named S (set, which makes the output 1) and R (reset, which makes it 0). The output, the light, is Q. Qb is the other gate's output: the inner wire that went back into the gate driving Q. The next challenge's part buttons offer the latch as one block. The block offers Qb as a second output. Qb is usually the opposite of Q; it is not when both S and R are 1. From here the lesson uses these names.\n\nThe next challenge asks you to build a circuit around the latch block. Your circuit has inputs D and EN, and output Q. While EN is 1, the circuit is transparent: a change on D passes straight through to Q. This circuit is called a D latch.",
   faultLabLead:
-    'This figure shows the two-button circuit you built, drawn with its gates, and four ways to break it. "Run checks" presses A, releases A, presses B, and releases B in turn. After each step, it compares LIGHT with what the circuit with no fault gives, and lists where they differ.\n\nChoose each fault in turn. Press A and B, then run the checks. Before you look, say what you expect LIGHT to do. Then choose "No fault": press A, then press B as well, so both are pressed. Then press "Release all at once" to release both in the same moment.',
+    'This figure shows the two-button circuit you built, drawn with its gates, and four ways to break it. "Run checks" presses A, releases A, presses B, and releases B in turn. After each setting, it compares LIGHT with what the circuit with no fault gives, and lists where they differ.\n\nChoose each fault in turn. Press A and B, then run the checks. Before you look, say what you expect LIGHT to do. Then choose "No fault": press A, then press B as well, so both are pressed. Then press "Release all at once" to release both in the same moment.',
   dLatchExplorerLead:
     "Leave EN at 1. Change D: Q follows every change for as long as EN is 1.\n\nLeave EN at 0: Q keeps its value, whatever D does.\n\nThe table marks the row that applies now.",
   setupHoldLead:
@@ -114,13 +114,10 @@ export const PROSE = {
     "It remembers which of two buttons was pressed last; A lights it, B puts it out.",
   faultLabAfterFault1:
     '"Feedback wire cut": the gate that drives LIGHT reads X where the other gate\'s output was (marked CUT). LIGHT is X unless B is pressed.',
-
   faultLabAfterFault2:
     '"LIGHT gate changed to OR": the light goes the wrong way: off while A is pressed, on while B is pressed. Release both and the values never stop changing, so LIGHT is X.',
-
   faultLabAfterFault3:
     '"Button A stuck at 1": the light stays 1 until B is pressed. The checks fail at "release B" because the light comes back on instead of staying off.',
-
   faultLabAfterNoFault:
     '"No fault", with A and B both pressed: both gates\' outputs are 0. A and B pressed together is the combination to avoid. Released in the same moment, both gates try to switch at once. The simulator cannot decide which gate wins, so LIGHT is X. In a real circuit one gate wins by being a little faster, and nothing says which.',
   raceLead:

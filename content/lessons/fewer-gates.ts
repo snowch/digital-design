@@ -44,6 +44,7 @@ export const fewerGates: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.predictWarm,
           props: {
+            show: "settings",
             question: PROSE.p1Question,
             libraryId: "call-rows",
             // WARM falls with the door open and the shop closed: the question is what changes.

@@ -2,10 +2,10 @@
 
 import { describe, expect, it } from "vitest";
 
-import { dFlipFlopCircuit, libraryCircuit } from "@dd/dd-model";
+import { buildDatapath, dFlipFlopCircuit, libraryCircuit, startDatapath } from "@dd/dd-model";
 import { Simulator, bit0, bit1, formatWord } from "@dd/sim";
 
-import { segmentsOf, traceEnd, valuesAt } from "./traces";
+import { marksShown, segmentsOf, traceEnd, valuesAt } from "./traces";
 import { enumerateTable, rowFor } from "./TruthTable";
 
 describe("reading a trace", () => {
@@ -66,5 +66,24 @@ describe("enumerating a truth table", () => {
     ]);
     expect(rowFor(inputColumns, rows, { A: "1", B: "0" })).toBe(2);
     expect(rowFor(inputColumns, rows, { A: "X", B: "0" })).toBeUndefined();
+  });
+});
+
+describe("the rises a timing diagram numbers", () => {
+  it("counts from the reset, never the reset's own: 9.3's run stops at its 23rd edge, ↑23", () => {
+    const built = buildDatapath({
+      libraryId: "machine-edges",
+      program: `R2 <= word[sensorA]
+R3 <= word[sensorB]
+if R2 < R3 signed goto show
+R2 <= R3
+show: word[display] <= R2
+stop`,
+    });
+    const sim = startDatapath(built, { inputs: { SENSORA: "-184", SENSORB: "-250" } });
+    for (let k = 0; k < 23; k++) sim.clockCycle("CLK");
+    const shown = marksShown(sim.trace.marks, "reset");
+    expect(shown[0]?.label).toBe("reset");
+    expect(shown.at(-1)?.label).toBe("↑23");
   });
 });

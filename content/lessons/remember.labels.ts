@@ -43,7 +43,7 @@ export const LABELS = {
     setupHold: "Move when D changes relative to the clock edge and roll the outcome.",
     tableSr: "The reference table for the latch.",
     internals:
-      "A recorded run inside the flip-flop; move the cursor, open the master and the slave.",
+      "A recorded run inside the flip-flop; move the red line, open the master and the slave.",
     asText: "The flip-flop drawn beside the text generated from it.",
     tableDff: "The reference table for the flip-flop.",
     buildDff: "Draw the flip-flop from two D latch blocks and an inverter, then run the tests.",

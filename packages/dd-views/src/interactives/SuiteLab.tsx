@@ -24,7 +24,7 @@ import { Prose, useSlot, type InteractiveProps } from "@platform/lesson-runtime"
 import { FaultInjector, PredictionChallenge } from "@platform/primitives";
 import { Simulator, formatWord, word, type Circuit } from "@dd/sim";
 
-import { format, useViewStrings } from "../strings";
+import { format, useViewStrings, youChose } from "../strings";
 import { FaultSpec, toFault } from "./FaultLab";
 import { withProps } from "./props";
 
@@ -166,7 +166,7 @@ export const SuiteLab = withProps(
                     role="status"
                     className={stored.choice === asked ? "prediction-match" : "prediction-nomatch"}
                   >
-                    {format(strings.prediction.youSaid, { choice: optionLabel(stored.choice) })}{" "}
+                    {youChose(strings.prediction.youSaid, optionLabel(stored.choice))}{" "}
                     {format(t.answer, { answer: optionLabel(asked ?? "none") })}{" "}
                     {stored.choice === asked
                       ? strings.prediction.match

@@ -28,7 +28,9 @@ async function textCollisions(page: Page): Promise<Collision[]> {
       const box = svg.getBoundingClientRect();
       const labels = [...svg.querySelectorAll("text")]
         .filter((t) => (t.textContent ?? "").trim() !== "")
-        .map((t) => ({ text: (t.textContent ?? "").trim(), r: t.getBoundingClientRect() }));
+        .map((t) => ({ text: (t.textContent ?? "").trim(), r: t.getBoundingClientRect() }))
+        // Text drawn with no size is not shown (the shared timeline's bare numbers, hidden).
+        .filter((t) => t.r.width > 0 && t.r.height > 0);
       for (let i = 0; i < labels.length; i++) {
         const a = labels[i]!;
         if (
@@ -333,6 +335,25 @@ async function crowding(page: Page): Promise<WireFault[]> {
   });
 }
 
+/**
+ * Every prediction figure on the page committed with its second answer. The figures' ids are
+ * collected first: once committed, a figure's button reads "Predict again", so a list filtered by
+ * the commit button shrinks as it is worked through, and a place in it would skip one.
+ */
+async function commitPredictions(page: Page): Promise<void> {
+  const ids = await page
+    .locator("figure.interactive")
+    .filter({ has: page.getByRole("button", { name: V.prediction.commit }) })
+    .evaluateAll((els) => els.map((e) => e.id));
+  for (const id of ids) {
+    const figure = page.locator(`[id="${id}"]`);
+    // A figure whose answers are not a choice of radios is left as first drawn.
+    if ((await figure.getByRole("radio").count()) < 2) continue;
+    await figure.getByRole("radio").nth(1).check();
+    await figure.getByRole("button", { name: V.prediction.commit }).click();
+  }
+}
+
 test.describe("the diagrams", () => {
   test("no label overlaps another or leaves its drawing, before and after use", async ({
     page,
@@ -443,6 +464,38 @@ test.describe("the diagrams", () => {
     }
   });
 
+  test("long runs: the timing diagrams' labels stay apart after 40 edges and a run to the stop", async ({
+    page,
+  }) => {
+    test.setTimeout(240_000);
+    const clockN = async (lesson: string, id: string, n: number, inputs: readonly string[]) => {
+      await openLesson(page, lesson);
+      const figure = page.locator(`#ix-${id}`);
+      await figure.scrollIntoViewIfNeeded();
+      for (const name of inputs) {
+        const button = figure.getByRole("button", {
+          name: format(V.machine.inputButton, { name, value: 0 }),
+          exact: true,
+        });
+        if ((await button.count()) > 0) await button.click();
+      }
+      const clock = figure.getByRole("button", { name: format(V.explorer.clock, { name: "CLK" }) });
+      for (let k = 0; k < n; k++) await clock.click();
+      expect(await textCollisions(page), `${lesson} ${id} after ${n} edges`).toEqual([]);
+    };
+    await clockN("state-machines", "retry-machine", 40, ["GO"]);
+    await clockN("several-edges", "controller", 30, []);
+    // A datapath figure run to its stop: the one whose lanes overlap when the run is long.
+    await openLesson(page, "trap-hardware");
+    const night = page.locator('[data-interactive="night-hardware"]');
+    await night.scrollIntoViewIfNeeded();
+    await night.getByRole("button", { name: V.datapath.run }).click();
+    await expect(night.locator(".datapath-status")).toContainText(
+      V.datapath.stopped.split("{")[0]!,
+    );
+    expect(await textCollisions(page), "trap-hardware night-hardware, run").toEqual([]);
+  });
+
   test("Module 2: no label overlaps another or leaves its drawing, before and after use", async ({
     page,
   }) => {
@@ -477,13 +530,7 @@ test.describe("the diagrams", () => {
     for (const lesson of ["alu-jobs", "flags", "wide-alu", "alu-tests"]) {
       await openLesson(page, lesson);
       expect(await textCollisions(page), lesson).toEqual([]);
-      for (const figure of await page
-        .locator("figure.interactive")
-        .filter({ has: page.getByRole("button", { name: V.prediction.commit }) })
-        .all()) {
-        await figure.getByRole("radio").nth(1).check();
-        await figure.getByRole("button", { name: V.prediction.commit }).click();
-      }
+      await commitPredictions(page);
       for (const faults of await page.locator(".fault-lab").all()) {
         await faults.getByRole("radio").nth(2).check();
         await faults.getByRole("button", { name: V.fault.run }).click();
@@ -493,6 +540,30 @@ test.describe("the diagrams", () => {
           .getByRole("button", { name: new RegExp(`${V.circuit.toggle}$`) })
           .first()
           .click();
+      expect(await textCollisions(page), `${lesson} after use`).toEqual([]);
+    }
+  });
+
+  test("Modules 3, 6 and 9: every prediction committed, no label overlaps another or leaves its drawing", async ({
+    page,
+  }) => {
+    // CLAUDE.md's "before or after the figures are used" holds for every prediction: these modules'
+    // were checked only as first drawn until the timing review (S8).
+    for (const lesson of [
+      "selectors",
+      "decoders",
+      "adders",
+      "alu",
+      "bytes",
+      "memory-map",
+      "ram",
+      "register-file",
+      "control-signals",
+      "illegal-instructions",
+    ]) {
+      await openLesson(page, lesson);
+      await commitPredictions(page);
+      expect(await page.locator('.prediction[data-committed="false"]').count(), lesson).toBe(0);
       expect(await textCollisions(page), `${lesson} after use`).toEqual([]);
     }
   });

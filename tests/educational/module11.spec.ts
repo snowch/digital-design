@@ -343,6 +343,37 @@ test.describe("Module 11's lab", () => {
     }
   });
 
+  test("11.3's run is drawn whole only where the window holds it, with the buttons, to its stop", async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, "the drawing sits under the listing on a wide screen only");
+    for (const [width, height, whole] of [
+      [1366, 768, false],
+      [1280, 720, false],
+      [1024, 768, false],
+      [1280, 1024, true],
+    ] as const) {
+      await page.setViewportSize({ width, height });
+      await openLesson(page, "functions");
+      const figure = page.locator('[data-interactive="call-and-return"]');
+      const actions = figure.locator(".debugger-actions");
+      await actions.evaluate((e) => {
+        e.scrollIntoView({ block: "start" });
+        window.scrollBy(0, -16);
+      });
+      const run = figure.getByRole("button", { name: /^Run to/ });
+      while (!(await run.isDisabled())) await run.click();
+      const box = figure.locator(".debugger-near-desk .run-lanes-box");
+      await expect(box).toHaveCSS("max-height", whole ? "none" : "144px");
+      const last = figure.locator(".debugger-near-desk .run-lanes-drawing > :last-child");
+      const mark = await last.boundingBox();
+      expect(mark!.y + mark!.height, `${width} by ${height}: the stop's mark`).toBeLessThanOrEqual(
+        height,
+      );
+    }
+  });
+
   test("11.5 at every pause: the buttons, the newest call's words and the marked room are on one screen", async ({
     page,
   }) => {

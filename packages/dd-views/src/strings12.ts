@@ -35,11 +35,16 @@ export interface Machine12Strings {
   /** {name}: a register, named in a failure as it was at the run's last trap. */
   readonly atTrap: string;
   /** {address}, {cause}: a fault at one of the learner's own lines. */
+  readonly ownFault: string;
   /** 12.8: the run stopped at a `stop` of the learner's own, but no line is named `handler`. */
   readonly stopUnnamed: string;
-  /** 12.8: the run stopped at a `stop` at or after the line `handler`, so it is the handler's. */
-  readonly stopAfterHandler: string;
-  readonly ownFault: string;
+  /**
+   * 12.8: the run stopped at a `stop` at or after the line `handler`, so it is the handler's; the
+   * start has a `stop` of its own above that line, which the run did not reach.
+   */
+  readonly stopInHandler: string;
+  /** 12.8: as `stopInHandler`, but no `stop` of the learner's sits above the line `handler`. */
+  readonly stopBelow: string;
   /** Over a test's lines, in a challenge: the tests add them after the learner's. */
   readonly dataAdded: string;
   /** {n}: instructions; {bytes}: ROM bytes the start, the handler and a test's lines take. */
@@ -147,12 +152,14 @@ export const MACHINE12_STRINGS: Machine12Strings = {
       "The debugger ended the run before the instruction at {address}: it copies {reg} into a control register, and nothing has set {reg}.",
   },
   atTrap: "{name} as the program left it at its last trap",
-  stopUnnamed:
-    "No line of your text is named handler, so the test cannot tell the start's stop from the handler's lines. Name the handler's first line handler.",
-  stopAfterHandler:
-    "The run ended at the stop at {address}, which comes at or after the line named handler, so the test counts it as the handler's. The start's stop must come above that line.",
   ownFault:
     "An instruction you wrote, in the start or the handler, at {address} faulted with cause {cause} (it is not one of the tests' lines).",
+  stopUnnamed:
+    "No line of your text is named handler, so the test cannot tell the start's stop from the handler's lines. Name the handler's first line handler.",
+  stopInHandler:
+    "That stop is at or after the line named handler, so the test counts it as the handler's.",
+  stopBelow:
+    "That stop is at or after the line named handler, so the test counts it as the handler's. No stop of yours sits above that line. The start's stop must go above it.",
   dataAdded: "The tests add these lines, which hold the program, after your start and handler:",
   assembled:
     "The assembler made {n} instructions; the listing, instructions and words of data together, takes {bytes} bytes of ROM.",

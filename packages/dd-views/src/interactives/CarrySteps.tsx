@@ -16,7 +16,7 @@ import { PredictionChallenge, Stepper } from "@platform/primitives";
 import { Simulator, bitAt, parseWord, type Circuit, type Word } from "@dd/sim";
 
 import { valueLabel } from "../CircuitView";
-import { format, useViewStrings } from "../strings";
+import { format, useViewStrings, youChose } from "../strings";
 import { withProps } from "./props";
 
 const Inputs = z.record(z.string(), z.union([z.string(), z.number()]));
@@ -143,7 +143,7 @@ export const CarrySteps = withProps(
                     role="status"
                     className={stored.choice === answer ? "prediction-match" : "prediction-nomatch"}
                   >
-                    {format(strings.prediction.youSaid, { choice: optionLabel(stored.choice) })}{" "}
+                    {youChose(strings.prediction.youSaid, optionLabel(stored.choice))}{" "}
                     {format(t.answer, { answer: optionLabel(answer) })}{" "}
                     {stored.choice === answer
                       ? strings.prediction.match

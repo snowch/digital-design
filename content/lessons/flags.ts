@@ -90,6 +90,7 @@ export const flags: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.predictMinus,
           props: {
+            show: "circuit",
             question: PROSE.p1Question,
             libraryId: "alu8-flags-4-block",
             run: [{ label: "0111 - 1000", set: { A: "0111", B: "1000", OP2: 0, OP1: 1, OP0: 1 } }],

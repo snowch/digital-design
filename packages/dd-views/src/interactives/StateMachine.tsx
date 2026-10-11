@@ -369,14 +369,18 @@ export const StateMachine = withProps(
 
     let status: string;
     if (!current) status = format(strings.machine.noState, { code: word(sWord) });
-    else if (resetting)
+    else if (resetting) {
+      // A reset loads all zeros, whatever the next-state logic gives: the state the register
+      // holds after the edge is the one whose code is all zeros, if any.
+      const zeros = "0".repeat(current.code.length);
+      const reset = m.states.find((st) => st.code === zeros);
       status = format(strings.machine.resetting, {
         state: current.name,
         code: current.code,
-        next: next?.name ?? strings.machine.noName,
-        nextCode: word(nWord),
+        next: reset?.name ?? strings.machine.noName,
+        nextCode: zeros,
       });
-    else
+    } else
       status = format(show.has("table") ? strings.machine.status : strings.machine.statusNoTable, {
         state: current.name,
         code: current.code,
@@ -443,7 +447,6 @@ export const StateMachine = withProps(
           <TimingDiagram
             circuit={circuit}
             trace={sim.sim.trace}
-            title={strings.machine.traceTitle}
             signals={[
               "CLK",
               "RST",

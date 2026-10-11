@@ -17,7 +17,7 @@ export const PROSE = {
   columnSumAfter:
     "So a column of an addition needs two outputs: the sum bit for that column, and the carry to the next. Start with the rightmost column, which has no carry coming into it.",
   prediction:
-    'The figure below draws a circuit for one column with no carry coming in. It has two inputs, A and B, and two outputs, SUM and CARRY. Choose an answer, then press "Check my prediction". The page will show what the simulator gave, with a timing diagram.',
+    'The figure below draws a circuit for one column with no carry coming in. It has two inputs, A and B, and two outputs, SUM and CARRY. Choose an answer, then press "Check my prediction". The page will show what the simulator gave, with the values written on the circuit.',
   p1Question:
     "The circuit uses an XOR gate, xorSum, that takes A and B and drives SUM. An AND gate, andCarry, takes A and B and drives CARRY. Now A is 1 and B is 1. What is SUM?",
   p1Explain:
@@ -39,10 +39,8 @@ export const PROSE = {
     'The figure shows a full adder with this structure: ha1 adds A and B, with outputs on wires S1 and C1. The half adder ha2 adds S1 and CIN, with its SUM driving the full adder\'s SUM output and its CARRY on wire C2. The OR gate, orCarry, takes C1 and C2 and drives COUT. Press a half adder to open it and see its two gates inside. Press a wire to see its name and value. "Run checks" runs 5 checks. Each is named after the sum it tests, written as A + B + CIN:\n\n- "0 + 0 + 0"\n- "1 + 1 + 0"\n- "1 + 0 + 1"\n- "0 + 1 + 1"\n- "1 + 1 + 1"\n\nEach check compares the circuit\'s SUM and COUT with a healthy full adder\'s. Choose each fault in turn. Before you run the checks, say which you expect to fail.',
   fullAdderFaultsAfterFault1:
     '"OR to XOR on carry": No check fails. C1 and C2 are never both 1 at the same time. When A and B are both 1, ha1\'s sum, S1, is 0, so ha2 cannot make a carry. OR and XOR differ only when both their inputs are 1, so here they always agree.',
-
   fullAdderFaultsAfterFault2:
     '"Carry in stuck at 0": 3 of 5 checks fail: "1 + 0 + 1", "0 + 1 + 1", and "1 + 1 + 1". These are the three checks where CIN is 1. When CIN is stuck at 0, the full adder operates as if CIN is always 0, so it only adds A and B.',
-
   fullAdderFaultsAfterFault3:
     '"XOR to OR in ha2\'s sum": 2 of 5 checks fail: "1 + 0 + 1" and "0 + 1 + 1". In these checks, S1 and CIN are both 1, so the sum bit should be 0, but the OR gate incorrectly gives 1 instead. In the "1 + 1 + 1" check, S1 is 0, so OR and XOR give the same result and the check succeeds.',
   explanation:

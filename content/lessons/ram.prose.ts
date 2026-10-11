@@ -51,7 +51,7 @@ export const PROSE = {
   explanation:
     "Writing a word: the decoder makes exactly one of Y0 to Y3 equal 1, the line A1 A0 names. Each AND gate passes its line only while WE is 1. At most one W wire is 1. At a rising edge of CLK, that one signal loads its register. Every other register has EN at 0 and keeps its word. A change of address, D or WE between edges, even while CLK is 1, writes nothing.\n\nReading a word: the word selector is made of gates, with no flip-flop. Q shows the word A1 A0 names as soon as the gates settle, with no wait for a clock edge.\n\nThe same address A1 A0 goes to two places: to the decoder, which picks which word to write, and to the selector, which picks which word to read.",
   openedLead:
-    "The figure shows the RAM opened. Press A1 or A0 to change the address, and watch which of Y0 to Y3 becomes 1. Set WE to 1 and watch the matching W wire light up.",
+    "The figure shows the RAM opened. The input pins in the RAM block only show their values, so set A1, A0 and WE on the whole memory: choose its name on the trail above the drawing, press them there, then open the RAM again. Y0 to Y3 then show which word the address picks, and one of them becomes 1. With WE at 1, the matching W wire lights up.",
   openedAfter:
     "Press any wire and its name and value appear. Follow Y2 to W2 to word2's load enable to see how the decoder picks a word to write.",
   generalisation:

@@ -99,6 +99,7 @@ export const gates: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.predictAlarm,
           props: {
+            show: "circuit",
             question: PROSE.p1Question,
             // A first try with an OR where the AND belongs, so the rule in the question does not
             // answer it and the construction is not a copy of it.

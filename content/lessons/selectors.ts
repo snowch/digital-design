@@ -105,6 +105,7 @@ export const selectors: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.predictOr,
           props: {
+            show: "circuit",
             question: PROSE.p1Question,
             libraryId: "rooms-or",
             run: [{ label: "A = 0, B = 1", set: { A: 0, B: 1 } }],
@@ -123,6 +124,7 @@ export const selectors: LessonInput = {
           timeModel: "settle",
           caption: LABELS.captions.predictAnd,
           props: {
+            show: "settings",
             question: PROSE.p2Question,
             libraryId: "and-pass",
             run: [

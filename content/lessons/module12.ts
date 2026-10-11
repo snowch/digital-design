@@ -1383,14 +1383,13 @@ ended:  stop`;
 
 /** The empty start: the requirements as comments. */
 export const RUN_EMPTY = `// The shop's runner is a start, then the handler. The start's lines, its stop included, go above
-// the handler's first line, which is named handler. The tests add a table, programs, after it:
-// its first word is how many programs, then each program's address. Run each in user mode with
+// the handler's first line, which is named handler. The tests add a table, programs, after it: its
+// first word is how many programs, then each program's address. Run each in user mode with
 // interrupts off, in order, from the first. Offer jobs 1 to 4 by call system: 1 shows R2; 2 puts
-// room R2's reading in R1 (R2 is 0 for room A, 1 for room B; any other R2 puts 0 in R1); 3 sets
-// the lamps from R2;
-// 4 ends the program. A program that faults ends there. For program k, store 0 at 0x400 + 8k if
-// it ended with job 4, else its cause. A job may change R1 and R2 only. After the last program,
-// stop.
+// room R2's reading in R1 (R2 is 0 for room A, 1 for room B; any other R2 puts 0 in R1); 3 sets the
+// lamps from R2; 4 ends the program. A program that faults ends there. For program k, store 0 at
+// 0x400 + 8k if it ended with job 4, else its cause. A job may change R1 and R2 only. After the
+// last program, stop.
 `;
 
 /**

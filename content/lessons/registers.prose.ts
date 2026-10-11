@@ -14,7 +14,7 @@ export const PROSE = {
   motivation:
     "The flip-flop takes D at every rising edge of CLK. With a never-stopping clock, that means a new value at every edge. The display must change only when Save is pressed, keeping its number at every other edge.\n\nFour flip-flops store four bits: one number. All four must change at the same moment, or the number passes through values nobody set.\n\nA flip-flop that no edge has set yet shows X. A display starting at X shows nothing anyone chose. So the circuit needs a way to start from a known value.\n\nThe previous lesson named three things a computer stores. Each is a number of several bits that must stay the same most of the time.",
   prediction:
-    'Two figures below each pose a question about four flip-flops sharing one clock. Each figure draws its circuit above its question. Choose one of three answers, then press "Check my prediction". The timing diagram that appears shows what the simulator did.\n\nA timing diagram draws each signal as a line against time: high for 1, low for 0, a hatched band for X. The previous lesson showed several without naming them.',
+    'Two figures below each pose a question about four flip-flops sharing one clock. Each figure draws its circuit above its question. Choose one of three answers, then press "Check my prediction". The timing diagram that appears shows what the simulator did.\n\nLesson 4.1 introduced the timing diagram, and this lesson\'s diagrams add two things. A word of more than one bit is drawn as a box with its value written in it. Each rise of the clock is marked on the axis with the name the figure gives it, such as "edge" or "edge 1".',
   p1Question:
     "Four flip-flops share one clock. Their D inputs together are written D. Their outputs are Q, as four bits with bit 3 on the left and bit 0 on the right. In `1000`, bit 3 is 1 and bit 0 is 0.\n\nThe figure sets D to `0110` while CLK is low, then gives one rising edge of CLK. Then it sets D to `1111`, and CLK does not rise again.\n\nWhat is Q at the end?",
   p1Explain:
@@ -88,10 +88,8 @@ export const PROSE = {
   ],
   keepFaultsAfterFault1:
     'KEEP wire forced to 0: a box CONST with value 0 now drives KEEP, and andKeep\'s output goes nowhere. Two checks fail, at "edge with EN 0" and "another edge with EN 0". With EN at 0, CHOICE is 0, so Q takes 0 instead of keeping the 1.',
-
   keepFaultsAfterFault2:
     "EN forced to 1: Two checks fail at the same points as the first fault. Every edge takes D, and D is 0 there. Two different faults fail the same checks, so the checks alone do not say which fault it is.",
-
   keepFaultsAfterFault3:
     'OR gate changed to AND: Three checks fail, at "load 1" and both edges with EN 0. LOAD needs EN 1, KEEP needs EN 0: they never both become 1. CHOICE is always 0, so every edge makes Q 0. "load 0" passes because 0 is expected.',
 } as const;

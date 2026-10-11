@@ -327,7 +327,7 @@ test.describe("the figures", () => {
     await expect(figure.locator(".internals-phase")).toContainText("CLK is 0 and D is 0");
     const next = figure.getByRole("button", { name: V.internals.next });
     for (let i = 0; i < 12; i++) {
-      const t = Number((await figure.locator(".internals-time").textContent())?.replace(/\D/g, ""));
+      const t = Number(await figure.getByRole("slider").inputValue());
       if (t >= 100) break;
       await next.click();
     }
@@ -389,8 +389,7 @@ test.describe("the figures", () => {
     const figure = page.locator("#ix-internals");
     await figure.scrollIntoViewIfNeeded();
     const next = figure.getByRole("button", { name: V.internals.next });
-    const time = async () =>
-      Number((await figure.locator(".internals-time").textContent())?.replace(/\D/g, ""));
+    const time = async () => Number(await figure.getByRole("slider").inputValue());
     for (let i = 0; i < 40 && (await time()) < 450; i++) await next.click();
     expect(await time()).toBe(450);
     await expect(figure.locator(".internals-phase")).toContainText("D fell at time 450");
