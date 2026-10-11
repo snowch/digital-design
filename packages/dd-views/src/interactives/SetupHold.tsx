@@ -184,9 +184,22 @@ export const SetupHold = withProps(
           // The red line stands at the clock's edge, and the axis counts units from it, every 20:
           // at a phone's scale, ticks every 10 would crowd the band's label.
           cursor={data.edgeAt}
-          // The view follows D's change: a phone shows about 100 units, too few for D's change at
-          // -80 and Q's at +30 together, so D's change, the cause, is the one kept in view.
-          focus={data.edgeAt + offset}
+          // A phone shows about 100 units. The rising edge, the band and D's change stay in view
+          // as the slider moves, and Q's change too when all of them fit.
+          keep={{
+            required: [
+              data.edgeAt + Math.min(offset, data.window[0]),
+              data.edgeAt + Math.max(offset, 0),
+            ],
+            ...(result.qEvents.length > 0
+              ? {
+                  extra: [
+                    Math.min(...result.qEvents.map((e) => e.time)),
+                    Math.max(...result.qEvents.map((e) => e.time)),
+                  ] as [number, number],
+                }
+              : {}),
+          }}
           units={{ ticks: 20, origin: data.edgeAt }}
           table={false}
         />

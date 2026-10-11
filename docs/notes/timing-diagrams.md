@@ -168,3 +168,5 @@ Items 1 to 15 of the managing session's list. Checked: item 1 was real (the band
 ## Round 3, follow-ups
 
 The managing session's two points. 4.1's setup-hold keeps D's change in view: the view's focus is D's change and follows the slider, because a phone shows about 100 units and D's change at -80 and Q's at +30 are further apart than that, so the cause has priority. An edge timeline's drawing now ends at its last change when it has a slider, so the slider's last position is that change and none is dead; the step past it, which gave the newest box a full width, is kept for figures without a slider.
+
+The setup-hold view, as measured at 390 (visible window in units from the edge): at load -88 to 8; slider -80: -88 to 8; -50: -58 to 38; -20: -40 to 55; 0: -60 to 35; 40: -40 to 55. At 1280 the whole drawing shows (-120 to 227). The rule is `keep` on `TimingDiagram`: the edge, the band and D's change always, Q's change when all fit.
