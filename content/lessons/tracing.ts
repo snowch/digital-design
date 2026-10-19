@@ -1,8 +1,8 @@
 // Copyright © 2026 Christopher Snow
 
-// Lesson: Module 13, lesson 3, tracing. Module 0's ladder followed one line down to one wire on a
-// path chosen for the learner; here the learner chooses the line, the edge and the path. The
-// figure pauses the shop's program before any edge of any line, lists every level opened with
+// Lesson: Module 13, lesson 3, tracing. Module 0's ladder followed one instruction down to one wire on a
+// path chosen for the learner; here the learner chooses the instruction, the edge and the path. The
+// figure pauses the shop's program before any edge of any instruction, lists every level opened with
 // its maker and its ports' values, and opens each part that never opens (a register, the register
 // file, the RAM, a selector or an adder of a whole word) as the module that built it drew one bit,
 // driven by the machine's values, so every path ends at a gate or a flip-flop. A wire held at 0

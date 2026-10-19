@@ -1,10 +1,10 @@
 // Copyright © 2026 Christopher Snow
 
 // Lesson: Module 0, lesson 1, what a computer does. The shop's finished machine runs a program of
-// nine lines: it reads the two rooms' sensors, works out how much warmer room A is than room B,
+// nine instructions: it reads the two rooms' sensors, works out how much warmer room A is than room B,
 // shows that on the office display, and lights the CLASH lamp when the gap is 10.0 degrees or
-// more. The learner predicts which lines run, runs it a line at a time, changes a room's reading
-// and runs it again, changes a number in a line, and sees each line kept as a number.
+// more. The learner predicts which instructions run, runs it one instruction at a time, changes a room's reading
+// and runs it again, changes a number in an instruction, and sees each instruction kept as a number.
 //
 // The structure is here; the words are in what-computers-do.prose.ts and .labels.ts. The machine
 // is Module 8's (`datapath-full`), read for a beginner by packages/dd-model/src/meet.ts; the
@@ -40,7 +40,7 @@ export const whatComputersDo: LessonInput = {
   module: 0,
   order: 1,
   objectives: [...LABELS.objectives],
-  introduces: [],
+  introduces: ["instruction"],
   sections: [
     {
       kind: "question",
@@ -256,6 +256,6 @@ export const whatComputersDo: LessonInput = {
     textbookExample:
       "The stock opening of a first course: the five units of a computer (input, output, memory, control, arithmetic) as boxes joined by arrows, then the fetch-execute cycle, then a toy machine's program traced in its own notation; Nand2Tetris's overview of the Hack computer; Petzold's Code, which builds towards a computer as a story from flashlights and relays.",
     howThisDiffers:
-      "The lesson starts from the shop the course already uses: two freezer rooms' sensors, an office display and three lamps, with the machine the course will build in between, running a nine-line program of the shop's own that shows how much warmer one room is than the other and lights a lamp at a limit. No block diagram of units and no named cycle appear; the machine is met as it runs, its program as numbered lines in plain words generated from each line's own number. The prediction is which lines run, the failure experiment is a program that checks only one way and is run faithfully when the other room fails, and the challenges change a number in a line and work a run out by hand, each graded by running the real machine in the simulator.",
+      "The lesson starts from the shop the course already uses: two freezer rooms' sensors, an office display and three lamps, with the machine the course will build in between, running a nine-instruction program of the shop's own that shows how much warmer one room is than the other and lights a lamp at a limit. No block diagram of units and no named cycle appear; the machine is met as it runs, its program as numbered instructions in plain words generated from each instruction's own number. The prediction is which instructions run, the failure experiment is a program that checks only one way and is run faithfully when the other room fails, and the challenges change a number in an instruction and work a run out by hand, each graded by running the real machine in the simulator.",
   },
 };
