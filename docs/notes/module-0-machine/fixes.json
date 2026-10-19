@@ -300,5 +300,12 @@
     " One number at the top is 1s and 0s on wires at the bottom.",
     "",
     "second pass: a repeat of the ladder's closing text"
+  ],
+  [
+    "1A",
+    "motivation",
+    "It runs a program: a list of lines, numbered from 1. It runs one line at a time",
+    "It runs a program: a list of lines, numbered from 1, each saying one small thing to do. It runs one line at a time",
+    "dropped: the brief said each line says one small thing to do; without it a reader took 'lines' for lines of code"
   ]
 ]
