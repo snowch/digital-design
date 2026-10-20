@@ -7,7 +7,7 @@
 
 export const PROSE = {
   question:
-    "A shop has two freezer rooms, A and B, each set to its own temperature and each with a sensor. The office has a display and three lamps: ALARM, NIGHT and GAP_ALARM.\n\nA machine sits between the sensors and the office. It reads the rooms and decides what the display shows and which lamps light. The figure below draws them: the sensors on the left, the machine in the middle, the display and the lamps on the right.\n\nHow does the machine decide what the display shows?",
+    "A shop has two freezer rooms, A and B, each set to its own temperature and each with a sensor. The office has a display and three lamps: ALARM, NIGHT and GAP_ALARM, the lamp for the gap between the two rooms.\n\nA machine sits between the sensors and the office. It reads the rooms and decides what the display shows and which lamps light. The figure below draws them: the sensors on the left, the machine in the middle, the display and the lamps on the right.\n\nHow does the machine decide what the display shows?",
   shopAfter:
     "Room A at -18.4 degrees sends -184. Room B, the colder room at -25.0 degrees, sends -250. Each number is in tenths of a degree.",
   motivation:
