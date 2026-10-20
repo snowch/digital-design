@@ -37,7 +37,7 @@ export const LABELS = {
     buildNot: "Draw NOT from NAND gates and run the tests.",
     buildAnd: "Draw AND from NAND gates and run the tests.",
     orFaults: "Choose a fault in the OR, run the checks.",
-    clashExpression: "CLASH circuit as one expression.",
+    clashExpression: "MISMATCH circuit as one expression.",
     exploreNor: "Press A and B; watch Y and the shaded row.",
     exploreNorTied: "NOR gate: both inputs on A; press A.",
     buildXor: "Draw XOR from NAND gates and run the tests.",

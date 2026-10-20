@@ -1,7 +1,7 @@
 // Copyright © 2026 Christopher Snow
 
 // The numbers the compiler chapter states, read off the model: the challenge's runs and the
-// attempts each catches, the compiled CLASH line on the whole machine edge by edge, the
+// attempts each catches, the compiled GAP_ALARM line on the whole machine edge by edge, the
 // prediction's answer, the generalisation's counts, and the links out of the course. The compiler's
 // own output is pinned by dd-model's compile.test.ts.
 
@@ -24,7 +24,7 @@ import type { Word } from "@dd/sim";
 import {
   BOTH_PROGRAM,
   CHALLENGE_LINE,
-  CLASH_PROGRAM,
+  GAP_ALARM_PROGRAM,
   COMPILER_REFERENCE,
   COMPILER_RUNS,
   COMPILER_START,
@@ -56,7 +56,7 @@ describe("the compiler chapter's challenge", () => {
     expect(grade(COMPILER_REFERENCE)).toEqual([true, true, true, true, true, true]);
   });
 
-  it("fails from its starting point the three runs where CLASH must light", () => {
+  it("fails from its starting point the three runs where GAP_ALARM must light", () => {
     expect(grade(COMPILER_START)).toEqual([false, true, false, true, false, true]);
   });
 
@@ -102,10 +102,10 @@ describe("the compiler chapter's figures", () => {
       expect(text).not.toContain("R3 < R4");
   });
 
-  it("runs the CLASH line on the whole machine in 22 edges, the branch's FETCH edge 19", () => {
+  it("runs the GAP_ALARM line on the whole machine in 22 edges, the branch's FETCH edge 19", () => {
     const run: RecordedRun = recordRun({
       libraryId: "machine-final",
-      program: CLASH_PROGRAM,
+      program: GAP_ALARM_PROGRAM,
       inputs: { SENSORA: SHOP_READINGS.sensorA, SENSORB: SHOP_READINGS.sensorB },
     });
     const at = (frame: number, name: string) => netWord(run.circuit, run.frames[frame] ?? [], name);
@@ -123,7 +123,7 @@ describe("the compiler chapter's figures", () => {
     expect([state(19), state(20)]).toEqual(["READ", "ALU"]);
     expect(hex(at(20, "MET"))).toBe("1");
     expect([signed(at(21, "HR")), hex(at(21, "PC"))]).toEqual(["-34", "1C"]);
-    // 01C is the stop's address; CLASH stays dark.
+    // 01C is the stop's address; GAP_ALARM stays dark.
     expect(
       runCompiled(compile("if sensorA - sensorB >= 100 then lamps <= 4"), -184, -250).lamps,
     ).toBe(0);

@@ -12,19 +12,19 @@ export const SHOP_READINGS = { sensorA: -184, sensorB: -250 } as const;
 /** Module 0's gap rule as one line: the display shows how much warmer room A is than room B. */
 export const GAP_LINE = "display <= sensorA - sensorB";
 
-/** Module 0's CLASH rule as one line: CLASH when room A is 10.0 degrees or more warmer. */
-export const CLASH_LINE = "if sensorA - sensorB >= 100 then lamps <= 4";
+/** Module 0's GAP_ALARM rule as one line: GAP_ALARM when room A is 10.0 degrees or more warmer. */
+export const GAP_ALARM_LINE = "if sensorA - sensorB >= 100 then lamps <= 4";
 
 /** The question's program: the gap rule as the shop says it, which the assembler refuses. */
 export const ASKED_PROGRAM = `${GAP_LINE}\nstop`;
 
-/** The compiler's program for the CLASH line, which the construction runs on the whole machine. */
-export const CLASH_PROGRAM = compile(CLASH_LINE).program;
+/** The compiler's program for the GAP_ALARM line, which the construction runs on the whole machine. */
+export const GAP_ALARM_PROGRAM = compile(GAP_ALARM_LINE).program;
 
 /** The compiler's program for both lines, beside Module 0's in the generalisation. */
-export const BOTH_PROGRAM = compile(`${GAP_LINE}\n${CLASH_LINE}`).program;
+export const BOTH_PROGRAM = compile(`${GAP_LINE}\n${GAP_ALARM_LINE}`).program;
 
-/** The challenge's line: CLASH when room B is more than 10.0 degrees warmer than room A. */
+/** The challenge's line: GAP_ALARM when room B is more than 10.0 degrees warmer than room A. */
 export const CHALLENGE_LINE = "if sensorB - sensorA > 100 then lamps <= 4";
 
 /** The challenge's starting text: the line as a comment, and `stop`. */

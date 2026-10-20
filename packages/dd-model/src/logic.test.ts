@@ -52,7 +52,7 @@ describe("truth tables", () => {
     expect(outputs("nand-or")).toEqual(["0", "1", "1", "1"]);
   });
   it("gives the same table for every XOR the lessons build", () => {
-    for (const id of ["clash-gates", "clash-xor", "xor-gate", "xor-nand-5", "xor-nand-4"])
+    for (const id of ["mismatch-gates", "mismatch-xor", "xor-gate", "xor-nand-5", "xor-nand-4"])
       expect(outputs(id), id).toEqual(["0", "1", "1", "0"]);
   });
   it("compares two circuits by every output, row by row", () => {
@@ -67,7 +67,9 @@ describe("truth tables", () => {
     );
     expect(lamps.outputs).toEqual(["ALARM", "CALL"]);
     expect(lamps.differ).toEqual([]);
-    expect(() => compareCircuits(libraryCircuit("alarm"), libraryCircuit("clash-xor"))).toThrow();
+    expect(() =>
+      compareCircuits(libraryCircuit("alarm"), libraryCircuit("mismatch-xor")),
+    ).toThrow();
   });
   it("pairs rows that differ in one input and says where it makes no difference", () => {
     const table = truthTableOf(libraryCircuit("call-rows"));

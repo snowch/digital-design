@@ -4,7 +4,7 @@
 // `display <= sensorA - sensorB`, is refused by the assembler. A program in the page, the course's
 // own compiler, takes such a line and writes the course's instructions for it, one at a time, while
 // the learner watches the line shrink: each piece it takes becomes an instruction, and the piece's
-// register takes its place. The compiled CLASH line then runs on the whole machine, and its `>=`,
+// register takes its place. The compiled GAP_ALARM line then runs on the whole machine, and its `>=`,
 // written as a branch on the comparison turned over, `<`, is followed down to the condition block's
 // gates, MINUS XOR OVER. The
 // compiler's output for the shop's two rules is Module 0's first program, the gap worked out twice.
@@ -19,8 +19,8 @@ import { MEET_PROGRAMS } from "@dd/dd-model";
 import {
   ASKED_PROGRAM,
   BOTH_PROGRAM,
-  CLASH_LINE,
-  CLASH_PROGRAM,
+  GAP_ALARM_LINE,
+  GAP_ALARM_PROGRAM,
   COMPILER_REFERENCE,
   COMPILER_RUNS,
   COMPILER_START,
@@ -40,7 +40,7 @@ const SHOP_TEXT = {
 /** The two lines the figures compile, each alone. */
 const LINES = [
   { label: LABELS.lines.gap, text: GAP_LINE },
-  { label: LABELS.lines.clash, text: CLASH_LINE },
+  { label: LABELS.lines.clash, text: GAP_ALARM_LINE },
 ];
 
 /** The runs the investigation offers after the last step: the shop's readings, and room A at -100. */
@@ -55,7 +55,7 @@ const FAULT_READINGS = [
   { label: LABELS.readings.bothSigns, sensorA: -30, sensorB: 80 },
 ];
 
-/** The CLASH line's branch: its FETCH edge is edge 19, its ALU edge edge 21. */
+/** The GAP_ALARM line's branch: its FETCH edge is edge 19, its ALU edge edge 21. */
 const BRANCH_HELD = { line: "if R3 < R4 signed goto after1", fetch: 19 };
 
 export const compiler: LessonInput = {
@@ -95,7 +95,7 @@ export const compiler: LessonInput = {
           timeModel: "none",
           caption: LABELS.captions.predict,
           props: {
-            lines: [{ label: LABELS.lines.clash, text: CLASH_LINE }],
+            lines: [{ label: LABELS.lines.clash, text: GAP_ALARM_LINE }],
             readings: [{ label: LABELS.readings.shop, ...SHOP_READINGS }],
             question: PROSE.p1Question,
             options: [
@@ -137,7 +137,7 @@ export const compiler: LessonInput = {
           caption: LABELS.captions.branch,
           lead: PROSE.branchLead,
           props: {
-            program: CLASH_PROGRAM,
+            program: GAP_ALARM_PROGRAM,
             inputs: SHOP_INPUTS,
             // Paused before the branch's FETCH edge, frame 18, where FETCHED already holds its
             // word: the question hides every value until the learner commits.
@@ -253,6 +253,6 @@ export const compiler: LessonInput = {
     textbookExample:
       "Nand2Tetris's compiler for its object-based Jack language, through a stack-based virtual machine (projects 7 to 11), split into a tokenizer, a parser that writes out a parse tree, and code generation; the Dragon Book's `position = initial + rate * 60` through three-address code with temporaries t1 and t2; Patterson and Hennessy's (and Harris and Harris's) \"compiling a C assignment statement\" and \"compiling if-then-else into conditional branches\", whose branch also tests the condition turned over; Crenshaw's \"Let's Build a Compiler\", recursive descent writing 68000 code.",
     howThisDiffers:
-      "The compiler's lines are the course's own register-transfer text with the assembler's refusals lifted: no classes, objects, methods or types, no let or do, and the only names are the shop's devices. It writes the course's instructions directly, with no virtual machine or other language in between: the only intermediate form is the line itself, rewritten in place, one piece and one instruction at a time, and the compiler in dd-model is built that way, so the figure shows its real steps and no textbook phases. Its five rules are the advice of refusals the learner met in Module 11. The lines are the shop's: Module 0's gap and CLASH rules, whose compiled output is Module 0's first program, and the challenge mends Module 0's one-way check. There is no multiplication, so no precedence example arises; the registers are the next free one, never named temporaries; no recursive descent is shown, and the reader builds no compiler. The comparison turned over is the machine's own lack of a branch on greater than (lesson 10.3), and the run is followed down to the condition block's gates on the course's final machine.",
+      "The compiler's lines are the course's own register-transfer text with the assembler's refusals lifted: no classes, objects, methods or types, no let or do, and the only names are the shop's devices. It writes the course's instructions directly, with no virtual machine or other language in between: the only intermediate form is the line itself, rewritten in place, one piece and one instruction at a time, and the compiler in dd-model is built that way, so the figure shows its real steps and no textbook phases. Its five rules are the advice of refusals the learner met in Module 11. The lines are the shop's: Module 0's gap and GAP_ALARM rules, whose compiled output is Module 0's first program, and the challenge mends Module 0's one-way check. There is no multiplication, so no precedence example arises; the registers are the next free one, never named temporaries; no recursive descent is shown, and the reader builds no compiler. The comparison turned over is the machine's own lack of a branch on greater than (lesson 10.3), and the run is followed down to the condition block's gates on the course's final machine.",
   },
 };

@@ -25,7 +25,7 @@ import {
 import { NIGHT_INPUTS } from "./traps";
 
 /**
- * The construction: R2 for job 3 to light NIGHT and CLASH; what a program that reads both rooms
+ * The construction: R2 for job 3 to light NIGHT and GAP_ALARM; what a program that reads both rooms
  * shows; and C2 after a `call system` at `0A0`.
  */
 export const CALL_ANSWERS = [

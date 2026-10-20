@@ -76,7 +76,7 @@ for (const lesson of [FIRST, SECOND]) {
 }
 
 test.describe("Module 0's challenges reject a wrong answer and re-grade on load", () => {
-  test("the limit: 51 leaves CLASH dark at a gap of 50, and that test is named", async ({
+  test("the limit: 51 leaves GAP_ALARM dark at a gap of 50, and that test is named", async ({
     page,
   }) => {
     test.setTimeout(120_000);
@@ -147,11 +147,11 @@ test.describe("the machine at work", () => {
       format(M.status.stopped, { line: 9 }),
       { timeout: 30_000 },
     );
-    await expect(figure.locator(".meet-shop")).toContainText(format(M.lamp, { name: "CLASH" }));
+    await expect(figure.locator(".meet-shop")).toContainText(format(M.lamp, { name: "GAP_ALARM" }));
     await expect(step).toBeDisabled();
   });
 
-  test("a reading changed, the same program lights CLASH and shows 200", async ({ page }) => {
+  test("a reading changed, the same program lights GAP_ALARM and shows 200", async ({ page }) => {
     test.setTimeout(120_000);
     await openLesson(page, FIRST.id);
     const figure = page.locator("#ix-run");

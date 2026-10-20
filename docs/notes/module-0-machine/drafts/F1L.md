@@ -1,1 +1,1 @@
-titles.reflection: Inside the box
+titles.reflection: From the top to one wire

@@ -34,7 +34,7 @@ const regs = (r: RecordedRun, frame: number) =>
   );
 
 describe("lesson whole-machine's facts", () => {
-  it("runs the shop's program in 69 edges, to its stop, showing 66 with CLASH off", () => {
+  it("runs the shop's program in 69 edges, to its stop, showing 66 with GAP_ALARM off", () => {
     expect(run.frames.length - 1).toBe(69);
     expect(run.stopped?.reason).toEqual({ kind: "stop" });
     expect(run.difference).toBeUndefined();

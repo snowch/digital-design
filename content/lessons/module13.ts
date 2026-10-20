@@ -11,11 +11,11 @@ import { MACHINE13_WORDS as W } from "./module13.words";
 
 /**
  * The shop's last program: Module 0's first program, the gap between the two rooms on the display
- * and CLASH when room A is 10.0 degrees or more warmer, written for the whole machine. Set if
+ * and GAP_ALARM when room A is 10.0 degrees or more warmer, written for the whole machine. Set if
  * replaces Module 0's branch; the gap reaches the display through a call through a register and a
  * system call, whose handler offers one job.
  */
-export const SHOP = `// The gap between the rooms, and CLASH, on the whole machine.
+export const SHOP = `// The gap between the rooms, and GAP_ALARM, on the whole machine.
         R1 <= handler
         C4 <= R1                // the handler's address
         R1 <= word[sensorA]
@@ -24,7 +24,7 @@ export const SHOP = `// The gap between the rooms, and CLASH, on the whole machi
         R4 <= 100
         R5 <= R3 >= R4 signed   // set if: 1 when room A is 10.0 degrees warmer or more
         R5 <= R5 + R5
-        R5 <= R5 + R5           // CLASH is bit 2
+        R5 <= R5 + R5           // GAP_ALARM is bit 2
         word[lamps] <= R5
         R6 <= show
         call R6, R15            // a call through a register
@@ -393,7 +393,7 @@ endmodule
 // ---------------------------------------------------------------------------------------------
 // 13.5 the capstone: a program of the learner's own, traced.
 
-/** The capstone's figures' program, not the challenge's task: CLASH when room B is colder. */
+/** The capstone's figures' program, not the challenge's task: GAP_ALARM when room B is colder. */
 export const CAPSTONE_SAMPLE = `// Is room B less than 10.0 degrees warmer than room A? The display shows 1 if so.
         R1 <= word[sensorA]
         R2 <= word[sensorB]

@@ -5,7 +5,7 @@
 
 /**
  * The program, by its name in the model's `MEET_PROGRAMS` (packages/dd-model/src/meet.ts): how
- * much warmer room A is than room B, on the office display, and the CLASH lamp at 10.0 degrees or
+ * much warmer room A is than room B, on the office display, and the GAP_ALARM lamp at 10.0 degrees or
  * more. A lesson names it, since its text says `word` and `signed`, which later lessons ration.
  */
 export const GAP = "gap";

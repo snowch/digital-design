@@ -16,12 +16,12 @@ const parsed = parseLesson(lesson);
 const challenge = (id: string) => parsed.challenges.find((c) => c.id === id)!;
 
 describe("facts for the lesson on what a computer does", () => {
-  it("runs instructions 1 to 6 and 9 on Module 1's rooms, and shows 66 with CLASH dark", () => {
+  it("runs instructions 1 to 6 and 9 on Module 1's rooms, and shows 66 with GAP_ALARM dark", () => {
     expect(meetFigureAnswer(lesson, "predict-lines")).toBe("1 2 3 4 5 6 9");
     expect(meetRun(lesson, "run")).toEqual({ lines: "1 2 3 4 5 6 9", display: "66", lamps: 0 });
   });
 
-  it("with room A at -50, shows 200 and lights CLASH, instructions 7 and 8 run", () => {
+  it("with room A at -50, shows 200 and lights GAP_ALARM, instructions 7 and 8 run", () => {
     expect(meetRun(lesson, "run", { SENSORA: "-50" })).toEqual({
       lines: "1 2 3 4 5 6 7 8 9",
       display: "200",
@@ -29,7 +29,7 @@ describe("facts for the lesson on what a computer does", () => {
     });
   });
 
-  it("with room B failing at -50, shows -134 and leaves CLASH dark", () => {
+  it("with room B failing at -50, shows -134 and leaves GAP_ALARM dark", () => {
     expect(meetFigureAnswer(lesson, "room-b-fails")).toBe("none");
     expect(meetRun(lesson, "room-b-fails")).toEqual({
       lines: "1 2 3 4 5 6 9",
@@ -61,7 +61,7 @@ describe("facts for the lesson on what a computer does", () => {
     expect(grade(c, { answers: { limit: "49" } }).passed).toBe(false);
   });
 
-  it("the last challenge: rooms at -100 and -250 show 150 and light CLASH, in 2 tests", () => {
+  it("the last challenge: rooms at -100 and -250 show 150 and light GAP_ALARM, in 2 tests", () => {
     const c = challenge("in-your-head");
     expect(grade(c, c.reference)).toMatchObject({ passed: true });
     expect(grade(c, { answers: { display: "150", lamp: "dark" } }).failures.length).toBe(1);

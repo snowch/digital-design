@@ -60,12 +60,12 @@ describe("the gates lesson's facts", () => {
     expect(expressionModule(libraryCircuit("alarm"))).toContain("assign ALARM = WARM & ~DOOR;");
   });
 
-  it("generalisation: CLASH from five gates and from one XOR has the same table", () => {
-    expect(outputs("clash-gates")).toEqual(["0", "1", "1", "0"]);
-    expect(outputs("clash-xor")).toEqual(outputs("clash-gates"));
-    expect(libraryCircuit("clash-gates").components).toHaveLength(5);
-    expect(expressionModule(libraryCircuit("clash-gates"))).toContain(
-      "assign CLASH = (WARM1 & ~WARM2) | (~WARM1 & WARM2);",
+  it("generalisation: MISMATCH from five gates and from one XOR has the same table", () => {
+    expect(outputs("mismatch-gates")).toEqual(["0", "1", "1", "0"]);
+    expect(outputs("mismatch-xor")).toEqual(outputs("mismatch-gates"));
+    expect(libraryCircuit("mismatch-gates").components).toHaveLength(5);
+    expect(expressionModule(libraryCircuit("mismatch-gates"))).toContain(
+      "assign MISMATCH = (WARM1 & ~WARM2) | (~WARM1 & WARM2);",
     );
   });
 

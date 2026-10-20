@@ -30,7 +30,7 @@ const byChallenge = (id: string) => LESSONS.find((l) => l.challenges.some((c) =>
 const data = (id: string) => challengeData(id, byChallenge(id));
 const total = (id: string) => testCount(data(id));
 
-const XOR_FIVE = `module clash(input logic A, input logic B, output logic Y);
+const XOR_FIVE = `module mismatch(input logic A, input logic B, output logic Y);
   logic NA;
   logic NB;
   logic P;
