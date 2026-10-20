@@ -2,7 +2,7 @@
 
 // Lesson: Module 0, lesson 1, what a computer does. The shop's finished machine runs a program of
 // nine instructions: it reads the two rooms' sensors, works out how much warmer room A is than room B,
-// shows that on the office display, and lights the CLASH lamp when the gap is 10.0 degrees or
+// shows that on the office display, and lights the GAP_ALARM lamp when the gap is 10.0 degrees or
 // more. The learner predicts which instructions run, runs it one instruction at a time, changes a room's reading
 // and runs it again, changes a number in an instruction, and sees each instruction kept as a number.
 //
@@ -27,7 +27,7 @@ const LIMIT_CASES = [
   { label: LABELS.cases.gap49, SENSORA: "-201", lamp: "dark" },
 ].map((c) => ({
   label: c.label,
-  given: { program: GAP_LIMIT, SENSORA: c.SENSORA, SENSORB: "-250", lamp: "CLASH" },
+  given: { program: GAP_LIMIT, SENSORA: c.SENSORA, SENSORB: "-250", lamp: "GAP_ALARM" },
   expect: { lamp: c.lamp },
 }));
 
@@ -69,7 +69,7 @@ export const whatComputersDo: LessonInput = {
               { kind: "readout", label: LABELS.scene.display },
               { kind: "lamp", label: "ALARM" },
               { kind: "lamp", label: "NIGHT" },
-              { kind: "lamp", label: "CLASH" },
+              { kind: "lamp", label: "GAP_ALARM" },
             ],
             labels: { title: LABELS.scene.title, summary: LABELS.scene.summary },
           },
@@ -154,7 +154,7 @@ export const whatComputersDo: LessonInput = {
             inputs: ROOM_B_FAILS,
             question: PROSE.p2Question,
             options: [
-              { value: "CLASH", label: LABELS.options.p2Lit },
+              { value: "GAP_ALARM", label: LABELS.options.p2Lit },
               { value: "none", label: LABELS.options.p2Dark },
             ],
             ask: "lamps",
@@ -237,12 +237,12 @@ export const whatComputersDo: LessonInput = {
         cases: [
           {
             label: LABELS.cases.display,
-            given: { program: GAP, ...IN_YOUR_HEAD, lamp: "CLASH" },
+            given: { program: GAP, ...IN_YOUR_HEAD, lamp: "GAP_ALARM" },
             expect: { display: "{display}" },
           },
           {
             label: LABELS.cases.lamp,
-            given: { program: GAP, ...IN_YOUR_HEAD, lamp: "CLASH" },
+            given: { program: GAP, ...IN_YOUR_HEAD, lamp: "GAP_ALARM" },
             expect: { lamp: "{lamp}" },
           },
         ],

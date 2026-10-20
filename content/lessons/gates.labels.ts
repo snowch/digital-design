@@ -39,8 +39,8 @@ export const LABELS = {
     buildAlarm: "Draw the ALARM circuit and run the tests.",
     alarmFaults: "Choose a fault, press the inputs, run the checks.",
     alarmExpression: "ALARM circuit and its expression.",
-    clashGates: "CLASH lamp from NOT, AND and OR; press WARM1 and WARM2.",
-    clashXor: "CLASH lamp from one XOR gate; press WARM1 and WARM2.",
+    clashGates: "MISMATCH lamp from NOT, AND and OR; press WARM1 and WARM2.",
+    clashXor: "MISMATCH lamp from one XOR gate; press WARM1 and WARM2.",
     writeNight: "Write the NIGHT lamp's circuit as text and run tests.",
   },
   faults: {

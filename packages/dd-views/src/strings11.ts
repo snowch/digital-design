@@ -337,7 +337,7 @@ export const MACHINE11_STRINGS: Machine11Strings = {
   devicesCaption: "The shop's devices",
   display: "Display",
   lamps: "Lamps",
-  lampNames: ["ALARM", "NIGHT", "CLASH"],
+  lampNames: ["ALARM", "NIGHT", "GAP_ALARM"],
   lampOn: "on",
   lampOff: "off",
   sensorA: "Room A's sensor",

@@ -19,7 +19,7 @@ import {
 import { assemble as assembleProgram } from "./assemble";
 import { resetMachine, step as refStep } from "./machine";
 
-/** Module 0's program: how much warmer room A is than room B, and CLASH at 10.0 apart. */
+/** Module 0's program: how much warmer room A is than room B, and GAP_ALARM at 10.0 apart. */
 const GAP = `R1 <= word[sensorA]
 R2 <= word[sensorB]
 R3 <= R1 - R2
@@ -90,7 +90,7 @@ describe("a line in plain words", () => {
 });
 
 describe("Module 0's machine, read for a beginner", () => {
-  it("runs the program on Module 1's rooms: 66 on the display, CLASH dark, lines 7 and 8 skipped", () => {
+  it("runs the program on Module 1's rooms: 66 on the display, GAP_ALARM dark, lines 7 and 8 skipped", () => {
     const built = meetMachine({ program: GAP });
     const sim = meetStart(built, { program: GAP, inputs: ROOMS });
     expect(meetAnswer(sim, "lines")).toBe("1 2 3 4 5 6 9");
@@ -126,7 +126,7 @@ describe("Module 0's graders run the machine", () => {
   const slices = ANSWER_GRADERS["machine-slices"]!;
 
   it("puts the learner's number into the program and grades what the shop sees", () => {
-    const given = { program: LIMIT, SENSORA: "-200", SENSORB: "-250", lamp: "CLASH" };
+    const given = { program: LIMIT, SENSORA: "-200", SENSORB: "-250", lamp: "GAP_ALARM" };
     expect(run({ limit: "50" }, given, { lamp: "lit" })).toMatchObject({ pass: true });
     expect(run({ limit: "51" }, given, { lamp: "lit" })).toMatchObject({
       pass: false,
@@ -137,7 +137,7 @@ describe("Module 0's graders run the machine", () => {
   });
 
   it("grades a learner's own account of a run against the run", () => {
-    const given = { program: GAP, SENSORA: "-100", SENSORB: "-250", lamp: "CLASH" };
+    const given = { program: GAP, SENSORA: "-100", SENSORB: "-250", lamp: "GAP_ALARM" };
     const expect_ = { display: "{display}", lamp: "{lamp}" };
     expect(run({ display: "150", lamp: "lit" }, given, expect_)).toMatchObject({ pass: true });
     expect(run({ display: "150", lamp: "dark" }, given, expect_)).toMatchObject({ pass: false });

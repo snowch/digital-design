@@ -40,7 +40,7 @@ export interface BeyondStrings {
   readonly ended: string;
   /** The run: room A at {a}, room B at {b}; the display shows {display}, the lamps {lamps}. */
   readonly run: string;
-  /** The lamps' word when none is lit, and the CLASH lamp's name. */
+  /** The lamps' word when none is lit, and the GAP_ALARM lamp's name. */
   readonly lampsDark: string;
   readonly lampsLit: string;
   /** The display before anything is written to it. */
@@ -87,7 +87,7 @@ export const BEYOND_STRINGS: BeyondStrings = {
   ended: "Nothing of the line is left. The program ends with stop.",
   run: "Room A at {a} and room B at {b}; the display shows {display}; the lamps: {lamps}.",
   lampsDark: "None lit",
-  lampsLit: "CLASH is lit",
+  lampsLit: "GAP_ALARM is lit",
   displayNothing: "Nothing written",
   answer: "The compiler writes {answer}.",
   pieceLabel: "Marked piece: {piece}",

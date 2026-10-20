@@ -29,16 +29,17 @@ export const LABELS = {
   },
   captions: {
     asked: "The debugger holds the shop's line and refuses it.",
-    predict: "The compiler stops before it writes the CLASH line's branch.",
+    predict: "The compiler stops before it writes the GAP_ALARM line's branch.",
     steps: "The compiler at work on a choice of two lines.",
-    branch: "The compiled CLASH line on the whole machine, paused before the branch's FETCH edge.",
+    branch:
+      "The compiled GAP_ALARM line on the whole machine, paused before the branch's FETCH edge.",
     fault: "The compiler with every piece in R1.",
     compare: "The compiler's program for both rules beside Module 0's.",
     challenge: "The challenge asks you to write the instructions for one line.",
   },
   lines: {
     gap: "The gap rule: `display <= sensorA - sensorB`",
-    clash: "The CLASH rule: `if sensorA - sensorB >= 100 then lamps <= 4`",
+    clash: "The GAP_ALARM rule: `if sensorA - sensorB >= 100 then lamps <= 4`",
   },
   readings: {
     shop: "The shop's readings: room A -184, room B -250",

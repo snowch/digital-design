@@ -39,7 +39,7 @@ export const LABELS = {
     sensor: "A handler that reads a room's sensor for a user program, and its tests.",
   },
   fields: {
-    lamps: "R2 to light NIGHT and CLASH with job 3",
+    lamps: "R2 to light NIGHT and GAP_ALARM with job 3",
     shown: "What the program shows",
     c2: "C2 after a call system at 0A0",
   },

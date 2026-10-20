@@ -79,4 +79,20 @@ export const LABELS = {
   faults: {
     stuck: "The wire in the slice worth 2, stuck low",
   },
+  details: {
+    runDisplay: "When the program stops, the display does not show {actual}.",
+    runLamp: "When the program stops, GAP_ALARM is not {actual}.",
+    traceChanged: "Your answer, {actual}, is not the number instruction 3 changes.",
+    traceValue: "Instruction 3 does not give {actual}.",
+    traceNext: "After instruction 3, the machine does not run instruction {actual} next.",
+    tracePart: "The number instruction 3 gives does not come from {actual}.",
+    slicesHigh: "The slices worth 128, 64, 32 and 16 do not give {actual}.",
+    slicesLow: "The slices worth 8, 4, 2 and 1 do not give {actual}.",
+    slices:
+      "Type eight 1s and 0s, one for each slice, the slice worth 128 first; a space between the two groups of four is allowed.",
+  },
+  invalidFor: {
+    slices:
+      "Type eight 1s and 0s, one for each slice, the slice worth 128 first; a space between the two groups of four is allowed.",
+  },
 } as const;

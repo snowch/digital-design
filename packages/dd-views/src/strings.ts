@@ -704,7 +704,7 @@ export interface MeetStrings {
   readonly notSet: string;
   readonly shopCaption: string;
   readonly display: string;
-  /** A lamp's row: {name} is ALARM, NIGHT or CLASH. */
+  /** A lamp's row: {name} is ALARM, NIGHT or GAP_ALARM. */
   readonly lamp: string;
   readonly lit: string;
   readonly dark: string;
@@ -1065,7 +1065,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       roomA: "Room A",
       roomB: "Room B",
       display: "The display",
-      lamp: "The CLASH lamp",
+      lamp: "The GAP_ALARM lamp",
     },
     unanswered: "Fill in {fields} to run the tests.",
     invalid: "{field} must be a valid entry.",
@@ -1076,7 +1076,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     // Module 0. Drafted by the prose process (docs/notes/module-0-machine/briefs/F2V.md).
     details: {
       runDisplay: "When the program stops, the display does not show {actual}.",
-      runLamp: "When the program stops, CLASH is not {actual}.",
+      runLamp: "When the program stops, GAP_ALARM is not {actual}.",
       traceChanged: "Your answer, {actual}, is not the number instruction 3 changes.",
       traceValue: "Instruction 3 does not give {actual}.",
       traceNext: "After instruction 3, the machine does not run instruction {actual} next.",
@@ -1124,7 +1124,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       userRefusal:
         "{actual} is not the cause for this line. User mode refuses a load or store at a device's address (7C0 to 7F7) with 32, and resume, the control-register copies and stop with 22. Give 0 if user mode runs the line.",
       callLamps:
-        "{actual} is not it. Job 3 sets each lamp from one bit of R2: bit 0 ALARM, bit 1 NIGHT, bit 2 CLASH, as the table of jobs says. R2 is the word with those bits set.",
+        "{actual} is not it. Job 3 sets each lamp from one bit of R2: bit 0 ALARM, bit 1 NIGHT, bit 2 GAP_ALARM, as the table of jobs says. R2 is the word with those bits set.",
       callShown:
         "{actual} is not what the program shows. Follow R1, R2 and R5 through each call: job 2 leaves the reading of the room R2 names in R1, and job 1 shows R2.",
       callC2:

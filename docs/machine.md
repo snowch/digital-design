@@ -112,7 +112,7 @@ The shop's devices, one word each, at the top of the memory. A device answers wo
 | Address | Device | Read gives | A write | At reset |
 | --- | --- | --- | --- | --- |
 | `7C0` | the office display | the word it shows | sets the word it shows, read signed | 0 |
-| `7C8` | the lamps | bit 0 ALARM, bit 1 NIGHT, bit 2 CLASH | sets the lamps from bits 2 to 0 | 0 |
+| `7C8` | the lamps | bit 0 ALARM, bit 1 NIGHT, bit 2 GAP_ALARM | sets the lamps from bits 2 to 0 | 0 |
 | `7D0` | DOOR and WARM | bit 0 DOOR, bit 1 WARM, as Module 2 defines them | traps (`34`) | |
 | `7D8` | room A's sensor | room A's reading, in tenths of a degree | traps (`34`) | |
 | `7E0` | room B's sensor | room B's reading | traps (`34`) | |

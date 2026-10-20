@@ -17,7 +17,7 @@ import { CompileSteps } from "./CompileSteps";
 
 const lesson = { id: "compiler", challenges: [] } as unknown as Lesson;
 const t = S.beyond;
-const CLASH = "if sensorA - sensorB >= 100 then lamps <= 4";
+const GAP_ALARM = "if sensorA - sensorB >= 100 then lamps <= 4";
 
 function mount(props: Record<string, unknown>) {
   const interactive: Interactive = {
@@ -84,7 +84,7 @@ describe("the compiler at work", () => {
     const user = userEvent.setup();
     const options = ["if R3 < R4 signed goto after1", "if R3 >= R4 signed goto after1"];
     const { container } = mount({
-      lines: [{ label: "clash", text: CLASH }],
+      lines: [{ label: "clash", text: GAP_ALARM }],
       question: "Which branch?",
       options: options.map((v) => ({ value: v, label: v })),
       ask: { step: 4 },

@@ -13,7 +13,7 @@ import { PROSE } from "./nand.prose";
 
 const NAND_ONLY = { only: ["nand"] };
 
-const XOR_NAND_TEXT = `module clash(input logic A, input logic B, output logic Y);
+const XOR_NAND_TEXT = `module mismatch(input logic A, input logic B, output logic Y);
   logic NA;
   logic NB;
   logic P;
@@ -167,13 +167,13 @@ export const nand: LessonInput = {
       prose: PROSE.explanation,
       interactives: [
         {
-          id: "clash-expression",
+          id: "mismatch-expression",
           kind: "circuit-text",
           timeModel: "none",
           caption: LABELS.captions.clashExpression,
           lead: PROSE.clashExpressionLead,
           after: PROSE.clashExpressionAfter,
-          props: { libraryId: "clash-gates", form: "expression" },
+          props: { libraryId: "mismatch-gates", form: "expression" },
         },
       ],
     },
@@ -288,6 +288,6 @@ endmodule
     textbookExample:
       "Nand2Tetris's first project: given NAND as the one primitive, build Not, And, Or, Xor, then the multiplexer and demultiplexer and their multi-bit forms, in that order and in its own HDL, with De Morgan's laws as the stated reason; or a textbook's proof of functional completeness through NAND and NOR equivalents of each gate drawn as a table of symbols.",
     howThisDiffers:
-      "The reason to build from one gate is a constraint the learner meets in the course's story: the engineer who will build the freezer room's alarm board has a drawer full of one kind of chip, so a board of one part is a board that can be built and repaired from that drawer. The learner predicts what a NAND gate with both inputs on one signal does before any construction, builds NOT and then AND from it under a grader that refuses any other kind of gate, and meets OR as a drawn circuit to break, not to build: a cut wire shows up in only two of the four rows. The argument that one gate is enough is made from the CLASH circuit of the previous lesson, read as one detector per row, rather than from algebraic laws. XOR from NAND is the closing challenge, built for the two-sensor CLASH lamp; no multiplexer appears, and NOR is shown to do the same job.",
+      "The reason to build from one gate is a constraint the learner meets in the course's story: the engineer who will build the freezer room's alarm board has a drawer full of one kind of chip, so a board of one part is a board that can be built and repaired from that drawer. The learner predicts what a NAND gate with both inputs on one signal does before any construction, builds NOT and then AND from it under a grader that refuses any other kind of gate, and meets OR as a drawn circuit to break, not to build: a cut wire shows up in only two of the four rows. The argument that one gate is enough is made from the MISMATCH circuit of the previous lesson, read as one detector per row, rather than from algebraic laws. XOR from NAND is the closing challenge, built for the two-sensor MISMATCH lamp; no multiplexer appears, and NOR is shown to do the same job.",
   },
 };

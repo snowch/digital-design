@@ -12,7 +12,7 @@ import { GATE_CONSTRUCTS, rows3 } from "./gates";
 import { LABELS } from "./fewer-gates.labels";
 import { PROSE } from "./fewer-gates.prose";
 
-const XOR_FOUR_TEXT = `module clash(input logic A, input logic B, output logic Y);
+const XOR_FOUR_TEXT = `module mismatch(input logic A, input logic B, output logic Y);
   logic M;
   logic P;
   logic Q;

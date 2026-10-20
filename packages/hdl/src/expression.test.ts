@@ -14,13 +14,13 @@ describe("expressions of a gate circuit", () => {
     expect(expressionsOf(libraryCircuit("alarm"))).toEqual([
       { output: "ALARM", expression: "WARM & ~DOOR" },
     ]);
-    expect(expressionsOf(libraryCircuit("clash-gates"))[0]?.expression).toBe(
+    expect(expressionsOf(libraryCircuit("mismatch-gates"))[0]?.expression).toBe(
       "(WARM1 & ~WARM2) | (~WARM1 & WARM2)",
     );
     expect(expressionsOf(libraryCircuit("nand-tied"))[0]?.expression).toBe("~(A & A)");
   });
   it("writes a module that elaborates to a circuit with the same truth table", () => {
-    for (const id of ["alarm", "clash-gates", "call-rows", "nand-or", "xor-nand-4"]) {
+    for (const id of ["alarm", "mismatch-gates", "call-rows", "nand-or", "xor-nand-4"]) {
       const original = libraryCircuit(id);
       const result = elaborate(expressionModule(original));
       expect(result.circuit, id).toBeDefined();

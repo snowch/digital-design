@@ -102,7 +102,7 @@ export interface CpuState {
   /** The RAM's 960 bytes, from address 400. */
   readonly ram: readonly (number | undefined)[];
   readonly display: bigint;
-  /** ALARM, NIGHT and CLASH as bits 0, 1 and 2. */
+  /** ALARM, NIGHT and GAP_ALARM as bits 0, 1 and 2. */
   readonly lamps: number;
   readonly timer: bigint;
   /** Bit 0: the timer has reached 0; bit 1: the door has opened. */

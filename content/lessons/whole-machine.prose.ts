@@ -37,7 +37,7 @@ export const PROSE = {
   faultsLead:
     'Choose a join, predict which instruction first goes wrong, then press "Run to the end".',
   faultMq:
-    "With MQ held at 0, every load reads 0. The run still stops: the gap is 0, so the display shows 0 and CLASH stays off. Nothing halts; only the comparison shows the fault.",
+    "With MQ held at 0, every load reads 0. The run still stops: the gap is 0, so the display shows 0 and GAP_ALARM stays off. Nothing halts; only the comparison shows the fault.",
   faultNoHandler:
     "With NOHANDLER held at 1, the trap logic sees no handler, so the system call halts the machine. C4 holds `044`, set by the program's second line, but the control unit never learns it: the join between the datapath and the control unit carries the wrong bit.",
   faultCause:

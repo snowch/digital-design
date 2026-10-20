@@ -133,7 +133,7 @@ export function plainLine(instruction: number, address: number): PlainLine {
  * never sees and which later lessons ration.
  *
  * `gap`: how much warmer room A is than room B, on the office display, in tenths of a degree; and
- * the CLASH lamp when room A is 10.0 degrees or more warmer. Line 6 goes to line 9 (address 020)
+ * the GAP_ALARM lamp when room A is 10.0 degrees or more warmer. Line 6 goes to line 9 (address 020)
  * when the gap is under 100. It checks one way only. `gap-limit` leaves line 5's number to the
  * learner, as `{limit}`.
  */
@@ -249,7 +249,7 @@ export const numberOf = (v: bigint | undefined): string | undefined =>
   v === undefined ? undefined : signed64(v).toString();
 
 /** The lamps by name, bit 0 first. */
-export const LAMP_NAMES = ["ALARM", "NIGHT", "CLASH"] as const;
+export const LAMP_NAMES = ["ALARM", "NIGHT", "GAP_ALARM"] as const;
 
 /** Runs the machine until it stops, at most `limit` lines; the lines it ran, in order. */
 export function runToStop(sim: Simulator, limit = 500): { lines: number[]; stopped: boolean } {
@@ -309,7 +309,7 @@ export function meetAnswer(sim: Simulator, ask: MeetQuestion, register = 0): str
   return answer;
 }
 
-/** The lit lamps by name, `CLASH`, or `none`. */
+/** The lit lamps by name, `GAP_ALARM`, or `none`. */
 export function litLamps(lamps: number | undefined): string {
   if (lamps === undefined) return "X";
   const lit = LAMP_NAMES.filter((_, k) => (lamps >> k) & 1);
@@ -516,7 +516,7 @@ export function machineRun(
   }
   const start = referenceStart(filled(program, answers), inputsOf(given));
   const state = run(start.state, 500, start.inputs).state;
-  const lampName = String(given["lamp"] ?? "CLASH");
+  const lampName = String(given["lamp"] ?? "GAP_ALARM");
   const actual: Record<string, string> = {};
   const expected: Record<string, string> = {};
   let pass = true;

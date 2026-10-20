@@ -78,7 +78,7 @@ describe("facts for the system-calls lesson", () => {
 
   it("the construction's answers: 6, -66, 0A4", () => {
     expect(CALL_ANSWERS.map((a) => a.value)).toEqual(["6", "-66", "0A4"]);
-    expect((1 << 1) | (1 << 2)).toBe(6); // NIGHT is bit 1 of the lamps, CLASH bit 2
+    expect((1 << 1) | (1 << 2)).toBe(6); // NIGHT is bit 1 of the lamps, GAP_ALARM bit 2
     const quiz = SERVICE2_REFERENCE.replace(/program:[\s\S]*$/, "").replace(/\n$/, "");
     const s = run(
       `${SERVICE2_REFERENCE}\nprogram: nothing\n${CALL_QUIZ}\n        R1 <= 4\n        call system`,

@@ -7,39 +7,40 @@
 
 export const PROSE = {
   question:
-    "A shop has two freezer rooms, A and B. Each has a sensor. One cooling plant feeds both rooms, so each room stays at its own steady temperature. The office has a display and three lamps: ALARM, NIGHT and CLASH.\n\nA machine sits between the sensors and the office. It reads the rooms and decides what the display shows and which lamps light. The figure below draws them: the sensors on the left, the machine in the middle, the display and the lamps on the right.\n\nHow does the machine decide what the display shows?",
+    "A shop has two freezer rooms, A and B, each set to its own temperature and each with a sensor. The office has a display and three lamps: ALARM, NIGHT and GAP_ALARM.\n\nA machine sits between the sensors and the office. It reads the rooms and decides what the display shows and which lamps light. The figure below draws them: the sensors on the left, the machine in the middle, the display and the lamps on the right.\n\nHow does the machine decide what the display shows?",
   shopAfter:
     "Room A at -18.4 degrees sends -184. Room B, the colder room at -25.0 degrees, sends -250. Each number is in tenths of a degree.",
   motivation:
-    "The machine does not decide anything by itself. It runs a program: a list of instructions, numbered from 1, each saying one small thing to do. It runs one instruction at a time, in order, unless an instruction tells it to go to another instruction.\n\nThe machine keeps sixteen numbers, named R0 to R15. An instruction can set one of them, read a room, show a number on the display, or set the lamps.\n\nThe display shows how much warmer room A is than room B, in tenths of a degree. The rooms sit at their own temperatures: 6.6 degrees apart while both are cooling. A gap of 10.0 degrees or more means one room has stopped cooling, and the shop wants CLASH to light.\n\nThe shop's program has 9 instructions:\n\n1. R1 becomes room A's reading\n2. R2 becomes room B's reading\n3. R3 becomes R1 minus R2\n4. Show R3 on the display\n5. R4 becomes 100\n6. If R3 is less than R4, go to instruction 9\n7. R5 becomes 4\n8. Set the lamps from R5\n9. Stop\n\nRunning these instructions is all the machine does. The next figure asks you which of them it runs.",
+    "The machine does not decide anything by itself. It runs a program: a list of instructions, numbered from 1, each saying one small thing to do. It runs one instruction at a time, in order, unless an instruction tells it to go to another instruction.\n\nThe machine keeps sixteen numbers, named R0 to R15. An instruction can set one of them, read a room, show a number on the display, or set the lamps.\n\nThe display shows how much warmer room A is than room B, in tenths of a degree. Each room stays at its own set temperature, and the gap between them is normally small. The shop treats a gap of 10.0 degrees or more as a sign that something is wrong, and wants GAP_ALARM to light.\n\nThe shop's program has 9 instructions:\n\n1. R1 becomes room A's reading\n2. R2 becomes room B's reading\n3. R3 becomes R1 minus R2\n4. Show R3 on the display\n5. R4 becomes 100\n6. If R3 is less than R4, go to instruction 9\n7. R5 becomes 4\n8. Set the lamps from R5\n9. Stop\n\nRunning these instructions is all the machine does. The next figure asks you which of them it runs.",
   prediction:
     'The figure shows the program and the rooms at -184 and -250. Its numbers and buttons stay hidden until you choose an answer. Work out what instruction 3 gives and what instruction 6 then does. Choose an answer and press "Check my prediction".',
   p1Question:
     "With room A at -184 and room B at -250, which instructions does the machine run from instruction 1 until it stops?",
   p1Explain:
-    "R3 becomes -184 minus -250, which is 66. Instruction 4 shows 66 on the display. Instruction 6 compares R3 (66) with R4 (100). 66 is less than 100, so it goes to instruction 9. Instructions 7 and 8 never run, and CLASH stays dark. The machine runs instructions 1, 2, 3, 4, 5, 6 and 9.",
+    "R3 becomes -184 minus -250, which is 66. Instruction 4 shows 66 on the display. Instruction 6 compares R3 (66) with R4 (100). 66 is less than 100, so it goes to instruction 9. Instructions 7 and 8 never run, and GAP_ALARM stays dark. The machine runs instructions 1, 2, 3, 4, 5, 6 and 9.",
   runLead:
     'This is the same machine and program, with its buttons. Each press of "Run one instruction" runs one instruction. The row marked "Next" is the instruction it runs next.\n\nWatch "The numbers it keeps": the number an instruction changes is marked "Changed". Watch "What the shop sees" after instruction 4. Press "Run one instruction" until the program stops. Then press "Start again".\n\nChange room A\'s reading to -50. This is -5.0 degrees: room A\'s cooling has failed. Press "Run" to watch the whole program. "Pause" stops a run. Which instructions run this time, and what does the display show?',
   runAfter:
-    "With the rooms at -184 and -250, each instruction changed at most one thing. R1 became -184, R2 -250, R3 66, R4 100, then the display showed 66. Instructions 7 and 8 did not run and CLASH stayed dark, because 66 is less than 100.",
+    "With the rooms at -184 and -250, each instruction changed at most one thing. R1 became -184, R2 -250, R3 66, R4 100, then the display showed 66. Instructions 7 and 8 did not run and GAP_ALARM stayed dark, because 66 is less than 100.",
   construction:
-    "The shop's manager wants CLASH to light when room A is 5.0 degrees or more warmer than room B, not 10.0 degrees. Instruction 5 sets R4 to 100: the limit. Instruction 6 compares the gap in R3 against that limit. To change when CLASH lights, you change one number in one instruction.",
+    "The shop's manager wants GAP_ALARM to light when room A is 5.0 degrees or more warmer than room B, not 10.0 degrees. Instruction 5 sets R4 to 100: the limit. Instruction 6 compares the gap in R3 against that limit. To change when GAP_ALARM lights, you change one number in one instruction.",
   limitLead:
     "The figure in the investigation runs the program with 100; you can try readings there first.",
   c1Task:
-    "Type the number instruction 5 should give R4 so that CLASH lights when room A is 5.0 degrees or more warmer than room B, and stays dark when the gap is less.\n\nThe tests run the machine with your number in instruction 5 and room B at -250, for three readings of room A: -190 (gap 60), -200 (50) and -201 (49). CLASH must light for gaps 60 and 50, and stay dark for 49. The box starts at 100. With 100, two of the 3 tests fail.",
+    "Type the number instruction 5 should give R4 so that GAP_ALARM lights when room A is 5.0 degrees or more warmer than room B, and stays dark when the gap is less.\n\nThe tests run the machine with your number in instruction 5 and room B at -250, for three readings of room A: -190 (gap 60), -200 (50) and -201 (49). GAP_ALARM must light for gaps 60 and 50, and stay dark for 49. The box starts at 100. With 100, two of the 3 tests fail.",
   c1Hints: [
-    "Instruction 6 goes to instruction 9, past the lamp, when R3 is less than R4. CLASH lights only when R3 is not less than R4.",
+    "Instruction 6 goes to instruction 9, past the lamp, when R3 is less than R4. GAP_ALARM lights only when R3 is not less than R4.",
     "A gap exactly equal to the limit is not less than it, so the lamp lights. Think about the gap of 50.",
-    "With 100 in instruction 5, a gap of 100 lights CLASH and a gap of 99 does not.",
+    "With 100 in instruction 5, a gap of 100 lights GAP_ALARM and a gap of 99 does not.",
     "5.0 degrees is 50 tenths of a degree.",
     "The limit is 50.",
   ],
   roomBFailsLead:
-    "Room B's cooling fails. Its room warms to -5.0 degrees, so its sensor reads -50. Room A stays at -184.\n\nRoom B is now 13.4 degrees warmer than room A. The shop would want CLASH to light: the two rooms are far apart. The figure runs the same program with these readings. Read the program again before you answer.",
-  p2Question: "Room A reads -184 and room B -50. When the program stops, is the CLASH lamp lit?",
+    "Room B's cooling fails. Its room warms to -5.0 degrees, so its sensor reads -50. Room A stays at -184.\n\nRoom B is now 13.4 degrees warmer than room A. The shop would want GAP_ALARM to light: the two rooms are far apart. The figure runs the same program with these readings. Read the program again before you answer.",
+  p2Question:
+    "Room A reads -184 and room B -50. When the program stops, is the GAP_ALARM lamp lit?",
   p2Explain:
-    "R3 becomes -184 minus -50, which is -134. The display shows -134. Instruction 6 compares -134 with 100. -134 is less than 100, so the machine goes to instruction 9. CLASH stays dark.\n\nThe program checks one way only: whether room A is warmer than room B. When room B is the warmer one, the gap is below zero, and the lamp never lights. The machine did what the instructions said. It cannot know what the shop meant. A wrong program gives a wrong answer, and the machine runs it without complaint.",
+    "R3 becomes -184 minus -50, which is -134. The display shows -134. Instruction 6 compares -134 with 100. -134 is less than 100, so the machine goes to instruction 9. GAP_ALARM stays dark.\n\nThe program checks one way only: whether room A is warmer than room B. When room B is the warmer one, the gap is below zero, and the lamp never lights. The machine did what the instructions said. It cannot know what the shop meant. A wrong program gives a wrong answer, and the machine runs it without complaint.",
   explanation:
     'Where are the instructions while the machine runs them? In its memory. The machine keeps each instruction as one number there. R0 to R15 are kept apart from the memory, inside the machine. The rooms\' readings come in from the sensors when an instruction reads them.\n\nTo run an instruction, the machine reads that instruction\'s number from memory, does what it says, and moves to the next instruction, unless the instruction says to go elsewhere.\n\nInstruction 5, "R4 becomes 100", is kept as 620773476. The 100 is part of that number: change instruction 5\'s number to 101 and it is kept as 620773477. So changing the limit, as you did in the construction, changed one kept number. Not every part of an instruction is kept as written: instruction 6 keeps "go to instruction 9" as 3, the count of instructions from instruction 6 to instruction 9.',
   keptLead:
@@ -51,18 +52,18 @@ export const PROSE = {
   inYourHeadLead:
     "Work this one out from the program first. Then check it in the investigation's figure if you like.",
   c2Task:
-    "Room A reads -100. Room B reads -250. Type the number the display shows when the program stops. Then choose whether the CLASH lamp is lit or dark. The tests run the machine with these readings and compare the display and the lamp with your answers. There are 2 tests.",
+    "Room A reads -100. Room B reads -250. Type the number the display shows when the program stops. Then choose whether the GAP_ALARM lamp is lit or dark. The tests run the machine with these readings and compare the display and the lamp with your answers. There are 2 tests.",
   c2Hints: [
     "The display shows R3. Instruction 3 works it out: room A's reading minus room B's.",
     "Subtracting a negative: -100 minus -250 is the same as -100 plus 250.",
-    "Look back at the earlier run: with -184 and -250, R3 was 66. Because 66 is less than 100, CLASH stayed dark.",
+    "Look back at the earlier run: with -184 and -250, R3 was 66. Because 66 is less than 100, GAP_ALARM stayed dark.",
     "R3 is 150.",
-    "The display shows 150. CLASH is lit, because 150 is not less than 100.",
+    "The display shows 150. GAP_ALARM is lit, because 150 is not less than 100.",
   ],
   reflection:
     "A computer runs a program. The instructions are kept as numbers in its memory. It runs them one at a time.\n\nThe machine follows the instructions exactly. The program decides what the display means. When the program is wrong, the machine is wrong with it. The machine is a box. It runs instructions. But what is inside the box, and how does it work out 66?",
   modelVsReality:
-    "The figures on this page run the machine in the course's simulator. Every number a figure shows comes from the simulator and the program it runs: the numbers it keeps, the display, the lamps, and the number each instruction is kept as. The degrees in the text are the machine's tenths written as degrees: -184 tenths is -18.4 degrees. The machine works in tenths only.\n\nEach press of \"Run one instruction\" runs one instruction. A real computer runs many millions of instructions a second. You see one instruction at a time here because the course is about how each instruction works.\n\nThe rooms' readings here are numbers you type. A real sensor's reading changes on its own. A real shop's computer would also run instructions for many other jobs. This machine runs one program, nine instructions long, and stops.",
+    "The figures on this page run the machine in the course's simulator. Every number a figure shows comes from the simulator and the program it runs: the numbers it keeps, the display, the lamps, and the number each instruction is kept as. The degrees in the text are the machine's tenths written as degrees: -184 tenths is -18.4 degrees. The machine works in tenths only.\n\nEach press of \"Run one instruction\" runs one instruction. A real computer runs many millions of instructions a second. You see one instruction at a time here because the course is about how each instruction works.\n\nThe rooms' readings here are numbers you type. A real sensor's reading changes on its own. A real shop's computer would also run instructions for many other jobs. This machine runs one program, nine instructions long, and stops.\n\nThe gap check is a teaching example. A real cold-store watch checks each room against its own safe limits as well; a difference alone cannot say which room, or which part, is at fault.",
   runAfterChanged:
-    "With room A at -50, R3 becomes 200. 200 is not less than 100, so instruction 6 does not go to instruction 9. Instructions 7 and 8 run: R5 becomes 4 and CLASH lights. The program did not change. Only a reading changed, and the same instructions gave a different display and a lit lamp.",
+    "With room A at -50, R3 becomes 200. 200 is not less than 100, so instruction 6 does not go to instruction 9. Instructions 7 and 8 run: R5 becomes 4 and GAP_ALARM lights. The program did not change. Only a reading changed, and the same instructions gave a different display and a lit lamp.",
 } as const;

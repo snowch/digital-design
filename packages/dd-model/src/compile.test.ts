@@ -12,7 +12,7 @@ import { instructionHex } from "./machine";
 import { MEET_PROGRAMS } from "./meet";
 
 const GAP = "display <= sensorA - sensorB";
-const CLASH = "if sensorA - sensorB >= 100 then lamps <= 4";
+const GAP_ALARM = "if sensorA - sensorB >= 100 then lamps <= 4";
 const words = (program: string) =>
   assemble(program).lines.flatMap((l) =>
     l.instruction === undefined ? [] : [instructionHex(l.instruction)],
@@ -34,8 +34,8 @@ describe("the compiler", () => {
     expect(runCompiled(c, -184, -250)).toMatchObject({ display: "66", lamps: 0, stopped: true });
   });
 
-  it("writes the CLASH rule in seven steps, Module 0's lines 1 to 3 and 5 to 9", () => {
-    const c = compile(CLASH);
+  it("writes the GAP_ALARM rule in seven steps, Module 0's lines 1 to 3 and 5 to 9", () => {
+    const c = compile(GAP_ALARM);
     expect(c.steps.map((s) => s.after)).toEqual([
       "if R1 - sensorB >= 100 then lamps <= 4",
       "if R1 - R2 >= 100 then lamps <= 4",
@@ -86,13 +86,13 @@ describe("the compiler", () => {
     ]);
     // Module 0's explanation keeps line 5 as this number.
     expect(parseInt("25004064", 16)).toBe(620773476);
-    // CLASH dark at a gap of 66; lit with room A at -100, a gap of 150.
+    // GAP_ALARM dark at a gap of 66; lit with room A at -100, a gap of 150.
     expect(runCompiled(c, -184, -250)).toMatchObject({ lamps: 0, stopped: true });
     expect(runCompiled(c, -100, -250)).toMatchObject({ lamps: 4, stopped: true });
   });
 
   it("writes the two rules as 12 instructions, 10 run with the shop's readings, against Module 0's 9 and 7", () => {
-    const c = compile(`${GAP}\n${CLASH}`);
+    const c = compile(`${GAP}\n${GAP_ALARM}`);
     expect(c.instructions).toHaveLength(12);
     const run = runCompiled(c, -184, -250);
     expect(run).toMatchObject({ display: "66", lamps: 0, ran: 10, stopped: true });

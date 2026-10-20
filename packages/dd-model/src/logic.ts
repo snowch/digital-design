@@ -76,19 +76,19 @@ export function alarmOrCircuit(): Circuit {
 }
 
 /**
- * CLASH from AND, OR and NOT: 1 when the two sensors' WARM bits disagree, one detector per row
+ * MISMATCH from AND, OR and NOT: 1 when the two sensors' WARM bits disagree, one detector per row
  * where they do. The same truth table as one XOR gate.
  */
-export function clashGatesCircuit(): Circuit {
-  const b = new CircuitBuilder("clash-gates");
+export function mismatchGatesCircuit(): Circuit {
+  const b = new CircuitBuilder("mismatch-gates");
   const w1 = b.input("WARM1");
   const w2 = b.input("WARM2");
   const n1 = b.not(w1, { name: "not1", output: b.net("NOT1") });
   const n2 = b.not(w2, { name: "not2", output: b.net("NOT2") });
   const only1 = b.and([w1, n2], { name: "and1", output: b.net("ONLY1") });
   const only2 = b.and([n1, w2], { name: "and2", output: b.net("ONLY2") });
-  const check = b.or([only1, only2], { name: "or", output: b.net("CLASH") });
-  b.output("CLASH", check);
+  const check = b.or([only1, only2], { name: "or", output: b.net("MISMATCH") });
+  b.output("MISMATCH", check);
   return placed(b.build(), {
     "in:WARM1": [0, 1],
     "in:WARM2": [0, 9],
@@ -97,22 +97,22 @@ export function clashGatesCircuit(): Circuit {
     and1: [11, 1],
     and2: [11, 9],
     or: [17, 5],
-    "out:CLASH": [22, 5],
+    "out:MISMATCH": [22, 5],
   });
 }
 
-/** CLASH as one XOR gate. */
-export function clashXorCircuit(): Circuit {
-  const b = new CircuitBuilder("clash-xor");
+/** MISMATCH as one XOR gate. */
+export function mismatchXorCircuit(): Circuit {
+  const b = new CircuitBuilder("mismatch-xor");
   const w1 = b.input("WARM1");
   const w2 = b.input("WARM2");
-  const check = b.xor([w1, w2], { name: "xor", output: b.net("CLASH") });
-  b.output("CLASH", check);
+  const check = b.xor([w1, w2], { name: "xor", output: b.net("MISMATCH") });
+  b.output("MISMATCH", check);
   return placed(b.build(), {
     "in:WARM1": [0, 1],
     "in:WARM2": [0, 4],
     xor: [5, 1],
-    "out:CLASH": [10, 1],
+    "out:MISMATCH": [10, 1],
   });
 }
 
@@ -362,8 +362,8 @@ export const LOGIC_LIBRARY: Readonly<Record<string, () => Circuit>> = {
   "nor-tied": () => tiedGate("nor"),
   alarm: () => alarmCircuit(),
   "alarm-try": () => alarmOrCircuit(),
-  "clash-gates": () => clashGatesCircuit(),
-  "clash-xor": () => clashXorCircuit(),
+  "mismatch-gates": () => mismatchGatesCircuit(),
+  "mismatch-xor": () => mismatchXorCircuit(),
   "nand-or": () => nandOrCircuit(),
   "xor-nand-5": () => xorNandFiveCircuit(),
   "xor-nand-4": () => xorNandFourCircuit(),

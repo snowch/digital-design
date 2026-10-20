@@ -1,5 +1,5 @@
 objectives.2: Read the 1s and 0s the slices give as the number.
-levels.line: The line
+levels.line: The instruction
 levels.parts: The machine's parts
 levels.adder: The part that adds
 levels.sixteen: Sixteen slices
@@ -13,10 +13,10 @@ captions.ladder: Open each level to see 66.
 captions.slices: Type the 1s and 0s the eight slices give.
 captions.stuck: Choose whether a wire is stuck.
 captions.tracePaused: See what the new rooms read.
-captions.trace: Trace line 3.
-fields.slices: Eight 1s and 0s, one for each slice.
+captions.trace: Trace instruction 3.
+fields.slices: Eight 1s and 0s, the slice worth 128 first
 cases.slicesHigh: Slices worth 128, 64, 32 and 16.
 cases.slicesLow: Slices worth 8, 4, 2 and 1.
 options.stuck66: 66
 options.stuck64: 64
-options.stuckStops: The machine stops at line 3.
+options.stuckStops: The machine stops at instruction 3.
