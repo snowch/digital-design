@@ -46,7 +46,7 @@ export const LABELS = {
     display: "Display",
     title: "The shop and the machine",
     summary:
-      "Each room has a sensor that sends its reading to the machine. The machine controls the office display and the three lamps.",
+      "Each room has a sensor that sends its reading to the machine. One cooling plant feeds both rooms. The machine controls the office display and the three lamps.",
   },
   options: {
     p1All: "All nine instructions, 1 to 9",
