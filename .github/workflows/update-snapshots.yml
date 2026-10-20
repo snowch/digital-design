@@ -1,0 +1,31 @@
+# Copyright © 2026 Christopher Snow
+name: Update screenshots
+on:
+  workflow_dispatch:
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+      - name: Dependencies, exactly as the lockfile says
+        run: npm ci
+      - name: Playwright's Chromium, for the educational tests
+        run: npx playwright install --with-deps chromium
+      - name: Build the site the tests drive
+        run: npm run build -w @dd/course
+      - name: Regenerate the aesthetics baselines on purpose
+        env:
+          CI: "true"
+        run: |
+          npx playwright test tests/educational/aesthetics.spec.ts -g "the scenes and a sum on paper look as designed" --update-snapshots=all || true
+          npx playwright test tests/educational/aesthetics.spec.ts -g "the lesson header and its figures match their stored screenshots" --update-snapshots=all || true
+      - name: The new baselines, for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: baselines
+          path: |
+            tests/educational/aesthetics.spec.ts-snapshots/

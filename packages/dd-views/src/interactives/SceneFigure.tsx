@@ -109,12 +109,21 @@ export const SceneFigure = withProps(
         ),
       ) +
       2 * GPAD;
-    const gap0 = Math.max(48, ...items.map((i) => nameWidth(i) + WIRE_SPARE));
-    const inner0 = Math.max(40, ...outputs.map((o) => nameWidth(o) + WIRE_SPARE));
+    // A wire's column is at least a name's width and the wire's spare, or a floor when no wire in
+    // it is named. On a narrow card, where scaling is barred by the text-size floor, an unnamed
+    // column gives up its floor and keeps only the spare, so a scene whose names fit still fits.
+    const narrow = (floor: number, ws: { signal?: string | undefined; width: number }[]) =>
+      Math.max(...ws.map((w) => nameWidth(w) + WIRE_SPARE), floor);
+    const wide0 = narrow(48, items);
+    const wideInner0 = narrow(40, outputs);
     const circuitW = Math.max(40, textWidth(data.circuit) + 24);
     const outputsW = Math.max(...outputs.map(outputWidth));
-    const natural = PAD + left + gap0 + circuitW + inner0 + outputsW + PAD;
-    const extra = Math.max(0, Math.min(available - natural, STRETCH));
+    const natural = PAD + left + wide0 + circuitW + wideInner0 + outputsW + PAD;
+    const squeezed = natural > available;
+    const gap0 = squeezed ? narrow(32, items) : wide0;
+    const inner0 = squeezed ? narrow(24, outputs) : wideInner0;
+    const innerNatural = PAD + left + gap0 + circuitW + inner0 + outputsW + PAD;
+    const extra = Math.max(0, Math.min(available - innerNatural, STRETCH));
     const gap = gap0 + extra * 0.6;
     const inner = inner0 + extra * 0.4;
 
