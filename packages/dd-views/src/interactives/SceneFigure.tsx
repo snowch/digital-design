@@ -171,6 +171,8 @@ export const SceneFigure = withProps(
 
     // A drawing a little wider than its card, as on a phone, is drawn a little smaller, never so
     // small that its 12-pixel text falls under the course's 11 pixels; a wider one still scrolls.
+    // The drawn width is floored, so a drawing scaled to the card never spills a rounding pixel
+    // into a sideways scroll.
     const scale = width > available && available / width >= 11 / 12 ? available / width : 1;
 
     return (
@@ -179,8 +181,8 @@ export const SceneFigure = withProps(
         <div className="scene-wrap" ref={ref}>
           <svg
             className="scene"
-            width={width * scale}
-            height={height * scale}
+            width={Math.floor(width * scale)}
+            height={Math.floor(height * scale)}
             viewBox={`0 0 ${width} ${height}`}
             role="img"
             aria-label={`${data.labels.title}. ${data.labels.summary}`}
