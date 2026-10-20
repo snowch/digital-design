@@ -16,12 +16,12 @@ const parsed = parseLesson(lesson);
 const challenge = (id: string) => parsed.challenges.find((c) => c.id === id)!;
 
 describe("facts for the lesson on what a computer does", () => {
-  it("runs lines 1 to 6 and 9 on Module 1's rooms, and shows 66 with CLASH dark", () => {
+  it("runs instructions 1 to 6 and 9 on Module 1's rooms, and shows 66 with CLASH dark", () => {
     expect(meetFigureAnswer(lesson, "predict-lines")).toBe("1 2 3 4 5 6 9");
     expect(meetRun(lesson, "run")).toEqual({ lines: "1 2 3 4 5 6 9", display: "66", lamps: 0 });
   });
 
-  it("with room A at -50, shows 200 and lights CLASH, lines 7 and 8 run", () => {
+  it("with room A at -50, shows 200 and lights CLASH, instructions 7 and 8 run", () => {
     expect(meetRun(lesson, "run", { SENSORA: "-50" })).toEqual({
       lines: "1 2 3 4 5 6 7 8 9",
       display: "200",
@@ -38,14 +38,14 @@ describe("facts for the lesson on what a computer does", () => {
     });
   });
 
-  it("keeps line 1 as 939530200, and the nine lines as the numbers the fact sheet lists", () => {
+  it("keeps instruction 1 as 939530200, and the nine instructions as the numbers the fact sheet lists", () => {
     expect(meetLines(GAP).map((l) => l.stored)).toEqual([
       939530200, 939534304, 319959040, 1208158144, 620773476, 1446248451, 620777476, 1208289224,
       2214592512,
     ]);
   });
 
-  it("line 5 with 101 is kept as 620773477; line 6 keeps its way to line 9 as 3", () => {
+  it("instruction 5 with 101 is kept as 620773477; instruction 6 keeps its way to instruction 9 as 3", () => {
     const with101 = meetLines(programText(GAP_LIMIT).replace("{limit}", "101"));
     expect(with101[4]?.stored).toBe(620773477);
     expect(meetLines(GAP)[5]!.stored & 0xfff).toBe(3);

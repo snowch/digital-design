@@ -97,7 +97,7 @@ export const instructions: LessonInput = {
   module: 8,
   order: 1,
   objectives: [...LABELS.objectives],
-  introduces: ["instruction", "datapath"],
+  introduces: ["datapath"],
   sections: [
     { kind: "question", title: LABELS.titles.question, prose: PROSE.question },
     {

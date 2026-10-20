@@ -70,7 +70,15 @@ const SHOWN = [
 ].filter((s): s is string => s !== undefined);
 
 describe("Module 0's figures say nothing a later lesson rations", () => {
-  const terms = [...new Set([...LESSONS.flatMap((l) => l.introduces), ...MODULE_10])];
+  // A term at home in Module 0 itself (the first lesson introduces "instruction") is not rationed
+  // against it; only the terms of every later lesson are.
+  const home0 = new Set(LESSONS.filter((l) => l.module === 0).flatMap((l) => l.introduces));
+  const terms = [
+    ...new Set([
+      ...LESSONS.filter((l) => l.module !== 0).flatMap((l) => l.introduces),
+      ...MODULE_10,
+    ]),
+  ].filter((t) => !home0.has(t));
 
   it("covers the terms of every lesson after it", () => {
     expect(terms.length).toBeGreaterThan(60);
