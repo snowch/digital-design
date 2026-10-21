@@ -7,7 +7,7 @@ Each part is used as a box, its insides hidden. You can look at one level at a t
 prediction: The machine is paused before instruction 3: R3 becomes R1 minus R2. The part that adds and subtracts has already worked out its answer, and R1 and R2 already reach it, but R3 has not changed yet. The part sends its answer out on 64 wires, each a 0 or a 1. The figure shows the eight wires of least worth, with each wire's worth above it. Which of these wires must give 1 for the answer to be 66?
 p1Explain: 66 is 64 + 2, so the wires worth 64 and 2 give 1. The other wires give 0, and no wire is worth 66. The 56 wires of higher worth all give 0 for this answer.
 
-The drawing below starts at the four slices of least worth. The slice worth 2 is marked: its wire is one of the two that give 1. Press "Down a level" to open it, down to the one wire that carries the 1.
+The drawing below starts inside the slice worth 2: its adding part, marked. Press "Down a level" to open it, down to the one wire that carries the 1.
 levelLine: This is instruction 3. The machine is about to run it.
 levelParts: The whole machine's drawing. It is wide; on a small screen, a strip above shows all of it. The part that adds is marked.
 levelAdder: The part that adds, opened into four boxes of 16 slices each. The first box is marked.

@@ -84,7 +84,7 @@ export const insideTheMachine: LessonInput = {
             inputs: ROOMS,
             lines: 2,
             strip: true,
-            levels: LEVELS.slice(4, 9),
+            levels: LEVELS.slice(6, 9),
             question: PROSE.p1Question,
             options: [
               { value: "64 + 2", label: LABELS.options.p1Two },

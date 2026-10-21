@@ -225,10 +225,15 @@ test.describe("the ladder", () => {
     const figure = page.locator("#ix-predict-slices");
     await figure.scrollIntoViewIfNeeded();
     await expect(figure.locator(".ladder-reading")).toHaveCount(0);
-    // The levels' words show from the start: they state no number.
+    // The strip of the eight wires of least worth shows its worths, but every wire's value
+    // stays a question mark, and the levels' words state no number.
+    await expect(figure.locator(".strip-table td")).toContainText(["?"]);
     await figure.getByRole("radio").first().check();
     await figure.getByRole("button", { name: V.prediction.commit }).click();
     await expect(figure.locator("[role=status]").first()).toContainText(V.prediction.match);
-    await expect(figure.locator(".ladder-reading")).toContainText("01000010");
+    // The strip's wires reveal, read off the simulator: 01000010, the wires worth 64 and 2
+    // marked, and the level's reading shows only now.
+    await expect(figure.locator(".strip-table")).toContainText("01000010");
+    await expect(figure.locator(".ladder-reading")).toHaveCount(1);
   });
 });
