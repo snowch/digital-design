@@ -124,6 +124,9 @@ test.describe("the machine at work", () => {
     await expect(figure.getByRole("button", { name: M.step })).toBeVisible();
   });
 
+  // The runner's compact window (issue #13): the whole program on a phone, the machine's
+  // state always on show, and one event line under the controls that says what the line
+  // the machine just ran did. These assertions read the compact window's own elements.
   test("a line at a time: the next line moves, the changed number is marked, the display shows 66", async ({
     page,
   }) => {
@@ -132,22 +135,39 @@ test.describe("the machine at work", () => {
     const figure = page.locator("#ix-run");
     await figure.scrollIntoViewIfNeeded();
     const step = figure.getByRole("button", { name: M.step });
-    await expect(figure.locator(".datapath-status")).toHaveText(format(M.status.next, { line: 1 }));
+    // The whole program shows from the first load, and no event line invents a change.
+    await expect(figure.locator(".meet-window .meet-line")).toHaveCount(9);
+    await expect(figure.locator(".meet-event")).toHaveCount(0);
+    await expect(figure.locator(".meet-window-position")).toHaveText(
+      format(M.window.position, { n: 1, total: 9 }),
+    );
     await step.click();
-    await expect(figure.locator(".datapath-status")).toHaveText(format(M.status.next, { line: 2 }));
-    await expect(figure.locator(".meet-numbers tr.row-current th")).toHaveText("R1");
-    await expect(figure.locator(".meet-numbers tr.row-current td").first()).toHaveText("-184");
+    await expect(figure.locator(".meet-window-position")).toHaveText(
+      format(M.window.position, { n: 2, total: 9 }),
+    );
+    await expect(figure.locator(".meet-event")).toHaveText(
+      format(M.window.eventRegister, { line: 1, name: "R1", value: "-184" }),
+    );
+    const r1 = figure.locator(".meet-state .meet-tile.row-current");
+    await expect(r1.locator(".meet-tile-name")).toHaveText("R1");
+    await expect(r1.locator(".meet-tile-value")).toHaveText("-184");
     for (let k = 0; k < 3; k++) await step.click();
-    await expect(figure.locator(".meet-shop tr").first()).toContainText("66");
+    // Instruction 4 put 66 on the display; the display tile shows it.
+    const display = figure.locator(".meet-state .meet-tile", { hasText: M.display });
+    await expect(display.locator(".meet-tile-value")).toHaveText("66");
     // The run goes on a line at a time and can be paused, then finished.
     await figure.getByRole("button", { name: M.run, exact: true }).click();
     await figure.getByRole("button", { name: M.pause, exact: true }).click();
     await figure.getByRole("button", { name: M.run, exact: true }).click();
-    await expect(figure.locator(".datapath-status")).toHaveText(
-      format(M.status.stopped, { line: 9 }),
+    await expect(figure.locator(".meet-event")).toHaveText(
+      format(M.window.eventStopped, { line: 9 }),
       { timeout: 30_000 },
     );
-    await expect(figure.locator(".meet-shop")).toContainText(format(M.lamp, { name: "GAP_ALARM" }));
+    const gapAlarm = figure.locator(".meet-state .meet-tile", { hasText: "GAP_ALARM" });
+    await expect(gapAlarm.locator(".meet-tile-value")).toHaveText(M.lit);
+    await expect(
+      figure.locator('.meet-window tr[aria-current="true"] .meet-line-number'),
+    ).toHaveText("9");
     await expect(step).toBeDisabled();
   });
 
@@ -158,13 +178,14 @@ test.describe("the machine at work", () => {
     await figure.scrollIntoViewIfNeeded();
     await figure.getByRole("spinbutton", { name: M.roomA }).fill("-50");
     await figure.getByRole("button", { name: M.run, exact: true }).click();
-    await expect(figure.locator(".datapath-status")).toHaveText(
-      format(M.status.stopped, { line: 9 }),
+    await expect(figure.locator(".meet-event")).toHaveText(
+      format(M.window.eventStopped, { line: 9 }),
       { timeout: 30_000 },
     );
-    const shop = figure.locator(".meet-shop tr");
-    await expect(shop.first()).toContainText("200");
-    await expect(shop.last()).toContainText(M.lit);
+    const display = figure.locator(".meet-state .meet-tile", { hasText: M.display });
+    await expect(display.locator(".meet-tile-value")).toHaveText("200");
+    const gapAlarm = figure.locator(".meet-state .meet-tile", { hasText: "GAP_ALARM" });
+    await expect(gapAlarm.locator(".meet-tile-value")).toHaveText(M.lit);
   });
 
   test("the stuck wire puts 64 on the display, and its outcome shows once it has run", async ({
