@@ -21,9 +21,11 @@ export function OutputStrip({ sim, shown }: { sim: Simulator; shown: boolean }) 
   const strings = useViewStrings();
   const t = strings.meet.strip;
   const digits = useMemo(() => sliceDigits(sim, 8), [sim]);
+  // `sliceDigits` writes the highest bit first, so the strip's first column (worth 128) is
+  // digits[0], and the column worth WORTHS[k] reads digits[k]: the same index, not reversed.
   const ones = useMemo(
     () =>
-      WORTHS.filter((_, k) => digits[WORTHS.length - 1 - k] === "1")
+      WORTHS.filter((_, k) => digits[k] === "1")
         .map(String)
         .join(" and "),
     [digits],
@@ -46,10 +48,10 @@ export function OutputStrip({ sim, shown }: { sim: Simulator; shown: boolean }) 
           <tr>
             <th scope="row">{t.wireHeading}</th>
             {WORTHS.map((w, k) => {
-              const on = digits[WORTHS.length - 1 - k] === "1";
+              const on = digits[k] === "1";
               return (
                 <td key={w} className={shown ? (on ? "strip-one" : "strip-zero") : undefined}>
-                  {shown ? digits[WORTHS.length - 1 - k] : t.hidden}
+                  {shown ? digits[k] : t.hidden}
                 </td>
               );
             })}
