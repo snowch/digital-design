@@ -2,11 +2,10 @@
 
 // @vitest-environment jsdom
 
-// The mobile presentation of the run investigation (`mobile: true`): the whole program on show by
-// default, with a Follow execution switch to the three-instruction window. Both modes are views over
-// the real machine: they follow its next instruction, browsing does not run it, and the summary
-// under the controls says what the last instruction changed, read off the machine's own
-// before-and-after snapshots. Without `mobile` the figure keeps its full-list table.
+// The compact mobile runner (`mobile: true`): the whole program with one row per instruction, the
+// machine's state always on show, and one short event line after a real step. No Ready card or
+// empty "What changed?" panel renders before the first step. Every value comes from the real
+// simulator's snapshots. Without `mobile` the figure keeps its full-list table and status line.
 
 import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -39,7 +38,7 @@ function mount(props: Record<string, unknown>, id = "run") {
   return render(<MachineAtWork lesson={lesson} interactive={interactive} store={store} />);
 }
 
-/** The program rows on show, as "number text", without the screen-reader-only marks. */
+/** The program rows, as "number text", without the screen-reader-only marks. */
 function programRows(): string[] {
   return within(document.querySelector(".meet-window") as HTMLElement)
     .getAllByRole("row")
@@ -62,12 +61,29 @@ function rowOf(line: number): HTMLElement {
     .find((r) => within(r).getByRole("rowheader").textContent?.includes(String(line)))!;
 }
 
+/** The always-visible machine-state tiles, as "name value". */
+function stateTiles(): string[] {
+  return within(document.querySelector(".meet-state") as HTMLElement)
+    .getAllByRole("listitem")
+    .map((li) => {
+      const name = li.querySelector(".meet-tile-name")?.textContent?.trim() ?? "";
+      const value = li.querySelector(".meet-tile-value")?.textContent?.trim() ?? "";
+      return `${name} ${value}`;
+    });
+}
+
+/** The one event line, or null when no instruction has run. */
+function eventLine(): string | null {
+  const el = document.querySelector(".meet-event");
+  return el === null ? null : (el.textContent?.replace(/\s+/g, " ").trim() ?? "");
+}
+
 afterEach(cleanup);
 
-describe("the mobile presentation: full program by default", () => {
-  it("shows all nine instructions, with instruction 1 next and no invented change", () => {
+describe("the compact mobile runner", () => {
+  it("shows all nine instructions by default, with instruction 1 next and no Ready card", () => {
     mount(PROPS);
-    // Full program is the default: every instruction is on show, in program order.
+    // The complete program, in program order, each number and its text in one row.
     expect(programRows()).toEqual([
       "1 R1 becomes room A's reading",
       "2 R2 becomes room B's reading",
@@ -80,167 +96,113 @@ describe("the mobile presentation: full program by default", () => {
       "9 Stop",
     ]);
     expect(screen.getByRole("row", { current: "step" })).toHaveTextContent("1");
-    // The header carries the position; no separate status line under the list.
     expect(screen.getByText(format(M.window.position, { n: 1, total: 9 }))).toBeTruthy();
-    expect(document.querySelector(".datapath-status")).toBeNull();
-    // Before any instruction runs, the summary says it is ready and invents no change.
-    expect(screen.getByText(format(M.changedSummary.ready, { line: 1 }))).toBeTruthy();
+    // No Ready message, no empty "What changed?" panel, no event line: the highlighted
+    // instruction is the guidance.
+    expect(screen.queryByText(/Ready for instruction/)).toBeNull();
+    expect(screen.queryByText(/What changed/)).toBeNull();
+    expect(eventLine()).toBeNull();
+    expect(document.querySelector(".meet-changed")).toBeNull();
+    // The machine's state is already on show, with not-yet-set numbers as dashes, not as 0.
+    expect(stateTiles()).toEqual([
+      "R1 —",
+      "R2 —",
+      "R3 —",
+      "R4 —",
+      "R5 —",
+      "The display 0",
+      "ALARM dark",
+      "NIGHT dark",
+      "GAP_ALARM dark",
+    ]);
   });
 
   it("keeps the number and the instruction's words in one row, with the arrow on the next row", async () => {
     const user = userEvent.setup();
     mount(PROPS);
     const row = rowOf(1);
-    // Number and text are cells of the same row, not stacked blocks.
     expect(within(row).getByRole("rowheader")).toHaveTextContent("1");
     expect(within(row).getByRole("cell")).toHaveTextContent("R1 becomes room A's reading");
     expect(row.querySelector(".meet-line-arrow")?.textContent).toBe("▶");
-    // The whole row carries the mark, not an extra line.
     expect(row.className).toContain("row-current");
     await user.click(screen.getByRole("button", { name: M.step }));
     expect(rowOf(2).querySelector(".meet-line-arrow")?.textContent).toBe("▶");
     expect(rowOf(1).querySelector(".meet-line-arrow")?.textContent).toBe("");
   });
 
-  it("after instruction 3, R3 is 66 and instruction 4 is next, with the display unchanged", async () => {
+  it("after a real step, one short event says what the instruction did", async () => {
     const user = userEvent.setup();
     mount(PROPS);
     const step = screen.getByRole("button", { name: M.step });
     await user.click(step);
-    await user.click(step);
-    await user.click(step);
-    expect(screen.getByRole("row", { current: "step" })).toHaveTextContent("4");
-    const summary = document.querySelector(".meet-changed")!;
-    expect(summary).toHaveTextContent(format(M.changedSummary.headingLine, { line: 3 }));
-    expect(within(summary as HTMLElement).getByText("R3")).toBeTruthy();
-    expect(within(summary as HTMLElement).getByText("66")).toBeTruthy();
-    // The display has not changed yet, and the summary says so rather than showing a made-up 0.
+    // Instruction 1: R1 became -184, read off the machine's own snapshots.
+    expect(eventLine()).toBe(
+      format(M.window.eventRegister, { line: 1, name: "R1", value: "-184" }),
+    );
+    // The register tile shows the same value, and is marked as changed.
+    expect(stateTiles()[0]).toBe("R1 -184");
     expect(
-      within(summary as HTMLElement).getAllByText(M.changedSummary.unchanged).length,
-    ).toBeGreaterThan(0);
+      within(document.querySelector(".meet-state") as HTMLElement).getAllByRole("listitem")[0]!
+        .className,
+    ).toContain("row-current");
+    await user.click(step);
+    expect(eventLine()).toBe(
+      format(M.window.eventRegister, { line: 2, name: "R2", value: "-250" }),
+    );
+    await user.click(step);
+    // Instruction 3: R3 became 66; the display is still 0 and no fake change is claimed.
+    expect(eventLine()).toBe(format(M.window.eventRegister, { line: 3, name: "R3", value: "66" }));
+    expect(stateTiles()[2]).toBe("R3 66");
+    expect(stateTiles()[5]).toBe("The display 0");
   });
 
-  it("at STOP the last instruction is marked stopped, not next to run", async () => {
+  it("after instruction 6, the event explains the jump to 9 without implying 7 or 8 ran", async () => {
+    const user = userEvent.setup();
+    mount(PROPS);
+    const step = screen.getByRole("button", { name: M.step });
+    for (let k = 0; k < 6; k++) await user.click(step);
+    expect(eventLine()).toBe(format(M.window.eventJump, { line: 6, to: 9 }));
+    // The highlighted row is 9; 7 and 8 carry no mark.
+    expect(screen.getByRole("row", { current: "step" })).toHaveTextContent("9");
+    expect(rowOf(7).getAttribute("aria-current")).toBeNull();
+    expect(rowOf(8).getAttribute("aria-current")).toBeNull();
+    expect(rowOf(7).className).not.toContain("row-current");
+    expect(rowOf(8).className).not.toContain("row-current");
+  });
+
+  it("after instruction 9, the event says the program stopped, and the row is not next to run", async () => {
     const user = userEvent.setup();
     mount(PROPS);
     const step = screen.getByRole("button", { name: M.step });
     for (let k = 0; k < 9; k++) await user.click(step);
+    expect(eventLine()).toBe(format(M.window.eventStopped, { line: 9 }));
     expect(screen.queryByRole("row", { current: "step" })).toBeNull();
     expect(screen.getByRole("row", { current: true })).toHaveTextContent("9");
     expect(screen.getByText(format(M.window.stoppedAria, { line: 9 }))).toBeTruthy();
     expect(step).toBeDisabled();
   });
-});
 
-describe("Follow execution: the three-instruction window", () => {
-  it("is off by default and shows the window when switched on, without running the machine", async () => {
+  it("Start again clears the event and returns to the compact initial state", async () => {
     const user = userEvent.setup();
     mount(PROPS);
-    expect(programRows()).toHaveLength(9);
-    await user.click(screen.getByRole("button", { name: M.window.modeFollow }));
-    // The window shows at most three instructions: instruction 1 is next, with no invented
-    // instruction before it.
-    expect(programRows()).toEqual([
-      "1 R1 becomes room A's reading",
-      "2 R2 becomes room B's reading",
-      "3 R3 becomes R1 minus R2",
-    ]);
-    // Switching modes did not step the machine: instruction 1 is still next, nothing changed.
-    expect(screen.getByRole("row", { current: "step" })).toHaveTextContent("1");
-    expect(screen.getByText(format(M.changedSummary.ready, { line: 1 }))).toBeTruthy();
-    // Switching back reveals all nine instructions again.
-    await user.click(screen.getByRole("button", { name: M.window.modeFull }));
-    expect(programRows()).toHaveLength(9);
-  });
-
-  it("follows the machine, and the 6 to 9 branch shows 9 without claiming 7 or 8 ran", async () => {
-    const user = userEvent.setup();
-    mount(PROPS);
-    await user.click(screen.getByRole("button", { name: M.window.modeFollow }));
     const step = screen.getByRole("button", { name: M.step });
-    for (let k = 0; k < 6; k++) await user.click(step);
-    // The gap is 66, under the limit of 100: instruction 6 goes to instruction 9. The window's
-    // rows are physically adjacent program positions, not execution history: 7 and 8 are shown
-    // as neighbours, and neither is marked as the place the machine is.
-    expect(programRows()).toEqual(["7 R5 becomes 4", "8 Set the lamps from R5", "9 Stop"]);
-    expect(screen.getByRole("row", { current: "step" })).toHaveTextContent("9");
-    expect(
-      screen.getAllByRole("row").filter((r) => r.getAttribute("aria-current") !== null),
-    ).toHaveLength(1);
-  });
-
-  it("browsing does not run the machine, and Back to the next instruction restores follow", async () => {
-    const user = userEvent.setup();
-    mount(PROPS);
-    await user.click(screen.getByRole("button", { name: M.window.modeFollow }));
-    await user.click(screen.getByRole("button", { name: M.step }));
-    // Browse away from instruction 2, which is next to run.
-    await user.click(screen.getByRole("button", { name: M.window.next }));
-    expect(screen.getByText(format(M.window.viewing, { viewing: 3, next: 2 }))).toBeTruthy();
-    // The machine has not moved: instruction 2 is still next, and the summary still names
-    // instruction 1 as the last to run.
-    expect(screen.getByRole("row", { current: "step" })).toHaveTextContent("2");
-    expect(
-      within(document.querySelector(".meet-changed") as HTMLElement).getByText(
-        format(M.changedSummary.headingLine, { line: 1 }),
-      ),
-    ).toBeTruthy();
-    // The browsed row is not marked as the one the machine runs.
-    expect(rowOf(3).getAttribute("aria-current")).toBeNull();
-    // Back to the next instruction follows the machine again.
-    await user.click(screen.getByRole("button", { name: M.window.follow }));
-    expect(screen.queryByText(/Viewing/)).toBeNull();
-    expect(screen.getByRole("row", { current: "step" })).toHaveTextContent("2");
-  });
-
-  it("the arrow keys browse the window; Home and End go to its ends", async () => {
-    const user = userEvent.setup();
-    mount(PROPS);
-    await user.click(screen.getByRole("button", { name: M.window.modeFollow }));
-    const window = document.querySelector(".meet-window") as HTMLElement;
-    window.focus();
-    await user.keyboard("{ArrowRight}");
-    expect(screen.getByText(format(M.window.viewing, { viewing: 2, next: 1 }))).toBeTruthy();
-    await user.keyboard("{End}");
-    expect(screen.getByText(format(M.window.viewing, { viewing: 9, next: 1 }))).toBeTruthy();
-    await user.keyboard("{Home}");
-    expect(screen.queryByText(/Viewing/)).toBeNull();
-  });
-
-  it("Start again resets the machine, the summary and the window, in either mode", async () => {
-    const user = userEvent.setup();
-    mount(PROPS);
-    await user.click(screen.getByRole("button", { name: M.window.modeFollow }));
-    await user.click(screen.getByRole("button", { name: M.step }));
-    await user.click(screen.getByRole("button", { name: M.window.next }));
+    await user.click(step);
+    await user.click(step);
+    expect(eventLine()).not.toBeNull();
     await user.click(screen.getByRole("button", { name: M.reset }));
+    expect(eventLine()).toBeNull();
+    expect(screen.queryByText(/Ready for instruction/)).toBeNull();
     expect(screen.getByRole("row", { current: "step" })).toHaveTextContent("1");
-    expect(screen.queryByText(/Viewing/)).toBeNull();
-    expect(screen.getByText(format(M.changedSummary.ready, { line: 1 }))).toBeTruthy();
+    expect(stateTiles()[0]).toBe("R1 —");
   });
 
-  it("step, run and the summary work the same after switching modes", async () => {
+  it("editing a room's reading does not invent a last-instruction event", async () => {
     const user = userEvent.setup();
     mount(PROPS);
-    await user.click(screen.getByRole("button", { name: M.step }));
-    // Switch to the window mid-run: it centres on the machine's own next place.
-    await user.click(screen.getByRole("button", { name: M.window.modeFollow }));
-    expect(programRows()).toEqual([
-      "1 R1 becomes room A's reading",
-      "2 R2 becomes room B's reading",
-      "3 R3 becomes R1 minus R2",
-    ]);
-    expect(screen.getByRole("row", { current: "step" })).toHaveTextContent("2");
-    // Switch back: all nine instructions, the same next row.
-    await user.click(screen.getByRole("button", { name: M.window.modeFull }));
-    expect(programRows()).toHaveLength(9);
-    expect(screen.getByRole("row", { current: "step" })).toHaveTextContent("2");
-    // The summary still names the last instruction that ran.
-    expect(
-      within(document.querySelector(".meet-changed") as HTMLElement).getByText(
-        format(M.changedSummary.headingLine, { line: 1 }),
-      ),
-    ).toBeTruthy();
+    await user.clear(screen.getByRole("spinbutton", { name: M.roomA }));
+    await user.type(screen.getByRole("spinbutton", { name: M.roomA }), "-50");
+    // No instruction has run: still no event, and the tiles show the live machine.
+    expect(eventLine()).toBeNull();
   });
 
   it("the screen reader hears which instruction is next to run", async () => {
@@ -255,7 +217,8 @@ describe("without the mobile presentation, the figure keeps its full list", () =
     expect(screen.getAllByRole("row").length).toBeGreaterThan(3);
     expect(screen.getByText(format(M.status.next, { line: 1 }))).toBeTruthy();
     expect(document.querySelector(".meet-window")).toBeNull();
-    expect(document.querySelector(".meet-changed")).toBeNull();
-    expect(document.querySelector(".datapath-tables")?.className).not.toContain("meet-compact");
+    expect(document.querySelector(".meet-state")).toBeNull();
+    expect(document.querySelector(".meet-event")).toBeNull();
+    expect(document.querySelector(".datapath-tables")).not.toBeNull();
   });
 });
