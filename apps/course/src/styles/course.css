@@ -2366,6 +2366,182 @@ button.bit {
 .meet-program td:nth-child(2) {
   font-family: var(--font-sans);
 }
+/* The compact window a phone shows instead of the whole program (the `mobile` figure): at most
+   three instructions, the one the machine runs next highlighted, with browsing that does not
+   run the machine. The full list is one toggle away, and the window's rows wrap, so instruction
+   6's words never force a sideways scroll. */
+.meet-window {
+  margin: var(--space-3) 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  overflow: hidden;
+}
+.meet-window-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+}
+.meet-window-caption {
+  font-weight: 650;
+  font-size: var(--text-md);
+}
+.meet-window-position {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
+}
+.meet-window-toggle {
+  margin-left: auto;
+  min-height: 2.75rem;
+}
+.meet-window-viewing {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
+  border-bottom: 1px solid var(--border);
+}
+.meet-window-follow {
+  font: inherit;
+  color: var(--accent);
+  background: none;
+  border: 0;
+  padding: 0;
+  min-height: 2.75rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.meet-window-body {
+  display: flex;
+  align-items: stretch;
+}
+.meet-window-nav {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-2);
+  border-right: 1px solid var(--border);
+}
+.meet-window-arrow {
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+  padding: 0;
+  font-size: var(--text-lg);
+  line-height: 1;
+}
+.meet-window-table {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+.meet-window-table th,
+.meet-window-table td {
+  padding: var(--space-2) var(--space-2) var(--space-2) 0;
+  overflow-wrap: anywhere;
+}
+.meet-window-table th {
+  white-space: nowrap;
+  font-family: var(--font-mono);
+}
+.meet-window-table .row-current {
+  background: var(--accent-soft);
+  font-weight: 700;
+  box-shadow: inset 4px 0 0 var(--accent);
+}
+/* What the last instruction the machine ran changed, read off the machine itself and shown
+   directly under the run controls. */
+.meet-changed {
+  margin: 0 0 var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  padding: var(--space-2) var(--space-3);
+}
+.meet-changed-heading {
+  margin: 0 0 var(--space-1);
+  font-weight: 650;
+  font-size: var(--text-sm);
+}
+.meet-changed-none {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
+}
+.meet-changed-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.meet-changed-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-1) 0;
+  border-bottom: 1px solid var(--border);
+  font-size: var(--text-sm);
+}
+.meet-changed-list li:last-child {
+  border-bottom: none;
+}
+.meet-changed-label {
+  font-weight: 650;
+}
+.meet-changed-value {
+  font-family: var(--font-mono);
+}
+.meet-changed-mark {
+  margin-left: auto;
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+}
+.meet-changed-list .row-current .meet-changed-mark {
+  color: var(--accent-strong);
+  font-weight: 700;
+}
+/* The whole register list and the shop's outputs stay reachable, as compact expanders. */
+.meet-compact-tables {
+  display: block;
+}
+.meet-expander {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  margin: 0 0 var(--space-2);
+}
+.meet-expander summary {
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-3);
+  font-weight: 650;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+.meet-expander .truth-table-wrap {
+  padding: 0 var(--space-3) var(--space-2);
+}
+.meet-expander .truth-table {
+  margin: 0;
+}
+/* On a narrow phone the run controls wrap to two rows, with Run one instruction first and most
+   prominent; every button keeps a tap area of at least 44 pixels. */
+@media (max-width: 480px) {
+  .meet-figure .explorer-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .meet-figure .explorer-actions .button:first-child {
+    grid-column: 1 / -1;
+  }
+}
 .ladder-line {
   font-family: var(--font-mono);
   margin: var(--space-2) 0;

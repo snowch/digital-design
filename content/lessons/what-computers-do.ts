@@ -119,6 +119,7 @@ export const whatComputersDo: LessonInput = {
             inputs: ROOMS,
             outcomes: PROSE.runAfter,
             outcomesChanged: PROSE.runAfterChanged,
+            mobile: true,
           },
         },
       ],
