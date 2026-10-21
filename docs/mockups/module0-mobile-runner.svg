@@ -1,51 +1,129 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="550" height="935" viewBox="0 0 550 935" role="img" aria-labelledby="title desc">
-<title id="title">Proposed mobile program runner: three instruction window with change summary</title>
-<desc id="desc">An illustrative dark mode layout with a small instruction window, highlighted instruction 3, Show all and Browse controls, run controls, and a What changed summary. This is a visual design only, not real application state.</desc>
-<rect x="0" y="0" width="550" height="935" rx="0" fill="#111721" stroke="#111721" stroke-width="1"/>
-<text x="36" y="38" fill="#83a9e8" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700" text-anchor="start">MOBILE LEARNER VIEW · PROPOSAL</text>
-<rect x="24" y="57" width="502" height="444" rx="16" fill="#1a2130" stroke="#354053" stroke-width="1"/>
-<text x="45" y="92" fill="#f5f7ff" font-family="Inter,Arial,sans-serif" font-size="25" font-weight="700" text-anchor="start">The program</text>
-<text x="497" y="90" fill="#aab9d5" font-family="Inter,Arial,sans-serif" font-size="15" font-weight="500" text-anchor="end">3 of 9</text>
-<rect x="283" y="106" width="108" height="38" rx="9" fill="#222e40" stroke="#485d79" stroke-width="1"/>
-<text x="337" y="131" fill="#d9e6f8" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="500" text-anchor="middle">‹  Browse  ›</text>
-<rect x="403" y="106" width="102" height="38" rx="9" fill="#222e40" stroke="#485d79" stroke-width="1"/>
-<text x="454" y="131" fill="#d9e6f8" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="600" text-anchor="middle">Show all</text>
-<rect x="42" y="157" width="466" height="74" rx="10" fill="#212b3a" stroke="#354357" stroke-width="1"/>
-<text x="58" y="200" fill="#abb8cf" font-family="Inter,Arial,sans-serif" font-size="17" font-weight="700" text-anchor="start">2</text>
-<text x="93" y="200" fill="#bec9dd" font-family="Inter,Arial,sans-serif" font-size="18" font-weight="400" text-anchor="start">R2 becomes room B's reading</text>
-<rect x="42" y="239" width="466" height="80" rx="11" fill="#183b79" stroke="#4587f3" stroke-width="2.2"/>
-<text x="58" y="287" fill="#9fc4ff" font-family="Inter,Arial,sans-serif" font-size="15" font-weight="700" text-anchor="start">▶</text>
-<text x="92" y="287" fill="#fff" font-family="Inter,Arial,sans-serif" font-size="17" font-weight="700" text-anchor="start">3</text>
-<text x="125" y="287" fill="#fff" font-family="Inter,Arial,sans-serif" font-size="18" font-weight="650" text-anchor="start">R3 becomes R1 minus R2</text>
-<rect x="42" y="327" width="466" height="74" rx="10" fill="#212b3a" stroke="#354357" stroke-width="1"/>
-<text x="58" y="370" fill="#abb8cf" font-family="Inter,Arial,sans-serif" font-size="17" font-weight="700" text-anchor="start">4</text>
-<text x="93" y="370" fill="#bec9dd" font-family="Inter,Arial,sans-serif" font-size="18" font-weight="400" text-anchor="start">Show R3 on the display</text>
-<rect x="42" y="416" width="237" height="60" rx="10" fill="#2f7cf3" stroke="#4c92ff" stroke-width="1"/>
-<text x="161" y="453" fill="#fff" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="650" text-anchor="middle">▶  Run one instruction</text>
-<rect x="287" y="416" width="78" height="60" rx="10" fill="#27354b" stroke="#506582" stroke-width="1"/>
-<text x="326" y="453" fill="#dfe8f5" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="600" text-anchor="middle">Run</text>
-<rect x="374" y="416" width="134" height="60" rx="10" fill="#27354b" stroke="#506582" stroke-width="1"/>
-<text x="441" y="453" fill="#dfe8f5" font-family="Inter,Arial,sans-serif" font-size="15" font-weight="600" text-anchor="middle">Start again</text>
-<rect x="24" y="521" width="502" height="220" rx="16" fill="#1a2130" stroke="#354053" stroke-width="1"/>
-<text x="45" y="556" fill="#f5f7ff" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="700" text-anchor="start">What changed?</text>
-<text x="45" y="585" fill="#a6b3cc" font-family="Inter,Arial,sans-serif" font-size="12" font-weight="400" text-anchor="start">Illustrative state after instruction 2 runs</text>
-<rect x="42" y="600" width="466" height="48" rx="9" fill="#222b39" stroke="#364256" stroke-width="1"/>
-<text x="56" y="632" fill="#eaf1fa" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="700" text-anchor="start">R2</text>
-<text x="270" y="632" fill="#b6d2ff" font-family="Inter,Arial,sans-serif" font-size="18" font-weight="700" text-anchor="middle">-250</text>
-<text x="484" y="632" fill="#90d9bb" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="600" text-anchor="end">Updated</text>
-<rect x="42" y="650" width="466" height="38" rx="9" fill="#222b39" stroke="#364256" stroke-width="1"/>
-<text x="56" y="674" fill="#eaf1fa" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="600" text-anchor="start">Display</text>
-<text x="270" y="674" fill="#dfe8f5" font-family="Inter,Arial,sans-serif" font-size="17" font-weight="600" text-anchor="middle">0</text>
-<text x="484" y="674" fill="#b6c2d5" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="500" text-anchor="end">Unchanged</text>
-<rect x="42" y="690" width="466" height="38" rx="9" fill="#222b39" stroke="#364256" stroke-width="1"/>
-<text x="56" y="714" fill="#eaf1fa" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="600" text-anchor="start">Lamps</text>
-<text x="270" y="714" fill="#dfe8f5" font-family="Inter,Arial,sans-serif" font-size="17" font-weight="600" text-anchor="middle">dark</text>
-<text x="484" y="714" fill="#b6c2d5" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="500" text-anchor="end">Unchanged</text>
-<rect x="24" y="760" width="502" height="61" rx="12" fill="#1a2130" stroke="#354053" stroke-width="1"/>
-<text x="45" y="795" fill="#edf1fb" font-family="Inter,Arial,sans-serif" font-size="19" font-weight="600" text-anchor="start">▸  All registers</text>
-<text x="505" y="794" fill="#aab9d5" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="400" text-anchor="end">Expand</text>
-<rect x="24" y="833" width="502" height="61" rx="12" fill="#1a2130" stroke="#354053" stroke-width="1"/>
-<text x="45" y="868" fill="#edf1fb" font-family="Inter,Arial,sans-serif" font-size="19" font-weight="600" text-anchor="start">▸  What the shop sees</text>
-<text x="505" y="867" fill="#aab9d5" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="400" text-anchor="end">Expand</text>
-<text x="275" y="920" fill="#8291aa" font-family="Inter,Arial,sans-serif" font-size="12" font-weight="400" text-anchor="middle">Design sketch; not a simulated screenshot</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1140" height="1295" viewBox="0 0 1140 1295" role="img" aria-labelledby="svg-title svg-desc">
+<title id="svg-title">Revised Module 0 mobile program runner mockup: full program by default, follow execution optional</title>
+<desc id="svg-desc">Two dark-mode mobile mockups. Left: all nine instructions visible by default with instruction number in the same row as its complete text; instruction 6 wraps within the text column. Right: optional Follow execution mode shows instructions 2, 3 and 4. Both show 3 next to execute and R2 updated to minus 250 after instruction 2. The drawings are illustrative layouts, not live simulation.</desc>
+<rect x="0" y="0" width="1140" height="1295" rx="0" fill="#0b111c" stroke="#0b111c" stroke-width="1"/>
+<text x="38" y="48" fill="#eef5ff" font-family="Inter,Arial,Helvetica,sans-serif" font-size="23" font-weight="700" text-anchor="start">MODULE 0 · MOBILE PROGRAM RUNNER</text>
+<text x="38" y="80" fill="#a7b8d2" font-family="Inter,Arial,Helvetica,sans-serif" font-size="17" font-weight="400" text-anchor="start">Revised mockup for GitHub issue #13 · two explicit viewing modes</text>
+<rect x="35" y="108" width="520" height="1120" rx="25" fill="#101722" stroke="#40506a" stroke-width="2"/>
+<text x="69" y="148" fill="#aebcd4" font-family="Inter,Arial,Helvetica,sans-serif" font-size="14" font-weight="600" text-anchor="start">15:46</text>
+<text x="523" y="148" fill="#aebcd4" font-family="Inter,Arial,Helvetica,sans-serif" font-size="14" font-weight="600" text-anchor="end">▰  61%</text>
+<rect x="55" y="177" width="480" height="910" rx="15" fill="#171f2d" stroke="#303d50" stroke-width="1"/>
+<text x="73" y="209" fill="#f6f8fe" font-family="Inter,Arial,Helvetica,sans-serif" font-size="24" font-weight="700" text-anchor="start">The program</text>
+<text x="515" y="207" fill="#b9c8df" font-family="Inter,Arial,Helvetica,sans-serif" font-size="15" font-weight="500" text-anchor="end">Next: 3 of 9</text>
+<rect x="71" y="228" width="448" height="42" rx="22" fill="#222e41" stroke="#42536a" stroke-width="1"/>
+<rect x="71" y="228" width="220" height="42" rx="22" fill="#347bf0" stroke="#5b9efe" stroke-width="1"/>
+<text x="181" y="256" fill="#ffffff" font-family="Inter,Arial,Helvetica,sans-serif" font-size="15" font-weight="700" text-anchor="middle">Full program</text>
+<text x="401" y="256" fill="#bbcbdf" font-family="Inter,Arial,Helvetica,sans-serif" font-size="15" font-weight="500" text-anchor="middle">Follow execution</text>
+<rect x="71" y="287" width="448" height="55" rx="8" fill="#1c2635" stroke="#303f55" stroke-width="1"/>
+<text x="91" y="320.5" fill="#b3c0d7" font-family="Inter,Arial,Helvetica,sans-serif" font-size="19" font-weight="600" text-anchor="start">1</text>
+<text x="130" y="320.5" fill="#e0e9f6" font-family="Inter,Arial,Helvetica,sans-serif" font-size="17" font-weight="450" text-anchor="start">R1 becomes room A&apos;s reading</text>
+<rect x="71" y="346" width="448" height="55" rx="8" fill="#1c2635" stroke="#303f55" stroke-width="1"/>
+<text x="91" y="379.5" fill="#b3c0d7" font-family="Inter,Arial,Helvetica,sans-serif" font-size="19" font-weight="600" text-anchor="start">2</text>
+<text x="130" y="379.5" fill="#e0e9f6" font-family="Inter,Arial,Helvetica,sans-serif" font-size="17" font-weight="450" text-anchor="start">R2 becomes room B&apos;s reading</text>
+<rect x="71" y="405" width="448" height="55" rx="8" fill="#193a76" stroke="#4790ff" stroke-width="2"/>
+<rect x="71" y="405" width="5" height="55" rx="2" fill="#51a0ff" stroke="#51a0ff" stroke-width="0"/>
+<text x="91" y="438.5" fill="#ffffff" font-family="Inter,Arial,Helvetica,sans-serif" font-size="19" font-weight="700" text-anchor="start">3</text>
+<text x="130" y="438.5" fill="#ffffff" font-family="Inter,Arial,Helvetica,sans-serif" font-size="17" font-weight="650" text-anchor="start">R3 becomes R1 minus R2</text>
+<text x="503" y="438.5" fill="#70b4ff" font-family="Inter,Arial,Helvetica,sans-serif" font-size="14" font-weight="600" text-anchor="end">▶</text>
+<rect x="71" y="464" width="448" height="55" rx="8" fill="#1c2635" stroke="#303f55" stroke-width="1"/>
+<text x="91" y="497.5" fill="#b3c0d7" font-family="Inter,Arial,Helvetica,sans-serif" font-size="19" font-weight="600" text-anchor="start">4</text>
+<text x="130" y="497.5" fill="#e0e9f6" font-family="Inter,Arial,Helvetica,sans-serif" font-size="17" font-weight="450" text-anchor="start">Show R3 on the display</text>
+<rect x="71" y="523" width="448" height="55" rx="8" fill="#1c2635" stroke="#303f55" stroke-width="1"/>
+<text x="91" y="556.5" fill="#b3c0d7" font-family="Inter,Arial,Helvetica,sans-serif" font-size="19" font-weight="600" text-anchor="start">5</text>
+<text x="130" y="556.5" fill="#e0e9f6" font-family="Inter,Arial,Helvetica,sans-serif" font-size="17" font-weight="450" text-anchor="start">R4 becomes 100</text>
+<rect x="71" y="582" width="448" height="75" rx="8" fill="#1c2635" stroke="#303f55" stroke-width="1"/>
+<text x="91" y="625.5" fill="#b3c0d7" font-family="Inter,Arial,Helvetica,sans-serif" font-size="19" font-weight="600" text-anchor="start">6</text>
+<text x="130" y="609" fill="#e0e9f6" font-family="Inter,Arial,Helvetica,sans-serif" font-size="17" font-weight="450" text-anchor="start">If R3 is less than R4, go to</text>
+<text x="130" y="633" fill="#e0e9f6" font-family="Inter,Arial,Helvetica,sans-serif" font-size="17" font-weight="450" text-anchor="start">instruction 9</text>
+<rect x="71" y="661" width="448" height="55" rx="8" fill="#1c2635" stroke="#303f55" stroke-width="1"/>
+<text x="91" y="694.5" fill="#b3c0d7" font-family="Inter,Arial,Helvetica,sans-serif" font-size="19" font-weight="600" text-anchor="start">7</text>
+<text x="130" y="694.5" fill="#e0e9f6" font-family="Inter,Arial,Helvetica,sans-serif" font-size="17" font-weight="450" text-anchor="start">R5 becomes 4</text>
+<rect x="71" y="720" width="448" height="55" rx="8" fill="#1c2635" stroke="#303f55" stroke-width="1"/>
+<text x="91" y="753.5" fill="#b3c0d7" font-family="Inter,Arial,Helvetica,sans-serif" font-size="19" font-weight="600" text-anchor="start">8</text>
+<text x="130" y="753.5" fill="#e0e9f6" font-family="Inter,Arial,Helvetica,sans-serif" font-size="17" font-weight="450" text-anchor="start">Set the lamps from R5</text>
+<rect x="71" y="779" width="448" height="55" rx="8" fill="#1c2635" stroke="#303f55" stroke-width="1"/>
+<text x="91" y="812.5" fill="#b3c0d7" font-family="Inter,Arial,Helvetica,sans-serif" font-size="19" font-weight="600" text-anchor="start">9</text>
+<text x="130" y="812.5" fill="#e0e9f6" font-family="Inter,Arial,Helvetica,sans-serif" font-size="17" font-weight="450" text-anchor="start">Stop</text>
+<rect x="71" y="850" width="218" height="51" rx="9" fill="#347bea" stroke="#5da1ff" stroke-width="1"/>
+<text x="180" y="882" fill="#ffffff" font-family="Inter,Arial,Helvetica,sans-serif" font-size="15" font-weight="650" text-anchor="middle">▶  Run one instruction</text>
+<rect x="297" y="850" width="80" height="51" rx="9" fill="#263449" stroke="#50627c" stroke-width="1"/>
+<text x="337" y="882" fill="#e2eafd" font-family="Inter,Arial,Helvetica,sans-serif" font-size="15" font-weight="550" text-anchor="middle">Run</text>
+<rect x="385" y="850" width="134" height="51" rx="9" fill="#263449" stroke="#50627c" stroke-width="1"/>
+<text x="452" y="882" fill="#e2eafd" font-family="Inter,Arial,Helvetica,sans-serif" font-size="15" font-weight="550" text-anchor="middle">Start again</text>
+<rect x="71" y="915" width="448" height="145" rx="10" fill="#1d2939" stroke="#34445a" stroke-width="1"/>
+<text x="84" y="941" fill="#c1d2e9" font-family="Inter,Arial,Helvetica,sans-serif" font-size="13" font-weight="700" text-anchor="start">WHAT CHANGED?</text>
+<text x="84" y="964" fill="#92a8c5" font-family="Inter,Arial,Helvetica,sans-serif" font-size="13" font-weight="400" text-anchor="start">Last executed: instruction 2</text>
+<line x1="84" y1="976" x2="506" y2="976" stroke="#334054" stroke-width="1"/>
+<text x="86" y="1001" fill="#f2f7ff" font-family="Inter,Arial,Helvetica,sans-serif" font-size="16" font-weight="650" text-anchor="start">R2</text>
+<text x="216" y="1001" fill="#bcd9ff" font-family="Inter,Arial,Helvetica,sans-serif" font-size="17" font-weight="700" text-anchor="start">-250</text>
+<text x="506" y="1001" fill="#8edabb" font-family="Inter,Arial,Helvetica,sans-serif" font-size="14" font-weight="600" text-anchor="end">Updated</text>
+<text x="86" y="1027" fill="#d2deec" font-family="Inter,Arial,Helvetica,sans-serif" font-size="15" font-weight="400" text-anchor="start">Display</text>
+<text x="216" y="1027" fill="#d2deec" font-family="Inter,Arial,Helvetica,sans-serif" font-size="16" font-weight="600" text-anchor="start">0</text>
+<text x="506" y="1027" fill="#a3b5cb" font-family="Inter,Arial,Helvetica,sans-serif" font-size="13" font-weight="450" text-anchor="end">No change</text>
+<text x="86" y="1050" fill="#d2deec" font-family="Inter,Arial,Helvetica,sans-serif" font-size="15" font-weight="400" text-anchor="start">All lamps</text>
+<text x="216" y="1050" fill="#d2deec" font-family="Inter,Arial,Helvetica,sans-serif" font-size="16" font-weight="500" text-anchor="start">dark</text>
+<text x="506" y="1050" fill="#a3b5cb" font-family="Inter,Arial,Helvetica,sans-serif" font-size="13" font-weight="450" text-anchor="end">No change</text>
+<rect x="71" y="1073" width="448" height="50" rx="10" fill="#202d40" stroke="#3b4c64" stroke-width="1"/>
+<text x="85" y="1104" fill="#f0f5fd" font-family="Inter,Arial,Helvetica,sans-serif" font-size="16" font-weight="600" text-anchor="start">▸  All registers</text>
+<text x="506" y="1104" fill="#9baec7" font-family="Inter,Arial,Helvetica,sans-serif" font-size="13" font-weight="400" text-anchor="end">Expand</text>
+<rect x="71" y="1133" width="448" height="50" rx="10" fill="#202d40" stroke="#3b4c64" stroke-width="1"/>
+<text x="85" y="1164" fill="#f0f5fd" font-family="Inter,Arial,Helvetica,sans-serif" font-size="16" font-weight="600" text-anchor="start">▸  What the shop sees</text>
+<text x="506" y="1164" fill="#9baec7" font-family="Inter,Arial,Helvetica,sans-serif" font-size="13" font-weight="400" text-anchor="end">Expand</text>
+<rect x="585" y="108" width="520" height="1120" rx="25" fill="#101722" stroke="#40506a" stroke-width="2"/>
+<text x="619" y="148" fill="#aebcd4" font-family="Inter,Arial,Helvetica,sans-serif" font-size="14" font-weight="600" text-anchor="start">15:46</text>
+<text x="1073" y="148" fill="#aebcd4" font-family="Inter,Arial,Helvetica,sans-serif" font-size="14" font-weight="600" text-anchor="end">▰  61%</text>
+<rect x="605" y="177" width="480" height="690" rx="15" fill="#171f2d" stroke="#303d50" stroke-width="1"/>
+<text x="623" y="209" fill="#f6f8fe" font-family="Inter,Arial,Helvetica,sans-serif" font-size="24" font-weight="700" text-anchor="start">The program</text>
+<text x="1065" y="207" fill="#b9c8df" font-family="Inter,Arial,Helvetica,sans-serif" font-size="15" font-weight="500" text-anchor="end">Next: 3 of 9</text>
+<rect x="621" y="228" width="448" height="42" rx="22" fill="#222e41" stroke="#42536a" stroke-width="1"/>
+<rect x="841" y="228" width="220" height="42" rx="22" fill="#347bf0" stroke="#5b9efe" stroke-width="1"/>
+<text x="731" y="256" fill="#bbcbdf" font-family="Inter,Arial,Helvetica,sans-serif" font-size="15" font-weight="500" text-anchor="middle">Full program</text>
+<text x="951" y="256" fill="#ffffff" font-family="Inter,Arial,Helvetica,sans-serif" font-size="15" font-weight="700" text-anchor="middle">Follow execution</text>
+<rect x="621" y="287" width="448" height="62" rx="8" fill="#1c2635" stroke="#303f55" stroke-width="1"/>
+<text x="641" y="324" fill="#b3c0d7" font-family="Inter,Arial,Helvetica,sans-serif" font-size="19" font-weight="600" text-anchor="start">2</text>
+<text x="680" y="324" fill="#e0e9f6" font-family="Inter,Arial,Helvetica,sans-serif" font-size="17" font-weight="450" text-anchor="start">R2 becomes room B&apos;s reading</text>
+<rect x="621" y="355" width="448" height="62" rx="8" fill="#193a76" stroke="#4790ff" stroke-width="2"/>
+<rect x="621" y="355" width="5" height="62" rx="2" fill="#51a0ff" stroke="#51a0ff" stroke-width="0"/>
+<text x="641" y="392" fill="#ffffff" font-family="Inter,Arial,Helvetica,sans-serif" font-size="19" font-weight="700" text-anchor="start">3</text>
+<text x="680" y="392" fill="#ffffff" font-family="Inter,Arial,Helvetica,sans-serif" font-size="17" font-weight="650" text-anchor="start">R3 becomes R1 minus R2</text>
+<text x="1053" y="392" fill="#70b4ff" font-family="Inter,Arial,Helvetica,sans-serif" font-size="14" font-weight="600" text-anchor="end">▶</text>
+<rect x="621" y="423" width="448" height="62" rx="8" fill="#1c2635" stroke="#303f55" stroke-width="1"/>
+<text x="641" y="460" fill="#b3c0d7" font-family="Inter,Arial,Helvetica,sans-serif" font-size="19" font-weight="600" text-anchor="start">4</text>
+<text x="680" y="460" fill="#e0e9f6" font-family="Inter,Arial,Helvetica,sans-serif" font-size="17" font-weight="450" text-anchor="start">Show R3 on the display</text>
+<rect x="621" y="500" width="133" height="51" rx="9" fill="#263449" stroke="#50627c" stroke-width="1"/>
+<text x="687.5" y="532" fill="#e2eafd" font-family="Inter,Arial,Helvetica,sans-serif" font-size="15" font-weight="550" text-anchor="middle">‹  Previous</text>
+<rect x="762" y="500" width="107" height="51" rx="9" fill="#263449" stroke="#50627c" stroke-width="1"/>
+<text x="815.5" y="532" fill="#e2eafd" font-family="Inter,Arial,Helvetica,sans-serif" font-size="15" font-weight="550" text-anchor="middle">Next  ›</text>
+<rect x="877" y="500" width="192" height="51" rx="9" fill="#263449" stroke="#50627c" stroke-width="1"/>
+<text x="973" y="532" fill="#e2eafd" font-family="Inter,Arial,Helvetica,sans-serif" font-size="15" font-weight="550" text-anchor="middle">Show all</text>
+<rect x="621" y="564" width="218" height="51" rx="9" fill="#347bea" stroke="#5da1ff" stroke-width="1"/>
+<text x="730" y="596" fill="#ffffff" font-family="Inter,Arial,Helvetica,sans-serif" font-size="15" font-weight="650" text-anchor="middle">▶  Run one instruction</text>
+<rect x="847" y="564" width="80" height="51" rx="9" fill="#263449" stroke="#50627c" stroke-width="1"/>
+<text x="887" y="596" fill="#e2eafd" font-family="Inter,Arial,Helvetica,sans-serif" font-size="15" font-weight="550" text-anchor="middle">Run</text>
+<rect x="935" y="564" width="134" height="51" rx="9" fill="#263449" stroke="#50627c" stroke-width="1"/>
+<text x="1002" y="596" fill="#e2eafd" font-family="Inter,Arial,Helvetica,sans-serif" font-size="15" font-weight="550" text-anchor="middle">Start again</text>
+<rect x="621" y="636" width="448" height="145" rx="10" fill="#1d2939" stroke="#34445a" stroke-width="1"/>
+<text x="634" y="662" fill="#c1d2e9" font-family="Inter,Arial,Helvetica,sans-serif" font-size="13" font-weight="700" text-anchor="start">WHAT CHANGED?</text>
+<text x="634" y="685" fill="#92a8c5" font-family="Inter,Arial,Helvetica,sans-serif" font-size="13" font-weight="400" text-anchor="start">Last executed: instruction 2</text>
+<line x1="634" y1="697" x2="1056" y2="697" stroke="#334054" stroke-width="1"/>
+<text x="636" y="722" fill="#f2f7ff" font-family="Inter,Arial,Helvetica,sans-serif" font-size="16" font-weight="650" text-anchor="start">R2</text>
+<text x="766" y="722" fill="#bcd9ff" font-family="Inter,Arial,Helvetica,sans-serif" font-size="17" font-weight="700" text-anchor="start">-250</text>
+<text x="1056" y="722" fill="#8edabb" font-family="Inter,Arial,Helvetica,sans-serif" font-size="14" font-weight="600" text-anchor="end">Updated</text>
+<text x="636" y="748" fill="#d2deec" font-family="Inter,Arial,Helvetica,sans-serif" font-size="15" font-weight="400" text-anchor="start">Display</text>
+<text x="766" y="748" fill="#d2deec" font-family="Inter,Arial,Helvetica,sans-serif" font-size="16" font-weight="600" text-anchor="start">0</text>
+<text x="1056" y="748" fill="#a3b5cb" font-family="Inter,Arial,Helvetica,sans-serif" font-size="13" font-weight="450" text-anchor="end">No change</text>
+<text x="636" y="771" fill="#d2deec" font-family="Inter,Arial,Helvetica,sans-serif" font-size="15" font-weight="400" text-anchor="start">All lamps</text>
+<text x="766" y="771" fill="#d2deec" font-family="Inter,Arial,Helvetica,sans-serif" font-size="16" font-weight="500" text-anchor="start">dark</text>
+<text x="1056" y="771" fill="#a3b5cb" font-family="Inter,Arial,Helvetica,sans-serif" font-size="13" font-weight="450" text-anchor="end">No change</text>
+<rect x="621" y="798" width="448" height="50" rx="10" fill="#202d40" stroke="#3b4c64" stroke-width="1"/>
+<text x="635" y="829" fill="#f0f5fd" font-family="Inter,Arial,Helvetica,sans-serif" font-size="16" font-weight="600" text-anchor="start">▸  All registers</text>
+<text x="1056" y="829" fill="#9baec7" font-family="Inter,Arial,Helvetica,sans-serif" font-size="13" font-weight="400" text-anchor="end">Expand</text>
+<rect x="621" y="858" width="448" height="50" rx="10" fill="#202d40" stroke="#3b4c64" stroke-width="1"/>
+<text x="635" y="889" fill="#f0f5fd" font-family="Inter,Arial,Helvetica,sans-serif" font-size="16" font-weight="600" text-anchor="start">▸  What the shop sees</text>
+<text x="1056" y="889" fill="#9baec7" font-family="Inter,Arial,Helvetica,sans-serif" font-size="13" font-weight="400" text-anchor="end">Expand</text>
+<text x="623" y="940" fill="#9bb0cf" font-family="Inter,Arial,Helvetica,sans-serif" font-size="13" font-weight="400" text-anchor="start">Browsing does not change execution.</text>
+<text x="53" y="1251" fill="#edf5ff" font-family="Inter,Arial,Helvetica,sans-serif" font-size="21" font-weight="700" text-anchor="start">DEFAULT: Full program</text>
+<text x="53" y="1276" fill="#a6b9d1" font-family="Inter,Arial,Helvetica,sans-serif" font-size="15" font-weight="400" text-anchor="start">All nine instructions; number + text share one row.</text>
+<text x="603" y="1251" fill="#edf5ff" font-family="Inter,Arial,Helvetica,sans-serif" font-size="21" font-weight="700" text-anchor="start">OPTIONAL: Follow execution</text>
+<text x="603" y="1276" fill="#a6b9d1" font-family="Inter,Arial,Helvetica,sans-serif" font-size="15" font-weight="400" text-anchor="start">Three rows tracking the real next instruction.</text>
 </svg>
