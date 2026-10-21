@@ -28,10 +28,10 @@
 <text x="441" y="453" fill="#dfe8f5" font-family="Inter,Arial,sans-serif" font-size="15" font-weight="600" text-anchor="middle">Start again</text>
 <rect x="24" y="521" width="502" height="220" rx="16" fill="#1a2130" stroke="#354053" stroke-width="1"/>
 <text x="45" y="556" fill="#f5f7ff" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="700" text-anchor="start">What changed?</text>
-<text x="45" y="585" fill="#a6b3cc" font-family="Inter,Arial,sans-serif" font-size="12" font-weight="400" text-anchor="start">Illustrative state after instruction 3 runs</text>
+<text x="45" y="585" fill="#a6b3cc" font-family="Inter,Arial,sans-serif" font-size="12" font-weight="400" text-anchor="start">Illustrative state after instruction 2 runs</text>
 <rect x="42" y="600" width="466" height="48" rx="9" fill="#222b39" stroke="#364256" stroke-width="1"/>
-<text x="56" y="632" fill="#eaf1fa" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="700" text-anchor="start">R3</text>
-<text x="270" y="632" fill="#b6d2ff" font-family="Inter,Arial,sans-serif" font-size="18" font-weight="700" text-anchor="middle">66</text>
+<text x="56" y="632" fill="#eaf1fa" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="700" text-anchor="start">R2</text>
+<text x="270" y="632" fill="#b6d2ff" font-family="Inter,Arial,sans-serif" font-size="18" font-weight="700" text-anchor="middle">-250</text>
 <text x="484" y="632" fill="#90d9bb" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="600" text-anchor="end">Updated</text>
 <rect x="42" y="650" width="466" height="38" rx="9" fill="#222b39" stroke="#364256" stroke-width="1"/>
 <text x="56" y="674" fill="#eaf1fa" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="600" text-anchor="start">Display</text>
