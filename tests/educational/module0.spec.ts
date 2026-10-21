@@ -230,7 +230,11 @@ test.describe("the ladder", () => {
     await expect(figure.locator(".strip-table td")).toContainText(["?"]);
     await figure.getByRole("radio").first().check();
     await figure.getByRole("button", { name: V.prediction.commit }).click();
-    await expect(figure.locator("[role=status]").first()).toContainText(V.prediction.match);
+    // The verdict is the strip's own status lines now follow the choices; the verdict keeps
+    // its class, so scope to it rather than to whichever status line renders first.
+    await expect(figure.locator(".prediction-match, .prediction-nomatch")).toContainText(
+      V.prediction.match,
+    );
     // The strip's wires reveal, read off the simulator: 01000010, the wires worth 64 and 2
     // marked. The real circuit stays closed behind its own open button, and its level
     // reading shows only once the learner explores.
