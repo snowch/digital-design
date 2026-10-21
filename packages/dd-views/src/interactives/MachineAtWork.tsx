@@ -14,7 +14,7 @@
 //
 // The words are Module 0's own (strings.ts, `meet`), held to the term gate by a test.
 
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 
 import {
@@ -272,17 +272,10 @@ export const MachineAtWork = withProps(
     const optionLabel = (v: string) =>
       (data.options?.find((o) => o.value === v)?.label ?? v).replace(/\.$/, "");
 
-    // The mobile presentation's two modes. The whole program is the default on a phone; Follow
-    // execution swaps it for the three-instruction window. Both modes show the same machine.
-    const [following, setFollowing] = useState(false);
-    // The window's browse position: the instruction the window is centred on. Undefined follows
-    // the machine: it shows whatever runs next. Browsing sets it, and browsing does not touch the
-    // machine; a step, a run and Start again return the window to the machine's place.
-    const [browseAt, setBrowseAt] = useState<number | undefined>(undefined);
-    // Reset browsing with the machine: Start again, and a new fault's new machine.
-    const resetBrowse = () => {
-      setBrowseAt(undefined);
-    };
+    // The one event line under the run controls: what the last instruction the machine ran
+    // actually did. Undefined before any instruction has run, and cleared by Start again, so a
+    // re-render or a restored unexecuted state never invents a "last instruction ran" event.
+    const [event, setEvent] = useState<string | undefined>(undefined);
 
     // A run moves a line at a time on a timer; a new start, a pause or leaving the page ends it.
     const runToken = useRef(0);
@@ -295,7 +288,9 @@ export const MachineAtWork = withProps(
     /** One line: one edge of the machine. True when the machine has now stopped. */
     const edge = (): boolean => {
       const was = sim.snapshotValues();
-      const halting = datapathState(circuit, was).halt === 1;
+      const wasState = datapathState(circuit, was);
+      const halting = wasState.halt === 1;
+      const ran = nextLine(wasState);
       sim.clockCycle("CLK");
       setBefore(was);
       if (halting) {
@@ -303,9 +298,68 @@ export const MachineAtWork = withProps(
         noteStop();
       }
       setRan(true);
-      // The window follows the machine: whatever the learner browsed, the next place to run
-      // comes back into view.
-      setBrowseAt(undefined);
+      // One short event, read off the machine's own before-and-after snapshots: what the
+      // instruction that just ran actually did. A branch says where it went; a stop says the
+      // program stopped; a trapped machine says it cannot run past the line.
+      if (data.mobile) {
+        const now = datapathState(circuit, sim.snapshotValues());
+        const nowWords = registerWords(circuit, sim.snapshotValues());
+        const wasWords = registerWords(circuit, was);
+        const shown = data.shown ?? namedRegisters(programText(program));
+        const changedNames = shown.filter(
+          (k) => numberText(t, nowWords[k]) !== numberText(t, wasWords[k]),
+        );
+        const displayChanged =
+          (numberOf(now.display) ?? t.notSet) !== (numberOf(wasState.display) ?? t.notSet);
+        const lampsChanged = now.lamps !== wasState.lamps;
+        if (halting) {
+          const trapped = now.cause !== undefined && now.cause !== 0;
+          setEvent(
+            format(
+              trapped ? t.window.eventTrapped : t.window.eventStopped,
+              trapped ? { line: ran ?? "", cause: String(now.cause) } : { line: ran ?? "" },
+            ),
+          );
+        } else {
+          const went = nextLine(now);
+          const jumped = went !== undefined && ran !== undefined && went !== ran + 1;
+          if (jumped) {
+            setEvent(format(t.window.eventJump, { line: ran, to: went }));
+          } else if (changedNames.length === 1) {
+            setEvent(
+              format(t.window.eventRegister, {
+                line: ran ?? "",
+                name: `R${changedNames[0]}`,
+                value: numberText(t, nowWords[changedNames[0]!]),
+              }),
+            );
+          } else if (changedNames.length > 1) {
+            setEvent(
+              format(t.window.eventSeveral, {
+                line: ran ?? "",
+                names: changedNames.map((k) => `R${k}`).join(", "),
+              }),
+            );
+          } else if (displayChanged) {
+            setEvent(
+              format(t.window.eventDisplay, {
+                line: ran ?? "",
+                value: numberOf(now.display) ?? t.notSet,
+              }),
+            );
+          } else if (lampsChanged) {
+            const lit = LAMP_NAMES.filter((_, k) => ((now.lamps ?? 0) >> k) & 1);
+            setEvent(
+              format(t.window.eventLamps, {
+                line: ran ?? "",
+                value: lit.length ? lit.join(", ") : t.dark,
+              }),
+            );
+          } else {
+            setEvent(format(t.window.eventNothing, { line: ran ?? "" }));
+          }
+        }
+      }
       bump();
       return halting;
     };
@@ -340,7 +394,7 @@ export const MachineAtWork = withProps(
       setBefore(undefined);
       setStopped(false);
       setGaveUp(false);
-      resetBrowse();
+      setEvent(undefined);
       // A text about a run waits for the next run: Start again, or a new choice, clears it.
       setRanFaults(new Set());
       setStoppedOnce(false);
@@ -395,87 +449,11 @@ export const MachineAtWork = withProps(
             ? format(t.status.next, { line: next })
             : "";
 
-    // The mobile presentation: the whole program by default, the three-instruction window in
-    // Follow execution mode. The window's centre is the instruction it follows (the machine's own
-    // next place, or the one it stopped after) when following, or the learner's browsed
-    // instruction. The window shows the centre and its physically adjacent neighbours in program
-    // order; a branch shows where the machine went, not the instructions it skipped.
+    // The mobile presentation: the whole program, the machine's state always on show, and the
+    // one event line. The machine's own next place is the highlighted row; after a stop it is
+    // the one the machine stopped after, marked Stopped rather than next to run.
     const compact = data.mobile && data.controls && committed;
-    const windowMode = compact && following;
     const anchor = stopped ? (lastRun ?? next) : next;
-    const centre = browseAt ?? anchor;
-    const windowLines = useMemo(() => {
-      if (!windowMode || centre === undefined) return [];
-      const at = lines.findIndex((l) => l.line === centre);
-      if (at < 0) return [];
-      // At most three rows: the centre and its physically adjacent neighbours in program order.
-      // At the program's ends the window shows the two that exist, so instruction 1 has no
-      // invented row before it and instruction 9 none after it.
-      const first = Math.min(Math.max(0, at - 1), Math.max(0, lines.length - 3));
-      return lines.slice(first, first + 3);
-    }, [windowMode, centre, lines]);
-    const browse = (by: number) =>
-      setBrowseAt((was) => {
-        const at = lines.findIndex((l) => l.line === (was ?? centre ?? 1));
-        const to = Math.min(Math.max(at + by, 0), lines.length - 1);
-        return lines[to]?.line;
-      });
-    const onWindowKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        browse(-1);
-      } else if (e.key === "ArrowRight") {
-        e.preventDefault();
-        browse(1);
-      } else if (e.key === "Home") {
-        e.preventDefault();
-        setBrowseAt(lines[0]?.line);
-      } else if (e.key === "End") {
-        e.preventDefault();
-        setBrowseAt(lines[lines.length - 1]?.line);
-      }
-    };
-
-    // What the last instruction the machine ran changed, read off the snapshots taken around its
-    // edge: a register's word, the display, or the lamps. A reading the learner typed is a sensor's
-    // change, not an instruction's, so it does not rewrite this summary.
-    const beforeState = before ? datapathState(circuit, before) : undefined;
-    const summary = useMemo(() => {
-      if (!compact || !before || lastRun === undefined) return undefined;
-      const rows: { label: string; value: string; changed: boolean }[] = [];
-      for (const k of shown) {
-        const now = numberText(t, words[k]);
-        const wasText = numberText(t, was[k]);
-        rows.push({
-          label: `R${k}`,
-          value: now,
-          changed: wasText !== now,
-        });
-      }
-      const displayNow = numberOf(state.display) ?? t.notSet;
-      const displayWas = beforeState ? (numberOf(beforeState.display) ?? t.notSet) : t.notSet;
-      rows.push({
-        label: t.display,
-        value: displayNow,
-        changed: displayWas !== displayNow,
-      });
-      const lampsNow = state.lamps;
-      const lampsWas = beforeState?.lamps;
-      const lampsText = (lamps: number | undefined) =>
-        lamps === undefined
-          ? t.notSet
-          : LAMP_NAMES.some((_, k) => (lamps >> k) & 1)
-            ? format(t.changedSummary.lampsLit, {
-                lamps: LAMP_NAMES.filter((_, k) => (lamps >> k) & 1).join(", "),
-              })
-            : t.changedSummary.lampsDark;
-      rows.push({
-        label: t.changedSummary.lampsLabel,
-        value: lampsText(lampsNow),
-        changed: lampsWas !== lampsNow,
-      });
-      return rows;
-    }, [compact, before, lastRun, shown, words, was, state, beforeState, t]);
 
     return (
       <div className="explorer meet-figure" data-interactive={interactive.id}>
@@ -559,12 +537,7 @@ export const MachineAtWork = withProps(
           </fieldset>
         )}
         {compact ? (
-          <div
-            className={`meet-window${windowMode ? " meet-window-follow" : ""}`}
-            role="group"
-            aria-label={t.window.caption}
-            onKeyDown={windowMode ? onWindowKey : undefined}
-          >
+          <div className="meet-window" role="group" aria-label={t.window.caption}>
             <div className="meet-window-head">
               <span className="meet-window-caption">{t.window.caption}</span>
               {anchor !== undefined && (
@@ -572,98 +545,24 @@ export const MachineAtWork = withProps(
                   {format(t.window.position, { n: anchor, total: lines.length })}
                 </span>
               )}
-              <div className="meet-mode" role="group" aria-label={t.window.modeLabel}>
-                <button
-                  type="button"
-                  className="meet-mode-button"
-                  aria-pressed={!following}
-                  onClick={() => setFollowing(false)}
-                >
-                  {t.window.modeFull}
-                </button>
-                <button
-                  type="button"
-                  className="meet-mode-button"
-                  aria-pressed={following}
-                  onClick={() => setFollowing(true)}
-                >
-                  {t.window.modeFollow}
-                </button>
-              </div>
             </div>
-            {windowMode &&
-              browseAt !== undefined &&
-              browseAt !== anchor &&
-              anchor !== undefined && (
-                <p role="status" className="meet-window-viewing">
-                  {format(t.window.viewing, { viewing: browseAt, next: anchor })}{" "}
-                  <button
-                    type="button"
-                    className="meet-window-follow"
-                    onClick={() => setBrowseAt(undefined)}
-                  >
-                    {t.window.follow}
-                  </button>
-                </p>
-              )}
-            {windowMode ? (
-              <div className="meet-window-body">
-                <div className="meet-window-nav">
-                  <button
-                    type="button"
-                    className="button secondary meet-window-arrow"
-                    aria-label={t.window.previous}
-                    disabled={centre === undefined || centre <= lines[0]!.line}
-                    onClick={() => browse(-1)}
-                  >
-                    ‹
-                  </button>
-                  <button
-                    type="button"
-                    className="button secondary meet-window-arrow"
-                    aria-label={t.window.next}
-                    disabled={centre === undefined || centre >= lines[lines.length - 1]!.line}
-                    onClick={() => browse(1)}
-                  >
-                    ›
-                  </button>
-                </div>
-                <table className="truth-table meet-program meet-window-table">
-                  <caption className="visually-hidden">{t.window.browseKeys}</caption>
-                  <tbody>
-                    {windowLines.map((l) => (
-                      <ProgramRow
-                        key={l.line}
-                        t={t}
-                        l={l}
-                        stored={data.stored}
-                        isNext={!stopped && l.line === next}
-                        isLast={stopped && l.line === lastRun}
-                      />
-                    ))}
-                  </tbody>
-                </table>
-                <p className="meet-window-note">{t.window.browseNote}</p>
-              </div>
-            ) : (
-              <div className="meet-window-list">
-                <table className="truth-table meet-program meet-full-table">
-                  <caption className="visually-hidden">{t.programCaption}</caption>
-                  <tbody>
-                    {lines.map((l) => (
-                      <ProgramRow
-                        key={l.line}
-                        t={t}
-                        l={l}
-                        stored={data.stored}
-                        isNext={!stopped && l.line === next}
-                        isLast={stopped && l.line === lastRun}
-                      />
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+            <div className="meet-window-list">
+              <table className="truth-table meet-program meet-full-table">
+                <caption className="visually-hidden">{t.programCaption}</caption>
+                <tbody>
+                  {lines.map((l) => (
+                    <ProgramRow
+                      key={l.line}
+                      t={t}
+                      l={l}
+                      stored={data.stored}
+                      isNext={!stopped && l.line === next}
+                      isLast={stopped && l.line === lastRun}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         ) : (
           <div className="truth-table-wrap">
@@ -722,40 +621,49 @@ export const MachineAtWork = withProps(
             </button>
           </div>
         )}
+        {compact && event !== undefined && (
+          <p role="status" className="meet-event">
+            {event}
+          </p>
+        )}
         {compact && (
-          <div className="meet-changed" role="status">
-            <p className="meet-changed-heading">
-              {summary === undefined
-                ? t.changedSummary.heading
-                : format(t.changedSummary.headingLine, { line: lastRun ?? "" })}
-            </p>
-            {summary === undefined ? (
-              anchor !== undefined && (
-                <p className="meet-changed-none">
-                  {format(t.changedSummary.ready, { line: anchor })}
-                </p>
-              )
-            ) : (
-              <ul className="meet-changed-list">
-                {summary.map((row) => (
-                  <li key={row.label} className={row.changed ? "row-current" : ""}>
-                    <span className="meet-changed-label">{row.label}</span>
-                    <span className="meet-changed-value memory-word">{row.value}</span>
-                    <span className="meet-changed-mark">
-                      {row.changed ? t.changedSummary.changed : t.changedSummary.unchanged}
+          <div className="meet-state" hidden={!committed}>
+            <div className="meet-state-head">
+              <span className="meet-state-heading">{t.window.stateHeading}</span>
+              <span className="meet-state-note">{format(t.window.notSetMark, { dash: "—" })}</span>
+            </div>
+            <ul className="meet-state-tiles">
+              {shown.map((k) => {
+                const now = numberText(t, words[k]);
+                const changed = before !== undefined && numberText(t, was[k]) !== now;
+                return (
+                  <li key={k} className={`meet-tile${changed ? " row-current" : ""}`}>
+                    <span className="meet-tile-name">{`R${k}`}</span>
+                    <span className="meet-tile-value memory-word">
+                      {now === t.notSet ? "—" : now}
                     </span>
                   </li>
-                ))}
-              </ul>
-            )}
+                );
+              })}
+              <li className="meet-tile">
+                <span className="meet-tile-name">{t.display}</span>
+                <span className="meet-tile-value memory-word">
+                  {numberOf(state.display) ?? "—"}
+                </span>
+              </li>
+              {LAMP_NAMES.map((name, k) => (
+                <li key={name} className="meet-tile">
+                  <span className="meet-tile-name">{name}</span>
+                  <span className="meet-tile-value">
+                    {state.lamps === undefined ? "—" : (state.lamps >> k) & 1 ? t.lit : t.dark}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
-        <div
-          className={`datapath-tables${compact ? " meet-compact-tables" : ""}`}
-          hidden={!committed}
-        >
-          <details className="meet-expander">
-            <summary>{t.changedSummary.allRegisters}</summary>
+        {!compact && (
+          <div className="datapath-tables" hidden={!committed}>
             <div className="truth-table-wrap">
               <table className="truth-table meet-numbers">
                 <caption>{t.numbersCaption}</caption>
@@ -781,9 +689,6 @@ export const MachineAtWork = withProps(
                 </tbody>
               </table>
             </div>
-          </details>
-          <details className="meet-expander">
-            <summary>{t.changedSummary.shopSees}</summary>
             <div className="truth-table-wrap">
               <table className="truth-table meet-shop">
                 <caption>{t.shopCaption}</caption>
@@ -807,8 +712,8 @@ export const MachineAtWork = withProps(
                 </tbody>
               </table>
             </div>
-          </details>
-        </div>
+          </div>
+        )}
         {drawing && (
           <CircuitView
             circuit={circuit}

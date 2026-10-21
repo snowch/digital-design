@@ -2370,11 +2370,10 @@ button.bit {
 .meet-line-text {
   font-family: var(--font-sans);
 }
-/* The mobile presentation of the machine at work (the `mobile` figure): the whole program on
-   show by default, with a switch to the Follow execution window of at most three instructions.
-   In both modes each instruction is one row: the number in a fixed-width column and the
-   instruction's words in a flexible column beside it, so a long instruction wraps inside its own
-   column and the number stays aligned with the first line of its text. */
+/* The compact mobile runner (the `mobile` figure): the whole program, with each instruction one
+   row: the number in a fixed-width column and the instruction's words in a flexible column beside
+   it, so a long instruction wraps inside its own column and the number stays aligned with the
+   first line of its text. */
 .meet-window {
   margin: var(--space-3) 0;
   border: 1px solid var(--border);
@@ -2395,79 +2394,9 @@ button.bit {
   font-size: var(--text-md);
 }
 .meet-window-position {
+  margin-left: auto;
   font-family: var(--font-mono);
   font-size: var(--text-sm);
-  color: var(--fg-muted);
-}
-.meet-mode {
-  display: flex;
-  margin-left: auto;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-.meet-mode-button {
-  font: inherit;
-  font-size: var(--text-sm);
-  font-weight: 600;
-  min-height: 2.75rem;
-  padding: 0 var(--space-3);
-  border: 0;
-  background: var(--bg-raised);
-  color: var(--fg-muted);
-  cursor: pointer;
-}
-.meet-mode-button[aria-pressed="true"] {
-  background: var(--accent);
-  color: var(--accent-fg);
-}
-.meet-window-viewing {
-  margin: 0;
-  padding: var(--space-2) var(--space-3);
-  font-size: var(--text-sm);
-  color: var(--fg-muted);
-  border-bottom: 1px solid var(--border);
-}
-.meet-window-follow {
-  font: inherit;
-  color: var(--accent);
-  background: none;
-  border: 0;
-  padding: 0;
-  min-height: 2.75rem;
-  text-decoration: underline;
-  cursor: pointer;
-}
-.meet-window-body {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: stretch;
-}
-.meet-window-nav {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: var(--space-2);
-  padding: 0 var(--space-2);
-  border-right: 1px solid var(--border);
-}
-.meet-window-arrow {
-  min-height: 2.75rem;
-  min-width: 2.75rem;
-  padding: 0;
-  font-size: var(--text-lg);
-  line-height: 1;
-}
-.meet-window-table {
-  flex: 1;
-  min-width: 0;
-  margin: 0;
-}
-.meet-window-note {
-  flex-basis: 100%;
-  margin: 0;
-  padding: var(--space-1) var(--space-3) var(--space-2);
-  font-size: var(--text-xs);
   color: var(--fg-muted);
 }
 /* One instruction as one row: the number's column is fixed, the words' column takes the rest and
@@ -2477,6 +2406,10 @@ button.bit {
   display: grid;
   grid-template-columns: 2rem minmax(0, 1fr);
   align-items: baseline;
+  border-bottom: 1px solid var(--border);
+}
+.meet-full-table tbody tr:last-child .meet-line {
+  border-bottom: none;
 }
 .meet-line-number {
   font-family: var(--font-mono);
@@ -2502,105 +2435,78 @@ button.bit {
   font-weight: 700;
   box-shadow: inset 4px 0 0 var(--accent);
 }
-.meet-window-table th,
-.meet-window-table td,
-.meet-full-table th,
-.meet-full-table td {
-  border-bottom: 1px solid var(--border);
-}
-.meet-window-table tbody tr:last-child th,
-.meet-window-table tbody tr:last-child td,
-.meet-full-table tbody tr:last-child th,
-.meet-full-table tbody tr:last-child td {
-  border-bottom: none;
-}
 .meet-full-table {
   margin: 0;
   width: 100%;
 }
-.meet-full-table .meet-line {
-  border-bottom: 1px solid var(--border);
-}
-.meet-full-table tbody tr:last-child .meet-line {
-  border-bottom: none;
-}
-/* What the last instruction the machine ran changed, read off the machine itself and shown
-   directly under the run controls. */
-.meet-changed {
-  margin: 0 0 var(--space-3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--bg-raised);
+/* The one event line under the run controls: what the instruction that just ran actually did.
+   Nothing renders before the first real step, so no placeholder says "ready". */
+.meet-event {
+  margin: 0 0 var(--space-2);
   padding: var(--space-2) var(--space-3);
-}
-.meet-changed-heading {
-  margin: 0 0 var(--space-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--accent-soft);
   font-weight: 650;
   font-size: var(--text-sm);
 }
-.meet-changed-none {
-  margin: 0;
-  font-size: var(--text-sm);
-  color: var(--fg-muted);
+/* The machine's state, always on show: the numbers the program names, the display and the three
+   lamps, as compact tiles. A value that is not set yet shows a dash, never a made-up 0. */
+.meet-state {
+  margin: 0 0 var(--space-3);
 }
-.meet-changed-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
+.meet-state[hidden] {
+  display: none;
 }
-.meet-changed-list li {
+.meet-state-head {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: var(--space-2);
-  padding: var(--space-1) 0;
-  border-bottom: 1px solid var(--border);
-  font-size: var(--text-sm);
+  margin: 0 0 var(--space-1);
 }
-.meet-changed-list li:last-child {
-  border-bottom: none;
-}
-.meet-changed-label {
+.meet-state-heading {
   font-weight: 650;
+  font-size: var(--text-md);
 }
-.meet-changed-value {
-  font-family: var(--font-mono);
-}
-.meet-changed-mark {
+.meet-state-note {
   margin-left: auto;
   font-size: var(--text-xs);
   color: var(--fg-muted);
 }
-.meet-changed-list .row-current .meet-changed-mark {
-  color: var(--accent-strong);
-  font-weight: 700;
-}
-/* The whole register list and the shop's outputs stay reachable, as compact expanders. */
-.meet-compact-tables {
-  display: block;
-}
-.meet-expander {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--bg-raised);
-  margin: 0 0 var(--space-2);
-}
-.meet-expander summary {
-  min-height: 2.75rem;
-  display: flex;
-  align-items: center;
-  padding: 0 var(--space-3);
-  font-weight: 650;
-  font-size: var(--text-sm);
-  cursor: pointer;
-}
-.meet-expander .truth-table-wrap {
-  padding: 0 var(--space-3) var(--space-2);
-}
-.meet-expander .truth-table {
+.meet-state-tiles {
+  list-style: none;
   margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(4.25rem, 1fr));
+  gap: var(--space-2);
+}
+.meet-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+  padding: var(--space-1) var(--space-2);
+}
+.meet-tile-name {
+  font-size: var(--text-xs);
+  font-weight: 650;
+  color: var(--fg-muted);
+}
+.meet-tile-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.meet-tile.row-current {
+  border-color: var(--accent);
+  box-shadow: inset 0 3px 0 var(--accent);
 }
 /* On a narrow phone the run controls wrap to two rows, with Run one instruction first and most
    prominent; every button keeps a tap area of at least 44 pixels. */
