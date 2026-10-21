@@ -8,7 +8,7 @@ levels.slice: One slice
 levels.adding: The adding part
 levels.smallest: The smallest parts
 levels.wire: One wire
-captions.predictSlices: Choose which slices show 1.
+captions.predictSlices: Choose which wires show 1.
 captions.ladder: Open each level to see 66.
 captions.slices: Type the 1s and 0s the eight slices give.
 captions.stuck: Choose whether a wire is stuck.

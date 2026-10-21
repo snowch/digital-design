@@ -18,7 +18,7 @@ export const LABELS = {
     c2: "Trace instruction 3",
   },
   captions: {
-    predictSlices: "Choose which slices show 1.",
+    predictSlices: "Choose which wires show 1.",
     ladder: "Open each level to see 66.",
     slices: "Type the 1s and 0s the eight slices give.",
     stuck: "Choose whether a wire is stuck.",
@@ -38,9 +38,9 @@ export const LABELS = {
     adding: "The adding part",
   },
   options: {
-    p1Two: "The slices worth 64 and 2",
-    p1One: "One slice worth 66",
-    p1All: "All 64 slices",
+    p1Two: "The wires worth 64 and 2",
+    p1One: "One wire worth 66",
+    p1All: "All 64 wires",
     stuck66: "66",
     stuck64: "64",
     stuckStops: "The machine stops at instruction 3.",

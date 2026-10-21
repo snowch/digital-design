@@ -31,6 +31,7 @@ import { PredictionChallenge } from "@platform/primitives";
 import type { Word } from "@dd/sim";
 
 import { CircuitView } from "../CircuitView";
+import { OutputStrip } from "./OutputStrip";
 import { format, useViewStrings, youChose } from "../strings";
 import { lineText } from "./MachineAtWork";
 import { withProps } from "./props";
@@ -51,6 +52,8 @@ const Props = z.object({
   inputs: z.record(z.string(), z.union([z.string(), z.number()])).default({}),
   /** Lines run before the pause: the ladder follows the line the machine runs next. */
   lines: z.number().int().nonnegative().default(0),
+  /** Show the eight lowest wires of the part that adds before any level opens. */
+  strip: z.boolean().default(false),
   levels: z.array(Level).min(2),
   question: z.string().optional(),
   options: z.array(z.object({ value: z.string(), label: z.string() })).optional(),
@@ -161,6 +164,7 @@ export const Ladder = withProps(
             {format(t.ladder.paused, { line: line.line, text: lineText(t, line) })}
           </p>
         )}
+        {data.strip && <OutputStrip sim={sim} shown={committed} />}
         <nav className="ladder-steps" aria-label={t.ladder.levelsName}>
           <button
             type="button"
