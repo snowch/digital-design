@@ -65,10 +65,12 @@ const Props = z.object({
   /** Any button at all: false shows the machine paused, for a challenge that asks about it. */
   controls: z.boolean().default(true),
   /**
-   * The compact presentation: on a phone, a window of at most three instructions that follows
-   * the machine, with browsing that does not run it, and a summary of what the last instruction
-   * changed under the controls. Desktop keeps the full list. Off for figures whose whole
-   * program must stay on show, such as a prediction's or one kept as numbers.
+   * The mobile presentation: on a phone, the whole program is on show by default, and a
+   * "Follow execution" switch swaps it for a window of at most three instructions that follows
+   * the machine, with browsing that does not run it. Under either mode the run controls sit
+   * directly above a summary of what the last instruction changed. Desktop keeps the full list.
+   * Off for figures whose whole program must stay on show, such as a prediction's or one kept
+   * as numbers.
    */
   mobile: z.boolean().default(false),
   /** Wires stuck deep inside, one at a time, each with its outcome, shown once it has run. */
@@ -123,6 +125,52 @@ export function lineText(t: MeetStrings, l: MeetLine): string {
   const values = { ...l.plain.values };
   if (values["device"] !== undefined) values["device"] = t.devices[values["device"]] ?? "";
   return format(t.lines[l.plain.key], values);
+}
+
+/**
+ * One instruction as a single semantic row: the number in a fixed-width column and the
+ * instruction's words in a flexible column beside it, so a long instruction wraps inside its own
+ * column and the number stays aligned with the first line of its text. The row carries the
+ * machine's own mark: the next-to-run arrow and highlight, or the stopped-after mark.
+ */
+function ProgramRow({
+  t,
+  l,
+  stored,
+  isNext,
+  isLast,
+}: {
+  readonly t: MeetStrings;
+  readonly l: MeetLine;
+  readonly stored: boolean;
+  readonly isNext: boolean;
+  readonly isLast: boolean;
+}) {
+  const here = isNext || isLast;
+  return (
+    <tr
+      className={`meet-line${here ? " row-current" : ""}`}
+      aria-current={isNext ? "step" : isLast ? "true" : undefined}
+    >
+      <th scope="row" className="meet-line-number">
+        <span aria-hidden="true" className="meet-line-arrow">
+          {isNext ? "▶" : ""}
+        </span>
+        {l.line}
+      </th>
+      <td className="meet-line-text">
+        {lineText(t, l)}
+        <span className="visually-hidden">
+          {isNext
+            ? format(t.window.nextAria, { line: l.line })
+            : isLast
+              ? format(t.window.stoppedAria, { line: l.line })
+              : ""}
+        </span>
+      </td>
+      {stored && <td className="memory-word meet-line-stored">{l.stored}</td>}
+    </tr>
+  );
 }
 
 /** A register's word as the figure writes it: signed, or "not set" while any digit is unknown. */
@@ -224,15 +272,16 @@ export const MachineAtWork = withProps(
     const optionLabel = (v: string) =>
       (data.options?.find((o) => o.value === v)?.label ?? v).replace(/\.$/, "");
 
-    // The compact window's browse position: the instruction the window is centred on. Undefined
-    // follows the machine: it shows whatever runs next. Browsing sets it, and browsing does not
-    // touch the machine; a step, a run and Start again return the window to the machine's place.
+    // The mobile presentation's two modes. The whole program is the default on a phone; Follow
+    // execution swaps it for the three-instruction window. Both modes show the same machine.
+    const [following, setFollowing] = useState(false);
+    // The window's browse position: the instruction the window is centred on. Undefined follows
+    // the machine: it shows whatever runs next. Browsing sets it, and browsing does not touch the
+    // machine; a step, a run and Start again return the window to the machine's place.
     const [browseAt, setBrowseAt] = useState<number | undefined>(undefined);
-    const [showAll, setShowAll] = useState(false);
     // Reset browsing with the machine: Start again, and a new fault's new machine.
     const resetBrowse = () => {
       setBrowseAt(undefined);
-      setShowAll(false);
     };
 
     // A run moves a line at a time on a timer; a new start, a pause or leaving the page ends it.
@@ -346,15 +395,17 @@ export const MachineAtWork = withProps(
             ? format(t.status.next, { line: next })
             : "";
 
-    // The compact window's centre: the instruction it follows (the machine's own next place, or
-    // the one it stopped after) when following, or the learner's browsed instruction. The window
-    // shows the centre and its physically adjacent neighbours in program order; a branch shows
-    // where the machine went, not the instructions it skipped.
+    // The mobile presentation: the whole program by default, the three-instruction window in
+    // Follow execution mode. The window's centre is the instruction it follows (the machine's own
+    // next place, or the one it stopped after) when following, or the learner's browsed
+    // instruction. The window shows the centre and its physically adjacent neighbours in program
+    // order; a branch shows where the machine went, not the instructions it skipped.
     const compact = data.mobile && data.controls && committed;
+    const windowMode = compact && following;
     const anchor = stopped ? (lastRun ?? next) : next;
     const centre = browseAt ?? anchor;
     const windowLines = useMemo(() => {
-      if (!compact || centre === undefined) return [];
+      if (!windowMode || centre === undefined) return [];
       const at = lines.findIndex((l) => l.line === centre);
       if (at < 0) return [];
       // At most three rows: the centre and its physically adjacent neighbours in program order.
@@ -362,7 +413,7 @@ export const MachineAtWork = withProps(
       // invented row before it and instruction 9 none after it.
       const first = Math.min(Math.max(0, at - 1), Math.max(0, lines.length - 3));
       return lines.slice(first, first + 3);
-    }, [compact, centre, lines]);
+    }, [windowMode, centre, lines]);
     const browse = (by: number) =>
       setBrowseAt((was) => {
         const at = lines.findIndex((l) => l.line === (was ?? centre ?? 1));
@@ -509,10 +560,10 @@ export const MachineAtWork = withProps(
         )}
         {compact ? (
           <div
-            className={`meet-window${showAll ? " show-all" : ""}`}
+            className={`meet-window${windowMode ? " meet-window-follow" : ""}`}
             role="group"
             aria-label={t.window.caption}
-            onKeyDown={onWindowKey}
+            onKeyDown={windowMode ? onWindowKey : undefined}
           >
             <div className="meet-window-head">
               <span className="meet-window-caption">{t.window.caption}</span>
@@ -521,82 +572,98 @@ export const MachineAtWork = withProps(
                   {format(t.window.position, { n: anchor, total: lines.length })}
                 </span>
               )}
-              <button
-                type="button"
-                className="button secondary meet-window-toggle"
-                onClick={() => setShowAll((was) => !was)}
-              >
-                {showAll ? t.window.collapse : t.window.showAll}
-              </button>
-            </div>
-            {browseAt !== undefined && browseAt !== anchor && anchor !== undefined && (
-              <p role="status" className="meet-window-viewing">
-                {format(t.window.viewing, { viewing: browseAt, next: anchor })}{" "}
+              <div className="meet-mode" role="group" aria-label={t.window.modeLabel}>
                 <button
                   type="button"
-                  className="meet-window-follow"
-                  onClick={() => setBrowseAt(undefined)}
+                  className="meet-mode-button"
+                  aria-pressed={!following}
+                  onClick={() => setFollowing(false)}
                 >
-                  {t.window.follow}
-                </button>
-              </p>
-            )}
-            <div className="meet-window-body">
-              <div className="meet-window-nav">
-                <button
-                  type="button"
-                  className="button secondary meet-window-arrow"
-                  aria-label={t.window.previous}
-                  disabled={centre === undefined || centre <= lines[0]!.line}
-                  onClick={() => browse(-1)}
-                >
-                  ‹
+                  {t.window.modeFull}
                 </button>
                 <button
                   type="button"
-                  className="button secondary meet-window-arrow"
-                  aria-label={t.window.next}
-                  disabled={centre === undefined || centre >= lines[lines.length - 1]!.line}
-                  onClick={() => browse(1)}
+                  className="meet-mode-button"
+                  aria-pressed={following}
+                  onClick={() => setFollowing(true)}
                 >
-                  ›
+                  {t.window.modeFollow}
                 </button>
               </div>
-              <table className="truth-table meet-program meet-window-table">
-                <caption className="visually-hidden">{t.window.browseKeys}</caption>
-                <tbody>
-                  {(showAll ? lines : windowLines).map((l) => {
-                    const isAnchor = l.line === anchor;
-                    const isNext = !stopped && l.line === next;
-                    const isLast = stopped && l.line === lastRun;
-                    const here = isAnchor && (isNext || isLast);
-                    return (
-                      <tr
-                        key={l.line}
-                        className={here ? "row-current" : ""}
-                        aria-current={isNext ? "step" : isLast ? "true" : undefined}
-                      >
-                        <th scope="row">
-                          <span aria-hidden="true">{isNext ? "▶" : " "}</span>
-                          {l.line}
-                        </th>
-                        <td>
-                          {lineText(t, l)}
-                          <span className="visually-hidden">
-                            {isNext
-                              ? format(t.window.nextAria, { line: l.line })
-                              : isLast
-                                ? format(t.window.stoppedAria, { line: l.line })
-                                : ""}
-                          </span>
-                        </td>
-                        {data.stored && <td className="memory-word">{l.stored}</td>}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
             </div>
+            {windowMode &&
+              browseAt !== undefined &&
+              browseAt !== anchor &&
+              anchor !== undefined && (
+                <p role="status" className="meet-window-viewing">
+                  {format(t.window.viewing, { viewing: browseAt, next: anchor })}{" "}
+                  <button
+                    type="button"
+                    className="meet-window-follow"
+                    onClick={() => setBrowseAt(undefined)}
+                  >
+                    {t.window.follow}
+                  </button>
+                </p>
+              )}
+            {windowMode ? (
+              <div className="meet-window-body">
+                <div className="meet-window-nav">
+                  <button
+                    type="button"
+                    className="button secondary meet-window-arrow"
+                    aria-label={t.window.previous}
+                    disabled={centre === undefined || centre <= lines[0]!.line}
+                    onClick={() => browse(-1)}
+                  >
+                    ‹
+                  </button>
+                  <button
+                    type="button"
+                    className="button secondary meet-window-arrow"
+                    aria-label={t.window.next}
+                    disabled={centre === undefined || centre >= lines[lines.length - 1]!.line}
+                    onClick={() => browse(1)}
+                  >
+                    ›
+                  </button>
+                </div>
+                <table className="truth-table meet-program meet-window-table">
+                  <caption className="visually-hidden">{t.window.browseKeys}</caption>
+                  <tbody>
+                    {windowLines.map((l) => (
+                      <ProgramRow
+                        key={l.line}
+                        t={t}
+                        l={l}
+                        stored={data.stored}
+                        isNext={!stopped && l.line === next}
+                        isLast={stopped && l.line === lastRun}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+                <p className="meet-window-note">{t.window.browseNote}</p>
+              </div>
+            ) : (
+              <div className="meet-window-list">
+                <table className="truth-table meet-program meet-full-table">
+                  <caption className="visually-hidden">{t.programCaption}</caption>
+                  <tbody>
+                    {lines.map((l) => (
+                      <ProgramRow
+                        key={l.line}
+                        t={t}
+                        l={l}
+                        stored={data.stored}
+                        isNext={!stopped && l.line === next}
+                        isLast={stopped && l.line === lastRun}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         ) : (
           <div className="truth-table-wrap">

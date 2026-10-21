@@ -720,9 +720,9 @@ export interface MeetStrings {
    * run the machine.
    */
   readonly window: {
-    /** The header of the window: {n} is the instruction next to run, {total} the count. */
+    /** The header of the program area: {n} is the instruction next to run, {total} the count. */
     readonly caption: string;
-    /** The position in the whole program: {n} of {total}. */
+    /** The position in the whole program, in the header: {n} of {total}. */
     readonly position: string;
     /** The row the machine runs next, announced to a screen reader. */
     readonly nextAria: string;
@@ -739,12 +739,20 @@ export interface MeetStrings {
      * {next} runs next.
      */
     readonly viewing: string;
-    /** Shows the whole program. */
+    /** Shows the whole program, instead of the three-instruction window. */
     readonly showAll: string;
     /** Hides the whole program, back to the window. */
     readonly collapse: string;
     /** The home and end keys move the window to the first and last instruction. */
     readonly browseKeys: string;
+    /** The mode switch's label for the whole program on show. */
+    readonly modeFull: string;
+    /** The mode switch's label for the three-instruction window that follows the machine. */
+    readonly modeFollow: string;
+    /** What the mode switch does, for a screen reader. */
+    readonly modeLabel: string;
+    /** Under the window's browsing controls: browsing does not run the machine. */
+    readonly browseNote: string;
   };
   /** The summary under the run controls: what the last instruction the machine ran changed. */
   readonly changedSummary: {
@@ -1582,7 +1590,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     limitLabel: "Instruction 5's number",
     window: {
       caption: "The program",
-      position: "{n} of {total}",
+      position: "Next: {n} of {total}",
       nextAria: "Instruction {line}, next to run.",
       stoppedAria: "Instruction {line}, the one it stopped after.",
       previous: "Browse to the instruction before",
@@ -1592,6 +1600,10 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       showAll: "Show all",
       collapse: "Collapse",
       browseKeys: "The left and right arrow keys browse the program; Home and End go to its ends.",
+      modeFull: "Full program",
+      modeFollow: "Follow execution",
+      modeLabel: "How the program is shown",
+      browseNote: "Browsing does not change execution.",
     },
     changedSummary: {
       heading: "What changed?",
