@@ -232,8 +232,17 @@ test.describe("the ladder", () => {
     await figure.getByRole("button", { name: V.prediction.commit }).click();
     await expect(figure.locator("[role=status]").first()).toContainText(V.prediction.match);
     // The strip's wires reveal, read off the simulator: 01000010, the wires worth 64 and 2
-    // marked, and the level's reading shows only now.
+    // marked. The real circuit stays closed behind its own open button, and its level
+    // reading shows only once the learner explores.
     await expect(figure.locator(".strip-table")).toContainText("01000010");
+    await expect(figure.locator(".ladder-reading")).toHaveCount(0);
+    await expect(figure.getByRole("button", { name: V.meet.strip.open })).toBeVisible();
+    await figure.getByRole("button", { name: V.meet.strip.open }).click();
     await expect(figure.locator(".ladder-reading")).toHaveCount(1);
+    // Predict again closes the circuit and hides the strip's values once more.
+    await figure.getByRole("button", { name: V.prediction.again }).click();
+    await expect(figure.locator(".strip-table td")).toContainText(["?"]);
+    await expect(figure.locator(".ladder-reading")).toHaveCount(0);
+    await expect(figure.getByRole("button", { name: "Down a level" })).toHaveCount(0);
   });
 });

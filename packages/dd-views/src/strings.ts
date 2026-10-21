@@ -737,6 +737,8 @@ export interface MeetStrings {
     readonly higher: string;
     readonly title: string;
     readonly ones: string;
+    /** Opens the real circuit below the strip, once the learner has committed. */
+    readonly open: string;
   };
 }
 
@@ -1535,6 +1537,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       higher: "The 56 wires of higher worth all give 0 for this answer.",
       title: "The eight wires of least worth",
       ones: "Wires worth {worths} give 1; the others give 0.",
+      open: "Explore the slice worth 2",
     },
   },
 };

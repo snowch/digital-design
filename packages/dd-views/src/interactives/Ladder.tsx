@@ -67,6 +67,11 @@ interface Stored {
   readonly choice?: string;
 }
 
+/** Whether the learner has opened the real circuit below the strip. */
+interface Explored {
+  readonly open?: boolean;
+}
+
 /** A word's 1s and 0s, in groups of eight from the right, so a long row wraps between groups. */
 export function digitsText(w: Word | undefined): string {
   if (!w) return "";
@@ -93,6 +98,7 @@ export const Ladder = withProps(
     const [at, setAt] = useState(0);
     const [reached, setReached] = useState(false);
     const [stored, setStored] = useSlot<Stored>(store, interactive.id);
+    const [explored, setExplored] = useSlot<Explored>(store, `${interactive.id}-explored`);
     const asking = data.question !== undefined && data.options !== undefined;
     const committed = !asking || stored?.choice !== undefined;
     const answer = useMemo(
@@ -127,17 +133,26 @@ export const Ladder = withProps(
                 ? t.ladder.high
                 : t.ladder.low;
 
+    // The prediction's order: the question, then the strip it asks about, then the choices.
+    // The real circuit stays closed until the learner opens it, and Try again closes it again.
+    const open = data.strip ? explored?.open === true && committed : true;
+    const again = () => {
+      setStored(undefined);
+      setExplored(undefined);
+      setAt(0);
+    };
     return (
       <div className="explorer ladder-figure" data-interactive={interactive.id}>
         {asking && (
           <div className="carry-question">
             <Prose markdown={data.question ?? ""} />
+            {data.strip && <OutputStrip sim={sim} shown={committed} />}
             <PredictionChallenge
               name={`${interactive.id}-choice`}
               options={data.options ?? []}
               committed={stored?.choice}
               onCommit={(choice) => setStored({ choice })}
-              onAgain={() => setStored(undefined)}
+              onAgain={again}
               legend={strings.prediction.legend}
               commitLabel={strings.prediction.commit}
               againLabel={strings.prediction.again}
@@ -164,29 +179,35 @@ export const Ladder = withProps(
             {format(t.ladder.paused, { line: line.line, text: lineText(t, line) })}
           </p>
         )}
-        {data.strip && <OutputStrip sim={sim} shown={committed} />}
-        <nav className="ladder-steps" aria-label={t.ladder.levelsName}>
-          <button
-            type="button"
-            className="button secondary"
-            disabled={at === 0}
-            onClick={() => go(at - 1)}
-          >
-            {t.ladder.up}
+        {data.strip && committed && !open && (
+          <button type="button" className="button" onClick={() => setExplored({ open: true })}>
+            {t.strip.open}
           </button>
-          <span className="ladder-position" aria-live="polite">
-            {format(t.ladder.position, { k: at + 1, n: data.levels.length })}
-          </span>
-          <button
-            type="button"
-            className="button"
-            disabled={at === last}
-            onClick={() => go(at + 1)}
-          >
-            {t.ladder.down}
-          </button>
-        </nav>
-        {level && (
+        )}
+        {open && (
+          <nav className="ladder-steps" aria-label={t.ladder.levelsName}>
+            <button
+              type="button"
+              className="button secondary"
+              disabled={at === 0}
+              onClick={() => go(at - 1)}
+            >
+              {t.ladder.up}
+            </button>
+            <span className="ladder-position" aria-live="polite">
+              {format(t.ladder.position, { k: at + 1, n: data.levels.length })}
+            </span>
+            <button
+              type="button"
+              className="button"
+              disabled={at === last}
+              onClick={() => go(at + 1)}
+            >
+              {t.ladder.down}
+            </button>
+          </nav>
+        )}
+        {level && open && (
           <section className="ladder-level" aria-label={level.title}>
             <h4 className="ladder-title">{level.title}</h4>
             <p className="ladder-module">
