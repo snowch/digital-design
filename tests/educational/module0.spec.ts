@@ -178,9 +178,11 @@ test.describe("the machine at work", () => {
     await openLesson(page, FIRST.id);
     const figure = page.locator("#ix-run");
     await figure.scrollIntoViewIfNeeded();
-    // Room B's freezer fails and warms to -5.0: the gap is 200, past the limit of 100, so the
-    // program runs on through line 6, lights GAP_ALARM at line 8, and shows 200.
-    await figure.getByRole("spinbutton", { name: M.roomB }).fill("-50");
+    // The lesson's own failure experiment, from its prose: room A reads -50, the gap is 200,
+    // past the limit of 100, so the program runs on through line 6, lights GAP_ALARM at line 8,
+    // and shows 200. The figure only applies the reading to the machine on Start again.
+    await figure.getByRole("spinbutton", { name: M.roomA }).fill("-50");
+    await figure.getByRole("button", { name: M.reset, exact: true }).click();
     await figure.getByRole("button", { name: M.run, exact: true }).click();
     await expect(figure.locator(".meet-event")).toHaveText(
       format(M.window.eventStopped, { line: 9 }),
