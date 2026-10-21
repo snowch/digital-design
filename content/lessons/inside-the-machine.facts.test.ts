@@ -10,7 +10,7 @@ import { parseLesson } from "@platform/lesson-schema";
 import { insideTheMachine as lesson } from "./inside-the-machine";
 import { MODULE_NAMES } from "./module-names";
 import { figureOf } from "./module3-facts";
-import { datapathState, meetAnswer, nextLine, numberOf } from "@dd/dd-model";
+import { datapathState, meetAnswer, nextLine, numberOf, sliceDigits } from "@dd/dd-model";
 
 import { levelReading, meetFigure, meetFigureAnswer, meetRun } from "./module0-facts";
 
@@ -33,6 +33,12 @@ describe("facts for the lesson on what the machine is made of", () => {
     expect(at("smallest")).toBe("1");
     expect(at("wire")).toBe("high");
   }, 30_000);
+
+  it("the prediction's strip: the eight wires of least worth give 01000010, the 56 above give 0", () => {
+    const sim = meetFigure(lesson, "predict-slices");
+    expect(sliceDigits(sim, 8)).toBe("01000010");
+    expect(sim.read("RESULT").value.toString(2)).toBe("1000010");
+  });
 
   it("names the modules 11, 8, 7, 7, 7, 7, 3, 2 and 1 by their names on the cover", () => {
     const levels = figureOf(lesson, "ladder")["levels"] as { module: number; moduleName: string }[];

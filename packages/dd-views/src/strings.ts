@@ -728,6 +728,16 @@ export interface MeetStrings {
     readonly low: string;
     readonly drawingTitle: string;
   };
+  /** The eight lowest wires of the part that adds, with each wire's worth above it. */
+  readonly strip: {
+    readonly caption: string;
+    readonly worthHeading: string;
+    readonly wireHeading: string;
+    readonly hidden: string;
+    readonly higher: string;
+    readonly title: string;
+    readonly ones: string;
+  };
 }
 
 export const DEFAULT_VIEW_STRINGS: ViewStrings = {
@@ -1516,6 +1526,15 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
       high: "The wire is high and stands for 1.",
       low: "The wire is low and stands for 0.",
       drawingTitle: "Inside this part",
+    },
+    strip: {
+      caption: "The part that adds, sending its answer out on 64 wires",
+      worthHeading: "The wire's worth",
+      wireHeading: "The wire gives",
+      hidden: "?",
+      higher: "The 56 wires of higher worth all give 0 for this answer.",
+      title: "The eight wires of least worth",
+      ones: "Wires worth {worths} give 1; the others give 0.",
     },
   },
 };

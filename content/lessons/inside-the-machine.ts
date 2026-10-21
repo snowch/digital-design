@@ -83,7 +83,8 @@ export const insideTheMachine: LessonInput = {
             program: GAP,
             inputs: ROOMS,
             lines: 2,
-            levels: LEVELS.slice(2, 5),
+            strip: true,
+            levels: LEVELS.slice(6, 9),
             question: PROSE.p1Question,
             options: [
               { value: "64 + 2", label: LABELS.options.p1Two },

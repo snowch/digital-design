@@ -2391,6 +2391,46 @@ button.bit {
   color: var(--fg-muted);
   margin: var(--space-1) 0;
 }
+/* The eight lowest wires of the part that adds, with each wire's worth above it: one column
+   per wire, so the worth and the wire's value read together; at a narrow width the columns
+   keep their size and the row of worths wraps as a whole. */
+.output-strip {
+  margin: var(--space-2) 0;
+}
+.output-strip figcaption {
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-1);
+}
+.strip-table {
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+}
+.strip-table th,
+.strip-table td {
+  padding: var(--space-1);
+  text-align: center;
+  border: 1px solid var(--border);
+}
+.strip-table thead th[scope="col"] {
+  font-weight: 650;
+}
+.strip-table th[scope="row"] {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  text-align: left;
+  max-width: 6rem;
+}
+.strip-table td.strip-one {
+  background: var(--accent-soft);
+  font-weight: 700;
+}
+.strip-table td.strip-zero {
+  color: var(--fg-muted);
+}
+.output-strip p {
+  margin: var(--space-1) 0 0;
+}
 .ladder-reading {
   font-family: var(--font-mono);
   overflow-wrap: anywhere;
