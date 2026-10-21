@@ -9,7 +9,7 @@
 
 export const PROSE = {
   question:
-    "The three lamps from the last lesson (ALARM, NIGHT and MISMATCH) are now to be built on one small board for the display. An electronics engineer will assemble the board. The engineer keeps a drawer of spare chips. Nearly all of them are one kind: each chip contains four NAND gates.\n\nA **NAND** gate is an AND gate followed by a NOT. Its output is 0 only when every input is 1. The last lesson ended by asking whether one kind of gate could be enough for every truth table. Here the question is more specific: can every lamp be built from NAND gates alone?",
+    "The three lamps from the last lesson (ALARM, NIGHT and MISMATCH) are now to be built on one small board for the display. MISMATCH warns that two sensors disagree; it is not the machine's GAP_ALARM lamp, which warns that the two rooms are too far apart. An electronics engineer will assemble the board. The engineer keeps a drawer of spare chips. Nearly all of them are one kind: each chip contains four NAND gates.\n\nA **NAND** gate is an AND gate followed by a NOT. Its output is 0 only when every input is 1. The last lesson ended by asking whether one kind of gate could be enough for every truth table. Here the question is more specific: can every lamp be built from NAND gates alone?",
   motivation:
     "A board built from one kind of chip needs one kind of spare. Any chip in the drawer can replace any failed chip on the board.\n\nNOT, AND and OR built every lamp in the last lesson. NAND gates must make all three to build those lamps. You will build NOT and AND from NAND gates. In a failure experiment, you will read and break OR, which is built from NAND gates.",
   prediction:
