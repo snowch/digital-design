@@ -14,7 +14,7 @@
 //
 // The words are Module 0's own (strings.ts, `meet`), held to the term gate by a test.
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { z } from "zod";
 
 import {
@@ -64,6 +64,15 @@ const Props = z.object({
   run: z.boolean().default(true),
   /** Any button at all: false shows the machine paused, for a challenge that asks about it. */
   controls: z.boolean().default(true),
+  /**
+   * The mobile presentation: on a phone, the whole program is on show by default, and a
+   * "Follow execution" switch swaps it for a window of at most three instructions that follows
+   * the machine, with browsing that does not run it. Under either mode the run controls sit
+   * directly above a summary of what the last instruction changed. Desktop keeps the full list.
+   * Off for figures whose whole program must stay on show, such as a prediction's or one kept
+   * as numbers.
+   */
+  mobile: z.boolean().default(false),
   /** Wires stuck deep inside, one at a time, each with its outcome, shown once it has run. */
   faults: z
     .array(
@@ -116,6 +125,52 @@ export function lineText(t: MeetStrings, l: MeetLine): string {
   const values = { ...l.plain.values };
   if (values["device"] !== undefined) values["device"] = t.devices[values["device"]] ?? "";
   return format(t.lines[l.plain.key], values);
+}
+
+/**
+ * One instruction as a single semantic row: the number in a fixed-width column and the
+ * instruction's words in a flexible column beside it, so a long instruction wraps inside its own
+ * column and the number stays aligned with the first line of its text. The row carries the
+ * machine's own mark: the next-to-run arrow and highlight, or the stopped-after mark.
+ */
+function ProgramRow({
+  t,
+  l,
+  stored,
+  isNext,
+  isLast,
+}: {
+  readonly t: MeetStrings;
+  readonly l: MeetLine;
+  readonly stored: boolean;
+  readonly isNext: boolean;
+  readonly isLast: boolean;
+}) {
+  const here = isNext || isLast;
+  return (
+    <tr
+      className={`meet-line${here ? " row-current" : ""}`}
+      aria-current={isNext ? "step" : isLast ? "true" : undefined}
+    >
+      <th scope="row" className="meet-line-number">
+        <span aria-hidden="true" className="meet-line-arrow">
+          {isNext ? "▶" : ""}
+        </span>
+        {l.line}
+      </th>
+      <td className="meet-line-text">
+        {lineText(t, l)}
+        <span className="visually-hidden">
+          {isNext
+            ? format(t.window.nextAria, { line: l.line })
+            : isLast
+              ? format(t.window.stoppedAria, { line: l.line })
+              : ""}
+        </span>
+      </td>
+      {stored && <td className="memory-word meet-line-stored">{l.stored}</td>}
+    </tr>
+  );
 }
 
 /** A register's word as the figure writes it: signed, or "not set" while any digit is unknown. */
@@ -217,6 +272,18 @@ export const MachineAtWork = withProps(
     const optionLabel = (v: string) =>
       (data.options?.find((o) => o.value === v)?.label ?? v).replace(/\.$/, "");
 
+    // The mobile presentation's two modes. The whole program is the default on a phone; Follow
+    // execution swaps it for the three-instruction window. Both modes show the same machine.
+    const [following, setFollowing] = useState(false);
+    // The window's browse position: the instruction the window is centred on. Undefined follows
+    // the machine: it shows whatever runs next. Browsing sets it, and browsing does not touch the
+    // machine; a step, a run and Start again return the window to the machine's place.
+    const [browseAt, setBrowseAt] = useState<number | undefined>(undefined);
+    // Reset browsing with the machine: Start again, and a new fault's new machine.
+    const resetBrowse = () => {
+      setBrowseAt(undefined);
+    };
+
     // A run moves a line at a time on a timer; a new start, a pause or leaving the page ends it.
     const runToken = useRef(0);
     useEffect(() => () => void (runToken.current += 1), []);
@@ -236,6 +303,9 @@ export const MachineAtWork = withProps(
         noteStop();
       }
       setRan(true);
+      // The window follows the machine: whatever the learner browsed, the next place to run
+      // comes back into view.
+      setBrowseAt(undefined);
       bump();
       return halting;
     };
@@ -270,6 +340,7 @@ export const MachineAtWork = withProps(
       setBefore(undefined);
       setStopped(false);
       setGaveUp(false);
+      resetBrowse();
       // A text about a run waits for the next run: Start again, or a new choice, clears it.
       setRanFaults(new Set());
       setStoppedOnce(false);
@@ -323,6 +394,88 @@ export const MachineAtWork = withProps(
           : next !== undefined
             ? format(t.status.next, { line: next })
             : "";
+
+    // The mobile presentation: the whole program by default, the three-instruction window in
+    // Follow execution mode. The window's centre is the instruction it follows (the machine's own
+    // next place, or the one it stopped after) when following, or the learner's browsed
+    // instruction. The window shows the centre and its physically adjacent neighbours in program
+    // order; a branch shows where the machine went, not the instructions it skipped.
+    const compact = data.mobile && data.controls && committed;
+    const windowMode = compact && following;
+    const anchor = stopped ? (lastRun ?? next) : next;
+    const centre = browseAt ?? anchor;
+    const windowLines = useMemo(() => {
+      if (!windowMode || centre === undefined) return [];
+      const at = lines.findIndex((l) => l.line === centre);
+      if (at < 0) return [];
+      // At most three rows: the centre and its physically adjacent neighbours in program order.
+      // At the program's ends the window shows the two that exist, so instruction 1 has no
+      // invented row before it and instruction 9 none after it.
+      const first = Math.min(Math.max(0, at - 1), Math.max(0, lines.length - 3));
+      return lines.slice(first, first + 3);
+    }, [windowMode, centre, lines]);
+    const browse = (by: number) =>
+      setBrowseAt((was) => {
+        const at = lines.findIndex((l) => l.line === (was ?? centre ?? 1));
+        const to = Math.min(Math.max(at + by, 0), lines.length - 1);
+        return lines[to]?.line;
+      });
+    const onWindowKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        browse(-1);
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        browse(1);
+      } else if (e.key === "Home") {
+        e.preventDefault();
+        setBrowseAt(lines[0]?.line);
+      } else if (e.key === "End") {
+        e.preventDefault();
+        setBrowseAt(lines[lines.length - 1]?.line);
+      }
+    };
+
+    // What the last instruction the machine ran changed, read off the snapshots taken around its
+    // edge: a register's word, the display, or the lamps. A reading the learner typed is a sensor's
+    // change, not an instruction's, so it does not rewrite this summary.
+    const beforeState = before ? datapathState(circuit, before) : undefined;
+    const summary = useMemo(() => {
+      if (!compact || !before || lastRun === undefined) return undefined;
+      const rows: { label: string; value: string; changed: boolean }[] = [];
+      for (const k of shown) {
+        const now = numberText(t, words[k]);
+        const wasText = numberText(t, was[k]);
+        rows.push({
+          label: `R${k}`,
+          value: now,
+          changed: wasText !== now,
+        });
+      }
+      const displayNow = numberOf(state.display) ?? t.notSet;
+      const displayWas = beforeState ? (numberOf(beforeState.display) ?? t.notSet) : t.notSet;
+      rows.push({
+        label: t.display,
+        value: displayNow,
+        changed: displayWas !== displayNow,
+      });
+      const lampsNow = state.lamps;
+      const lampsWas = beforeState?.lamps;
+      const lampsText = (lamps: number | undefined) =>
+        lamps === undefined
+          ? t.notSet
+          : LAMP_NAMES.some((_, k) => (lamps >> k) & 1)
+            ? format(t.changedSummary.lampsLit, {
+                lamps: LAMP_NAMES.filter((_, k) => (lamps >> k) & 1).join(", "),
+              })
+            : t.changedSummary.lampsDark;
+      rows.push({
+        label: t.changedSummary.lampsLabel,
+        value: lampsText(lampsNow),
+        changed: lampsWas !== lampsNow,
+      });
+      return rows;
+    }, [compact, before, lastRun, shown, words, was, state, beforeState, t]);
 
     return (
       <div className="explorer meet-figure" data-interactive={interactive.id}>
@@ -405,37 +558,146 @@ export const MachineAtWork = withProps(
             ))}
           </fieldset>
         )}
-        <div className="truth-table-wrap">
-          <table className="truth-table meet-program">
-            <caption>{t.programCaption}</caption>
-            <thead>
-              <tr>
-                <th scope="col">{t.line}</th>
-                <th scope="col">{t.does}</th>
-                {data.stored && <th scope="col">{t.stored}</th>}
-                <th scope="col">{t.marks}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {lines.map((l) => {
-                const here = committed && (stopped ? l.line === lastRun : l.line === next);
-                return (
-                  <tr
-                    key={l.line}
-                    className={here ? "row-current" : ""}
-                    aria-current={here ? "true" : undefined}
+        {compact ? (
+          <div
+            className={`meet-window${windowMode ? " meet-window-follow" : ""}`}
+            role="group"
+            aria-label={t.window.caption}
+            onKeyDown={windowMode ? onWindowKey : undefined}
+          >
+            <div className="meet-window-head">
+              <span className="meet-window-caption">{t.window.caption}</span>
+              {anchor !== undefined && (
+                <span className="meet-window-position">
+                  {format(t.window.position, { n: anchor, total: lines.length })}
+                </span>
+              )}
+              <div className="meet-mode" role="group" aria-label={t.window.modeLabel}>
+                <button
+                  type="button"
+                  className="meet-mode-button"
+                  aria-pressed={!following}
+                  onClick={() => setFollowing(false)}
+                >
+                  {t.window.modeFull}
+                </button>
+                <button
+                  type="button"
+                  className="meet-mode-button"
+                  aria-pressed={following}
+                  onClick={() => setFollowing(true)}
+                >
+                  {t.window.modeFollow}
+                </button>
+              </div>
+            </div>
+            {windowMode &&
+              browseAt !== undefined &&
+              browseAt !== anchor &&
+              anchor !== undefined && (
+                <p role="status" className="meet-window-viewing">
+                  {format(t.window.viewing, { viewing: browseAt, next: anchor })}{" "}
+                  <button
+                    type="button"
+                    className="meet-window-follow"
+                    onClick={() => setBrowseAt(undefined)}
                   >
-                    <th scope="row">{l.line}</th>
-                    <td>{lineText(t, l)}</td>
-                    {data.stored && <td className="memory-word">{l.stored}</td>}
-                    <td className="cell-now">{here ? (stopped ? t.stoppedHere : t.next) : ""}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-        {committed && status && (
+                    {t.window.follow}
+                  </button>
+                </p>
+              )}
+            {windowMode ? (
+              <div className="meet-window-body">
+                <div className="meet-window-nav">
+                  <button
+                    type="button"
+                    className="button secondary meet-window-arrow"
+                    aria-label={t.window.previous}
+                    disabled={centre === undefined || centre <= lines[0]!.line}
+                    onClick={() => browse(-1)}
+                  >
+                    ‹
+                  </button>
+                  <button
+                    type="button"
+                    className="button secondary meet-window-arrow"
+                    aria-label={t.window.next}
+                    disabled={centre === undefined || centre >= lines[lines.length - 1]!.line}
+                    onClick={() => browse(1)}
+                  >
+                    ›
+                  </button>
+                </div>
+                <table className="truth-table meet-program meet-window-table">
+                  <caption className="visually-hidden">{t.window.browseKeys}</caption>
+                  <tbody>
+                    {windowLines.map((l) => (
+                      <ProgramRow
+                        key={l.line}
+                        t={t}
+                        l={l}
+                        stored={data.stored}
+                        isNext={!stopped && l.line === next}
+                        isLast={stopped && l.line === lastRun}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+                <p className="meet-window-note">{t.window.browseNote}</p>
+              </div>
+            ) : (
+              <div className="meet-window-list">
+                <table className="truth-table meet-program meet-full-table">
+                  <caption className="visually-hidden">{t.programCaption}</caption>
+                  <tbody>
+                    {lines.map((l) => (
+                      <ProgramRow
+                        key={l.line}
+                        t={t}
+                        l={l}
+                        stored={data.stored}
+                        isNext={!stopped && l.line === next}
+                        isLast={stopped && l.line === lastRun}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="truth-table-wrap">
+            <table className="truth-table meet-program">
+              <caption>{t.programCaption}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">{t.line}</th>
+                  <th scope="col">{t.does}</th>
+                  {data.stored && <th scope="col">{t.stored}</th>}
+                  <th scope="col">{t.marks}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {lines.map((l) => {
+                  const here = committed && (stopped ? l.line === lastRun : l.line === next);
+                  return (
+                    <tr
+                      key={l.line}
+                      className={here ? "row-current" : ""}
+                      aria-current={here ? "true" : undefined}
+                    >
+                      <th scope="row">{l.line}</th>
+                      <td>{lineText(t, l)}</td>
+                      {data.stored && <td className="memory-word">{l.stored}</td>}
+                      <td className="cell-now">{here ? (stopped ? t.stoppedHere : t.next) : ""}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+        {committed && status && !compact && (
           <p role="status" className="datapath-status">
             {status}
           </p>
@@ -460,55 +722,92 @@ export const MachineAtWork = withProps(
             </button>
           </div>
         )}
-        <div className="datapath-tables" hidden={!committed}>
-          <div className="truth-table-wrap">
-            <table className="truth-table meet-numbers">
-              <caption>{t.numbersCaption}</caption>
-              <thead>
-                <tr>
-                  <th scope="col">{t.name}</th>
-                  <th scope="col">{t.number}</th>
-                  <th scope="col">{t.marks}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {shown.map((k) => {
-                  const now = numberText(t, words[k]);
-                  const changed = before !== undefined && numberText(t, was[k]) !== now;
-                  return (
-                    <tr key={k} className={changed ? "row-current" : ""}>
-                      <th scope="row">{`R${k}`}</th>
-                      <td className="memory-word">{now}</td>
-                      <td className="cell-now">{changed ? t.changed : ""}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-          <div className="truth-table-wrap">
-            <table className="truth-table meet-shop">
-              <caption>{t.shopCaption}</caption>
-              <tbody>
-                <tr>
-                  <th scope="row">{t.display}</th>
-                  <td className="memory-word">{numberOf(state.display) ?? t.notSet}</td>
-                </tr>
-                {LAMP_NAMES.map((name, k) => (
-                  <tr key={name}>
-                    <th scope="row">{format(t.lamp, { name })}</th>
-                    <td>
-                      {state.lamps === undefined
-                        ? t.notSet
-                        : (state.lamps >> k) & 1
-                          ? t.lit
-                          : t.dark}
-                    </td>
-                  </tr>
+        {compact && (
+          <div className="meet-changed" role="status">
+            <p className="meet-changed-heading">
+              {summary === undefined
+                ? t.changedSummary.heading
+                : format(t.changedSummary.headingLine, { line: lastRun ?? "" })}
+            </p>
+            {summary === undefined ? (
+              anchor !== undefined && (
+                <p className="meet-changed-none">
+                  {format(t.changedSummary.ready, { line: anchor })}
+                </p>
+              )
+            ) : (
+              <ul className="meet-changed-list">
+                {summary.map((row) => (
+                  <li key={row.label} className={row.changed ? "row-current" : ""}>
+                    <span className="meet-changed-label">{row.label}</span>
+                    <span className="meet-changed-value memory-word">{row.value}</span>
+                    <span className="meet-changed-mark">
+                      {row.changed ? t.changedSummary.changed : t.changedSummary.unchanged}
+                    </span>
+                  </li>
                 ))}
-              </tbody>
-            </table>
+              </ul>
+            )}
           </div>
+        )}
+        <div
+          className={`datapath-tables${compact ? " meet-compact-tables" : ""}`}
+          hidden={!committed}
+        >
+          <details className="meet-expander">
+            <summary>{t.changedSummary.allRegisters}</summary>
+            <div className="truth-table-wrap">
+              <table className="truth-table meet-numbers">
+                <caption>{t.numbersCaption}</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">{t.name}</th>
+                    <th scope="col">{t.number}</th>
+                    <th scope="col">{t.marks}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {shown.map((k) => {
+                    const now = numberText(t, words[k]);
+                    const changed = before !== undefined && numberText(t, was[k]) !== now;
+                    return (
+                      <tr key={k} className={changed ? "row-current" : ""}>
+                        <th scope="row">{`R${k}`}</th>
+                        <td className="memory-word">{now}</td>
+                        <td className="cell-now">{changed ? t.changed : ""}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </details>
+          <details className="meet-expander">
+            <summary>{t.changedSummary.shopSees}</summary>
+            <div className="truth-table-wrap">
+              <table className="truth-table meet-shop">
+                <caption>{t.shopCaption}</caption>
+                <tbody>
+                  <tr>
+                    <th scope="row">{t.display}</th>
+                    <td className="memory-word">{numberOf(state.display) ?? t.notSet}</td>
+                  </tr>
+                  {LAMP_NAMES.map((name, k) => (
+                    <tr key={name}>
+                      <th scope="row">{format(t.lamp, { name })}</th>
+                      <td>
+                        {state.lamps === undefined
+                          ? t.notSet
+                          : (state.lamps >> k) & 1
+                            ? t.lit
+                            : t.dark}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </details>
         </div>
         {drawing && (
           <CircuitView
