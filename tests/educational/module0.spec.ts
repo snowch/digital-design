@@ -163,8 +163,10 @@ test.describe("the machine at work", () => {
       format(M.window.eventStopped, { line: 9 }),
       { timeout: 30_000 },
     );
+    // The gap of 66 is under the limit of 100, so the branch at line 6 goes to line 9 and
+    // GAP_ALARM stays dark; the display tile shows 66.
     const gapAlarm = figure.locator(".meet-state .meet-tile", { hasText: "GAP_ALARM" });
-    await expect(gapAlarm.locator(".meet-tile-value")).toHaveText(M.lit);
+    await expect(gapAlarm.locator(".meet-tile-value")).toHaveText(M.dark);
     await expect(
       figure.locator('.meet-window tr[aria-current="true"] .meet-line-number'),
     ).toHaveText("9");
@@ -176,7 +178,9 @@ test.describe("the machine at work", () => {
     await openLesson(page, FIRST.id);
     const figure = page.locator("#ix-run");
     await figure.scrollIntoViewIfNeeded();
-    await figure.getByRole("spinbutton", { name: M.roomA }).fill("-50");
+    // Room B's freezer fails and warms to -5.0: the gap is 200, past the limit of 100, so the
+    // program runs on through line 6, lights GAP_ALARM at line 8, and shows 200.
+    await figure.getByRole("spinbutton", { name: M.roomB }).fill("-50");
     await figure.getByRole("button", { name: M.run, exact: true }).click();
     await expect(figure.locator(".meet-event")).toHaveText(
       format(M.window.eventStopped, { line: 9 }),
