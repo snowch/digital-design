@@ -16,6 +16,7 @@ import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react";
 import { defineConfig, type Plugin } from "vite";
 
+import { offlineCache } from "./offline";
 import { courseTitle, staticPage } from "./src/static-page";
 import { MANIFEST_FILE, webManifest } from "./src/web-manifest";
 
@@ -61,7 +62,7 @@ export default defineConfig({
       date: new Date(committedAt).toISOString().slice(0, 10),
     }),
   },
-  plugins: [react(), coverWords()],
+  plugins: [react(), coverWords(), offlineCache()],
   build: {
     outDir: "dist",
     sourcemap: true,

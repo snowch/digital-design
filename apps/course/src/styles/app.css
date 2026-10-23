@@ -134,6 +134,27 @@ svg {
   margin: 0 auto;
 }
 
+.update-notice {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-3) var(--gutter);
+  background: var(--note-bg);
+  border-bottom: 1px solid var(--border-strong);
+}
+.update-notice p {
+  margin: 0;
+}
+.update-notice [role="alert"] {
+  flex-basis: 100%;
+  text-align: center;
+}
+
 .shell-footer {
   padding: var(--space-4) var(--gutter);
   color: var(--fg-muted);
