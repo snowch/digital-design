@@ -5,7 +5,7 @@
 // recomputed on load and cannot be bypassed through storage; a reset clears the work; the one
 // random element replays identically. Each runs at desktop and phone widths.
 
-import { expect, test, type Page } from "./fixtures";
+import { expect, mockMainRef, test, type Page } from "./fixtures";
 
 import { testCount } from "@platform/lesson-schema";
 
@@ -301,6 +301,7 @@ test.describe("the figures", () => {
   test("the setup-and-hold roll is recorded and replays identically", async ({ browser }) => {
     const roll = async () => {
       const context = await browser.newContext();
+      await mockMainRef(context);
       const page = await context.newPage();
       await page.goto("#/lesson/remember");
       await expect(page.locator("section.lesson-section")).toHaveCount(10);
