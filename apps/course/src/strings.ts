@@ -21,6 +21,14 @@ export const STRINGS = {
   /** Under the footer's line, on every page. */
   copyright: "© 2026 Christopher Snow",
   latestCommit: "Latest commit on main",
+  appUpdate: {
+    available: "Update available",
+    action: "Update and reload",
+    applying: "Updating…",
+    storage:
+      "Your work could not be saved. Allow browser storage or free some space, then try again.",
+    activation: "The update could not be activated. Try again.",
+  },
   noLessons: "No lessons are published yet.",
   noChallenges: "No challenges",
   /** Under the course title: what the course takes as known before Module 1. */

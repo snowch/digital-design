@@ -45,3 +45,16 @@ data), `platform/` (the learning platform's schema, runtime and primitives, a ch
 `packages/hdl` and `packages/dd-views` (the digital-design domain), and `tests/educational`
 (Playwright). `snowch/learning-platform` holds the platform's code, its contract and the
 cross-book regression job.
+
+## Offline use and updates
+
+Production builds precache the app, lessons and fonts under `/digital-design/`. After the first
+complete download, the course can reopen offline. New releases download in the background and
+wait for **Update and reload**, or for every course tab and window to close. The button reloads
+only the tab where it was pressed; other open tabs keep their work and show their own notice.
+It refuses to reload if work held in memory cannot be saved to browser storage.
+
+`apps/course/offline.ts` generates the app-scoped worker from the production build. Preview a
+build to test this flow; the development server does not register a worker. The educational
+update suite uses real workers and two releases; other browser tests block workers so their
+network assertions and lesson checks stay independent of the cache.

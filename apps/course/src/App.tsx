@@ -7,21 +7,24 @@ import { useEffect, useMemo, useState } from "react";
 
 import { createBook, INTERACTIVES } from "@dd/dd-views";
 import { LESSONS } from "@dd/content";
-import { browserStorage, LessonView } from "@platform/lesson-runtime";
+import { LessonView } from "@platform/lesson-runtime";
 
+import { UpdateNotice } from "./UpdateNotice";
 import { LatestCommit } from "./LatestCommit";
 import { LessonList } from "./pages/LessonList";
 import { LessonPager } from "./pages/LessonPager";
 import { Preface } from "./pages/Preface";
 import { PREFACE_HREF, lessonHref, pageTitle, useRoute } from "./route";
 import { RUNTIME_STRINGS } from "./runtime-strings";
+import { reloadStorage } from "./reload-storage";
 import { STRINGS } from "./strings";
 import { useTheme, type Theme } from "./theme";
 
 export function App() {
   const route = useRoute();
   const [theme, setTheme] = useTheme();
-  const storage = useMemo(() => browserStorage(), []);
+  const savedWork = useMemo(() => reloadStorage(), []);
+  const storage = savedWork.storage;
   const book = useMemo(() => createBook(LESSONS, INTERACTIVES), []);
   // The lesson last shown, so a reader who comes back to the list finds that lesson's module open.
   const [lastLesson, setLastLesson] = useState<string | undefined>();
@@ -104,6 +107,7 @@ export function App() {
           </select>
         </label>
       </header>
+      <UpdateNotice beforeReload={savedWork.beforeReload} />
       <main id="main" className="shell-main" tabIndex={-1}>
         {page}
       </main>

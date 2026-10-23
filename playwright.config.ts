@@ -20,6 +20,8 @@ export default defineConfig({
   timeout: 60_000,
   reporter: [["list"]],
   use: {
+    // Ordinary lesson tests inspect network traffic; the update suite enables real workers.
+    serviceWorkers: "block",
     baseURL: `http://localhost:${port}${base}`,
     trace: "retain-on-failure",
   },
