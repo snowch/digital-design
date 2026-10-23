@@ -6,7 +6,7 @@
 // resettable to the blank start, and asks before it replaces work. The blank start stays the
 // first way in. Each runs at desktop and phone widths.
 
-import { expect, test, type Locator } from "@playwright/test";
+import { expect, test, type Locator } from "./fixtures";
 
 import { libraryCircuit } from "@dd/dd-model";
 import { elaborate } from "@dd/hdl";

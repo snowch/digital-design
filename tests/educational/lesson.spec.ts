@@ -5,7 +5,7 @@
 // recomputed on load and cannot be bypassed through storage; a reset clears the work; the one
 // random element replays identically. Each runs at desktop and phone widths.
 
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 
 import { testCount } from "@platform/lesson-schema";
 

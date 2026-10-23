@@ -4,7 +4,7 @@
 // on to the next lesson and back again, each opening at its top; the first lesson leads back to
 // the page before it, and the last lesson written so far leads back to the list of lessons.
 
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 
 import { STRINGS } from "../../apps/course/src/strings";
 import { LESSONS, openLesson } from "./helpers";

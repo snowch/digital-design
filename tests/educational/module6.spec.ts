@@ -10,7 +10,7 @@
 // The drawing helpers are Module 3's (module3.spec.ts), copied rather than moved, so this file
 // merges without touching another module's tests.
 
-import { expect, test, type Locator, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "./fixtures";
 
 import { libraryCircuit } from "@dd/dd-model";
 import { circuitToDrawing, type Drawing } from "@dd/dd-views";

@@ -6,7 +6,7 @@
 // and the figures used as a learner uses them: two machines run side by side, a prediction
 // answered by the simulators, and a fault that breaks the agreement.
 
-import { expect, test, type Locator } from "@playwright/test";
+import { expect, test, type Locator } from "./fixtures";
 
 import { grade } from "@dd/dd-views";
 import { testCount, type Challenge } from "@platform/lesson-schema";

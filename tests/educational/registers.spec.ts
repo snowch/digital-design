@@ -6,7 +6,7 @@
 // load, a reset that clears the work, and hints one rung at a time. Each runs at desktop and
 // phone widths.
 
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 import { testCount } from "@platform/lesson-schema";
 

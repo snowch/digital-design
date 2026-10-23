@@ -5,7 +5,7 @@
 // a press, a drag or the keys, and a zoom from fitting the box to twice its size, from the buttons,
 // from two fingers and from a trackpad's pinch. The branches lesson's loop stands for them all.
 
-import { expect, test, type Locator, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "./fixtures";
 
 import { LARGE_DRAWING } from "@dd/dd-views";
 

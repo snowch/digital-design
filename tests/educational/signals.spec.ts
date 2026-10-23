@@ -7,7 +7,7 @@
 // work, hints one rung at a time, and the figures' controls doing what the prose says. Each
 // runs at desktop and phone widths.
 
-import { expect, test, type Locator, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "./fixtures";
 
 import { testCount } from "@platform/lesson-schema";
 
