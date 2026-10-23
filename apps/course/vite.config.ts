@@ -8,14 +8,26 @@
 // reader whose browser runs no scripts are written into index.html from the cover's own words
 // (static-page.ts), and the manifest a browser installs the course from is written beside it
 // (web-manifest.ts). The icons themselves are files in public/, drawn by scripts/icons.mjs.
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import react from "@vitejs/plugin-react";
 import { defineConfig, type Plugin } from "vite";
 
 import { courseTitle, staticPage } from "./src/static-page";
 import { MANIFEST_FILE, webManifest } from "./src/web-manifest";
+
+// Read the revision being built, including in Actions' shallow checkout. Keep its date in UTC
+// so the same revision shows the same date regardless of where the course is built or read.
+const [commit, committedAt] = execFileSync("git", ["log", "-1", "--format=%H%n%cI"], {
+  cwd: fileURLToPath(new URL(".", import.meta.url)),
+  encoding: "utf8",
+})
+  .trim()
+  .split("\n");
+if (!commit || !committedAt) throw new Error("Git did not return the course revision and date");
 
 function coverWords(): Plugin {
   let base = "/";
@@ -43,6 +55,12 @@ function coverWords(): Plugin {
 
 export default defineConfig({
   base: process.env.BASE_PATH ?? "/digital-design/",
+  define: {
+    __BUILD_INFO__: JSON.stringify({
+      commit,
+      date: new Date(committedAt).toISOString().slice(0, 10),
+    }),
+  },
   plugins: [react(), coverWords()],
   build: {
     outDir: "dist",

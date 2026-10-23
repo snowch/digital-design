@@ -7,7 +7,7 @@
 // its circuit, a prediction answered by the simulator, a program run edge by edge with the views
 // of each edge, and a fault that changes where a run ends.
 
-import { expect, test, type Locator } from "@playwright/test";
+import { expect, test, type Locator } from "./fixtures";
 
 import { grade } from "@dd/dd-views";
 import { testCount } from "@platform/lesson-schema";

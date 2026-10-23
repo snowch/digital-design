@@ -4,7 +4,7 @@
 // marks each answer and shows the model's working under a wrong one, and it ends at the first
 // lesson.
 
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 import { STRINGS } from "../../apps/course/src/strings";
 import { LESSONS } from "./helpers";

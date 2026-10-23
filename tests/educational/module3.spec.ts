@@ -6,7 +6,7 @@
 // plausible wrong attempt rejected with the failing test named, saved work graded again on load,
 // a reset that clears the work, and hints one rung at a time. Each runs at desktop and phone widths.
 
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 import { libraryCircuit } from "@dd/dd-model";
 import { circuitToDrawing, labelFor, type Drawing } from "@dd/dd-views";

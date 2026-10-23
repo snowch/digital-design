@@ -6,7 +6,7 @@
 // not bypassed by a tampered store, a reset in two steps, hints one rung at a time, and the
 // figures answering with what the simulator does. Each runs at desktop and phone widths.
 
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 import { testCount } from "@platform/lesson-schema";
 

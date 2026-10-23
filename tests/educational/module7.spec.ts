@@ -6,7 +6,7 @@
 // the failing test named, saved work graded again on load, a reset that clears the work, hints one
 // rung at a time, and the module's new figures used as a learner uses them.
 
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 import { libraryCircuit } from "@dd/dd-model";
 import { circuitToDrawing, compileDrawing, grade, type Drawing } from "@dd/dd-views";

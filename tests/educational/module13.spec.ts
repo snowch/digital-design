@@ -7,7 +7,7 @@
 // the capstone completed with its reference program and answers, a wrong answer told where to look
 // and not the value, and its program run on the whole machine; saved work graded again on load.
 
-import { expect, test, type Locator } from "@playwright/test";
+import { expect, test, type Locator } from "./fixtures";
 
 import { DEFAULT_VIEW_STRINGS } from "@dd/dd-views";
 import { testCount, type Challenge } from "@platform/lesson-schema";

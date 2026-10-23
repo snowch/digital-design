@@ -6,7 +6,7 @@
 // work graded again on load, a reset that clears the work, hints one rung at a time, and the
 // state-machine figure moving its views together. Each runs at desktop and phone widths.
 
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 import { MACHINES, machineText } from "@dd/dd-model";
 import { testCount } from "@platform/lesson-schema";

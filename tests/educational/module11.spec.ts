@@ -6,7 +6,7 @@
 // load, and the lab used as a learner uses it: a program stepped and run, a breakpoint and a
 // watch, a prediction answered by the run, and a program the assembler refuses mended.
 
-import { expect, test, type Locator } from "@playwright/test";
+import { expect, test, type Locator } from "./fixtures";
 
 import { DEFAULT_VIEW_STRINGS } from "@dd/dd-views";
 import { testCount, type Challenge } from "@platform/lesson-schema";

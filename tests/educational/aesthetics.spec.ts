@@ -7,7 +7,7 @@
 // commit renders the same everywhere; a change that alters a figure's look fails here until its
 // baseline is updated on purpose (`npx playwright test --update-snapshots`).
 
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 
 import { LESSONS, fontsLoaded, openLesson } from "./helpers";
 

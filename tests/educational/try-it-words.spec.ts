@@ -4,7 +4,7 @@
 // hexadecimal or as a number, the circuit shows the word, and a value the field cannot take is
 // refused with the word left as it was.
 
-import { expect, test, type Locator } from "@playwright/test";
+import { expect, test, type Locator } from "./fixtures";
 
 import { V, challenge, challengeData, format, lessonData, openLesson, writeText } from "./helpers";
 

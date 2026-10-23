@@ -6,7 +6,7 @@
 // moves, results shown only once a run has ended, the trap timeline stepped edge by edge, the
 // door's time chosen, and the capstone's three ways in.
 
-import { expect, test, type Locator } from "@playwright/test";
+import { expect, test, type Locator } from "./fixtures";
 
 import { DEFAULT_VIEW_STRINGS, grade } from "@dd/dd-views";
 import { testCount, type Challenge } from "@platform/lesson-schema";

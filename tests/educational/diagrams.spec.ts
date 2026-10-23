@@ -4,7 +4,7 @@
 // page overlaps another or leaves its drawing, at desktop and phone widths, before and after the
 // figures have been used. A diagram whose text collides fails a learner however right its data.
 
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 
 import { libraryCircuit } from "@dd/dd-model";
 import { circuitToDrawing, labelFor } from "@dd/dd-views";

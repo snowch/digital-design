@@ -7,7 +7,7 @@
 // runs at desktop and phone widths. A run of the whole machine is a run on its gates, so these
 // tests keep to what only a browser shows.
 
-import { expect, test, type Locator, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "./fixtures";
 
 import { testCount } from "@platform/lesson-schema";
 
