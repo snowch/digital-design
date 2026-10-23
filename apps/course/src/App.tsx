@@ -109,6 +109,13 @@ export function App() {
       <footer className="shell-footer">
         <p>{STRINGS.footer}</p>
         <p className="copyright">{STRINGS.copyright}</p>
+        <p>
+          <a href={`https://github.com/snowch/digital-design/commit/${__BUILD_INFO__.commit}`}>
+            {__BUILD_INFO__.commit.slice(0, 7)}
+          </a>
+          {" · "}
+          <time dateTime={__BUILD_INFO__.date}>{__BUILD_INFO__.date}</time>
+        </p>
       </footer>
     </>
   );
