@@ -9,6 +9,7 @@ import { createBook, INTERACTIVES } from "@dd/dd-views";
 import { LESSONS } from "@dd/content";
 import { browserStorage, LessonView } from "@platform/lesson-runtime";
 
+import { LatestCommit } from "./LatestCommit";
 import { LessonList } from "./pages/LessonList";
 import { LessonPager } from "./pages/LessonPager";
 import { Preface } from "./pages/Preface";
@@ -113,6 +114,7 @@ export function App() {
           <a href={`https://github.com/snowch/digital-design/commit/${__BUILD_INFO__.commit}`}>
             {__BUILD_INFO__.commit.slice(0, 7)}
           </a>
+          <LatestCommit commit={__BUILD_INFO__.commit} />
           {" · "}
           <time dateTime={__BUILD_INFO__.date}>{__BUILD_INFO__.date}</time>
         </p>
