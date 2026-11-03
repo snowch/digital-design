@@ -8,6 +8,8 @@ import { MODULE_NAMES } from "@dd/content/module-names";
 export const STRINGS = {
   skip: "Skip to content",
   lessons: "Lessons",
+  githubStar: "Star on GitHub",
+  githubStarLabel: "Star on GitHub (opens in a new tab)",
   theme: "Theme",
   themeAuto: "System",
   themeLight: "Light",
