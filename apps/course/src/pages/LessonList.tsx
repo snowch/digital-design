@@ -23,6 +23,7 @@ import { LessonStore, verifyCompletion, type Book, type Storage } from "@platfor
 
 import { PREFACE_HREF, lessonHref } from "../route";
 import { STRINGS } from "../strings";
+import { useLessonCompletion } from "../lesson-completion";
 
 type Lesson = Book["lessons"][number];
 
@@ -94,6 +95,7 @@ function LessonCards({
   id?: string;
   hidden?: boolean;
 }) {
+  const reading = useLessonCompletion();
   return (
     <ol id={id} className="lesson-list" hidden={hidden}>
       {lessons.map((lesson) => {
@@ -101,7 +103,18 @@ function LessonCards({
         return (
           <li key={lesson.id}>
             <a href={lessonHref(lesson.id)} className="lesson-link">
-              <span className="lesson-link-title">{lesson.title}</span>
+              <span className="lesson-link-title">
+                {reading?.completed.has(lesson.id) && (
+                  <span
+                    className="lesson-done-tick"
+                    role="img"
+                    aria-label={STRINGS.lessonDone.done}
+                  >
+                    ✓
+                  </span>
+                )}
+                {lesson.title}
+              </span>
               <span className="meta">
                 {c && c.total > 0 ? STRINGS.progress(c.passed, c.total) : STRINGS.noChallenges}
               </span>
