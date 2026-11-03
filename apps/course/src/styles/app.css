@@ -637,3 +637,48 @@ ol {
     --gutter: 32px;
   }
 }
+
+/* Manual reading marks remain distinct from the challenge counts. */
+.lesson-pager {
+  align-items: end;
+}
+.lesson-forward {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.lesson-done-label {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  color: var(--fg-muted);
+  cursor: pointer;
+}
+.lesson-done-label input {
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: var(--ok);
+  cursor: pointer;
+}
+.lesson-done-label:focus-within {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.lesson-done-label[data-done="true"],
+.lesson-done-tick {
+  color: var(--ok);
+}
+.lesson-done-tick {
+  display: inline-block;
+  margin-right: var(--space-2);
+}
+@media (max-width: 40rem) {
+  .lesson-done-label {
+    justify-content: flex-start;
+  }
+}

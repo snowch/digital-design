@@ -10,6 +10,7 @@ import type { Book } from "@platform/lesson-runtime";
 
 import { PREFACE_HREF, lessonHref } from "../route";
 import { STRINGS } from "../strings";
+import { LessonDoneCheckbox } from "../LessonDoneCheckbox";
 import { placeOf } from "./LessonList";
 
 export function LessonPager({ book, lessonId }: { book: Book; lessonId: string }) {
@@ -28,20 +29,23 @@ export function LessonPager({ book, lessonId }: { book: Book; lessonId: string }
         <span className="lesson-link-title">{before ? before.title : STRINGS.preface.title}</span>
         {before && <span className="meta">{placeOf(before)}</span>}
       </a>
-      {after ? (
-        <a className="lesson-link pager-after" rel="next" href={lessonHref(after.id)}>
-          <span className="pager-way">{STRINGS.pager.next}</span>
-          <span className="lesson-link-title">{after.title}</span>
-          <span className="meta">{placeOf(after)}</span>
-        </a>
-      ) : (
-        <a className="lesson-link pager-after" href="#/">
-          <span className="pager-way">
-            {book.lessons[at]?.optional ? STRINGS.pager.end : STRINGS.pager.notYet}
-          </span>
-          <span className="lesson-link-title">{STRINGS.backToLessons}</span>
-        </a>
-      )}
+      <div className="lesson-forward">
+        <LessonDoneCheckbox lessonId={lessonId} />
+        {after ? (
+          <a className="lesson-link pager-after" rel="next" href={lessonHref(after.id)}>
+            <span className="pager-way">{STRINGS.pager.next}</span>
+            <span className="lesson-link-title">{after.title}</span>
+            <span className="meta">{placeOf(after)}</span>
+          </a>
+        ) : (
+          <a className="lesson-link pager-after" href="#/">
+            <span className="pager-way">
+              {book.lessons[at]?.optional ? STRINGS.pager.end : STRINGS.pager.notYet}
+            </span>
+            <span className="lesson-link-title">{STRINGS.backToLessons}</span>
+          </a>
+        )}
+      </div>
     </nav>
   );
 }

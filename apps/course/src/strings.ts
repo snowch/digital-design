@@ -29,6 +29,10 @@ export const STRINGS = {
       "Your work could not be saved. Allow browser storage or free some space, then try again.",
     activation: "The update could not be activated. Try again.",
   },
+  lessonDone: {
+    mark: "Mark lesson as done",
+    done: "Lesson done",
+  },
   noLessons: "No lessons are published yet.",
   noChallenges: "No challenges",
   /** Under the course title: what the course takes as known before Module 1. */

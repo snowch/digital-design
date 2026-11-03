@@ -11,6 +11,7 @@ import { LessonView } from "@platform/lesson-runtime";
 
 import { UpdateNotice } from "./UpdateNotice";
 import { LatestCommit } from "./LatestCommit";
+import { LessonCompletionProvider } from "./lesson-completion";
 import { LessonList } from "./pages/LessonList";
 import { LessonPager } from "./pages/LessonPager";
 import { Preface } from "./pages/Preface";
@@ -109,7 +110,9 @@ export function App() {
       </header>
       <UpdateNotice beforeReload={savedWork.beforeReload} />
       <main id="main" className="shell-main" tabIndex={-1}>
-        {page}
+        <LessonCompletionProvider book={book} storage={storage}>
+          {page}
+        </LessonCompletionProvider>
       </main>
       <footer className="shell-footer">
         <p>{STRINGS.footer}</p>
