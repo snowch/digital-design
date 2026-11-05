@@ -99,6 +99,19 @@ export function App() {
             {STRINGS.preface.title}
           </a>
         </nav>
+        <a
+          className="header-star"
+          href="https://github.com/snowch/digital-design"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={STRINGS.githubStarLabel}
+          title={STRINGS.githubStarLabel}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="m12 3 2.8 5.7 6.3.9-4.5 4.4 1.1 6.2-5.7-3-5.7 3 1.1-6.2L3 9.6l6.2-.9Z" />
+          </svg>
+          <span>{STRINGS.githubStar}</span>
+        </a>
         <label className="theme-picker">
           <span>{STRINGS.theme}</span>
           <select value={theme} onChange={(e) => setTheme(e.target.value as Theme)}>
