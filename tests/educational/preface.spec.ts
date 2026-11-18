@@ -17,11 +17,12 @@ test("the front page leads to a self-check that marks answers, and on to the fir
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(STRINGS.preface.title);
 
   const fields = page.getByRole("textbox");
+  const score = page.getByRole("region", { name: STRINGS.selfCheck.title }).getByRole("status");
   await expect(fields).toHaveCount(4);
   await fields.nth(0).fill("178");
   await fields.nth(1).fill("100100");
   await page.getByRole("button", { name: STRINGS.selfCheck.check }).click();
-  await expect(page.getByRole("status")).toHaveText(STRINGS.selfCheck.score(1, 4));
+  await expect(score).toHaveText(STRINGS.selfCheck.score(1, 4));
   await expect(page.getByText(STRINGS.selfCheck.right, { exact: true })).toHaveCount(1);
   await expect(
     page.getByText(STRINGS.selfCheck.workingBinary(37, "32 + 4 + 1", "0010 0101")),
@@ -30,9 +31,9 @@ test("the front page leads to a self-check that marks answers, and on to the fir
 
   // Correcting an answer clears the marks until the learner checks again.
   await fields.nth(1).fill("0010 0101");
-  await expect(page.getByRole("status")).toHaveText("");
+  await expect(score).toHaveText("");
   await page.getByRole("button", { name: STRINGS.selfCheck.check }).click();
-  await expect(page.getByRole("status")).toHaveText(STRINGS.selfCheck.score(2, 4));
+  await expect(score).toHaveText(STRINGS.selfCheck.score(2, 4));
 
   const first = LESSONS[0]!;
   await page.getByRole("link", { name: STRINGS.preface.start(first.module, first.title) }).click();
