@@ -9,16 +9,16 @@
 
 export const PROSE = {
   question:
-    "Lesson 4 asked which instruction you would add, and how you would show it is worth its cost. This lesson answers both for one instruction, set if less: it puts 1 in a register when one register's word is less than another's, and 0 when it is not. You design it, justify it with a program it shortens, and build it into your copy of Module 9's machine, where kind 9 holds the call through a register.\n\nWhat must the design decide?",
+    "Lesson 4 asked which instruction you would add, and how you would show it is worth its cost. This lesson answers both for set if. The instruction puts 1 in a register when its condition holds and 0 otherwise. Start with the signed less-than test the program needs. You design it, justify it with a program it shortens, and build it into your copy of Module 9's machine, where kind 9 holds the call through a register.\n\nWhat must the design decide?",
   motivation:
     "A program that compares and keeps the answer as a number needs a branch around each count. The count of cold rooms counts how many of two rooms are colder than the limit, -200. With branches, a branch skips each room's count when the room is not colder.\n\nOther programs could be shortened too: 7 × 5 by a loop (lesson 4), and the colder room (Module 8), which shows the lower of two readings.\n\nA design answers four questions: is its code free? Does every field keep the place and meaning every instruction gives it? What does it save, counted on a program? What does it cost the circuit? Apply them as lesson 4 did.",
   needLead:
     'The figure runs the count of cold rooms, written with branches, on the course\'s machine. Room A reads -184 and room B -250.\n\nPress "Run the programs".',
   needAfter:
     "It displays 1: room B, at -250, is colder than -200, and room A, at -184, is not. It has 10 instructions and runs 9.",
-  designLead: "Design set if less against the four questions.",
+  designLead: "Design set if for the less-than example.",
   c1Task:
-    "Design set if less: one instruction that puts 1 in a register when one register's word is less than another's, and 0 when it is not.\n\nMake five choices, each tied to a question: the kind (is its code free? choose from 0, 5, 9 or A); the field that names the register written, and where the condition comes from (does every field keep its place and meaning?); the program it shortens (what does it save?); and what it costs the circuit.\n\nThere are 5 tests, one for each choice.",
+    "Design set if. Start with the less-than example. The instruction writes 1 when the first register's word is less than the second's and 0 otherwise.\n\nMake five choices, each tied to a question: the kind (is its code free? choose from 0, 5, 9 or A); the field that names the register written, and where the condition comes from (does every field keep its place and meaning?); the program it shortens (what does it save?); and what it costs the circuit.\n\nThere are 5 tests, one for each choice.",
   c1Hints: [
     "The idea: answer each question as lesson 4 did, for this instruction.",
     "A common mistake: kind 9. It is free on the course's machine, but your copy's call through a register holds it.",
@@ -27,7 +27,7 @@ export const PROSE = {
     "The whole answer: kind A; Y, digit 3; the job digit, as a branch's; the count of cold rooms; a new source for register Y's word, with a control signal to choose it.",
   ],
   prediction:
-    "The course's design: set if less is kind A, free in your copy. Its job is a branch's condition: 0 always, 1 never, 2 equal, 3 differs, 4 and 5 less and not less read unsigned, 6 and 7 less and not less read signed. Jobs 8 to F are refused.\n\nIt reads A and B and writes Y; the constant is unused. R5 ← 1 if R2 < R1, read signed, else 0 is `A6215000`: kind A, job 6, A is R2, B is R1, Y is R5.\n\nIt subtracts RB from RA, as a branch does, and writes register Y, as a register job does. In Module 9's machine a register job takes FETCH, READ, ALU and WRITE; a branch takes FETCH, READ and ALU.\n\nThe figure runs the decoder's signals for kind A through the controller. Choose an answer and press \"Check my prediction\"; the figure then shows each kind's edges.",
+    "The course gives set if kind A. That kind is free in your copy. Its job is a branch's condition: 0 always, 1 never, 2 equal, 3 differs, 4 and 5 less and not less read unsigned, 6 and 7 less and not less read signed. Jobs 8 to F are refused.\n\nIt reads A and B and writes Y; the constant is unused. R5 ← 1 if R2 < R1, read signed, else 0 is `A6215000`: kind A, job 6, A is R2, B is R1, Y is R5.\n\nIt subtracts RB from RA, as a branch does, and writes register Y, as a register job does. In Module 9's machine a register job takes FETCH, READ, ALU and WRITE; a branch takes FETCH, READ and ALU.\n\nThe figure runs the decoder's signals for kind A through the controller. Choose an answer and press \"Check my prediction\"; the figure then shows each kind's edges.",
   p1Question: "How many edges does set if take in your copy of Module 9's machine?",
   p1Explain:
     "Set if takes 4 edges, FETCH, READ, ALU, WRITE, as a register job. The decoder gives WRITEY and not MEM or CALL, so the controller goes from READ to ALU, then to WRITE. The controller does not change.\n\nAt the WRITE edge the condition is worked out again: HA, HB and the IR keep their words from READ, so the ALU's flags and MET are the same as at ALU. Register Y takes MET as a word.",

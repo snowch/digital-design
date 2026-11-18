@@ -434,7 +434,7 @@ describe("saved work a grader cannot run", () => {
     expect(() => grade(unknown, { text: broken, answers: {} })).toThrow();
     const v = book.grade(unknown, { text: broken, answers: {} });
     expect(v.passed).toBe(false);
-    expect(v.blocked).toMatch(/^The tests could not run: /);
+    expect(v.blocked).toBe("no answer grader no-such-grader");
   });
 
   it("keeps the list and the lesson drawn over such saved work", () => {

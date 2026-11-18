@@ -1,1 +1,30 @@
-[]
+[
+  [
+    "F1",
+    "runAfter",
+    "R1 became -184, R2 -250, R3 66, R4 100, then the display showed 66.",
+    "R1 became -184, R2 became -250 and R3 became 66. Instruction 4 showed 66 on the display. Instruction 5 set R4 to 100.",
+    "The instruction trace updates the display before it sets R4."
+  ],
+  [
+    "F1",
+    "keptAfter",
+    "Changing instruction 5's number changed one number in \"Kept as\": instruction 5's. With 101 it is 620773477. Changing a room's reading changed no number in \"Kept as\". A reading comes in while the program runs; the instructions stay as they are.",
+    "Only changing instruction 5's number changes its row in \"Kept as\". The machine reads the room while the program runs. Read the display and GAP_ALARM to see the result for the readings you chose.",
+    "The program column changes for an instruction edit. The display and lamp show the effect of the room readings."
+  ],
+  [
+    "F2A",
+    "p1Explain",
+    "The drawing below starts inside the slice worth 2: its adding part, marked. Press \"Down a level\" to open it, down to the one wire that carries the 1.",
+    "First press \"Explore the slice worth 2\". Then press \"Down a level\" to reach the wire that carries the 1.",
+    "The second control is available after the learner opens the slice."
+  ],
+  [
+    "F2B",
+    "stuckLead",
+    "Look before you run: the part that makes the sum gives 1, and the wire SUM stays low. Then answer the question above the drawing.",
+    "Choose an answer and press \"Check my prediction\". Then inspect the live values on the drawing.",
+    "The figure reveals live values after checking the prediction."
+  ]
+]

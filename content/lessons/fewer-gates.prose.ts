@@ -40,8 +40,6 @@ export const PROSE = {
     "Does the short circuit light CALL in the same rows as the manager's, or in different rows?",
   p2Explain:
     "They differ in 1 row of 8. WARM is 1, DOOR is 1, CLOSED is 0: the manager's circuit gives 0, the short one gives 1. This is a warm freezer with its door open while the shop is open, with staff loading stock. The short circuit would call the engineer.\n\nThe manager's CALL is 1 with WARM and NOT DOOR, or with DOOR and the shop closed. The short circuit lights CALL whenever WARM is 1. Its first term lost NOT DOOR. WARM makes no difference in one pair; that does not let NOT DOOR drop from the other term. The short circuit is right only if every row still matches.",
-  tooShortAfter:
-    "The table below compares both circuits row by row. Like the challenges' tests, it shows what each circuit produces in every row.",
   explanation:
     "Gate count is one way to measure a circuit: fewer gates is better. But gates take time to answer. A change takes one step for each gate it passes through. So the longest path from an input to the output matters too.\n\nThe two circuits below both light ANY when any of four freezer rooms in the shop's warehouse is warm: inputs ROOM1 to ROOM4, each 1 while that room is warm. Both use three OR gates, each with two inputs. The circuit settles when no gate's output changes any more. Drag the \"Step\" slider to see how fast each settles.",
   chainStepsLead:

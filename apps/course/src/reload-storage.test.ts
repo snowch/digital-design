@@ -92,3 +92,26 @@ it("does not repeat successful saves after a partial failure", () => {
   expect(localStorage.getItem("first")).toBe("newer work in another tab");
   expect(localStorage.getItem("second")).toBe("draft two");
 });
+
+it("notifies the page when work becomes memory-only and when it is saved again", () => {
+  const saved = reloadStorage(browserStorage());
+  const changed = vi.fn();
+  const unsubscribe = saved.subscribe(changed);
+  saved.storage.set("work", "saved");
+  expect(changed).not.toHaveBeenCalled();
+  const blocked = vi.spyOn(window.Storage.prototype, "setItem").mockImplementation(() => {
+    throw new DOMException("full", "QuotaExceededError");
+  });
+  saved.storage.set("work", "latest draft");
+  expect(changed).toHaveBeenCalledTimes(1);
+  expect(saved.hasPending()).toBe(true);
+  expect(saved.storage.get("work")).toBe("latest draft");
+  expect(() => saved.beforeReload()).toThrow();
+  expect(changed).toHaveBeenCalledTimes(1);
+  blocked.mockRestore();
+  saved.beforeReload();
+  expect(changed).toHaveBeenCalledTimes(2);
+  expect(saved.hasPending()).toBe(false);
+  expect(localStorage.getItem("work")).toBe("latest draft");
+  unsubscribe();
+});

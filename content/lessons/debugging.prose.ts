@@ -24,7 +24,7 @@ export const PROSE = {
   investigation:
     "The figure runs log 4 with a breakpoint on `next`. It watches R1, `word[R1]`, R2 and R3. The log is shown, and the reading that R1 points at is marked.",
   findLead:
-    '1. Press "Run to a breakpoint" again and again.\n2. Before each press, say where R1 should point and what R2 should hold.\n3. At each pause, compare: which readings does R1 reach, and is each one loaded?',
+    '1. Press "Run to a breakpoint" at each pause while a breakpoint lies ahead.\n2. Before each press, say where R1 should point and what R2 should hold.\n3. At each pause, compare: which readings does R1 reach, and is each one loaded? When the button reads "Run to the end", press it and compare what the watch showed at the pauses with the value on the display.',
   findAfter:
     "The run paused twice. After 6 instructions, R1 held `050`, R2 held 1 and R3 held 0. After 12 instructions, R1 held `058`, R2 held 0 and R3 held 0. R2 is 0, so the loop ends. R1 points at the last reading, -170, at `058`, but no instruction loads it. The display shows 0, where log 4 should show 1. The program ran 15 instructions and stopped at `038`.",
   construction:

@@ -18,13 +18,13 @@ export const PROSE = {
     'The program has two instructions: R1 ← 66 at `000`, and memory[`7C0`] ← R1 at `004`, which shows R1 on the display. It has no stop.\n\nAfter them, at `008`, the program puts data: the word `12345678` in hexadecimal.\n\nThe machine fetches whatever 32 bits are at the PC.\n\nChoose an answer and press "Check my prediction". Then press "Run the programs".',
   p1Question: "After the store at `004`, where does the run halt?",
   p1Explain:
-    "The run halts at `00C` with cause `21`, after one more instruction.\n\nThe word's low 32 bits, at `008`, are `12345678`: kind 1, job 2, so the machine runs it as R5 ← R3 + R4. The next 32 bits, at `00C`, are the word's top half, `00000000`: kind 0, refused.\n\nThe display shows 66, and 3 instructions ran.\n\nOther data halts sooner: 5000 puts `00001388` at `008`, kind 0; -250 puts `FFFFFF06`, kind F. Both halt at `008`.",
+    "The run halts at `00C` with cause `21`, after one more instruction.\n\nThe word's low 32 bits, at `008`, are `12345678`: kind 1, job 2, so the machine runs it as R5 ← R3 + R4. Neither input register holds a known value, so R5 receives X. The next 32 bits, at `00C`, are the word's top half, `00000000`: kind 0, refused.\n\nThe display shows 66, and 3 instructions ran.\n\nOther data halts sooner: 5000 puts `00001388` at `008`, kind 0; -250 puts `FFFFFF06`, kind F. Both halt at `008`.",
   investigation:
     "The machine has no multiplication; the figure runs two programs that work out 7 × 5.",
   multiplyLead:
     'The first program adds 7 into R3 five times, in a loop. R2 counts down from 5, and the branch goes back while R2 differs from R0, which holds 0: the machine has no comparison with zero, so the program keeps 0 in a register.\n\nThe second doubles 7 twice and adds 7 once: 7 + 7 is 14, 14 + 14 is 28, 28 + 7 is 35. It works only for a factor known when the program is written.\n\nPress "Run the programs".',
   multiplyAfter:
-    "Both programs display 35.\n\nThe loop has 9 instructions and runs 21: 3 each time round. For 7 × n it runs 4 + 3n + 2, the stop among them.\n\nThe doubling has 6 instructions and runs 6.",
+    "Both programs display 35.\n\nThe loop has 9 instructions and runs 21: 3 each time round. For 7 × n with n positive, it runs 4 + 3n + 2, including the stop.\n\nThe doubling has 6 instructions and runs 6.",
   construction:
     "A code the machine refuses today is room for an instruction later. A later instruction can take any refused code except the instruction of zeros, which must stay refused to halt a program that runs off its end.\n\nA code an instruction has today is taken: an old program may use it, and giving it a new meaning would change what that program does.\n\nOn the course's machine, kind 9 is free. In your copy, the call through a register took it.",
   sortCodesLead: "For each code, say whether a later instruction could take it.",

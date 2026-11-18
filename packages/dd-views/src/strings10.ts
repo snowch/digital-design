@@ -301,7 +301,8 @@ export const MACHINE10_STRINGS: Machine10Strings = {
   jobLabel: "Job",
   jobOption: "{k} {name}",
   fromWord: "Take the job and B from the word",
-  fromWordNone: "Only a register job or a constant job gives the ALU a job.",
+  fromWordNone:
+    "This control reads the job digit from register jobs and constant jobs. Loads and branches get a fixed ALU job from the decoder.",
   tookJob: "The job is the word's J, {job}.",
   tookB: "B is the word's constant, widened.",
   yHeading: "Y",

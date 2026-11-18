@@ -37,7 +37,7 @@ export const LABELS = {
     answers: "Four questions about the registers after the trap in that program.",
     noSkip: "The night program with a handler that only resumes, run in the debugger.",
     debugger: "The night program with its handler in the debugger, with the control registers.",
-    skip34: "A handler that skips refused stores, with its four tests.",
+    skip34: "A handler that skips refused stores.",
   },
   fields: {
     c2: "C2 after the trap",

@@ -11,7 +11,7 @@ export const PROSE = {
   question:
     "Module 0 began with the machine as a box that runs instructions of a program. Lesson 3 traced one value of your choosing down to a single gate, and lesson 4 joined the parts into the whole machine. Can you write a program of your own, run it on the whole machine, and answer questions about your own run that a trace answers directly?\n\nThe figure runs a short program written for this lesson, not for the challenge. It shows 1 on the display when room B is less than 10.0 degrees warmer than room A. It is paused before edge 22, the ALU edge of its set if.",
   questionLead:
-    "Press any edge in the run to pause before it, and open the blocks as lesson 3 did.",
+    'Choose an answer in the prediction below and press "Check my prediction". Return here once the trace is available. Press an edge to pause before it and open the blocks as in lesson 3.',
   motivation:
     "The challenge's program has two halves: a count of cold rooms on the display, and ALARM on the lamps, lit when both rooms are colder than -20.0 degrees. The display half is the count from Module 10's lesson 5, which that lesson wrote with branches and then with set if.\n\nThen the challenge asks questions about your own run on the whole machine, each paused before the ALU edge of your first set if: the ALU's result, a row of its flags and MET, a row of carries inside the ALU, and a held word.\n\nThe answers are read off the run of your own program, so they depend on how you wrote it. No two programs need give the same answers.\n\nWhen an answer is wrong, the course tells you which level to look at and what to read there. It never gives you the value.\n\nThe figures practise reading the datapath on the figure's own program.",
   prediction:

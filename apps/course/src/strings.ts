@@ -14,10 +14,11 @@ export const STRINGS = {
   themeAuto: "System",
   themeLight: "Light",
   themeDark: "Dark",
-  footer: "Everything runs in your browser. Nothing is sent anywhere.",
+  workNotSaved:
+    "Your latest work is held in this tab because browser storage could not save it. Keep this tab open to keep your work.",
   /** For a browser that runs no scripts, under the cover's words (static-page.ts). */
   noScript:
-    "This course runs a circuit simulator in your browser, so it needs JavaScript. Nothing is sent anywhere: everything runs here.",
+    "JavaScript is needed to open the lessons and run the circuit simulator in your browser.",
   /** A page's name in the browser's tab, after its own name; the front page keeps the full title. */
   pageTitle: (page: string) => `${page} / Digital Design`,
   /** Under the footer's line, on every page. */
@@ -39,30 +40,31 @@ export const STRINGS = {
   noChallenges: "No challenges",
   /** Under the course title: what the course takes as known before Module 1. */
   assumes:
-    "The course assumes you can turn binary numbers to decimal and back. It assumes everyday arithmetic, but nothing about electronics, circuits or programming.",
+    "You need to know how to turn binary numbers into decimal and back. You also need everyday arithmetic. You can start without experience in electronics or programming.",
   /** Under the line above: the link to the page before the first lesson. */
   prefaceLink: "Check if you are ready and see how a lesson works.",
   preface: {
     title: "Before you start",
     /** What the course is. */
-    what: "You build a working computer from its parts, one module at a time, starting from two voltages on a wire. You test everything you build in the page, with tests you can read. Everything runs in your browser, and your work stays there. Each new browser or device starts from nothing.",
+    what: "You build a working computer from its parts, one module at a time, starting from two voltages on a wire. You test what you build in the page. Your work saves in this browser when storage is available. Each new browser or device has its own work.",
     needHeading: "What you should know",
     /** What the learner needs, above the self-check. */
-    need: "You need to know how to turn a binary number into decimal, and a decimal number into binary. The course uses both from Module 0 and does not teach them. You need everyday arithmetic. You do not need to know anything about electronics, circuits or programming.\n\nThe check below takes a minute or two. If it takes you longer, learn binary first, then come back.",
+    need: "You need to know how to turn a binary number into decimal, and a decimal number into binary. The course uses both from Module 0 and does not teach them. You need everyday arithmetic. You do not need to know anything about electronics, circuits or programming.\n\nTry the four optional questions below to check your binary arithmetic.",
     lessonsHeading: "How a lesson works",
     /** How a lesson works, under the self-check. */
     lessons:
-      'Each lesson starts from a question about something real. It has ten sections, each labelled: Question, Motivation, Prediction, Investigation, Construction, Failure experiment, Explanation, Generalisation, Challenge, Reflection. Before the course shows you an answer, it asks you to predict it. You choose an answer and press "Check my prediction". The course\'s model gives its answer and the working. You can predict again.\n\nYou build circuits and other answers in the page and run their tests. A failed test shows its inputs, what your work gave and what was expected. Each challenge has five hints, shown one at a time, and the last hint gives the answer. When you open a lesson, the course checks your saved work again. A figure carries a badge when the circuit\'s timing matters. The badge names how it counts time: "Stepped", "Clocked" or "Gate delays". Press it to read how. Module 0\'s figures run the course\'s simulator but carry no badge: a press runs a whole line of a program, and the circuit\'s timing is not shown.',
+      'Choose an answer and press "Check my prediction" to see the result and working. In a challenge, build your answer and press "Run tests". A failed test gives evidence or a hint. If the tests could not run, the message says what stopped them. Each challenge has five hints. The last gives the answer. The course rechecks saved work when you open a lesson.\n\nSelect a figure\'s "Stepped", "Clocked" or "Gate delays" label to read how it models timing. In Module 0, the first machine figure runs one instruction at a time.',
     start: (module: number, title: string) => `Start with Module ${module}: ${title}`,
   },
   selfCheck: {
     title: "Ready to start?",
-    intro: "There are four questions. Type each answer, then press the check button.",
+    intro: 'Type each answer, then press "Check my answers".',
     check: "Check my answers",
     right: "Correct",
     blank: "Please answer",
     toDecimal: (binary: string) => `What is ${binary} in decimal?`,
-    toBinary: (n: number) => `What is ${n} in 8-digit binary?`,
+    toBinary: (n: number) =>
+      `What is ${n} in binary? Use up to eight digits. Leading zeroes are optional.`,
     workingDecimal: (binary: string, terms: string, value: number) =>
       `${binary} = ${terms} = ${value}`,
     workingBinary: (n: number, terms: string, binary: string) =>
@@ -84,7 +86,7 @@ export const STRINGS = {
     /** Under the course title, larger than the rest: what you do in the course (brief C3). */
     tagline: "You build a working computer from its parts, starting from two voltages on a wire.",
     /** Under the tagline: how the course goes about it. */
-    lead: "By Module 8, reused parts form one machine that runs programs. For each circuit you predict, build, run, break and explain. Each idea and each name arrives when the circuit you are building raises a question that needs it. Every simulation runs the real circuit, not an animation. Everything runs and stays in your browser.",
+    lead: "By Module 8, reused parts form one machine that runs programs. For each circuit you predict, build, run, break and explain. The simulator works out what the connected parts do. Your work saves in this browser when storage is available.",
     /** The way in, on two lines: the module, then its first lesson's question under it. */
     startLine: (where: string) => `Start with ${where}`,
     continueLine: (where: string) => `Continue with ${where}`,
@@ -94,7 +96,7 @@ export const STRINGS = {
      */
     heroTitle: "Freezer room alarm",
     heroCaption:
-      "This real circuit from Module 2 lights a lamp when the room is warm and the door is shut. Press WARM and DOOR to see it change.",
+      "This simulated circuit lights a lamp when the room is warm and the door is shut. Press WARM and DOOR to see the lamp change.",
     /** The path through the course, in order: five stages, each over the modules it names. */
     journeyHeading: "Signals to computer in five stages",
     /**

@@ -69,7 +69,7 @@ export const PROSE = {
   saveOnceAfter:
     "After the first edge of the press, NOW is `0101` and PREV is `0011`. The next two edges change nothing. A new press saves again. The flip-flop last stores one bit: SAVE's value from the edge before. That bit becomes OLD, and it is what makes STEP turn off after the first edge of the press.",
   saveOnceLead:
-    "The fix uses a flip-flop called last. At every edge, last takes SAVE, and its output OLD shows what SAVE was at the previous edge. Two gates combine these: notOld produces NOT OLD, and andStep produces STEP = SAVE AND NOT OLD. STEP is 1 only before the first edge of a press, because after that edge, OLD becomes 1 and STEP becomes 0. STEP replaces SAVE as the enable for both registers. Try it: press SAVE to 1, then press Clock CLK three times. Release SAVE and press Clock CLK. Then press SAVE to 1 again to save a new value.",
+    "The fix uses a flip-flop called last. At every edge, last takes SAVE, and its output OLD shows what SAVE was at the previous edge. Two gates combine these: notOld produces NOT OLD, and andStep produces STEP = SAVE AND NOT OLD. STEP is 1 only before the first edge of a press, because after that edge, OLD becomes 1 and STEP becomes 0. STEP replaces SAVE as the enable for both registers. Set SAVE to 1, then press Clock CLK three times. Check that NOW and PREV change only once. Set SAVE to 0 and press Clock CLK. Set IN to a different word, set SAVE to 1 and press Clock CLK. Read the new word in NOW and the previous word in PREV.",
   writeReadingsLead:
     "The freezer room's last two readings are 16 bits each. The office keeps them both and can undo a reading.",
 } as const;

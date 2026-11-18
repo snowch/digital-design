@@ -6,13 +6,20 @@ import { browserStorage, type Storage } from "@platform/lesson-runtime";
 // an explicit app update can refuse to reload until that work really is durable.
 export function reloadStorage(base: Storage = browserStorage(), local = () => window.localStorage) {
   const pending = new Map<string, string | null>();
+  const listeners = new Set<() => void>();
+  const hasPending = () => pending.size > 0;
+  const notify = (wasPending: boolean) => {
+    if (wasPending !== hasPending()) for (const listener of listeners) listener();
+  };
   const track = (key: string, value: string | null) => {
+    const wasPending = hasPending();
     pending.set(key, value);
     try {
       if (local().getItem(key) === value) pending.delete(key);
     } catch {
       // This write still exists only in this tab's memory.
     }
+    notify(wasPending);
   };
   const storage: Storage = {
     get: (key) => (pending.has(key) ? pending.get(key)! : base.get(key)),
@@ -29,14 +36,23 @@ export function reloadStorage(base: Storage = browserStorage(), local = () => wi
   };
   return {
     storage,
+    hasPending,
+    subscribe(listener: () => void) {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
     beforeReload() {
-      if (pending.size === 0) return;
-      const target = local();
-      for (const [key, value] of pending) {
-        if (value === null) target.removeItem(key);
-        else target.setItem(key, value);
-        if (target.getItem(key) !== value) throw new Error("Course work could not be saved");
-        pending.delete(key);
+      if (!hasPending()) return;
+      try {
+        const target = local();
+        for (const [key, value] of pending) {
+          if (value === null) target.removeItem(key);
+          else target.setItem(key, value);
+          if (target.getItem(key) !== value) throw new Error("Course work could not be saved");
+          pending.delete(key);
+        }
+      } finally {
+        notify(true);
       }
     },
   };

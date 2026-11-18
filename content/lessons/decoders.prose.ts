@@ -52,7 +52,7 @@ export const PROSE = {
   p2Explain:
     "S is 11: room D, whose door is shut. L1 makes S0 1 and L2 makes S1 1, and the two numbers' bits mix. The encoder assumes exactly one door signal is 1. With no door open, S is 00, the same as room A's door alone.",
   comparatorBlockLead:
-    "A decoder output compares S1 S0 with one fixed number. The same idea compares two words with each other. Room A has twin sensors side by side. Each sends a 16-bit word. If the words ever differ, one sensor is faulty, and a fault lamp must light. The figure compares the last four bits of each word, as two 4-bit words, A and B. The figure is a closed block with word inputs A and B and output EQ. Both start at `1000`. Change their bits in the rows under the drawing.",
+    "A decoder output compares S1 S0 with one fixed number. The same idea compares two words with each other. Room A has twin sensors side by side. Each sends a 16-bit word. This example expects the readings to match exactly. A difference lights the fault lamp. It does not tell the office which sensor needs checking. The figure compares the last four bits of each word, as two 4-bit words, A and B. The figure is a closed block with word inputs A and B and output EQ. Both start at `1000`. Change their bits in the rows under the drawing.",
   comparatorBlockAfter:
     'EQ is 1 while A and B are equal, and 0 when any bit differs. The fault lamp is lit when EQ is 0. A circuit that compares two words is a **comparator**. This one is an equality comparator: it says only whether the words are equal. The drawing labels such a block "comparator". The challenge below builds the comparator from gates.',
   buildComparatorLead:

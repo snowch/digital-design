@@ -17,7 +17,7 @@ export const PROSE = {
   p1Question:
     "The figure takes a 4-bit word B. A NOT gate called notB turns every bit of B over. Its output is the word NB. An adder block adds NB and `0000` (a part labelled CONST, named zero), with its carry in, CIN, fixed at 1 (another CONST, named one). Its SUM is the output NEG. So NEG is NOT B plus 1. B is `0011`, which is 3. What is NEG?",
   p1Explain:
-    "NEG is `1101`. NOT B is `1100`, and adding 1 gives `1101`. Read signed, `1101` is -8 + 4 + 1 = -3: minus B. The next sections show why NOT B plus 1 is always minus B.",
+    "NEG is `1101`. NOT B is `1100`, and adding 1 gives `1101`. Read signed, `1101` is -8 + 4 + 1 = -3: minus B. The next sections show why NOT B plus 1 gives minus B when the result fits.",
   aluBlockLead:
     "This figure shows a 4-bit block with word inputs A and B, and inputs OP1 and OP0. The outputs are Y (a word) and COUT. The block is closed. A starts at `0010` (2) and B at `0011` (3). The table reads the words unsigned and signed. Press OP1 and OP0 through 00, 01, 10 and 11 in turn. Read Y for each job.",
   aluBlockAfter:
@@ -36,11 +36,11 @@ export const PROSE = {
   addsubFaultsAfterFault3:
     '"C2 stuck at 0": 3 of 4 checks fail: "6 + 3", "3 - 6" and "5 - 5": each needs a carry from bit 1 into bit 2. "6 - 3" makes no such carry, and succeeds.',
   explanation:
-    "Each bit of NOT B is the opposite of B's bit. Add B and NOT B together: you get 1 in every position. In 4 bits, that is `1111`, which reads as -1 when signed. So NOT B equals -1 minus B. Add 1 to both: NOT B plus 1 equals minus B.\n\nThis is why A plus NOT B plus 1 equals A minus B.\n\nThe last lesson's overflow rules are for adding, and they do not carry over to subtracting. Unsigned: when subtracting, COUT is 1 exactly when A is at least B, read unsigned. Signed: `0111` minus `1111` is 7 minus -1, which is 8. 8 does not fit in 4 bits signed, though A and B have different top bits.",
+    "Each bit of NOT B is the opposite of B's bit. Add B and NOT B together: you get 1 in every position. In 4 bits, that is `1111`, which reads as -1 when signed. Add 1 to NOT B to give minus B within the word's width. At 4 bits, if B is `1000` (-8), NEG stays `1000` (-8). The value +8 cannot fit in a signed 4-bit word.\n\nThis is why A plus NOT B plus 1 equals A minus B.\n\nThe last lesson's overflow rules are for adding, and they do not carry over to subtracting. Unsigned: when subtracting, COUT is 1 exactly when A is at least B, read unsigned. Signed: `0111` minus `1111` is 7 minus -1, which is 8. 8 does not fit in 4 bits signed, though A and B have different top bits.",
   addsubRowLead:
     "This is the healthy 4-bit add-or-subtract unit from the fault figure. It starts at `0010` minus `0011`: A is 2, B is 3, SUB is 1. The table reads each word signed. Change A, B and SUB. Press a slice to open it.",
   addsubRowAfter:
-    "2 minus 3 gives SUM `1111`, which reads -1 signed. COUT is 0, because 2 is less than 3. Set A to `0110` and B to `0011`: 6 minus 3 gives SUM `0011` and COUT 1. Set SUB to 0. The same slices now add the two words instead: 2 plus 3 gives `0101`. One unit does both jobs; SUB decides whether to add or subtract.",
+    "2 minus 3 gives SUM `1111`, which reads -1 signed. COUT is 0, because 2 is less than 3. Set A to `0110` and B to `0011`: 6 minus 3 gives SUM `0011` and COUT 1. Set A back to `0010`, keep B at `0011`, then set SUB to 0. Read SUM `0101` for 2 plus 3. One unit does both jobs; SUB decides whether to add or subtract.",
   generalisation:
     "Each ALU slice makes A AND B and A XOR B. It has one add-or-subtract part, which gives the sum bit of A plus B or of A minus B, as SUB says: one of the two, not both. A 4-way selector chooses one, controlled by OP1 and OP0.\n\nFor job 11 (subtract), SUB equals OP1 AND OP0: each slice has one AND gate that makes this signal. Bit 0 gets its carry in from another AND gate on OP1 and OP0.\n\nCopies of one slice make an ALU of any width.",
   alu16Lead:

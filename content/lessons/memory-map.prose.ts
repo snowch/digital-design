@@ -49,7 +49,7 @@ export const PROSE = {
   p2Explain:
     "Q is `FF48`. A write to the sensor does nothing; the sensor keeps its own reading, which you did not change. Read the sensor's address and you always get its reading, whatever you wrote there.",
   shopLead:
-    "This is the module's capstone. You draw it from blocks you have met: the decoder, the ROM of the limits, the memory of bytes, a 16-bit register for the display, a word selector, and AND and NOT gates. It reads and writes bytes and 16-bit words by address. The display and the sensor answer at addresses too, as if they were memory. The tests match the reads and writes a small program would make.",
+    'This is the module\'s capstone. You draw it from blocks you have met: the decoder, the ROM of the limits, the memory of bytes, a 16-bit register for the display, a word selector, and AND and NOT gates. It reads and writes bytes and 16-bit words by address. The display and the sensor answer at addresses too, as if they were memory. With "Start from the parts", the editor supplies five unwired blocks. Join them and add the write-enable gates. The tests match the reads and writes a small program would make.',
   c2Task:
     "- Inputs: A5, A4, A (4 bits), D (16 bits), WORD, WE, CLK, SENSOR (16 bits); Outputs: Q (16 bits), DISPLAY (16 bits)\n- A5 A4 choose the part:\n  - 00: ROM (read only)\n  - 01: memory of bytes (read and written, with WORD and A as in the previous lesson)\n  - 10: display (write anywhere there sets it, read gives it back, DISPLAY always shows it)\n  - 11: sensor (read gives SENSOR, write changes nothing)\n- A write happens only at rising edge of CLK while WE is 1, to the part A5 A4 names\n- One test step raises A5 while CLK is 1, and nothing may be written then",
   reflection:

@@ -52,7 +52,7 @@ export const PROSE = {
   generalisation:
     "The flags come from slices, so they work at any width. At 16 bits, the office can ask its question: is room A colder than room B?",
   roomsFlagsLead:
-    "Here is the 16-bit ALU with all four flags. Words show as hexadecimal; the table reads them signed. It starts at code `011`, subtract, with input A = room A's word `FF48` (-184) and input B = room B's word `FF06` (-250). Then swap the two words. Then try add (code `010`) on `7FFF` and `0001`.",
+    "Here is the 16-bit ALU with all four flags. Words show as hexadecimal; the table reads them signed. It starts at code `011`, subtract, with input A = room A's word `FF48` (-184) and input B = room B's word `FF06` (-250). Read MINUS and COUT. Use the A and B bit rows to swap the two words and compare the same flags. Then set A to `7FFF` and B to `0001`. Set the OP pins to `010` for addition and inspect OVER and the signed result.",
   roomsFlagsAfter:
     "- `FF48` - `FF06`: Y is `0042` (66). MINUS is 0 and OVER is 0. With no overflow, MINUS is right: the result is not below zero, so room A is not colder than room B.\n- `FF06` - `FF48`: Y is `FFBE` (-66). MINUS is 1 and OVER is 0. MINUS is right again: room B is colder, by 6.6 degrees.\n- `7FFF` + `0001`: Y is `8000`. The true sum, 32768, is above zero, but the largest 16-bit signed word is 32767. MINUS is 1: it says below zero, which is wrong. OVER is 1: the result did not fit.",
   buildColderLead:

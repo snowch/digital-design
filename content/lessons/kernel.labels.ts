@@ -12,7 +12,7 @@ export const LABELS = {
     "Set up a program for the kernel.",
   ],
   titles: {
-    question: "The runner stalls on the report",
+    question: "The gap loop keeps the report waiting",
     motivation: "Why the runner needs a kernel",
     prediction: "Predicting R5 after a switch",
     investigation: "Running the kernel with both programs",

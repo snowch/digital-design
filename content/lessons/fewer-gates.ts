@@ -105,7 +105,6 @@ export const fewerGates: LessonInput = {
           timeModel: "none",
           caption: LABELS.captions.tooShort,
           lead: PROSE.tooShortLead,
-          after: PROSE.tooShortAfter,
           props: {
             circuits: [
               { libraryId: "call-rows", label: LABELS.sides.rows },

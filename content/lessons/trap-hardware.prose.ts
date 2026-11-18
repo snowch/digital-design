@@ -10,8 +10,7 @@
 export const PROSE = {
   question:
     "Lesson 6 ended on a question. Which parts of the machine copy C0 into C1, take the cause into C3 and send the PC to C4, all at one edge?\n\nLessons 1 to 6 ran on the machine of one edge per instruction. This lesson opens Module 9's machine of several edges, with the parts a trap needs added.\n\nThe figure is a timing diagram of a program's first 12 edges. It has a lane for TRAP, and one for each of C0, C1, C2 and C3. The program sets C4, then stores to room B's sensor. The store faults.",
-  edgesLead:
-    "Move along the diagram's edges and find the one where TRAP is 1 before the edge fires.",
+  edgesLead: 'Move the "Red line" slider to the rising edge and read TRAP before the edge fires.',
   edgesAfter:
     "The store takes edges 8 to 11. Before edge 11 the controller is in MEMORY and TRAP is 1.\n\nAt edge 11 the PC takes `010`, the handler's address. C2 takes `008`, the store's address. C1 takes `01`, C0 as it was. C3 takes `34`. C0 stays `01`.\n\nEdge 12 fetches the handler's first line, `R5 <= C3`.",
   motivation:

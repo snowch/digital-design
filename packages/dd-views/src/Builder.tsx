@@ -306,6 +306,9 @@ export function Builder({ drawing, onChange, palette, highlight = [], title }: B
 
   return (
     <div className="builder" data-pending={pending ? "true" : "false"}>
+      <p id={`${id}-help`} className="builder-help">
+        {strings.builder.help}
+      </p>
       <div className="builder-toolbar" role="toolbar" aria-label={strings.builder.palette}>
         {palette.map((kind) => {
           const spec = partSpec(kind);
@@ -516,9 +519,6 @@ export function Builder({ drawing, onChange, palette, highlight = [], title }: B
           </g>
         </svg>
       </div>
-      <p id={`${id}-help`} className="builder-help">
-        {strings.builder.help}
-      </p>
       <p className="builder-status" role="status" aria-live="polite">
         {status}
       </p>

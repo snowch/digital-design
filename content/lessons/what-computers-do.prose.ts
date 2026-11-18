@@ -21,7 +21,7 @@ export const PROSE = {
   runLead:
     'This is the same machine and program, with its buttons. Each press of "Run one instruction" runs one instruction. The row marked "Next" is the instruction it runs next.\n\nWatch "The numbers it keeps": the number an instruction changes is marked "Changed". Watch "What the shop sees" after instruction 4. Press "Run one instruction" until the program stops. Then press "Start again".\n\nChange room A\'s reading to -50. This is -5.0 degrees: room A\'s cooling has failed. Press "Run" to watch the whole program. "Pause" stops a run. Which instructions run this time, and what does the display show?',
   runAfter:
-    "With the rooms at -184 and -250, each instruction changed at most one thing. R1 became -184, R2 -250, R3 66, R4 100, then the display showed 66. Instructions 7 and 8 did not run and GAP_ALARM stayed dark, because 66 is less than 100.",
+    "With the rooms at -184 and -250, each instruction changed at most one thing. R1 became -184, R2 became -250 and R3 became 66. Instruction 4 showed 66 on the display. Instruction 5 set R4 to 100. Instructions 7 and 8 did not run and GAP_ALARM stayed dark, because 66 is less than 100.",
   construction:
     "The shop's manager wants GAP_ALARM to light when room A is 5.0 degrees or more warmer than room B, not 10.0 degrees. Instruction 5 sets R4 to 100: the limit. Instruction 6 compares the gap in R3 against that limit. To change when GAP_ALARM lights, you change one number in one instruction.",
   limitLead:
@@ -46,7 +46,7 @@ export const PROSE = {
   keptLead:
     "The figure adds a column, \"Kept as\": the number the machine keeps each instruction as. A box shows instruction 5's number, which starts at 100. Change instruction 5's number, for example to 101, and watch instruction 5's row in \"Kept as\". Change a room's reading too. Run the program after each change.",
   keptAfter:
-    'Changing instruction 5\'s number changed one number in "Kept as": instruction 5\'s. With 101 it is 620773477. Changing a room\'s reading changed no number in "Kept as". A reading comes in while the program runs; the instructions stay as they are.',
+    'Only changing instruction 5\'s number changes its row in "Kept as". The machine reads the room while the program runs. Read the display and GAP_ALARM to see the result for the readings you chose.',
   generalisation:
     "This machine did four things. It read numbers from the rooms. It kept sixteen numbers, R0 to R15. It ran instructions of the program one at a time. It set the display and the lamps.\n\nThe same program with different readings gave different displays: 66, 200, -134. A different job needs a different program: different numbers in the machine's memory, put there before the program runs. The machine itself does not change between jobs.\n\nEvery computer, from this one to a phone, reads from outside, keeps numbers, runs programs and sets things outside. A phone runs many programs at once and does several things at once, but each program's instructions still take effect in their order.",
   inYourHeadLead:

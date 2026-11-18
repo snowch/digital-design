@@ -3,7 +3,7 @@
 // The course shell: header, routes, footer. Lessons render through the runtime with the
 // digital-design book; the shell itself knows nothing about circuits.
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import { createBook, INTERACTIVES } from "@dd/dd-views";
 import { LESSONS } from "@dd/content";
@@ -26,6 +26,7 @@ export function App() {
   const [theme, setTheme] = useTheme();
   const savedWork = useMemo(() => reloadStorage(), []);
   const storage = savedWork.storage;
+  const workPending = useSyncExternalStore(savedWork.subscribe, savedWork.hasPending);
   const book = useMemo(() => createBook(LESSONS, INTERACTIVES), []);
   // The lesson last shown, so a reader who comes back to the list finds that lesson's module open.
   const [lastLesson, setLastLesson] = useState<string | undefined>();
@@ -121,14 +122,18 @@ export function App() {
           </select>
         </label>
       </header>
-      <UpdateNotice beforeReload={savedWork.beforeReload} />
+      <div className="shell-notices">
+        <p className="work-save-notice" role="status">
+          {workPending ? STRINGS.workNotSaved : ""}
+        </p>
+        <UpdateNotice beforeReload={savedWork.beforeReload} />
+      </div>
       <main id="main" className="shell-main" tabIndex={-1}>
         <LessonCompletionProvider book={book} storage={storage}>
           {page}
         </LessonCompletionProvider>
       </main>
       <footer className="shell-footer">
-        <p>{STRINGS.footer}</p>
         <p className="copyright">{STRINGS.copyright}</p>
         <p>
           <a href={`https://github.com/snowch/digital-design/commit/${__BUILD_INFO__.commit}`}>
