@@ -29,6 +29,8 @@ describe("the final machine's text", () => {
     expect(ms).toBeLessThan(20_000);
   });
   const circuit = result.circuit!;
+  // Each run simulates the whole machine gate by gate, edge by edge: one took 75 seconds on a busy
+  // machine, so each has three minutes, which still stops a run that never ends.
   it("runs the shop's program as the model does", () => {
     const r = compareFinalCircuit(circuit, SHOP, {
       ...QUIET_INPUTS,
@@ -37,9 +39,7 @@ describe("the final machine's text", () => {
     });
     expect(r.difference).toBeUndefined();
     expect(r.edges).toBe(69);
-  });
-  // Each run simulates the whole machine gate by gate, edge by edge: one took 75 seconds on a busy
-  // machine, so each has three minutes, which still stops a run that never ends.
+  }, 180_000);
   for (const p of FINAL_PROGRAMS)
     it(
       p.label,
