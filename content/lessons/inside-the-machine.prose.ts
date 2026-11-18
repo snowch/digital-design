@@ -14,7 +14,7 @@ export const PROSE = {
     "The machine is paused before instruction 3: R3 becomes R1 minus R2. The part that adds and subtracts has already worked out its answer, and R1 and R2 already reach it, but R3 has not changed yet. The part sends its answer out on 64 wires, each a 0 or a 1. The figure shows the eight wires of least worth, with each wire's worth above it. Which of these wires must give 1 for the answer to be 66?",
   p1Question: "The answer is 66. Which of the eight wires shown give a 1?",
   p1Explain:
-    '66 is 64 + 2, so the wires worth 64 and 2 give 1. The other wires give 0, and no wire is worth 66. The 56 wires of higher worth all give 0 for this answer.\n\nThe drawing below starts inside the slice worth 2: its adding part, marked. Press "Down a level" to open it, down to the one wire that carries the 1.',
+    '66 is 64 + 2, so the wires worth 64 and 2 give 1. The other wires give 0, and no wire is worth 66. The 56 wires of higher worth all give 0 for this answer.\n\nFirst press "Explore the slice worth 2". Then press "Down a level" to reach the wire that carries the 1.',
   levelLine: "This is instruction 3. The machine is about to run it.",
   levelParts:
     "The whole machine's drawing. It is wide; on a small screen, a strip above shows all of it. The part that adds is marked.",
@@ -43,7 +43,7 @@ export const PROSE = {
     "70 is 64 + 4 + 2, so the eight slices give `0100 0110`.",
   ],
   stuckLead:
-    "Choose the stuck wire. It is at the bottom of the ladder, inside the slice worth 2, and it stays at 0 whatever the slice works out.\n\nThe drawing is the half of that slice's adding part that makes the sum. Look before you run: the part that makes the sum gives 1, and the wire SUM stays low. Then answer the question above the drawing.",
+    'Choose the stuck wire. It is at the bottom of the ladder, inside the slice worth 2, and it stays at 0 whatever the slice works out.\n\nThe drawing is the half of that slice\'s adding part that makes the sum. Choose an answer and press "Check my prediction". Then inspect the live values on the drawing.',
   stuckAfter:
     "Every instruction ran as before. The program stopped normally, and nothing on the page says anything is wrong. 6.4 degrees looks like a reasonable gap. One wire, deep inside the part that adds, changed what the shop sees.",
   explanation:

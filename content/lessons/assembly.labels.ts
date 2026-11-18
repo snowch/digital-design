@@ -37,7 +37,7 @@ export const LABELS = {
     warmer: "Write the warmer-room program and pass the tests.",
     mistakes: "Mend the lines the assembler refuses.",
     dataListing: "A word of data follows the program, and the assembler places it at an address.",
-    beAssembler: "Work out the address and word for each line, then run the tests.",
+    beAssembler: "Find the two addresses and the two instruction words requested below.",
   },
   fields: {
     cold: "the address cold names",

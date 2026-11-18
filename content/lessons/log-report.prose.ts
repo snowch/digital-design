@@ -24,7 +24,7 @@ export const PROSE = {
   investigation:
     "The figure runs the program from the prediction with a breakpoint on `lowNext`. It watches R5, the lowest so far, R6, the reading just loaded, and R2. It shows the log.",
   walkLead:
-    'Press "Run to a breakpoint" again and again. At each pause, say what R5 and R2 should hold before you look.',
+    'Press "Run to a breakpoint" at each pause while a breakpoint lies ahead. At each pause, say what R5 and R2 should hold before you look. When the button reads "Run to the end", press it and read the final display after the function returns.',
   walkAfter:
     "The run on the model:\n\n- There are 5 pauses. R2 is 5, 4, 3, 2 and 1 at them: it goes down by 1 each time round.\n- R5 is -184 at the first four pauses. The readings in R6 there, 35, -176 and 12, are not lower.\n- At the fifth pause, R6 holds -190, and R5 has taken it.\n- After the fifth pause, R2 reaches 0, `lowestOf` returns with -190 in R1, and the display shows -190. 35 instructions run.",
   construction:

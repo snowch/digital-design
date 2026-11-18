@@ -778,7 +778,7 @@ export interface MeetStrings {
 
 export const DEFAULT_VIEW_STRINGS: ViewStrings = {
   grading: {
-    couldNotRun: "The tests could not run: {why}.",
+    couldNotRun: "{why}",
   },
   circuit: {
     where: "Which block you are viewing",
@@ -806,7 +806,7 @@ export const DEFAULT_VIEW_STRINGS: ViewStrings = {
     add: "Add {label}",
     deleteSelected: "Delete",
     tidy: "Tidy the layout",
-    help: "Press a button to add a part. Press a port to start a wire, then press another port to finish it. Select a part and move it with the arrow keys or by dragging. Press Delete to remove the selected part or wire. The circuit's inputs and outputs cannot be removed.",
+    help: "Use the part buttons to add parts. Select one port, then another to draw a wire. Press Escape to cancel the wire. Use the arrow keys or drag to move a selected part. Select a part or wire and press Delete to remove it. The circuit's input and output pins stay in place.",
     partHelp: "Use arrow keys to move, Delete to remove.",
     wireHelp: "Press Delete to remove.",
     startWire: "Press to start a wire from here.",

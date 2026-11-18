@@ -28,7 +28,7 @@ export const LABELS = {
     c1: "Your program, traced",
   },
   captions: {
-    free: "The figure's program on the whole machine, paused before the ALU edge of its set if, ready to trace.",
+    free: "The figure's program on the whole machine, paused before its set if reaches the ALU edge.",
     predict:
       "The same program, paused before the ALU edge of its set if, with a question about COUT.",
     carry: "The same program, paused before the ALU edge of its set if, for COUT and MET.",

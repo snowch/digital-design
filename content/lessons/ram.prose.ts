@@ -55,7 +55,7 @@ export const PROSE = {
   openedAfter:
     "Press any wire and its name and value appear. Follow Y2 to W2 to word2's load enable to see how the decoder picks a word to write.",
   generalisation:
-    'Each address bit doubles the words a memory can hold. Two address bits name four words; four address bits name sixteen. The decoder grows too: one output line per word. The course draws a larger memory as one closed block, labelled "memory", that does not open. Built from gates, the memory in the next figure (16 words of 16 bits) would need 256 flip-flops. The simulator runs this block as one part. It behaves as the four-word RAM does. It writes a word at a rising edge while WE is 1. Q shows the word A names with no clock edge.',
+    'Each address bit lets the decoder name twice as many addresses. It does not add storage by itself. The four-word RAM still holds four words when a third address bit is added but ignored. The decoder grows too: one output line per word. The course draws a larger memory as one closed block, labelled "memory", that does not open. Built from gates, the memory in the next figure (16 words of 16 bits) would need 256 flip-flops. The simulator runs this block as one part. It behaves as the four-word RAM does. It writes a word at a rising edge while WE is 1. Q shows the word A names with no clock edge.',
   bigLead:
     "This memory keeps sixteen words of sixteen bits each. Its address is one 4-bit input, A, set with a row of bit buttons like D. 16-bit words are shown in hexadecimal, four bits to a digit, so `XXXX` here is 16 unknown bits; A is still shown in binary. The table shows all sixteen words and marks which one A names right now.",
   bigAfter:

@@ -40,7 +40,7 @@ export const PROSE = {
   countToFiveLead:
     "A wait of 16 edges is only one wait. To count 6 edges, the counter must go from `0101` back to `0000`. The figure adds Module 3's comparator. It compares Q with the fixed word `0101`. Its output, EQ, is 1 while Q is `0101`. EQ is the TICK here. EQ, ORed with RST, drives the register's RST. So when Q is `0101`, the register's RST is 1, and at the next edge Q becomes `0000`.\n\nThe figure starts at `0000` after a reset, with EN at 1. Press \"Clock CLK\" and watch Q and TICK.",
   counterExplorerAfter:
-    "TICK is the last half adder's carry. It is 1 while Q is `1111` and EN is 1, so the next edge gives `0000`. To measure a wait of 16 edges, start the counter at `0000` and watch for TICK.",
+    "TICK is the last half adder's carry. It is 1 while Q is `1111` and EN is 1, so the next edge gives `0000`. Start at `0000` with EN at 1. TICK is high after the fifteenth edge. Watch Q return to `0000` on the sixteenth edge.",
   counterExplorerLead:
     'This circuit runs the register\'s output Q back to the register\'s input through an "add one" block. At each rising edge, the register takes Q plus one.\n\nAt the start Q is `XXXX`: no edge has set it. Press RST to 1, then "Clock CLK": Q becomes `0000`. Press RST back to 0 and EN to 1. Each "Clock CLK" adds one to Q. Press EN to 0 and the count stays.\n\nOpen the "add one" block. Inside are four half adders in a chain. The first adds bit 0 of Q and EN. Each later half adder adds its bit and the carry from the one before. A register whose D is its own Q plus one is a **counter**. It goes up by one at each rising edge where EN is 1.',
   counterFaultsLead:
@@ -60,7 +60,7 @@ export const PROSE = {
   motivation:
     "A register keeps a word and takes D at each edge. Module 3's adders add words. Feed the register's own Q into an adder that adds 1: its output goes into the register's D. At each edge, the register takes Q plus 1: the next number up.\n\nTo add 1, each bit needs a half adder: a half adder adds a bit of Q and a carry. Bit 0's half adder adds EN instead, so when EN is 0 nothing is added and the register keeps its number. The adder's output feeds back, but the loop does not run wild, because the register changes only at an edge.",
   p1Explain:
-    "Q is `0000`. After 15 edges, Q was `1111`, the largest 4-bit number. The next number up, `10000`, has five bits, so the register keeps four and takes `0000`. The carry out of bit 3 has nowhere to go: Module 3 called this overflow, and counting wraps from `1111` to `0000`. While Q was `1111`, TICK was 1, as the timing diagram shows.",
+    "Q is `0000`. After 15 rising edges of CLK, Q was `1111`, the largest 4-bit number, and TICK was 1. At rising edge 16, the counter takes the next number, `10000`, keeps its four low bits and wraps to `0000`. This is the same overflow that Module 3 showed. An external circuit can sample TICK at edge 16, before Q changes.",
   p1Question:
     "The figure resets the circuit, so Q is `0000`. EN stays 1. Then CLK rises 16 times. What is Q after the 16th edge?",
   p2Explain:

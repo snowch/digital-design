@@ -169,10 +169,21 @@ svg {
   margin: 0 auto;
 }
 
-.update-notice {
+.shell-notices {
   position: sticky;
   top: 0;
   z-index: 30;
+}
+.work-save-notice {
+  margin: 0;
+}
+.work-save-notice:not(:empty) {
+  padding: var(--space-2) var(--gutter);
+  background: var(--note-bg);
+  border-bottom: 1px solid var(--border-strong);
+  text-align: center;
+}
+.update-notice {
   display: flex;
   flex-wrap: wrap;
   align-items: center;

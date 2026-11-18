@@ -27,7 +27,7 @@ export const PROSE = {
   explorerAfter:
     "selectA follows the address RA1 RA0 and drives QA. selectB follows RB1 RB0 and drives QB. Neither selector has a clock, so each output follows its address at once. The write side is unchanged from the RAM: one write address, one write per edge.",
   construction:
-    "You build a register file of two words. The addresses are one bit: WA for writes, RA and RB for reads. Start with the two-word memory from the previous lesson, and add a second read.\n\nUse the editor to add parts and wire them. Press one port, then another port to join them. When a test fails, it names the step and the part that drove the wrong output.",
+    "You build a register file of two words. The addresses are one bit: WA for writes, RA and RB for reads. The editor starts with the pins and parts palette. Draw the two-word memory from the previous lesson, then add a second read. Press one port, then another port to join them. When a test fails, it names the step and the part that drove the wrong output.",
   buildLead:
     "The parts offered are a register (inputs D, EN, CLK; output Q), a word selector (inputs A, B, S; output Y: Y is A when S is 0 and B when S is 1), AND, and NOT.",
   c1Task:
@@ -45,13 +45,13 @@ export const PROSE = {
   explanation:
     "A read only looks at the registers through a selector. It takes the registers' outputs and changes nothing. Any number of reads can share the same registers, each with its own selector and address. Each read costs one selector.\n\nA write changes a register. Two writes at one rising edge could name the same address with two different words. The circuit would then need a rule for which one wins, a second decoder, and a selector in front of each register's D to choose between two words. So this register file takes one write per edge.\n\nA read of the word being written shows the word the register kept until the edge, and the new word after it. The second prediction showed the kept-word part: a read before an edge shows the word the register kept.",
   openedLead:
-    'The figure shows the register file opened. To see words on the reads, first write two different words: set WA1, WA0 and D, set WE to 1, then press "Clock CLK". Change WA1, WA0 and D to new values, then press "Clock CLK" again. Now press RA1, RA0, RB1 and RB0 and watch QA and QB. The decoder\'s outputs follow WA1 WA0. Each W wire is a decoder output AND WE, so it becomes 1 only while WE is 1.',
+    'The figure starts inside the register file. Select "Four-word register file" in the trail above the drawing to return to the outer circuit. There you can set WA1, WA0 and WE. Set D with its bit row. Press "Clock CLK" to write the word. Change WA1, WA0 and D, then press "Clock CLK" again. Set the read addresses with RA1, RA0, RB1 and RB0. Compare QA and QB with the words you wrote. Reopen the register file to follow each read through its selector. The decoder\'s outputs follow WA1 WA0. Each W wire is a decoder output AND WE, so it becomes 1 only while WE is 1.',
   openedAfter:
     "The register file's size is the designer's choice. This one has four words of four bits; the course's register file component takes the number of words and their width as settings.",
   generalisation:
     "A memory with many words written as gates would be one `always_ff` per register and a long selector. SystemVerilog writes a memory in three lines, as an array. The figure shows the previous lesson's RAM written that way, generated from the circuit beside it.",
   ramTextLead:
-    "`logic [3:0] words [0:3];` declares an **array**: four words of four bits, numbered 0 to 3. The word width comes before the name, the number of words after.\n\n`assign Q = words[A];` reads the word at address A, with no clock: Q follows A.\n\n`always_ff @(posedge CLK) if (WE) words[A] <= D;` writes D into the word at address A at a rising edge while WE is 1.\n\nThe text and the drawing are the same circuit. The course turns an array into a memory component, drawn as one closed block, not into gates.",
+    "`logic [3:0] words [0:3];` declares an **array**: four words of four bits, numbered 0 to 3. The word width comes before the name, the range of word indices after.\n\n`assign Q = words[A];` reads the word at address A, with no clock: Q follows A.\n\n`always_ff @(posedge CLK) if (WE) words[A] <= D;` writes D into the word at address A at a rising edge while WE is 1.\n\nThe text and the drawing are the same circuit. The course turns an array into a memory component, drawn as one closed block, not into gates.",
   ramTextAfter:
     "In this RAM, the same address A picks both the word to read and the word to write. Below, you write as text the register file you drew: each read has its own address.",
   writeLead:

@@ -38,7 +38,7 @@ export const PROSE = {
   selectorFaultsAfterFault2:
     '"Input S is stuck at 1": 2 of 5 checks fail: "S 0, A 1, B 0" and "S 0, A 0, B 1". Y is always B. The check "S 0, A 1, B 1" still gives the right Y, because A and B are the same.',
   selectorFaultsAfterFault3:
-    '"OR gate orY becomes XOR": No check fails. An XOR gate gives 1 when exactly one input is 1. PA and PB are never both 1: andA takes NS and andB takes S, so they never pass together. It is true for every one of the 8 patterns of S, A and B, not only the 5 checks. So OR and XOR give the same Y for every input, and no check could catch this fault.',
+    '"OR gate orY becomes XOR": No check fails. An XOR gate gives 1 when exactly one input is 1. Once the circuit settles, PA and PB cannot both be 1. andA takes NS and andB takes S. While S rises with A and B both 1, the direct path to PB can turn on before NS falls, so PA and PB can briefly both be 1. It is true for every one of the 8 patterns of S, A and B, not only the 5 checks. So OR and XOR give the same settled Y for every input. Checks of the settled result miss this fault.',
   explanation:
     "When S is 0, andA passes A while andB gives 0. When S is 1, andB passes B while andA gives 0. The OR of a bit and 0 is that bit. So Y is the passed input.",
   wordSelectorLead:
