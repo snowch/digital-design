@@ -50,6 +50,11 @@ function coverWords(): Plugin {
     },
     generateBundle() {
       this.emitFile({ type: "asset", fileName: MANIFEST_FILE, source: manifest });
+      this.emitFile({
+        type: "asset",
+        fileName: "version.json",
+        source: JSON.stringify({ object: { sha: commit } }) + "\n",
+      });
     },
   };
 }

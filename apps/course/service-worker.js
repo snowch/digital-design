@@ -44,6 +44,11 @@ self.addEventListener("fetch", (event) => {
   const request = event.request;
   const url = new URL(request.url);
   if (request.method !== "GET" || !url.href.startsWith(SCOPE)) return;
+  // Freshness metadata must bypass the saved release, including its cached JSON.
+  if (url.href === new URL("version.json", SCOPE).href) {
+    event.respondWith(fetch(request, { cache: "no-store" }));
+    return;
+  }
   event.respondWith(
     (async () => {
       const cache = await caches.open(CACHE);

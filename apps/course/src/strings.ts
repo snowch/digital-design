@@ -23,7 +23,7 @@ export const STRINGS = {
   pageTitle: (page: string) => `${page} / Digital Design`,
   /** Under the footer's line, on every page. */
   copyright: "© 2026 Christopher Snow",
-  latestCommit: "Latest commit on main",
+  latestCommit: "Current published version",
   appUpdate: {
     available: "Update available",
     action: "Update and reload",
