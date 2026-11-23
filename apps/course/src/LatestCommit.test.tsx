@@ -17,7 +17,7 @@ afterEach(() => {
 });
 
 describe("the latest commit tick", () => {
-  it("waits for an exact match from the public main branch", async () => {
+  it("waits for an exact match from the published build", async () => {
     let resolve!: (value: unknown) => void;
     const fetch = vi.fn(() => new Promise((done) => (resolve = done)));
     vi.stubGlobal("fetch", fetch);
@@ -26,7 +26,7 @@ describe("the latest commit tick", () => {
     await act(async () => resolve(response(commit)));
     expect(tick()).toBeVisible();
     expect(fetch).toHaveBeenCalledWith(
-      "https://api.github.com/repos/snowch/digital-design/git/ref/heads/main",
+      `${import.meta.env.BASE_URL}version.json`,
       expect.objectContaining({ cache: "no-store", signal: expect.any(AbortSignal) }),
     );
   });
@@ -51,7 +51,7 @@ describe("the latest commit tick", () => {
     expect(tick()).toBeNull();
   });
 
-  it("removes a previous tick when main advances and the tab becomes visible", async () => {
+  it("removes a previous tick when the published build advances and the tab becomes visible", async () => {
     vi.stubGlobal(
       "fetch",
       vi

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { STRINGS } from "./strings";
 
-// Check only the public branch ref. No lesson data or saved work leaves the browser.
+// Check only the published build revision. No lesson data or saved work leaves the browser.
 export function LatestCommit({ commit }: { commit: string }) {
   const [latest, setLatest] = useState(false);
   useEffect(() => {
@@ -19,10 +19,10 @@ export function LatestCommit({ commit }: { commit: string }) {
       setLatest(false);
       timeout = setTimeout(() => controller.abort(), 10_000);
       try {
-        const response = await fetch(
-          "https://api.github.com/repos/snowch/digital-design/git/ref/heads/main",
-          { cache: "no-store", signal: controller.signal },
-        );
+        const response = await fetch(`${import.meta.env.BASE_URL}version.json`, {
+          cache: "no-store",
+          signal: controller.signal,
+        });
         if (!response.ok) return;
         const ref: unknown = await response.json();
         if (active && !controller.signal.aborted) {
@@ -37,7 +37,7 @@ export function LatestCommit({ commit }: { commit: string }) {
           );
         }
       } catch {
-        // Offline, rate-limited or timed out: there is no confirmed match to show.
+        // Offline or timed out: there is no confirmed match to show.
       } finally {
         if (request === controller) clearTimeout(timeout);
       }
